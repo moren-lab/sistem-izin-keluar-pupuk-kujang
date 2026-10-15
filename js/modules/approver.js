@@ -5,7 +5,9 @@
 
 function updateApproverMetrics() {
   const ticketsList = window.ticketsList || [];
-  const pending = ticketsList.filter(t => t.status === 'Menunggu Persetujuan').length;
+  const pendingInitial = ticketsList.filter(t => t.status === 'Menunggu Persetujuan').length;
+  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan').length;
+  const pending = pendingInitial + pendingExtensions;
   const approved = ticketsList.filter(t => t.status === 'Disetujui').length;
   const rejected = ticketsList.filter(t => t.status === 'Ditolak').length;
   const total = ticketsList.length;
@@ -31,6 +33,7 @@ function renderApproverDashboard() {
   updateApproverMetrics();
   const ticketsList = window.ticketsList || [];
   const pendingTickets = ticketsList.filter(t => t.status === 'Menunggu Persetujuan');
+  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan');
   const outsideTickets = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
 
   const approverUrgentBanner = document.getElementById('approverUrgentBanner');
@@ -66,6 +69,30 @@ function renderApproverDashboard() {
       `;
     }
 
+    if (pendingExtensions.length > 0) {
+      const extFirst = pendingExtensions[0];
+      bannerHtml += `
+        <div style="background: #fffdf7; border: 1.5px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="font-size: 1.4rem;">⏱️</div>
+            <div>
+              <div style="font-weight: 800; font-size: 0.875rem; color: #92400e;">
+                Permohonan Perpanjangan Waktu Izin (${pendingExtensions.length} Karyawan Sedang di Luar)
+              </div>
+              <div style="font-size: 0.775rem; color: #78350f;">
+                ${extFirst.applicantName} (${extFirst.id}) mengajukan perpanjangan kembali s/d <strong>${extFirst.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong>. Alasan: "${extFirst.pendingExtension.reason}"
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <button class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${extFirst.id}', 'detail')">Rincian</button>
+            <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openRejectExtensionModal('${extFirst.id}')">✕ Tolak</button>
+            <button class="btn-approve" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="approveExtensionRequest('${extFirst.id}')">✓ Setujui</button>
+          </div>
+        </div>
+      `;
+    }
+
     if (pendingTickets.length > 0) {
       bannerHtml += `
         <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
@@ -85,7 +112,7 @@ function renderApproverDashboard() {
           </button>
         </div>
       `;
-    } else if (emergencyTickets.length === 0) {
+    } else if (emergencyTickets.length === 0 && pendingExtensions.length === 0) {
       bannerHtml += `
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
           <div style="font-size: 1.2rem;">✅</div>
@@ -99,42 +126,82 @@ function renderApproverDashboard() {
     approverUrgentBanner.innerHTML = bannerHtml;
   }
 
-  // Pending queue quick inline list
+  // Pending queue quick inline list (Initial approvals + Extension requests)
   if (approverDashboardPendingList) {
-    if (pendingTickets.length === 0) {
+    if (pendingTickets.length === 0 && pendingExtensions.length === 0) {
       approverDashboardPendingList.innerHTML = `
         <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
           Tidak ada antrian izin yang menunggu keputusan. Semua beres!
         </div>
       `;
     } else {
-      approverDashboardPendingList.innerHTML = pendingTickets.map(t => `
-        <div class="feed-item" style="border-left: 3px solid var(--amber-warning); flex-direction: column; align-items: stretch; gap: 0.65rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
-              <span class="tag-badge ${t.category === 'Dinas Kantor' ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
+      let html = '';
+
+      // Render perpanjangan waktu terlebih dahulu (urgent)
+      pendingExtensions.forEach(t => {
+        html += `
+          <div class="feed-item" style="border-left: 3.5px solid #d97706; background: #fffdfa; flex-direction: column; align-items: stretch; gap: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
+                <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; font-size: 0.7rem;">⏱️ PERPANJANGAN WAKTU</span>
+              </div>
+              <span class="tag-badge" style="background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; font-weight: 700;">Sedang di Luar</span>
             </div>
-            ${window.getStatusPill(t.status)}
-          </div>
-          <div style="font-size: 0.825rem; color: var(--text-primary);">
-            <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
-          </div>
-          <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4;">
-            "${t.reason}"
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem;">
-            <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
-              Keluar: ${t.plannedExit.replace('T', ' ')}
-            </span>
-            <div style="display: flex; gap: 0.35rem;">
-              <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Rincian</button>
-              <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectModal('${t.id}')">✕ Tolak</button>
-              <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openApproveModal('${t.id}')">✓ Setujui</button>
+            <div style="font-size: 0.825rem; color: var(--text-primary);">
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
+            </div>
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.775rem; color: #92400e; line-height: 1.45;">
+              <div><strong>Estimasi Kembali Semula:</strong> ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : '-'}</div>
+              <div><strong>Permohonan Waktu Baru:</strong> <strong style="color: #b45309;">${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong></div>
+              <div style="margin-top: 2px;"><strong>Alasan:</strong> "${t.pendingExtension.reason}"</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: gap: 0.5rem;">
+              <span style="font-size: 0.725rem; color: var(--text-muted);">
+                Diajukan: ${t.pendingExtension.requestedAt}
+              </span>
+              <div style="display: flex; gap: 0.35rem;">
+                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Rincian</button>
+                <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectExtensionModal('${t.id}')">✕ Tolak</button>
+                <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="approveExtensionRequest('${t.id}')">✓ Setujui</button>
+              </div>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      });
+
+      // Render regular pending tickets
+      pendingTickets.forEach(t => {
+        html += `
+          <div class="feed-item" style="border-left: 3px solid var(--amber-warning); flex-direction: column; align-items: stretch; gap: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
+                <span class="tag-badge ${t.category === 'Dinas Kantor' ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
+              </div>
+              ${window.getStatusPill(t.status)}
+            </div>
+            <div style="font-size: 0.825rem; color: var(--text-primary);">
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
+            </div>
+            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4;">
+              "${t.reason}"
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem;">
+              <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
+                Keluar: ${t.plannedExit.replace('T', ' ')}
+              </span>
+              <div style="display: flex; gap: 0.35rem;">
+                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Rincian</button>
+                <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectModal('${t.id}')">✕ Tolak</button>
+                <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openApproveModal('${t.id}')">✓ Setujui</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      approverDashboardPendingList.innerHTML = html;
     }
   }
 
@@ -230,6 +297,19 @@ function renderApproverCards(list, containerElement) {
               </div>
             </div>
 
+            ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+              <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; margin: 0.5rem 0;">
+                <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between;">
+                  <span>⏱️ Permohonan Perpanjangan Waktu</span>
+                  <span class="tag-badge" style="background:#fef3c7; color:#92400e;">Grace Period</span>
+                </div>
+                <div style="margin-top: 0.35rem; color: #78350f; font-size: 0.775rem; line-height: 1.4;">
+                  <div><strong>Waktu Baru:</strong> <strong style="color: #b45309;">${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong></div>
+                  <div><strong>Alasan:</strong> "${t.pendingExtension.reason}"</div>
+                </div>
+              </div>
+            ` : ''}
+
             ${t.approverNote ? `
               <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.75rem;">
                 <strong>Catatan Keputusan:</strong> "${t.approverNote}"
@@ -248,7 +328,16 @@ function renderApproverCards(list, containerElement) {
                 </button>
               </div>
 
-              ${isPending ? `
+              ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+                <div class="approver-action-grid">
+                  <button class="btn-reject" onclick="openRejectExtensionModal('${t.id}')">
+                    ✕ Tolak Perpanjang
+                  </button>
+                  <button class="btn-approve" onclick="approveExtensionRequest('${t.id}')">
+                    ✓ Setujui Perpanjang
+                  </button>
+                </div>
+              ` : (isPending ? `
                 <div class="approver-action-grid">
                   <button class="btn-reject" onclick="openRejectModal('${t.id}')">
                     ✕ Tolak
@@ -259,7 +348,7 @@ function renderApproverCards(list, containerElement) {
                 </div>
               ` : `
                 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Sudah Diputuskan</span>
-              `}
+              `)}
             </div>
           </div>
         `;
@@ -287,7 +376,7 @@ function renderApproverView() {
 
   // 2. ANTRIAN PERSETUJUAN
   if (currentApproverNav === 'antrian') {
-    const pendingList = ticketsList.filter(t => t.status === 'Menunggu Persetujuan');
+    const pendingList = ticketsList.filter(t => t.status === 'Menunggu Persetujuan' || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
 
     if (pendingList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
@@ -455,7 +544,124 @@ document.addEventListener('DOMContentLoaded', () => {
       renderApproverView();
     });
   }
+
+  // Reject Extension Modal Elements & Listeners
+  const modalRejectExtension = document.getElementById('modalRejectExtension');
+  const btnCloseRejectExtModal = document.getElementById('btnCloseRejectExtModal');
+  const btnCancelRejectExtModal = document.getElementById('btnCancelRejectExtModal');
+  const btnConfirmRejectExt = document.getElementById('btnConfirmRejectExt');
+  const rejectExtReasonInput = document.getElementById('rejectExtReasonInput');
+
+  if (btnCloseRejectExtModal) btnCloseRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
+  if (btnCancelRejectExtModal) btnCancelRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
+
+  if (btnConfirmRejectExt) {
+    btnConfirmRejectExt.addEventListener('click', () => {
+      const reason = rejectExtReasonInput ? rejectExtReasonInput.value.trim() : '';
+      if (!reason) {
+        if (typeof window.showToast === 'function') window.showToast('Alasan penolakan perpanjangan waktu wajib diisi!', 'danger');
+        return;
+      }
+      rejectExtensionRequest(window.currentRejectExtTicketId, reason);
+      if (modalRejectExtension) modalRejectExtension.classList.remove('open');
+    });
+  }
 });
+
+// DECISION FUNCTIONS FOR EXTENSION REQUESTS
+function approveExtensionRequest(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (!ticket || !ticket.pendingExtension) return;
+
+  const newReturn = ticket.pendingExtension.newEstimatedReturn;
+  const ACTORS = window.ACTORS || {};
+  const approverName = ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+  ticket.estimatedReturn = newReturn;
+  if (ticket.status === 'Terlambat') {
+    ticket.status = 'Sedang di Luar';
+  }
+
+  if (!ticket.timeline) ticket.timeline = [];
+  ticket.timeline.push({
+    event: 'Perpanjangan Waktu Disetujui',
+    time: nowFormatted,
+    by: `${approverName} (Manager)`,
+    desc: `Perpanjangan waktu hingga ${window.formatDisplayDate ? window.formatDisplayDate(newReturn) : newReturn} telah disetujui. Estimasi jam kembali resmi diperbarui.`
+  });
+
+  ticket.pendingExtension = null;
+  ticket.extensionApproved = true;
+
+  window.saveTickets(ticketsList);
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Perpanjangan waktu tiket #${ticket.id} berhasil disetujui!`, 'success');
+  }
+  renderApproverView();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    window.openTicketDetail(ticket.id, 'detail');
+  }
+}
+
+function openRejectExtensionModal(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (!ticket || !ticket.pendingExtension) return;
+
+  window.currentRejectExtTicketId = ticketId;
+  const rejectExtEmployeeName = document.getElementById('rejectExtEmployeeName');
+  const rejectExtTicketId = document.getElementById('rejectExtTicketId');
+  const rejectExtReasonInput = document.getElementById('rejectExtReasonInput');
+  const modalRejectExtension = document.getElementById('modalRejectExtension');
+
+  if (rejectExtEmployeeName) rejectExtEmployeeName.textContent = ticket.applicantName || 'Budi Pratama';
+  if (rejectExtTicketId) rejectExtTicketId.textContent = ticket.id;
+  if (rejectExtReasonInput) rejectExtReasonInput.value = '';
+  if (modalRejectExtension) modalRejectExtension.classList.add('open');
+}
+
+function rejectExtensionRequest(ticketId, reason) {
+  const ticketsList = window.ticketsList || [];
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (!ticket || !ticket.pendingExtension) return;
+
+  const rejectReason = reason || 'Karyawan diminta segera kembali sesuai jadwal semula.';
+  const ACTORS = window.ACTORS || {};
+  const approverName = ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+  if (!ticket.timeline) ticket.timeline = [];
+  ticket.timeline.push({
+    event: 'Perpanjangan Waktu Ditolak',
+    time: nowFormatted,
+    by: `${approverName} (Manager)`,
+    desc: `Permohonan perpanjangan ditolak: "${rejectReason}". Estimasi kembali tetap mengacu pada jadwal semula.`
+  });
+
+  ticket.pendingExtension = null;
+  ticket.extensionRejected = true;
+
+  window.saveTickets(ticketsList);
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Permohonan perpanjangan tiket #${ticket.id} ditolak.`, 'info');
+  }
+  renderApproverView();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    window.openTicketDetail(ticket.id, 'detail');
+  }
+}
 
 // Expose globally
 window.updateApproverMetrics = updateApproverMetrics;
@@ -464,3 +670,6 @@ window.renderApproverCards = renderApproverCards;
 window.renderApproverView = renderApproverView;
 window.openApproveModal = openApproveModal;
 window.openRejectModal = openRejectModal;
+window.approveExtensionRequest = approveExtensionRequest;
+window.openRejectExtensionModal = openRejectExtensionModal;
+window.rejectExtensionRequest = rejectExtensionRequest;

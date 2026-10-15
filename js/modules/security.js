@@ -556,7 +556,17 @@ function executeScanIn(ticketId) {
   const ACTORS = window.ACTORS || {};
   const securityName = ACTORS.security ? ACTORS.security.name : 'Sertu Agus';
 
-  const wasOverdue = ticket.status === 'Terlambat';
+  // Periksa apakah ada perpanjangan waktu yang sedang aktif
+  const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';
+  let isCoveredByExtension = false;
+  if (hasPendingExt && ticket.pendingExtension.newEstimatedReturn) {
+    const extTime = new Date(ticket.pendingExtension.newEstimatedReturn);
+    if (!isNaN(extTime.getTime()) && now.getTime() <= extTime.getTime()) {
+      isCoveredByExtension = true;
+    }
+  }
+
+  const wasOverdue = ticket.status === 'Terlambat' && !isCoveredByExtension;
   ticket.scanInTime = `${nowFormatted} (${gate})${wasOverdue ? ' [Terlambat]' : ''}`;
   ticket.status = 'Selesai';
   if (!ticket.timeline) ticket.timeline = [];
@@ -566,8 +576,20 @@ function executeScanIn(ticketId) {
     by: `${securityName} (${gate})`,
     desc: wasOverdue
       ? `Karyawan tiba kembali di kawasan pabrik MELEWATI estimasi waktu kembali (Terlambat). QR code dinonaktifkan permanen.`
-      : `Karyawan kembali tiba di kawasan pabrik. QR code dinonaktifkan permanen.`
+      : (isCoveredByExtension 
+          ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu. Scan In berhasil, QR code dinonaktifkan.`
+          : `Karyawan kembali tiba di kawasan pabrik. QR code dinonaktifkan permanen.`)
   });
+
+  if (ticket.pendingExtension) {
+    ticket.timeline.push({
+      event: 'Perpanjangan Waktu Selesai Otomatis',
+      time: nowFormatted,
+      by: `${securityName} (${gate})`,
+      desc: 'Karyawan telah kembali ke pabrik dan melakukan Scan In saat permohonan perpanjangan waktu masih berjalan. Tiket resmi selesai.'
+    });
+    ticket.pendingExtension = null;
+  }
 
   window.saveTickets(ticketsList);
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');

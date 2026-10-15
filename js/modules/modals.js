@@ -379,6 +379,66 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
     }
   }
 
+  // Pending Extension Info & Approver Action Buttons inside detail modal
+  const infoPendingExtensionBox = document.getElementById('infoPendingExtensionBox');
+  const infoExtNewReturn = document.getElementById('infoExtNewReturn');
+  const infoExtReason = document.getElementById('infoExtReason');
+  const approverExtActionBtns = document.getElementById('approverExtActionBtns');
+  const btnDetailRejectExt = document.getElementById('btnDetailRejectExt');
+  const btnDetailApproveExt = document.getElementById('btnDetailApproveExt');
+
+  const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';
+  if (infoPendingExtensionBox) {
+    if (hasPendingExt) {
+      infoPendingExtensionBox.style.display = 'block';
+      if (infoExtNewReturn) {
+        infoExtNewReturn.textContent = window.formatDisplayDate 
+          ? window.formatDisplayDate(ticket.pendingExtension.newEstimatedReturn)
+          : ticket.pendingExtension.newEstimatedReturn;
+      }
+      if (infoExtReason) infoExtReason.textContent = ticket.pendingExtension.reason;
+
+      if (approverExtActionBtns) {
+        if (window.currentActor === 'approver') {
+          approverExtActionBtns.style.display = 'flex';
+          if (btnDetailApproveExt) {
+            btnDetailApproveExt.onclick = () => {
+              if (typeof window.approveExtensionRequest === 'function') {
+                window.approveExtensionRequest(ticket.id);
+              }
+            };
+          }
+          if (btnDetailRejectExt) {
+            btnDetailRejectExt.onclick = () => {
+              if (typeof window.openRejectExtensionModal === 'function') {
+                window.openRejectExtensionModal(ticket.id);
+              }
+            };
+          }
+        } else {
+          approverExtActionBtns.style.display = 'none';
+        }
+      }
+    } else {
+      infoPendingExtensionBox.style.display = 'none';
+    }
+  }
+
+  // Employee "Ajukan Perpanjangan" button in detail modal footer
+  const btnDetailExtend = document.getElementById('btnDetailExtend');
+  if (btnDetailExtend) {
+    const isOutsideKembali = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && ticket.type === 'Kembali ke Area';
+    if (window.currentActor === 'karyawan' && isOutsideKembali && !hasPendingExt) {
+      btnDetailExtend.style.display = 'inline-flex';
+      btnDetailExtend.onclick = function() {
+        openExtendDurationModal(ticket.id);
+      };
+    } else {
+      btnDetailExtend.style.display = 'none';
+      btnDetailExtend.onclick = null;
+    }
+  }
+
   switchDetailTab(defaultTab);
   if (modalTicketDetail) modalTicketDetail.classList.add('open');
 }
@@ -814,7 +874,149 @@ document.addEventListener('DOMContentLoaded', () => {
       openTicketDetail(ticketId);
     });
   }
+
+  // TIME EXTENSION SUBMIT & CLOSE LISTENERS
+  const modalExtendDuration = document.getElementById('modalExtendDuration');
+  const btnCloseExtendModal = document.getElementById('btnCloseExtendModal');
+  const btnCancelExtendModal = document.getElementById('btnCancelExtendModal');
+  const btnSubmitExtendDuration = document.getElementById('btnSubmitExtendDuration');
+  const inputExtendNewReturn = document.getElementById('inputExtendNewReturn');
+  const inputExtendReason = document.getElementById('inputExtendReason');
+
+  if (btnCloseExtendModal) btnCloseExtendModal.addEventListener('click', () => modalExtendDuration && modalExtendDuration.classList.remove('open'));
+  if (btnCancelExtendModal) btnCancelExtendModal.addEventListener('click', () => modalExtendDuration && modalExtendDuration.classList.remove('open'));
+
+  if (btnSubmitExtendDuration) {
+    btnSubmitExtendDuration.addEventListener('click', () => {
+      const ticketsList = window.ticketsList || [];
+      const ticket = ticketsList.find(t => t.id === window.currentExtendTicketId);
+      if (!ticket) return;
+
+      const newReturnVal = inputExtendNewReturn ? inputExtendNewReturn.value : '';
+      const reasonVal = inputExtendReason ? inputExtendReason.value.trim() : '';
+
+      if (!newReturnVal) {
+        if (typeof window.showToast === 'function') window.showToast('Harap pilih perkiraan waktu kembali baru!', 'danger');
+        return;
+      }
+
+      const newReturnDate = new Date(newReturnVal);
+      const now = new Date();
+      if (isNaN(newReturnDate.getTime()) || newReturnDate.getTime() <= now.getTime()) {
+        if (typeof window.showToast === 'function') window.showToast('Perkiraan waktu kembali baru harus lebih lambat dari waktu saat ini!', 'danger');
+        return;
+      }
+
+      if (ticket.estimatedReturn) {
+        const oldReturnDate = new Date(ticket.estimatedReturn);
+        if (!isNaN(oldReturnDate.getTime()) && newReturnDate.getTime() <= oldReturnDate.getTime()) {
+          if (typeof window.showToast === 'function') window.showToast('Waktu kembali baru harus lebih lama dari estimasi kembali semula!', 'danger');
+          return;
+        }
+      }
+
+      if (!reasonVal || reasonVal.length < 5) {
+        if (typeof window.showToast === 'function') window.showToast('Alasan perpanjangan waktu wajib diisi (minimal 5 karakter)!', 'danger');
+        return;
+      }
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+      ticket.pendingExtension = {
+        requestedAt: nowFormatted,
+        requestedAtIso: now.toISOString(),
+        oldEstimatedReturn: ticket.estimatedReturn,
+        newEstimatedReturn: newReturnVal,
+        reason: reasonVal,
+        status: 'Menunggu Persetujuan'
+      };
+
+      if (!ticket.timeline) ticket.timeline = [];
+      ticket.timeline.push({
+        event: 'Pengajuan Perpanjangan Waktu',
+        time: nowFormatted,
+        by: `${ticket.applicantName || 'Budi Pratama'} (Karyawan)`,
+        desc: `Mengajukan perpanjangan waktu kembali hingga ${window.formatDisplayDate ? window.formatDisplayDate(newReturnVal) : newReturnVal}. Alasan: "${reasonVal}". Grace Period aktif.`
+      });
+
+      window.saveTickets(ticketsList);
+      if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Pengajuan perpanjangan waktu tiket #${ticket.id} berhasil dikirim ke Atasan. Grace Period aktif!`, 'success');
+      }
+
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+      if (typeof window.renderApproverView === 'function') window.renderApproverView();
+      const modalTicketDetail = document.getElementById('modalTicketDetail');
+      if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+        window.openTicketDetail(ticket.id, 'detail');
+      }
+    });
+  }
 });
+
+// TIME EXTENSION MODAL TRIGGER FUNCTION
+function openExtendDurationModal(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (!ticket) return;
+
+  if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
+    if (typeof window.showToast === 'function') window.showToast('Perpanjangan waktu hanya dapat diajukan saat izin berstatus Sedang di Luar!', 'danger');
+    return;
+  }
+
+  if (ticket.type !== 'Kembali ke Area') {
+    if (typeof window.showToast === 'function') window.showToast('Izin dengan tipe Pulang Mendahului tidak memerlukan perpanjangan waktu kembali.', 'info');
+    return;
+  }
+
+  if (ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan') {
+    if (typeof window.showToast === 'function') window.showToast('Tiket ini sudah memiliki pengajuan perpanjangan waktu yang sedang ditinjau Atasan.', 'info');
+    return;
+  }
+
+  window.currentExtendTicketId = ticketId;
+  const extendTicketId = document.getElementById('extendTicketId');
+  const extendTicketDest = document.getElementById('extendTicketDest');
+  const extendCurrentReturnDisplay = document.getElementById('extendCurrentReturnDisplay');
+  const inputExtendNewReturn = document.getElementById('inputExtendNewReturn');
+  const inputExtendReason = document.getElementById('inputExtendReason');
+  const modalExtendDuration = document.getElementById('modalExtendDuration');
+
+  if (extendTicketId) extendTicketId.textContent = ticket.id;
+  if (extendTicketDest) extendTicketDest.textContent = `${ticket.destination} — "${ticket.reason}"`;
+  if (extendCurrentReturnDisplay) {
+    extendCurrentReturnDisplay.textContent = ticket.estimatedReturn 
+      ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn)
+      : 'Pulang Hari Ini';
+  }
+
+  // Pre-fill inputExtendNewReturn with default value (+1 hour from current estimatedReturn or +30m from now)
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  let baseDate = ticket.estimatedReturn ? new Date(ticket.estimatedReturn) : new Date();
+  if (isNaN(baseDate.getTime()) || baseDate.getTime() <= now.getTime()) {
+    baseDate = new Date(now.getTime() + 60 * 60000); // 1 jam dari sekarang
+  } else {
+    baseDate = new Date(baseDate.getTime() + 60 * 60000); // 1 jam dari jadwal semula
+  }
+  const defaultVal = `${baseDate.getFullYear()}-${pad(baseDate.getMonth() + 1)}-${pad(baseDate.getDate())}T${pad(baseDate.getHours())}:${pad(baseDate.getMinutes())}`;
+  const minVal = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  if (inputExtendNewReturn) {
+    inputExtendNewReturn.value = defaultVal;
+    inputExtendNewReturn.min = minVal;
+  }
+  if (inputExtendReason) {
+    inputExtendReason.value = '';
+  }
+
+  if (modalExtendDuration) modalExtendDuration.classList.add('open');
+}
 
 // Expose globally
 window.handleOpenNewRequest = handleOpenNewRequest;
@@ -824,3 +1026,4 @@ window.switchDetailTab = switchDetailTab;
 window.openTicketDetail = openTicketDetail;
 window.openCancelModal = openCancelModal;
 window.handleOpenEmergency = handleOpenEmergency;
+window.openExtendDurationModal = openExtendDurationModal;

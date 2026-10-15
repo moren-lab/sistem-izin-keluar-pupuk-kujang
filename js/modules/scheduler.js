@@ -50,13 +50,26 @@ function checkOverdueAndExpiredTickets(silent = true) {
     if (ticket.status === 'Sedang di Luar' && ticket.type === 'Kembali ke Area' && ticket.estimatedReturn && !ticket.scanInTime) {
       const returnTime = new Date(ticket.estimatedReturn);
       if (!isNaN(returnTime.getTime()) && (now.getTime() > returnTime.getTime())) {
+        // PERIKSA GRACE PERIOD PENGAJUAN PERPANJANGAN WAKTU
+        const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';
+        if (hasPendingExt && ticket.pendingExtension.newEstimatedReturn) {
+          const extTime = new Date(ticket.pendingExtension.newEstimatedReturn);
+          if (!isNaN(extTime.getTime()) && now.getTime() <= extTime.getTime()) {
+            // GRACE PERIOD AKTIF: Karyawan telah mengajukan perpanjangan waktu dan waktu baru belum terlewati.
+            // Status dibekukan tetap 'Sedang di Luar' agar karyawan tidak divonis terlambat saat atasan belum merespons.
+            return;
+          }
+        }
+
         ticket.status = 'Terlambat';
         if (!ticket.timeline) ticket.timeline = [];
         ticket.timeline.push({
           event: 'Terdeteksi Terlambat',
           time: nowFormatted,
           by: 'Sistem Otomatis (Scheduler)',
-          desc: 'Karyawan terdeteksi belum kembali dan belum melakukan Scan In melewati perkiraan waktu kembali.'
+          desc: hasPendingExt
+            ? 'Karyawan terdeteksi belum kembali dan batas waktu perpanjangan yang diajukan pun telah terlewati.'
+            : 'Karyawan terdeteksi belum kembali dan belum melakukan Scan In melewati perkiraan waktu kembali.'
         });
         hasChanges = true;
         newlyOverdue++;

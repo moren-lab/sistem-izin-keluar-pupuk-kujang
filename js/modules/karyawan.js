@@ -144,20 +144,37 @@ function renderKaryawanDashboard() {
             <div>
               <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Estimasi Kembali</span>
               <strong style="font-family: var(--font-mono);">${activeTicket.estimatedReturn ? activeTicket.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</strong>
+              ${activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan' ? `
+                <div style="font-size:0.685rem; color:#b45309; font-weight:700; margin-top:2px;">(Diajukan: ${activeTicket.pendingExtension.newEstimatedReturn.replace('T', ' ')})</div>
+              ` : ''}
             </div>
           </div>
 
           <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div style="font-size: 0.775rem; color: var(--text-secondary);">
-              ${isOverdue 
-                ? '<strong style="color: var(--rose-danger);">Segera kembali ke pabrik dan lakukan Scan In di Pos 1 Gerbang Utama!</strong>'
-                : 'Tunjukkan QR Code pada petugas keamanan di Pos 1 saat melewati gerbang pabrik.'}
+              ${activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan'
+                ? '<strong style="color: #b45309;">⏱️ Permohonan perpanjangan waktu sedang menunggu persetujuan Atasan (Grace Period Aktif).</strong>'
+                : (isOverdue 
+                    ? '<strong style="color: var(--rose-danger);">Segera kembali ke pabrik dan lakukan Scan In di Pos 1 Gerbang Utama!</strong>'
+                    : 'Tunjukkan QR Code pada petugas keamanan di Pos 1 saat melewati gerbang pabrik.')}
             </div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               ${canCancel ? `
                 <button class="btn-cancel-ticket" style="padding: 0.45rem 0.85rem; font-size: 0.775rem;" onclick="openCancelModal('${activeTicket.id}')">
                   Batalkan Izin
                 </button>
+              ` : ''}
+              ${(activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat') && activeTicket.type === 'Kembali ke Area' ? `
+                ${activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan' ? `
+                  <button class="btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.775rem; background: #fffbeb; border: 1.5px solid #fde68a; color: #92400e; font-weight: 700;" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+                    ⏳ Perpanjangan Diajukan
+                  </button>
+                ` : `
+                  <button class="btn-primary-action" style="padding: 0.45rem 0.85rem; font-size: 0.775rem; background: #d97706; border-color: #d97706; display: inline-flex; align-items: center; gap: 0.35rem;" onclick="openExtendDurationModal('${activeTicket.id}')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Ajukan Perpanjangan</span>
+                  </button>
+                `}
               ` : ''}
               <button class="btn-card-detail" style="padding: 0.45rem 0.85rem; font-size: 0.775rem;" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
@@ -396,6 +413,12 @@ function renderEmpCards(list, containerElement) {
               </div>
             ` : ''}
 
+            ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+              <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.5rem 0.75rem; font-size:0.75rem; color:#92400e; display:flex; align-items:center; gap:0.4rem;">
+                <span>⏳ <strong>Perpanjangan Waktu Diajukan:</strong> Estimasi baru hingga <strong>${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong> (Menunggu Persetujuan Atasan • Grace Period Aktif).</span>
+              </div>
+            ` : ''}
+
             ${t.status === 'Kedaluwarsa' ? `
               <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:0.5rem 0.75rem; font-size:0.75rem; color:#475569;">
                 <span>⏱️ Tiket hangus (Kedaluwarsa) karena tidak digunakan keluar melewati batas toleransi (+10 menit).</span>
@@ -419,6 +442,12 @@ function renderEmpCards(list, containerElement) {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                   <span>Lihat Rincian</span>
                 </button>
+
+                ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.type === 'Kembali ke Area' && !t.pendingExtension ? `
+                  <button class="btn-secondary" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px; border:1.5px solid #d97706; color:#b45309; font-weight:700; background:#fff;" onclick="openExtendDurationModal('${t.id}')" title="Ajukan Perpanjangan Waktu">
+                    ⏱️ Perpanjang
+                  </button>
+                ` : ''}
               </div>
 
               <div>

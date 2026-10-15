@@ -2208,6 +2208,30 @@
             </div>
           </div>
 
+          <!-- KARTU INFORMASI PERPANJANGAN WAKTU (JIKA ADA PENGAJUAN) -->
+          <div id="infoPendingExtensionBox"
+            style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.8rem; margin-top: 0.75rem;">
+            <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>⏱️</span>
+                <span>Permohonan Perpanjangan Waktu Izin</span>
+              </span>
+              <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Grace Period Aktif</span>
+            </div>
+            <div style="margin-top: 0.45rem; color: #78350f; font-size: 0.775rem; line-height: 1.5;">
+              <div><strong>Waktu Kembali Baru:</strong> <span id="infoExtNewReturn" style="font-family: var(--font-mono); font-weight: 700; color: #92400e;">-</span></div>
+              <div style="margin-top: 2px;"><strong>Alasan Perpanjangan:</strong> <span id="infoExtReason">-</span></div>
+              <div style="margin-top: 5px; font-size: 0.725rem; color: #92400e; background: rgba(254,243,199,0.7); padding: 5px 8px; border-radius: 5px; border-left: 3px solid #f59e0b;">
+                🛡️ Status <em>Terlambat</em> dibekukan otomatis oleh sistem (Grace Period). Jika Anda telah tiba di pabrik, Anda tetap dapat melakukan <strong>Scan In</strong> di Pos Jaga tanpa terhalang.
+              </div>
+            </div>
+            <!-- Tombol Aksi Approver di dalam Detail Modal -->
+            <div id="approverExtActionBtns" style="display: none; margin-top: 0.65rem; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
+              <button type="button" class="btn-reject" id="btnDetailRejectExt" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">✕ Tolak Perpanjangan</button>
+              <button type="button" class="btn-approve" id="btnDetailApproveExt" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">✓ Setujui Perpanjangan</button>
+            </div>
+          </div>
+
           <div id="approverNoteDisplay"
             style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem;">
             <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 0.4rem;">
@@ -2243,6 +2267,13 @@
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           <span>Konfirmasi Scan In (Masuk Kembali)</span>
+        </button>
+        <button type="button" class="btn-primary-action" id="btnDetailExtend" style="display: none; background: #d97706; border-color: #d97706;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Ajukan Perpanjangan</span>
         </button>
         <button type="button" class="btn-primary-action" id="btnCloseDetailBottom">Tutup</button>
       </div>
@@ -2613,6 +2644,106 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-secondary" id="btnCancelScanMethodPicker">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 11: PENGAJUAN PERPANJANGAN WAKTU ================= -->
+  <div class="modal-overlay" id="modalExtendDuration">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: #b45309; display: flex; align-items: center; gap: 0.4rem;">
+            <span>⏱️</span>
+            <span>Ajukan Perpanjangan Waktu Izin</span>
+          </h3>
+          <p>Penambahan Durasi Waktu Kembali • PT Pupuk Kujang</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseExtendModal">✕</button>
+      </div>
+
+      <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
+        <!-- Ringkasan Tiket Aktif -->
+        <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; font-size: 0.825rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Nomor Tiket</span>
+            <strong id="extendTicketId" style="font-family: var(--font-mono); color: var(--corp-teal); font-size: 0.9rem;">-</strong>
+          </div>
+          <div style="margin-bottom: 0.35rem;">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Tujuan & Keperluan</span>
+            <span id="extendTicketDest" style="font-weight: 600; color: var(--text-primary);">-</span>
+          </div>
+          <div>
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Estimasi Kembali Semula</span>
+            <span id="extendCurrentReturnDisplay" style="font-family: var(--font-mono); font-weight: 700; color: #b45309;">-</span>
+          </div>
+        </div>
+
+        <!-- Form Input -->
+        <div class="form-group" style="margin-top: 1rem;">
+          <label class="form-label" for="inputExtendNewReturn">
+            Perkiraan Waktu Kembali Baru <span style="color: var(--rose-danger);">*</span>
+          </label>
+          <input type="datetime-local" id="inputExtendNewReturn" class="form-input" required>
+          <div style="font-size: 0.725rem; color: var(--text-secondary); margin-top: 3px;">
+            Waktu kembali baru harus lebih lambat dari perkiraan waktu kembali semula.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputExtendReason">
+            Alasan Perpanjangan Waktu <span style="color: var(--rose-danger);">*</span>
+          </label>
+          <textarea id="inputExtendReason" class="form-textarea" rows="3"
+            placeholder="Jelaskan alasan perpanjangan durasi (misal: antrean pengujian lab eksternal belum selesai, kemacetan lalu lintas, koordinasi dinas tambahan)..." required></textarea>
+        </div>
+
+        <!-- Edukasi Grace Period & Safety -->
+        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.775rem; color: #92400e; line-height: 1.45;">
+          <strong>🛡️ Grace Period & Prioritas Pos Jaga:</strong>
+          Setelah pengajuan dikirim, status <em>Terlambat</em> otomatis dibekukan (ditahan) selama menunggu persetujuan Atasan. Jika Anda telah tiba di pabrik sebelum Atasan merespons, Anda <strong>tetap dapat melakukan Scan In</strong> di Pos Jaga tanpa terhalang.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelExtendModal">Batal</button>
+        <button type="button" class="btn-primary-action" id="btnSubmitExtendDuration" style="background: #b45309; border-color: #b45309;">
+          Kirim Pengajuan Perpanjangan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 12: PENOLAKAN PERPANJANGAN WAKTU ================= -->
+  <div class="modal-overlay" id="modalRejectExtension">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--rose-danger);">Tolak Perpanjangan Waktu</h3>
+          <p>Karyawan diwajibkan segera kembali sesuai jadwal semula</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseRejectExtModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-primary);">
+          Anda menolak permohonan perpanjangan waktu untuk <strong id="rejectExtEmployeeName">-</strong> (<span id="rejectExtTicketId">TK-XXX</span>).
+        </p>
+
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label" for="rejectExtReasonInput">
+            Alasan Penolakan <span style="color: var(--rose-danger);">* Wajib diisi</span>
+          </label>
+          <textarea id="rejectExtReasonInput" class="form-textarea"
+            placeholder="Jelaskan alasan penolakan perpanjangan waktu (misal: ada agenda rapat internal mendesak)..." required></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelRejectExtModal">Batal</button>
+        <button type="button" class="btn-emergency" id="btnConfirmRejectExt">
+          ✕ Konfirmasi Tolak Perpanjangan
+        </button>
       </div>
     </div>
   </div>
