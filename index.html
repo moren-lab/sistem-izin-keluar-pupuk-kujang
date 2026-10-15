@@ -755,7 +755,9 @@
               <div class="filters-group">
                 <select id="filterAppViewMode" class="filter-select">
                   <option value="all">Semua Riwayat Keputusan & Status</option>
-                  <option value="pending">Khusus Antrean Menunggu Review</option>
+                  <option value="emergency">🚨 Khusus Izin Darurat / Bypass Atasan</option>
+                  <option value="outside">🚗 Khusus Karyawan Sedang di Luar</option>
+                  <option value="pending">⏳ Khusus Antrean Menunggu Review</option>
                 </select>
               </div>
             </div>
@@ -1963,27 +1965,27 @@
 
   <!-- ================= MODAL 7: IZIN DARURAT ================= -->
   <div class="modal-overlay" id="modalEmergency">
-    <div class="modal-card" style="max-width: 520px;">
+    <div class="modal-card" style="max-width: 500px;">
       <div class="modal-header">
         <div>
           <h3 style="color: var(--rose-danger); display: flex; align-items: center; gap: 0.4rem;">
             <span>🚨</span>
-            <span>Prosedur Izin Keluar Darurat</span>
+            <span>Izin Keluar Darurat / Bypass Atasan</span>
           </h3>
-          <p>Klausul Darurat [FR-KAR-07] • Khusus Situasi Kritis & Keselamatan K3</p>
+          <p>Kondisi Mendesak atau Atasan Sedang Berhalangan / di Luar Kantor</p>
         </div>
         <button class="btn-close-modal" id="btnCloseEmergencyModal">✕</button>
       </div>
 
       <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
         <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
-          <strong>🚨 SOP Darurat Pabrik:</strong> QR Darurat akan langsung diterbitkan tanpa menunggu approval Atasan demi keselamatan. Sistem akan otomatis mem-broadcast notifikasi darurat ke Atasan yang dipilih & Departemen K3 saat Anda dipindai di Pos Jaga.
+          <strong>Informasi Prosedur:</strong> Jalur ini digunakan saat situasi mendesak atau ketika Atasan sedang di luar/perjalanan sehingga tidak dapat dihubungi segera. QR Code keluar aktif langsung untuk verifikasi di Pos Jaga, dan sistem otomatis mengirimkan pelacakan ke Atasan yang dipilih.
         </div>
 
         <!-- Pilih Atasan untuk Notifikasi Pelacakan -->
         <div class="form-group" style="margin-top: 0.85rem;">
           <label class="form-label" for="emergApprover">
-            Pilih Atasan untuk Notifikasi Pelacakan <span style="color: var(--rose-danger);">*</span>
+            Pilih Atasan untuk Notifikasi & Pelacakan <span style="color: var(--rose-danger);">*</span>
           </label>
           <select id="emergApprover" class="form-select" required>
             <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan</option>
@@ -1992,27 +1994,14 @@
             <option value="Bambang Sutrisno, S.T.">Bambang Sutrisno, S.T. — Supervisi Pengamanan & K3</option>
           </select>
           <div style="font-size: 0.725rem; color: var(--text-secondary); margin-top: 3px;">
-            Atasan yang Anda pilih akan menerima peringatan darurat instan di dashboard-nya.
+            Atasan yang dipilih dapat memantau pergerakan izin keluar Anda secara real-time.
           </div>
         </div>
 
-        <!-- Kategori Kedaruratan -->
-        <div class="form-group">
-          <label class="form-label" for="emergCategory">
-            Kategori Kedaruratan <span style="color: var(--rose-danger);">*</span>
-          </label>
-          <select id="emergCategory" class="form-select" required>
-            <option value="Medis / Sakit Mendadak">🏥 Medis / Sakit Mendadak (Rujukan RS/Klinik)</option>
-            <option value="Kecelakaan Kerja Ringan (K3)">⚠️ Kecelakaan Kerja Ringan / Insiden K3</option>
-            <option value="Musibah Keluarga Kritis">🚨 Musibah / Keluarga Inti Kritis</option>
-            <option value="Bencana / Urusan Mendesak">⚡ Bencana / Insiden Operasional Mendesak</option>
-          </select>
-        </div>
-
-        <!-- Tipe Kepulangan Darurat -->
+        <!-- Tipe Kepulangan -->
         <div class="form-group">
           <label class="form-label">
-            Tipe Kepulangan Darurat <span style="color: var(--rose-danger);">*</span>
+            Tipe Kepulangan <span style="color: var(--rose-danger);">*</span>
           </label>
           <div class="option-grid">
             <label class="option-card selected" id="optEmergKembali" style="padding: 0.6rem 0.8rem; cursor: pointer;">
@@ -2024,37 +2013,29 @@
             </label>
 
             <label class="option-card" id="optEmergPulang" style="padding: 0.6rem 0.8rem; cursor: pointer;">
-              <input type="radio" name="emergType" value="Pulang / Rujuk RS">
+              <input type="radio" name="emergType" value="Pulang Mendahului">
               <div>
-                <div class="option-name" style="font-size: 0.85rem;">Tidak Kembali / Pulang</div>
-                <div class="option-desc" style="font-size: 0.725rem;">Rujuk rawat inap / pulang ke rumah</div>
+                <div class="option-name" style="font-size: 0.85rem;">Pulang Mendahului</div>
+                <div class="option-desc" style="font-size: 0.725rem;">Tidak kembali ke area hari ini</div>
               </div>
             </label>
           </div>
         </div>
 
-        <!-- Lokasi Tujuan Darurat -->
+        <!-- Lokasi Tujuan -->
         <div class="form-group">
           <label class="form-label" for="emergDest">
-            Lokasi Tujuan Darurat <span style="color: var(--rose-danger);">*</span>
+            Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
           </label>
-          <input type="text" id="emergDest" class="form-input" placeholder="Contoh: IGD RS Pupuk Kujang / Klinik Medika / Rumah Keluarga" required>
+          <input type="text" id="emergDest" class="form-input" placeholder="Contoh: Rumah Sakit / Dinas Mendesak / Urusan Penting" required>
         </div>
 
-        <!-- No Kontak Darurat / Pendamping -->
-        <div class="form-group">
-          <label class="form-label" for="emergPhone">
-            No. Kontak Darurat / Rekan Pendamping <span style="color: var(--rose-danger);">*</span>
-          </label>
-          <input type="tel" id="emergPhone" class="form-input" placeholder="Contoh: 0812-3456-7890 (Keluarga / Rekan Sekantor)" required>
-        </div>
-
-        <!-- Alasan Kedaruratan -->
+        <!-- Alasan Keperluan Izin -->
         <div class="form-group">
           <label class="form-label" for="emergReason">
-            Alasan Singkat Kedaruratan <span style="color: var(--rose-danger);">*</span>
+            Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
           </label>
-          <textarea id="emergReason" class="form-textarea" style="min-height: 65px;" placeholder="Jelaskan kondisi mendesak secara singkat..." required></textarea>
+          <textarea id="emergReason" class="form-textarea" style="min-height: 70px;" placeholder="Jelaskan keperluan/alasan mendesak..." required></textarea>
         </div>
       </div>
 

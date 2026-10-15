@@ -45,16 +45,17 @@ function renderApproverDashboard() {
 
     if (emergencyTickets.length > 0) {
       const emg = emergencyTickets[0];
+      const liveStatusText = emg.status === 'Disetujui' ? 'Menuju Pos Gerbang (Belum Keluar)' : (emg.status === 'Sedang di Luar' ? `Sedang di Luar (Scan Out: ${emg.scanOutTime || '-'})` : emg.status);
       bannerHtml += `
         <div style="background: #fff1f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.9rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="font-size: 1.4rem;">🚨</div>
             <div>
               <div style="font-weight: 800; font-size: 0.875rem; color: #9f1239;">
-                Pemberitahuan Darurat K3: Ada ${emergencyTickets.length} Karyawan Menggunakan Izin Darurat!
+                Monitoring Izin Darurat / Bypass Atasan (${emergencyTickets.length} Karyawan)
               </div>
               <div style="font-size: 0.775rem; color: #881337;">
-                ${emg.applicantName} • Tujuan: <strong>${emg.destination}</strong> ${emg.emergencyContact ? `(Kontak: <strong>${emg.emergencyContact}</strong>)` : ''}
+                ${emg.applicantName} • Tujuan: <strong>${emg.destination}</strong> • Status: <strong>${liveStatusText}</strong>
               </div>
             </div>
           </div>
@@ -300,6 +301,10 @@ function renderApproverView() {
     let list = ticketsList;
     if (mode === 'pending') {
       list = ticketsList.filter(t => t.status === 'Menunggu Persetujuan');
+    } else if (mode === 'emergency') {
+      list = ticketsList.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+    } else if (mode === 'outside') {
+      list = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     }
 
     if (list.length === 0) {

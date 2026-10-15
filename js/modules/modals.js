@@ -595,23 +595,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSubmitEmergency) {
     btnSubmitEmergency.addEventListener('click', () => {
       const emergApprover = document.getElementById('emergApprover');
-      const emergCategory = document.getElementById('emergCategory');
       const optEmergKembali = document.getElementById('optEmergKembali');
       const emergDest = document.getElementById('emergDest');
-      const emergPhone = document.getElementById('emergPhone');
       const emergReason = document.getElementById('emergReason');
 
       const approverVal = emergApprover ? emergApprover.value : 'Ir. Hendra Gunawan, M.T.';
-      const categoryVal = emergCategory ? emergCategory.value : 'Medis / Sakit Mendadak';
       const isKembali = optEmergKembali ? optEmergKembali.classList.contains('selected') : true;
-      const typeVal = isKembali ? 'Kembali ke Area' : 'Pulang / Rujuk RS';
+      const typeVal = isKembali ? 'Kembali ke Area' : 'Pulang Mendahului';
       const dest = emergDest ? emergDest.value.trim() : '';
-      const phone = emergPhone ? emergPhone.value.trim() : '';
       const reason = emergReason ? emergReason.value.trim() : '';
 
-      if (!dest || !reason || !phone) {
+      if (!dest || !reason) {
         if (typeof window.showToast === 'function') {
-          window.showToast('Harap lengkapi lokasi, no kontak darurat, dan alasan kedaruratan!', 'danger');
+          window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'danger');
         }
         return;
       }
@@ -632,38 +628,37 @@ document.addEventListener('DOMContentLoaded', () => {
         applicantName: ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.',
         applicantNip: ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841',
         department: ACTORS.karyawan ? ACTORS.karyawan.department : 'Departemen Rekayasa & Pemeliharaan',
-        category: categoryVal,
+        category: 'Izin Darurat',
         type: typeVal,
         destination: `[DARURAT] ${dest}`,
-        reason: `[DARURAT - ${categoryVal}] ${reason}`,
+        reason: `[DARURAT/BYPASS] ${reason}`,
         plannedExit: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`,
         estimatedReturn: estimatedReturnVal,
         status: 'Disetujui',
         isEmergency: true,
-        emergencyContact: phone,
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
         approverName: approverVal,
-        approverNote: `⚠️ Jalur K3 Darurat (Bypass). Peringatan pelacakan dikirim langsung ke Atasan (${approverVal}) & Dept K3.`,
+        approverNote: `⚠️ Jalur Darurat/Bypass. Izin diterbitkan mandiri dan terlacak di dashboard Atasan (${approverVal}).`,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
           {
-            event: 'Izin Darurat Diterbitkan',
+            event: 'Izin Darurat / Bypass Diterbitkan',
             time: nowFormatted,
             by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
-            desc: `Klausul darurat K3 diaktifkan menuju ${dest}. Kontak darurat: ${phone}.`
+            desc: `Izin darurat diaktifkan menuju ${dest} (Bypass approval Atasan).`
           },
           {
-            event: 'Broadcast Pelacakan Atasan & K3',
+            event: 'Pelacakan Aktif di Dashboard Atasan',
             time: nowFormatted,
-            by: 'Sistem K3 Digital',
-            desc: `Peringatan darurat otomatis dikirim ke Atasan: ${approverVal} & Tim K3/Pengamanan.`
+            by: 'Sistem Izin Keluar Pabrik',
+            desc: `Notifikasi pelacakan terkirim ke Atasan: ${approverVal}.`
           },
           {
-            event: 'QR Code Darurat Aktif',
+            event: 'QR Code Siap Dipindai di Pos Jaga',
             time: nowFormatted,
             by: 'Sistem Gerbang Digital',
-            desc: 'QR aktif untuk verifikasi darurat di Pos Jaga.'
+            desc: 'QR aktif untuk proses Scan Out di Pos Jaga Satpam.'
           }
         ]
       };
@@ -674,11 +669,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       modalEmergency.classList.remove('open');
       if (typeof window.showToast === 'function') {
-        window.showToast(`🚨 Tiket Darurat #${ticketId} diterbitkan! Notifikasi pelacakan terkirim ke ${approverVal}.`, 'success');
+        window.showToast(`🚨 Tiket Darurat #${ticketId} berhasil diterbitkan! QR aktif & terlacak di Atasan ${approverVal}.`, 'success');
       }
       if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
       if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
-      if (typeof window.renderApproverDashboard === 'function') window.renderApproverDashboard();
+      if (typeof window.renderApproverView === 'function') window.renderApproverView();
       openTicketDetail(ticketId);
     });
   }

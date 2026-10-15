@@ -25,8 +25,10 @@ function checkOverdueAndExpiredTickets(silent = true) {
 
   list.forEach(ticket => {
     // 1. KEDALUWARSA (BRULE-11):
-    // Tiket yang telah Disetujui tapi tidak kunjung dipindai keluar melewati toleransi rencana jam keluar (+10 menit)
-    if (ticket.status === 'Disetujui' && ticket.plannedExit && !ticket.scanOutTime) {
+    // Tiket reguler yang telah Disetujui tapi tidak kunjung dipindai keluar melewati toleransi rencana jam keluar (+10 menit)
+    // PENTING: Tiket Darurat / Bypass (isEmergency) TIDAK hangus otomatis agar tetap aktif dan dapat dipindai di pos jaga.
+    const isEmergencyTicket = ticket.isEmergency || (ticket.id && ticket.id.startsWith('TK-EMG'));
+    if (!isEmergencyTicket && ticket.status === 'Disetujui' && ticket.plannedExit && !ticket.scanOutTime) {
       const exitTime = new Date(ticket.plannedExit);
       const toleranceMs = 10 * 60 * 1000; // toleransi 10 menit
       if (!isNaN(exitTime.getTime()) && (now.getTime() > exitTime.getTime() + toleranceMs)) {
