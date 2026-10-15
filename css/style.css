@@ -1460,7 +1460,7 @@ body {
   justify-content: space-between;
 }
 
-.form-input, .form-textarea {
+.form-input, .form-textarea, .form-select {
   width: 100%;
   padding: 0.65rem 0.85rem;
   border-radius: var(--radius-sm);
@@ -1472,7 +1472,7 @@ body {
   transition: border-color 0.15s ease;
 }
 
-.form-input:focus, .form-textarea:focus {
+.form-input:focus, .form-textarea:focus, .form-select:focus {
   outline: none;
   border-color: var(--corp-teal);
   box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);

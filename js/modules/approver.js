@@ -37,10 +37,36 @@ function renderApproverDashboard() {
   const approverDashboardPendingList = document.getElementById('approverDashboardPendingList');
   const approverDashboardOutsideList = document.getElementById('approverDashboardOutsideList');
 
+  const emergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'));
+
   // Urgent Attention Banner
   if (approverUrgentBanner) {
+    let bannerHtml = '';
+
+    if (emergencyTickets.length > 0) {
+      const emg = emergencyTickets[0];
+      bannerHtml += `
+        <div style="background: #fff1f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.9rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="font-size: 1.4rem;">🚨</div>
+            <div>
+              <div style="font-weight: 800; font-size: 0.875rem; color: #9f1239;">
+                Pemberitahuan Darurat K3: Ada ${emergencyTickets.length} Karyawan Menggunakan Izin Darurat!
+              </div>
+              <div style="font-size: 0.775rem; color: #881337;">
+                ${emg.applicantName} • Tujuan: <strong>${emg.destination}</strong> ${emg.emergencyContact ? `(Kontak: <strong>${emg.emergencyContact}</strong>)` : ''}
+              </div>
+            </div>
+          </div>
+          <button class="btn-card-detail" style="background: #be123c; color: #ffffff; border: none; padding: 0.4rem 0.85rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer;" onclick="openTicketDetail('${emg.id}', 'detail')">
+            Lacak Izin Darurat →
+          </button>
+        </div>
+      `;
+    }
+
     if (pendingTickets.length > 0) {
-      approverUrgentBanner.innerHTML = `
+      bannerHtml += `
         <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="font-size: 1.4rem;">⚡</div>
@@ -58,8 +84,8 @@ function renderApproverDashboard() {
           </button>
         </div>
       `;
-    } else {
-      approverUrgentBanner.innerHTML = `
+    } else if (emergencyTickets.length === 0) {
+      bannerHtml += `
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
           <div style="font-size: 1.2rem;">✅</div>
           <div style="font-size: 0.825rem; color: #166534; font-weight: 600;">
@@ -68,6 +94,8 @@ function renderApproverDashboard() {
         </div>
       `;
     }
+
+    approverUrgentBanner.innerHTML = bannerHtml;
   }
 
   // Pending queue quick inline list
@@ -120,16 +148,21 @@ function renderApproverDashboard() {
     } else {
       approverDashboardOutsideList.innerHTML = outsideTickets.map(t => {
         const isOverdue = t.status === 'Terlambat';
+        const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
         return `
-          <div class="feed-item" style="${isOverdue ? 'border-left: 3px solid var(--rose-danger); background: #fff5f5;' : ''}">
+          <div class="feed-item" style="${isEmergency ? 'border-left: 3.5px solid var(--rose-danger); background: #fff1f2;' : (isOverdue ? 'border-left: 3.5px solid var(--rose-danger); background: #fff5f5;' : '')}">
             <div class="feed-item-left">
-              <div class="feed-item-icon" style="background: ${isOverdue ? 'var(--rose-light)' : '#e0f2fe'}; color: ${isOverdue ? 'var(--rose-danger)' : '#0284c7'};">
-                ${isOverdue ? '⚠️' : '🚗'}
+              <div class="feed-item-icon" style="background: ${isEmergency ? '#ffe4e6' : (isOverdue ? 'var(--rose-light)' : '#e0f2fe')}; color: ${isEmergency ? '#b91c1c' : (isOverdue ? 'var(--rose-danger)' : '#0284c7')};">
+                ${isEmergency ? '🚨' : (isOverdue ? '⚠️' : '🚗')}
               </div>
               <div>
-                <div class="feed-item-title">${t.applicantName} • ${t.destination}</div>
+                <div class="feed-item-title" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                  <span>${t.applicantName} • ${t.destination}</span>
+                  ${isEmergency ? '<span class="tag-badge" style="background:#ffe4e6; color:#b91c1c; font-weight:800; font-size:0.65rem;">🚨 DARURAT</span>' : ''}
+                </div>
                 <div class="feed-item-sub">
-                  ${t.id} • Est. Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : '-'}</span>
+                  ${t.id} • Est. Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
+                  ${t.emergencyContact ? ` • Kontak: <strong style="color: #9f1239;">${t.emergencyContact}</strong>` : ''}
                 </div>
               </div>
             </div>
@@ -150,10 +183,11 @@ function renderApproverCards(list, containerElement) {
     <div class="cards-grid">
       ${list.map(t => {
         const isPending = t.status === 'Menunggu Persetujuan';
+        const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
         const isDinas = t.category === 'Dinas Kantor';
 
         return `
-          <div class="card-item" style="${isPending ? 'border-left: 4px solid var(--amber-warning);' : ''}">
+          <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : (isPending ? 'border-left: 4px solid var(--amber-warning);' : '')}">
             <div class="card-top">
               <div>
                 <span class="card-id-num">${t.id}</span>
@@ -167,7 +201,7 @@ function renderApproverCards(list, containerElement) {
                 <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
                 <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} • ${t.department || 'Rekayasa Mesin'}</div>
               </div>
-              <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
+              <span class="tag-badge ${isEmergency ? '' : (isDinas ? 'tag-dinas' : 'tag-pribadi')}" style="${isEmergency ? 'background:#ffe4e6; color:#b91c1c; font-weight:800;' : ''}">${isEmergency ? '🚨 ' + t.category : t.category}</span>
             </div>
 
             <div style="font-size:0.85rem; color:var(--text-primary); line-height:1.4;">

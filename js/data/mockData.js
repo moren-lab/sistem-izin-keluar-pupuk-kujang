@@ -39,6 +39,34 @@ const ACTORS = {
   }
 };
 
+// Daftar Atasan Peninjau (Approvers) yang dapat dipilih oleh Karyawan
+const MOCK_APPROVERS = [
+  {
+    nip: 'PK-2015-1002',
+    name: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Manager Rekayasa & Pemeliharaan',
+    department: 'Departemen Rekayasa & Pemeliharaan'
+  },
+  {
+    nip: 'PK-2012-0845',
+    name: 'Dewi Sartika, S.T., M.M.',
+    title: 'Supervisor Operasional Lapangan',
+    department: 'Departemen Rekayasa & Pemeliharaan'
+  },
+  {
+    nip: 'PK-2010-0112',
+    name: 'Dr. Agus Priyanto, M.Eng.',
+    title: 'VP Produksi & Utilitas',
+    department: 'Direktorat Operasi Pabrik'
+  },
+  {
+    nip: 'PK-2014-0331',
+    name: 'Bambang Sutrisno, S.T.',
+    title: 'Supervisi Pengamanan & K3',
+    department: 'Departemen Pengamanan & K3'
+  }
+];
+
 let currentActor = 'karyawan'; // 'karyawan', 'approver', 'security', or 'admin'
 
 // Helper tanggal dinamis untuk data mock awal
@@ -262,4 +290,5 @@ window.currentEmpViewMode = currentEmpViewMode;
 window.currentDecisionTicketId = currentDecisionTicketId;
 window.currentCancelTicketId = currentCancelTicketId;
 window.pendingFormData = pendingFormData;
+window.MOCK_APPROVERS = MOCK_APPROVERS;
 

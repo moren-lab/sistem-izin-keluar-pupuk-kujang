@@ -73,6 +73,20 @@ function setupRadioToggles() {
       if (inputEstimatedReturn) inputEstimatedReturn.required = false;
     });
   }
+
+  // Emergency radio toggles
+  const optEmergKembali = document.getElementById('optEmergKembali');
+  const optEmergPulang = document.getElementById('optEmergPulang');
+  if (optEmergKembali && optEmergPulang) {
+    optEmergKembali.addEventListener('click', () => {
+      optEmergKembali.classList.add('selected');
+      optEmergPulang.classList.remove('selected');
+    });
+    optEmergPulang.addEventListener('click', () => {
+      optEmergPulang.classList.add('selected');
+      optEmergKembali.classList.remove('selected');
+    });
+  }
 }
 
 function initFormDates() {
@@ -233,6 +247,20 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
   const infoCatType = document.getElementById('infoCatType');
   if (infoCatType) infoCatType.textContent = `${ticket.category} • ${ticket.type}`;
 
+  const infoApproverName = document.getElementById('infoApproverName');
+  if (infoApproverName) infoApproverName.textContent = ticket.approverName || (ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.');
+
+  const infoEmergContactRow = document.getElementById('infoEmergContactRow');
+  const infoEmergencyContact = document.getElementById('infoEmergencyContact');
+  if (infoEmergContactRow && infoEmergencyContact) {
+    if (ticket.emergencyContact || ticket.isEmergency || (ticket.id && ticket.id.startsWith('TK-EMG'))) {
+      infoEmergContactRow.style.display = 'flex';
+      infoEmergencyContact.textContent = ticket.emergencyContact || 'Pusat Medis / Pos Jaga';
+    } else {
+      infoEmergContactRow.style.display = 'none';
+    }
+  }
+
   const infoDestination = document.getElementById('infoDestination');
   if (infoDestination) infoDestination.textContent = ticket.destination;
 
@@ -368,8 +396,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn };
+      const selectApprover = document.getElementById('selectApprover');
+      const approverName = selectApprover ? selectApprover.value : (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.');
 
+      window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn, approverName };
+
+      const sumApprover = document.getElementById('sumApprover');
       const sumCategory = document.getElementById('sumCategory');
       const sumType = document.getElementById('sumType');
       const sumDestination = document.getElementById('sumDestination');
@@ -378,6 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sumReturnRow = document.getElementById('sumReturnRow');
       const sumReturnTime = document.getElementById('sumReturnTime');
 
+      if (sumApprover) sumApprover.textContent = approverName;
       if (sumCategory) sumCategory.textContent = category;
       if (sumType) sumType.textContent = type;
       if (sumDestination) sumDestination.textContent = destination;
@@ -441,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
         estimatedReturn: window.pendingFormData.estimatedReturn,
         status: 'Menunggu Persetujuan',
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
-        approverName: ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.',
+        approverName: window.pendingFormData.approverName || (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.'),
         approverNote: null,
         scanOutTime: null,
         scanInTime: null,
@@ -561,13 +594,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSubmitEmergency) {
     btnSubmitEmergency.addEventListener('click', () => {
+      const emergApprover = document.getElementById('emergApprover');
+      const emergCategory = document.getElementById('emergCategory');
+      const optEmergKembali = document.getElementById('optEmergKembali');
       const emergDest = document.getElementById('emergDest');
+      const emergPhone = document.getElementById('emergPhone');
       const emergReason = document.getElementById('emergReason');
+
+      const approverVal = emergApprover ? emergApprover.value : 'Ir. Hendra Gunawan, M.T.';
+      const categoryVal = emergCategory ? emergCategory.value : 'Medis / Sakit Mendadak';
+      const isKembali = optEmergKembali ? optEmergKembali.classList.contains('selected') : true;
+      const typeVal = isKembali ? 'Kembali ke Area' : 'Pulang / Rujuk RS';
       const dest = emergDest ? emergDest.value.trim() : '';
+      const phone = emergPhone ? emergPhone.value.trim() : '';
       const reason = emergReason ? emergReason.value.trim() : '';
 
-      if (!dest || !reason) {
-        if (typeof window.showToast === 'function') window.showToast('Harap lengkapi lokasi dan alasan keduratan!', 'danger');
+      if (!dest || !reason || !phone) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap lengkapi lokasi, no kontak darurat, dan alasan kedaruratan!', 'danger');
+        }
         return;
       }
 
@@ -579,26 +624,47 @@ document.addEventListener('DOMContentLoaded', () => {
       const ticketId = `TK-EMG-${dateCode}-${randomSuffix}`;
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
+      const futureReturn = new Date(now.getTime() + 180 * 60000);
+      const estimatedReturnVal = isKembali ? `${futureReturn.getFullYear()}-${pad(futureReturn.getMonth() + 1)}-${pad(futureReturn.getDate())}T${pad(futureReturn.getHours())}:${pad(futureReturn.getMinutes())}` : null;
+
       const emergencyTicket = {
         id: ticketId,
         applicantName: ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.',
         applicantNip: ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841',
         department: ACTORS.karyawan ? ACTORS.karyawan.department : 'Departemen Rekayasa & Pemeliharaan',
-        category: 'Urusan Pribadi',
-        type: 'Pulang Mendahului',
+        category: categoryVal,
+        type: typeVal,
         destination: `[DARURAT] ${dest}`,
-        reason: `[DARURAT] ${reason}`,
-        plannedExit: now.toISOString().slice(0, 16),
-        estimatedReturn: null,
+        reason: `[DARURAT - ${categoryVal}] ${reason}`,
+        plannedExit: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`,
+        estimatedReturn: estimatedReturnVal,
         status: 'Disetujui',
+        isEmergency: true,
+        emergencyContact: phone,
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
-        approverName: 'Jalur Darurat Pos Jaga',
-        approverNote: 'Tiket diterbitkan melalui jalur darurat. Wajib verifikasi fisik di Pos Jaga.',
+        approverName: approverVal,
+        approverNote: `⚠️ Jalur K3 Darurat (Bypass). Peringatan pelacakan dikirim langsung ke Atasan (${approverVal}) & Dept K3.`,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
-          { event: 'Pengajuan Darurat Dibuat', time: nowFormatted, by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`, desc: 'Jalur izin darurat diaktifkan.' },
-          { event: 'QR Code Darurat Aktif', time: nowFormatted, by: 'Sistem Gerbang Digital', desc: 'QR aktif khusus verifikasi darurat Pos Jaga.' }
+          {
+            event: 'Izin Darurat Diterbitkan',
+            time: nowFormatted,
+            by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+            desc: `Klausul darurat K3 diaktifkan menuju ${dest}. Kontak darurat: ${phone}.`
+          },
+          {
+            event: 'Broadcast Pelacakan Atasan & K3',
+            time: nowFormatted,
+            by: 'Sistem K3 Digital',
+            desc: `Peringatan darurat otomatis dikirim ke Atasan: ${approverVal} & Tim K3/Pengamanan.`
+          },
+          {
+            event: 'QR Code Darurat Aktif',
+            time: nowFormatted,
+            by: 'Sistem Gerbang Digital',
+            desc: 'QR aktif untuk verifikasi darurat di Pos Jaga.'
+          }
         ]
       };
 
@@ -607,9 +673,12 @@ document.addEventListener('DOMContentLoaded', () => {
       window.saveTickets(ticketsList);
 
       modalEmergency.classList.remove('open');
-      if (typeof window.showToast === 'function') window.showToast(`Tiket Darurat #${ticketId} berhasil diterbitkan!`, 'success');
+      if (typeof window.showToast === 'function') {
+        window.showToast(`🚨 Tiket Darurat #${ticketId} diterbitkan! Notifikasi pelacakan terkirim ke ${approverVal}.`, 'success');
+      }
       if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
       if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+      if (typeof window.renderApproverDashboard === 'function') window.renderApproverDashboard();
       openTicketDetail(ticketId);
     });
   }
