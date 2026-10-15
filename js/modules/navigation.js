@@ -333,9 +333,74 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSwitchSecurity) btnSwitchSecurity.addEventListener('click', () => switchRole('security'));
   if (btnSwitchAdmin) btnSwitchAdmin.addEventListener('click', () => switchRole('admin'));
 
+  // LOGOUT & PORTAL AUTH BINDINGS
+  const btnSidebarLogout = document.getElementById('btnSidebarLogout');
+  const btnCloseLogoutModal = document.getElementById('btnCloseLogoutModal');
+  const btnCancelLogoutModal = document.getElementById('btnCancelLogoutModal');
+  const btnConfirmLogoutModal = document.getElementById('btnConfirmLogoutModal');
+  const btnLoginSubmit = document.getElementById('btnLoginSubmit');
+  const userChoices = document.querySelectorAll('.portal-user-option');
+
+  if (btnSidebarLogout) btnSidebarLogout.addEventListener('click', openLogoutModal);
+  if (btnCloseLogoutModal) btnCloseLogoutModal.addEventListener('click', closeLogoutModal);
+  if (btnCancelLogoutModal) btnCancelLogoutModal.addEventListener('click', closeLogoutModal);
+  if (btnConfirmLogoutModal) btnConfirmLogoutModal.addEventListener('click', executeLogout);
+
+  userChoices.forEach(opt => {
+    opt.addEventListener('click', () => {
+      userChoices.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  if (btnLoginSubmit) btnLoginSubmit.addEventListener('click', handleLoginSubmit);
+
   setInterval(updateClock, 1000);
   updateClock();
 });
+
+// LOGOUT & PORTAL AUTH FUNCTIONS
+function openLogoutModal() {
+  const modalLogoutConfirm = document.getElementById('modalLogoutConfirm');
+  if (modalLogoutConfirm) modalLogoutConfirm.classList.add('open');
+}
+
+function closeLogoutModal() {
+  const modalLogoutConfirm = document.getElementById('modalLogoutConfirm');
+  if (modalLogoutConfirm) modalLogoutConfirm.classList.remove('open');
+}
+
+function executeLogout() {
+  closeLogoutModal();
+  if (typeof window.stopCameraScanner === 'function') {
+    try { window.stopCameraScanner(); } catch (e) {}
+  }
+  closeMobileSidebar();
+
+  const portalLoginOverlay = document.getElementById('portalLoginOverlay');
+  if (portalLoginOverlay) {
+    portalLoginOverlay.classList.add('open');
+  }
+  if (typeof window.showToast === 'function') {
+    window.showToast('Sesi KUJANG ID berhasil diakhiri. Silakan pilih akun untuk masuk kembali.', 'info');
+  }
+}
+
+function handleLoginSubmit() {
+  const portalLoginOverlay = document.getElementById('portalLoginOverlay');
+  const selectedOpt = document.querySelector('.portal-user-option.selected');
+  const role = selectedOpt ? selectedOpt.getAttribute('data-role') : 'karyawan';
+
+  if (typeof window.switchRole === 'function') {
+    window.switchRole(role);
+  }
+  if (portalLoginOverlay) {
+    portalLoginOverlay.classList.remove('open');
+  }
+  if (typeof window.showToast === 'function') {
+    window.showToast('Autentikasi KUJANG ID berhasil. Selamat datang kembali!', 'success');
+  }
+}
 
 // Expose globally
 window.updateClock = updateClock;
@@ -346,3 +411,8 @@ window.setApproverNav = setApproverNav;
 window.setSecurityNav = setSecurityNav;
 window.setAdminNav = setAdminNav;
 window.switchRole = switchRole;
+window.openLogoutModal = openLogoutModal;
+window.closeLogoutModal = closeLogoutModal;
+window.executeLogout = executeLogout;
+window.handleLoginSubmit = handleLoginSubmit;
+

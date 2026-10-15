@@ -49,6 +49,9 @@ function filterEmpTickets() {
   const filterEmpType = document.getElementById('filterEmpType');
   const filterEmpStatus = document.getElementById('filterEmpStatus');
 
+  const ACTORS = window.ACTORS || {};
+  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
+
   const query = searchEmpInput ? searchEmpInput.value.trim().toLowerCase() : '';
   const category = filterEmpCategory ? filterEmpCategory.value : 'all';
   const type = filterEmpType ? filterEmpType.value : 'all';
@@ -57,6 +60,10 @@ function filterEmpTickets() {
   const currentKaryawanNav = window.currentKaryawanNav || 'dashboard';
 
   return ticketsList.filter(t => {
+    // 0. Hak akses Karyawan: batasi data hanya milik karyawan login
+    const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841');
+    if (!isMyTicket) return false;
+
     // 1. Sidebar tab mode
     if (currentKaryawanNav === 'pengajuan') {
       const isActive = t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
@@ -172,8 +179,9 @@ function renderKaryawanDashboard() {
                 </div>
               </div>
             </div>
-            <button class="btn-primary-action" style="padding: 0.5rem 1rem; font-size: 0.825rem;" onclick="handleOpenNewRequest()">
-              + Ajukan Izin Baru
+            <button class="btn-secondary" style="padding: 0.55rem 1.15rem; font-size: 0.825rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.45rem; background: #ffffff; border: 1.5px solid #10b981; color: #065f46; box-shadow: 0 2px 6px rgba(16,185,129,0.15); cursor: pointer;" onclick="setKaryawanNav('pengajuan')">
+              <span>Pengajuan Saya</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
           </div>
         </div>

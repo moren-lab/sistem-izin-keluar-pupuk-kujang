@@ -112,6 +112,30 @@ body {
   flex-shrink: 0;
   transition: width 0.25s ease, transform 0.25s ease;
   z-index: 50;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .sidebar.collapsed {
@@ -127,6 +151,11 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
 }
 
 .brand-wrapper {
@@ -258,6 +287,8 @@ body {
   padding: 1rem;
   border-top: 1px solid var(--border-color);
   background: #fdfdfd;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .current-role-box {
@@ -1341,6 +1372,10 @@ body {
 /* ===================================================================
    MODAL DIALOGS - SCROLL & PINNED FOOTER
    =================================================================== */
+body.modal-open {
+  overflow: hidden !important;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1354,6 +1389,8 @@ body {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-overlay.open {
@@ -1366,11 +1403,12 @@ body {
   border-radius: 14px;
   width: 100%;
   max-width: 600px;
-  max-height: 88vh;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.25);
   overflow: hidden;
+  margin: auto;
 }
 
 .modal-card form {
@@ -1421,15 +1459,37 @@ body {
   color: var(--text-primary);
 }
 
-/* Scrollable Body */
+/* Scrollable Body with Visible Custom Scrollbars */
 .modal-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-  flex: 1;
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 /* Pinned Footer */
@@ -1525,8 +1585,28 @@ body {
 .summary-container {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 290px;
   background: var(--bg-app);
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.summary-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.summary-container::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.summary-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.summary-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .summary-row {
@@ -2566,5 +2646,316 @@ body {
     color: #000000 !important;
   }
 }
+
+/* ==========================================================================
+   REVISI FITUR & PENINGKATAN UI/UX ELEGAN PT PUPUK KUJANG
+   ========================================================================== */
+
+/* 1. Sidebar Logout Button */
+.btn-sidebar-logout {
+  width: 100%;
+  margin-top: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: var(--radius-sm);
+  color: #ef4444;
+  font-size: 0.775rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sidebar-logout:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-sidebar-logout:active {
+  transform: translateY(0);
+}
+
+/* 2. Scanner Slider Control with Navigation Arrows */
+.scanner-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 480px;
+  user-select: none;
+}
+
+.btn-slider-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: rgba(15, 23, 42, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-slider-arrow:hover {
+  background: rgba(2, 132, 199, 0.8);
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.btn-slider-arrow:active {
+  transform: scale(0.95);
+}
+
+.scanner-slider-control {
+  position: relative;
+  display: flex;
+  flex: 1;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.scanner-slider-control .slider-glider {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.5);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.scanner-slider-control.slider-manual .slider-glider {
+  transform: translateX(100%);
+}
+
+.slider-tab {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.slider-tab.active {
+  color: #ffffff;
+}
+
+.slider-tab:hover:not(.active) {
+  color: #f1f5f9;
+}
+
+/* 3. Consolidated Kamera Belum Aktif Card */
+.camera-idle-interactive {
+  border-radius: var(--radius-md);
+  transition: all 0.25s ease;
+}
+
+.camera-idle-interactive .btn-cam-action {
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.camera-idle-interactive .btn-cam-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.camera-idle-interactive:hover .camera-idle-lens {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+}
+
+.camera-idle-lens {
+  transition: all 0.25s ease;
+}
+
+/* 4. Action Buttons in Ticket Detail Footer */
+.btn-quick-scan-out {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.15rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-quick-scan-out:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-quick-scan-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.15rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-quick-scan-in:hover {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+  transform: translateY(-1px);
+}
+
+/* 5. Portal SAKTI KUJANG ID Login Overlay */
+.portal-login-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 29, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeInPortal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-login-overlay.open {
+  display: flex;
+}
+
+@keyframes fadeInPortal {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.portal-login-card {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.portal-login-header {
+  background: linear-gradient(135deg, #004b87 0%, #02335a 100%);
+  padding: 1.75rem 1.5rem 1.25rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.portal-login-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.portal-user-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.portal-user-option:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: translateX(2px);
+}
+
+.portal-user-option.selected {
+  background: #f0fdf4;
+  border-color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+/* 6. Page Transitions & Visual Polish */
+.page-view-animated {
+  animation: fadeInPageView 0.25s ease-out;
+}
+
+@keyframes fadeInPageView {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-view-animated,
+  .scanner-slider-control .slider-glider,
+  .btn-sidebar-logout,
+  .portal-login-overlay,
+  .scan-method-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.scan-method-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.scan-method-card:active {
+  transform: scale(0.99);
+}
+
+.camera-idle-lens:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.45);
+}
+
+
 
 

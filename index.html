@@ -222,11 +222,19 @@
 
       <!-- Current Actor Footer -->
       <div class="sidebar-footer-card">
-        <div class="current-role-box">
+        <div class="current-role-box" id="current-role-box">
           <span class="role-tag-pill role-karyawan" id="roleBadge">Peran: Karyawan</span>
           <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary);" id="sidebarUserName">Budi Pratama, S.T.</div>
           <div style="font-size: 0.7rem; color: var(--text-secondary);" id="sidebarUserSub">NIP: PK-2024-8841</div>
         </div>
+        <button type="button" class="btn-sidebar-logout" id="btnSidebarLogout" title="Keluar dari sesi KUJANG ID">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout (Sesi)</span>
+        </button>
       </div>
     </aside>
 
@@ -420,19 +428,19 @@
                 <p id="karyawanHeadingSub">Daftar permohonan izin keluar kawasan yang sedang aktif dan berjalan</p>
               </div>
               <div class="page-actions-group">
-                <button class="btn-primary-action" id="btnOpenNewRequestModal">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  <span>Buat Pengajuan Izin</span>
-                </button>
                 <button class="btn-emergency" id="btnOpenEmergencyModal" title="Pengajuan Izin Darurat">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                   </svg>
                   <span>Izin Darurat</span>
+                </button>
+                <button class="btn-primary-action" id="btnOpenNewRequestModal">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Buat Pengajuan Izin</span>
                 </button>
               </div>
             </div>
@@ -986,27 +994,35 @@
                 </div>
               </div>
 
-              <!-- SCANNER MODE TABS -->
-              <div class="scanner-mode-tabs">
-                <button type="button" class="btn-scan-mode active" id="btnModeCameraScan">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                  <span>Kamera Scan QR (Live)</span>
+              <!-- SCANNER SLIDING CONTROL WITH ARROW BUTTONS -->
+              <div class="scanner-slider-wrapper">
+                <button type="button" class="btn-slider-arrow" id="btnPrevScanMode" title="Pindah ke Mode Kamera" aria-label="Mode Sebelumnya">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
-                <button type="button" class="btn-scan-mode" id="btnModeManualScan">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                  <span>Input Manual / Alat Barcode</span>
+
+                <div class="scanner-slider-control" id="scanModeSlider">
+                  <div class="slider-glider" id="scanSliderGlider"></div>
+                  <button type="button" class="slider-tab active" id="btnModeCameraScan">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    <span>Kamera Scan QR</span>
+                  </button>
+                  <button type="button" class="slider-tab" id="btnModeManualScan">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Input Manual / Alat Barcode</span>
+                  </button>
+                </div>
+
+                <button type="button" class="btn-slider-arrow" id="btnNextScanMode" title="Pindah ke Input Manual" aria-label="Mode Berikutnya">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
               </div>
 
               <!-- 1. LIVE CAMERA SCANNER VIEW -->
               <div id="cameraScannerBox" class="camera-scanner-container">
-                <div class="camera-control-toolbar">
+                <!-- Running Camera Active Controls (Hidden when idle) -->
+                <div class="camera-control-toolbar" id="cameraActiveToolbar" style="display: none;">
                   <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                    <button type="button" class="btn-cam-action primary" id="btnStartCamera">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                      <span>Aktifkan Kamera</span>
-                    </button>
-                    <button type="button" class="btn-cam-action danger" id="btnStopCamera" style="display: none;">
+                    <button type="button" class="btn-cam-action danger" id="btnStopCamera">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12"></rect></svg>
                       <span>Matikan Kamera</span>
                     </button>
@@ -1014,32 +1030,45 @@
                       <option value="">Pilih Kamera...</option>
                     </select>
                   </div>
-
                   <div>
-                    <button type="button" class="btn-cam-action secondary" id="btnTriggerFileScan">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                      <span>Unggah Gambar QR</span>
-                    </button>
-                    <input type="file" id="inputScanQrFile" accept="image/*" style="display: none;">
+                    <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">🟢 Kamera Live Berjalan</span>
                   </div>
                 </div>
 
-                <!-- VIEWPORT KAMERA -->
-                <div class="camera-viewport-card" id="cameraViewportCard">
-                  <div id="cameraReaderView" style="width: 100%; max-width: 420px; margin: 0 auto; min-height: 250px; background: #000; border-radius: 8px; overflow: hidden; position: relative;">
-                    <div id="cameraIdlePlaceholder" class="camera-idle-wrap">
-                      <div class="camera-idle-lens">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
-                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                          <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                      </div>
-                      <div style="font-weight: 700; font-size: 0.9rem; color: #f0f9ff; margin-top: 0.6rem;">Kamera Belum Aktif</div>
-                      <p style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-top: 0.25rem;">Tekan tombol "Aktifkan Kamera" di atas untuk mulai memindai QR Code izin keluar karyawan</p>
+                <!-- VIEWPORT KAMERA & KONSOLIDASI AREA KAMERA BELUM AKTIF -->
+                <div class="camera-viewport-card" id="cameraViewportCard" style="position: relative; width: 100%; max-width: 440px; margin: 0 auto; min-height: 270px; background: #000; border-radius: 8px; overflow: hidden;">
+                  <!-- Dedicated HTML5 QR Container for Video/Canvas stream -->
+                  <div id="cameraReaderView" style="width: 100%; min-height: 270px; background: #000;"></div>
+
+                  <!-- Consolidated Kamera Belum Aktif Card (Sibling layer, immune to clearElement) -->
+                  <div id="cameraIdlePlaceholder" class="camera-idle-wrap camera-idle-interactive" style="position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); padding: 1.5rem; text-align: center; cursor: pointer;" title="Klik di sini untuk memilih metode pemindaian">
+                    <div class="camera-idle-lens" id="btnClickCameraLens" title="Klik gambar kamera ini untuk memilih metode scan">
+                      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                      </svg>
+                    </div>
+                    <div style="font-weight: 800; font-size: 1.05rem; color: #f0f9ff; margin-top: 0.65rem;">Kamera Belum Aktif</div>
+                    <p id="cameraIdleHint" style="font-size: 0.775rem; color: #94a3b8; max-width: 320px; margin-top: 0.25rem; margin-bottom: 0.85rem;">
+                      Klik gambar kamera atau pilih opsi di bawah untuk memindai:
+                    </p>
+                    <div class="camera-idle-actions" id="cameraIdleActions" style="display: flex; gap: 0.65rem; justify-content: center; flex-wrap: wrap;">
+                      <button type="button" class="btn-cam-action primary" id="btnStartCamera" style="padding: 0.6rem 1.15rem; font-size: 0.825rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <span>Aktifkan Kamera</span>
+                      </button>
+                      <button type="button" class="btn-cam-action secondary" id="btnTriggerFileScan" style="padding: 0.6rem 1.15rem; font-size: 0.825rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>Unggah Gambar QR</span>
+                      </button>
                     </div>
                   </div>
 
-                  <div id="cameraScanOverlay" class="camera-laser-overlay" style="display: none;">
+                  <!-- Safe Hidden File Input -->
+                  <input type="file" id="inputScanQrFile" accept="image/*" style="display: none;">
+
+                  <!-- Laser scan reticle overlay -->
+                  <div id="cameraScanOverlay" class="camera-laser-overlay" style="display: none; position: absolute; inset: 0; z-index: 4;">
                     <div class="laser-reticle">
                       <div class="laser-corner tl"></div>
                       <div class="laser-corner tr"></div>
@@ -1051,7 +1080,7 @@
                 </div>
 
                 <div id="cameraScanStatus" class="camera-status-pill">
-                  💡 Arahkan kamera ke QR Code Tiket Izin Karyawan. Hasil akan otomatis diproses.
+                  💡 Arahkan kamera ke QR Code Tiket Izin Karyawan atau unggah gambar QR untuk memvalidasi.
                 </div>
               </div>
 
@@ -1070,11 +1099,6 @@
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                   <span>Verifikasi Tiket</span>
                 </button>
-              </div>
-
-              <!-- Result Box after scanning / entering code -->
-              <div id="scanResultContainer" style="display: none; background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 1.25rem;">
-                <!-- Rendered via JS -->
               </div>
             </div>
           </div>
@@ -1132,6 +1156,63 @@
             </div>
 
             <div class="content-section" style="margin-top: 1.5rem;">
+              <!-- Toolbar Smart Riwayat Pemindaian Pos Jaga -->
+              <div class="smart-toolbar" style="margin-bottom: 1.25rem;">
+                <div class="toolbar-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="searchSecurityLogInput" class="search-input" placeholder="Cari nomor tiket, pemohon, NIP, atau tujuan...">
+                </div>
+
+                <div class="filters-group">
+                  <select id="filterSecurityLogCategory" class="filter-select">
+                    <option value="all">Semua Kategori</option>
+                    <option value="Dinas Kantor">Dinas Kantor</option>
+                    <option value="Urusan Pribadi">Urusan Pribadi</option>
+                  </select>
+
+                  <select id="filterSecurityLogStatus" class="filter-select">
+                    <option value="all">Semua Status</option>
+                    <option value="Sedang di Luar">Sedang di Luar</option>
+                    <option value="Selesai">Selesai (Kembali/Pulang)</option>
+                    <option value="Terlambat">Terlambat</option>
+                    <option value="Disetujui">Siap Keluar (Disetujui)</option>
+                  </select>
+
+                  <div class="view-mode-group">
+                    <button class="btn-view-mode active" id="btnSecurityLogViewCard" title="Tampilan Kartu">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                      </svg>
+                    </button>
+                    <button class="btn-view-mode" id="btnSecurityLogViewTable" title="Tampilan Tabel">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <button class="btn-secondary" id="btnSecurityLogExport" style="font-size: 0.775rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Ekspor CSV</span>
+                  </button>
+                </div>
+              </div>
+
               <div id="containerSecurityLog">
                 <!-- Rendered via JS -->
               </div>
@@ -1947,7 +2028,15 @@
 
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" id="detailModalFooter" style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn-quick-scan-out" id="btnDetailScanOut" style="display: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <span>Konfirmasi Scan Out (Keluar)</span>
+        </button>
+        <button type="button" class="btn-quick-scan-in" id="btnDetailScanIn" style="display: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Konfirmasi Scan In (Masuk Kembali)</span>
+        </button>
         <button type="button" class="btn-primary-action" id="btnCloseDetailBottom">Tutup</button>
       </div>
     </div>
@@ -2144,6 +2233,144 @@
       <div class="modal-footer">
         <button type="button" class="btn-secondary" id="btnDismissBlockedModal">Tutup</button>
         <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 9: KONFIRMASI LOGOUT ================= -->
+  <div class="modal-overlay" id="modalLogoutConfirm">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: #dc2626;">Konfirmasi Logout</h3>
+          <p>Portal Otentikasi KUJANG ID • PT Pupuk Kujang</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseLogoutModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="text-align: center; padding: 0.5rem 0;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+            🚪
+          </div>
+          <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem;">
+            Keluar dari Sesi Aplikasi?
+          </h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            Apakah Anda yakin ingin mengakhiri sesi aktif saat ini? Seluruh otentikasi sesi Anda akan dihentikan dan Anda perlu masuk kembali melalui Portal KUJANG ID.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelLogoutModal">Batal</button>
+        <button type="button" class="btn-primary-action" id="btnConfirmLogoutModal" style="background: #dc2626; border-color: #dc2626;">Ya, Logout Sekarang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PORTAL SAKTI KUJANG ID LOGIN OVERLAY ================= -->
+  <div class="portal-login-overlay" id="portalLoginOverlay">
+    <div class="portal-login-card">
+      <div class="portal-login-header">
+        <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.15); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
+          🔐
+        </div>
+        <h2 style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">Portal SAKTI KUJANG ID</h2>
+        <p style="font-size: 0.785rem; color: #93c5fd; margin-top: 0.25rem;">Sistem Perizinan Keluar Area • PT Pupuk Kujang</p>
+      </div>
+
+      <div class="portal-login-body">
+        <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary);">
+          Sesi telah berakhir. Pilih profil KUJANG ID untuk masuk:
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;" id="loginUserChoices">
+          <div class="portal-user-option selected" data-role="karyawan">
+            <div style="font-size: 1.3rem;">👷</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Budi Pratama, S.T.</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Karyawan Pemohon • NIP: PK-2024-8841</div>
+            </div>
+            <span class="role-tag-pill role-karyawan">Karyawan</span>
+          </div>
+
+          <div class="portal-user-option" data-role="approver">
+            <div style="font-size: 1.3rem;">👔</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Ir. Hendra Gunawan, M.T.</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Manager Approver • NIP: PK-2015-1002</div>
+            </div>
+            <span class="role-tag-pill role-approver">Atasan</span>
+          </div>
+
+          <div class="portal-user-option" data-role="security">
+            <div style="font-size: 1.3rem;">👮</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Sertu Agus</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Petugas Pos 1 Gerbang • NIP: SEC-2018-042</div>
+            </div>
+            <span class="role-tag-pill role-security">Pos Jaga</span>
+          </div>
+
+          <div class="portal-user-option" data-role="admin">
+            <div style="font-size: 1.3rem;">🛡️</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Bambang Sutrisno, S.T.</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisi K3 & Keamanan • NIP: ADM-2016-019</div>
+            </div>
+            <span class="role-tag-pill role-admin">Admin</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-primary-action" id="btnLoginSubmit" style="width: 100%; justify-content: center; padding: 0.75rem; margin-top: 0.5rem; font-size: 0.9rem;">
+          Masuk ke Aplikasi (KUJANG ID)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 10: PILIH METODE PEMINDAIAN QR ================= -->
+  <div class="modal-overlay" id="modalScanMethodPicker">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--corp-teal);">Pilih Metode Pemindaian QR</h3>
+          <p>Terminal Pos Jaga • PT Pupuk Kujang</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseScanMethodPicker">✕</button>
+      </div>
+
+      <div class="modal-body" style="gap: 0.85rem; padding: 1.5rem 1.25rem;">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
+          Silakan pilih metode yang ingin digunakan untuk memverifikasi tiket izin keluar kawasan:
+        </p>
+
+        <!-- Option 1: Live Webcam -->
+        <button type="button" class="scan-method-card" id="btnPickerStartCamera" style="width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid #059669; background: #f0fdf4; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 800; font-size: 0.95rem; color: #065f46;">Aktifkan Kamera Live</div>
+            <div style="font-size: 0.775rem; color: #047857; margin-top: 2px;">Pindai QR Code langsung menggunakan kamera laptop atau smartphone</div>
+          </div>
+        </button>
+
+        <!-- Option 2: Upload Image -->
+        <button type="button" class="scan-method-card" id="btnPickerUploadQr" style="width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #004b87; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">Unggah Gambar QR</div>
+            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">Pilih foto QR tiket dari galeri berkas tanpa menyalakan kamera</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelScanMethodPicker">Batal</button>
       </div>
     </div>
   </div>

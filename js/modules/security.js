@@ -338,23 +338,130 @@ function renderSecurityView() {
 
   // 4. RIWAYAT PEMINDAIAN POS JAGA
   if (currentSecurityNav === 'riwayat') {
-    const logList = ticketsList.filter(t => t.scanOutTime || t.scanInTime || t.status === 'Selesai');
+    const filteredLog = filterSecurityLogTickets();
 
-    if (logList.length === 0) {
+    const btnSecurityLogViewCard = document.getElementById('btnSecurityLogViewCard');
+    const btnSecurityLogViewTable = document.getElementById('btnSecurityLogViewTable');
+    if (btnSecurityLogViewCard && btnSecurityLogViewTable) {
+      btnSecurityLogViewCard.classList.toggle('active', window.currentSecurityLogViewMode === 'card');
+      btnSecurityLogViewTable.classList.toggle('active', window.currentSecurityLogViewMode === 'table');
+    }
+
+    if (filteredLog.length === 0) {
       if (containerSecurityLog) containerSecurityLog.innerHTML = '';
       if (emptySecurityLogBox) emptySecurityLogBox.style.display = 'flex';
       return;
     }
 
     if (emptySecurityLogBox) emptySecurityLogBox.style.display = 'none';
-    renderSecurityCards(logList, containerSecurityLog);
+    if (window.currentSecurityLogViewMode === 'table') {
+      renderSecurityLogTable(filteredLog, containerSecurityLog);
+    } else {
+      renderSecurityCards(filteredLog, containerSecurityLog);
+    }
+    return;
   }
+}
+
+// RIWAYAT PEMINDAIAN GLOBAL STATE & HANDLERS
+window.currentSecurityLogViewMode = window.currentSecurityLogViewMode || 'card';
+
+function filterSecurityLogTickets() {
+  const ticketsList = window.ticketsList || [];
+  const searchSecurityLogInput = document.getElementById('searchSecurityLogInput');
+  const filterSecurityLogCategory = document.getElementById('filterSecurityLogCategory');
+  const filterSecurityLogStatus = document.getElementById('filterSecurityLogStatus');
+
+  const query = searchSecurityLogInput ? searchSecurityLogInput.value.trim().toLowerCase() : '';
+  const category = filterSecurityLogCategory ? filterSecurityLogCategory.value : 'all';
+  const status = filterSecurityLogStatus ? filterSecurityLogStatus.value : 'all';
+
+  const ACTORS = window.ACTORS || {};
+  const currentActor = window.currentActor || 'security';
+  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
+
+  return ticketsList.filter(t => {
+    // Hak akses: jika peran adalah Karyawan, batasi riwayat hanya miliknya
+    if (currentActor === 'karyawan') {
+      const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841');
+      if (!isMyTicket) return false;
+    }
+
+    // Hanya tiket yang relevan dengan transaksi pos gerbang atau selesai
+    const hasLog = t.scanOutTime || t.scanInTime || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat' || t.status === 'Disetujui';
+    if (!hasLog) return false;
+
+    // Filter Kategori
+    if (category !== 'all' && t.category !== category) return false;
+
+    // Filter Status
+    if (status !== 'all' && t.status !== status) return false;
+
+    // Search query
+    if (query) {
+      const matchId = (t.id || '').toLowerCase().includes(query);
+      const matchName = (t.applicantName || '').toLowerCase().includes(query);
+      const matchNip = (t.applicantNip || '').toLowerCase().includes(query);
+      const matchDest = (t.destination || '').toLowerCase().includes(query);
+      const matchReason = (t.reason || '').toLowerCase().includes(query);
+      if (!matchId && !matchName && !matchNip && !matchDest && !matchReason) return false;
+    }
+
+    return true;
+  });
+}
+
+function renderSecurityLogTable(list, containerElement) {
+  if (!containerElement) return;
+
+  containerElement.innerHTML = `
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nomor Tiket</th>
+            <th>Pemohon & NIP</th>
+            <th>Kategori & Tipe</th>
+            <th>Waktu Scan Out</th>
+            <th>Waktu Scan In</th>
+            <th>Status</th>
+            <th style="text-align: right;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(t => `
+            <tr style="cursor: pointer;" onclick="openTicketDetail('${t.id}', 'detail')">
+              <td>
+                <span style="font-family:var(--font-mono); font-weight:700; color:var(--corp-teal);">${t.id}</span>
+                <div style="font-size:0.7rem; color:var(--text-muted);">${(t.createdAt || '').slice(0,10)}</div>
+              </td>
+              <td>
+                <div style="font-weight:700; color:var(--text-primary);">${t.applicantName || 'Budi Pratama'}</div>
+                <div style="font-size:0.725rem; color:var(--text-secondary);">${t.applicantNip || 'PK-2024-8841'}</div>
+              </td>
+              <td>
+                <span class="tag-badge ${t.category === 'Dinas Kantor' ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
+                <div style="font-size:0.725rem; color:var(--text-secondary); margin-top:2px;">${t.type}</div>
+              </td>
+              <td style="font-family:var(--font-mono); font-size:0.775rem;">${t.scanOutTime || '-'}</td>
+              <td style="font-family:var(--font-mono); font-size:0.775rem;">${t.scanInTime || '-'}</td>
+              <td>${window.getStatusPill(t.status)}</td>
+              <td style="text-align: right;">
+                <button class="btn-card-detail" style="padding:0.35rem 0.65rem; font-size:0.725rem;" onclick="event.stopPropagation(); openTicketDetail('${t.id}', 'detail')">
+                  Rincian Tiket
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 // VERIFICATION ENGINE
 function executeVerification(inputQuery) {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
-  const scanResultContainer = document.getElementById('scanResultContainer');
   const ticketsList = window.ticketsList || [];
 
   const query = (inputQuery || (inputScanTicketCode ? inputScanTicketCode.value : '')).trim().toUpperCase();
@@ -376,87 +483,44 @@ function executeVerification(inputQuery) {
   );
 
   if (!ticket) {
-    if (scanResultContainer) {
-      scanResultContainer.style.display = 'block';
-      scanResultContainer.innerHTML = `
-        <div style="display:flex; align-items:center; gap:0.75rem; color:#fca5a5;">
-          <span style="font-size:1.5rem;">✕</span>
-          <div>
-            <strong style="font-size:0.95rem;">Tiket Tidak Ditemukan!</strong>
-            <p style="font-size:0.8rem; color:#e2e8f0;">Kode "${query}" tidak terdaftar di pangkalan data perizinan aktif.</p>
-          </div>
-        </div>
-      `;
-    }
-    if (typeof window.showToast === 'function') window.showToast('Tiket tidak terdaftar di sistem pengamanan.', 'danger');
+    if (typeof window.showToast === 'function') window.showToast(`Tiket tidak ditemukan! Kode "${query}" tidak terdaftar di sistem.`, 'danger');
     return;
   }
 
-  // Render Found Ticket Card in Scanner Panel
-  const isApproved = ticket.status === 'Disetujui';
-  const isOutside = ticket.status === 'Sedang di Luar';
-  const isOverdue = ticket.status === 'Terlambat';
-  const isExpired = ticket.status === 'Kedaluwarsa';
-  const isPending = ticket.status === 'Menunggu Persetujuan';
-  const isFinished = ticket.status === 'Selesai';
+  // Status feedback alerts:
+  if (ticket.status === 'Kedaluwarsa') {
+    if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} telah KEDALUWARSA dan hangus. Dilarang keluar pabrik!`, 'danger');
+  } else if (ticket.status === 'Menunggu Persetujuan') {
+    if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} belum disetujui Atasan. Dilarang keluar!`, 'warning');
+  } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') {
+    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah keluar pabrik. Siap diproses Scan In (Masuk Kembali).`, 'info');
+  } else if (ticket.status === 'Disetujui') {
+    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} valid dan disetujui. Siap diproses Scan Out!`, 'success');
+  } else if (ticket.status === 'Selesai') {
+    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah selesai diproses.`, 'info');
+  }
 
-  if (scanResultContainer) {
-    scanResultContainer.style.display = 'block';
-    scanResultContainer.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
-        <div>
-          <div style="font-size:1.1rem; font-weight:800; color:#ffffff; font-family:var(--font-mono);">${ticket.id}</div>
-          <div style="font-size:0.9rem; font-weight:700; color:#e0f2fe; margin-top:2px;">
-            ${ticket.applicantName || 'Budi Pratama'} (${ticket.applicantNip || 'PK-2024-8841'})
-          </div>
-          <div style="font-size:0.775rem; color:#93c5fd;">${ticket.category} • ${ticket.type} • Tujuan: ${ticket.destination}</div>
-          <div style="font-size:0.775rem; color:#cbd5e1; margin-top:4px;">Rencana Keluar: ${ticket.plannedExit.replace('T', ' ')}</div>
-        </div>
-
-        <div style="text-align: right;">
-          ${window.getStatusPill(ticket.status)}
-        </div>
-      </div>
-
-      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
-        <div style="font-size:0.8rem; color:#e2e8f0;">
-          ${isApproved ? 'Status: Izin sah & disetujui. Siap diproses keluar (Scan Out).' : ''}
-          ${isOutside ? 'Status: Karyawan sedang di luar. Siap diproses kembali (Scan In).' : ''}
-          ${isOverdue ? '<strong style="color:#f87171;">⚠️ PERINGATAN: Karyawan TERLAMBAT kembali! Segera proses Scan In.</strong>' : ''}
-          ${isExpired ? '<strong style="color:#f87171;">✕ DITOLAK: Tiket telah KEDALUWARSA dan hangus. Dilarang keluar!</strong>' : ''}
-          ${isPending ? 'PERINGATAN: Pengajuan belum disetujui Atasan! Dilarang keluar.' : ''}
-          ${isFinished ? 'INFORMASI: Izin ini telah selesai diproses.' : ''}
-        </div>
-
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-          ${isApproved ? `
-            <button class="btn-quick-scan-out" style="padding:0.6rem 1.25rem; font-size:0.85rem;" onclick="executeScanOut('${ticket.id}')">
-              ✓ Konfirmasi Scan Out (Keluar)
-            </button>
-          ` : ''}
-
-          ${(isOutside || isOverdue) ? `
-            <button class="btn-quick-scan-in" style="padding:0.6rem 1.25rem; font-size:0.85rem; ${isOverdue ? 'background:#dc2626;' : ''}" onclick="executeScanIn('${ticket.id}')">
-              ✓ Konfirmasi Scan In (Masuk Kembali) ${isOverdue ? '- Terlambat' : ''}
-            </button>
-          ` : ''}
-
-          <button class="btn-secondary" style="background:rgba(255,255,255,0.15); color:#fff; border:none; padding:0.5rem 0.85rem; font-size:0.8rem;" onclick="openTicketDetail('${ticket.id}', 'detail')">
-            Buka Rincian
-          </button>
-        </div>
-      </div>
-    `;
-
-    scanResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Langsung buka Rincian Tiket tanpa kartu perantara terpisah
+  if (typeof window.openTicketDetail === 'function') {
+    window.openTicketDetail(ticket.id, 'detail');
   }
 }
 
 // EXECUTE SCAN OUT
 function executeScanOut(ticketId) {
+  if (window.currentActor !== 'security') {
+    if (typeof window.showToast === 'function') window.showToast('Akses Ditolak: Hanya Petugas Pengamanan yang berwenang memproses Scan Out!', 'danger');
+    return;
+  }
+
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
+
+  if (ticket.scanOutTime) {
+    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah pernah tercatat Scan Out (${ticket.scanOutTime}). Tidak dapat diproses berulang!`, 'danger');
+    return;
+  }
 
   if (ticket.status === 'Kedaluwarsa') {
     if (typeof window.showToast === 'function') window.showToast('Akses Ditolak: Tiket telah KEDALUWARSA dan hangus. Dilarang keluar!', 'danger');
@@ -464,7 +528,7 @@ function executeScanOut(ticketId) {
   }
 
   if (ticket.status !== 'Disetujui') {
-    if (typeof window.showToast === 'function') window.showToast('Hanya tiket berstatus Disetujui yang dapat diproses Scan Out!', 'danger');
+    if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Hanya tiket berstatus Disetujui yang dapat diproses Scan Out! (Status saat ini: ${ticket.status})`, 'danger');
     return;
   }
 
@@ -503,9 +567,7 @@ function executeScanOut(ticketId) {
 
   window.saveTickets(ticketsList);
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
-  const scanResultContainer = document.getElementById('scanResultContainer');
   if (inputScanTicketCode) inputScanTicketCode.value = '';
-  if (scanResultContainer) scanResultContainer.style.display = 'none';
 
   renderSecurityView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
@@ -683,6 +745,10 @@ function handleCameraQrSuccess(decodedText) {
 document.addEventListener('DOMContentLoaded', () => {
   const btnModeCameraScan = document.getElementById('btnModeCameraScan');
   const btnModeManualScan = document.getElementById('btnModeManualScan');
+  const scanModeSlider = document.getElementById('scanModeSlider');
+  const btnPrevScanMode = document.getElementById('btnPrevScanMode');
+  const btnNextScanMode = document.getElementById('btnNextScanMode');
+
   const cameraScannerBox = document.getElementById('cameraScannerBox');
   const manualScannerBox = document.getElementById('manualScannerBox');
   const btnStartCamera = document.getElementById('btnStartCamera');
@@ -694,25 +760,91 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   const filterSecurityQueueTab = document.getElementById('filterSecurityQueueTab');
 
-  if (btnModeCameraScan && btnModeManualScan) {
-    btnModeCameraScan.addEventListener('click', () => {
-      btnModeCameraScan.classList.add('active');
-      btnModeManualScan.classList.remove('active');
+  function setScannerMode(mode) {
+    if (mode === 'camera') {
+      if (btnModeCameraScan) btnModeCameraScan.classList.add('active');
+      if (btnModeManualScan) btnModeManualScan.classList.remove('active');
+      if (scanModeSlider) scanModeSlider.classList.remove('slider-manual');
       if (cameraScannerBox) cameraScannerBox.style.display = 'flex';
       if (manualScannerBox) manualScannerBox.style.display = 'none';
-    });
-
-    btnModeManualScan.addEventListener('click', () => {
-      btnModeManualScan.classList.add('active');
-      btnModeCameraScan.classList.remove('active');
+    } else {
+      if (btnModeManualScan) btnModeManualScan.classList.add('active');
+      if (btnModeCameraScan) btnModeCameraScan.classList.remove('active');
+      if (scanModeSlider) scanModeSlider.classList.add('slider-manual');
       if (cameraScannerBox) cameraScannerBox.style.display = 'none';
       if (manualScannerBox) manualScannerBox.style.display = 'flex';
+      stopCameraScanner();
+      if (inputScanTicketCode) inputScanTicketCode.focus();
+    }
+  }
+
+  if (btnModeCameraScan) btnModeCameraScan.addEventListener('click', () => setScannerMode('camera'));
+  if (btnModeManualScan) btnModeManualScan.addEventListener('click', () => setScannerMode('manual'));
+  if (btnPrevScanMode) btnPrevScanMode.addEventListener('click', () => setScannerMode('camera'));
+  if (btnNextScanMode) btnNextScanMode.addEventListener('click', () => setScannerMode('manual'));
+
+  if (btnStartCamera) {
+    btnStartCamera.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      startCameraScanner();
+    });
+  }
+
+  if (btnStopCamera) {
+    btnStopCamera.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       stopCameraScanner();
     });
   }
 
-  if (btnStartCamera) btnStartCamera.addEventListener('click', () => startCameraScanner());
-  if (btnStopCamera) btnStopCamera.addEventListener('click', () => stopCameraScanner());
+  // Klik gambar kamera atau area placeholder membuka pilihan metode pemindaian
+  const btnClickCameraLens = document.getElementById('btnClickCameraLens');
+  const cameraIdlePlaceholderEl = document.getElementById('cameraIdlePlaceholder');
+
+  if (btnClickCameraLens) {
+    btnClickCameraLens.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openScanMethodPicker();
+    });
+  }
+
+  if (cameraIdlePlaceholderEl) {
+    cameraIdlePlaceholderEl.addEventListener('click', (e) => {
+      // Jika yang diklik adalah tombol direct, biarkan handler tombol berjalan
+      if (e.target.closest('#btnStartCamera') || e.target.closest('#btnTriggerFileScan')) {
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      openScanMethodPicker();
+    });
+  }
+
+  // Event listener untuk Modal Pilih Metode Pemindaian QR
+  const btnCloseScanMethodPicker = document.getElementById('btnCloseScanMethodPicker');
+  const btnCancelScanMethodPicker = document.getElementById('btnCancelScanMethodPicker');
+  const btnPickerStartCamera = document.getElementById('btnPickerStartCamera');
+  const btnPickerUploadQr = document.getElementById('btnPickerUploadQr');
+
+  if (btnCloseScanMethodPicker) btnCloseScanMethodPicker.addEventListener('click', closeScanMethodPicker);
+  if (btnCancelScanMethodPicker) btnCancelScanMethodPicker.addEventListener('click', closeScanMethodPicker);
+
+  if (btnPickerStartCamera) {
+    btnPickerStartCamera.addEventListener('click', () => {
+      closeScanMethodPicker();
+      startCameraScanner();
+    });
+  }
+
+  if (btnPickerUploadQr && inputScanQrFile) {
+    btnPickerUploadQr.addEventListener('click', () => {
+      closeScanMethodPicker();
+      inputScanQrFile.click();
+    });
+  }
 
   if (cameraDeviceSelect) {
     cameraDeviceSelect.addEventListener('change', async () => {
@@ -724,21 +856,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnTriggerFileScan && inputScanQrFile) {
-    btnTriggerFileScan.addEventListener('click', () => inputScanQrFile.click());
-    inputScanQrFile.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    btnTriggerFileScan.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      inputScanQrFile.click();
+    });
 
-      if (!html5QrScannerInstance) {
-        html5QrScannerInstance = new Html5Qrcode('cameraReaderView');
-      }
+    inputScanQrFile.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    inputScanQrFile.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
 
       const cameraScanStatus = document.getElementById('cameraScanStatus');
       try {
-        if (cameraScanStatus) cameraScanStatus.textContent = 'Memindai berkas gambar QR...';
-        const decodedText = await html5QrScannerInstance.scanFile(file, true);
-        handleCameraQrSuccess(decodedText);
+        if (cameraScanStatus) cameraScanStatus.textContent = '⏳ Memindai berkas gambar QR...';
+
+        if (isCameraScanningActive) {
+          await stopCameraScanner();
+        }
+
+        if (!html5QrScannerInstance) {
+          html5QrScannerInstance = new Html5Qrcode('cameraReaderView');
+        }
+
+        // scanFile(file, false) membaca QR code tanpa menyalakan webcam atau merusak DOM
+        const decodedText = await html5QrScannerInstance.scanFile(file, false);
+        if (decodedText) {
+          handleCameraQrSuccess(decodedText);
+        } else {
+          throw new Error('QR Code tidak dapat dibaca dari berkas gambar');
+        }
       } catch (err) {
+        console.warn('QR file scan error:', err);
         if (cameraScanStatus) cameraScanStatus.textContent = '⚠️ QR Code tidak terdeteksi di dalam foto.';
         if (typeof window.showToast === 'function') window.showToast('Gagal memindai: QR Code tidak ditemukan di dalam gambar.', 'danger');
       } finally {
@@ -755,16 +907,96 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (filterSecurityQueueTab) filterSecurityQueueTab.addEventListener('change', renderSecurityView);
+
+  // Riwayat Pemindaian Pos Jaga event listeners
+  const searchSecurityLogInput = document.getElementById('searchSecurityLogInput');
+  const filterSecurityLogCategory = document.getElementById('filterSecurityLogCategory');
+  const filterSecurityLogStatus = document.getElementById('filterSecurityLogStatus');
+  const btnSecurityLogViewCard = document.getElementById('btnSecurityLogViewCard');
+  const btnSecurityLogViewTable = document.getElementById('btnSecurityLogViewTable');
+  const btnSecurityLogExport = document.getElementById('btnSecurityLogExport');
+
+  if (searchSecurityLogInput) searchSecurityLogInput.addEventListener('input', renderSecurityView);
+  if (filterSecurityLogCategory) filterSecurityLogCategory.addEventListener('change', renderSecurityView);
+  if (filterSecurityLogStatus) filterSecurityLogStatus.addEventListener('change', renderSecurityView);
+
+  if (btnSecurityLogViewCard && btnSecurityLogViewTable) {
+    btnSecurityLogViewCard.addEventListener('click', () => {
+      window.currentSecurityLogViewMode = 'card';
+      btnSecurityLogViewCard.classList.add('active');
+      btnSecurityLogViewTable.classList.remove('active');
+      renderSecurityView();
+    });
+
+    btnSecurityLogViewTable.addEventListener('click', () => {
+      window.currentSecurityLogViewMode = 'table';
+      btnSecurityLogViewTable.classList.add('active');
+      btnSecurityLogViewCard.classList.remove('active');
+      renderSecurityView();
+    });
+  }
+
+  if (btnSecurityLogExport) {
+    btnSecurityLogExport.addEventListener('click', () => {
+      const filtered = filterSecurityLogTickets();
+      if (filtered.length === 0) {
+        if (typeof window.showToast === 'function') window.showToast('Tidak ada data riwayat pemindaian untuk diekspor.', 'danger');
+        return;
+      }
+
+      let csv = "data:text/csv;charset=utf-8,";
+      csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Waktu Scan Out,Waktu Scan In,Status\n";
+
+      filtered.forEach(t => {
+        csv += [
+          `"${t.id}"`,
+          `"${t.applicantName || 'Budi Pratama'}"`,
+          `"${t.applicantNip || 'PK-2024-8841'}"`,
+          `"${t.category}"`,
+          `"${t.type}"`,
+          `"${(t.destination || '').replace(/"/g, '""')}"`,
+          `"${t.scanOutTime || '-'}"`,
+          `"${t.scanInTime || '-'}"`,
+          `"${t.status}"`
+        ].join(',') + "\n";
+      });
+
+      const uri = encodeURI(csv);
+      const a = document.createElement('a');
+      a.href = uri;
+      a.download = `Riwayat-Pemindaian-Pos-Jaga-${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (typeof window.showToast === 'function') window.showToast('Riwayat pemindaian berhasil diekspor ke CSV!', 'success');
+    });
+  }
 });
+
+// SCAN METHOD PICKER MODAL
+function openScanMethodPicker() {
+  const modalScanMethodPicker = document.getElementById('modalScanMethodPicker');
+  if (modalScanMethodPicker) modalScanMethodPicker.classList.add('open');
+}
+
+function closeScanMethodPicker() {
+  const modalScanMethodPicker = document.getElementById('modalScanMethodPicker');
+  if (modalScanMethodPicker) modalScanMethodPicker.classList.remove('open');
+}
 
 // Expose globally
 window.updateSecurityMetrics = updateSecurityMetrics;
 window.renderSecurityDashboard = renderSecurityDashboard;
 window.renderSecurityCards = renderSecurityCards;
 window.renderSecurityView = renderSecurityView;
+window.filterSecurityLogTickets = filterSecurityLogTickets;
+window.renderSecurityLogTable = renderSecurityLogTable;
 window.executeVerification = executeVerification;
 window.executeScanOut = executeScanOut;
 window.executeScanIn = executeScanIn;
 window.startCameraScanner = startCameraScanner;
 window.stopCameraScanner = stopCameraScanner;
 window.handleCameraQrSuccess = handleCameraQrSuccess;
+window.openScanMethodPicker = openScanMethodPicker;
+window.closeScanMethodPicker = closeScanMethodPicker;
+

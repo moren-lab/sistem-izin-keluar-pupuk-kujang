@@ -332,6 +332,40 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
     }
   }
 
+  // Security Action Buttons (Scan Out / Scan In) directly inside detail modal
+  const btnDetailScanOut = document.getElementById('btnDetailScanOut');
+  const btnDetailScanIn = document.getElementById('btnDetailScanIn');
+
+  if (btnDetailScanOut) {
+    if (window.currentActor === 'security' && ticket.status === 'Disetujui' && !ticket.scanOutTime) {
+      btnDetailScanOut.style.display = 'inline-flex';
+      btnDetailScanOut.onclick = function() {
+        if (typeof window.executeScanOut === 'function') {
+          window.executeScanOut(ticket.id);
+          openTicketDetail(ticket.id, 'detail');
+        }
+      };
+    } else {
+      btnDetailScanOut.style.display = 'none';
+      btnDetailScanOut.onclick = null;
+    }
+  }
+
+  if (btnDetailScanIn) {
+    if (window.currentActor === 'security' && (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && ticket.scanOutTime && !ticket.scanInTime) {
+      btnDetailScanIn.style.display = 'inline-flex';
+      btnDetailScanIn.onclick = function() {
+        if (typeof window.executeScanIn === 'function') {
+          window.executeScanIn(ticket.id);
+          openTicketDetail(ticket.id, 'detail');
+        }
+      };
+    } else {
+      btnDetailScanIn.style.display = 'none';
+      btnDetailScanIn.onclick = null;
+    }
+  }
+
   switchDetailTab(defaultTab);
   if (modalTicketDetail) modalTicketDetail.classList.add('open');
 }

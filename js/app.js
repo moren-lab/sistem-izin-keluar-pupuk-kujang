@@ -102,6 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Modal background scroll lock observer
+  const modalObserver = new MutationObserver(() => {
+    const hasOpenModal = document.querySelectorAll('.modal-overlay.open').length > 0;
+    document.body.classList.toggle('modal-open', hasOpenModal);
+  });
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modalObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  });
+
   // ===================================================================
   // INITIALIZATION & BOOTSTRAP
   // ===================================================================
