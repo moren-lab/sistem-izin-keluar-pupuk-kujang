@@ -69,55 +69,6 @@ function renderSecurityDashboard() {
     }
   }
 
-  // Antrean Izin Siap Keluar di Pos Jaga (Scan Out)
-  const readyTickets = ticketsList.filter(t => t.status === 'Disetujui');
-  const badgeReadyScanOutCount = document.getElementById('badgeReadyScanOutCount');
-  if (badgeReadyScanOutCount) badgeReadyScanOutCount.textContent = `${readyTickets.length} Izin`;
-
-  const securityDashboardReadyList = document.getElementById('securityDashboardReadyList');
-  if (securityDashboardReadyList) {
-    if (readyTickets.length === 0) {
-      securityDashboardReadyList.innerHTML = `
-        <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
-          Tidak ada antrean izin keluar. Semua izin yang disetujui telah diproses keluar.
-        </div>
-      `;
-    } else {
-      securityDashboardReadyList.innerHTML = readyTickets.map(t => {
-        const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
-        return `
-          <div class="feed-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger); background: #fff5f5;' : 'border-left: 4px solid var(--corp-teal);'}">
-            <div class="feed-item-left">
-              <div class="feed-item-icon" style="background: ${isEmergency ? '#fee2e2' : '#d1fae5'}; color: ${isEmergency ? 'var(--rose-danger)' : 'var(--corp-teal)'};">
-                ${isEmergency ? '🚨' : '🎫'}
-              </div>
-              <div>
-                <div class="feed-item-title" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-                  <strong>${t.applicantName || 'Budi Pratama'}</strong> 
-                  <span style="font-family: var(--font-mono); font-size: 0.775rem; color: var(--text-secondary);">(${t.id})</span>
-                  ${isEmergency ? '<span class="status-pill rejected" style="font-size: 0.65rem; padding: 0.15rem 0.45rem;">🚨 DARURAT / BYPASS</span>' : ''}
-                </div>
-                <div class="feed-item-sub" style="margin-top: 3px;">
-                  <span style="font-weight: 700; color: var(--text-primary);">${t.category}</span> (${t.type}) • 
-                  Tujuan: <strong>${t.destination}</strong> • 
-                  Rencana Keluar: <span style="font-family: var(--font-mono); font-weight: 700;">${t.plannedExit ? t.plannedExit.replace('T', ' ') : '-'}</span>
-                </div>
-              </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-              <button class="btn-card-qr" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'qr')" title="Buka QR Code">
-                QR Code
-              </button>
-              <button class="btn-quick-scan-out" style="padding: 0.4rem 0.85rem; font-size: 0.775rem;" onclick="executeScanOut('${t.id}')">
-                ✓ Konfirmasi Scan Out
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-  }
-
   // Outside headcount list with 1-click Scan In
   if (securityDashboardOutsideList) {
     if (outsideTickets.length === 0) {
@@ -371,10 +322,12 @@ function filterSecurityLogTickets() {
   const searchSecurityLogInput = document.getElementById('searchSecurityLogInput');
   const filterSecurityLogCategory = document.getElementById('filterSecurityLogCategory');
   const filterSecurityLogStatus = document.getElementById('filterSecurityLogStatus');
+  const filterSecurityLogPeriod = document.getElementById('filterSecurityLogPeriod');
 
   const query = searchSecurityLogInput ? searchSecurityLogInput.value.trim().toLowerCase() : '';
   const category = filterSecurityLogCategory ? filterSecurityLogCategory.value : 'all';
   const status = filterSecurityLogStatus ? filterSecurityLogStatus.value : 'all';
+  const period = filterSecurityLogPeriod ? filterSecurityLogPeriod.value : 'all';
 
   const ACTORS = window.ACTORS || {};
   const currentActor = window.currentActor || 'security';
@@ -390,6 +343,11 @@ function filterSecurityLogTickets() {
     // Hanya tiket yang relevan dengan transaksi pos gerbang atau selesai
     const hasLog = t.scanOutTime || t.scanInTime || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat' || t.status === 'Disetujui';
     if (!hasLog) return false;
+
+    // Filter Periode Waktu
+    if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, period)) {
+      return false;
+    }
 
     // Filter Kategori
     if (category !== 'all' && t.category !== category) return false;
@@ -916,6 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchSecurityLogInput = document.getElementById('searchSecurityLogInput');
   const filterSecurityLogCategory = document.getElementById('filterSecurityLogCategory');
   const filterSecurityLogStatus = document.getElementById('filterSecurityLogStatus');
+  const filterSecurityLogPeriod = document.getElementById('filterSecurityLogPeriod');
   const btnSecurityLogViewCard = document.getElementById('btnSecurityLogViewCard');
   const btnSecurityLogViewTable = document.getElementById('btnSecurityLogViewTable');
   const btnSecurityLogExport = document.getElementById('btnSecurityLogExport');
@@ -923,6 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchSecurityLogInput) searchSecurityLogInput.addEventListener('input', renderSecurityView);
   if (filterSecurityLogCategory) filterSecurityLogCategory.addEventListener('change', renderSecurityView);
   if (filterSecurityLogStatus) filterSecurityLogStatus.addEventListener('change', renderSecurityView);
+  if (filterSecurityLogPeriod) filterSecurityLogPeriod.addEventListener('change', renderSecurityView);
 
   if (btnSecurityLogViewCard && btnSecurityLogViewTable) {
     btnSecurityLogViewCard.addEventListener('click', () => {

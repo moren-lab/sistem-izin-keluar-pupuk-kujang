@@ -67,6 +67,54 @@ function showToast(message, type = 'success') {
 
 // Expose globally
 window.getStatusPill = getStatusPill;
+// FILTER PERIODE WAKTU (Hari Ini, Minggu Ini, Bulan Ini, Tahun Ini)
+function matchesPeriodFilter(ticket, period) {
+  if (!period || period === 'all') return true;
+  let d = null;
+  if (ticket.plannedExit) {
+    const pd = new Date(ticket.plannedExit);
+    if (!isNaN(pd.getTime())) d = pd;
+  }
+  if (!d && ticket.createdAt) {
+    const cd = new Date(ticket.createdAt);
+    if (!isNaN(cd.getTime())) {
+      d = cd;
+    } else {
+      const months = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'Mei': 4, 'Jun': 5, 'Jul': 6, 'Agu': 7, 'Sep': 8, 'Okt': 9, 'Nov': 10, 'Des': 11 };
+      const m = ticket.createdAt.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+      if (m && months[m[2]] !== undefined) {
+        d = new Date(parseInt(m[3], 10), months[m[2]], parseInt(m[1], 10));
+      }
+    }
+  }
+  if (!d) return true;
+
+  const now = new Date();
+  if (period === 'today') {
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  }
+  if (period === 'week') {
+    const startOfWeek = new Date(now);
+    const day = startOfWeek.getDay();
+    const diff = (day === 0 ? -6 : 1) - day;
+    startOfWeek.setDate(now.getDate() + diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    return d >= startOfWeek && d <= endOfWeek;
+  }
+  if (period === 'month') {
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }
+  if (period === 'year') {
+    return d.getFullYear() === now.getFullYear();
+  }
+  return true;
+}
+
 window.formatDisplayDate = formatDisplayDate;
 window.playScannerBeep = playScannerBeep;
 window.showToast = showToast;
+window.matchesPeriodFilter = matchesPeriodFilter;
+

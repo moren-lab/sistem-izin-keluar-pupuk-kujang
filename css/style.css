@@ -2956,6 +2956,210 @@ body.modal-open {
   box-shadow: 0 0 24px rgba(56, 189, 248, 0.45);
 }
 
+/* ==========================================================================
+   7. INTERACTIVE CHARTS & METRIC VISUALIZATIONS
+   ========================================================================== */
+.donut-slice {
+  cursor: pointer;
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center;
+}
+
+.donut-slice:hover {
+  filter: brightness(1.1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  opacity: 1 !important;
+}
+
+.chart-legend-row {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chart-legend-row:hover {
+  background: rgba(2, 132, 199, 0.08);
+  transform: translateX(3px);
+}
+
+.chart-legend-row.selected {
+  background: rgba(2, 132, 199, 0.15);
+  font-weight: 700;
+}
+
+.bar-item, .chart-point {
+  cursor: pointer;
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+}
+
+.bar-item:hover {
+  filter: brightness(1.12) drop-shadow(0 -2px 6px rgba(0, 0, 0, 0.2));
+}
+
+.chart-point:hover {
+  filter: drop-shadow(0 0 6px #0284c7);
+}
+
+@keyframes fadeInDonutDetail {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   8. ENHANCED BUTTONS & CONTROLS UI POLISH (DESKTOP & MOBILE)
+   ========================================================================== */
+.btn-primary-action {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.28), 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn-primary-action:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+  transform: translateY(-1.5px);
+}
+
+.btn-primary-action:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-emergency {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+  border: 1.5px solid #fecdd3;
+  color: #e11d48;
+  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.08);
+}
+
+.btn-emergency:hover {
+  background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+  border-color: #fda4af;
+  color: #be123c;
+  transform: translateY(-1.5px);
+  box-shadow: 0 3px 8px rgba(225, 29, 72, 0.18);
+}
+
+.btn-emergency:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-secondary {
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.btn-secondary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.filter-select {
+  border: 1.5px solid #e2e8f0;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.filter-select:focus {
+  border-color: var(--corp-teal);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+/* ==========================================================================
+   9. RESPONSIVE PERFECTION FOR LAPTOP & MOBILE
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .smart-toolbar {
+    gap: 0.65rem;
+  }
+  .filters-group {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .smart-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .toolbar-search {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .filters-group {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .filter-select {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 130px;
+  }
+
+  .view-mode-group {
+    order: 10;
+  }
+
+  #btnEmpExport, #btnSecurityLogExport {
+    order: 11;
+    flex-grow: 1;
+  }
+
+  .page-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .page-actions-group {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .page-actions-group > button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-select {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+  
+  .table-responsive {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+
 
 
 

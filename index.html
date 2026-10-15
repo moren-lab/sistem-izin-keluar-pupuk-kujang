@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,12 +9,14 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="css/style.css?v=20261014_02">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
+
 <body>
 
   <div class="app-layout">
-    
+
     <!-- Mobile Backdrop for Sidebar -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
@@ -22,7 +25,8 @@
       <div class="sidebar-header">
         <a href="#" class="brand-wrapper">
           <div class="brand-icon-box">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               <path d="m9 12 2 2 4-4"></path>
             </svg>
@@ -61,7 +65,8 @@
             </svg>
             <span>Pengajuan Saya</span>
           </div>
-          <span class="nav-badge-count" id="sidebarEmpActiveBadge" style="display: none; background: var(--corp-teal);">0</span>
+          <span class="nav-badge-count" id="sidebarEmpActiveBadge"
+            style="display: none; background: var(--corp-teal);">0</span>
         </a>
 
         <a class="nav-item" id="menuKaryawanRiwayat">
@@ -177,7 +182,8 @@
             </svg>
             <span>Monitoring Headcount</span>
           </div>
-          <span class="nav-badge-count" id="sidebarAdminOutsideBadge" style="background: #dc2626; display: none;">0</span>
+          <span class="nav-badge-count" id="sidebarAdminOutsideBadge"
+            style="background: #dc2626; display: none;">0</span>
         </a>
 
         <div class="nav-section-label">Audit & Investigasi</div>
@@ -224,7 +230,8 @@
       <div class="sidebar-footer-card">
         <div class="current-role-box" id="current-role-box">
           <span class="role-tag-pill role-karyawan" id="roleBadge">Peran: Karyawan</span>
-          <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary);" id="sidebarUserName">Budi Pratama, S.T.</div>
+          <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary);" id="sidebarUserName">Budi
+            Pratama, S.T.</div>
           <div style="font-size: 0.7rem; color: var(--text-secondary);" id="sidebarUserSub">NIP: PK-2024-8841</div>
         </div>
         <button type="button" class="btn-sidebar-logout" id="btnSidebarLogout" title="Keluar dari sesi KUJANG ID">
@@ -240,7 +247,7 @@
 
     <!-- ================= 2. MAIN VIEW ================= -->
     <div class="main-wrapper">
-      
+
       <!-- TOP NAVBAR & 3-ACTOR ROLE SWITCHER -->
       <header class="top-navbar">
         <div class="navbar-left">
@@ -285,7 +292,9 @@
             <button class="role-switch-btn" id="btnSwitchAdmin">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
               </svg>
               <span>Admin (K3)</span>
             </button>
@@ -298,7 +307,7 @@
 
         <!-- ================= A. KARYAWAN VIEW ================= -->
         <div id="viewKaryawan">
-          
+
           <!-- A1. HALAMAN DASHBOARD KARYAWAN -->
           <div id="karyawanDashboardPage">
             <!-- Hero Welcome Banner -->
@@ -369,7 +378,8 @@
                     <span>🕒</span>
                     <span>Ringkasan Pengajuan Terkini</span>
                   </div>
-                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setKaryawanNav('riwayat')">
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
+                    onclick="setKaryawanNav('riwayat')">
                     Lihat Semua Riwayat →
                   </button>
                 </div>
@@ -400,18 +410,22 @@
                       <span>Ketentuan & SOP Gerbang</span>
                     </div>
                   </div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 0.65rem;">
+                  <div
+                    style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 0.65rem;">
                     <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
                       <span style="color: var(--corp-teal); font-weight: 800;">1.</span>
-                      <span><strong>Maksimal 1 Izin Aktif:</strong> Sistem hanya mengizinkan 1 pengajuan aktif berjalan sebelum pengajuan berikutnya.</span>
+                      <span><strong>Maksimal 1 Izin Aktif:</strong> Sistem hanya mengizinkan 1 pengajuan aktif berjalan
+                        sebelum pengajuan berikutnya.</span>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
                       <span style="color: var(--corp-teal); font-weight: 800;">2.</span>
-                      <span><strong>Toleransi 10 Menit:</strong> Tiket yang disetujui akan otomatis kedaluwarsa jika tidak dipindai keluar melewati batas toleransi (+10 menit dari jadwal).</span>
+                      <span><strong>Toleransi 10 Menit:</strong> Tiket yang disetujui akan otomatis kedaluwarsa jika
+                        tidak dipindai keluar melewati batas toleransi (+10 menit dari jadwal).</span>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
                       <span style="color: var(--corp-teal); font-weight: 800;">3.</span>
-                      <span><strong>Wajib Scan In Kembali:</strong> Pastikan memindai QR di Pos 1 saat tiba kembali agar status tidak terhitung Terlambat.</span>
+                      <span><strong>Wajib Scan In Kembali:</strong> Pastikan memindai QR di Pos 1 saat tiba kembali agar
+                        status tidak terhitung Terlambat.</span>
                     </div>
                   </div>
                 </div>
@@ -426,7 +440,8 @@
                   <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
                     <div><strong>Atasan Langsung:</strong> Ir. Hendra Gunawan, M.T. (Ext: 2411)</div>
                     <div style="margin-top: 4px;"><strong>Pos Gerbang Aktif:</strong> Pos 1 Gerbang Utama (Utara)</div>
-                    <div style="margin-top: 4px; color: var(--rose-danger); font-weight: 700;">Hotline Darurat K3/Security: Ext 110</div>
+                    <div style="margin-top: 4px; color: var(--rose-danger); font-weight: 700;">Hotline Darurat
+                      K3/Security: Ext 110</div>
                   </div>
                 </div>
               </div>
@@ -459,27 +474,43 @@
             </div>
 
             <!-- Active Permit Alert Banner -->
-            <div id="activePermitBanner" style="display: none; margin-top: 1.25rem; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div id="activePermitBanner"
+              style="display: none; margin-top: 1.25rem; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #b45309; flex-shrink: 0; font-size: 1.1rem;">
+                <div
+                  style="width: 36px; height: 36px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #b45309; flex-shrink: 0; font-size: 1.1rem;">
                   ⚠️
                 </div>
                 <div>
                   <div style="font-weight: 800; font-size: 0.875rem; color: #92400e;">
-                    Anda Memiliki Izin Aktif: <span id="bannerActiveTicketId" style="font-family: var(--font-mono); text-decoration: underline;">TK-XXX</span> (<span id="bannerActiveStatus">Menunggu Persetujuan</span>)
+                    Anda Memiliki Izin Aktif: <span id="bannerActiveTicketId"
+                      style="font-family: var(--font-mono); text-decoration: underline;">TK-XXX</span> (<span
+                      id="bannerActiveStatus">Menunggu Persetujuan</span>)
                   </div>
                   <div style="font-size: 0.775rem; color: #78350f;">
-                    Sesuai kebijakan perusahaan, pengajuan izin baru ditangguhkan sampai proses perizinan ini selesai atau dibatalkan.
+                    Sesuai kebijakan perusahaan, pengajuan izin baru ditangguhkan sampai proses perizinan ini selesai
+                    atau dibatalkan.
                   </div>
                 </div>
               </div>
               <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="bannerButtonsGroup">
-                <button class="btn-card-detail" id="btnBannerViewActive" style="font-size: 0.775rem; padding: 0.45rem 0.85rem;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <button class="btn-card-detail" id="btnBannerViewActive"
+                  style="font-size: 0.775rem; padding: 0.45rem 0.85rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
                   <span>Lihat Rincian</span>
                 </button>
                 <button class="btn-card-qr" id="btnBannerViewQR" style="font-size: 0.775rem; padding: 0.45rem 0.85rem;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
                   <span>Tiket & QR Code</span>
                 </button>
               </div>
@@ -499,9 +530,11 @@
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </div>
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Tidak Ada Pengajuan Aktif</h3>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                  Tidak Ada Pengajuan Aktif</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px; margin-bottom: 1.25rem;">
-                  Saat ini Anda tidak memiliki izin keluar yang sedang berjalan. Buat pengajuan baru jika hendak meninggalkan kawasan pabrik.
+                  Saat ini Anda tidak memiliki izin keluar yang sedang berjalan. Buat pengajuan baru jika hendak
+                  meninggalkan kawasan pabrik.
                 </p>
                 <button class="btn-primary-action" onclick="handleOpenNewRequest()">+ Buat Pengajuan Baru</button>
               </div>
@@ -513,7 +546,8 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Riwayat Pengajuan Izin</h1>
-                <p>Arsip seluruh riwayat perizinan keluar kawasan yang telah selesai, kedaluwarsa, ditolak, atau dibatalkan</p>
+                <p>Arsip seluruh riwayat perizinan keluar kawasan yang telah selesai, kedaluwarsa, ditolak, atau
+                  dibatalkan</p>
               </div>
             </div>
 
@@ -525,10 +559,19 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
-                  <input type="text" id="searchEmpInput" class="search-input" placeholder="Cari nomor tiket, alasan, atau tujuan...">
+                  <input type="text" id="searchEmpInput" class="search-input"
+                    placeholder="Cari nomor tiket, alasan, atau tujuan...">
                 </div>
 
                 <div class="filters-group">
+                  <select id="filterEmpPeriod" class="filter-select" title="Filter Periode Waktu">
+                    <option value="all">📅 Semua Waktu</option>
+                    <option value="today">Hari Ini</option>
+                    <option value="week">Minggu Ini</option>
+                    <option value="month">Bulan Ini</option>
+                    <option value="year">Tahun Ini</option>
+                  </select>
+
                   <select id="filterEmpCategory" class="filter-select">
                     <option value="all">Semua Kategori</option>
                     <option value="Dinas Kantor">Dinas Kantor</option>
@@ -555,7 +598,8 @@
 
                   <div class="view-mode-group">
                     <button class="btn-view-mode active" id="btnEmpViewCard" title="Tampilan Kartu">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
                         <rect x="14" y="14" width="7" height="7"></rect>
@@ -563,7 +607,8 @@
                       </svg>
                     </button>
                     <button class="btn-view-mode" id="btnEmpViewTable" title="Tampilan Tabel">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
                         <line x1="8" y1="6" x2="21" y2="6"></line>
                         <line x1="8" y1="12" x2="21" y2="12"></line>
                         <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -600,7 +645,8 @@
                     <line x1="9" y1="14" x2="15" y2="14"></line>
                   </svg>
                 </div>
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Belum Ada Riwayat Perizinan</h3>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                  Belum Ada Riwayat Perizinan</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px; margin-bottom: 1.25rem;">
                   Arsip riwayat izin yang telah selesai, kedaluwarsa, atau ditolak akan tersimpan otomatis di sini.
                 </p>
@@ -612,7 +658,7 @@
 
         <!-- ================= B. APPROVER (ATASAN) VIEW ================= -->
         <div id="viewApprover" style="display: none;">
-          
+
           <!-- B1. HALAMAN DASHBOARD APPROVER -->
           <div id="approverDashboardPage">
             <!-- Approver Hero Welcome Banner -->
@@ -621,12 +667,15 @@
                 <div class="dashboard-avatar-circle">👔</div>
                 <div class="dashboard-hero-text">
                   <h2>Pusat Persetujuan & Monitoring Bawahan</h2>
-                  <p>Ir. Hendra Gunawan, M.T. • Manager Rekayasa & Pemeliharaan • Prinsip: <strong>No Approval, No Exit</strong></p>
+                  <p>Ir. Hendra Gunawan, M.T. • Manager Rekayasa & Pemeliharaan • Prinsip: <strong>No Approval, No
+                      Exit</strong></p>
                 </div>
               </div>
               <div class="dashboard-hero-actions">
                 <button class="btn-primary-action" style="background: #0f766e;" onclick="setApproverNav('antrian')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                   <span>Review Antrian Izin</span>
                 </button>
               </div>
@@ -681,7 +730,8 @@
                     <span>⚡</span>
                     <span>Antrean Persetujuan Cepat</span>
                   </div>
-                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setApproverNav('antrian')">
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
+                    onclick="setApproverNav('antrian')">
                     Buka Semua Antrian →
                   </button>
                 </div>
@@ -712,7 +762,8 @@
                       <span>🚶‍♂️</span>
                       <span>Monitor Bawahan di Luar Area</span>
                     </div>
-                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;" onclick="setApproverNav('pelacakan')">
+                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;"
+                      onclick="setApproverNav('pelacakan')">
                       Pelacakan Penuh →
                     </button>
                   </div>
@@ -730,8 +781,10 @@
                   </div>
                   <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
                     <p>• <strong>Dinas Kantor:</strong> Verifikasi urgensi pekerjaan dan kelengkapan dokumen tugas.</p>
-                    <p style="margin-top: 6px;">• <strong>Urusan Pribadi:</strong> Diberikan secara proporsional dengan estimasi waktu kembali yang wajar.</p>
-                    <p style="margin-top: 6px;">• <strong>Penolakan:</strong> Wajib menyertakan catatan alasan penolakan yang jelas bagi pemohon.</p>
+                    <p style="margin-top: 6px;">• <strong>Urusan Pribadi:</strong> Diberikan secara proporsional dengan
+                      estimasi waktu kembali yang wajar.</p>
+                    <p style="margin-top: 6px;">• <strong>Penolakan:</strong> Wajib menyertakan catatan alasan penolakan
+                      yang jelas bagi pemohon.</p>
                   </div>
                 </div>
               </div>
@@ -743,7 +796,8 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1 id="approverHeadingTitle">Antrian Persetujuan Izin Bawahan</h1>
-                <p id="approverHeadingSub">Tinjau dan putuskan permohonan izin bawahan langsung Anda • <strong>Prinsip: No Approval, No Exit</strong></p>
+                <p id="approverHeadingSub">Tinjau dan putuskan permohonan izin bawahan langsung Anda • <strong>Prinsip:
+                    No Approval, No Exit</strong></p>
               </div>
               <div>
                 <span class="role-tag-pill role-approver" style="font-size: 0.8rem; padding: 4px 10px;">
@@ -772,7 +826,8 @@
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </div>
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Semua Pengajuan Telah Ditinjau</h3>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                  Semua Pengajuan Telah Ditinjau</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
                   Tidak ada permohonan izin baru yang menunggu persetujuan Anda saat ini.
                 </p>
@@ -785,7 +840,8 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Izin Karyawan</h1>
-                <p>Pemantauan status bawahan secara menyeluruh (Sedang di Luar, Terlambat kembali, Disetujui, dan Selesai)</p>
+                <p>Pemantauan status bawahan secara menyeluruh (Sedang di Luar, Terlambat kembali, Disetujui, dan
+                  Selesai)</p>
               </div>
               <div class="filters-group">
                 <select id="filterAppViewMode" class="filter-select">
@@ -808,7 +864,8 @@
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </div>
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Belum Ada Data Permohonan</h3>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                  Belum Ada Data Permohonan</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
                   Belum ada permohonan izin yang sesuai kriteria filter ini.
                 </p>
@@ -820,7 +877,7 @@
 
         <!-- ================= C. SECURITY / SATPAM (POS JAGA) VIEW ================= -->
         <div id="viewSecurity" style="display: none;">
-          
+
           <!-- C1. HALAMAN DASHBOARD SECURITY -->
           <div id="securityDashboardPage">
             <!-- Security Hero Welcome Banner -->
@@ -834,7 +891,10 @@
               </div>
               <div class="dashboard-hero-actions">
                 <button class="btn-primary-action" style="background: #0284c7;" onclick="setSecurityNav('scanner')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
                   <span>Buka Kamera Scanner QR</span>
                 </button>
               </div>
@@ -885,8 +945,10 @@
               <div class="shortcut-action-card" onclick="setSecurityNav('scanner')">
                 <div class="shortcut-icon-wrap" style="background: #e0f2fe; color: #0284c7;">📟</div>
                 <div>
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pemindai QR & Manual</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Pindai tiket dengan kamera live atau masukkan kode tiket</div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pemindai QR & Manual
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Pindai tiket dengan
+                    kamera live atau masukkan kode tiket</div>
                 </div>
               </div>
 
@@ -894,35 +956,19 @@
                 <div class="shortcut-icon-wrap" style="background: #ecfeff; color: #0891b2;">🚶‍♂️</div>
                 <div>
                   <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pelacakan di Luar</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Monitoring headcount muster roll & 1-klik Scan In</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Monitoring headcount
+                    muster roll & 1-klik Scan In</div>
                 </div>
               </div>
 
               <div class="shortcut-action-card" onclick="setSecurityNav('riwayat')">
                 <div class="shortcut-icon-wrap" style="background: #f1f5f9; color: #475569;">📋</div>
                 <div>
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Log Riwayat Gerbang</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Arsip seluruh pemindaian Scan Out dan Scan In</div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Log Riwayat Gerbang
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Arsip seluruh
+                    pemindaian Scan Out dan Scan In</div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Antrean Izin Siap Keluar di Pos Jaga (Scan Out) -->
-            <div class="dashboard-widget-card" style="margin-bottom: 1.5rem; border: 1.5px solid var(--corp-teal);">
-              <div class="dashboard-widget-header" style="background: rgba(5, 150, 105, 0.05); padding: 0.85rem 1.25rem;">
-                <div class="dashboard-widget-title" style="color: var(--corp-teal);">
-                  <span>🎫</span>
-                  <span>Antrean Izin Siap Keluar di Pos Jaga (Scan Out)</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <span class="badge" id="badgeReadyScanOutCount" style="background: var(--corp-teal); color: #fff; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: 700; font-size: 0.75rem;">0 Izin</span>
-                  <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;" onclick="setSecurityNav('pelacakan'); const tab = document.getElementById('filterSecurityQueueTab'); if(tab){tab.value='ready'; renderSecurityView();}">
-                    Lihat Semua →
-                  </button>
-                </div>
-              </div>
-              <div id="securityDashboardReadyList" class="feed-list">
-                <!-- Rendered via JS: Tiket dengan status Disetujui / Darurat siap Scan Out -->
               </div>
             </div>
 
@@ -935,7 +981,8 @@
                     <span>🚶‍♂️</span>
                     <span>Headcount: Karyawan Sedang di Luar Pabrik</span>
                   </div>
-                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setSecurityNav('pelacakan')">
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
+                    onclick="setSecurityNav('pelacakan')">
                     Buka Pelacakan Lengkap →
                   </button>
                 </div>
@@ -952,7 +999,8 @@
                       <span>🕒</span>
                       <span>Aktivitas Transaksi Gerbang Terkini</span>
                     </div>
-                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;" onclick="setSecurityNav('riwayat')">
+                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;"
+                      onclick="setSecurityNav('riwayat')">
                       Log Lengkap →
                     </button>
                   </div>
@@ -969,15 +1017,18 @@
                     </div>
                   </div>
                   <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
                       <span><strong>Pos 1 Gerbang Utama (Utara)</strong></span>
                       <span class="status-pill approved" style="font-size: 0.7rem;">Aktif Operasional</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
                       <span><strong>Pos 2 Gerbang Barat</strong></span>
                       <span class="status-pill pending" style="font-size: 0.7rem;">Siaga / Patroli</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0;">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0;">
                       <span><strong>Pos 3 Gerbang Timur</strong></span>
                       <span class="status-pill pending" style="font-size: 0.7rem;">Siaga / Logistik</span>
                     </div>
@@ -992,7 +1043,8 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1 id="securityHeadingTitle">Terminal Pemindai QR & Verifikasi Manual</h1>
-                <p id="securityHeadingSub">Pindai tiket dengan kamera langsung (HP/Webcam), unggah gambar QR, atau masukkan nomor tiket secara manual</p>
+                <p id="securityHeadingSub">Pindai tiket dengan kamera langsung (HP/Webcam), unggah gambar QR, atau
+                  masukkan nomor tiket secara manual</p>
               </div>
               <div>
                 <span class="role-tag-pill role-security" style="font-size: 0.8rem; padding: 4px 10px;">
@@ -1007,8 +1059,10 @@
                 <div class="scanner-title-badge">
                   <div class="scanner-icon">📟</div>
                   <div>
-                    <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.2px;">Terminal Verifikasi Tiket & Kamera Scan QR</h3>
-                    <p style="font-size: 0.775rem; color: #bae6fd;">Pindai tiket dengan kamera langsung (HP/Webcam), unggah foto QR, atau masukkan nomor tiket secara manual</p>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.2px;">Terminal Verifikasi Tiket &
+                      Kamera Scan QR</h3>
+                    <p style="font-size: 0.775rem; color: #bae6fd;">Pindai tiket dengan kamera langsung (HP/Webcam),
+                      unggah foto QR, atau masukkan nomor tiket secara manual</p>
                   </div>
                 </div>
 
@@ -1026,11 +1080,21 @@
                 <div class="scanner-slider-control" id="scanModeSlider">
                   <div class="slider-glider" id="scanSliderGlider"></div>
                   <button type="button" class="slider-tab active" id="btnModeCameraScan">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.5">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                      </path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
                     <span>Kamera Scan QR</span>
                   </button>
                   <button type="button" class="slider-tab" id="btnModeManualScan">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
                     <span>Input Manual / Alat Barcode</span>
                   </button>
                 </div>
@@ -1042,7 +1106,10 @@
                 <div class="camera-control-toolbar" id="cameraActiveToolbar" style="display: none;">
                   <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                     <button type="button" class="btn-cam-action danger" id="btnStopCamera">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12"></rect></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <rect x="6" y="6" width="12" height="12"></rect>
+                      </svg>
                       <span>Matikan Kamera</span>
                     </button>
                     <select id="cameraDeviceSelect" class="cam-select-device" style="display: none;">
@@ -1055,29 +1122,47 @@
                 </div>
 
                 <!-- VIEWPORT KAMERA & KONSOLIDASI AREA KAMERA BELUM AKTIF -->
-                <div class="camera-viewport-card" id="cameraViewportCard" style="position: relative; width: 100%; max-width: 440px; margin: 0 auto; min-height: 270px; background: #000; border-radius: 8px; overflow: hidden;">
+                <div class="camera-viewport-card" id="cameraViewportCard"
+                  style="position: relative; width: 100%; max-width: 440px; margin: 0 auto; min-height: 270px; background: #000; border-radius: 8px; overflow: hidden;">
                   <!-- Dedicated HTML5 QR Container for Video/Canvas stream -->
                   <div id="cameraReaderView" style="width: 100%; min-height: 270px; background: #000;"></div>
 
                   <!-- Consolidated Kamera Belum Aktif Card (Sibling layer, immune to clearElement) -->
-                  <div id="cameraIdlePlaceholder" class="camera-idle-wrap camera-idle-interactive" style="position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); padding: 1.5rem; text-align: center; cursor: pointer;" title="Klik di sini untuk memilih metode pemindaian">
-                    <div class="camera-idle-lens" id="btnClickCameraLens" title="Klik gambar kamera ini untuk memilih metode scan">
+                  <div id="cameraIdlePlaceholder" class="camera-idle-wrap camera-idle-interactive"
+                    style="position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); padding: 1.5rem; text-align: center; cursor: pointer;"
+                    title="Klik di sini untuk memilih metode pemindaian">
+                    <div class="camera-idle-lens" id="btnClickCameraLens"
+                      title="Klik gambar kamera ini untuk memilih metode scan">
                       <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                        </path>
                         <circle cx="12" cy="13" r="4"></circle>
                       </svg>
                     </div>
-                    <div style="font-weight: 800; font-size: 1.05rem; color: #f0f9ff; margin-top: 0.65rem;">Kamera Belum Aktif</div>
-                    <p id="cameraIdleHint" style="font-size: 0.775rem; color: #94a3b8; max-width: 320px; margin-top: 0.25rem; margin-bottom: 0.85rem;">
+                    <div style="font-weight: 800; font-size: 1.05rem; color: #f0f9ff; margin-top: 0.65rem;">Kamera Belum
+                      Aktif</div>
+                    <p id="cameraIdleHint"
+                      style="font-size: 0.775rem; color: #94a3b8; max-width: 320px; margin-top: 0.25rem; margin-bottom: 0.85rem;">
                       Klik gambar kamera atau pilih opsi di bawah untuk memindai:
                     </p>
-                    <div class="camera-idle-actions" id="cameraIdleActions" style="display: flex; gap: 0.65rem; justify-content: center; flex-wrap: wrap;">
-                      <button type="button" class="btn-cam-action primary" id="btnStartCamera" style="padding: 0.6rem 1.15rem; font-size: 0.825rem;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <div class="camera-idle-actions" id="cameraIdleActions"
+                      style="display: flex; gap: 0.65rem; justify-content: center; flex-wrap: wrap;">
+                      <button type="button" class="btn-cam-action primary" id="btnStartCamera"
+                        style="padding: 0.6rem 1.15rem; font-size: 0.825rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2.5">
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
                         <span>Aktifkan Kamera</span>
                       </button>
-                      <button type="button" class="btn-cam-action secondary" id="btnTriggerFileScan" style="padding: 0.6rem 1.15rem; font-size: 0.825rem;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                      <button type="button" class="btn-cam-action secondary" id="btnTriggerFileScan"
+                        style="padding: 0.6rem 1.15rem; font-size: 0.825rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
                         <span>Unggah Gambar QR</span>
                       </button>
                     </div>
@@ -1087,7 +1172,8 @@
                   <input type="file" id="inputScanQrFile" accept="image/*" style="display: none;">
 
                   <!-- Laser scan reticle overlay -->
-                  <div id="cameraScanOverlay" class="camera-laser-overlay" style="display: none; position: absolute; inset: 0; z-index: 4;">
+                  <div id="cameraScanOverlay" class="camera-laser-overlay"
+                    style="display: none; position: absolute; inset: 0; z-index: 4;">
                     <div class="laser-reticle">
                       <div class="laser-corner tl"></div>
                       <div class="laser-corner tr"></div>
@@ -1112,10 +1198,13 @@
                     <rect x="14" y="14" width="7" height="7"></rect>
                     <rect x="3" y="14" width="7" height="7"></rect>
                   </svg>
-                  <input type="text" id="inputScanTicketCode" placeholder="Masukkan Nomor Tiket (contoh: TK-20261013-001) atau NIP...">
+                  <input type="text" id="inputScanTicketCode"
+                    placeholder="Masukkan Nomor Tiket (contoh: TK-20261013-001) atau NIP...">
                 </div>
                 <button class="btn-execute-scan" id="btnExecuteScanSearch">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
                   <span>Verifikasi Tiket</span>
                 </button>
               </div>
@@ -1127,7 +1216,8 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Karyawan di Luar (Headcount)</h1>
-                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Scan In)</p>
+                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Scan In)
+                </p>
               </div>
               <div class="filters-group">
                 <select id="filterSecurityQueueTab" class="filter-select">
@@ -1157,7 +1247,8 @@
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                   </svg>
                 </div>
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Tidak Ada Tiket di Antrean Ini</h3>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                  Tidak Ada Tiket di Antrean Ini</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
                   Tidak ada data tiket yang memerlukan pemindaian keluar atau masuk pada kategori ini.
                 </p>
@@ -1182,10 +1273,19 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
-                  <input type="text" id="searchSecurityLogInput" class="search-input" placeholder="Cari nomor tiket, pemohon, NIP, atau tujuan...">
+                  <input type="text" id="searchSecurityLogInput" class="search-input"
+                    placeholder="Cari nomor tiket, pemohon, NIP, atau tujuan...">
                 </div>
 
                 <div class="filters-group">
+                  <select id="filterSecurityLogPeriod" class="filter-select" title="Filter Periode Waktu">
+                    <option value="all">📅 Semua Waktu</option>
+                    <option value="today">Hari Ini</option>
+                    <option value="week">Minggu Ini</option>
+                    <option value="month">Bulan Ini</option>
+                    <option value="year">Tahun Ini</option>
+                  </select>
+
                   <select id="filterSecurityLogCategory" class="filter-select">
                     <option value="all">Semua Kategori</option>
                     <option value="Dinas Kantor">Dinas Kantor</option>
@@ -1202,7 +1302,8 @@
 
                   <div class="view-mode-group">
                     <button class="btn-view-mode active" id="btnSecurityLogViewCard" title="Tampilan Kartu">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
                         <rect x="14" y="14" width="7" height="7"></rect>
@@ -1210,7 +1311,8 @@
                       </svg>
                     </button>
                     <button class="btn-view-mode" id="btnSecurityLogViewTable" title="Tampilan Tabel">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
                         <line x1="8" y1="6" x2="21" y2="6"></line>
                         <line x1="8" y1="12" x2="21" y2="12"></line>
                         <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -1242,7 +1344,8 @@
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
                 </div>
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Belum Ada Riwayat Gerbang</h3>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                  Belum Ada Riwayat Gerbang</h3>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
                   Belum ada catatan pemindaian keluar atau masuk yang tercatat pada sesi hari ini.
                 </p>
@@ -1263,7 +1366,8 @@
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                   <span class="role-badge-neutral">Pengawasan & K3</span>
                   <span style="font-size: 0.75rem; color: var(--text-muted);">•</span>
-                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Bambang Sutrisno, S.T. (Supervisi Pusat)</span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Bambang Sutrisno, S.T. (Supervisi
+                    Pusat)</span>
                 </div>
                 <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">
                   Monitoring Headcount & Perizinan Pabrik
@@ -1280,7 +1384,8 @@
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
-              <span><strong>Ketentuan Peran (BRULE-09):</strong> Admin berfungsi sebagai pengawas dan auditor data. Persetujuan izin adalah wewenang langsung Atasan, dan jam gerbang dicatat otomatis dari pemindai pos jaga.</span>
+              <span><strong>Ketentuan Peran:</strong> Admin berfungsi sebagai pengawas dan auditor data. Persetujuan
+                izin adalah wewenang langsung Atasan, dan jam gerbang dicatat otomatis dari pemindai pos jaga.</span>
             </div>
 
             <!-- Calm Headcount Card -->
@@ -1328,7 +1433,8 @@
             </div>
 
             <!-- 2-Column Analytics Grid Admin: Jam Sibuk Gerbang & Sebaran Departemen -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-top: 1.25rem;">
+            <div
+              style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-top: 1.25rem;">
               <!-- Left Chart: Jam Sibuk Lalu Lintas Gerbang -->
               <div class="dashboard-widget-card">
                 <div class="dashboard-widget-header">
@@ -1357,7 +1463,8 @@
             </div>
 
             <!-- Split Section: Muster Roll & Recent Logs -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-top: 1.25rem;" class="admin-grid-split">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-top: 1.25rem;"
+              class="admin-grid-split">
               <!-- Left: Muster Roll -->
               <div class="content-section" style="padding: 1.25rem;">
                 <div class="section-header-compact" style="margin-bottom: 0.75rem;">
@@ -1391,24 +1498,29 @@
                 </div>
 
                 <div class="empty-box" id="adminEmptyMusterRollBox" style="display: none; padding: 2rem 1rem;">
-                  <div class="empty-icon-circle" style="background: #f8fafc; color: #059669; width: 44px; height: 44px;">
+                  <div class="empty-icon-circle"
+                    style="background: #f8fafc; color: #059669; width: 44px; height: 44px;">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                       <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
                   </div>
-                  <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem;">Kawasan Pabrik Terpantau Kondusif</h3>
+                  <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem;">
+                    Kawasan Pabrik Terpantau Kondusif</h3>
                   <p style="font-size: 0.775rem; color: var(--text-secondary); max-width: 380px;">
-                    Seluruh personel berada di dalam kawasan pabrik. Tidak ada perizinan aktif yang sedang berada di luar.
+                    Seluruh personel berada di dalam kawasan pabrik. Tidak ada perizinan aktif yang sedang berada di
+                    luar.
                   </p>
                 </div>
               </div>
 
               <!-- Right: Clean Activity Log Feed -->
               <div class="content-section" style="padding: 1.25rem;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                <div
+                  style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
                   <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary);">Aktivitas Terkini</h4>
-                  <button class="btn-action-sm outline" onclick="window.setAdminNav('audit')" style="font-size: 0.7rem; padding: 2px 8px;">Lihat Log</button>
+                  <button class="btn-action-sm outline" onclick="window.setAdminNav('audit')"
+                    style="font-size: 0.7rem; padding: 2px 8px;">Lihat Log</button>
                 </div>
                 <div id="adminRecentActivityFeed">
                 </div>
@@ -1428,7 +1540,8 @@
                   Audit Trail & Log Investigasi Aktivitas
                 </h1>
                 <p style="font-size: 0.825rem; color: var(--text-secondary);">
-                  Rekam jejak setiap tahapan perizinan dari pengajuan, persetujuan atasan, hingga pemindaian gerbang fisik.
+                  Rekam jejak setiap tahapan perizinan dari pengajuan, persetujuan atasan, hingga pemindaian gerbang
+                  fisik.
                 </p>
               </div>
             </div>
@@ -1436,7 +1549,8 @@
             <!-- Filter Toolbar -->
             <div class="admin-filter-toolbar" style="margin-top: 1rem;">
               <div class="admin-filter-group">
-                <input type="text" id="adminAuditSearchInput" class="admin-search-input" placeholder="Cari tiket, nama, satpam, atau atasan...">
+                <input type="text" id="adminAuditSearchInput" class="admin-search-input"
+                  placeholder="Cari tiket, nama, satpam, atau atasan...">
                 <select id="adminAuditEventFilter" class="admin-select-filter">
                   <option value="all">Semua Peristiwa</option>
                   <option value="Pengajuan">Pengajuan Baru</option>
@@ -1449,7 +1563,8 @@
                 </select>
               </div>
               <div>
-                <span id="adminAuditFilterCount" style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
+                <span id="adminAuditFilterCount"
+                  style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
                   0 data
                 </span>
               </div>
@@ -1482,8 +1597,10 @@
             <div class="printable-report-header" style="display: none;">
               <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
-                  <h2 style="font-size: 1.25rem; font-weight: 800; color: #000000; margin: 0;">PT PUPUK KUJANG CIKAMPEK</h2>
-                  <div style="font-size: 0.8rem; color: #333333; margin-top: 2px;">Departemen Pengamanan & K3 • Biro Umum & Tata Usaha</div>
+                  <h2 style="font-size: 1.25rem; font-weight: 800; color: #000000; margin: 0;">PT PUPUK KUJANG CIKAMPEK
+                  </h2>
+                  <div style="font-size: 0.8rem; color: #333333; margin-top: 2px;">Departemen Pengamanan & K3 • Biro
+                    Umum & Tata Usaha</div>
                   <div style="font-size: 0.95rem; font-weight: 700; margin-top: 6px; text-decoration: underline;">
                     REKAPITULASI PERIZINAN KELUAR AREA PABRIK (GATE PASS AUDIT REPORT)
                   </div>
@@ -1553,7 +1670,8 @@
                 </select>
               </div>
               <div>
-                <span id="adminReportRowCount" style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
+                <span id="adminReportRowCount"
+                  style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
                   0 data
                 </span>
               </div>
@@ -1594,7 +1712,8 @@
                   Direktori Akun & Hak Akses Pengguna
                 </h1>
                 <p style="font-size: 0.825rem; color: var(--text-secondary);">
-                  Pemetaan hak akses sistem perizinan dari akun induk KUJANG ID (Karyawan, Atasan, Satpam Pos Jaga, dan Admin).
+                  Pemetaan hak akses sistem perizinan dari akun induk KUJANG ID (Karyawan, Atasan, Satpam Pos Jaga, dan
+                  Admin).
                 </p>
               </div>
             </div>
@@ -1602,7 +1721,8 @@
             <!-- Filter Toolbar -->
             <div class="admin-filter-toolbar" style="margin-top: 1rem;">
               <div class="admin-filter-group">
-                <input type="text" id="adminUserSearchInput" class="admin-search-input" placeholder="Cari nama, NIP, KUJANG ID, atau divisi...">
+                <input type="text" id="adminUserSearchInput" class="admin-search-input"
+                  placeholder="Cari nama, NIP, KUJANG ID, atau divisi...">
                 <select id="adminUserRoleFilter" class="admin-select-filter">
                   <option value="all">Semua Peran</option>
                   <option value="karyawan">Karyawan Pemohon</option>
@@ -1667,8 +1787,10 @@
               Pilih Atasan / Approver Peninjau <span style="color: var(--rose-danger);">*</span>
             </label>
             <select id="selectApprover" class="form-select" required>
-              <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan</option>
-              <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan</option>
+              <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan
+              </option>
+              <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan
+              </option>
               <option value="Dr. Agus Priyanto, M.Eng.">Dr. Agus Priyanto, M.Eng. — VP Produksi & Utilitas</option>
               <option value="Bambang Sutrisno, S.T.">Bambang Sutrisno, S.T. — Supervisi Pengamanan & K3</option>
             </select>
@@ -1730,7 +1852,8 @@
             <label class="form-label" for="inputDestination">
               Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
             </label>
-            <input type="text" id="inputDestination" class="form-input" placeholder="Contoh: KPP Pratama Cikampek / Rumah Sakit Pupuk Kujang" required>
+            <input type="text" id="inputDestination" class="form-input"
+              placeholder="Contoh: KPP Pratama Cikampek / Rumah Sakit Pupuk Kujang" required>
           </div>
 
           <!-- Alasan Izin -->
@@ -1738,7 +1861,8 @@
             <label class="form-label" for="inputReason">
               Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
             </label>
-            <textarea id="inputReason" class="form-textarea" placeholder="Jelaskan alasan dan keperluan dengan jelas..." required></textarea>
+            <textarea id="inputReason" class="form-textarea" placeholder="Jelaskan alasan dan keperluan dengan jelas..."
+              required></textarea>
           </div>
 
           <!-- Rencana Keluar & Estimasi Kembali -->
@@ -1763,7 +1887,9 @@
           <button type="button" class="btn-secondary" id="btnCancelNewModal">Batal</button>
           <button type="submit" class="btn-primary-action" id="btnSubmitNewRequest">
             <span>Lanjut ke Konfirmasi</span>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </button>
         </div>
       </form>
@@ -1818,7 +1944,8 @@
         </div>
 
         <p style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.5;">
-          Pengajuan akan diteruskan ke antrean Atasan. Anda hanya diizinkan meninggalkan pos jaga apabila izin telah <strong>Disetujui</strong> dan QR Code resmi telah dipindai oleh Petugas Pengamanan.
+          Pengajuan akan diteruskan ke antrean Atasan. Anda hanya diizinkan meninggalkan pos jaga apabila izin telah
+          <strong>Disetujui</strong> dan QR Code resmi telah dipindai oleh Petugas Pengamanan.
         </p>
       </div>
 
@@ -1844,14 +1971,16 @@
 
       <div class="modal-body">
         <p style="font-size: 0.85rem; color: var(--text-primary);">
-          Anda menyetujui izin keluar untuk <strong id="approveEmployeeName">Budi Pratama</strong> (<span id="approveTicketId">TK-XXX</span>).
+          Anda menyetujui izin keluar untuk <strong id="approveEmployeeName">Budi Pratama</strong> (<span
+            id="approveTicketId">TK-XXX</span>).
         </p>
 
         <div class="form-group" style="margin-top: 0.75rem;">
           <label class="form-label" for="approveNoteInput">
             Catatan / Arahan Atasan <span style="font-weight: 400; color: var(--text-muted);">(Opsional)</span>
           </label>
-          <input type="text" id="approveNoteInput" class="form-input" placeholder="Contoh: Disetujui. Pastikan koordinasi selesai tepat waktu.">
+          <input type="text" id="approveNoteInput" class="form-input"
+            placeholder="Contoh: Disetujui. Pastikan koordinasi selesai tepat waktu.">
         </div>
       </div>
 
@@ -1877,14 +2006,16 @@
 
       <div class="modal-body">
         <p style="font-size: 0.85rem; color: var(--text-primary);">
-          Anda menolak izin keluar untuk <strong id="rejectEmployeeName">Budi Pratama</strong> (<span id="rejectTicketId">TK-XXX</span>).
+          Anda menolak izin keluar untuk <strong id="rejectEmployeeName">Budi Pratama</strong> (<span
+            id="rejectTicketId">TK-XXX</span>).
         </p>
 
         <div class="form-group" style="margin-top: 0.75rem;">
           <label class="form-label" for="rejectReasonInput">
             Alasan Penolakan <span style="color: var(--rose-danger);">* Wajib diisi</span>
           </label>
-          <textarea id="rejectReasonInput" class="form-textarea" placeholder="Jelaskan alasan penolakan secara spesifik..." required></textarea>
+          <textarea id="rejectReasonInput" class="form-textarea"
+            placeholder="Jelaskan alasan penolakan secara spesifik..." required></textarea>
         </div>
       </div>
 
@@ -1909,19 +2040,32 @@
       </div>
 
       <!-- MODAL DETAIL TAB SWITCHER -->
-      <div class="modal-detail-tabs" style="display: flex; border-bottom: 1px solid var(--border-color); background: #f8fafc; padding: 0 1.25rem; gap: 0.5rem;">
-        <button type="button" class="tab-detail-nav active" id="tabNavQR" style="padding: 0.75rem 1rem; font-size: 0.825rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid var(--corp-teal); color: var(--corp-teal); display: flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <div class="modal-detail-tabs"
+        style="display: flex; border-bottom: 1px solid var(--border-color); background: #f8fafc; padding: 0 1.25rem; gap: 0.5rem;">
+        <button type="button" class="tab-detail-nav active" id="tabNavQR"
+          style="padding: 0.75rem 1rem; font-size: 0.825rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid var(--corp-teal); color: var(--corp-teal); display: flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
           <span>Tiket & QR Code</span>
         </button>
-        <button type="button" class="tab-detail-nav" id="tabNavInfo" style="padding: 0.75rem 1rem; font-size: 0.825rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <button type="button" class="tab-detail-nav" id="tabNavInfo"
+          style="padding: 0.75rem 1rem; font-size: 0.825rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
           <span>Lihat Rincian & Riwayat</span>
         </button>
       </div>
 
       <div class="modal-body">
-        
+
         <!-- PANE A: TIKET DIGITAL DENGAN QR CODE -->
         <div id="paneDetailQR" style="display: flex; flex-direction: column; gap: 1rem;">
           <div class="pass-card-container">
@@ -1931,7 +2075,9 @@
                   <h4>TIKET IZIN KELUAR AREA</h4>
                   <span>PT PUPUK KUJANG CIKAMPEK</span>
                 </div>
-                <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">DIGITAL PASS</span>
+                <span
+                  style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">DIGITAL
+                  PASS</span>
               </div>
 
               <div class="pass-qr-wrap">
@@ -1973,7 +2119,8 @@
                 </div>
 
                 <!-- Pos Jaga Scan Real Records -->
-                <div class="pass-grid-info" id="scanRecordGrid" style="display: none; padding-top: 0.5rem; border-top: 1px dashed var(--border-color);">
+                <div class="pass-grid-info" id="scanRecordGrid"
+                  style="display: none; padding-top: 0.5rem; border-top: 1px dashed var(--border-color);">
                   <div>
                     <span class="pass-lbl">Scan Out (Keluar)</span>
                     <div class="pass-val" id="passScanOut" style="color: #059669;">-</div>
@@ -1987,7 +2134,7 @@
             </div>
           </div>
 
-          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+          <div id="paneQrActionButtons" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
             <button type="button" class="btn-secondary" id="btnDownloadQRPng" style="font-size: 0.775rem;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -2012,11 +2159,13 @@
           <div class="summary-container">
             <div class="summary-row">
               <span class="summary-key">Nomor Tiket</span>
-              <span class="summary-val" id="infoTicketId" style="font-family: var(--font-mono); color: var(--corp-teal);">-</span>
+              <span class="summary-val" id="infoTicketId"
+                style="font-family: var(--font-mono); color: var(--corp-teal);">-</span>
             </div>
             <div class="summary-row">
               <span class="summary-key">Status Izin</span>
-              <span class="summary-val" id="infoStatusContainer"><span id="infoStatusPill" class="status-pill pending">-</span></span>
+              <span class="summary-val" id="infoStatusContainer"><span id="infoStatusPill"
+                  class="status-pill pending">-</span></span>
             </div>
             <div class="summary-row">
               <span class="summary-key">Nama Pemohon</span>
@@ -2032,11 +2181,14 @@
             </div>
             <div class="summary-row">
               <span class="summary-key">Atasan Peninjau</span>
-              <span class="summary-val" id="infoApproverName" style="font-weight: 700; color: var(--corp-teal);">-</span>
+              <span class="summary-val" id="infoApproverName"
+                style="font-weight: 700; color: var(--corp-teal);">-</span>
             </div>
-            <div class="summary-row" id="infoEmergContactRow" style="display: none; background: #fff1f2; padding: 4px 8px; border-radius: 6px;">
+            <div class="summary-row" id="infoEmergContactRow"
+              style="display: none; background: #fff1f2; padding: 4px 8px; border-radius: 6px;">
               <span class="summary-key" style="color: var(--rose-danger); font-weight: 700;">🚨 Kontak Darurat</span>
-              <span class="summary-val" id="infoEmergencyContact" style="color: var(--rose-danger); font-weight: 700;">-</span>
+              <span class="summary-val" id="infoEmergencyContact"
+                style="color: var(--rose-danger); font-weight: 700;">-</span>
             </div>
             <div class="summary-row">
               <span class="summary-key">Lokasi / Tujuan</span>
@@ -2056,7 +2208,8 @@
             </div>
           </div>
 
-          <div id="approverNoteDisplay" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem;">
+          <div id="approverNoteDisplay"
+            style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem;">
             <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 0.4rem;">
               <span>💬 Catatan / Arahan Atasan:</span>
             </div>
@@ -2065,7 +2218,8 @@
 
           <!-- TIMELINE RIWAYAT AKTIVITAS -->
           <div>
-            <h4 style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+            <h4
+              style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
               <span>📜 Audit Trail & Jejak Aktivitas</span>
             </h4>
             <div class="timeline-box" id="timelineActivityList">
@@ -2076,13 +2230,18 @@
 
       </div>
 
-      <div class="modal-footer" id="detailModalFooter" style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <div class="modal-footer" id="detailModalFooter"
+        style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
         <button type="button" class="btn-quick-scan-out" id="btnDetailScanOut" style="display: none;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
           <span>Konfirmasi Scan Out (Keluar)</span>
         </button>
         <button type="button" class="btn-quick-scan-in" id="btnDetailScanIn" style="display: none;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
           <span>Konfirmasi Scan In (Masuk Kembali)</span>
         </button>
         <button type="button" class="btn-primary-action" id="btnCloseDetailBottom">Tutup</button>
@@ -2109,7 +2268,8 @@
           <label class="form-label" for="cancelReasonInput">
             Alasan Pembatalan <span style="color: var(--rose-danger);">*</span>
           </label>
-          <input type="text" id="cancelReasonInput" class="form-input" placeholder="Contoh: Jadwal ditunda / Keperluan selesai..." required>
+          <input type="text" id="cancelReasonInput" class="form-input"
+            placeholder="Contoh: Jadwal ditunda / Keperluan selesai..." required>
         </div>
       </div>
 
@@ -2135,8 +2295,11 @@
       </div>
 
       <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
-        <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
-          <strong>⚡ Bypass Persetujuan:</strong> Izin ini langsung berstatus <strong>Disetujui</strong> tanpa perlu menunggu approval Atasan (khusus situasi mendesak / Atasan di luar kantor). QR Code keluar langsung aktif dan otomatis terpantau di dashboard Atasan & Pos Jaga.
+        <div
+          style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
+          <strong>⚡ Bypass Persetujuan:</strong> Izin ini langsung berstatus <strong>Disetujui</strong> tanpa perlu
+          menunggu approval Atasan (khusus situasi mendesak / Atasan di luar kantor). QR Code keluar langsung aktif dan
+          otomatis terpantau di dashboard Atasan & Pos Jaga.
         </div>
 
         <!-- Pilih Atasan untuk Notifikasi Pelacakan -->
@@ -2185,7 +2348,8 @@
             Tipe Kepulangan <span style="color: var(--rose-danger);">*</span>
           </label>
           <div class="option-grid">
-            <label class="option-card selected" id="optEmergTypeKembali" style="padding: 0.6rem 0.8rem; cursor: pointer;">
+            <label class="option-card selected" id="optEmergTypeKembali"
+              style="padding: 0.6rem 0.8rem; cursor: pointer;">
               <input type="radio" name="emergType" value="Kembali ke Area" checked>
               <div>
                 <div class="option-name" style="font-size: 0.85rem;">Kembali ke Area</div>
@@ -2208,7 +2372,8 @@
           <label class="form-label" for="emergDest">
             Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
           </label>
-          <input type="text" id="emergDest" class="form-input" placeholder="Contoh: KPP Pratama / Rumah Sakit / Lokasi Dinas" required>
+          <input type="text" id="emergDest" class="form-input"
+            placeholder="Contoh: KPP Pratama / Rumah Sakit / Lokasi Dinas" required>
         </div>
 
         <!-- Alasan Keperluan Izin -->
@@ -2216,7 +2381,8 @@
           <label class="form-label" for="emergReason">
             Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
           </label>
-          <textarea id="emergReason" class="form-textarea" style="min-height: 65px;" placeholder="Jelaskan alasan dan keperluan dengan jelas..." required></textarea>
+          <textarea id="emergReason" class="form-textarea" style="min-height: 65px;"
+            placeholder="Jelaskan alasan dan keperluan dengan jelas..." required></textarea>
         </div>
 
         <!-- Rencana Keluar & Estimasi Kembali -->
@@ -2239,7 +2405,8 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-secondary" id="btnAbortEmergency">Batal</button>
-        <button type="button" class="btn-emergency" id="btnSubmitEmergency" style="display: flex; align-items: center; gap: 0.4rem;">
+        <button type="button" class="btn-emergency" id="btnSubmitEmergency"
+          style="display: flex; align-items: center; gap: 0.4rem;">
           <span>🚨</span>
           <span>Terbitkan & Buka QR Izin Darurat</span>
         </button>
@@ -2260,19 +2427,24 @@
 
       <div class="modal-body">
         <div style="text-align: center; padding: 0.5rem 0;">
-          <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--amber-light); border: 2px solid var(--amber-border); color: var(--amber-warning); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+          <div
+            style="width: 54px; height: 54px; border-radius: 50%; background: var(--amber-light); border: 2px solid var(--amber-border); color: var(--amber-warning); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
             ⚠️
           </div>
           <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem;">
             Anda Masih Memiliki Izin Aktif
           </h4>
           <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-            Tiket <strong id="blockedTicketId">TK-XXX</strong> saat ini masih berstatus <span id="blockedTicketStatusContainer"><span id="blockedTicketStatus" class="status-pill pending">Menunggu Persetujuan</span></span>.
+            Tiket <strong id="blockedTicketId">TK-XXX</strong> saat ini masih berstatus <span
+              id="blockedTicketStatusContainer"><span id="blockedTicketStatus" class="status-pill pending">Menunggu
+                Persetujuan</span></span>.
           </p>
-          <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-top: 1rem; text-align: left; font-size: 0.8rem;">
+          <div
+            style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-top: 1rem; text-align: left; font-size: 0.8rem;">
             <strong style="color: var(--text-primary);">Kebijakan Sistem:</strong>
             <p style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.4;">
-              Karyawan tidak diperkenankan mengajukan izin baru sebelum tiket aktif saat ini diselesaikan (telah kembali dan <em>Scan In</em> di Pos Jaga), dibatalkan mandiri, atau ditolak oleh Atasan.
+              Karyawan tidak diperkenankan mengajukan izin baru sebelum tiket aktif saat ini diselesaikan (telah kembali
+              dan <em>Scan In</em> di Pos Jaga), dibatalkan mandiri, atau ditolak oleh Atasan.
             </p>
           </div>
         </div>
@@ -2298,21 +2470,24 @@
 
       <div class="modal-body">
         <div style="text-align: center; padding: 0.5rem 0;">
-          <div style="width: 54px; height: 54px; border-radius: 50%; background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+          <div
+            style="width: 54px; height: 54px; border-radius: 50%; background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
             🚪
           </div>
           <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem;">
             Keluar dari Sesi Aplikasi?
           </h4>
           <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-            Apakah Anda yakin ingin mengakhiri sesi aktif saat ini? Seluruh otentikasi sesi Anda akan dihentikan dan Anda perlu masuk kembali melalui Portal KUJANG ID.
+            Apakah Anda yakin ingin mengakhiri sesi aktif saat ini? Seluruh otentikasi sesi Anda akan dihentikan dan
+            Anda perlu masuk kembali melalui Portal KUJANG ID.
           </p>
         </div>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn-secondary" id="btnCancelLogoutModal">Batal</button>
-        <button type="button" class="btn-primary-action" id="btnConfirmLogoutModal" style="background: #dc2626; border-color: #dc2626;">Ya, Logout Sekarang</button>
+        <button type="button" class="btn-primary-action" id="btnConfirmLogoutModal"
+          style="background: #dc2626; border-color: #dc2626;">Ya, Logout Sekarang</button>
       </div>
     </div>
   </div>
@@ -2321,11 +2496,13 @@
   <div class="portal-login-overlay" id="portalLoginOverlay">
     <div class="portal-login-card">
       <div class="portal-login-header">
-        <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.15); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
+        <div
+          style="width: 52px; height: 52px; background: rgba(255,255,255,0.15); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
           🔐
         </div>
         <h2 style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">Portal SAKTI KUJANG ID</h2>
-        <p style="font-size: 0.785rem; color: #93c5fd; margin-top: 0.25rem;">Sistem Perizinan Keluar Area • PT Pupuk Kujang</p>
+        <p style="font-size: 0.785rem; color: #93c5fd; margin-top: 0.25rem;">Sistem Perizinan Keluar Area • PT Pupuk
+          Kujang</p>
       </div>
 
       <div class="portal-login-body">
@@ -2346,7 +2523,8 @@
           <div class="portal-user-option" data-role="approver">
             <div style="font-size: 1.3rem;">👔</div>
             <div style="flex: 1;">
-              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Ir. Hendra Gunawan, M.T.</div>
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Ir. Hendra Gunawan, M.T.
+              </div>
               <div style="font-size: 0.725rem; color: var(--text-secondary);">Manager Approver • NIP: PK-2015-1002</div>
             </div>
             <span class="role-tag-pill role-approver">Atasan</span>
@@ -2356,7 +2534,8 @@
             <div style="font-size: 1.3rem;">👮</div>
             <div style="flex: 1;">
               <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Sertu Agus</div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Petugas Pos 1 Gerbang • NIP: SEC-2018-042</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Petugas Pos 1 Gerbang • NIP: SEC-2018-042
+              </div>
             </div>
             <span class="role-tag-pill role-security">Pos Jaga</span>
           </div>
@@ -2364,14 +2543,17 @@
           <div class="portal-user-option" data-role="admin">
             <div style="font-size: 1.3rem;">🛡️</div>
             <div style="flex: 1;">
-              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Bambang Sutrisno, S.T.</div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisi K3 & Keamanan • NIP: ADM-2016-019</div>
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Bambang Sutrisno, S.T.
+              </div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisi K3 & Keamanan • NIP:
+                ADM-2016-019</div>
             </div>
             <span class="role-tag-pill role-admin">Admin</span>
           </div>
         </div>
 
-        <button type="button" class="btn-primary-action" id="btnLoginSubmit" style="width: 100%; justify-content: center; padding: 0.75rem; margin-top: 0.5rem; font-size: 0.9rem;">
+        <button type="button" class="btn-primary-action" id="btnLoginSubmit"
+          style="width: 100%; justify-content: center; padding: 0.75rem; margin-top: 0.5rem; font-size: 0.9rem;">
           Masuk ke Aplikasi (KUJANG ID)
         </button>
       </div>
@@ -2395,24 +2577,36 @@
         </p>
 
         <!-- Option 1: Live Webcam -->
-        <button type="button" class="scan-method-card" id="btnPickerStartCamera" style="width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid #059669; background: #f0fdf4; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <button type="button" class="scan-method-card" id="btnPickerStartCamera"
+          style="width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid #059669; background: #f0fdf4; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+          <div
+            style="width: 48px; height: 48px; border-radius: 50%; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
           </div>
           <div style="flex: 1;">
             <div style="font-weight: 800; font-size: 0.95rem; color: #065f46;">Aktifkan Kamera Live</div>
-            <div style="font-size: 0.775rem; color: #047857; margin-top: 2px;">Pindai QR Code langsung menggunakan kamera laptop atau smartphone</div>
+            <div style="font-size: 0.775rem; color: #047857; margin-top: 2px;">Pindai QR Code langsung menggunakan
+              kamera laptop atau smartphone</div>
           </div>
         </button>
 
         <!-- Option 2: Upload Image -->
-        <button type="button" class="scan-method-card" id="btnPickerUploadQr" style="width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #004b87; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <button type="button" class="scan-method-card" id="btnPickerUploadQr"
+          style="width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+          <div
+            style="width: 48px; height: 48px; border-radius: 50%; background: #004b87; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
           </div>
           <div style="flex: 1;">
             <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">Unggah Gambar QR</div>
-            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">Pilih foto QR tiket dari galeri berkas tanpa menyalakan kamera</div>
+            <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">Pilih foto QR tiket dari
+              galeri berkas tanpa menyalakan kamera</div>
           </div>
         </button>
       </div>
@@ -2441,4 +2635,5 @@
   <script src="js/modules/modals.js?v=20261015_06"></script>
   <script src="js/app.js?v=20261015_06"></script>
 </body>
+
 </html>

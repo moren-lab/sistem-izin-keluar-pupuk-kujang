@@ -282,6 +282,10 @@ const MOCK_USERS = [
 
 function saveTickets(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  window.ticketsList = data;
+  if (typeof window.renderAllCharts === 'function') {
+    window.renderAllCharts();
+  }
 }
 
 let ticketsList = loadTickets();

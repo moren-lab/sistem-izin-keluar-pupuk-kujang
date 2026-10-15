@@ -261,6 +261,19 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
     }
   }
 
+  // Hapus / Sembunyikan fitur unduh dan cetak QR saat QR belum muncul / belum aktif (status menunggu, ditolak, dll)
+  const paneQrActionButtons = document.getElementById('paneQrActionButtons');
+  const btnDownloadQRPng = document.getElementById('btnDownloadQRPng');
+  const btnPrintPassPdf = document.getElementById('btnPrintPassPdf');
+  const hasActiveQr = (ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai');
+
+  if (paneQrActionButtons) {
+    paneQrActionButtons.style.display = hasActiveQr ? 'flex' : 'none';
+  } else {
+    if (btnDownloadQRPng) btnDownloadQRPng.style.display = hasActiveQr ? 'inline-flex' : 'none';
+    if (btnPrintPassPdf) btnPrintPassPdf.style.display = hasActiveQr ? 'inline-flex' : 'none';
+  }
+
   // --- TAB B: RINCIAN METADATA & TIMELINE AUDIT TRAIL ---
   const infoTicketId = document.getElementById('infoTicketId');
   if (infoTicketId) infoTicketId.textContent = ticket.id;

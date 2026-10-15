@@ -6,6 +6,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const searchEmpInput = document.getElementById('searchEmpInput');
+  const filterEmpPeriod = document.getElementById('filterEmpPeriod');
   const filterEmpCategory = document.getElementById('filterEmpCategory');
   const filterEmpType = document.getElementById('filterEmpType');
   const filterEmpStatus = document.getElementById('filterEmpStatus');
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnEmpExport = document.getElementById('btnEmpExport');
 
   if (searchEmpInput) searchEmpInput.addEventListener('input', () => window.renderKaryawanView());
+  if (filterEmpPeriod) filterEmpPeriod.addEventListener('change', () => window.renderKaryawanView());
   if (filterEmpCategory) filterEmpCategory.addEventListener('change', () => window.renderKaryawanView());
   if (filterEmpType) filterEmpType.addEventListener('change', () => window.renderKaryawanView());
   if (filterEmpStatus) filterEmpStatus.addEventListener('change', () => window.renderKaryawanView());

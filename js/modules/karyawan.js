@@ -48,6 +48,7 @@ function filterEmpTickets() {
   const filterEmpCategory = document.getElementById('filterEmpCategory');
   const filterEmpType = document.getElementById('filterEmpType');
   const filterEmpStatus = document.getElementById('filterEmpStatus');
+  const filterEmpPeriod = document.getElementById('filterEmpPeriod');
 
   const ACTORS = window.ACTORS || {};
   const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
@@ -56,6 +57,7 @@ function filterEmpTickets() {
   const category = filterEmpCategory ? filterEmpCategory.value : 'all';
   const type = filterEmpType ? filterEmpType.value : 'all';
   const status = filterEmpStatus ? filterEmpStatus.value : 'all';
+  const period = filterEmpPeriod ? filterEmpPeriod.value : 'all';
   const activeEmpStatusFilter = window.activeEmpStatusFilter || 'all';
   const currentKaryawanNav = window.currentKaryawanNav || 'dashboard';
 
@@ -78,6 +80,11 @@ function filterEmpTickets() {
     if (type !== 'all' && t.type !== type) return false;
     if (status !== 'all' && t.status !== status) return false;
     if (activeEmpStatusFilter !== 'all' && t.status !== activeEmpStatusFilter) return false;
+
+    // 2.5 Filter Periode Waktu (Hari Ini, Minggu Ini, Bulan Ini, Tahun Ini)
+    if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, period)) {
+      return false;
+    }
 
     // 3. Search query
     if (query) {
