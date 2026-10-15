@@ -342,8 +342,8 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
       btnDetailScanOut.onclick = function() {
         if (typeof window.executeScanOut === 'function') {
           window.executeScanOut(ticket.id);
-          openTicketDetail(ticket.id, 'detail');
         }
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
       };
     } else {
       btnDetailScanOut.style.display = 'none';
@@ -357,8 +357,8 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
       btnDetailScanIn.onclick = function() {
         if (typeof window.executeScanIn === 'function') {
           window.executeScanIn(ticket.id);
-          openTicketDetail(ticket.id, 'detail');
         }
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
       };
     } else {
       btnDetailScanIn.style.display = 'none';

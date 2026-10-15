@@ -569,6 +569,10 @@ function executeScanOut(ticketId) {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   if (inputScanTicketCode) inputScanTicketCode.value = '';
 
+  // Tutup modal rincian tiket agar kartu langsung hilang dan tidak bisa langsung di-scan in
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+
   renderSecurityView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
 }
@@ -612,6 +616,10 @@ function executeScanIn(ticketId) {
   const scanResultContainer = document.getElementById('scanResultContainer');
   if (inputScanTicketCode) inputScanTicketCode.value = '';
   if (scanResultContainer) scanResultContainer.style.display = 'none';
+
+  // Tutup modal rincian tiket jika terbuka
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
 
   if (typeof window.showToast === 'function') {
     window.showToast(
@@ -746,8 +754,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnModeCameraScan = document.getElementById('btnModeCameraScan');
   const btnModeManualScan = document.getElementById('btnModeManualScan');
   const scanModeSlider = document.getElementById('scanModeSlider');
-  const btnPrevScanMode = document.getElementById('btnPrevScanMode');
-  const btnNextScanMode = document.getElementById('btnNextScanMode');
 
   const cameraScannerBox = document.getElementById('cameraScannerBox');
   const manualScannerBox = document.getElementById('manualScannerBox');
@@ -780,8 +786,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnModeCameraScan) btnModeCameraScan.addEventListener('click', () => setScannerMode('camera'));
   if (btnModeManualScan) btnModeManualScan.addEventListener('click', () => setScannerMode('manual'));
-  if (btnPrevScanMode) btnPrevScanMode.addEventListener('click', () => setScannerMode('camera'));
-  if (btnNextScanMode) btnNextScanMode.addEventListener('click', () => setScannerMode('manual'));
 
   if (btnStartCamera) {
     btnStartCamera.addEventListener('click', (e) => {
