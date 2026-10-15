@@ -86,25 +86,26 @@ const DEFAULT_TICKETS = [
     type: 'Kembali ke Area',
     destination: 'Kantor Pelayanan Pajak (KPP) Pratama Cikampek',
     reason: 'Koordinasi verifikasi dan rekonsiliasi faktur pajak terpadu pengadaan alat berat.',
-    plannedExit: _initFmt(new Date(_initNow.getTime() + 60 * 60000)), // 1 jam ke depan (Siap Scan Out)
-    estimatedReturn: _initFmt(new Date(_initNow.getTime() + 180 * 60000)),
-    status: 'Disetujui',
+    plannedExit: _initFmt(new Date(_initNow.getTime() - 120 * 60000)),
+    estimatedReturn: _initFmt(new Date(_initNow.getTime() - 60 * 60000)),
+    status: 'Selesai',
     createdAt: `${_initTodayStr}, 08:30 WIB`,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui. Bawa berkas tanda terima resmi.',
-    scanOutTime: null,
-    scanInTime: null,
+    scanOutTime: `${_initTodayStr}, 08:35 WIB (Pos 1 Gerbang Utama)`,
+    scanInTime: `${_initTodayStr}, 09:30 WIB (Pos 1 Gerbang Utama)`,
     timeline: [
       { event: 'Pengajuan Dibuat', time: `${_initTodayStr}, 08:30 WIB`, by: 'Budi Pratama (Karyawan)', desc: 'Pengajuan izin keluar area berhasil dikirim.' },
       { event: 'Disetujui Atasan', time: `${_initTodayStr}, 08:45 WIB`, by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui. Bawa berkas tanda terima resmi.' },
-      { event: 'QR Code Diterbitkan', time: `${_initTodayStr}, 08:45 WIB`, by: 'Sistem Gerbang Digital', desc: 'QR Code aktif resmi siap dipindai di Pos Jaga Utama.' }
+      { event: 'Scan Out Pos Jaga', time: `${_initTodayStr}, 08:35 WIB`, by: 'Sertu Agus (Pos 1)', desc: 'Validasi keluar berhasil.' },
+      { event: 'Scan In (Kembali)', time: `${_initTodayStr}, 09:30 WIB`, by: 'Sertu Agus (Pos 1)', desc: 'Karyawan kembali ke area pabrik tepat waktu. Tiket selesai.' }
     ]
   },
   {
     id: `TK-${_initNow.getFullYear()}${_initPad(_initNow.getMonth() + 1)}${_initPad(_initNow.getDate())}-002`,
-    applicantName: 'Budi Pratama, S.T.',
-    applicantNip: 'PK-2024-8841',
-    department: 'Departemen Rekayasa & Pemeliharaan',
+    applicantName: 'Agus Setiawan, A.Md.',
+    applicantNip: 'PK-2022-4419',
+    department: 'Departemen Operasi Pabrik 1',
     category: 'Dinas Kantor',
     type: 'Kembali ke Area',
     destination: 'Workshop Kalibrasi Instrumen KIIC Karawang',
@@ -118,7 +119,7 @@ const DEFAULT_TICKETS = [
     scanOutTime: `${_initTodayStr}, 07:30 WIB (Pos 1 Gerbang Utama)`,
     scanInTime: null,
     timeline: [
-      { event: 'Pengajuan Dibuat', time: `${_initTodayStr}, 07:15 WIB`, by: 'Budi Pratama', desc: 'Pengajuan dikirim.' },
+      { event: 'Pengajuan Dibuat', time: `${_initTodayStr}, 07:15 WIB`, by: 'Agus Setiawan', desc: 'Pengajuan dikirim.' },
       { event: 'Disetujui Atasan', time: `${_initTodayStr}, 07:25 WIB`, by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
       { event: 'Scan Out Pos Jaga', time: `${_initTodayStr}, 07:30 WIB`, by: 'Sertu Agus (Pos 1)', desc: 'Validasi keluar berhasil. Karyawan tercatat meninggalkan kawasan.' },
       { event: 'Terdeteksi Terlambat', time: `${_initTodayStr}, 08:00 WIB`, by: 'Sistem Otomatis (Scheduler)', desc: 'Karyawan terdeteksi belum kembali dan belum Scan In melewati batas estimasi jam kembali.' }
@@ -180,7 +181,20 @@ function loadTickets() {
     return DEFAULT_TICKETS;
   }
   try {
-    return JSON.parse(saved);
+    let list = JSON.parse(saved);
+    let changed = false;
+    list = list.map(t => {
+      // Pulihkan tiket darurat jika sebelumnya terlanjur ditandai Kedaluwarsa oleh scheduler lama
+      if ((t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && t.status === 'Kedaluwarsa') {
+        t.status = 'Disetujui';
+        changed = true;
+      }
+      return t;
+    });
+    if (changed) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+    return list;
   } catch (e) {
     return DEFAULT_TICKETS;
   }

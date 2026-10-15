@@ -74,17 +74,47 @@ function setupRadioToggles() {
     });
   }
 
-  // Emergency radio toggles
-  const optEmergKembali = document.getElementById('optEmergKembali');
-  const optEmergPulang = document.getElementById('optEmergPulang');
-  if (optEmergKembali && optEmergPulang) {
-    optEmergKembali.addEventListener('click', () => {
-      optEmergKembali.classList.add('selected');
-      optEmergPulang.classList.remove('selected');
+  // Emergency radio toggles (Kategori: Dinas vs Pribadi)
+  const optEmergCatDinas = document.getElementById('optEmergCatDinas');
+  const optEmergCatPribadi = document.getElementById('optEmergCatPribadi');
+  if (optEmergCatDinas && optEmergCatPribadi) {
+    optEmergCatDinas.addEventListener('click', () => {
+      optEmergCatDinas.classList.add('selected');
+      optEmergCatPribadi.classList.remove('selected');
+      const input = optEmergCatDinas.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
     });
-    optEmergPulang.addEventListener('click', () => {
-      optEmergPulang.classList.add('selected');
-      optEmergKembali.classList.remove('selected');
+
+    optEmergCatPribadi.addEventListener('click', () => {
+      optEmergCatPribadi.classList.add('selected');
+      optEmergCatDinas.classList.remove('selected');
+      const input = optEmergCatPribadi.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
+    });
+  }
+
+  // Emergency radio toggles (Tipe: Kembali vs Pulang Mendahului)
+  const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
+  const optEmergTypePulang = document.getElementById('optEmergTypePulang');
+  const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
+  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
+  if (optEmergTypeKembali && optEmergTypePulang) {
+    optEmergTypeKembali.addEventListener('click', () => {
+      optEmergTypeKembali.classList.add('selected');
+      optEmergTypePulang.classList.remove('selected');
+      const input = optEmergTypeKembali.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
+      if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
+      if (emergEstimatedReturn) emergEstimatedReturn.required = true;
+    });
+
+    optEmergTypePulang.addEventListener('click', () => {
+      optEmergTypePulang.classList.add('selected');
+      optEmergTypeKembali.classList.remove('selected');
+      const input = optEmergTypePulang.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
+      if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'none';
+      if (emergEstimatedReturn) emergEstimatedReturn.required = false;
     });
   }
 }
@@ -331,10 +361,43 @@ function openCancelModal(ticketId) {
 function handleOpenEmergency() {
   const emergDest = document.getElementById('emergDest');
   const emergReason = document.getElementById('emergReason');
+  const emergPlannedExit = document.getElementById('emergPlannedExit');
+  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
+  const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
+  const optEmergCatDinas = document.getElementById('optEmergCatDinas');
+  const optEmergCatPribadi = document.getElementById('optEmergCatPribadi');
+  const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
+  const optEmergTypePulang = document.getElementById('optEmergTypePulang');
   const modalEmergency = document.getElementById('modalEmergency');
 
   if (emergDest) emergDest.value = '';
   if (emergReason) emergReason.value = '';
+
+  // Reset toggles to default
+  if (optEmergCatDinas && optEmergCatPribadi) {
+    optEmergCatDinas.classList.add('selected');
+    optEmergCatPribadi.classList.remove('selected');
+    const input = optEmergCatDinas.querySelector('input[type="radio"]');
+    if (input) input.checked = true;
+  }
+  if (optEmergTypeKembali && optEmergTypePulang) {
+    optEmergTypeKembali.classList.add('selected');
+    optEmergTypePulang.classList.remove('selected');
+    const input = optEmergTypeKembali.querySelector('input[type="radio"]');
+    if (input) input.checked = true;
+    if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
+  }
+
+  // Initialize dates
+  const now = new Date();
+  const futureExit = new Date(now.getTime() + 10 * 60000); // 10 menit ke depan
+  const futureReturn = new Date(now.getTime() + 120 * 60000); // 2 jam ke depan
+  const pad = (n) => String(n).padStart(2, '0');
+  const fmt = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+
+  if (emergPlannedExit) emergPlannedExit.value = fmt(futureExit);
+  if (emergEstimatedReturn) emergEstimatedReturn.value = fmt(futureReturn);
+
   if (modalEmergency) modalEmergency.classList.add('open');
 }
 
@@ -595,19 +658,49 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSubmitEmergency) {
     btnSubmitEmergency.addEventListener('click', () => {
       const emergApprover = document.getElementById('emergApprover');
-      const optEmergKembali = document.getElementById('optEmergKembali');
+      const optEmergCatDinas = document.getElementById('optEmergCatDinas');
+      const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
       const emergDest = document.getElementById('emergDest');
       const emergReason = document.getElementById('emergReason');
+      const emergPlannedExit = document.getElementById('emergPlannedExit');
+      const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
 
       const approverVal = emergApprover ? emergApprover.value : 'Ir. Hendra Gunawan, M.T.';
-      const isKembali = optEmergKembali ? optEmergKembali.classList.contains('selected') : true;
+      const isDinas = optEmergCatDinas ? optEmergCatDinas.classList.contains('selected') : true;
+      const categoryVal = isDinas ? 'Dinas Kantor' : 'Urusan Pribadi';
+
+      const isKembali = optEmergTypeKembali ? optEmergTypeKembali.classList.contains('selected') : true;
       const typeVal = isKembali ? 'Kembali ke Area' : 'Pulang Mendahului';
+
       const dest = emergDest ? emergDest.value.trim() : '';
       const reason = emergReason ? emergReason.value.trim() : '';
+      const plannedExitVal = emergPlannedExit ? emergPlannedExit.value : '';
+      const estimatedReturnVal = isKembali ? (emergEstimatedReturn ? emergEstimatedReturn.value : null) : null;
 
       if (!dest || !reason) {
         if (typeof window.showToast === 'function') {
           window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'danger');
+        }
+        return;
+      }
+
+      if (!plannedExitVal) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap isi rencana waktu keluar!', 'danger');
+        }
+        return;
+      }
+
+      if (isKembali && !estimatedReturnVal) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap isi perkiraan waktu kembali!', 'danger');
+        }
+        return;
+      }
+
+      if (isKembali && estimatedReturnVal && new Date(estimatedReturnVal) <= new Date(plannedExitVal)) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
         }
         return;
       }
@@ -620,25 +713,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const ticketId = `TK-EMG-${dateCode}-${randomSuffix}`;
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
-      const futureReturn = new Date(now.getTime() + 180 * 60000);
-      const estimatedReturnVal = isKembali ? `${futureReturn.getFullYear()}-${pad(futureReturn.getMonth() + 1)}-${pad(futureReturn.getDate())}T${pad(futureReturn.getHours())}:${pad(futureReturn.getMinutes())}` : null;
-
       const emergencyTicket = {
         id: ticketId,
         applicantName: ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.',
         applicantNip: ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841',
         department: ACTORS.karyawan ? ACTORS.karyawan.department : 'Departemen Rekayasa & Pemeliharaan',
-        category: 'Izin Darurat',
+        category: categoryVal,
         type: typeVal,
-        destination: `[DARURAT] ${dest}`,
-        reason: `[DARURAT/BYPASS] ${reason}`,
-        plannedExit: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`,
+        destination: dest,
+        reason: reason,
+        plannedExit: plannedExitVal,
         estimatedReturn: estimatedReturnVal,
         status: 'Disetujui',
         isEmergency: true,
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
         approverName: approverVal,
-        approverNote: `⚠️ Jalur Darurat/Bypass. Izin diterbitkan mandiri dan terlacak di dashboard Atasan (${approverVal}).`,
+        approverNote: `⚡ [Izin Darurat / Bypass]: Izin langsung Disetujui mandiri tanpa approval Atasan (${approverVal}). Siap Scan Out di Pos Jaga.`,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
@@ -646,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event: 'Izin Darurat / Bypass Diterbitkan',
             time: nowFormatted,
             by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
-            desc: `Izin darurat diaktifkan menuju ${dest} (Bypass approval Atasan).`
+            desc: `Izin darurat keluar area berhasil diterbitkan (Bypass approval Atasan).`
           },
           {
             event: 'Pelacakan Aktif di Dashboard Atasan',
@@ -655,10 +745,10 @@ document.addEventListener('DOMContentLoaded', () => {
             desc: `Notifikasi pelacakan terkirim ke Atasan: ${approverVal}.`
           },
           {
-            event: 'QR Code Siap Dipindai di Pos Jaga',
+            event: 'Tiket Siap Scan Out di Pos Jaga',
             time: nowFormatted,
             by: 'Sistem Gerbang Digital',
-            desc: 'QR aktif untuk proses Scan Out di Pos Jaga Satpam.'
+            desc: 'QR Code resmi siap dipindai keluar oleh Petugas Pengamanan di Pos Jaga.'
           }
         ]
       };
@@ -669,7 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       modalEmergency.classList.remove('open');
       if (typeof window.showToast === 'function') {
-        window.showToast(`🚨 Tiket Darurat #${ticketId} berhasil diterbitkan! QR aktif & terlacak di Atasan ${approverVal}.`, 'success');
+        window.showToast(`🚨 Izin Darurat #${ticketId} berhasil diterbitkan & langsung Disetujui! QR Code siap di Pos Jaga.`, 'success');
       }
       if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
       if (typeof window.renderSecurityView === 'function') window.renderSecurityView();

@@ -872,6 +872,25 @@
               </div>
             </div>
 
+            <!-- Antrean Izin Siap Keluar di Pos Jaga (Scan Out) -->
+            <div class="dashboard-widget-card" style="margin-bottom: 1.5rem; border: 1.5px solid var(--corp-teal);">
+              <div class="dashboard-widget-header" style="background: rgba(5, 150, 105, 0.05); padding: 0.85rem 1.25rem;">
+                <div class="dashboard-widget-title" style="color: var(--corp-teal);">
+                  <span>🎫</span>
+                  <span>Antrean Izin Siap Keluar di Pos Jaga (Scan Out)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span class="badge" id="badgeReadyScanOutCount" style="background: var(--corp-teal); color: #fff; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: 700; font-size: 0.75rem;">0 Izin</span>
+                  <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;" onclick="setSecurityNav('pelacakan'); const tab = document.getElementById('filterSecurityQueueTab'); if(tab){tab.value='ready'; renderSecurityView();}">
+                    Lihat Semua →
+                  </button>
+                </div>
+              </div>
+              <div id="securityDashboardReadyList" class="feed-list">
+                <!-- Rendered via JS: Tiket dengan status Disetujui / Darurat siap Scan Out -->
+              </div>
+            </div>
+
             <!-- 2-Column Grid Dashboard Security -->
             <div class="dashboard-grid-layout">
               <!-- Left Column: Headcount Karyawan di Luar Pabrik -->
@@ -1072,6 +1091,7 @@
                   <option value="outside">Karyawan Sedang di Luar (Perlu Scan In)</option>
                   <option value="overdue">⚠️ Karyawan Terlambat Kembali</option>
                   <option value="ready">Izin Siap Keluar (Disetujui Atasan)</option>
+                  <option value="emergency">🚨 Khusus Izin Darurat / Bypass</option>
                   <option value="all">Semua Riwayat Pemindaian Pos Jaga</option>
                 </select>
               </div>
@@ -1965,21 +1985,21 @@
 
   <!-- ================= MODAL 7: IZIN DARURAT ================= -->
   <div class="modal-overlay" id="modalEmergency">
-    <div class="modal-card" style="max-width: 500px;">
+    <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header">
         <div>
           <h3 style="color: var(--rose-danger); display: flex; align-items: center; gap: 0.4rem;">
             <span>🚨</span>
-            <span>Izin Keluar Darurat / Bypass Atasan</span>
+            <span>Formulir Izin Keluar Darurat / Bypass</span>
           </h3>
-          <p>Kondisi Mendesak atau Atasan Sedang Berhalangan / di Luar Kantor</p>
+          <p>Langsung Disetujui (Directly Approved) • Siap Scan di Pos Jaga</p>
         </div>
         <button class="btn-close-modal" id="btnCloseEmergencyModal">✕</button>
       </div>
 
-      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+      <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
         <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
-          <strong>Informasi Prosedur:</strong> Jalur ini digunakan saat situasi mendesak atau ketika Atasan sedang di luar/perjalanan sehingga tidak dapat dihubungi segera. QR Code keluar aktif langsung untuk verifikasi di Pos Jaga, dan sistem otomatis mengirimkan pelacakan ke Atasan yang dipilih.
+          <strong>⚡ Bypass Persetujuan:</strong> Izin ini langsung berstatus <strong>Disetujui</strong> tanpa perlu menunggu approval Atasan (khusus situasi mendesak / Atasan di luar kantor). QR Code keluar langsung aktif dan otomatis terpantau di dashboard Atasan & Pos Jaga.
         </div>
 
         <!-- Pilih Atasan untuk Notifikasi Pelacakan -->
@@ -1998,13 +2018,37 @@
           </div>
         </div>
 
+        <!-- Kategori Keperluan -->
+        <div class="form-group">
+          <label class="form-label">
+            Kategori Keperluan <span style="color: var(--rose-danger);">*</span>
+          </label>
+          <div class="option-grid">
+            <label class="option-card selected" id="optEmergCatDinas" style="padding: 0.6rem 0.8rem; cursor: pointer;">
+              <input type="radio" name="emergCategory" value="Dinas Kantor" checked>
+              <div>
+                <div class="option-name" style="font-size: 0.85rem;">Dinas Kantor</div>
+                <div class="option-desc" style="font-size: 0.725rem;">Keperluan kedinasan mendesak</div>
+              </div>
+            </label>
+
+            <label class="option-card" id="optEmergCatPribadi" style="padding: 0.6rem 0.8rem; cursor: pointer;">
+              <input type="radio" name="emergCategory" value="Urusan Pribadi">
+              <div>
+                <div class="option-name" style="font-size: 0.85rem;">Urusan Pribadi</div>
+                <div class="option-desc" style="font-size: 0.725rem;">Keperluan mendesak perorangan</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- Tipe Kepulangan -->
         <div class="form-group">
           <label class="form-label">
             Tipe Kepulangan <span style="color: var(--rose-danger);">*</span>
           </label>
           <div class="option-grid">
-            <label class="option-card selected" id="optEmergKembali" style="padding: 0.6rem 0.8rem; cursor: pointer;">
+            <label class="option-card selected" id="optEmergTypeKembali" style="padding: 0.6rem 0.8rem; cursor: pointer;">
               <input type="radio" name="emergType" value="Kembali ke Area" checked>
               <div>
                 <div class="option-name" style="font-size: 0.85rem;">Kembali ke Area</div>
@@ -2012,7 +2056,7 @@
               </div>
             </label>
 
-            <label class="option-card" id="optEmergPulang" style="padding: 0.6rem 0.8rem; cursor: pointer;">
+            <label class="option-card" id="optEmergTypePulang" style="padding: 0.6rem 0.8rem; cursor: pointer;">
               <input type="radio" name="emergType" value="Pulang Mendahului">
               <div>
                 <div class="option-name" style="font-size: 0.85rem;">Pulang Mendahului</div>
@@ -2027,7 +2071,7 @@
           <label class="form-label" for="emergDest">
             Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
           </label>
-          <input type="text" id="emergDest" class="form-input" placeholder="Contoh: Rumah Sakit / Dinas Mendesak / Urusan Penting" required>
+          <input type="text" id="emergDest" class="form-input" placeholder="Contoh: KPP Pratama / Rumah Sakit / Lokasi Dinas" required>
         </div>
 
         <!-- Alasan Keperluan Izin -->
@@ -2035,15 +2079,32 @@
           <label class="form-label" for="emergReason">
             Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
           </label>
-          <textarea id="emergReason" class="form-textarea" style="min-height: 70px;" placeholder="Jelaskan keperluan/alasan mendesak..." required></textarea>
+          <textarea id="emergReason" class="form-textarea" style="min-height: 65px;" placeholder="Jelaskan alasan dan keperluan dengan jelas..." required></textarea>
+        </div>
+
+        <!-- Rencana Keluar & Estimasi Kembali -->
+        <div class="option-grid">
+          <div class="form-group">
+            <label class="form-label" for="emergPlannedExit">
+              Rencana Waktu Keluar <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <input type="datetime-local" id="emergPlannedExit" class="form-input" required>
+          </div>
+
+          <div class="form-group" id="emergGroupEstimatedReturn">
+            <label class="form-label" for="emergEstimatedReturn">
+              Perkiraan Waktu Kembali <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <input type="datetime-local" id="emergEstimatedReturn" class="form-input" required>
+          </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="btnAbortEmergency">Tutup</button>
+        <button type="button" class="btn-secondary" id="btnAbortEmergency">Batal</button>
         <button type="button" class="btn-emergency" id="btnSubmitEmergency" style="display: flex; align-items: center; gap: 0.4rem;">
           <span>🚨</span>
-          <span>Terbitkan Izin Darurat</span>
+          <span>Terbitkan & Buka QR Izin Darurat</span>
         </button>
       </div>
     </div>
@@ -2093,15 +2154,15 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261014_02"></script>
-  <script src="js/modules/ui.js?v=20261014_02"></script>
-  <script src="js/modules/scheduler.js?v=20261014_02"></script>
-  <script src="js/modules/navigation.js?v=20261014_02"></script>
-  <script src="js/modules/karyawan.js?v=20261014_02"></script>
-  <script src="js/modules/approver.js?v=20261014_02"></script>
-  <script src="js/modules/security.js?v=20261014_02"></script>
-  <script src="js/modules/admin.js?v=20261014_02"></script>
-  <script src="js/modules/modals.js?v=20261014_02"></script>
-  <script src="js/app.js?v=20261014_02"></script>
+  <script src="js/data/mockData.js?v=20261015_05"></script>
+  <script src="js/modules/ui.js?v=20261015_05"></script>
+  <script src="js/modules/scheduler.js?v=20261015_05"></script>
+  <script src="js/modules/navigation.js?v=20261015_05"></script>
+  <script src="js/modules/karyawan.js?v=20261015_05"></script>
+  <script src="js/modules/approver.js?v=20261015_05"></script>
+  <script src="js/modules/security.js?v=20261015_05"></script>
+  <script src="js/modules/admin.js?v=20261015_05"></script>
+  <script src="js/modules/modals.js?v=20261015_05"></script>
+  <script src="js/app.js?v=20261015_05"></script>
 </body>
 </html>
