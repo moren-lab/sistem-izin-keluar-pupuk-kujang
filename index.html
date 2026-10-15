@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sistem Perizinan Keluar Area | PT Pupuk Kujang</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="css/style.css?v=20261014_02">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- Mobile Backdrop for Sidebar -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ================= 1. SIDEBAR ================= -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="#" class="brand-wrapper">
+          <div class="brand-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="m9 12 2 2 4-4"></path>
+            </svg>
+          </div>
+          <div class="brand-text-group">
+            <span class="brand-app-name">Izin Keluar Area</span>
+            <span class="brand-corp-name">PT Pupuk Kujang</span>
+          </div>
+        </a>
+        <button class="btn-sidebar-close-mobile" id="btnCloseSidebarMobile" title="Tutup Menu">✕</button>
+      </div>
+
+      <!-- Nav Karyawan -->
+      <nav class="sidebar-navigation" id="navKaryawanGroup">
+        <a class="nav-item active" id="menuKaryawanDashboard">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Dashboard</span>
+          </div>
+        </a>
+
+        <div class="nav-section-label">Perizinan</div>
+
+        <a class="nav-item" id="menuKaryawanPengajuanSaya">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Pengajuan Saya</span>
+          </div>
+          <span class="nav-badge-count" id="sidebarEmpActiveBadge" style="display: none; background: var(--corp-teal);">0</span>
+        </a>
+
+        <a class="nav-item" id="menuKaryawanRiwayat">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Riwayat Pengajuan</span>
+          </div>
+        </a>
+      </nav>
+
+      <!-- Nav Approver (Atasan) -->
+      <nav class="sidebar-navigation" id="navApproverGroup" style="display: none;">
+        <a class="nav-item active" id="menuApproverDashboard">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Dashboard</span>
+          </div>
+        </a>
+
+        <div class="nav-section-label">Persetujuan dan pelacakan</div>
+
+        <a class="nav-item" id="menuApproverAntrian">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Antrian Persetujuan</span>
+          </div>
+          <span class="nav-badge-count" id="sidebarPendingBadge">0</span>
+        </a>
+
+        <a class="nav-item" id="menuApproverPelacakan">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+            <span>Pelacakan Izin Karyawan</span>
+          </div>
+        </a>
+      </nav>
+
+      <!-- Nav Security (Satpam / Pos Jaga) -->
+      <nav class="sidebar-navigation" id="navSecurityGroup" style="display: none;">
+        <a class="nav-item active security" id="menuSecurityDashboard">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Dashboard</span>
+          </div>
+        </a>
+
+        <div class="nav-section-label">Pos jaga</div>
+
+        <a class="nav-item security" id="menuSecurityScanner">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Pemindai QR & input manual</span>
+          </div>
+        </a>
+
+        <a class="nav-item security" id="menuSecurityPelacakan">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Pelacakan Karyawan di luar</span>
+          </div>
+          <span class="nav-badge-count" id="sidebarOutsideBadge" style="background: #0891b2;">0</span>
+        </a>
+
+        <a class="nav-item security" id="menuSecurityRiwayat">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Riwayat</span>
+          </div>
+        </a>
+      </nav>
+
+      <!-- Nav Admin (Pengamanan & K3 / Administrator Pusat) -->
+      <nav class="sidebar-navigation" id="navAdminGroup" style="display: none;">
+        <a class="nav-item active admin" id="menuAdminDashboard">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Monitoring Headcount</span>
+          </div>
+          <span class="nav-badge-count" id="sidebarAdminOutsideBadge" style="background: #dc2626; display: none;">0</span>
+        </a>
+
+        <div class="nav-section-label">Audit & Investigasi</div>
+
+        <a class="nav-item admin" id="menuAdminAudit">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <circle cx="12" cy="11" r="3"></circle>
+            </svg>
+            <span>Audit Trail & Log</span>
+          </div>
+          <span class="nav-badge-count" id="sidebarAdminAuditBadge" style="background: #64748b;">0</span>
+        </a>
+
+        <div class="nav-section-label">Laporan & Pengguna</div>
+
+        <a class="nav-item admin" id="menuAdminReport">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Rekapitulasi Data</span>
+          </div>
+        </a>
+
+        <a class="nav-item admin" id="menuAdminUsers">
+          <div class="nav-item-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Hak Akses KUJANG ID</span>
+          </div>
+        </a>
+      </nav>
+
+      <!-- Current Actor Footer -->
+      <div class="sidebar-footer-card">
+        <div class="current-role-box">
+          <span class="role-tag-pill role-karyawan" id="roleBadge">Peran: Karyawan</span>
+          <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary);" id="sidebarUserName">Budi Pratama, S.T.</div>
+          <div style="font-size: 0.7rem; color: var(--text-secondary);" id="sidebarUserSub">NIP: PK-2024-8841</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= 2. MAIN VIEW ================= -->
+    <div class="main-wrapper">
+      
+      <!-- TOP NAVBAR & 3-ACTOR ROLE SWITCHER -->
+      <header class="top-navbar">
+        <div class="navbar-left">
+          <button class="btn-sidebar-toggle" id="btnToggleSidebar" title="Toggle Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <div class="live-clock-pill">
+            <span class="pulsing-dot"></span>
+            <span id="liveDigitalClock">Memuat waktu...</span>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Multi-Actor Role Switcher (Karyawan | Atasan | Satpam) -->
+          <div class="role-switcher-container" title="Beralih peran untuk menguji alur terintegrasi">
+            <button class="role-switch-btn active" id="btnSwitchKaryawan">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Karyawan</span>
+            </button>
+            <button class="role-switch-btn" id="btnSwitchApprover">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <polyline points="16 11 18 13 22 9"></polyline>
+              </svg>
+              <span>Atasan</span>
+            </button>
+            <button class="role-switch-btn" id="btnSwitchSecurity">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Pos Jaga (Satpam)</span>
+            </button>
+            <button class="role-switch-btn" id="btnSwitchAdmin">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              <span>Admin (K3)</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <main class="page-container">
+
+        <!-- ================= A. KARYAWAN VIEW ================= -->
+        <div id="viewKaryawan">
+          
+          <!-- A1. HALAMAN DASHBOARD KARYAWAN -->
+          <div id="karyawanDashboardPage">
+            <!-- Hero Welcome Banner -->
+            <div class="dashboard-hero-banner">
+              <div class="dashboard-hero-content">
+                <div class="dashboard-avatar-circle">👷</div>
+                <div class="dashboard-hero-text">
+                  <h2>Selamat Datang, Budi Pratama, S.T. 👋</h2>
+                  <p>Staf Rekayasa Mesin • Departemen Rekayasa & Pemeliharaan • Atasan: Ir. Hendra Gunawan, M.T.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metrics Row Karyawan -->
+            <div class="stats-row" id="karyawanStatsRow" style="margin-top: 1.5rem;">
+              <div class="stat-box active" data-filter="all">
+                <div class="stat-meta">
+                  <span class="stat-title">Total Pengajuan</span>
+                  <span class="stat-number" id="statEmpTotal">0</span>
+                </div>
+                <div class="stat-icon blue">📋</div>
+              </div>
+
+              <div class="stat-box" data-filter="Menunggu Persetujuan">
+                <div class="stat-meta">
+                  <span class="stat-title">Menunggu Review</span>
+                  <span class="stat-number" id="statEmpPending" style="color: var(--amber-warning);">0</span>
+                </div>
+                <div class="stat-icon amber">⏳</div>
+              </div>
+
+              <div class="stat-box" data-filter="Disetujui">
+                <div class="stat-meta">
+                  <span class="stat-title">QR Siap Pakai</span>
+                  <span class="stat-number" id="statEmpApproved" style="color: var(--corp-teal);">0</span>
+                </div>
+                <div class="stat-icon teal">✅</div>
+              </div>
+
+              <div class="stat-box" data-filter="Sedang di Luar">
+                <div class="stat-meta">
+                  <span class="stat-title">Sedang di Luar</span>
+                  <span class="stat-number" id="statEmpOutside" style="color: #0891b2;">0</span>
+                </div>
+                <div class="stat-icon cyan">🚗</div>
+              </div>
+
+              <div class="stat-box" data-filter="Selesai">
+                <div class="stat-meta">
+                  <span class="stat-title">Selesai / Kembali</span>
+                  <span class="stat-number" id="statEmpCompleted">0</span>
+                </div>
+                <div class="stat-icon slate">🏁</div>
+              </div>
+            </div>
+
+            <!-- Widget Status Izin Aktif Saat Ini -->
+            <div id="karyawanDashboardActiveWidget" style="margin-top: 1.5rem;">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- 2-Column Grid Dashboard Karyawan -->
+            <div class="dashboard-grid-layout">
+              <!-- Left Column: Aktivitas Pengajuan Terkini -->
+              <div class="dashboard-widget-card">
+                <div class="dashboard-widget-header">
+                  <div class="dashboard-widget-title">
+                    <span>🕒</span>
+                    <span>Ringkasan Pengajuan Terkini</span>
+                  </div>
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setKaryawanNav('riwayat')">
+                    Lihat Semua Riwayat →
+                  </button>
+                </div>
+                <div id="karyawanDashboardRecentList" class="feed-list">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Right Column: Informasi & Panduan SOP Gerbang -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="dashboard-widget-card">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>📌</span>
+                      <span>Ketentuan & SOP Gerbang</span>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 0.65rem;">
+                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                      <span style="color: var(--corp-teal); font-weight: 800;">1.</span>
+                      <span><strong>Maksimal 1 Izin Aktif:</strong> Sistem hanya mengizinkan 1 pengajuan aktif berjalan sebelum pengajuan berikutnya.</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                      <span style="color: var(--corp-teal); font-weight: 800;">2.</span>
+                      <span><strong>Toleransi 10 Menit:</strong> Tiket yang disetujui akan otomatis kedaluwarsa jika tidak dipindai keluar melewati batas toleransi (+10 menit dari jadwal).</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                      <span style="color: var(--corp-teal); font-weight: 800;">3.</span>
+                      <span><strong>Wajib Scan In Kembali:</strong> Pastikan memindai QR di Pos 1 saat tiba kembali agar status tidak terhitung Terlambat.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dashboard-widget-card" style="background: #f8fafc;">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>🏢</span>
+                      <span>Kontak & Pos Pelayanan</span>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
+                    <div><strong>Atasan Langsung:</strong> Ir. Hendra Gunawan, M.T. (Ext: 2411)</div>
+                    <div style="margin-top: 4px;"><strong>Pos Gerbang Aktif:</strong> Pos 1 Gerbang Utama (Utara)</div>
+                    <div style="margin-top: 4px; color: var(--rose-danger); font-weight: 700;">Hotline Darurat K3/Security: Ext 110</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- A2. HALAMAN PENGAJUAN SAYA (AKTIF) -->
+          <div id="karyawanPengajuanPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1 id="karyawanHeadingTitle">Pengajuan Saya</h1>
+                <p id="karyawanHeadingSub">Daftar permohonan izin keluar kawasan yang sedang aktif dan berjalan</p>
+              </div>
+              <div class="page-actions-group">
+                <button class="btn-primary-action" id="btnOpenNewRequestModal">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Buat Pengajuan Izin</span>
+                </button>
+                <button class="btn-emergency" id="btnOpenEmergencyModal" title="Pengajuan Izin Darurat">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                  </svg>
+                  <span>Izin Darurat</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Permit Alert Banner -->
+            <div id="activePermitBanner" style="display: none; margin-top: 1.25rem; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #b45309; flex-shrink: 0; font-size: 1.1rem;">
+                  ⚠️
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.875rem; color: #92400e;">
+                    Anda Memiliki Izin Aktif: <span id="bannerActiveTicketId" style="font-family: var(--font-mono); text-decoration: underline;">TK-XXX</span> (<span id="bannerActiveStatus">Menunggu Persetujuan</span>)
+                  </div>
+                  <div style="font-size: 0.775rem; color: #78350f;">
+                    Sesuai kebijakan perusahaan, pengajuan izin baru ditangguhkan sampai proses perizinan ini selesai atau dibatalkan.
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="bannerButtonsGroup">
+                <button class="btn-card-detail" id="btnBannerViewActive" style="font-size: 0.775rem; padding: 0.45rem 0.85rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Lihat Rincian</span>
+                </button>
+                <button class="btn-card-qr" id="btnBannerViewQR" style="font-size: 0.775rem; padding: 0.45rem 0.85rem;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  <span>Tiket & QR Code</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content Section Pengajuan Aktif -->
+            <div class="content-section" style="margin-top: 1.5rem;">
+              <div class="section-header-row">
+                <h2 class="section-heading" id="karyawanSectionHeading">Pengajuan Izin Aktif</h2>
+              </div>
+              <div id="containerEmpActiveRequests">
+                <!-- Rendered via JS -->
+              </div>
+              <div class="empty-box" id="emptyEmpActiveBox" style="display: none;">
+                <div class="empty-icon-circle">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Tidak Ada Pengajuan Aktif</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px; margin-bottom: 1.25rem;">
+                  Saat ini Anda tidak memiliki izin keluar yang sedang berjalan. Buat pengajuan baru jika hendak meninggalkan kawasan pabrik.
+                </p>
+                <button class="btn-primary-action" onclick="handleOpenNewRequest()">+ Buat Pengajuan Baru</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- A3. HALAMAN RIWAYAT PENGAJUAN (ARSIP) -->
+          <div id="karyawanRiwayatPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1>Riwayat Pengajuan Izin</h1>
+                <p>Arsip seluruh riwayat perizinan keluar kawasan yang telah selesai, kedaluwarsa, ditolak, atau dibatalkan</p>
+              </div>
+            </div>
+
+            <div class="content-section" style="margin-top: 1.5rem;">
+              <!-- Toolbar Karyawan Riwayat -->
+              <div class="smart-toolbar">
+                <div class="toolbar-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="searchEmpInput" class="search-input" placeholder="Cari nomor tiket, alasan, atau tujuan...">
+                </div>
+
+                <div class="filters-group">
+                  <select id="filterEmpCategory" class="filter-select">
+                    <option value="all">Semua Kategori</option>
+                    <option value="Dinas Kantor">Dinas Kantor</option>
+                    <option value="Urusan Pribadi">Urusan Pribadi</option>
+                  </select>
+
+                  <select id="filterEmpType" class="filter-select">
+                    <option value="all">Semua Tipe Izin</option>
+                    <option value="Kembali ke Area">Kembali ke Area</option>
+                    <option value="Pulang Mendahului">Pulang Mendahului</option>
+                  </select>
+
+                  <select id="filterEmpStatus" class="filter-select">
+                    <option value="all">Semua Status</option>
+                    <option value="Selesai">Selesai</option>
+                    <option value="Kedaluwarsa">Kedaluwarsa</option>
+                    <option value="Ditolak">Ditolak</option>
+                    <option value="Dibatalkan">Dibatalkan</option>
+                    <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Sedang di Luar">Sedang di Luar</option>
+                    <option value="Terlambat">Terlambat</option>
+                  </select>
+
+                  <div class="view-mode-group">
+                    <button class="btn-view-mode active" id="btnEmpViewCard" title="Tampilan Kartu">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                      </svg>
+                    </button>
+                    <button class="btn-view-mode" id="btnEmpViewTable" title="Tampilan Tabel">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <button class="btn-secondary" id="btnEmpExport" style="font-size: 0.775rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Ekspor CSV</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Content Area Karyawan Riwayat -->
+              <div id="containerEmpRequests">
+                <!-- Rendered via JS -->
+              </div>
+
+              <!-- Empty State Karyawan Riwayat -->
+              <div class="empty-box" id="emptyEmpBox" style="display: none;">
+                <div class="empty-icon-circle">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                    <line x1="9" y1="14" x2="15" y2="14"></line>
+                  </svg>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Belum Ada Riwayat Perizinan</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px; margin-bottom: 1.25rem;">
+                  Arsip riwayat izin yang telah selesai, kedaluwarsa, atau ditolak akan tersimpan otomatis di sini.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= B. APPROVER (ATASAN) VIEW ================= -->
+        <div id="viewApprover" style="display: none;">
+          
+          <!-- B1. HALAMAN DASHBOARD APPROVER -->
+          <div id="approverDashboardPage">
+            <!-- Approver Hero Welcome Banner -->
+            <div class="dashboard-hero-banner approver-theme">
+              <div class="dashboard-hero-content">
+                <div class="dashboard-avatar-circle">👔</div>
+                <div class="dashboard-hero-text">
+                  <h2>Pusat Persetujuan & Monitoring Bawahan</h2>
+                  <p>Ir. Hendra Gunawan, M.T. • Manager Rekayasa & Pemeliharaan • Prinsip: <strong>No Approval, No Exit</strong></p>
+                </div>
+              </div>
+              <div class="dashboard-hero-actions">
+                <button class="btn-primary-action" style="background: #0f766e;" onclick="setApproverNav('antrian')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <span>Review Antrian Izin</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Metrics Row Approver -->
+            <div class="stats-row" id="approverStatsRow" style="margin-top: 1.5rem;">
+              <div class="stat-box active" id="statCardPendingApprovals">
+                <div class="stat-meta">
+                  <span class="stat-title">Perlu Keputusan Segera</span>
+                  <span class="stat-number" id="statAppPending" style="color: var(--amber-warning);">0</span>
+                </div>
+                <div class="stat-icon amber">⚡</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-meta">
+                  <span class="stat-title">Telah Disetujui</span>
+                  <span class="stat-number" id="statAppApproved" style="color: var(--corp-teal);">0</span>
+                </div>
+                <div class="stat-icon teal">✅</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-meta">
+                  <span class="stat-title">Telah Ditolak</span>
+                  <span class="stat-number" id="statAppRejected" style="color: var(--rose-danger);">0</span>
+                </div>
+                <div class="stat-icon" style="background: var(--rose-light); color: var(--rose-danger);">✕</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-meta">
+                  <span class="stat-title">Total Permohonan Masuk</span>
+                  <span class="stat-number" id="statAppTotal">0</span>
+                </div>
+                <div class="stat-icon blue">📊</div>
+              </div>
+            </div>
+
+            <!-- Urgent Attention Alert Banner -->
+            <div id="approverUrgentBanner" style="margin-top: 1.25rem;">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- 2-Column Grid Dashboard Approver -->
+            <div class="dashboard-grid-layout">
+              <!-- Left Column: Antrean Persetujuan Cepat (Inline Approval) -->
+              <div class="dashboard-widget-card">
+                <div class="dashboard-widget-header">
+                  <div class="dashboard-widget-title">
+                    <span>⚡</span>
+                    <span>Antrean Persetujuan Cepat</span>
+                  </div>
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setApproverNav('antrian')">
+                    Buka Semua Antrian →
+                  </button>
+                </div>
+                <div id="approverDashboardPendingList" class="feed-list">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Right Column: Monitor Bawahan di Luar Area & SOP -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="dashboard-widget-card">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>🚶‍♂️</span>
+                      <span>Monitor Bawahan di Luar Area</span>
+                    </div>
+                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;" onclick="setApproverNav('pelacakan')">
+                      Pelacakan Penuh →
+                    </button>
+                  </div>
+                  <div id="approverDashboardOutsideList" class="feed-list">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+
+                <div class="dashboard-widget-card" style="background: #f8fafc;">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>🛡️</span>
+                      <span>Panduan Persetujuan (SOP)</span>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
+                    <p>• <strong>Dinas Kantor:</strong> Verifikasi urgensi pekerjaan dan kelengkapan dokumen tugas.</p>
+                    <p style="margin-top: 6px;">• <strong>Urusan Pribadi:</strong> Diberikan secara proporsional dengan estimasi waktu kembali yang wajar.</p>
+                    <p style="margin-top: 6px;">• <strong>Penolakan:</strong> Wajib menyertakan catatan alasan penolakan yang jelas bagi pemohon.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- B2. HALAMAN ANTRIAN PERSETUJUAN -->
+          <div id="approverAntrianPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1 id="approverHeadingTitle">Antrian Persetujuan Izin Bawahan</h1>
+                <p id="approverHeadingSub">Tinjau dan putuskan permohonan izin bawahan langsung Anda • <strong>Prinsip: No Approval, No Exit</strong></p>
+              </div>
+              <div>
+                <span class="role-tag-pill role-approver" style="font-size: 0.8rem; padding: 4px 10px;">
+                  Approver: Ir. Hendra Gunawan, M.T. (Manager)
+                </span>
+              </div>
+            </div>
+
+            <div class="content-section" style="margin-top: 1.5rem;">
+              <div class="section-header-row">
+                <h2 class="section-heading">
+                  <span id="approverSectionHeading">Daftar Antrean Menunggu Keputusan</span>
+                  <span class="nav-badge-count" id="headingPendingBadge" style="font-size: 0.75rem;">0</span>
+                </h2>
+              </div>
+
+              <!-- Content Container Approver Antrian -->
+              <div id="containerApproverPendingQueue">
+                <!-- Rendered via JS -->
+              </div>
+
+              <!-- Empty Approver Box -->
+              <div class="empty-box" id="emptyApproverPendingBox" style="display: none;">
+                <div class="empty-icon-circle">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Semua Pengajuan Telah Ditinjau</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
+                  Tidak ada permohonan izin baru yang menunggu persetujuan Anda saat ini.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- B3. HALAMAN PELACAKAN IZIN KARYAWAN -->
+          <div id="approverPelacakanPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1>Pelacakan Izin Karyawan</h1>
+                <p>Pemantauan status bawahan secara menyeluruh (Sedang di Luar, Terlambat kembali, Disetujui, dan Selesai)</p>
+              </div>
+              <div class="filters-group">
+                <select id="filterAppViewMode" class="filter-select">
+                  <option value="all">Semua Riwayat Keputusan & Status</option>
+                  <option value="pending">Khusus Antrean Menunggu Review</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="content-section" style="margin-top: 1.5rem;">
+              <div id="containerApproverRequests">
+                <!-- Rendered via JS -->
+              </div>
+
+              <div class="empty-box" id="emptyApproverBox" style="display: none;">
+                <div class="empty-icon-circle">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Belum Ada Data Permohonan</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
+                  Belum ada permohonan izin yang sesuai kriteria filter ini.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= C. SECURITY / SATPAM (POS JAGA) VIEW ================= -->
+        <div id="viewSecurity" style="display: none;">
+          
+          <!-- C1. HALAMAN DASHBOARD SECURITY -->
+          <div id="securityDashboardPage">
+            <!-- Security Hero Welcome Banner -->
+            <div class="dashboard-hero-banner security-theme">
+              <div class="dashboard-hero-content">
+                <div class="dashboard-avatar-circle">🛡️</div>
+                <div class="dashboard-hero-text">
+                  <h2>Terminal Pos Jaga Pengamanan (Pos Utama)</h2>
+                  <p>Petugas Jaga: Sertu Agus • NIP: SEC-2018-042 • Departemen Pengamanan & K3 • PT Pupuk Kujang</p>
+                </div>
+              </div>
+              <div class="dashboard-hero-actions">
+                <button class="btn-primary-action" style="background: #0284c7;" onclick="setSecurityNav('scanner')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  <span>Buka Kamera Scanner QR</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Metrics Row Pos Jaga -->
+            <div class="stats-row" id="securityStatsRow" style="margin-top: 1.5rem;">
+              <div class="stat-box active" id="statCardOutsideHeadcount">
+                <div class="stat-meta">
+                  <span class="stat-title">Sedang di Luar Pabrik (Headcount)</span>
+                  <span class="stat-number" id="statSecOutside" style="color: #0891b2;">0</span>
+                </div>
+                <div class="stat-icon cyan">🚶‍♂️</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-meta">
+                  <span class="stat-title">Tiket Siap Keluar (Disetujui)</span>
+                  <span class="stat-number" id="statSecReadyExit" style="color: var(--corp-teal);">0</span>
+                </div>
+                <div class="stat-icon teal">🎫</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-meta">
+                  <span class="stat-title">Scan Out Hari Ini</span>
+                  <span class="stat-number" id="statSecScanOutCount">0</span>
+                </div>
+                <div class="stat-icon blue">🚪</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-meta">
+                  <span class="stat-title">Scan In (Kembali) Hari Ini</span>
+                  <span class="stat-number" id="statSecScanInCount">0</span>
+                </div>
+                <div class="stat-icon slate">🏢</div>
+              </div>
+            </div>
+
+            <!-- Security Alert Banner (Overdue Warning) -->
+            <div id="securityOverdueBanner" style="margin-top: 1.25rem;">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Shortcut Action Cards -->
+            <div class="shortcut-card-grid" style="margin-top: 1.5rem;">
+              <div class="shortcut-action-card" onclick="setSecurityNav('scanner')">
+                <div class="shortcut-icon-wrap" style="background: #e0f2fe; color: #0284c7;">📟</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pemindai QR & Manual</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Pindai tiket dengan kamera live atau masukkan kode tiket</div>
+                </div>
+              </div>
+
+              <div class="shortcut-action-card" onclick="setSecurityNav('pelacakan')">
+                <div class="shortcut-icon-wrap" style="background: #ecfeff; color: #0891b2;">🚶‍♂️</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pelacakan di Luar</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Monitoring headcount muster roll & 1-klik Scan In</div>
+                </div>
+              </div>
+
+              <div class="shortcut-action-card" onclick="setSecurityNav('riwayat')">
+                <div class="shortcut-icon-wrap" style="background: #f1f5f9; color: #475569;">📋</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Log Riwayat Gerbang</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Arsip seluruh pemindaian Scan Out dan Scan In</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2-Column Grid Dashboard Security -->
+            <div class="dashboard-grid-layout">
+              <!-- Left Column: Headcount Karyawan di Luar Pabrik -->
+              <div class="dashboard-widget-card">
+                <div class="dashboard-widget-header">
+                  <div class="dashboard-widget-title">
+                    <span>🚶‍♂️</span>
+                    <span>Headcount: Karyawan Sedang di Luar Pabrik</span>
+                  </div>
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setSecurityNav('pelacakan')">
+                    Buka Pelacakan Lengkap →
+                  </button>
+                </div>
+                <div id="securityDashboardOutsideList" class="feed-list">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Right Column: Log Aktivitas Pemindaian & Status Pos -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="dashboard-widget-card">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>🕒</span>
+                      <span>Aktivitas Transaksi Gerbang Terkini</span>
+                    </div>
+                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;" onclick="setSecurityNav('riwayat')">
+                      Log Lengkap →
+                    </button>
+                  </div>
+                  <div id="securityDashboardRecentFeed" class="feed-list">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+
+                <div class="dashboard-widget-card" style="background: #f8fafc;">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>🛡️</span>
+                      <span>Status Pos Gerbang Pabrik</span>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
+                      <span><strong>Pos 1 Gerbang Utama (Utara)</strong></span>
+                      <span class="status-pill approved" style="font-size: 0.7rem;">Aktif Operasional</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
+                      <span><strong>Pos 2 Gerbang Barat</strong></span>
+                      <span class="status-pill pending" style="font-size: 0.7rem;">Siaga / Patroli</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0;">
+                      <span><strong>Pos 3 Gerbang Timur</strong></span>
+                      <span class="status-pill pending" style="font-size: 0.7rem;">Siaga / Logistik</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- C2. HALAMAN PEMINDAI QR & INPUT MANUAL -->
+          <div id="securityScannerPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1 id="securityHeadingTitle">Terminal Pemindai QR & Verifikasi Manual</h1>
+                <p id="securityHeadingSub">Pindai tiket dengan kamera langsung (HP/Webcam), unggah gambar QR, atau masukkan nomor tiket secara manual</p>
+              </div>
+              <div>
+                <span class="role-tag-pill role-security" style="font-size: 0.8rem; padding: 4px 10px;">
+                  Petugas Jaga: Sertu Agus • Pos 1
+                </span>
+              </div>
+            </div>
+
+            <!-- SECURITY SCANNER PANEL -->
+            <div class="security-scanner-panel" id="securityScannerPanel" style="margin-top: 1.25rem;">
+              <div class="scanner-top-row">
+                <div class="scanner-title-badge">
+                  <div class="scanner-icon">📟</div>
+                  <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.2px;">Terminal Verifikasi Tiket & Kamera Scan QR</h3>
+                    <p style="font-size: 0.775rem; color: #bae6fd;">Pindai tiket dengan kamera langsung (HP/Webcam), unggah foto QR, atau masukkan nomor tiket secara manual</p>
+                  </div>
+                </div>
+
+                <div>
+                  <select class="post-select-box" id="selectGateLocation">
+                    <option value="Pos 1 Gerbang Utama">Pos 1 Gerbang Utama (Utara)</option>
+                    <option value="Pos 2 Gerbang Barat">Pos 2 Gerbang Barat</option>
+                    <option value="Pos 3 Gerbang Timur">Pos 3 Gerbang Timur</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- SCANNER MODE TABS -->
+              <div class="scanner-mode-tabs">
+                <button type="button" class="btn-scan-mode active" id="btnModeCameraScan">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  <span>Kamera Scan QR (Live)</span>
+                </button>
+                <button type="button" class="btn-scan-mode" id="btnModeManualScan">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  <span>Input Manual / Alat Barcode</span>
+                </button>
+              </div>
+
+              <!-- 1. LIVE CAMERA SCANNER VIEW -->
+              <div id="cameraScannerBox" class="camera-scanner-container">
+                <div class="camera-control-toolbar">
+                  <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn-cam-action primary" id="btnStartCamera">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                      <span>Aktifkan Kamera</span>
+                    </button>
+                    <button type="button" class="btn-cam-action danger" id="btnStopCamera" style="display: none;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12"></rect></svg>
+                      <span>Matikan Kamera</span>
+                    </button>
+                    <select id="cameraDeviceSelect" class="cam-select-device" style="display: none;">
+                      <option value="">Pilih Kamera...</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <button type="button" class="btn-cam-action secondary" id="btnTriggerFileScan">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                      <span>Unggah Gambar QR</span>
+                    </button>
+                    <input type="file" id="inputScanQrFile" accept="image/*" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- VIEWPORT KAMERA -->
+                <div class="camera-viewport-card" id="cameraViewportCard">
+                  <div id="cameraReaderView" style="width: 100%; max-width: 420px; margin: 0 auto; min-height: 250px; background: #000; border-radius: 8px; overflow: hidden; position: relative;">
+                    <div id="cameraIdlePlaceholder" class="camera-idle-wrap">
+                      <div class="camera-idle-lens">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                          <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                      </div>
+                      <div style="font-weight: 700; font-size: 0.9rem; color: #f0f9ff; margin-top: 0.6rem;">Kamera Belum Aktif</div>
+                      <p style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-top: 0.25rem;">Tekan tombol "Aktifkan Kamera" di atas untuk mulai memindai QR Code izin keluar karyawan</p>
+                    </div>
+                  </div>
+
+                  <div id="cameraScanOverlay" class="camera-laser-overlay" style="display: none;">
+                    <div class="laser-reticle">
+                      <div class="laser-corner tl"></div>
+                      <div class="laser-corner tr"></div>
+                      <div class="laser-corner bl"></div>
+                      <div class="laser-corner br"></div>
+                      <div class="laser-beam"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="cameraScanStatus" class="camera-status-pill">
+                  💡 Arahkan kamera ke QR Code Tiket Izin Karyawan. Hasil akan otomatis diproses.
+                </div>
+              </div>
+
+              <!-- 2. MANUAL INPUT BOX -->
+              <div id="manualScannerBox" class="scanner-input-container" style="display: none;">
+                <div class="scan-input-box">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <input type="text" id="inputScanTicketCode" placeholder="Masukkan Nomor Tiket (contoh: TK-20261013-001) atau NIP...">
+                </div>
+                <button class="btn-execute-scan" id="btnExecuteScanSearch">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  <span>Verifikasi Tiket</span>
+                </button>
+              </div>
+
+              <!-- Result Box after scanning / entering code -->
+              <div id="scanResultContainer" style="display: none; background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 1.25rem;">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- C3. HALAMAN PELACAKAN KARYAWAN DI LUAR -->
+          <div id="securityPelacakanPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1>Pelacakan Karyawan di Luar (Headcount)</h1>
+                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Scan In)</p>
+              </div>
+              <div class="filters-group">
+                <select id="filterSecurityQueueTab" class="filter-select">
+                  <option value="outside">Karyawan Sedang di Luar (Perlu Scan In)</option>
+                  <option value="overdue">⚠️ Karyawan Terlambat Kembali</option>
+                  <option value="ready">Izin Siap Keluar (Disetujui Atasan)</option>
+                  <option value="all">Semua Riwayat Pemindaian Pos Jaga</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="content-section" style="margin-top: 1.5rem;">
+              <div class="section-header-row">
+                <h2 class="section-heading">
+                  <span id="securitySectionHeading">Daftar Headcount Pos Jaga</span>
+                </h2>
+              </div>
+
+              <div id="containerSecurityQueue">
+                <!-- Rendered via JS -->
+              </div>
+
+              <div class="empty-box" id="emptySecurityBox" style="display: none;">
+                <div class="empty-icon-circle">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Tidak Ada Tiket di Antrean Ini</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
+                  Tidak ada data tiket yang memerlukan pemindaian keluar atau masuk pada kategori ini.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- C4. HALAMAN RIWAYAT PEMINDAIAN POS JAGA -->
+          <div id="securityRiwayatPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <h1>Riwayat Pemindaian Pos Jaga</h1>
+                <p>Log catatan seluruh transaksi perizinan gerbang (Scan Out meninggalkan pabrik & Scan In kembali)</p>
+              </div>
+            </div>
+
+            <div class="content-section" style="margin-top: 1.5rem;">
+              <div id="containerSecurityLog">
+                <!-- Rendered via JS -->
+              </div>
+              <div class="empty-box" id="emptySecurityLogBox" style="display: none;">
+                <div class="empty-icon-circle">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Belum Ada Riwayat Gerbang</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 400px;">
+                  Belum ada catatan pemindaian keluar atau masuk yang tercatat pada sesi hari ini.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= D. ADMINISTRATOR PENGAMANAN & K3 VIEW ================= -->
+        <div id="viewAdmin" style="display: none;">
+
+          <!-- D1. HALAMAN DASHBOARD & HEADCOUNT MONITORING (FR-ADM-01 & UC-19) -->
+          <div id="adminDashboardPage">
+            <!-- Calm Corporate Header -->
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                  <span class="role-badge-neutral">Pengawasan & K3</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">•</span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Bambang Sutrisno, S.T. (Supervisi Pusat)</span>
+                </div>
+                <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">
+                  Monitoring Headcount & Perizinan Pabrik
+                </h1>
+                <p style="font-size: 0.825rem; color: var(--text-secondary);">
+                  Pantauan terpusat mobilitas personel di luar kawasan industri dan penelusuran audit trail perizinan.
+                </p>
+              </div>
+            </div>
+
+            <!-- Subtle Auditor Strip (BRULE-09) -->
+            <div class="subtle-auditor-strip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span><strong>Ketentuan Peran (BRULE-09):</strong> Admin berfungsi sebagai pengawas dan auditor data. Persetujuan izin adalah wewenang langsung Atasan, dan jam gerbang dicatat otomatis dari pemindai pos jaga.</span>
+            </div>
+
+            <!-- Calm Headcount Card -->
+            <div class="headcount-card-calm" id="adminEmergencyBanner" style="margin-top: 1rem;">
+              <div>
+                <div class="headcount-title-row">
+                  <span style="font-size: 1.1rem;">📍</span>
+                  <span>Muster Roll Tracker (K3 & Darurat)</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;" id="adminHeadcountSub">
+                  Memuat data personel terkini...
+                </div>
+              </div>
+              <div class="headcount-count-box">
+                <span id="adminHeadcountBig">0</span>
+                <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">Personel di Luar</span>
+              </div>
+            </div>
+
+            <!-- Minimal KPI Cards Grid -->
+            <div class="admin-stats-grid">
+              <div class="admin-kpi-box">
+                <div class="admin-kpi-label">Total Izin Hari Ini</div>
+                <div class="admin-kpi-value" id="statAdminTotal">0</div>
+                <div class="admin-kpi-sub">Seluruh pengajuan hari ini</div>
+              </div>
+
+              <div class="admin-kpi-box">
+                <div class="admin-kpi-label">Menunggu Review</div>
+                <div class="admin-kpi-value" id="statAdminPending">0</div>
+                <div class="admin-kpi-sub">Dalam antrean Atasan</div>
+              </div>
+
+              <div class="admin-kpi-box">
+                <div class="admin-kpi-label">Terlambat Kembali</div>
+                <div class="admin-kpi-value" id="statAdminOverdue">0</div>
+                <div class="admin-kpi-sub">Melewati jam estimasi</div>
+              </div>
+
+              <div class="admin-kpi-box">
+                <div class="admin-kpi-label">Hangus / Kedaluwarsa</div>
+                <div class="admin-kpi-value" id="statAdminExpired">0</div>
+                <div class="admin-kpi-sub">Tidak digunakan keluar</div>
+              </div>
+            </div>
+
+            <!-- Split Section: Muster Roll & Recent Logs -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-top: 1.25rem;" class="admin-grid-split">
+              <!-- Left: Muster Roll -->
+              <div class="content-section" style="padding: 1.25rem;">
+                <div class="section-header-compact" style="margin-bottom: 0.75rem;">
+                  <div>
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">
+                      Personel Sedang di Luar Pabrik
+                    </h3>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 1px;">
+                      Karyawan yang telah Scan Out gerbang dan belum memindai masuk kembali.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="table-responsive" id="adminTableMusterRollWrap">
+                  <table class="report-data-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 130px;">No Tiket</th>
+                        <th>Karyawan</th>
+                        <th>Departemen</th>
+                        <th>Tujuan</th>
+                        <th>Scan Out</th>
+                        <th>Batas Kembali</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminMusterRollTableBody">
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="empty-box" id="adminEmptyMusterRollBox" style="display: none; padding: 2rem 1rem;">
+                  <div class="empty-icon-circle" style="background: #f8fafc; color: #059669; width: 44px; height: 44px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                  <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem;">Kawasan Pabrik Terpantau Kondusif</h3>
+                  <p style="font-size: 0.775rem; color: var(--text-secondary); max-width: 380px;">
+                    Seluruh personel berada di dalam kawasan pabrik. Tidak ada perizinan aktif yang sedang berada di luar.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Right: Clean Activity Log Feed -->
+              <div class="content-section" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                  <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary);">Aktivitas Terkini</h4>
+                  <button class="btn-action-sm outline" onclick="window.setAdminNav('audit')" style="font-size: 0.7rem; padding: 2px 8px;">Lihat Log</button>
+                </div>
+                <div id="adminRecentActivityFeed">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- D2. HALAMAN AUDIT TRAIL LENGKAP (FR-ADM-04, UC-21, BRULE-13) -->
+          <div id="adminAuditPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                  <span class="role-badge-neutral">Audit Log</span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">BRULE-13 (Immutable Trail)</span>
+                </div>
+                <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">
+                  Audit Trail & Log Investigasi Aktivitas
+                </h1>
+                <p style="font-size: 0.825rem; color: var(--text-secondary);">
+                  Rekam jejak setiap tahapan perizinan dari pengajuan, persetujuan atasan, hingga pemindaian gerbang fisik.
+                </p>
+              </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div class="admin-filter-toolbar" style="margin-top: 1rem;">
+              <div class="admin-filter-group">
+                <input type="text" id="adminAuditSearchInput" class="admin-search-input" placeholder="Cari tiket, nama, satpam, atau atasan...">
+                <select id="adminAuditEventFilter" class="admin-select-filter">
+                  <option value="all">Semua Peristiwa</option>
+                  <option value="Pengajuan">Pengajuan Baru</option>
+                  <option value="Disetujui">Persetujuan Atasan</option>
+                  <option value="Ditolak">Penolakan Atasan</option>
+                  <option value="Scan Out">Scan Out (Keluar)</option>
+                  <option value="Scan In">Scan In (Kembali)</option>
+                  <option value="Terlambat">Keterlambatan</option>
+                  <option value="Kedaluwarsa">Hangus / Expired</option>
+                </select>
+              </div>
+              <div>
+                <span id="adminAuditFilterCount" style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
+                  0 data
+                </span>
+              </div>
+            </div>
+
+            <!-- Audit Table -->
+            <div class="content-section">
+              <div class="table-responsive">
+                <table class="report-data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 140px; white-space: nowrap;">Waktu & Tanggal</th>
+                      <th style="width: 130px; white-space: nowrap;">No. Tiket</th>
+                      <th>Karyawan</th>
+                      <th>Peristiwa</th>
+                      <th>Eksekutor</th>
+                      <th>Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminAuditTableBody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- D3. HALAMAN LAPORAN & REKAPITULASI DATA (FR-ADM-03, UC-22, UC-23) -->
+          <div id="adminReportPage" style="display: none;">
+            <!-- Official Corporate Header for PDF Print Only -->
+            <div class="printable-report-header" style="display: none;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <h2 style="font-size: 1.25rem; font-weight: 800; color: #000000; margin: 0;">PT PUPUK KUJANG CIKAMPEK</h2>
+                  <div style="font-size: 0.8rem; color: #333333; margin-top: 2px;">Departemen Pengamanan & K3 • Biro Umum & Tata Usaha</div>
+                  <div style="font-size: 0.95rem; font-weight: 700; margin-top: 6px; text-decoration: underline;">
+                    REKAPITULASI PERIZINAN KELUAR AREA PABRIK (GATE PASS AUDIT REPORT)
+                  </div>
+                </div>
+                <div style="text-align: right; font-size: 0.75rem; color: #555555;">
+                  <div>Ref: PK-K3-SEC-2026</div>
+                  <div id="adminPrintTimestamp">Dicetak pada: -</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-title-row no-print">
+              <div class="page-title-wrap">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                  <span class="role-badge-neutral">Laporan & Rekap</span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Arsip Personalia / HRD</span>
+                </div>
+                <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">
+                  Laporan & Rekapitulasi Data Perizinan
+                </h1>
+                <p style="font-size: 0.825rem; color: var(--text-secondary);">
+                  Rekapitulasi data seluruh perizinan keluar area untuk pencocokan absensi HRD dan arsip gerbang.
+                </p>
+              </div>
+              <div class="page-actions-group">
+                <button class="btn-export-excel" id="btnAdminExportExcel" title="Unduh spreadsheet Excel">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Export Excel (.csv)</span>
+                </button>
+                <button class="btn-export-pdf" id="btnAdminPrintPdf" title="Cetak atau simpan sebagai PDF">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  <span>Cetak / PDF Resmi</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Report Filter Toolbar -->
+            <div class="admin-filter-toolbar no-print" style="margin-top: 1rem;">
+              <div class="admin-filter-group">
+                <select id="adminReportDateFilter" class="admin-select-filter">
+                  <option value="today">Periode: Hari Ini</option>
+                  <option value="week">Periode: 7 Hari Terakhir</option>
+                  <option value="month">Periode: Bulan Ini</option>
+                  <option value="all">Periode: Semua Riwayat</option>
+                </select>
+                <select id="adminReportStatusFilter" class="admin-select-filter">
+                  <option value="all">Semua Status</option>
+                  <option value="Selesai">Status: Selesai</option>
+                  <option value="Sedang di Luar">Status: Sedang di Luar</option>
+                  <option value="Terlambat">Status: Terlambat</option>
+                  <option value="Kedaluwarsa">Status: Kedaluwarsa</option>
+                  <option value="Disetujui">Status: Disetujui</option>
+                  <option value="Ditolak">Status: Ditolak</option>
+                </select>
+                <select id="adminReportCategoryFilter" class="admin-select-filter">
+                  <option value="all">Semua Keperluan</option>
+                  <option value="Dinas Kantor">Dinas Kantor</option>
+                  <option value="Keperluan Pribadi">Keperluan Pribadi</option>
+                </select>
+              </div>
+              <div>
+                <span id="adminReportRowCount" style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
+                  0 data
+                </span>
+              </div>
+            </div>
+
+            <!-- Report Preview Table -->
+            <div class="content-section" style="padding: 0; overflow: hidden;">
+              <div class="table-responsive" style="border: none;">
+                <table class="report-data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 140px; white-space: nowrap;">No. Tiket</th>
+                      <th style="min-width: 170px;">Karyawan</th>
+                      <th style="min-width: 150px;">Departemen</th>
+                      <th style="width: 120px;">Keperluan</th>
+                      <th style="min-width: 140px;">Scan Out (Keluar)</th>
+                      <th style="min-width: 140px;">Scan In (Kembali)</th>
+                      <th style="width: 130px;">Batas Kembali</th>
+                      <th style="width: 120px; text-align: center;">Status Akhir</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminReportTableBody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- D4. HALAMAN MANAJEMEN HAK AKSES PENGGUNA / KUJANG ID (FR-ADM-06, UC-24) -->
+          <div id="adminUsersPage" style="display: none;">
+            <div class="page-title-row">
+              <div class="page-title-wrap">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                  <span class="role-badge-neutral">KUJANG ID</span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Pemetaan Akses Single Sign-On</span>
+                </div>
+                <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">
+                  Direktori Akun & Hak Akses Pengguna
+                </h1>
+                <p style="font-size: 0.825rem; color: var(--text-secondary);">
+                  Pemetaan hak akses sistem perizinan dari akun induk KUJANG ID (Karyawan, Atasan, Satpam Pos Jaga, dan Admin).
+                </p>
+              </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div class="admin-filter-toolbar" style="margin-top: 1rem;">
+              <div class="admin-filter-group">
+                <input type="text" id="adminUserSearchInput" class="admin-search-input" placeholder="Cari nama, NIP, KUJANG ID, atau divisi...">
+                <select id="adminUserRoleFilter" class="admin-select-filter">
+                  <option value="all">Semua Peran</option>
+                  <option value="karyawan">Karyawan Pemohon</option>
+                  <option value="approver">Atasan (Approver)</option>
+                  <option value="security">Petugas Pengamanan</option>
+                  <option value="admin">Administrator K3</option>
+                </select>
+              </div>
+              <div>
+                <span id="adminUsersCount" style="font-size: 0.775rem; font-weight: 600; color: var(--text-secondary);">
+                  0 Akun
+                </span>
+              </div>
+            </div>
+
+            <!-- User Access Directory Table -->
+            <div class="content-section" style="padding: 0; overflow: hidden;">
+              <div class="table-responsive" style="border: none;">
+                <table class="report-data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 120px; white-space: nowrap;">KUJANG ID</th>
+                      <th style="min-width: 170px;">Nama & NIP</th>
+                      <th>Email Perusahaan</th>
+                      <th>Departemen</th>
+                      <th>Peran Sistem</th>
+                      <th>Status</th>
+                      <th style="text-align: right;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminUsersTableBody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ================= MODAL 1: FORM PENGAJUAN BARU ================= -->
+  <div class="modal-overlay" id="modalNewRequest">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Formulir Izin Keluar Area</h3>
+          <p>Lengkapi informasi izin keluar untuk diajukan kepada Atasan langsung</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseNewModal" title="Tutup">✕</button>
+      </div>
+
+      <form id="formNewRequest">
+        <div class="modal-body">
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #166534; display: flex; align-items: center; gap: 0.6rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg>
+            <div>
+              Atasan Peninjau: <strong>Ir. Hendra Gunawan, M.T.</strong> (Manager Rekayasa & Pemeliharaan).
+            </div>
+          </div>
+
+          <!-- Kategori Keperluan -->
+          <div class="form-group">
+            <label class="form-label">
+              Kategori Keperluan <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <div class="option-grid">
+              <label class="option-card selected" id="optCatDinas">
+                <input type="radio" name="reqCategory" value="Dinas Kantor" checked>
+                <div>
+                  <div class="option-name">Dinas Kantor</div>
+                  <div class="option-desc">Keperluan kedinasan pabrik/tugas</div>
+                </div>
+              </label>
+
+              <label class="option-card" id="optCatPribadi">
+                <input type="radio" name="reqCategory" value="Urusan Pribadi">
+                <div>
+                  <div class="option-name">Urusan Pribadi</div>
+                  <div class="option-desc">Keperluan perorangan mendesak</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tipe Izin -->
+          <div class="form-group">
+            <label class="form-label">
+              Tipe Kepulangan <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <div class="option-grid">
+              <label class="option-card selected" id="optTypeKembali">
+                <input type="radio" name="reqType" value="Kembali ke Area" checked>
+                <div>
+                  <div class="option-name">Kembali ke Area</div>
+                  <div class="option-desc">Wajib Scan In saat tiba kembali</div>
+                </div>
+              </label>
+
+              <label class="option-card" id="optTypePulang">
+                <input type="radio" name="reqType" value="Pulang Mendahului">
+                <div>
+                  <div class="option-name">Pulang Mendahului</div>
+                  <div class="option-desc">Tidak kembali ke area hari ini</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Lokasi / Tujuan -->
+          <div class="form-group">
+            <label class="form-label" for="inputDestination">
+              Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <input type="text" id="inputDestination" class="form-input" placeholder="Contoh: KPP Pratama Cikampek / Rumah Sakit Pupuk Kujang" required>
+          </div>
+
+          <!-- Alasan Izin -->
+          <div class="form-group">
+            <label class="form-label" for="inputReason">
+              Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <textarea id="inputReason" class="form-textarea" placeholder="Jelaskan alasan dan keperluan dengan jelas..." required></textarea>
+          </div>
+
+          <!-- Rencana Keluar & Estimasi Kembali -->
+          <div class="option-grid">
+            <div class="form-group">
+              <label class="form-label" for="inputPlannedExit">
+                Rencana Waktu Keluar <span style="color: var(--rose-danger);">*</span>
+              </label>
+              <input type="datetime-local" id="inputPlannedExit" class="form-input" required>
+            </div>
+
+            <div class="form-group" id="groupEstimatedReturn">
+              <label class="form-label" for="inputEstimatedReturn">
+                Perkiraan Waktu Kembali <span style="color: var(--rose-danger);">*</span>
+              </label>
+              <input type="datetime-local" id="inputEstimatedReturn" class="form-input" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelNewModal">Batal</button>
+          <button type="submit" class="btn-primary-action" id="btnSubmitNewRequest">
+            <span>Lanjut ke Konfirmasi</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: KONFIRMASI RINGKASAN DATA (STEP 2) ================= -->
+  <div class="modal-overlay" id="modalConfirmSummary">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <h3>Konfirmasi Ringkasan Pengajuan</h3>
+          <p>Pastikan seluruh informasi perizinan sudah sesuai</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseConfirmModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="summary-container">
+          <div class="summary-row">
+            <span class="summary-key">Nama Pemohon</span>
+            <span class="summary-val">Budi Pratama, S.T. (PK-2024-8841)</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-key">Atasan Peninjau</span>
+            <span class="summary-val">Ir. Hendra Gunawan, M.T.</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-key">Kategori</span>
+            <span class="summary-val" id="sumCategory">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-key">Tipe Izin</span>
+            <span class="summary-val" id="sumType">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-key">Lokasi / Tujuan</span>
+            <span class="summary-val" id="sumDestination">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-key">Alasan</span>
+            <span class="summary-val" id="sumReason">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-key">Rencana Keluar</span>
+            <span class="summary-val" id="sumExitTime">-</span>
+          </div>
+          <div class="summary-row" id="sumReturnRow">
+            <span class="summary-key">Estimasi Kembali</span>
+            <span class="summary-val" id="sumReturnTime">-</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.5;">
+          Pengajuan akan diteruskan ke antrean Atasan. Anda hanya diizinkan meninggalkan pos jaga apabila izin telah <strong>Disetujui</strong> dan QR Code resmi telah dipindai oleh Petugas Pengamanan.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnBackToForm">Kembali Ubah</button>
+        <button type="button" class="btn-primary-action" id="btnFinalSubmitRequest">
+          Kirim Pengajuan Resmi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: KEPUTUSAN APPROVAL (SETUJUI) ================= -->
+  <div class="modal-overlay" id="modalApproveDecision">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--corp-teal);">Setujui Pengajuan Izin</h3>
+          <p>Tiket QR Code digital akan langsung diterbitkan untuk karyawan</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseApproveModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-primary);">
+          Anda menyetujui izin keluar untuk <strong id="approveEmployeeName">Budi Pratama</strong> (<span id="approveTicketId">TK-XXX</span>).
+        </p>
+
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label" for="approveNoteInput">
+            Catatan / Arahan Atasan <span style="font-weight: 400; color: var(--text-muted);">(Opsional)</span>
+          </label>
+          <input type="text" id="approveNoteInput" class="form-input" placeholder="Contoh: Disetujui. Pastikan koordinasi selesai tepat waktu.">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelApproveModal">Batal</button>
+        <button type="button" class="btn-primary-action" id="btnConfirmApprove">
+          ✓ Konfirmasi Setujui
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 4: KEPUTUSAN REJECT (TOLAK) ================= -->
+  <div class="modal-overlay" id="modalRejectDecision">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--rose-danger);">Tolak Pengajuan Izin</h3>
+          <p>Sesuai aturan BRD: Wajib mencantumkan alasan penolakan</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseRejectModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-primary);">
+          Anda menolak izin keluar untuk <strong id="rejectEmployeeName">Budi Pratama</strong> (<span id="rejectTicketId">TK-XXX</span>).
+        </p>
+
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label" for="rejectReasonInput">
+            Alasan Penolakan <span style="color: var(--rose-danger);">* Wajib diisi</span>
+          </label>
+          <textarea id="rejectReasonInput" class="form-textarea" placeholder="Jelaskan alasan penolakan secara spesifik..." required></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelRejectModal">Batal</button>
+        <button type="button" class="btn-emergency" id="btnConfirmReject">
+          ✕ Konfirmasi Tolak
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 5: DETAIL TIKET & DIGITAL QR PASS ================= -->
+  <div class="modal-overlay" id="modalTicketDetail">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalDetailHeading">Rincian Perizinan & Tiket Digital</h3>
+          <p>PT Pupuk Kujang Cikampek • Pengendalian Akses Area</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseDetailModal" title="Tutup">✕</button>
+      </div>
+
+      <!-- MODAL DETAIL TAB SWITCHER -->
+      <div class="modal-detail-tabs" style="display: flex; border-bottom: 1px solid var(--border-color); background: #f8fafc; padding: 0 1.25rem; gap: 0.5rem;">
+        <button type="button" class="tab-detail-nav active" id="tabNavQR" style="padding: 0.75rem 1rem; font-size: 0.825rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid var(--corp-teal); color: var(--corp-teal); display: flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Tiket & QR Code</span>
+        </button>
+        <button type="button" class="tab-detail-nav" id="tabNavInfo" style="padding: 0.75rem 1rem; font-size: 0.825rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; transition: all 0.15s ease;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>Lihat Rincian & Riwayat</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- PANE A: TIKET DIGITAL DENGAN QR CODE -->
+        <div id="paneDetailQR" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div class="pass-card-container">
+            <div class="digital-pass">
+              <div class="pass-header">
+                <div>
+                  <h4>TIKET IZIN KELUAR AREA</h4>
+                  <span>PT PUPUK KUJANG CIKAMPEK</span>
+                </div>
+                <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">DIGITAL PASS</span>
+              </div>
+
+              <div class="pass-qr-wrap">
+                <div class="qr-frame" id="qrCodeContainer">
+                  <!-- QR Code rendered here -->
+                </div>
+                <span class="pass-ticket-num" id="passTicketId">TK-20261013-001</span>
+                <div style="margin-top: 6px;" id="passStatusBadgeContainer">
+                  <span id="passStatusBadge" class="status-pill approved">Disetujui</span>
+                </div>
+              </div>
+
+              <div class="pass-body">
+                <div class="pass-grid-info">
+                  <div>
+                    <span class="pass-lbl">Pemohon</span>
+                    <div class="pass-val" id="passEmployeeName">Budi Pratama</div>
+                  </div>
+                  <div>
+                    <span class="pass-lbl">NIP</span>
+                    <div class="pass-val" id="passEmployeeNIP">PK-2024-8841</div>
+                  </div>
+                  <div>
+                    <span class="pass-lbl">Kategori & Tipe</span>
+                    <div class="pass-val" id="passCatType">Dinas Kantor • Kembali</div>
+                  </div>
+                  <div>
+                    <span class="pass-lbl">Atasan Peninjau</span>
+                    <div class="pass-val" id="passApprover">Ir. Hendra Gunawan</div>
+                  </div>
+                  <div>
+                    <span class="pass-lbl">Rencana Keluar</span>
+                    <div class="pass-val" id="passPlannedExit">-</div>
+                  </div>
+                  <div>
+                    <span class="pass-lbl">Estimasi Kembali</span>
+                    <div class="pass-val" id="passEstimatedReturn">-</div>
+                  </div>
+                </div>
+
+                <!-- Pos Jaga Scan Real Records -->
+                <div class="pass-grid-info" id="scanRecordGrid" style="display: none; padding-top: 0.5rem; border-top: 1px dashed var(--border-color);">
+                  <div>
+                    <span class="pass-lbl">Scan Out (Keluar)</span>
+                    <div class="pass-val" id="passScanOut" style="color: #059669;">-</div>
+                  </div>
+                  <div>
+                    <span class="pass-lbl">Scan In (Masuk)</span>
+                    <div class="pass-val" id="passScanIn" style="color: #0891b2;">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary" id="btnDownloadQRPng" style="font-size: 0.775rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Unduh QR PNG</span>
+            </button>
+            <button type="button" class="btn-secondary" id="btnPrintPassPdf" style="font-size: 0.775rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              <span>Cetak Tiket / PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PANE B: RINCIAN LENGKAP & AUDIT TRAIL TIMELINE -->
+        <div id="paneDetailInfo" style="display: none; flex-direction: column; gap: 1rem;">
+          <div class="summary-container">
+            <div class="summary-row">
+              <span class="summary-key">Nomor Tiket</span>
+              <span class="summary-val" id="infoTicketId" style="font-family: var(--font-mono); color: var(--corp-teal);">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Status Izin</span>
+              <span class="summary-val" id="infoStatusContainer"><span id="infoStatusPill" class="status-pill pending">-</span></span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Nama Pemohon</span>
+              <span class="summary-val" id="infoEmployeeName">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">NIP & Unit Kerja</span>
+              <span class="summary-val" id="infoEmployeeMeta">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Kategori & Tipe</span>
+              <span class="summary-val" id="infoCatType">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Lokasi / Tujuan</span>
+              <span class="summary-val" id="infoDestination">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Alasan Keperluan</span>
+              <span class="summary-val" id="infoReason">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Rencana Keluar</span>
+              <span class="summary-val" id="infoPlannedExit">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Estimasi Kembali</span>
+              <span class="summary-val" id="infoEstimatedReturn">-</span>
+            </div>
+          </div>
+
+          <div id="approverNoteDisplay" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem;">
+            <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 0.4rem;">
+              <span>💬 Catatan / Arahan Atasan:</span>
+            </div>
+            <div id="approverNoteText" style="color: #78350f; margin-top: 0.25rem; font-style: italic;"></div>
+          </div>
+
+          <!-- TIMELINE RIWAYAT AKTIVITAS -->
+          <div>
+            <h4 style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>📜 Audit Trail & Jejak Aktivitas</span>
+            </h4>
+            <div class="timeline-box" id="timelineActivityList">
+              <!-- Timeline items rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-primary-action" id="btnCloseDetailBottom">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 6: BATALKAN PENGAJUAN ================= -->
+  <div class="modal-overlay" id="modalCancelRequest">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--rose-danger);">Batalkan Pengajuan Izin?</h3>
+          <p>Pembatalan hanya sah dilakukan sebelum Scan Out di Pos Jaga</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseCancelModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-primary);">
+          Apakah Anda yakin ingin membatalkan tiket izin <strong id="cancelTicketId">-</strong>?
+        </p>
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label" for="cancelReasonInput">
+            Alasan Pembatalan <span style="color: var(--rose-danger);">*</span>
+          </label>
+          <input type="text" id="cancelReasonInput" class="form-input" placeholder="Contoh: Jadwal ditunda / Keperluan selesai..." required>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnAbortCancel">Kembali</button>
+        <button type="button" class="btn-emergency" id="btnConfirmCancelTicket">Ya, Batalkan Izin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 7: IZIN DARURAT ================= -->
+  <div class="modal-overlay" id="modalEmergency">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--rose-danger);">Prosedur Izin Keluar Darurat</h3>
+          <p>Klausul Darurat [FR-KAR-07] • Khusus Situasi Kritis</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseEmergencyModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239;">
+          <strong>Perhatian:</strong> Jalur ini digunakan saat situasi medis keluarga inti atau keselamatan kerja mendesak ketika Atasan tidak dapat dihubungi. Petugas pos jaga akan melakukan verifikasi darurat.
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emergDest">Lokasi Tujuan Darurat <span style="color: var(--rose-danger);">*</span></label>
+          <input type="text" id="emergDest" class="form-input" placeholder="Contoh: IGD Rumah Sakit / Lokasi Insiden">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emergReason">Alasan Keduratan <span style="color: var(--rose-danger);">*</span></label>
+          <textarea id="emergReason" class="form-textarea" placeholder="Jelaskan urgensi kondisi mendesak..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnAbortEmergency">Tutup</button>
+        <button type="button" class="btn-emergency" id="btnSubmitEmergency">Terbitkan Izin Darurat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 8: PERINGATAN IZIN MASIH AKTIF ================= -->
+  <div class="modal-overlay" id="modalActiveBlocked">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="color: var(--amber-warning);">Pengajuan Baru Ditangguhkan</h3>
+          <p>Ketentuan Pembatasan Izin Aktif Karyawan</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseBlockedModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="text-align: center; padding: 0.5rem 0;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--amber-light); border: 2px solid var(--amber-border); color: var(--amber-warning); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+            ⚠️
+          </div>
+          <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem;">
+            Anda Masih Memiliki Izin Aktif
+          </h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            Tiket <strong id="blockedTicketId">TK-XXX</strong> saat ini masih berstatus <span id="blockedTicketStatusContainer"><span id="blockedTicketStatus" class="status-pill pending">Menunggu Persetujuan</span></span>.
+          </p>
+          <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-top: 1rem; text-align: left; font-size: 0.8rem;">
+            <strong style="color: var(--text-primary);">Kebijakan Sistem:</strong>
+            <p style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.4;">
+              Karyawan tidak diperkenankan mengajukan izin baru sebelum tiket aktif saat ini diselesaikan (telah kembali dan <em>Scan In</em> di Pos Jaga), dibatalkan mandiri, atau ditolak oleh Atasan.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnDismissBlockedModal">Tutup</button>
+        <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="qrcode.min.js"></script>
+  <script src="html5-qrcode.min.js"></script>
+  <script src="js/data/mockData.js?v=20261014_02"></script>
+  <script src="js/modules/ui.js?v=20261014_02"></script>
+  <script src="js/modules/scheduler.js?v=20261014_02"></script>
+  <script src="js/modules/navigation.js?v=20261014_02"></script>
+  <script src="js/modules/karyawan.js?v=20261014_02"></script>
+  <script src="js/modules/approver.js?v=20261014_02"></script>
+  <script src="js/modules/security.js?v=20261014_02"></script>
+  <script src="js/modules/admin.js?v=20261014_02"></script>
+  <script src="js/modules/modals.js?v=20261014_02"></script>
+  <script src="js/app.js?v=20261014_02"></script>
+</body>
+</html>
