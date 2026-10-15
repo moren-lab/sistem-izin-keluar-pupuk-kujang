@@ -246,6 +246,14 @@ function renderAdminDashboard() {
 
   // Render Recent Activity Feed for Admin
   renderAdminRecentFeed();
+
+  // Render Charts for Admin
+  if (typeof window.renderAdminTrafficChart === 'function') {
+    window.renderAdminTrafficChart();
+  }
+  if (typeof window.renderAdminDeptChart === 'function') {
+    window.renderAdminDeptChart();
+  }
 }
 
 function renderAdminRecentFeed() {

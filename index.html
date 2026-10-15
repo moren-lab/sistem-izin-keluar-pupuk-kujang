@@ -380,6 +380,19 @@
 
               <!-- Right Column: Informasi & Panduan SOP Gerbang -->
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
+                <div class="dashboard-widget-card">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>📊</span>
+                      <span>Komposisi Pengajuan Izin Saya</span>
+                    </div>
+                  </div>
+                  <div id="chartEmpCategoryContainer" style="padding: 0.5rem 0.25rem;">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+
                 <div class="dashboard-widget-card">
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
@@ -679,6 +692,20 @@
 
               <!-- Right Column: Monitor Bawahan di Luar Area & SOP -->
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Chart Approver: Tren Izin Tim Mingguan -->
+                <div class="dashboard-widget-card">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>📈</span>
+                      <span>Tren Izin Tim per Hari Kerja</span>
+                    </div>
+                    <span style="font-size: 0.725rem; color: var(--text-muted); font-weight: 700;">Senin – Jumat</span>
+                  </div>
+                  <div id="chartApproverWeeklyContainer" style="padding: 0.5rem 0.25rem;">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+
                 <div class="dashboard-widget-card">
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
@@ -1297,6 +1324,35 @@
                 <div class="admin-kpi-label">Hangus / Kedaluwarsa</div>
                 <div class="admin-kpi-value" id="statAdminExpired">0</div>
                 <div class="admin-kpi-sub">Tidak digunakan keluar</div>
+              </div>
+            </div>
+
+            <!-- 2-Column Analytics Grid Admin: Jam Sibuk Gerbang & Sebaran Departemen -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-top: 1.25rem;">
+              <!-- Left Chart: Jam Sibuk Lalu Lintas Gerbang -->
+              <div class="dashboard-widget-card">
+                <div class="dashboard-widget-header">
+                  <div class="dashboard-widget-title">
+                    <span>🌊</span>
+                    <span>Jam Sibuk Lalu Lintas Gerbang (07:00 – 17:00 WIB)</span>
+                  </div>
+                </div>
+                <div id="chartAdminTrafficContainer" style="padding: 0.5rem 0.25rem;">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Right Chart: Sebaran Frekuensi Izin per Departemen -->
+              <div class="dashboard-widget-card">
+                <div class="dashboard-widget-header">
+                  <div class="dashboard-widget-title">
+                    <span>🏢</span>
+                    <span>Frekuensi Izin per Departemen</span>
+                  </div>
+                </div>
+                <div id="chartAdminDeptContainer" style="padding: 0.5rem 0.25rem;">
+                  <!-- Rendered via JS -->
+                </div>
               </div>
             </div>
 
@@ -2381,6 +2437,7 @@
   <script src="js/modules/approver.js?v=20261015_06"></script>
   <script src="js/modules/security.js?v=20261015_06"></script>
   <script src="js/modules/admin.js?v=20261015_06"></script>
+  <script src="js/modules/charts.js?v=20261015_06"></script>
   <script src="js/modules/modals.js?v=20261015_06"></script>
   <script src="js/app.js?v=20261015_06"></script>
 </body>

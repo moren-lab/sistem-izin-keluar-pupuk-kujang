@@ -80,6 +80,9 @@ function setKaryawanNav(navKey) {
   if (typeof window.renderKaryawanView === 'function') {
     window.renderKaryawanView();
   }
+  if (navKey === 'dashboard' && typeof window.renderKaryawanDonutChart === 'function') {
+    window.renderKaryawanDonutChart();
+  }
 }
 
 function setApproverNav(navKey) {
@@ -105,6 +108,9 @@ function setApproverNav(navKey) {
 
   if (typeof window.renderApproverView === 'function') {
     window.renderApproverView();
+  }
+  if (navKey === 'dashboard' && typeof window.renderApproverBarChart === 'function') {
+    window.renderApproverBarChart();
   }
 }
 
@@ -169,6 +175,10 @@ function setAdminNav(navKey) {
 
   if (typeof window.renderAdminView === 'function') {
     window.renderAdminView();
+  }
+  if (navKey === 'dashboard') {
+    if (typeof window.renderAdminTrafficChart === 'function') window.renderAdminTrafficChart();
+    if (typeof window.renderAdminDeptChart === 'function') window.renderAdminDeptChart();
   }
 }
 
@@ -274,6 +284,10 @@ function switchRole(role) {
 
     setAdminNav(currentAdminNav || 'dashboard');
     if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Administrator Pengamanan & K3 (Bambang Sutrisno)', 'info');
+  }
+
+  if (typeof window.renderAllCharts === 'function') {
+    window.renderAllCharts();
   }
 }
 

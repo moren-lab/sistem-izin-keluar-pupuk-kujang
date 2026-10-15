@@ -173,6 +173,10 @@ function renderApproverDashboard() {
       }).join('');
     }
   }
+
+  if (typeof window.renderApproverBarChart === 'function') {
+    window.renderApproverBarChart();
+  }
 }
 
 function renderApproverCards(list, containerElement) {

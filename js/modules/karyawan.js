@@ -223,6 +223,10 @@ function renderKaryawanDashboard() {
       `).join('');
     }
   }
+
+  if (typeof window.renderKaryawanDonutChart === 'function') {
+    window.renderKaryawanDonutChart();
+  }
 }
 
 function renderKaryawanView() {
