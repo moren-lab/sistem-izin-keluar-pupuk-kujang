@@ -321,17 +321,14 @@
               </div>
             </div>
 
-            <!-- Metrics Row Karyawan -->
-            <div class="stats-row" id="karyawanStatsRow" style="margin-top: 1.5rem;">
-              <div class="stat-box active" data-filter="all">
-                <div class="stat-meta">
-                  <span class="stat-title">Total Pengajuan</span>
-                  <span class="stat-number" id="statEmpTotal">0</span>
-                </div>
-                <div class="stat-icon blue">📋</div>
-              </div>
+            <!-- Widget Status Izin Aktif Saat Ini (Ditempatkan di atas KPI Row) -->
+            <div id="karyawanDashboardActiveWidget" style="margin-top: 1.5rem;">
+              <!-- Rendered via JS -->
+            </div>
 
-              <div class="stat-box" data-filter="Menunggu Persetujuan">
+            <!-- Metrics Row Karyawan (Total Pengajuan Dihapus Sesuai Permintaan) -->
+            <div class="stats-row" id="karyawanStatsRow" style="margin-top: 1.25rem;">
+              <div class="stat-box">
                 <div class="stat-meta">
                   <span class="stat-title">Menunggu Review</span>
                   <span class="stat-number" id="statEmpPending" style="color: var(--amber-warning);">0</span>
@@ -339,7 +336,7 @@
                 <div class="stat-icon amber">⏳</div>
               </div>
 
-              <div class="stat-box" data-filter="Disetujui">
+              <div class="stat-box">
                 <div class="stat-meta">
                   <span class="stat-title">QR Siap Pakai</span>
                   <span class="stat-number" id="statEmpApproved" style="color: var(--corp-teal);">0</span>
@@ -347,7 +344,7 @@
                 <div class="stat-icon teal">✅</div>
               </div>
 
-              <div class="stat-box" data-filter="Sedang di Luar">
+              <div class="stat-box">
                 <div class="stat-meta">
                   <span class="stat-title">Sedang di Luar</span>
                   <span class="stat-number" id="statEmpOutside" style="color: #0891b2;">0</span>
@@ -355,7 +352,7 @@
                 <div class="stat-icon cyan">🚗</div>
               </div>
 
-              <div class="stat-box" data-filter="Selesai">
+              <div class="stat-box">
                 <div class="stat-meta">
                   <span class="stat-title">Selesai / Kembali</span>
                   <span class="stat-number" id="statEmpCompleted">0</span>
@@ -364,45 +361,27 @@
               </div>
             </div>
 
-            <!-- Widget Status Izin Aktif Saat Ini -->
-            <div id="karyawanDashboardActiveWidget" style="margin-top: 1.5rem;">
-              <!-- Rendered via JS -->
-            </div>
-
             <!-- 2-Column Grid Dashboard Karyawan -->
             <div class="dashboard-grid-layout">
-              <!-- Left Column: Aktivitas Pengajuan Terkini -->
-              <div class="dashboard-widget-card">
-                <div class="dashboard-widget-header">
-                  <div class="dashboard-widget-title">
-                    <span>🕒</span>
-                    <span>Ringkasan Pengajuan Terkini</span>
-                  </div>
-                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
-                    onclick="setKaryawanNav('riwayat')">
-                    Lihat Semua Riwayat →
-                  </button>
-                </div>
-                <div id="karyawanDashboardRecentList" class="feed-list">
-                  <!-- Rendered via JS -->
-                </div>
-              </div>
-
-              <!-- Right Column: Informasi & Panduan SOP Gerbang -->
+              <!-- Left Column: Aktivitas Pengajuan Terkini & Ketentuan SOP Gerbang -->
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
                 <div class="dashboard-widget-card">
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
-                      <span>📊</span>
-                      <span>Komposisi Pengajuan Izin Saya</span>
+                      <span>🕒</span>
+                      <span>Ringkasan Pengajuan Terkini</span>
                     </div>
+                    <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
+                      onclick="setKaryawanNav('riwayat')">
+                      Lihat Semua Riwayat →
+                    </button>
                   </div>
-                  <div id="chartEmpCategoryContainer" style="padding: 0.5rem 0.25rem;">
+                  <div id="karyawanDashboardRecentList" class="feed-list">
                     <!-- Rendered via JS -->
                   </div>
                 </div>
 
+                <!-- Pindahan: Ketentuan & SOP Gerbang mengisi sisi kiri yang kosong -->
                 <div class="dashboard-widget-card">
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
@@ -427,6 +406,22 @@
                       <span><strong>Wajib Scan In Kembali:</strong> Pastikan memindai QR di Pos 1 saat tiba kembali agar
                         status tidak terhitung Terlambat.</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Komposisi Jenis Izin & Kontak Pelayanan -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
+                <div class="dashboard-widget-card">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>📊</span>
+                      <span>Komposisi Pengajuan Izin Saya</span>
+                    </div>
+                  </div>
+                  <div id="chartEmpCategoryContainer" style="padding: 0.5rem 0.25rem;">
+                    <!-- Rendered via JS -->
                   </div>
                 </div>
 
@@ -683,7 +678,7 @@
 
             <!-- Metrics Row Approver -->
             <div class="stats-row" id="approverStatsRow" style="margin-top: 1.5rem;">
-              <div class="stat-box active" id="statCardPendingApprovals">
+              <div class="stat-box" id="statCardPendingApprovals">
                 <div class="stat-meta">
                   <span class="stat-title">Perlu Keputusan Segera</span>
                   <span class="stat-number" id="statAppPending" style="color: var(--amber-warning);">0</span>
@@ -902,7 +897,7 @@
 
             <!-- Metrics Row Pos Jaga -->
             <div class="stats-row" id="securityStatsRow" style="margin-top: 1.5rem;">
-              <div class="stat-box active" id="statCardOutsideHeadcount">
+              <div class="stat-box" id="statCardOutsideHeadcount">
                 <div class="stat-meta">
                   <span class="stat-title">Sedang di Luar Pabrik (Headcount)</span>
                   <span class="stat-number" id="statSecOutside" style="color: #0891b2;">0</span>
@@ -1095,7 +1090,7 @@
                       <rect x="14" y="14" width="7" height="7"></rect>
                       <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
-                    <span>Input Manual / Alat Barcode</span>
+                    <span>Input Manual / Barcode</span>
                   </button>
                 </div>
               </div>
@@ -1207,6 +1202,44 @@
                   </svg>
                   <span>Verifikasi Tiket</span>
                 </button>
+              </div>
+
+              <!-- TATA CARA PENGGUNAAN TERMINAL PEMINDAI QR & VERIFIKASI MANUAL -->
+              <div class="scanner-sop-guide" style="margin-top: 1.25rem; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 1.15rem 1.25rem; color: #e2e8f0;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                  <span style="font-size: 1.1rem;">📋</span>
+                  <span style="font-weight: 800; font-size: 0.875rem; color: #f0f9ff; letter-spacing: -0.2px;">
+                    Tata Cara Penggunaan Pemindai QR & Verifikasi Manual Pos Jaga
+                  </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+                  <!-- Tata Cara Kamera Scan QR -->
+                  <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                    <div style="display: flex; align-items: center; gap: 0.4rem; color: #38bdf8; font-weight: 700; font-size: 0.8rem;">
+                      <span>📷</span>
+                      <span>1. Tata Cara Kamera Scan QR (Webcam / HP)</span>
+                    </div>
+                    <ul style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.5; margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                      <li>Klik tombol <strong>"Aktifkan Kamera"</strong> untuk membuka kamera perangkat atau klik <strong>"Unggah Gambar QR"</strong> jika tiket berupa foto screenshot.</li>
+                      <li>Arahkan kamera tegak lurus ke QR Code tiket karyawan dengan pencahayaan yang cukup.</li>
+                      <li>Sistem otomatis membaca tiket, memvalidasi masa berlaku, dan mencatat waktu Scan Out / Scan In di gerbang.</li>
+                    </ul>
+                  </div>
+
+                  <!-- Tata Cara Input Manual / Alat Barcode Scanner -->
+                  <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                    <div style="display: flex; align-items: center; gap: 0.4rem; color: #34d399; font-weight: 700; font-size: 0.8rem;">
+                      <span>🏷️</span>
+                      <span>2. Tata Cara Input Manual / Alat Barcode</span>
+                    </div>
+                    <ul style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.5; margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                      <li>Pilih tab <strong>"Input Manual / Barcode"</strong> pada panel di atas.</li>
+                      <li><strong>Alat Barcode Scanner (USB / Gun Scanner):</strong> Arahkan alat pemindai langsung ke barcode/QR tiket, nomor tiket otomatis terinput dan divalidasi.</li>
+                      <li><strong>Input Manual Petugas:</strong> Ketik Nomor Tiket (misal: <code>TK-20261015-689</code>) atau NIP pada kolom input, lalu tekan Enter atau klik tombol <strong>"Verifikasi Tiket"</strong>.</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

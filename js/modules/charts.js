@@ -121,51 +121,9 @@ function renderKaryawanDonutChart() {
       </div>
     </div>
 
-    <!-- Area Detail di Bawah Diagram (Sensor Responsif) -->
-    <div id="donutDetailArea" style="margin-top: 0.75rem; min-height: 125px; transition: all 0.2s ease;">
-      <!-- Default Idle State (Sebelum Diarahkan Kursor: Tanpa Persentase) -->
-      <div id="donutIdleContent" style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div style="padding: 0.45rem 0.65rem; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; text-align: center; font-size: 0.75rem; color: var(--text-secondary);">
-          💡 Arahkan kursor ke warna diagram untuk melihat detail persentase
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.775rem;">
-          <div id="legendDinas" class="chart-legend-row" style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.65rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; cursor: pointer;"
-            onmouseenter="window.hoverDonutCategory('dinas')" onmousemove="window.hoverDonutCategory('dinas')">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #059669; display: inline-block;"></span>
-              <span style="font-weight: 700; color: #166534;">Dinas Kantor</span>
-            </div>
-            <div style="font-weight: 800; font-family: var(--font-mono); color: #166534;">
-              ${data.dinas} Izin
-            </div>
-          </div>
-
-          <div id="legendPribadi" class="chart-legend-row" style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.65rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; cursor: pointer;"
-            onmouseenter="window.hoverDonutCategory('pribadi')" onmousemove="window.hoverDonutCategory('pribadi')">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #d97706; display: inline-block;"></span>
-              <span style="font-weight: 700; color: #92400e;">Urusan Pribadi</span>
-            </div>
-            <div style="font-weight: 800; font-family: var(--font-mono); color: #92400e;">
-              ${data.pribadi} Izin
-            </div>
-          </div>
-
-          <div id="legendDarurat" class="chart-legend-row" style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.65rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; cursor: pointer;"
-            onmouseenter="window.hoverDonutCategory('darurat')" onmousemove="window.hoverDonutCategory('darurat')">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #e11d48; display: inline-block;"></span>
-              <span style="font-weight: 700; color: #9f1239;">Izin Darurat</span>
-            </div>
-            <div style="font-weight: 800; font-family: var(--font-mono); color: #9f1239;">
-              ${data.darurat} Izin
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Active Hover Card (Hanya Memperlihatkan Detail Warna yang Disorot) -->
+    <!-- Area Detail di Bawah Diagram (Hanya Tampil Saat Kursor Mengarah ke Diagram & Terkena Sensor) -->
+    <div id="donutDetailArea" style="margin-top: 0.5rem; transition: all 0.2s ease;">
+      <!-- Active Hover Card (Hanya Memperlihatkan Detail Warna yang Disorot Sensor) -->
       <div id="donutActiveCard" style="display: none; padding: 0.85rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.06); animation: fadeInDonutDetail 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
         <!-- Injected via hoverDonutCategory -->
       </div>
@@ -181,7 +139,6 @@ function hoverDonutCategory(catKey) {
   const centerVal = document.getElementById('donutCenterVal');
   const centerLbl = document.getElementById('donutCenterLbl');
   const centerPct = document.getElementById('donutCenterPct');
-  const idleContent = document.getElementById('donutIdleContent');
   const activeCard = document.getElementById('donutActiveCard');
 
   const meta = {
@@ -237,7 +194,6 @@ function hoverDonutCategory(catKey) {
   }
 
   // 2. Tampilkan HANYA detail dari warna yang disorot di bawah diagram
-  if (idleContent) idleContent.style.display = 'none';
   if (activeCard) {
     activeCard.style.display = 'block';
     activeCard.style.background = selected.bg;
@@ -285,7 +241,6 @@ function unhoverDonutCategory() {
   const centerVal = document.getElementById('donutCenterVal');
   const centerLbl = document.getElementById('donutCenterLbl');
   const centerPct = document.getElementById('donutCenterPct');
-  const idleContent = document.getElementById('donutIdleContent');
   const activeCard = document.getElementById('donutActiveCard');
 
   // Reset center text to idle default (tanpa persentase)
@@ -302,8 +257,7 @@ function unhoverDonutCategory() {
     centerPct.style.display = 'none';
   }
 
-  // Restore list di bawah diagram ke mode idle (tanpa persentase)
-  if (idleContent) idleContent.style.display = 'flex';
+  // Hide detail card on idle/unhover
   if (activeCard) activeCard.style.display = 'none';
 
   // Restore seluruh slice SVG ke ukuran normal

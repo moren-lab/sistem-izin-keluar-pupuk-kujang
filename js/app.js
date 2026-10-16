@@ -41,16 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     filterAppViewMode.addEventListener('change', () => window.renderApproverView());
   }
 
-  // Stat card shortcuts Karyawan
-  document.querySelectorAll('#viewKaryawan .stat-box').forEach(box => {
-    box.addEventListener('click', () => {
-      document.querySelectorAll('#viewKaryawan .stat-box').forEach(b => b.classList.remove('active'));
-      box.classList.add('active');
-      window.activeEmpStatusFilter = box.getAttribute('data-filter') || 'all';
-      if (filterEmpStatus) filterEmpStatus.value = window.activeEmpStatusFilter;
-      window.renderKaryawanView();
-    });
-  });
 
   // Export CSV
   if (btnEmpExport) {

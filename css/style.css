@@ -589,20 +589,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  cursor: default;
+  user-select: none;
   box-shadow: var(--shadow-sm);
 }
 
 .stat-box:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: #cbd5e1;
+  border-color: var(--border-color);
 }
 
 .stat-box.active {
-  border-color: var(--corp-teal);
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-meta {
@@ -2688,7 +2686,8 @@ body.modal-open {
   align-items: center;
   gap: 0.5rem;
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
+  box-sizing: border-box;
   user-select: none;
 }
 
@@ -2722,11 +2721,15 @@ body.modal-open {
   position: relative;
   display: flex;
   flex: 1;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: rgba(15, 23, 42, 0.7);
   border: 1.5px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-md);
   padding: 4px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
 }
 
 .scanner-slider-control .slider-glider {
@@ -2748,23 +2751,33 @@ body.modal-open {
 }
 
 .slider-tab {
-  flex: 1;
+  flex: 1 1 50%;
+  min-width: 0;
+  max-width: 50%;
+  box-sizing: border-box;
   position: relative;
   z-index: 2;
   background: transparent;
   color: #cbd5e1;
   border: none;
-  padding: 0.6rem 0.75rem;
+  padding: 0.55rem 0.4rem;
   border-radius: var(--radius-sm);
-  font-size: 0.825rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   transition: color 0.2s ease;
+  overflow: hidden;
+}
+
+.slider-tab span {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .slider-tab.active {
@@ -2773,6 +2786,22 @@ body.modal-open {
 
 .slider-tab:hover:not(.active) {
   color: #f1f5f9;
+}
+
+@media (max-width: 520px) {
+  .scanner-slider-wrapper {
+    max-width: 100%;
+  }
+  .slider-tab {
+    font-size: 0.725rem;
+    padding: 0.5rem 0.25rem;
+    gap: 0.25rem;
+  }
+  .slider-tab svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
 }
 
 /* 3. Consolidated Kamera Belum Aktif Card */
