@@ -363,25 +363,39 @@
 
             <!-- 2-Column Grid Dashboard Karyawan -->
             <div class="dashboard-grid-layout">
-              <!-- Left Column: Aktivitas Pengajuan Terkini & Ketentuan SOP Gerbang -->
+              <!-- Left Column: Aktivitas Pengajuan Terkini -->
+              <div class="dashboard-widget-card">
+                <div class="dashboard-widget-header">
+                  <div class="dashboard-widget-title">
+                    <span>🕒</span>
+                    <span>Ringkasan Pengajuan Terkini</span>
+                  </div>
+                  <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
+                    onclick="setKaryawanNav('riwayat')">
+                    Lihat Semua Riwayat →
+                  </button>
+                </div>
+                <div id="karyawanDashboardRecentList" class="feed-list">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Right Column: Komposisi Jenis Izin, Ketentuan SOP Gerbang, & Kontak Pelayanan -->
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
                 <div class="dashboard-widget-card">
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
-                      <span>🕒</span>
-                      <span>Ringkasan Pengajuan Terkini</span>
+                      <span>📊</span>
+                      <span>Komposisi Pengajuan Izin Saya</span>
                     </div>
-                    <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
-                      onclick="setKaryawanNav('riwayat')">
-                      Lihat Semua Riwayat →
-                    </button>
                   </div>
-                  <div id="karyawanDashboardRecentList" class="feed-list">
+                  <div id="chartEmpCategoryContainer" style="padding: 0.5rem 0.25rem;">
                     <!-- Rendered via JS -->
                   </div>
                 </div>
 
-                <!-- Pindahan: Ketentuan & SOP Gerbang mengisi sisi kiri yang kosong -->
+                <!-- Ketentuan & SOP Gerbang (Di bawah chart Komposisi dan di atas Kontak) -->
                 <div class="dashboard-widget-card">
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
@@ -406,22 +420,6 @@
                       <span><strong>Wajib Scan In Kembali:</strong> Pastikan memindai QR di Pos 1 saat tiba kembali agar
                         status tidak terhitung Terlambat.</span>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right Column: Komposisi Jenis Izin & Kontak Pelayanan -->
-              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
-                <div class="dashboard-widget-card">
-                  <div class="dashboard-widget-header">
-                    <div class="dashboard-widget-title">
-                      <span>📊</span>
-                      <span>Komposisi Pengajuan Izin Saya</span>
-                    </div>
-                  </div>
-                  <div id="chartEmpCategoryContainer" style="padding: 0.5rem 0.25rem;">
-                    <!-- Rendered via JS -->
                   </div>
                 </div>
 

@@ -119,6 +119,11 @@ function setupRadioToggles() {
   }
 }
 
+function getFormattedDateTimeLocal(dt = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
+
 function initFormDates() {
   const inputPlannedExit = document.getElementById('inputPlannedExit');
   const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
@@ -128,11 +133,16 @@ function initFormDates() {
   const futureExit = new Date(now.getTime() + 15 * 60000);
   const futureReturn = new Date(now.getTime() + 120 * 60000);
 
-  const pad = (n) => String(n).padStart(2, '0');
-  const fmt = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  // Kunci batas waktu minimum ke waktu sekarang (hari atau tanggal sebelumnya tidak bisa dipilih)
+  const currentMinStr = getFormattedDateTimeLocal(now);
+  inputPlannedExit.min = currentMinStr;
+  inputPlannedExit.value = getFormattedDateTimeLocal(futureExit);
 
-  inputPlannedExit.value = fmt(futureExit);
-  if (inputEstimatedReturn) inputEstimatedReturn.value = fmt(futureReturn);
+  if (inputEstimatedReturn) {
+    // Estimasi kembali minimal harus sama atau setelah rencana keluar
+    inputEstimatedReturn.min = inputPlannedExit.value || currentMinStr;
+    inputEstimatedReturn.value = getFormattedDateTimeLocal(futureReturn);
+  }
 }
 
 // TAB SWITCHER IN DETAIL MODAL
@@ -499,17 +509,100 @@ function handleOpenEmergency() {
   const now = new Date();
   const futureExit = new Date(now.getTime() + 10 * 60000); // 10 menit ke depan
   const futureReturn = new Date(now.getTime() + 120 * 60000); // 2 jam ke depan
-  const pad = (n) => String(n).padStart(2, '0');
-  const fmt = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  const currentMinStr = getFormattedDateTimeLocal(now);
 
-  if (emergPlannedExit) emergPlannedExit.value = fmt(futureExit);
-  if (emergEstimatedReturn) emergEstimatedReturn.value = fmt(futureReturn);
+  if (emergPlannedExit) {
+    emergPlannedExit.min = currentMinStr;
+    emergPlannedExit.value = getFormattedDateTimeLocal(futureExit);
+  }
+  if (emergEstimatedReturn) {
+    emergEstimatedReturn.min = emergPlannedExit ? emergPlannedExit.value : currentMinStr;
+    emergEstimatedReturn.value = getFormattedDateTimeLocal(futureReturn);
+  }
 
   if (modalEmergency) modalEmergency.classList.add('open');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   setupRadioToggles();
+  initFormDates();
+
+  // Setup batasan tanggal/waktu minimum (hari/tanggal sebelumnya tidak dapat dipilih)
+  const inputPlannedExit = document.getElementById('inputPlannedExit');
+  const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
+  if (inputPlannedExit) {
+    inputPlannedExit.addEventListener('change', () => {
+      const currentMin = getFormattedDateTimeLocal(new Date());
+      inputPlannedExit.min = currentMin;
+      if (inputPlannedExit.value && inputPlannedExit.value < currentMin) {
+        inputPlannedExit.value = currentMin;
+        if (typeof window.showToast === 'function') {
+          window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih!', 'warning');
+        }
+      }
+      if (inputEstimatedReturn) {
+        inputEstimatedReturn.min = inputPlannedExit.value || currentMin;
+        if (inputEstimatedReturn.value && inputEstimatedReturn.value <= inputPlannedExit.value) {
+          const exitDt = new Date(inputPlannedExit.value);
+          const newReturn = new Date(exitDt.getTime() + 60 * 60000);
+          inputEstimatedReturn.value = getFormattedDateTimeLocal(newReturn);
+        }
+      }
+    });
+
+    inputPlannedExit.addEventListener('input', () => {
+      if (inputEstimatedReturn && inputPlannedExit.value) {
+        inputEstimatedReturn.min = inputPlannedExit.value;
+      }
+    });
+  }
+
+  if (inputEstimatedReturn) {
+    inputEstimatedReturn.addEventListener('change', () => {
+      const minReturn = inputPlannedExit && inputPlannedExit.value ? inputPlannedExit.value : getFormattedDateTimeLocal(new Date());
+      if (inputEstimatedReturn.value && inputEstimatedReturn.value < minReturn) {
+        inputEstimatedReturn.value = minReturn;
+        if (typeof window.showToast === 'function') {
+          window.showToast('Perkiraan waktu kembali tidak boleh sebelum rencana waktu keluar!', 'warning');
+        }
+      }
+    });
+  }
+
+  const emergPlannedExit = document.getElementById('emergPlannedExit');
+  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
+  if (emergPlannedExit) {
+    emergPlannedExit.addEventListener('change', () => {
+      const currentMin = getFormattedDateTimeLocal(new Date());
+      emergPlannedExit.min = currentMin;
+      if (emergPlannedExit.value && emergPlannedExit.value < currentMin) {
+        emergPlannedExit.value = currentMin;
+        if (typeof window.showToast === 'function') {
+          window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih!', 'warning');
+        }
+      }
+      if (emergEstimatedReturn) {
+        emergEstimatedReturn.min = emergPlannedExit.value || currentMin;
+        if (emergEstimatedReturn.value && emergEstimatedReturn.value <= emergPlannedExit.value) {
+          const exitDt = new Date(emergPlannedExit.value);
+          const newReturn = new Date(exitDt.getTime() + 60 * 60000);
+          emergEstimatedReturn.value = getFormattedDateTimeLocal(newReturn);
+        }
+      }
+    });
+  }
+
+  if (emergEstimatedReturn) {
+    emergEstimatedReturn.addEventListener('change', () => {
+      const minReturn = emergPlannedExit && emergPlannedExit.value ? emergPlannedExit.value : getFormattedDateTimeLocal(new Date());
+      if (emergEstimatedReturn.value && emergEstimatedReturn.value < minReturn) {
+        emergEstimatedReturn.value = minReturn;
+        if (typeof window.showToast === 'function') {
+          window.showToast('Perkiraan waktu kembali tidak boleh sebelum rencana waktu keluar!', 'warning');
+        }
+      }
+    });
+  }
 
   const btnOpenNewRequestModal = document.getElementById('btnOpenNewRequestModal');
   const menuQuickNew = document.getElementById('menuQuickNew');
@@ -560,6 +653,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const reason = inputReason ? inputReason.value.trim() : '';
       const plannedExit = inputPlannedExit ? inputPlannedExit.value : '';
       const estimatedReturn = type === 'Kembali ke Area' ? (inputEstimatedReturn ? inputEstimatedReturn.value : null) : null;
+
+      // Validasi proteksi tanggal masa lampau (hari/tanggal sebelumnya tidak dapat dipilih)
+      const now = new Date();
+      const oneMinuteAgo = new Date(now.getTime() - 60000);
+      if (plannedExit && new Date(plannedExit) < oneMinuteAgo) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih sebagai rencana waktu keluar!', 'danger');
+        }
+        if (inputPlannedExit) inputPlannedExit.focus();
+        return;
+      }
 
       if (type === 'Kembali ke Area' && estimatedReturn && new Date(estimatedReturn) <= new Date(plannedExit)) {
         if (typeof window.showToast === 'function') window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
@@ -795,6 +899,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.showToast === 'function') {
           window.showToast('Harap isi rencana waktu keluar!', 'danger');
         }
+        return;
+      }
+
+      const nowCheck = new Date();
+      const oneMinuteAgo = new Date(nowCheck.getTime() - 60000);
+      if (plannedExitVal && new Date(plannedExitVal) < oneMinuteAgo) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih sebagai rencana waktu keluar!', 'danger');
+        }
+        if (emergPlannedExit) emergPlannedExit.focus();
         return;
       }
 
