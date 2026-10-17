@@ -384,11 +384,17 @@
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
                 <div class="dashboard-widget-card">
+                  
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
                       <span>📊</span>
-                      <span>Komposisi Pengajuan Izin Saya</span>
+                      <span>Komposisi Izin Saya</span>
                     </div>
+                    <select id="filterEmpChartPeriod" class="chart-filter-select" title="Filter Periode Komposisi Izin">
+                      <option value="month" selected>📅 Bulan Ini</option>
+                      <option value="year">📅 Tahun Ini</option>
+                      <option value="all">📅 Semua Riwayat</option>
+                    </select>
                   </div>
                   <div id="chartEmpCategoryContainer" style="padding: 0.5rem 0.25rem;">
                     <!-- Rendered via JS -->
@@ -740,9 +746,12 @@
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
                       <span>📈</span>
-                      <span>Tren Izin Tim per Hari Kerja</span>
+                      <span>Tren Pengajuan Tim</span>
                     </div>
-                    <span style="font-size: 0.725rem; color: var(--text-muted); font-weight: 700;">Senin – Jumat</span>
+                    <select id="filterAppChartPeriod" class="chart-filter-select" title="Filter Periode Tren Tim">
+                      <option value="week" selected>📅 Minggu Ini</option>
+                      <option value="month">📅 Bulan Ini</option>
+                    </select>
                   </div>
                   <div id="chartApproverWeeklyContainer" style="padding: 0.5rem 0.25rem;">
                     <!-- Rendered via JS -->
@@ -1471,8 +1480,12 @@
                 <div class="dashboard-widget-header">
                   <div class="dashboard-widget-title">
                     <span>🌊</span>
-                    <span>Jam Sibuk Lalu Lintas Gerbang (07:00 – 17:00 WIB)</span>
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-size: 0.875rem; font-weight: 800; line-height: 1.2;">Jam Sibuk Gerbang</span>
+                      <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">07:00 – 17:00 WIB</span>
+                    </div>
                   </div>
+                  <span style="font-size: 0.725rem; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1.5px solid #bae6fd; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">📅 Hari Ini</span>
                 </div>
                 <div id="chartAdminTrafficContainer" style="padding: 0.5rem 0.25rem;">
                   <!-- Rendered via JS -->
@@ -1484,8 +1497,12 @@
                 <div class="dashboard-widget-header">
                   <div class="dashboard-widget-title">
                     <span>🏢</span>
-                    <span>Frekuensi Izin per Departemen</span>
+                    <span style="font-size: 0.875rem; font-weight: 800;">Sebaran Departemen</span>
                   </div>
+                  <select id="filterAdminDeptPeriod" class="chart-filter-select" title="Filter Periode Departemen">
+                    <option value="month" selected>📅 Bulan Ini</option>
+                    <option value="year">📅 Tahun Ini</option>
+                  </select>
                 </div>
                 <div id="chartAdminDeptContainer" style="padding: 0.5rem 0.25rem;">
                   <!-- Rendered via JS -->

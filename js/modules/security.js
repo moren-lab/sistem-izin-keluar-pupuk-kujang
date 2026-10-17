@@ -95,9 +95,6 @@ function renderSecurityDashboard() {
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               ${window.getStatusPill(t.status)}
-              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; ${isOverdue ? 'background: #dc2626;' : ''}" onclick="executeScanIn('${t.id}')">
-                ✓ Scan In
-              </button>
             </div>
           </div>
         `;
@@ -221,13 +218,6 @@ function renderSecurityCards(list, containerElement) {
                   <button class="btn-quick-scan-out" onclick="executeScanOut('${t.id}')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     Proses Scan Out
-                  </button>
-                ` : ''}
-
-                ${(isOutside || isOverdue) ? `
-                  <button class="btn-quick-scan-in" style="${isOverdue ? 'background:#dc2626;' : ''}" onclick="executeScanIn('${t.id}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    Proses Scan In ${isOverdue ? '(Terlambat)' : ''}
                   </button>
                 ` : ''}
               </div>

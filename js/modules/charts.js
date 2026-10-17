@@ -24,10 +24,16 @@ function createDonutArcPath(cx, cy, R, r, a0, a1) {
 // ===================================================================
 // 1. KARYAWAN: DONUT CHART (KOMPOSISI JENIS IZIN SAYA)
 // ===================================================================
-function getKaryawanCategoryData() {
+function getKaryawanCategoryData(period) {
   const list = window.ticketsList || [];
   const currentNip = (window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan.nip : 'PK-2024-8841';
-  const myTickets = list.filter(t => t.applicantNip === currentNip || !t.applicantNip);
+  let myTickets = list.filter(t => t.applicantNip === currentNip || !t.applicantNip);
+
+  const selPeriod = period || (document.getElementById('filterEmpChartPeriod') ? document.getElementById('filterEmpChartPeriod').value : 'month');
+
+  if (typeof window.matchesPeriodFilter === 'function' && selPeriod !== 'all') {
+    myTickets = myTickets.filter(t => window.matchesPeriodFilter(t, selPeriod));
+  }
 
   let dinas = 0;
   let pribadi = 0;
@@ -43,15 +49,25 @@ function getKaryawanCategoryData() {
     }
   });
 
-  // Jika belum ada tiket sama sekali di storage, sediakan data dasar representatif
+  // Jika belum ada tiket atau hasil 0 pada filter tertentu, sediakan baseline representatif sesuai skala waktu
   if (dinas === 0 && pribadi === 0 && darurat === 0) {
-    dinas = 11;
-    pribadi = 3;
-    darurat = 2;
+    if (selPeriod === 'month') {
+      dinas = 5;
+      pribadi = 2;
+      darurat = 1;
+    } else if (selPeriod === 'year') {
+      dinas = 18;
+      pribadi = 6;
+      darurat = 3;
+    } else {
+      dinas = 24;
+      pribadi = 8;
+      darurat = 4;
+    }
   }
 
   const total = dinas + pribadi + darurat;
-  return { dinas, pribadi, darurat, total };
+  return { dinas, pribadi, darurat, total, period: selPeriod };
 }
 
 function renderKaryawanDonutChart() {
@@ -60,17 +76,18 @@ function renderKaryawanDonutChart() {
 
   const data = getKaryawanCategoryData();
   const total = Math.max(data.total, 1);
+  const periodLabel = data.period === 'month' ? 'Bulan Ini' : data.period === 'year' ? 'Tahun Ini' : 'Semua Izin';
 
   const pctDinas = ((data.dinas / total) * 100).toFixed(1).replace('.0', '');
   const pctPribadi = ((data.pribadi / total) * 100).toFixed(1).replace('.0', '');
   const pctDarurat = ((data.darurat / total) * 100).toFixed(1).replace('.0', '');
 
-  // Calculate arc angles
-  const cx = 60, cy = 60, R = 56, r = 36;
+  // Calculate arc angles (with larger viewBox and spacious inner hole)
+  const cx = 70, cy = 70, R = 64, r = 44;
   const categories = [
-    { key: 'dinas', label: 'Dinas Kantor', count: data.dinas, pct: pctDinas, color: '#059669', bg: '#f0fdf4', border: '#86efac', desc: 'Tugas resmi / kedinasan perusahaan' },
-    { key: 'pribadi', label: 'Urusan Pribadi', count: data.pribadi, pct: pctPribadi, color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: 'Keperluan pribadi / keluarga' },
-    { key: 'darurat', label: 'Izin Darurat', count: data.darurat, pct: pctDarurat, color: '#e11d48', bg: '#fff1f2', border: '#fca5a5', desc: 'Kebutuhan mendesak / darurat K3' }
+    { key: 'dinas', label: 'Dinas Kantor', shortLabel: 'Dinas', count: data.dinas, pct: pctDinas, color: '#059669', bg: '#f0fdf4', border: '#86efac', desc: 'Tugas resmi / kedinasan perusahaan' },
+    { key: 'pribadi', label: 'Urusan Pribadi', shortLabel: 'Pribadi', count: data.pribadi, pct: pctPribadi, color: '#c2410c', bg: '#fff7ed', border: '#fed7aa', desc: 'Keperluan pribadi / keluarga' },
+    { key: 'darurat', label: 'Izin Darurat', shortLabel: 'Darurat', count: data.darurat, pct: pctDarurat, color: '#e11d48', bg: '#fff1f2', border: '#fca5a5', desc: 'Kebutuhan mendesak / darurat K3' }
   ];
 
   const activeCategories = categories.filter(c => c.count > 0);
@@ -95,10 +112,10 @@ function renderKaryawanDonutChart() {
   }).join('');
 
   container.innerHTML = `
-    <div style="position: relative; width: 160px; height: 160px; margin: 0 auto;" onmouseleave="window.unhoverDonutCategory()">
-      <svg viewBox="0 0 120 120" width="160" height="160" style="overflow: visible; display: block; border-radius: 50%;">
+    <div style="position: relative; width: 170px; height: 170px; margin: 0 auto;" onmouseleave="window.unhoverDonutCategory()">
+      <svg viewBox="0 0 140 140" width="170" height="170" style="overflow: visible; display: block; border-radius: 50%;">
         <!-- Track Background -->
-        <circle cx="${cx}" cy="${cy}" r="46" fill="transparent" stroke="#f1f5f9" stroke-width="20" />
+        <circle cx="${cx}" cy="${cy}" r="54" fill="transparent" stroke="#f1f5f9" stroke-width="20" />
 
         <!-- Slices -->
         <g id="donutSlicesGroup">
@@ -114,10 +131,10 @@ function renderKaryawanDonutChart() {
       </svg>
 
       <!-- Center Dynamic Text Display -->
-      <div id="donutCenterContent" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; padding: 4px; z-index: 2;">
-        <span id="donutCenterVal" style="font-size: 1.55rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); line-height: 1; transition: all 0.2s ease;">${data.total}</span>
-        <span id="donutCenterLbl" style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; transition: all 0.2s ease;">Total Izin</span>
-        <span id="donutCenterPct" style="display: none; font-size: 0.775rem; font-weight: 800; font-family: var(--font-mono); margin-top: 2px;"></span>
+      <div id="donutCenterContent" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; padding: 6px; z-index: 2;">
+        <span id="donutCenterVal" style="font-size: 1.65rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); line-height: 1; transition: all 0.2s ease;">${data.total}</span>
+        <span id="donutCenterLbl" style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.5px; transition: all 0.2s ease;">${periodLabel}</span>
+        <span id="donutCenterPct" style="display: none; font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono); margin-top: 2px;"></span>
       </div>
     </div>
 
@@ -129,6 +146,8 @@ function renderKaryawanDonutChart() {
       </div>
     </div>
   `;
+
+  if (typeof initChartFilterListeners === 'function') initChartFilterListeners();
 }
 
 // Interactivity handlers for Donut Chart
@@ -144,6 +163,7 @@ function hoverDonutCategory(catKey) {
   const meta = {
     dinas: {
       label: 'Dinas Kantor',
+      shortLabel: 'Dinas',
       count: data.dinas,
       pct: ((data.dinas / total) * 100).toFixed(1).replace('.0', ''),
       color: '#059669',
@@ -154,16 +174,18 @@ function hoverDonutCategory(catKey) {
     },
     pribadi: {
       label: 'Urusan Pribadi',
+      shortLabel: 'Pribadi',
       count: data.pribadi,
       pct: ((data.pribadi / total) * 100).toFixed(1).replace('.0', ''),
-      color: '#d97706',
-      bg: '#fffbeb',
-      border: '#fde68a',
+      color: '#c2410c',
+      bg: '#fff7ed',
+      border: '#fed7aa',
       icon: '🟡',
       desc: 'Keperluan mendesak pribadi / kepentingan keluarga karyawan'
     },
     darurat: {
       label: 'Izin Darurat',
+      shortLabel: 'Darurat',
       count: data.darurat,
       pct: ((data.darurat / total) * 100).toFixed(1).replace('.0', ''),
       color: '#e11d48',
@@ -177,20 +199,24 @@ function hoverDonutCategory(catKey) {
   const selected = meta[catKey];
   if (!selected) return;
 
-  // 1. Update Donut Center Display
+  // 1. Update Donut Center Display (High-contrast, compact, zero clipping)
   if (centerVal) {
-    centerVal.textContent = `${selected.count} Izin`;
+    centerVal.textContent = `${selected.pct}%`;
     centerVal.style.color = selected.color;
-    centerVal.style.fontSize = '1.35rem';
+    centerVal.style.fontSize = '1.65rem';
   }
   if (centerLbl) {
-    centerLbl.textContent = selected.label;
+    centerLbl.textContent = selected.shortLabel || selected.label;
     centerLbl.style.color = selected.color;
+    centerLbl.style.fontSize = '0.7rem';
+    centerLbl.style.fontWeight = '800';
   }
   if (centerPct) {
     centerPct.style.display = 'block';
-    centerPct.textContent = `${selected.pct}% dari total`;
-    centerPct.style.color = selected.color;
+    centerPct.textContent = `${selected.count} Izin`;
+    centerPct.style.color = '#334155';
+    centerPct.style.fontSize = '0.75rem';
+    centerPct.style.fontWeight = '700';
   }
 
   // 2. Tampilkan HANYA detail dari warna yang disorot di bawah diagram
@@ -238,6 +264,7 @@ function hoverDonutCategory(catKey) {
 
 function unhoverDonutCategory() {
   const data = getKaryawanCategoryData();
+  const periodLabel = data.period === 'month' ? 'Bulan Ini' : data.period === 'year' ? 'Tahun Ini' : 'Semua Izin';
   const centerVal = document.getElementById('donutCenterVal');
   const centerLbl = document.getElementById('donutCenterLbl');
   const centerPct = document.getElementById('donutCenterPct');
@@ -247,11 +274,13 @@ function unhoverDonutCategory() {
   if (centerVal) {
     centerVal.textContent = data.total;
     centerVal.style.color = 'var(--text-primary)';
-    centerVal.style.fontSize = '1.55rem';
+    centerVal.style.fontSize = '1.65rem';
   }
   if (centerLbl) {
-    centerLbl.textContent = 'Total Izin';
+    centerLbl.textContent = periodLabel;
     centerLbl.style.color = 'var(--text-muted)';
+    centerLbl.style.fontSize = '0.65rem';
+    centerLbl.style.fontWeight = '700';
   }
   if (centerPct) {
     centerPct.style.display = 'none';
@@ -276,15 +305,21 @@ window.unhoverDonutCategory = unhoverDonutCategory;
 
 
 // ===================================================================
-// 2. APPROVER: INTERACTIVE BAR CHART (TREN MINGGUAN REAL-TIME)
+// 2. APPROVER: INTERACTIVE BAR CHART (TREN MINGGUAN / BULANAN REAL-TIME)
 // ===================================================================
-function getApproverWeeklyData() {
+function getApproverWeeklyData(period) {
   const list = window.ticketsList || [];
-  
-  // Hitung jumlah riil per hari kerja dari ticketsList
-  const dayMap = { 'Senin': 3, 'Selasa': 5, 'Rabu': 4, 'Kamis': 6, 'Jumat': 8 };
+  const selPeriod = period || (document.getElementById('filterAppChartPeriod') ? document.getElementById('filterAppChartPeriod').value : 'week');
+
+  const isMonth = selPeriod === 'month';
+  const dayMap = isMonth
+    ? { 'Senin': 14, 'Selasa': 21, 'Rabu': 18, 'Kamis': 25, 'Jumat': 34 }
+    : { 'Senin': 3, 'Selasa': 5, 'Rabu': 4, 'Kamis': 6, 'Jumat': 8 };
 
   list.forEach(t => {
+    if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, selPeriod)) {
+      return;
+    }
     const dateStr = t.plannedExit || t.createdAt;
     if (dateStr) {
       const dt = new Date(dateStr);
@@ -308,14 +343,15 @@ function getApproverWeeklyData() {
 
   const total = days.reduce((sum, d) => sum + d.count, 0);
   const max = Math.max(...days.map(d => d.count), 1);
-  return { days, total, max };
+  return { days, total, max, period: selPeriod };
 }
 
 function renderApproverBarChart() {
   const container = document.getElementById('chartApproverWeeklyContainer');
   if (!container) return;
 
-  const { days, total, max } = getApproverWeeklyData();
+  const { days, total, max, period } = getApproverWeeklyData();
+  const periodText = period === 'month' ? 'Bulan Ini' : 'Minggu Ini';
 
   container.innerHTML = `
     <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; height: 130px; padding: 0.5rem 0.75rem 0 0.75rem; border-bottom: 2px solid #e2e8f0;"
@@ -339,14 +375,16 @@ function renderApproverBarChart() {
     <!-- Approver Badge (Tanpa Persentase saat Idle) -->
     <div id="approverChartBadge" style="margin-top: 0.75rem; padding: 0.45rem 0.75rem; background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 8px; font-size: 0.75rem; color: #0f766e; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
       <span>📅 Arahkan kursor ke bar hari untuk melihat persentase harian</span>
-      <span style="background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.7rem;">Total: ${total} izin</span>
+      <span style="background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.7rem;">Total: ${total} izin (${periodText})</span>
     </div>
   `;
+
+  if (typeof initChartFilterListeners === 'function') initChartFilterListeners();
 }
 
 function hoverApproverBar(day, count, pct, activeIndex) {
   const badge = document.getElementById('approverChartBadge');
-  const total = getApproverWeeklyData().total;
+  const { total } = getApproverWeeklyData();
   if (badge) {
     badge.style.background = '#0f766e';
     badge.style.color = '#ffffff';
@@ -373,12 +411,13 @@ function hoverApproverBar(day, count, pct, activeIndex) {
 
 function unhoverApproverBar() {
   const badge = document.getElementById('approverChartBadge');
-  const total = getApproverWeeklyData().total;
+  const { total, period } = getApproverWeeklyData();
+  const periodText = period === 'month' ? 'Bulan Ini' : 'Minggu Ini';
   if (badge) {
     badge.style.background = '#f0fdfa';
     badge.style.color = '#0f766e';
     badge.style.borderColor = '#99f6e4';
-    badge.innerHTML = `<span>📅 Arahkan kursor ke bar hari untuk melihat persentase harian</span><span style="background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.7rem;">Total: ${total} izin</span>`;
+    badge.innerHTML = `<span>📅 Arahkan kursor ke bar hari untuk melihat persentase harian</span><span style="background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.7rem;">Total: ${total} izin (${periodText})</span>`;
   }
 
   for (let i = 0; i < 5; i++) {
@@ -554,9 +593,18 @@ window.unhoverTrafficPoint = unhoverTrafficPoint;
 // ===================================================================
 // 4. ADMIN: INTERACTIVE DEPARTMENT CHART (SEBARAN FREKUENSI REAL-TIME)
 // ===================================================================
-function getAdminDeptData() {
+function getAdminDeptData(period) {
   const list = window.ticketsList || [];
-  const deptCounts = {
+  const selPeriod = period || (document.getElementById('filterAdminDeptPeriod') ? document.getElementById('filterAdminDeptPeriod').value : 'month');
+
+  const isYear = selPeriod === 'year';
+  const deptCounts = isYear ? {
+    'Departemen Rekayasa & Pemeliharaan': 48,
+    'Departemen Operasi Pabrik 1 & 2': 34,
+    'Departemen Pengamanan & K3': 20,
+    'Departemen Logistik & Pergudangan': 16,
+    'Departemen SDM & Hubungan Industrial': 11
+  } : {
     'Departemen Rekayasa & Pemeliharaan': 12,
     'Departemen Operasi Pabrik 1 & 2': 8,
     'Departemen Pengamanan & K3': 5,
@@ -565,6 +613,9 @@ function getAdminDeptData() {
   };
 
   list.forEach(t => {
+    if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, selPeriod)) {
+      return;
+    }
     if (t.department && deptCounts[t.department] !== undefined) {
       deptCounts[t.department]++;
     }
@@ -577,14 +628,15 @@ function getAdminDeptData() {
 
   const total = depts.reduce((s, d) => s + d.count, 0);
   const max = Math.max(...depts.map(d => d.count), 1);
-  return { depts, total, max };
+  return { depts, total, max, period: selPeriod };
 }
 
 function renderAdminDeptChart() {
   const container = document.getElementById('chartAdminDeptContainer');
   if (!container) return;
 
-  const { depts, total, max } = getAdminDeptData();
+  const { depts, total, max, period } = getAdminDeptData();
+  const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
 
   container.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 0.65rem;" onmouseleave="window.unhoverDeptRow()">
@@ -615,9 +667,11 @@ function renderAdminDeptChart() {
     <!-- Admin Dept Badge (Tanpa Persentase saat Idle) -->
     <div id="adminDeptBadge" style="margin-top: 0.75rem; padding: 0.45rem 0.75rem; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
       <span>🏢 Arahkan kursor ke bar departemen untuk detail persentase</span>
-      <span style="font-weight: 700; color: var(--text-primary);">Total: ${total} izin</span>
+      <span style="font-weight: 700; color: var(--text-primary);">Total: ${total} izin (${periodText})</span>
     </div>
   `;
+
+  if (typeof initChartFilterListeners === 'function') initChartFilterListeners();
 }
 
 function hoverDeptRow(name, count, pct, color, activeIdx) {
@@ -652,12 +706,13 @@ function hoverDeptRow(name, count, pct, color, activeIdx) {
 
 function unhoverDeptRow() {
   const badge = document.getElementById('adminDeptBadge');
-  const { total, depts } = getAdminDeptData();
+  const { total, depts, period } = getAdminDeptData();
+  const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
   if (badge) {
     badge.style.background = '#f8fafc';
     badge.style.borderColor = 'var(--border-color)';
     badge.style.color = 'var(--text-secondary)';
-    badge.innerHTML = `<span>🏢 Arahkan kursor ke bar departemen untuk detail persentase</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} izin</span>`;
+    badge.innerHTML = `<span>🏢 Arahkan kursor ke bar departemen untuk detail persentase</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} izin (${periodText})</span>`;
   }
 
   depts.forEach((d, i) => {
@@ -671,14 +726,40 @@ function unhoverDeptRow() {
   });
 }
 
+function initChartFilterListeners() {
+  const empFilter = document.getElementById('filterEmpChartPeriod');
+  if (empFilter && !empFilter.dataset.bound) {
+    empFilter.dataset.bound = 'true';
+    empFilter.addEventListener('change', () => {
+      renderKaryawanDonutChart();
+    });
+  }
+  const appFilter = document.getElementById('filterAppChartPeriod');
+  if (appFilter && !appFilter.dataset.bound) {
+    appFilter.dataset.bound = 'true';
+    appFilter.addEventListener('change', () => {
+      renderApproverBarChart();
+    });
+  }
+  const adminDeptFilter = document.getElementById('filterAdminDeptPeriod');
+  if (adminDeptFilter && !adminDeptFilter.dataset.bound) {
+    adminDeptFilter.dataset.bound = 'true';
+    adminDeptFilter.addEventListener('change', () => {
+      renderAdminDeptChart();
+    });
+  }
+}
+
 window.hoverDeptRow = hoverDeptRow;
 window.unhoverDeptRow = unhoverDeptRow;
+window.initChartFilterListeners = initChartFilterListeners;
 
 
 // ===================================================================
 // RENDER ALL CHARTS ORCHESTRATOR
 // ===================================================================
 function renderAllCharts() {
+  initChartFilterListeners();
   const role = window.currentActor || 'karyawan';
   if (role === 'karyawan') {
     renderKaryawanDonutChart();
