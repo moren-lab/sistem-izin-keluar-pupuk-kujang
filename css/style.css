@@ -3270,6 +3270,195 @@ body.modal-open {
   }
 }
 
+/* ==========================================================================
+   10. MOBILE BOTTOM NAVIGATION (KARYAWAN, APPROVER, SECURITY - EXCLUDES ADMIN)
+   ========================================================================== */
+.mobile-bottom-nav {
+  display: none; /* Always hidden on PC / Desktop */
+}
+
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Only display bottom nav when NOT Admin */
+  body:not(.role-is-admin) .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 -4px 18px rgba(15, 43, 72, 0.08);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: content-box;
+  }
+
+  /* When NOT Admin on mobile: Hide hamburger toggle button and mobile sidebar */
+  body:not(.role-is-admin) .btn-sidebar-toggle {
+    display: none !important;
+  }
+  body:not(.role-is-admin) .sidebar {
+    display: none !important;
+  }
+  body:not(.role-is-admin) .sidebar-backdrop {
+    display: none !important;
+  }
+
+  /* When NOT Admin on mobile: Add bottom padding to page body so content isn't covered */
+  body:not(.role-is-admin) .page-body {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* When Admin on mobile: Hide bottom nav completely, keep hamburger toggle */
+  body.role-is-admin .mobile-bottom-nav {
+    display: none !important;
+  }
+  body.role-is-admin .btn-sidebar-toggle {
+    display: inline-flex !important;
+  }
+
+  /* Bottom nav group container */
+  .bottom-nav-group {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  /* Individual bottom nav item */
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    height: 100%;
+    padding: 6px 2px 4px 2px;
+    color: #64748b;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+  }
+
+  .bottom-nav-item:active {
+    transform: scale(0.94);
+  }
+
+  .bnav-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+  }
+
+  .bnav-icon-wrap svg {
+    width: 21px;
+    height: 21px;
+    stroke: currentColor;
+    transition: stroke 0.2s ease, transform 0.2s ease;
+  }
+
+  .bnav-label {
+    font-size: 0.675rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: currentColor;
+    transition: color 0.2s ease, font-weight 0.2s ease;
+    letter-spacing: -0.01em;
+  }
+
+  /* Active state */
+  .bottom-nav-item.active {
+    color: #059669; /* Pupuk Kujang Teal */
+  }
+
+  .bottom-nav-item.active .bnav-icon-wrap svg {
+    stroke: #059669;
+    stroke-width: 2.3;
+    transform: translateY(-1px);
+  }
+
+  .bottom-nav-item.active .bnav-label {
+    color: #059669;
+    font-weight: 700;
+  }
+
+  /* Active indicator top bar */
+  .bottom-nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 32px;
+    height: 3px;
+    background: #059669;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4);
+  }
+
+  /* Special Highlight for Scan QR in Security */
+  .bottom-nav-item.bnav-special-scan {
+    color: #0891b2;
+  }
+  .bottom-nav-item.bnav-special-scan .bnav-icon-wrap {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    color: #ffffff;
+    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    box-shadow: 0 3px 8px rgba(8, 145, 178, 0.35);
+    margin-top: -4px;
+  }
+  .bottom-nav-item.bnav-special-scan .bnav-icon-wrap svg {
+    width: 20px;
+    height: 20px;
+    stroke: #ffffff;
+  }
+  .bottom-nav-item.bnav-special-scan.active .bnav-label {
+    color: #0891b2;
+    font-weight: 700;
+  }
+  .bottom-nav-item.bnav-special-scan.active::before {
+    background: #0891b2;
+  }
+
+  /* Badge Counter on Bottom Nav */
+  .bnav-badge {
+    position: absolute;
+    top: -4px;
+    right: -7px;
+    background: #e11d48;
+    color: #ffffff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 9999px;
+    border: 1.5px solid #ffffff;
+    min-width: 16px;
+    text-align: center;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(225, 29, 72, 0.3);
+  }
+}
+
+
 
 
 

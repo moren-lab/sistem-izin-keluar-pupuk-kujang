@@ -24,9 +24,14 @@ function updateApproverMetrics() {
 
   const sidebarPendingBadge = document.getElementById('sidebarPendingBadge');
   const headingPendingBadge = document.getElementById('headingPendingBadge');
+  const bnavPendingBadge = document.getElementById('bnavPendingBadge');
 
   if (sidebarPendingBadge) sidebarPendingBadge.textContent = pending;
   if (headingPendingBadge) headingPendingBadge.textContent = pending;
+  if (bnavPendingBadge) {
+    bnavPendingBadge.textContent = pending;
+    bnavPendingBadge.style.display = pending > 0 ? 'inline-block' : 'none';
+  }
 }
 
 function renderApproverDashboard() {

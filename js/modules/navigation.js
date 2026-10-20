@@ -65,6 +65,10 @@ function setKaryawanNav(navKey) {
   const menuKaryawanPengajuanSaya = document.getElementById('menuKaryawanPengajuanSaya');
   const menuKaryawanRiwayat = document.getElementById('menuKaryawanRiwayat');
 
+  const bnavEmpDashboard = document.getElementById('bnavEmpDashboard');
+  const bnavEmpPengajuan = document.getElementById('bnavEmpPengajuan');
+  const bnavEmpRiwayat = document.getElementById('bnavEmpRiwayat');
+
   const karyawanDashboardPage = document.getElementById('karyawanDashboardPage');
   const karyawanPengajuanPage = document.getElementById('karyawanPengajuanPage');
   const karyawanRiwayatPage = document.getElementById('karyawanRiwayatPage');
@@ -72,6 +76,10 @@ function setKaryawanNav(navKey) {
   if (menuKaryawanDashboard) menuKaryawanDashboard.classList.toggle('active', navKey === 'dashboard');
   if (menuKaryawanPengajuanSaya) menuKaryawanPengajuanSaya.classList.toggle('active', navKey === 'pengajuan');
   if (menuKaryawanRiwayat) menuKaryawanRiwayat.classList.toggle('active', navKey === 'riwayat');
+
+  if (bnavEmpDashboard) bnavEmpDashboard.classList.toggle('active', navKey === 'dashboard');
+  if (bnavEmpPengajuan) bnavEmpPengajuan.classList.toggle('active', navKey === 'pengajuan');
+  if (bnavEmpRiwayat) bnavEmpRiwayat.classList.toggle('active', navKey === 'riwayat');
 
   if (karyawanDashboardPage) karyawanDashboardPage.style.display = navKey === 'dashboard' ? 'block' : 'none';
   if (karyawanPengajuanPage) karyawanPengajuanPage.style.display = navKey === 'pengajuan' ? 'block' : 'none';
@@ -94,6 +102,10 @@ function setApproverNav(navKey) {
   const menuApproverAntrian = document.getElementById('menuApproverAntrian');
   const menuApproverPelacakan = document.getElementById('menuApproverPelacakan');
 
+  const bnavAppDashboard = document.getElementById('bnavAppDashboard');
+  const bnavAppAntrian = document.getElementById('bnavAppAntrian');
+  const bnavAppPelacakan = document.getElementById('bnavAppPelacakan');
+
   const approverDashboardPage = document.getElementById('approverDashboardPage');
   const approverAntrianPage = document.getElementById('approverAntrianPage');
   const approverPelacakanPage = document.getElementById('approverPelacakanPage');
@@ -101,6 +113,10 @@ function setApproverNav(navKey) {
   if (menuApproverDashboard) menuApproverDashboard.classList.toggle('active', navKey === 'dashboard');
   if (menuApproverAntrian) menuApproverAntrian.classList.toggle('active', navKey === 'antrian');
   if (menuApproverPelacakan) menuApproverPelacakan.classList.toggle('active', navKey === 'pelacakan');
+
+  if (bnavAppDashboard) bnavAppDashboard.classList.toggle('active', navKey === 'dashboard');
+  if (bnavAppAntrian) bnavAppAntrian.classList.toggle('active', navKey === 'antrian');
+  if (bnavAppPelacakan) bnavAppPelacakan.classList.toggle('active', navKey === 'pelacakan');
 
   if (approverDashboardPage) approverDashboardPage.style.display = navKey === 'dashboard' ? 'block' : 'none';
   if (approverAntrianPage) approverAntrianPage.style.display = navKey === 'antrian' ? 'block' : 'none';
@@ -124,6 +140,11 @@ function setSecurityNav(navKey) {
   const menuSecurityPelacakan = document.getElementById('menuSecurityPelacakan');
   const menuSecurityRiwayat = document.getElementById('menuSecurityRiwayat');
 
+  const bnavSecDashboard = document.getElementById('bnavSecDashboard');
+  const bnavSecScanner = document.getElementById('bnavSecScanner');
+  const bnavSecPelacakan = document.getElementById('bnavSecPelacakan');
+  const bnavSecRiwayat = document.getElementById('bnavSecRiwayat');
+
   const securityDashboardPage = document.getElementById('securityDashboardPage');
   const securityScannerPage = document.getElementById('securityScannerPage');
   const securityPelacakanPage = document.getElementById('securityPelacakanPage');
@@ -133,6 +154,11 @@ function setSecurityNav(navKey) {
   if (menuSecurityScanner) menuSecurityScanner.classList.toggle('active', navKey === 'scanner');
   if (menuSecurityPelacakan) menuSecurityPelacakan.classList.toggle('active', navKey === 'pelacakan');
   if (menuSecurityRiwayat) menuSecurityRiwayat.classList.toggle('active', navKey === 'riwayat');
+
+  if (bnavSecDashboard) bnavSecDashboard.classList.toggle('active', navKey === 'dashboard');
+  if (bnavSecScanner) bnavSecScanner.classList.toggle('active', navKey === 'scanner');
+  if (bnavSecPelacakan) bnavSecPelacakan.classList.toggle('active', navKey === 'pelacakan');
+  if (bnavSecRiwayat) bnavSecRiwayat.classList.toggle('active', navKey === 'riwayat');
 
   if (securityDashboardPage) securityDashboardPage.style.display = navKey === 'dashboard' ? 'block' : 'none';
   if (securityScannerPage) securityScannerPage.style.display = navKey === 'scanner' ? 'block' : 'none';
@@ -286,10 +312,41 @@ function switchRole(role) {
     if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Administrator Pengamanan & K3 (Bambang Sutrisno)', 'info');
   }
 
+  // Update mobile bottom nav visibility & active role group (Excludes Admin)
+  updateMobileBottomNav(role);
+
   if (typeof window.renderAllCharts === 'function') {
     window.renderAllCharts();
   }
 }
+
+// UPDATE MOBILE BOTTOM NAV (Karyawan, Approver, Security ONLY - Excludes Admin)
+function updateMobileBottomNav(role) {
+  const bottomNavKaryawan = document.getElementById('bottomNavKaryawan');
+  const bottomNavApprover = document.getElementById('bottomNavApprover');
+  const bottomNavSecurity = document.getElementById('bottomNavSecurity');
+  const mobileBottomNav = document.getElementById('mobileBottomNav');
+
+  // Toggle body class so responsive CSS applies automatically
+  document.body.classList.toggle('role-is-admin', role === 'admin');
+
+  if (!mobileBottomNav) return;
+
+  if (role === 'admin') {
+    mobileBottomNav.style.display = 'none';
+    if (bottomNavKaryawan) bottomNavKaryawan.style.display = 'none';
+    if (bottomNavApprover) bottomNavApprover.style.display = 'none';
+    if (bottomNavSecurity) bottomNavSecurity.style.display = 'none';
+    return;
+  }
+
+  // For Karyawan, Approver, and Security:
+  mobileBottomNav.style.display = ''; // Let CSS media query control visibility
+  if (bottomNavKaryawan) bottomNavKaryawan.style.display = role === 'karyawan' ? 'flex' : 'none';
+  if (bottomNavApprover) bottomNavApprover.style.display = role === 'approver' ? 'flex' : 'none';
+  if (bottomNavSecurity) bottomNavSecurity.style.display = role === 'security' ? 'flex' : 'none';
+}
+window.updateMobileBottomNav = updateMobileBottomNav;
 
 // BIND LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
@@ -300,6 +357,33 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', toggleSidebar);
   if (btnCloseSidebarMobile) btnCloseSidebarMobile.addEventListener('click', closeMobileSidebar);
   if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+
+  // Bottom Nav Button Listeners
+  const bnavEmpDashboard = document.getElementById('bnavEmpDashboard');
+  const bnavEmpPengajuan = document.getElementById('bnavEmpPengajuan');
+  const bnavEmpRiwayat = document.getElementById('bnavEmpRiwayat');
+  if (bnavEmpDashboard) bnavEmpDashboard.addEventListener('click', () => setKaryawanNav('dashboard'));
+  if (bnavEmpPengajuan) bnavEmpPengajuan.addEventListener('click', () => setKaryawanNav('pengajuan'));
+  if (bnavEmpRiwayat) bnavEmpRiwayat.addEventListener('click', () => setKaryawanNav('riwayat'));
+
+  const bnavAppDashboard = document.getElementById('bnavAppDashboard');
+  const bnavAppAntrian = document.getElementById('bnavAppAntrian');
+  const bnavAppPelacakan = document.getElementById('bnavAppPelacakan');
+  if (bnavAppDashboard) bnavAppDashboard.addEventListener('click', () => setApproverNav('dashboard'));
+  if (bnavAppAntrian) bnavAppAntrian.addEventListener('click', () => setApproverNav('antrian'));
+  if (bnavAppPelacakan) bnavAppPelacakan.addEventListener('click', () => setApproverNav('pelacakan'));
+
+  const bnavSecDashboard = document.getElementById('bnavSecDashboard');
+  const bnavSecScanner = document.getElementById('bnavSecScanner');
+  const bnavSecPelacakan = document.getElementById('bnavSecPelacakan');
+  const bnavSecRiwayat = document.getElementById('bnavSecRiwayat');
+  if (bnavSecDashboard) bnavSecDashboard.addEventListener('click', () => setSecurityNav('dashboard'));
+  if (bnavSecScanner) bnavSecScanner.addEventListener('click', () => setSecurityNav('scanner'));
+  if (bnavSecPelacakan) bnavSecPelacakan.addEventListener('click', () => setSecurityNav('pelacakan'));
+  if (bnavSecRiwayat) bnavSecRiwayat.addEventListener('click', () => setSecurityNav('riwayat'));
+
+  // Initialize Mobile Bottom Nav state
+  updateMobileBottomNav(window.currentActor || 'karyawan');
 
   const menuKaryawanDashboard = document.getElementById('menuKaryawanDashboard');
   const menuKaryawanPengajuanSaya = document.getElementById('menuKaryawanPengajuanSaya');

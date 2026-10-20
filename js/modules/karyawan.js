@@ -32,13 +32,18 @@ function updateKaryawanMetrics() {
   if (sidebarOutsideBadge) sidebarOutsideBadge.textContent = outside;
   if (headingPendingBadge) headingPendingBadge.textContent = pending;
 
-  // Active permit badge for Karyawan sidebar (Pengajuan Saya)
+  // Active permit badge for Karyawan sidebar & mobile bottom nav (Pengajuan Saya)
   const activeCount = ticketsList.filter(t => 
     t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'
   ).length;
   if (sidebarEmpActiveBadge) {
     sidebarEmpActiveBadge.textContent = activeCount;
     sidebarEmpActiveBadge.style.display = activeCount > 0 ? 'inline-block' : 'none';
+  }
+  const bnavEmpActiveBadge = document.getElementById('bnavEmpActiveBadge');
+  if (bnavEmpActiveBadge) {
+    bnavEmpActiveBadge.textContent = activeCount;
+    bnavEmpActiveBadge.style.display = activeCount > 0 ? 'inline-block' : 'none';
   }
 }
 

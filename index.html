@@ -2796,6 +2796,135 @@
     </div>
   </div>
 
+  <!-- ================= MOBILE BOTTOM NAVIGATION (KARYAWAN, APPROVER, SECURITY ONLY - EXCLUDES ADMIN) ================= -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Navigasi Bawah Layar Mobile">
+    <!-- Bottom Nav Karyawan -->
+    <div class="bottom-nav-group" id="bottomNavKaryawan">
+      <button type="button" class="bottom-nav-item active" id="bnavEmpDashboard">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="bnav-label">Dashboard</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item" id="bnavEmpPengajuan">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span class="bnav-badge" id="bnavEmpActiveBadge" style="display: none;">0</span>
+        </div>
+        <span class="bnav-label">Pengajuan</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item" id="bnavEmpRiwayat">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <span class="bnav-label">Riwayat</span>
+      </button>
+    </div>
+
+    <!-- Bottom Nav Approver (Atasan) -->
+    <div class="bottom-nav-group" id="bottomNavApprover" style="display: none;">
+      <button type="button" class="bottom-nav-item active" id="bnavAppDashboard">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="bnav-label">Dashboard</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item" id="bnavAppAntrian">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span class="bnav-badge" id="bnavPendingBadge">0</span>
+        </div>
+        <span class="bnav-label">Antrean</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item" id="bnavAppPelacakan">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+          </svg>
+        </div>
+        <span class="bnav-label">Pelacakan</span>
+      </button>
+    </div>
+
+    <!-- Bottom Nav Security (Pos Jaga) -->
+    <div class="bottom-nav-group" id="bottomNavSecurity" style="display: none;">
+      <button type="button" class="bottom-nav-item active" id="bnavSecDashboard">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="bnav-label">Dashboard</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item bnav-special-scan" id="bnavSecScanner">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+            <line x1="7" y1="12" x2="17" y2="12"></line>
+          </svg>
+        </div>
+        <span class="bnav-label">Scan QR</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item" id="bnavSecPelacakan">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <span class="bnav-label">Personel</span>
+      </button>
+
+      <button type="button" class="bottom-nav-item" id="bnavSecRiwayat">
+        <div class="bnav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <span class="bnav-label">Log Pos</span>
+      </button>
+    </div>
+  </nav>
+
   <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" id="toastContainer"></div>
 
