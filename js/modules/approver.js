@@ -63,6 +63,7 @@ function renderApproverDashboard() {
   // Emergency tickets breakdown: Locked (Need Authorization) vs Active (Monitoring)
   const lockedEmergencyTickets = ticketsList.filter(t => t.isEmergency && t.status === 'Menunggu Otorisasi Darurat');
   const activeEmergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !t.emergencyLocked && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'));
+  const emergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && t.status !== 'Selesai' && t.status !== 'Ditolak' && t.status !== 'Dibatalkan');
 
   // Urgent Attention Banner
   if (approverUrgentBanner) {
@@ -188,7 +189,7 @@ function renderApproverDashboard() {
           </button>
         </div>
       `;
-    } else if (emergencyTickets.length === 0 && pendingExtensions.length === 0) {
+    } else if (lockedEmergencyTickets.length === 0 && activeEmergencyTickets.length === 0 && pendingExtensions.length === 0) {
       bannerHtml += `
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
           <div style="font-size: 1.2rem;">✅</div>
