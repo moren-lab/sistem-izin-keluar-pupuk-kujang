@@ -73,6 +73,39 @@ function handleOpenNewRequest() {
       }
     }
 
+    const btnBlockedCancelAndNew = document.getElementById('btnBlockedCancelAndNew');
+    if (btnBlockedCancelAndNew) {
+      if (canCancel) {
+        btnBlockedCancelAndNew.style.display = 'inline-flex';
+        btnBlockedCancelAndNew.onclick = () => {
+          if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
+          activeTicket.status = 'Dibatalkan';
+          if (!activeTicket.timeline) activeTicket.timeline = [];
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, '0');
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+          const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+          activeTicket.timeline.unshift({
+            event: 'Izin Dibatalkan (Buat Baru)',
+            time: nowFormatted,
+            by: `${window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+            desc: `Izin dibatalkan oleh pemohon agar dapat mengajukan izin baru.`
+          });
+          window.saveTickets(window.ticketsList || []);
+          if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+          if (typeof window.showToast === 'function') {
+            window.showToast(`Izin #${activeTicket.id} telah dibatalkan. Membuka formulir pengajuan baru...`, 'info');
+          }
+          setTimeout(() => {
+            handleOpenNewRequest();
+          }, 100);
+        };
+      } else {
+        btnBlockedCancelAndNew.style.display = 'none';
+        btnBlockedCancelAndNew.onclick = null;
+      }
+    }
+
     if (modalActiveBlocked) modalActiveBlocked.classList.add('open');
     if (typeof window.showToast === 'function') {
       window.showToast(`Pengajuan baru ditangguhkan: Anda masih memiliki izin aktif (${activeTicket.id})!`, 'danger');
@@ -204,8 +237,12 @@ function openEditEmergencyModal(ticket) {
 
   // 1. Pilih atasan untuk Notifikasi & Pelacakan
   const emergApprover = document.getElementById('emergApprover');
-  if (emergApprover && ticket.approverName) {
-    emergApprover.value = ticket.approverName;
+  const targetApprover = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
+  if (emergApprover) {
+    emergApprover.value = targetApprover;
+  }
+  if (typeof window.chooseEmergApproverByName === 'function') {
+    window.chooseEmergApproverByName(targetApprover);
   }
 
   // 2. Kategori Keperluan & Tipe Kepulangan
@@ -368,26 +405,26 @@ function highlightApproverMatch(text, query) {
   return text.replace(regex, '<mark class="approver-highlight">$1</mark>');
 }
 
-function setupApproverSearch() {
-  const searchInput = document.getElementById('searchApproverInput');
-  const selectApprover = document.getElementById('selectApprover');
-  const btnClear = document.getElementById('btnClearApproverSearch');
-  const btnToggle = document.getElementById('btnToggleApproverList');
-  const dropdown = document.getElementById('approverFloatingDropdown');
-  const beforeSearchBanner = document.getElementById('approverBeforeSearchBanner');
-  const itemsList = document.getElementById('approverItemsList');
-  const emptyState = document.getElementById('approverEmptyState');
-  const emptySearchTerm = document.getElementById('emptySearchTerm');
-  const foundBadge = document.getElementById('approverFoundBadge');
-  const dropdownSubtitle = document.getElementById('approverDropdownSubtitle');
-  const selectedPreview = document.getElementById('approverSelectedPreview');
-  const selectedAvatar = document.getElementById('selectedApproverAvatar');
-  const selectedName = document.getElementById('selectedApproverName');
-  const selectedTitle = document.getElementById('selectedApproverTitle');
-  const btnChangeChoice = document.getElementById('btnChangeApproverChoice');
-  const comboboxWrapper = document.getElementById('approverComboboxWrapper');
+function setupSingleApproverCombobox(cfg) {
+  const searchInput = document.getElementById(cfg.searchInputId);
+  const selectApprover = document.getElementById(cfg.selectApproverId);
+  const btnClear = document.getElementById(cfg.btnClearId);
+  const btnToggle = document.getElementById(cfg.btnToggleId);
+  const dropdown = document.getElementById(cfg.dropdownId);
+  const beforeSearchBanner = document.getElementById(cfg.beforeSearchBannerId);
+  const itemsList = document.getElementById(cfg.itemsListId);
+  const emptyState = document.getElementById(cfg.emptyStateId);
+  const emptySearchTerm = document.getElementById(cfg.emptySearchTermId);
+  const foundBadge = document.getElementById(cfg.foundBadgeId);
+  const dropdownSubtitle = document.getElementById(cfg.dropdownSubtitleId);
+  const selectedPreview = document.getElementById(cfg.selectedPreviewId);
+  const selectedAvatar = document.getElementById(cfg.selectedAvatarId);
+  const selectedName = document.getElementById(cfg.selectedNameId);
+  const selectedTitle = document.getElementById(cfg.selectedTitleId);
+  const btnChangeChoice = document.getElementById(cfg.btnChangeChoiceId);
+  const comboboxWrapper = document.getElementById(cfg.comboboxWrapperId);
 
-  if (!searchInput || !selectApprover || !dropdown) return;
+  if (!searchInput || !selectApprover || !dropdown) return null;
 
   let currentKeyboardIndex = -1;
 
@@ -408,22 +445,6 @@ function setupApproverSearch() {
         department: 'Departemen Rekayasa & Pemeliharaan',
         isDirectSupervisor: false,
         avatarBg: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
-      },
-      {
-        nip: 'PK-2010-0112',
-        name: 'Dr. Agus Priyanto, M.Eng.',
-        title: 'VP Produksi & Utilitas',
-        department: 'Direktorat Operasi Pabrik',
-        isDirectSupervisor: false,
-        avatarBg: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)'
-      },
-      {
-        nip: 'PK-2014-0331',
-        name: 'Bambang Sutrisno, S.T.',
-        title: 'Supervisi Pengamanan & K3',
-        department: 'Departemen Pengamanan & K3',
-        isDirectSupervisor: false,
-        avatarBg: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)'
       }
     ];
   }
@@ -434,7 +455,6 @@ function setupApproverSearch() {
     const approvers = getApprovers();
 
     if (!cleanQuery) {
-      // SEBELUM SEARCH: Tampilkan banner instruksi "Ketik / cari nama atasan anda"
       if (beforeSearchBanner) beforeSearchBanner.style.display = 'flex';
       if (dropdownSubtitle) dropdownSubtitle.textContent = 'Daftar Atasan Peninjau';
       if (foundBadge) foundBadge.textContent = `${approvers.length} Atasan`;
@@ -445,7 +465,6 @@ function setupApproverSearch() {
       return;
     }
 
-    // SAAT MENGETIK (SEARCHING)
     if (beforeSearchBanner) beforeSearchBanner.style.display = 'none';
     const filtered = approvers.filter(a => {
       return (
@@ -527,11 +546,10 @@ function setupApproverSearch() {
     });
   }
 
-  function chooseApprover(approver) {
+  function chooseApprover(approver, silent = false) {
     selectApprover.value = approver.name;
     searchInput.value = approver.name;
 
-    // Tampilkan preview kartu atasan terpilih
     if (selectedName) selectedName.textContent = approver.name;
     if (selectedTitle) selectedTitle.textContent = `${approver.title} • ${approver.department}`;
     if (selectedAvatar) {
@@ -542,13 +560,20 @@ function setupApproverSearch() {
     if (btnClear) btnClear.style.display = 'flex';
 
     closeDropdown();
-
-    // Trigger change on selectApprover for any observers
     selectApprover.dispatchEvent(new Event('change', { bubbles: true }));
 
-    if (typeof window.showToast === 'function') {
+    if (!silent && typeof window.showToast === 'function') {
       window.showToast(`Atasan peninjau dipilih: ${approver.name}`, 'info');
     }
+  }
+
+  function resetApproverSelection() {
+    selectApprover.value = '';
+    searchInput.value = '';
+    if (selectedPreview) selectedPreview.style.display = 'none';
+    if (btnClear) btnClear.style.display = 'none';
+    renderList('');
+    selectApprover.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   function openDropdown() {
@@ -563,15 +588,6 @@ function setupApproverSearch() {
     currentKeyboardIndex = -1;
   }
 
-  function resetApproverSelection() {
-    selectApprover.value = '';
-    searchInput.value = '';
-    if (selectedPreview) selectedPreview.style.display = 'none';
-    if (btnClear) btnClear.style.display = 'none';
-    renderList('');
-  }
-
-  // EVENT LISTENERS
   searchInput.addEventListener('focus', () => {
     openDropdown();
   });
@@ -662,22 +678,73 @@ function setupApproverSearch() {
     });
   }
 
-  // Click outside listener
   document.addEventListener('click', (e) => {
     if (comboboxWrapper && !comboboxWrapper.contains(e.target)) {
       closeDropdown();
     }
   });
 
-  // Expose global methods
-  window.resetApproverSearch = resetApproverSelection;
-  window.chooseApproverByName = (approverName) => {
-    const approver = getApprovers().find(a => a.name === approverName);
-    if (approver) chooseApprover(approver);
-  };
-
-  // Initial render
   renderList('');
+
+  return {
+    chooseApproverByName: (name, silent = false) => {
+      const app = getApprovers().find(a => a.name === name);
+      if (app) chooseApprover(app, silent);
+    },
+    resetApproverSelection
+  };
+}
+
+function setupApproverSearch() {
+  const reg = setupSingleApproverCombobox({
+    searchInputId: 'searchApproverInput',
+    selectApproverId: 'selectApprover',
+    btnClearId: 'btnClearApproverSearch',
+    btnToggleId: 'btnToggleApproverList',
+    dropdownId: 'approverFloatingDropdown',
+    beforeSearchBannerId: 'approverBeforeSearchBanner',
+    itemsListId: 'approverItemsList',
+    emptyStateId: 'approverEmptyState',
+    emptySearchTermId: 'emptySearchTerm',
+    foundBadgeId: 'approverFoundBadge',
+    dropdownSubtitleId: 'approverDropdownSubtitle',
+    selectedPreviewId: 'approverSelectedPreview',
+    selectedAvatarId: 'selectedApproverAvatar',
+    selectedNameId: 'selectedApproverName',
+    selectedTitleId: 'selectedApproverTitle',
+    btnChangeChoiceId: 'btnChangeApproverChoice',
+    comboboxWrapperId: 'approverComboboxWrapper'
+  });
+
+  if (reg) {
+    window.resetApproverSearch = reg.resetApproverSelection;
+    window.chooseApproverByName = reg.chooseApproverByName;
+  }
+
+  const emg = setupSingleApproverCombobox({
+    searchInputId: 'searchEmergApproverInput',
+    selectApproverId: 'emergApprover',
+    btnClearId: 'btnClearEmergApproverSearch',
+    btnToggleId: 'btnToggleEmergApproverList',
+    dropdownId: 'emergApproverFloatingDropdown',
+    beforeSearchBannerId: 'emergApproverBeforeSearchBanner',
+    itemsListId: 'emergApproverItemsList',
+    emptyStateId: 'emergApproverEmptyState',
+    emptySearchTermId: 'emergEmptySearchTerm',
+    foundBadgeId: 'emergApproverFoundBadge',
+    dropdownSubtitleId: 'emergApproverDropdownSubtitle',
+    selectedPreviewId: 'emergApproverSelectedPreview',
+    selectedAvatarId: 'selectedEmergApproverAvatar',
+    selectedNameId: 'selectedEmergApproverName',
+    selectedTitleId: 'selectedEmergApproverTitle',
+    btnChangeChoiceId: 'btnChangeEmergApproverChoice',
+    comboboxWrapperId: 'emergApproverComboboxWrapper'
+  });
+
+  if (emg) {
+    window.resetEmergApproverSearch = emg.resetApproverSelection;
+    window.chooseEmergApproverByName = emg.chooseApproverByName;
+  }
 }
 
 function getFormattedDateTimeLocal(dt = new Date()) {
@@ -906,7 +973,11 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
-    infoApproverLbl.textContent = `Catatan Atasan • ${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}`;
+    if (ticket.reassignedFrom) {
+      infoApproverLbl.innerHTML = `Catatan Atasan • <strong>${ticket.approverName}</strong> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
+    } else {
+      infoApproverLbl.textContent = `Catatan Atasan • ${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}`;
+    }
   }
 
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
@@ -926,14 +997,16 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoNoticeText = document.getElementById('infoNoticeText');
   if (infoNoticeText) {
-    if (ticket.status === 'Selesai') {
+    if (ticket.reassignedFrom && (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat')) {
+      infoNoticeText.innerHTML = `Pengajuan ini dialihkan oleh pemohon ke <strong>${ticket.approverName}</strong> pada ${ticket.reassignedAt || 'hari ini'} dan menunggu keputusan persetujuan.`;
+    } else if (ticket.status === 'Selesai') {
       infoNoticeText.textContent = `Perjalanan selesai pukul ${ticket.scanInTime || '10.52'} WIB. QR tiket ini tidak berlaku lagi.`;
     } else if (ticket.status === 'Sedang di Luar') {
       infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Scan In sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) : '13.00'} WIB.`;
     } else if (ticket.status === 'Disetujui') {
       infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos 1 untuk Scan Out.`;
     } else if (ticket.status === 'Menunggu Persetujuan') {
-      infoNoticeText.textContent = `Tiket sedang menunggu persetujuan dari Atasan langsung. QR belum aktif.`;
+      infoNoticeText.textContent = `Tiket sedang menunggu persetujuan dari Atasan langsung (${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}). QR belum aktif.`;
     } else {
       infoNoticeText.textContent = `Status tiket: ${ticket.status}. Catatan tersimpan dalam audit trail sistem.`;
     }
@@ -942,72 +1015,100 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   // --- TAB 2: RIWAYAT AKTIVITAS (CONNECTED TIMELINE) ---
   const figmaDetailTimelineList = document.getElementById('figmaDetailTimelineList');
   if (figmaDetailTimelineList) {
-    const isApproved = ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai';
-    const isScanOut = ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai' || ticket.scanOutTime;
-    const isDone = ticket.status === 'Selesai';
+    if (ticket.timeline && Array.isArray(ticket.timeline) && ticket.timeline.length > 0) {
+      figmaDetailTimelineList.innerHTML = ticket.timeline.map((item, idx) => {
+        let dotColor = '#059669'; // default green
+        const evLower = (item.event || '').toLowerCase();
+        if (evLower.includes('dibuat') || evLower.includes('diajukan')) {
+          dotColor = '#2563eb';
+        } else if (evLower.includes('dialihkan')) {
+          dotColor = '#d97706';
+        } else if (evLower.includes('tolak') || evLower.includes('batal')) {
+          dotColor = '#dc2626';
+        } else if (evLower.includes('darurat') || evLower.includes('terkunci')) {
+          dotColor = '#e11d48';
+        }
 
-    const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Okt 2026';
-    const exitHour = ticket.plannedExit ? ticket.plannedExit.slice(11, 16) : '08.15';
+        return `
+          <div class="figma-timeline-item">
+            <div class="figma-timeline-dot" style="background: ${dotColor};"></div>
+            <div class="figma-timeline-top">
+              <span class="figma-timeline-event" style="${idx === 0 ? 'font-weight: 800; color: #0f172a;' : ''}">${item.event}</span>
+              <span class="figma-timeline-time">${item.time}</span>
+            </div>
+            <div class="figma-timeline-actor">${item.by || 'Sistem'}</div>
+            <div class="figma-timeline-desc">${item.desc || ''}</div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      const isApproved = ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai';
+      const isScanOut = ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai' || ticket.scanOutTime;
+      const isDone = ticket.status === 'Selesai';
 
-    let timelineHtml = `
-      <!-- Step 1: Pengajuan Dibuat -->
-      <div class="figma-timeline-item">
-        <div class="figma-timeline-dot"></div>
-        <div class="figma-timeline-top">
-          <span class="figma-timeline-event">Pengajuan Dibuat</span>
-          <span class="figma-timeline-time">${dayStr} • ${exitHour} WIB</span>
-        </div>
-        <div class="figma-timeline-actor">${ticket.applicantName || 'Budi Pratama, S.T.'} • ${ticket.applicantNip || 'PK-2024-8841'}</div>
-        <div class="figma-timeline-desc">${ticket.category} • ${ticket.destination}</div>
-      </div>
-    `;
+      const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Okt 2026';
+      const exitHour = ticket.plannedExit ? ticket.plannedExit.slice(11, 16) : '08.15';
 
-    if (isApproved) {
-      timelineHtml += `
-        <!-- Step 2: Disetujui Atasan -->
+      let timelineHtml = `
+        <!-- Step 1: Pengajuan Dibuat -->
         <div class="figma-timeline-item">
           <div class="figma-timeline-dot"></div>
           <div class="figma-timeline-top">
-            <span class="figma-timeline-event">Disetujui Atasan</span>
-            <span class="figma-timeline-time">${dayStr} • 08.32 WIB</span>
+            <span class="figma-timeline-event">Pengajuan Dibuat</span>
+            <span class="figma-timeline-time">${dayStr} • ${exitHour} WIB</span>
           </div>
-          <div class="figma-timeline-actor">${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
-          <div class="figma-timeline-desc">"${ticket.approverNote || 'Disetujui. Sampaikan hasil pemeriksaan setelah kembali.'}"</div>
+          <div class="figma-timeline-actor">${ticket.applicantName || 'Budi Pratama, S.T.'} • ${ticket.applicantNip || 'PK-2024-8841'}</div>
+          <div class="figma-timeline-desc">${ticket.category} • ${ticket.destination}</div>
         </div>
       `;
-    }
 
-    if (isScanOut) {
-      timelineHtml += `
-        <!-- Step 3: Scan Out Pos Jaga -->
-        <div class="figma-timeline-item">
-          <div class="figma-timeline-dot"></div>
-          <div class="figma-timeline-top">
-            <span class="figma-timeline-event">Scan Out Pos Jaga</span>
-            <span class="figma-timeline-time">${dayStr} • ${ticket.scanOutTime || '09.03'} WIB</span>
+      if (isApproved) {
+        timelineHtml += `
+          <!-- Step 2: Disetujui Atasan -->
+          <div class="figma-timeline-item">
+            <div class="figma-timeline-dot"></div>
+            <div class="figma-timeline-top">
+              <span class="figma-timeline-event">Disetujui Atasan</span>
+              <span class="figma-timeline-time">${dayStr} • 08.32 WIB</span>
+            </div>
+            <div class="figma-timeline-actor">${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
+            <div class="figma-timeline-desc">"${ticket.approverNote || 'Disetujui. Sampaikan hasil pemeriksaan setelah kembali.'}"</div>
           </div>
-          <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>
-          <div class="figma-timeline-desc">Identitas dan QR sesuai. Karyawan keluar area.</div>
-        </div>
-      `;
-    }
+        `;
+      }
 
-    if (isDone) {
-      timelineHtml += `
-        <!-- Step 4: Scan In Pos Jaga -->
-        <div class="figma-timeline-item">
-          <div class="figma-timeline-dot green"></div>
-          <div class="figma-timeline-top">
-            <span class="figma-timeline-event">Scan In Pos Jaga</span>
-            <span class="figma-timeline-time">${dayStr} • ${ticket.scanInTime || '10.52'} WIB</span>
+      if (isScanOut) {
+        timelineHtml += `
+          <!-- Step 3: Scan Out Pos Jaga -->
+          <div class="figma-timeline-item">
+            <div class="figma-timeline-dot"></div>
+            <div class="figma-timeline-top">
+              <span class="figma-timeline-event">Scan Out Pos Jaga</span>
+              <span class="figma-timeline-time">${dayStr} • ${ticket.scanOutTime || '09.03'} WIB</span>
+            </div>
+            <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>
+            <div class="figma-timeline-desc">Identitas dan QR sesuai. Karyawan keluar area.</div>
           </div>
-          <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>
-          <div class="figma-timeline-desc">Tepat Waktu • 8 menit sebelum batas kembali pukul 11.00 WIB.</div>
-        </div>
-      `;
-    }
+        `;
+      }
 
-    figmaDetailTimelineList.innerHTML = timelineHtml;
+      if (isDone) {
+        timelineHtml += `
+          <!-- Step 4: Scan In -->
+          <div class="figma-timeline-item">
+            <div class="figma-timeline-dot green"></div>
+            <div class="figma-timeline-top">
+              <span class="figma-timeline-event">Scan In</span>
+              <span class="figma-timeline-time">${dayStr} • ${ticket.scanInTime || '10.52'} WIB</span>
+            </div>
+            <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>
+            <div class="figma-timeline-desc">Tepat Waktu • 8 menit sebelum batas kembali pukul 11.00 WIB.</div>
+          </div>
+        `;
+      }
+
+      figmaDetailTimelineList.innerHTML = timelineHtml;
+    }
   }
 
   // Footer Metadata & Buttons
@@ -1147,8 +1248,17 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const isApproverActor = (window.currentActor === 'approver' || window.currentActor === 'approver2');
   const isPendingDecision = (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat');
 
+  const isApprover2 = (window.currentActor === 'approver2');
+  const myApproverName = isApprover2 ? (ACTORS.approver2 ? ACTORS.approver2.name : 'Dewi Sartika') : (ACTORS.approver ? ACTORS.approver.name : 'Hendra Gunawan');
+  const tApprover = (ticket.approverName || '').toLowerCase();
+  const tFrom = (ticket.reassignedFrom || '').toLowerCase();
+  const myApproverLower = myApproverName.toLowerCase();
+
+  const isAssignedToMe = (myApproverLower.includes('dewi') && tApprover.includes('dewi')) || (myApproverLower.includes('hendra') && (tApprover.includes('hendra') || !tApprover.includes('dewi')));
+  const isReassignedFromMe = Boolean(tFrom && ((myApproverLower.includes('dewi') && tFrom.includes('dewi')) || (myApproverLower.includes('hendra') && tFrom.includes('hendra'))));
+
   if (btnDetailRejectTicket && btnDetailApproveTicket) {
-    if (isApproverActor && isPendingDecision) {
+    if (isApproverActor && isPendingDecision && isAssignedToMe) {
       btnDetailRejectTicket.style.display = 'inline-flex';
       btnDetailApproveTicket.style.display = 'inline-flex';
       btnDetailRejectTicket.onclick = () => {
@@ -1375,6 +1485,9 @@ function handleOpenEmergency() {
 
   const emergApprover = document.getElementById('emergApprover');
   if (emergApprover) emergApprover.selectedIndex = 0;
+  if (typeof window.chooseEmergApproverByName === 'function') {
+    window.chooseEmergApproverByName('Ir. Hendra Gunawan, M.T.', true);
+  }
 
   const emergDest = document.getElementById('emergDest');
   const emergReason = document.getElementById('emergReason');
@@ -1525,7 +1638,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const formNewRequest = document.getElementById('formNewRequest');
   const modalConfirmSummary = document.getElementById('modalConfirmSummary');
 
-  if (btnOpenNewRequestModal) btnOpenNewRequestModal.addEventListener('click', handleOpenNewRequest);
+  // btnOpenNewRequestModal uses inline onclick="handleOpenNewRequest()"
+  if (btnOpenNewRequestModal && !btnOpenNewRequestModal.getAttribute('onclick')) {
+    btnOpenNewRequestModal.addEventListener('click', handleOpenNewRequest);
+  }
   if (menuQuickNew) {
     menuQuickNew.addEventListener('click', () => {
       if (window.currentActor !== 'karyawan' && typeof window.switchRole === 'function') {
@@ -1548,7 +1664,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formNewRequest.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      if (typeof window.getActiveTicket === 'function' && window.getActiveTicket()) {
+      if (!window.editingTicketId && typeof window.getActiveTicket === 'function' && window.getActiveTicket()) {
         if (typeof window.showToast === 'function') window.showToast('Gagal mengajukan: Anda masih memiliki tiket izin yang sedang aktif!', 'danger');
         modalNewRequest.classList.remove('open');
         return;
@@ -1663,26 +1779,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const ticketsList = window.ticketsList || [];
         const ticket = ticketsList.find(t => t.id === window.editingTicketId);
         if (ticket) {
+          const oldApprover = ticket.approverName;
+          const newApprover = window.pendingFormData.approverName;
+          const isApproverChanged = Boolean(oldApprover && newApprover && oldApprover !== newApprover);
+
           ticket.category = window.pendingFormData.category;
           ticket.type = window.pendingFormData.type;
           ticket.destination = window.pendingFormData.destination;
           ticket.reason = window.pendingFormData.reason;
           ticket.plannedExit = window.pendingFormData.plannedExit;
           ticket.estimatedReturn = window.pendingFormData.estimatedReturn;
-          ticket.approverName = window.pendingFormData.approverName;
+          ticket.approverName = newApprover;
 
           const ACTORS = window.ACTORS || {};
+          const isDewi = Boolean(newApprover && newApprover.toLowerCase().includes('dewi'));
+          const targetApproverActor = isDewi
+            ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional Lapangan (Plt. Manager)' })
+            : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+          ticket.approverTitle = targetApproverActor.title;
+
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
           const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
           if (!ticket.timeline) ticket.timeline = [];
-          ticket.timeline.unshift({
-            event: 'Pengajuan Diperbarui (Diedit)',
-            time: nowFormatted,
-            by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
-            desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${ticket.approverName}).`
-          });
+
+          if (isApproverChanged) {
+            ticket.reassignedFrom = oldApprover;
+            ticket.reassignedTo = newApprover;
+            ticket.reassignedAt = nowFormatted;
+            ticket.reassignedBy = `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`;
+
+            ticket.timeline.unshift({
+              event: 'Persetujuan Dialihkan',
+              time: nowFormatted,
+              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              desc: `Peninjauan persetujuan izin dialihkan dari ${oldApprover} ke ${newApprover}.`
+            });
+          } else {
+            ticket.timeline.unshift({
+              event: 'Pengajuan Diperbarui (Diedit)',
+              time: nowFormatted,
+              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${ticket.approverName}).`
+            });
+          }
 
           window.saveTickets(ticketsList);
           modalConfirmSummary.classList.remove('open');
@@ -1695,10 +1836,16 @@ document.addEventListener('DOMContentLoaded', () => {
           window.editingTicketId = null;
 
           if (typeof window.showToast === 'function') {
-            window.showToast(`Pengajuan #${editedId} berhasil diperbarui!`, 'success');
+            if (isApproverChanged) {
+              window.showToast(`Pengajuan #${editedId} berhasil dialihkan ke ${newApprover}!`, 'success');
+            } else {
+              window.showToast(`Pengajuan #${editedId} berhasil diperbarui!`, 'success');
+            }
           }
           if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
           if (typeof window.renderApproverView === 'function') window.renderApproverView();
+          if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+          if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
           return;
         }
       }
@@ -1820,7 +1967,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSubmitEmergency = document.getElementById('btnSubmitEmergency');
   const modalEmergency = document.getElementById('modalEmergency');
 
-  if (btnOpenEmergencyModal) btnOpenEmergencyModal.addEventListener('click', handleOpenEmergency);
+  // btnOpenEmergencyModal uses inline onclick="handleOpenEmergency()"
+  if (btnOpenEmergencyModal && !btnOpenEmergencyModal.getAttribute('onclick')) {
+    btnOpenEmergencyModal.addEventListener('click', handleOpenEmergency);
+  }
   if (btnCloseEmergencyModal) btnCloseEmergencyModal.addEventListener('click', () => modalEmergency.classList.remove('open'));
   if (btnAbortEmergency) btnAbortEmergency.addEventListener('click', () => modalEmergency.classList.remove('open'));
 
@@ -1906,7 +2056,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const ticketsList = window.ticketsList || [];
         const ticket = ticketsList.find(t => t.id === window.editingEmergencyTicketId);
         if (ticket) {
-          ticket.approverName = approverVal;
+          const oldApprover = ticket.approverName;
+          const newApprover = approverVal;
+          const isApproverChanged = Boolean(oldApprover && newApprover && oldApprover !== newApprover);
+
+          ticket.approverName = newApprover;
+          const ACTORS = window.ACTORS || {};
+          const isDewi = Boolean(newApprover && newApprover.toLowerCase().includes('dewi'));
+          const targetApproverActor = isDewi
+            ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional Lapangan (Plt. Manager)' })
+            : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+          ticket.approverTitle = targetApproverActor.title;
+
           ticket.category = categoryVal;
           ticket.type = typeVal;
           ticket.destination = dest;
@@ -1914,20 +2075,34 @@ document.addEventListener('DOMContentLoaded', () => {
           ticket.plannedExit = plannedExitVal;
           ticket.estimatedReturn = estimatedReturnVal;
           ticket.selectedMethod = selectedMethod;
-          ticket.approverNote = `🚨 [Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${approverVal}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`;
+          ticket.approverNote = `🚨 [Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${newApprover}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`;
 
-          const ACTORS = window.ACTORS || {};
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
           const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
           if (!ticket.timeline) ticket.timeline = [];
-          ticket.timeline.unshift({
-            event: 'Pengajuan Darurat Diperbarui (Diedit)',
-            time: nowFormatted,
-            by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
-            desc: `Formulir izin darurat berhasil diperbarui untuk Atasan: ${approverVal} (Metode Otorisasi: ${selectedMethod}).`
-          });
+
+          if (isApproverChanged) {
+            ticket.reassignedFrom = oldApprover;
+            ticket.reassignedTo = newApprover;
+            ticket.reassignedAt = nowFormatted;
+            ticket.reassignedBy = `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`;
+
+            ticket.timeline.unshift({
+              event: 'Persetujuan Dialihkan',
+              time: nowFormatted,
+              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              desc: `Peninjauan izin darurat dialihkan dari ${oldApprover} ke ${newApprover}.`
+            });
+          } else {
+            ticket.timeline.unshift({
+              event: 'Pengajuan Darurat Diperbarui (Diedit)',
+              time: nowFormatted,
+              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              desc: `Formulir izin darurat berhasil diperbarui untuk Atasan: ${newApprover} (Metode Otorisasi: ${selectedMethod}).`
+            });
+          }
 
           window.saveTickets(ticketsList);
           modalEmergency.classList.remove('open');
@@ -1935,7 +2110,11 @@ document.addEventListener('DOMContentLoaded', () => {
           window.editingEmergencyTicketId = null;
 
           if (typeof window.showToast === 'function') {
-            window.showToast(`🚨 Formulir Izin Darurat #${editedEmergId} berhasil diperbarui!`, 'success');
+            if (isApproverChanged) {
+              window.showToast(`🚨 Izin Darurat #${editedEmergId} berhasil dialihkan ke ${newApprover}!`, 'info');
+            } else {
+              window.showToast(`🚨 Formulir Izin Darurat #${editedEmergId} berhasil diperbarui!`, 'success');
+            }
           }
           if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
           if (typeof window.renderSecurityView === 'function') window.renderSecurityView();

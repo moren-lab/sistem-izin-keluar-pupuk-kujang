@@ -63,54 +63,6 @@ const MOCK_APPROVERS = [
     department: 'Departemen Rekayasa & Pemeliharaan',
     isDirectSupervisor: false,
     avatarBg: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
-  },
-  {
-    nip: 'PK-2010-0112',
-    name: 'Dr. Agus Priyanto, M.Eng.',
-    title: 'VP Produksi & Utilitas',
-    department: 'Direktorat Operasi Pabrik',
-    isDirectSupervisor: false,
-    avatarBg: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)'
-  },
-  {
-    nip: 'PK-2014-0331',
-    name: 'Bambang Sutrisno, S.T.',
-    title: 'Supervisi Pengamanan & K3',
-    department: 'Departemen Pengamanan & K3',
-    isDirectSupervisor: false,
-    avatarBg: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)'
-  },
-  {
-    nip: 'PK-2012-0543',
-    name: 'Dr. Ahmad Subagja, M.M.',
-    title: 'VP SDM & Tata Kelola Organisasi',
-    department: 'Departemen SDM & Organisasi',
-    isDirectSupervisor: false,
-    avatarBg: 'linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)'
-  },
-  {
-    nip: 'PK-2013-0421',
-    name: 'Ir. Wahyu Hidayat, M.Sc.',
-    title: 'Superintendent Pemeliharaan Listrik & Instrumen',
-    department: 'Departemen Rekayasa & Pemeliharaan',
-    isDirectSupervisor: false,
-    avatarBg: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)'
-  },
-  {
-    nip: 'PK-2016-0912',
-    name: 'Siti Rahayu, S.T.',
-    title: 'Kepala Seksi Logistik & Pergudangan Pabrik',
-    department: 'Departemen Logistik & Pengadaan',
-    isDirectSupervisor: false,
-    avatarBg: 'linear-gradient(135deg, #db2777 0%, #ec4899 100%)'
-  },
-  {
-    nip: 'PK-2011-0284',
-    name: 'Dian Kusuma, S.T., M.Eng.',
-    title: 'Manager Operasi Pabrik Kujang 1B',
-    department: 'Direktorat Operasi Pabrik',
-    isDirectSupervisor: false,
-    avatarBg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
   }
 ];
 

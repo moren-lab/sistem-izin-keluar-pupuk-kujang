@@ -78,15 +78,40 @@ function filterEmpTickets() {
   const type = filterEmpType ? filterEmpType.value : 'all';
   const status = filterEmpStatus ? filterEmpStatus.value : 'all';
 
+  // Status resmi yang diizinkan untuk Riwayat Pengajuan
+  const RIWAYAT_STATUSES = ['selesai', 'terlambat', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
+
   return ticketsList.filter(t => {
     // 0. Batasi ke akun Budi Pratama
     const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841');
     if (!isMyTicket) return false;
 
+    // HANYA tiket berstatus riwayat yang diizinkan (mengecualikan status aktif seperti Menunggu Persetujuan, Menunggu Otorisasi Darurat, Disetujui, Sedang di Luar)
+    const tStatusNorm = (t.status || '').toLowerCase().trim();
+    const isRiwayat = RIWAYAT_STATUSES.includes(tStatusNorm) || !!t.isLate;
+    if (!isRiwayat) return false;
+
     // 1. Dropdown Filters
     if (category !== 'all' && t.category !== category) return false;
     if (type !== 'all' && t.type !== type) return false;
-    if (status !== 'all' && t.status !== status) return false;
+
+    // Status Filter:
+    if (status !== 'all') {
+      if (status === 'Terlambat') {
+        const isLate = t.status === 'Terlambat' || !!t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
+        if (!isLate) return false;
+      } else if (status === 'Kedaluwarsa') {
+        if (tStatusNorm !== 'kedaluwarsa' && tStatusNorm !== 'kadaluwarsa') return false;
+      } else if (status === 'Ditolak') {
+        if (!tStatusNorm.includes('tolak')) return false;
+      } else if (status === 'Dibatalkan') {
+        if (!tStatusNorm.includes('batal')) return false;
+      } else if (status === 'Selesai') {
+        if (tStatusNorm !== 'selesai' || t.isLate) return false;
+      } else {
+        if (t.status !== status) return false;
+      }
+    }
 
     // 2. Period Filter
     if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, period)) {
@@ -324,7 +349,7 @@ function renderKaryawanDashboard() {
           <span class="hero-strip-text">Status: Tidak Ada Perizinan Aktif</span>
           <span class="hero-strip-sub">Anda sedang berada di area kerja operasional. Ajukan izin bila hendak meninggalkan area.</span>
         </div>
-        <button class="btn-hero-action" onclick="handleOpenNewRequest()">
+        <button class="btn-hero-action" onclick="setKaryawanNav('pengajuan')">
           + Buat Pengajuan
         </button>
       `;
@@ -457,11 +482,14 @@ function renderKaryawanDashboard() {
           <h3 class="figma-card-title">Izin aktif saya</h3>
         </div>
         <div style="padding: 1.5rem 0.5rem; text-align: center;">
-          <div style="font-size: 1.75rem; margin-bottom: 0.5rem;">🏢</div>
-          <div style="font-size: 0.9rem; font-weight: 700; color: #0f172a;">Tidak Ada Perizinan Aktif</div>
-          <p style="font-size: 0.775rem; color: #64748b; margin-top: 4px; max-width: 320px; margin-left: auto; margin-right: auto;">
-            Anda berada di kawasan pabrik. Jika perlu meninggalkan kawasan, silakan ajukan perizinan melalui menu Pengajuan Saya.
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏢</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a;">Tidak Ada Perizinan Aktif</div>
+          <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px; max-width: 320px; margin-left: auto; margin-right: auto; margin-bottom: 1.25rem;">
+            Anda sedang berada di kawasan operasional pabrik.
           </p>
+          <button class="btn-figma-primary" onclick="setKaryawanNav('pengajuan')" style="font-size: 0.825rem; padding: 0.5rem 1rem;">
+            Buka Pengajuan Saya →
+          </button>
         </div>
       `;
     }
@@ -803,6 +831,11 @@ function renderPengajuanSayaView() {
         </div>
         <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">${activeTicket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
         <div style="font-size: 0.775rem; color: #64748b; margin-top: 2px;">${activeTicket.approverTitle || 'Manajer Rekayasa & Pemeliharaan'}</div>
+        ${activeTicket.reassignedFrom ? `
+          <div style="margin-top: 0.45rem; font-size: 0.75rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 0.3rem 0.65rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
+            <span>↳ Dialihkan dari ${activeTicket.reassignedFrom}</span>
+          </div>
+        ` : ''}
       </div>
 
       <!-- Card 3: Informasi pengajuan -->
@@ -992,40 +1025,16 @@ function renderEmpCards(list, containerElement) {
   target.innerHTML = `
     <div class="figma-card-grid">
       ${list.map(t => {
-    // Border color based on status
+    // Border color and status styling for Riwayat
     let topBorderColor = '#059669'; // green default (Selesai)
     let statusPillHtml = `<span class="status-pill-green">• Selesai</span>`;
     let calloutBoxHtml = `
           <div style="background: #ecfdf5; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #065f46; font-weight: 600;">
-            Tepat waktu • Disetujui Hendra Gunawan
+            Tepat waktu • Disetujui ${t.approverName || 'Atasan'}
           </div>
         `;
 
-    if (t.status === 'Sedang di Luar') {
-      topBorderColor = '#9333ea'; // purple
-      statusPillHtml = `<span class="status-pill-purple">• Sedang di Luar</span>`;
-      calloutBoxHtml = `
-            <div style="background: #f3e8ff; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #7e22ce; font-weight: 600;">
-              Izin aktif • QR tersedia untuk verifikasi satpam
-            </div>
-          `;
-    } else if (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') {
-      topBorderColor = '#f59e0b'; // amber
-      statusPillHtml = `<span class="status-pill-amber">• Menunggu Persetujuan</span>`;
-      calloutBoxHtml = `
-            <div style="background: #fffbeb; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #b45309; font-weight: 600;">
-              Menunggu persetujuan atasan (${t.approverName || 'Ir. Hendra Gunawan, M.T.'})
-            </div>
-          `;
-    } else if (t.status === 'Disetujui') {
-      topBorderColor = '#059669'; // green
-      statusPillHtml = `<span class="status-pill-green">• Disetujui</span>`;
-      calloutBoxHtml = `
-            <div style="background: #ecfdf5; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #065f46; font-weight: 600;">
-              Disetujui • Siap scan keluar di Pos 1
-            </div>
-          `;
-    } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'))) {
+    if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || t.status === 'Terlambat') {
       topBorderColor = '#d97706'; // amber
       statusPillHtml = `<span class="status-pill-amber">• Selesai • Terlambat ${t.lateMinutes || 10} mnt</span>`;
       calloutBoxHtml = `
@@ -1033,12 +1042,28 @@ function renderEmpCards(list, containerElement) {
               Kembali ${t.actualReturnTime || '12.10 WIB'} • +${t.lateMinutes || 10} menit dari estimasi
             </div>
           `;
-    } else if (t.status === 'Ditolak') {
+    } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
       topBorderColor = '#dc2626'; // red
       statusPillHtml = `<span class="status-pill-red">• Ditolak</span>`;
       calloutBoxHtml = `
             <div style="background: #fef2f2; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #b91c1c; font-weight: 600;">
               ${t.rejectionReason || 'Ditolak: alasan tidak memadai'}
+            </div>
+          `;
+    } else if (t.status === 'Kedaluwarsa' || t.status === 'Kadaluwarsa') {
+      topBorderColor = '#64748b'; // slate
+      statusPillHtml = `<span class="status-pill-gray" style="background:#f1f5f9; color:#475569; padding:0.2rem 0.55rem; border-radius:999px; font-weight:700; font-size:0.75rem;">• Kedaluwarsa</span>`;
+      calloutBoxHtml = `
+            <div style="background: #f8fafc; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #64748b; font-weight: 600;">
+              Waktu berlaku izin habis sebelum verifikasi scan keluar
+            </div>
+          `;
+    } else if (t.status === 'Dibatalkan' || (t.status || '').toLowerCase().includes('batal')) {
+      topBorderColor = '#64748b'; // slate
+      statusPillHtml = `<span class="status-pill-gray" style="background:#f1f5f9; color:#64748b; padding:0.2rem 0.55rem; border-radius:999px; font-weight:700; font-size:0.75rem;">• Dibatalkan</span>`;
+      calloutBoxHtml = `
+            <div style="background: #f8fafc; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #64748b; font-weight: 600;">
+              Pengajuan izin dibatalkan oleh pemohon
             </div>
           `;
     }
@@ -1085,13 +1110,19 @@ function renderEmpCards(list, containerElement) {
             ${calloutBoxHtml}
 
             <!-- Action Buttons -->
-            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: auto; padding-top: 0.5rem;">
-              ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
-                <button class="btn-figma-primary" style="padding: 0.45rem 1rem; font-size: 0.775rem;" onclick="openTicketDetail('${t.id}', 'qr')">
-                  Buka QR Izin
-                </button>
-              ` : ''}
-              <a href="#" class="figma-card-link" style="font-size: 0.775rem;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Rincian</a>
+            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.5rem;">
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
+                  <button class="btn-figma-primary" style="padding: 0.45rem 1rem; font-size: 0.775rem;" onclick="openTicketDetail('${t.id}', 'qr')">
+                    Buka QR Izin
+                  </button>
+                ` : ''}
+                <a href="#" class="figma-card-link" style="font-size: 0.775rem;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Rincian</a>
+              </div>
+              <button type="button" class="btn-figma-delete-single" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.5rem; border-radius: 4px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Hapus</span>
+              </button>
             </div>
           </div>
         `;
@@ -1126,25 +1157,29 @@ function renderEmpTable(list, containerElement) {
     let catatanHtml = `<span style="color: #475569;">Tepat waktu • Disetujui Hendra Gunawan</span>`;
     let tindakanHtml = `<a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Rincian</a>`;
 
-    if (t.status === 'Sedang di Luar') {
-      statusPillHtml = `<span class="status-pill-purple">• Sedang di Luar</span>`;
-      catatanHtml = `<span style="color: #7e22ce; font-weight: 600;">Izin aktif • QR tersedia</span>`;
-      tindakanHtml = `<a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'qr'); return false;">Rincian / QR</a>`;
-    } else if (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') {
-      statusPillHtml = `<span class="status-pill-amber">• Menunggu Persetujuan</span>`;
-      catatanHtml = `<span style="color: #b45309;">Menunggu persetujuan atasan</span>`;
-      tindakanHtml = `<a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Rincian</a>`;
-    } else if (t.status === 'Disetujui') {
-      statusPillHtml = `<span class="status-pill-green">• Disetujui</span>`;
-      catatanHtml = `<span style="color: #065f46;">Disetujui • QR siap</span>`;
-      tindakanHtml = `<a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'qr'); return false;">Rincian / QR</a>`;
-    } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'))) {
+    if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || t.status === 'Terlambat') {
       statusPillHtml = `<span class="status-pill-amber">• Selesai • Terlambat ${t.lateMinutes || 10} mnt</span>`;
       catatanHtml = `<span style="color: #b45309;">Kembali ${t.actualReturnTime || '12.10 WIB'} • +${t.lateMinutes || 10} menit</span>`;
-    } else if (t.status === 'Ditolak') {
+    } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
       statusPillHtml = `<span class="status-pill-red">• Ditolak</span>`;
       catatanHtml = `<span style="color: #b91c1c;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
+    } else if (t.status === 'Kedaluwarsa' || t.status === 'Kadaluwarsa') {
+      statusPillHtml = `<span class="status-pill-gray" style="background:#f1f5f9; color:#475569; padding:0.2rem 0.55rem; border-radius:999px; font-weight:700; font-size:0.75rem;">• Kedaluwarsa</span>`;
+      catatanHtml = `<span style="color: #64748b;">Kedaluwarsa sebelum scan keluar</span>`;
+    } else if (t.status === 'Dibatalkan' || (t.status || '').toLowerCase().includes('batal')) {
+      statusPillHtml = `<span class="status-pill-gray" style="background:#f1f5f9; color:#64748b; padding:0.2rem 0.55rem; border-radius:999px; font-weight:700; font-size:0.75rem;">• Dibatalkan</span>`;
+      catatanHtml = `<span style="color: #64748b;">Pengajuan dibatalkan oleh pemohon</span>`;
+    } else {
+      statusPillHtml = `<span class="status-pill-green">• Selesai</span>`;
+      catatanHtml = `<span style="color: #475569;">Tepat waktu • Disetujui ${t.approverName || 'Atasan'}</span>`;
     }
+
+    tindakanHtml += `
+      <button type="button" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.65rem; display: inline-flex; align-items: center; gap: 0.2rem;" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"></path></svg>
+        Hapus
+      </button>
+    `;
 
     const dateStr = t.createdAt ? t.createdAt.slice(0, 11) : '19 Okt 2026';
     const plannedStr = t.plannedExit ? t.plannedExit.slice(11, 16) : '10.00';
@@ -1243,6 +1278,55 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// DELETE FEATURE FOR RIWAYAT PENGAJUAN
+function deleteEmpTicket(ticketId) {
+  if (!confirm(`Apakah Anda yakin ingin menghapus pengajuan #${ticketId} dari riwayat? Tindakan ini tidak dapat dibatalkan.`)) {
+    return;
+  }
+
+  let ticketsList = window.ticketsList || [];
+  ticketsList = ticketsList.filter(t => t.id !== ticketId);
+  window.saveTickets(ticketsList);
+
+  renderRiwayatView();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Pengajuan #${ticketId} berhasil dihapus dari riwayat.`, 'info');
+  }
+}
+
+function deleteAllEmpRiwayat() {
+  const filtered = typeof filterEmpTickets === 'function' ? filterEmpTickets() : [];
+  if (filtered.length === 0) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada pengajuan di riwayat yang dapat dihapus.', 'warning');
+    }
+    return;
+  }
+
+  const count = filtered.length;
+  if (!confirm(`Apakah Anda yakin ingin menghapus ${count} pengajuan dari riwayat? Tindakan ini tidak dapat dibatalkan.`)) {
+    return;
+  }
+
+  const idsToDelete = new Set(filtered.map(t => t.id));
+  let ticketsList = window.ticketsList || [];
+  ticketsList = ticketsList.filter(t => !idsToDelete.has(t.id));
+  window.saveTickets(ticketsList);
+
+  renderRiwayatView();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`${count} pengajuan berhasil dihapus dari riwayat.`, 'success');
+  }
+}
+
 // Expose globally
 window.updateKaryawanMetrics = updateKaryawanMetrics;
 window.filterEmpTickets = filterEmpTickets;
@@ -1253,3 +1337,5 @@ window.renderKaryawanView = renderKaryawanView;
 window.renderEmpCards = renderEmpCards;
 window.renderEmpTable = renderEmpTable;
 window.buildActivePermitTimeline = buildActivePermitTimeline;
+window.deleteEmpTicket = deleteEmpTicket;
+window.deleteAllEmpRiwayat = deleteAllEmpRiwayat;

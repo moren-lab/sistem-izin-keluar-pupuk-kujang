@@ -83,13 +83,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Click outside modal overlay to close
   document.querySelectorAll('.modal-overlay').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('open');
+      if (e.target === modal) {
+        if (modal.id === 'modalEmergencyUnlock' && typeof window.stopEmergencyFaceScanner === 'function') {
+          window.stopEmergencyFaceScanner();
+        }
+        modal.classList.remove('open');
+      }
     });
   });
 
   // ESC key closes active modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (typeof window.stopEmergencyFaceScanner === 'function') {
+        window.stopEmergencyFaceScanner();
+      }
       document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
     }
   });

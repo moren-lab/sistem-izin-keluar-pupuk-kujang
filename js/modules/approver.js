@@ -3,14 +3,62 @@
  * Approver (Atasan) Module: Dashboard, Antrian Persetujuan, Pelacakan Izin, Approve & Reject Decision Flow
  */
 
+function getCurrentApproverActor() {
+  const ACTORS = window.ACTORS || {};
+  const isApprover2 = (window.currentActor === 'approver2');
+  return isApprover2 
+    ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional Lapangan (Plt. Manager)', nip: 'PK-2012-0845' })
+    : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan', nip: 'PK-2015-1002' });
+}
+
+function isTicketAssignedToCurrentApprover(ticket) {
+  if (!ticket) return false;
+  const currentActor = getCurrentApproverActor();
+  const aName = (currentActor.name || '').toLowerCase();
+  const tApprover = (ticket.approverName || '').toLowerCase();
+  
+  if (aName.includes('dewi')) {
+    return tApprover.includes('dewi');
+  } else {
+    // Hendra Gunawan or default
+    return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+  }
+}
+
+function isTicketReassignedFromCurrentApprover(ticket) {
+  if (!ticket || !ticket.reassignedFrom) return false;
+  const currentActor = getCurrentApproverActor();
+  const aName = (currentActor.name || '').toLowerCase();
+  const fromName = (ticket.reassignedFrom || '').toLowerCase();
+  
+  if (aName.includes('dewi')) {
+    return fromName.includes('dewi');
+  } else {
+    return fromName.includes('hendra');
+  }
+}
+
 function updateApproverMetrics() {
   const ticketsList = window.ticketsList || [];
-  const pendingInitial = ticketsList.filter(t => t.status !== 'Dibatalkan' && t.status !== 'Ditolak' && (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')).length;
-  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan').length;
+  const currentApprover = getCurrentApproverActor();
+
+  const pendingInitial = ticketsList.filter(t => 
+    t.status !== 'Dibatalkan' && 
+    t.status !== 'Ditolak' && 
+    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') &&
+    isTicketAssignedToCurrentApprover(t)
+  ).length;
+
+  const pendingExtensions = ticketsList.filter(t => 
+    t.pendingExtension && 
+    t.pendingExtension.status === 'Menunggu Persetujuan' &&
+    isTicketAssignedToCurrentApprover(t)
+  ).length;
+
   const pending = pendingInitial + pendingExtensions;
-  const approved = ticketsList.filter(t => t.status === 'Disetujui').length;
-  const rejected = ticketsList.filter(t => t.status === 'Ditolak').length;
-  const total = ticketsList.length;
+  const approved = ticketsList.filter(t => t.status === 'Disetujui' && isTicketAssignedToCurrentApprover(t)).length;
+  const rejected = ticketsList.filter(t => t.status === 'Ditolak' && isTicketAssignedToCurrentApprover(t)).length;
+  const total = ticketsList.filter(t => isTicketAssignedToCurrentApprover(t) || isTicketReassignedFromCurrentApprover(t)).length;
 
   const statAppPending = document.getElementById('statAppPending');
   const statAppApproved = document.getElementById('statAppApproved');
@@ -52,22 +100,55 @@ function renderApproverDashboard() {
   }
 
   const ticketsList = window.ticketsList || [];
-  const pendingTickets = ticketsList.filter(t => t.status === 'Menunggu Persetujuan');
-  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan');
-  const outsideTickets = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+  const pendingTickets = ticketsList.filter(t => t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
+  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
+  const outsideTickets = ticketsList.filter(t => (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && (isTicketAssignedToCurrentApprover(t) || isTicketReassignedFromCurrentApprover(t)));
 
   const approverUrgentBanner = document.getElementById('approverUrgentBanner');
   const approverDashboardPendingList = document.getElementById('approverDashboardPendingList');
   const approverDashboardOutsideList = document.getElementById('approverDashboardOutsideList');
 
   // Emergency tickets breakdown: Locked (Need Authorization) vs Active (Monitoring)
-  const lockedEmergencyTickets = ticketsList.filter(t => t.isEmergency && t.status === 'Menunggu Otorisasi Darurat');
-  const activeEmergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !t.emergencyLocked && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'));
-  const emergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && t.status !== 'Selesai' && t.status !== 'Ditolak' && t.status !== 'Dibatalkan');
+  const lockedEmergencyTickets = ticketsList.filter(t => t.isEmergency && t.status === 'Menunggu Otorisasi Darurat' && isTicketAssignedToCurrentApprover(t));
+  const activeEmergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !t.emergencyLocked && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketAssignedToCurrentApprover(t));
+  const emergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && t.status !== 'Selesai' && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && isTicketAssignedToCurrentApprover(t));
+
+  // Pengajuan yang dialihkan dari atasan ini ke atasan lain (tetap dipantau selama belum selesai)
+  const reassignedAwayTickets = ticketsList.filter(t => isTicketReassignedFromCurrentApprover(t) && t.status !== 'Selesai' && t.status !== 'Ditolak' && t.status !== 'Dibatalkan');
 
   // Urgent Attention Banner
   if (approverUrgentBanner) {
     let bannerHtml = '';
+
+    // 0. INFORMASI PENGAJUAN DIALIHKAN KE ATASAN LAIN (JIKA ADA)
+    if (reassignedAwayTickets.length > 0) {
+      bannerHtml += `
+        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 0.95rem 1.25rem; margin-bottom: 0.85rem; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+              <div style="font-size: 1.5rem;">↳</div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <span style="font-weight: 800; font-size: 0.9rem; color: #92400e;">
+                    ${reassignedAwayTickets.length} PENGAJUAN DIALIHKAN KE ATASAN LAIN
+                  </span>
+                  <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Dialihkan</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #78350f; margin-top: 3px;">
+                  ${reassignedAwayTickets.map(t => `Tiket <strong>${t.id}</strong> (${t.applicantName}) dialihkan ke <strong>${t.approverName}</strong>`).join(', ')}.
+                </div>
+                <div style="font-size: 0.75rem; color: #b45309; margin-top: 2px;">
+                  Status pengajuan ini tetap dapat Anda pantau di menu Pelacakan Izin Karyawan.
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem; background: #ffffff; border: 1px solid #cbd5e1;" onclick="setApproverNav('pelacakan')">
+              Lihat di Pelacakan →
+            </button>
+          </div>
+        </div>
+      `;
+    }
 
     // 1. TIKET DARURAT BUTUH OTORISASI CEPAT (3 METODE)
     if (lockedEmergencyTickets.length > 0) {
@@ -205,7 +286,7 @@ function renderApproverDashboard() {
 
   // Pending queue quick inline list (Initial approvals + Extension requests)
   if (approverDashboardPendingList) {
-    if (pendingTickets.length === 0 && pendingExtensions.length === 0) {
+    if (pendingTickets.length === 0 && pendingExtensions.length === 0 && reassignedAwayTickets.length === 0) {
       approverDashboardPendingList.innerHTML = `
         <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
           Tidak ada antrian izin yang menunggu keputusan. Semua beres!
@@ -278,6 +359,33 @@ function renderApproverDashboard() {
         `;
       });
 
+      // Render reassigned away tickets (so former approver can monitor them directly in feed)
+      reassignedAwayTickets.forEach(t => {
+        html += `
+          <div class="feed-item" style="border-left: 3.5px solid #d97706; background: #fffdfa; flex-direction: column; align-items: stretch; gap: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
+                <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; font-size: 0.7rem;">↳ DIALIHKAN KE ${t.approverName.toUpperCase()}</span>
+              </div>
+              <span class="tag-badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">Status: ${t.status}</span>
+            </div>
+            <div style="font-size: 0.825rem; color: var(--text-primary);">
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
+            </div>
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; color: #92400e; line-height: 1.45;">
+              Pengajuan ini dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangan statusnya.
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem;">
+              <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
+                Rencana: ${t.plannedExit ? t.plannedExit.replace('T', ' ') : '-'}
+              </span>
+              <button class="btn-card-detail" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Lihat Rincian Status</button>
+            </div>
+          </div>
+        `;
+      });
+
       approverDashboardPendingList.innerHTML = html;
     }
   }
@@ -323,10 +431,11 @@ function renderApproverDashboard() {
   }
 }
 
-function renderApproverCards(list, containerElement) {
+function renderApproverCards(list, containerElement, isTracking = false) {
   const containerApproverRequests = document.getElementById('containerApproverRequests');
   const target = containerElement || containerApproverRequests;
   if (!target) return;
+  const isTrackingView = isTracking || (window.currentApproverNav === 'pelacakan') || (target === containerApproverRequests);
 
   target.innerHTML = `
     <div class="cards-grid">
@@ -352,6 +461,18 @@ function renderApproverCards(list, containerElement) {
               </div>
               <span class="tag-badge ${isEmergency ? '' : (isDinas ? 'tag-dinas' : 'tag-pribadi')}" style="${isEmergency ? 'background:#ffe4e6; color:#b91c1c; font-weight:800;' : ''}">${isEmergency ? '🚨 ' + t.category : t.category}</span>
             </div>
+
+            ${isTicketReassignedFromCurrentApprover(t) ? `
+              <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; color: #92400e; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                <span>↳ <strong>Status:</strong> Pengajuan ini dialihkan oleh pemohon ke <strong>${t.approverName}</strong></span>
+                <span style="font-size: 0.7rem; color: #b45309;">${t.reassignedAt || ''}</span>
+              </div>
+            ` : (isTicketAssignedToCurrentApprover(t) && t.reassignedFrom ? `
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; color: #1e40af; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                <span>↳ <strong>Status:</strong> Pengajuan ini dialihkan dari <strong>${t.reassignedFrom}</strong> ke Anda</span>
+                <span style="font-size: 0.7rem; color: #3b82f6;">${t.reassignedAt || ''}</span>
+              </div>
+            ` : '')}
 
             <div style="font-size:0.85rem; color:var(--text-primary); line-height:1.4;">
               <strong>Alasan Izin:</strong> "${t.reason}"
@@ -440,36 +561,55 @@ function renderApproverCards(list, containerElement) {
                 </button>
               </div>
 
-              ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
-                <div class="approver-action-grid">
-                  <button class="btn-reject" onclick="openRejectExtensionModal('${t.id}')">
-                    ✕ Tolak Perpanjang
-                  </button>
-                  <button class="btn-approve" onclick="approveExtensionRequest('${t.id}')">
-                    ✓ Setujui Perpanjang
-                  </button>
-                </div>
-              ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
-                <div class="approver-action-grid">
-                  <button class="btn-reject" onclick="openRejectModal('${t.id}')">
-                    ✕ Tolak Darurat
-                  </button>
-                  <button class="btn-approve" style="background:#059669; font-weight:800;" onclick="window.emergencyDirectApprove('${t.id}')">
-                    ✓ Validasi & Buka Kunci
-                  </button>
-                </div>
-              ` : (isPending ? `
-                <div class="approver-action-grid">
-                  <button class="btn-reject" onclick="openRejectModal('${t.id}')">
-                    ✕ Tolak
-                  </button>
-                  <button class="btn-approve" onclick="openApproveModal('${t.id}')">
-                    ✓ Setujui
-                  </button>
-                </div>
-              ` : `
-                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Sudah Diputuskan</span>
-              `))}
+              ${isTicketReassignedFromCurrentApprover(t) ? `
+                <span style="font-size:0.75rem; color:#92400e; background:#fef3c7; border:1px solid #fde68a; padding:0.3rem 0.7rem; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
+                  <span style="width:7px; height:7px; border-radius:50%; background:#d97706; display:inline-block;"></span>
+                  Dialihkan ke ${t.approverName}
+                </span>
+              ` : (isTrackingView ? (
+                (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
+                  <span style="font-size:0.75rem; color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.3rem 0.7rem; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:#d97706; display:inline-block;"></span>
+                    Belum Diputuskan
+                  </span>
+                ` : `
+                  <span style="font-size:0.75rem; color:#047857; background:#ecfdf5; border:1px solid #a7f3d0; padding:0.3rem 0.7rem; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:#059669; display:inline-block;"></span>
+                    Sudah Diputuskan
+                  </span>
+                `
+              ) : (
+                t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+                  <div class="approver-action-grid">
+                    <button class="btn-reject" onclick="openRejectExtensionModal('${t.id}')">
+                      ✕ Tolak Perpanjang
+                    </button>
+                    <button class="btn-approve" onclick="approveExtensionRequest('${t.id}')">
+                      ✓ Setujui Perpanjang
+                    </button>
+                  </div>
+                ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
+                  <div class="approver-action-grid">
+                    <button class="btn-reject" onclick="openRejectModal('${t.id}')">
+                      ✕ Tolak Darurat
+                    </button>
+                    <button class="btn-approve" style="background:#059669; font-weight:800;" onclick="window.emergencyDirectApprove('${t.id}')">
+                      ✓ Validasi & Buka Kunci
+                    </button>
+                  </div>
+                ` : (isPending ? `
+                  <div class="approver-action-grid">
+                    <button class="btn-reject" onclick="openRejectModal('${t.id}')">
+                      ✕ Tolak
+                    </button>
+                    <button class="btn-approve" onclick="openApproveModal('${t.id}')">
+                      ✓ Setujui
+                    </button>
+                  </div>
+                ` : `
+                  <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Sudah Diputuskan</span>
+                `))
+              ))}
             </div>
           </div>
         `;
@@ -497,21 +637,64 @@ function renderApproverView() {
 
   // 2. ANTRIAN PERSETUJUAN (Termasuk Tiket Darurat Terkunci)
   if (currentApproverNav === 'antrian') {
+    // 1. Pengajuan tertunda yang ditujukan ke atasan aktif saat ini
     const pendingList = ticketsList.filter(t => 
       t.status !== 'Dibatalkan' &&
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
+      isTicketAssignedToCurrentApprover(t) &&
       (t.status === 'Menunggu Persetujuan' || 
        t.status === 'Menunggu Otorisasi Darurat' || 
        (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))
     );
 
-    if (pendingList.length === 0) {
+    // 2. Pengajuan yang sebelumnya diajukan ke atasan ini tapi dialihkan ke atasan lain
+    const reassignedAwayList = ticketsList.filter(t =>
+      t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      isTicketReassignedFromCurrentApprover(t) &&
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
+    );
+
+    if (pendingList.length === 0 && reassignedAwayList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
       if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'flex';
     } else {
       if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'none';
-      renderApproverCards(pendingList, containerApproverPendingQueue);
+      if (containerApproverPendingQueue) {
+        let queueHtml = '';
+        if (pendingList.length > 0) {
+          const tempDiv = document.createElement('div');
+          renderApproverCards(pendingList, tempDiv);
+          queueHtml += tempDiv.innerHTML;
+        } else {
+          queueHtml += `
+            <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem; background: #ffffff; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+              Tidak ada antrean persetujuan baru yang ditujukan ke Anda saat ini.
+            </div>
+          `;
+        }
+
+        if (reassignedAwayList.length > 0) {
+          const tempDivReassigned = document.createElement('div');
+          renderApproverCards(reassignedAwayList, tempDivReassigned, true);
+          queueHtml += `
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px dashed #fde68a;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; color: #92400e; display: flex; align-items: center; gap: 0.4rem; margin: 0;">
+                  <span>↳ Pengajuan Dialihkan ke Atasan Lain</span>
+                  <span style="font-size: 0.75rem; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; border: 1px solid #fde68a;">${reassignedAwayList.length}</span>
+                </h4>
+                <span style="font-size: 0.75rem; color: #b45309; font-weight: 600;">Status pengajuan ini tetap dapat Anda pantau</span>
+              </div>
+              ${tempDivReassigned.innerHTML}
+            </div>
+          `;
+        }
+
+        containerApproverPendingQueue.innerHTML = queueHtml;
+      }
     }
     return;
   }
@@ -715,29 +898,37 @@ function initApproverDecisionListeners() {
   const btnCancelRejectModal = document.getElementById('btnCancelRejectModal');
   const btnConfirmReject = document.getElementById('btnConfirmReject');
 
-  if (btnCloseApproveModal && !btnCloseApproveModal.dataset.bound) {
-    btnCloseApproveModal.dataset.bound = 'true';
+  const isBound = (el) => el && (el.getAttribute ? el.getAttribute('data-bound') : (el.dataset ? el.dataset.bound : el._bound));
+  const setBound = (el) => {
+    if (!el) return;
+    if (el.setAttribute) el.setAttribute('data-bound', 'true');
+    if (el.dataset) el.dataset.bound = 'true';
+    el._bound = true;
+  };
+
+  if (btnCloseApproveModal && !isBound(btnCloseApproveModal)) {
+    setBound(btnCloseApproveModal);
     btnCloseApproveModal.addEventListener('click', () => modalApproveDecision && modalApproveDecision.classList.remove('open'));
   }
-  if (btnCancelApproveModal && !btnCancelApproveModal.dataset.bound) {
-    btnCancelApproveModal.dataset.bound = 'true';
+  if (btnCancelApproveModal && !isBound(btnCancelApproveModal)) {
+    setBound(btnCancelApproveModal);
     btnCancelApproveModal.addEventListener('click', () => modalApproveDecision && modalApproveDecision.classList.remove('open'));
   }
-  if (btnConfirmApprove && !btnConfirmApprove.dataset.bound) {
-    btnConfirmApprove.dataset.bound = 'true';
+  if (btnConfirmApprove && !isBound(btnConfirmApprove)) {
+    setBound(btnConfirmApprove);
     btnConfirmApprove.addEventListener('click', confirmApproveDecision);
   }
 
-  if (btnCloseRejectModal && !btnCloseRejectModal.dataset.bound) {
-    btnCloseRejectModal.dataset.bound = 'true';
+  if (btnCloseRejectModal && !isBound(btnCloseRejectModal)) {
+    setBound(btnCloseRejectModal);
     btnCloseRejectModal.addEventListener('click', () => modalRejectDecision && modalRejectDecision.classList.remove('open'));
   }
-  if (btnCancelRejectModal && !btnCancelRejectModal.dataset.bound) {
-    btnCancelRejectModal.dataset.bound = 'true';
+  if (btnCancelRejectModal && !isBound(btnCancelRejectModal)) {
+    setBound(btnCancelRejectModal);
     btnCancelRejectModal.addEventListener('click', () => modalRejectDecision && modalRejectDecision.classList.remove('open'));
   }
-  if (btnConfirmReject && !btnConfirmReject.dataset.bound) {
-    btnConfirmReject.dataset.bound = 'true';
+  if (btnConfirmReject && !isBound(btnConfirmReject)) {
+    setBound(btnConfirmReject);
     btnConfirmReject.addEventListener('click', confirmRejectDecision);
   }
 
@@ -748,17 +939,17 @@ function initApproverDecisionListeners() {
   const btnConfirmRejectExt = document.getElementById('btnConfirmRejectExt');
   const rejectExtReasonInput = document.getElementById('rejectExtReasonInput');
 
-  if (btnCloseRejectExtModal && !btnCloseRejectExtModal.dataset.bound) {
-    btnCloseRejectExtModal.dataset.bound = 'true';
+  if (btnCloseRejectExtModal && !isBound(btnCloseRejectExtModal)) {
+    setBound(btnCloseRejectExtModal);
     btnCloseRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
   }
-  if (btnCancelRejectExtModal && !btnCancelRejectExtModal.dataset.bound) {
-    btnCancelRejectExtModal.dataset.bound = 'true';
+  if (btnCancelRejectExtModal && !isBound(btnCancelRejectExtModal)) {
+    setBound(btnCancelRejectExtModal);
     btnCancelRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
   }
 
-  if (btnConfirmRejectExt && !btnConfirmRejectExt.dataset.bound) {
-    btnConfirmRejectExt.dataset.bound = 'true';
+  if (btnConfirmRejectExt && !isBound(btnConfirmRejectExt)) {
+    setBound(btnConfirmRejectExt);
     btnConfirmRejectExt.addEventListener('click', () => {
       const reason = rejectExtReasonInput ? rejectExtReasonInput.value.trim() : '';
       if (!reason) {
@@ -873,17 +1064,6 @@ function rejectExtensionRequest(ticketId, reason) {
 }
 
 // Expose globally
-window.updateApproverMetrics = updateApproverMetrics;
-window.renderApproverDashboard = renderApproverDashboard;
-window.renderApproverCards = renderApproverCards;
-window.renderApproverView = renderApproverView;
-window.openApproveModal = openApproveModal;
-window.openRejectModal = openRejectModal;
-window.approveExtensionRequest = approveExtensionRequest;
-window.openRejectExtensionModal = openRejectExtensionModal;
-window.rejectExtensionRequest = rejectExtensionRequest;
-window.approveEmergencyDirect = approveEmergencyDirect;
-window.rejectEmergencyDirect = rejectEmergencyDirect;
 window.updateApproverMetrics = updateApproverMetrics;
 window.renderApproverDashboard = renderApproverDashboard;
 window.renderApproverCards = renderApproverCards;

@@ -262,8 +262,10 @@ function verifyEmergencyPasscode() {
 // METODE 3: Scan Wajah (Face Scan) Biometrik Atasan
 let faceScanStream = null;
 let faceScanTimeout = null;
+let isFaceScanningActive = false;
 
 function startEmergencyFaceScanner() {
+  isFaceScanningActive = true;
   const video = document.getElementById('emgFaceVideo');
   const statusText = document.getElementById('emgFaceStatusText');
   const progressBar = document.getElementById('emgFaceProgressBar');
@@ -281,9 +283,14 @@ function startEmergencyFaceScanner() {
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && video) {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
       .then(stream => {
+        // Jika pengguna sudah berpindah tab atau menutup modal sebelum izin webcam keluar:
+        if (!isFaceScanningActive) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
         faceScanStream = stream;
         video.srcObject = stream;
-        video.play();
+        video.play().catch(e => console.warn('Video play error:', e));
       })
       .catch(err => {
         console.warn('Webcam stream unavailable or permission denied:', err);
@@ -347,18 +354,31 @@ function completeEmergencyFaceScan() {
 }
 
 function stopEmergencyFaceScanner() {
+  isFaceScanningActive = false;
   if (faceScanTimeout) {
     clearTimeout(faceScanTimeout);
     faceScanTimeout = null;
   }
   if (faceScanStream) {
-    faceScanStream.getTracks().forEach(track => track.stop());
+    faceScanStream.getTracks().forEach(track => {
+      try { track.stop(); } catch(e) {}
+    });
     faceScanStream = null;
   }
   const video = document.getElementById('emgFaceVideo');
-  if (video) video.srcObject = null;
+  if (video) {
+    try { video.pause(); } catch(e) {}
+    video.srcObject = null;
+  }
   const scanRing = document.getElementById('emgFaceScanRing');
   if (scanRing) scanRing.classList.remove('scanning');
+  const progressBar = document.getElementById('emgFaceProgressBar');
+  if (progressBar) progressBar.style.width = '0%';
+  const btnTrigger = document.getElementById('btnTriggerFaceScan');
+  if (btnTrigger) {
+    btnTrigger.disabled = false;
+    btnTrigger.innerHTML = '📸 Pindai Wajah Atasan Sekarang';
+  }
 }
 
 // BIND EVENT LISTENERS SAAT DOM SIAP
@@ -395,6 +415,16 @@ function initEmergencyModule() {
     inputPasscode.onkeyup = (e) => {
       if (e.key === 'Enter') verifyEmergencyPasscode();
     };
+  }
+
+  // Backdrop click to close & turn off camera
+  const modalEmergencyUnlock = document.getElementById('modalEmergencyUnlock');
+  if (modalEmergencyUnlock) {
+    modalEmergencyUnlock.addEventListener('click', (e) => {
+      if (e.target === modalEmergencyUnlock) {
+        closeEmergencyUnlockModal();
+      }
+    });
   }
 }
 

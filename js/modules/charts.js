@@ -137,8 +137,11 @@ function renderKaryawanDonutChart() {
   `;
 
   // Attach filter change listener
-  if (filterSelect && !filterSelect.dataset.bound) {
-    filterSelect.dataset.bound = 'true';
+  const isBoundDonut = filterSelect && (filterSelect.getAttribute ? filterSelect.getAttribute('data-bound') : (filterSelect.dataset ? filterSelect.dataset.bound : filterSelect._bound));
+  if (filterSelect && !isBoundDonut) {
+    if (filterSelect.setAttribute) filterSelect.setAttribute('data-bound', 'true');
+    if (filterSelect.dataset) filterSelect.dataset.bound = 'true';
+    filterSelect._bound = true;
     filterSelect.addEventListener('change', () => {
       renderKaryawanDonutChart();
     });
@@ -261,8 +264,11 @@ function renderApproverBarChart() {
   `;
 
   // Attach filter change listener
-  if (filterSelect && !filterSelect.dataset.bound) {
-    filterSelect.dataset.bound = 'true';
+  const isBoundBar = filterSelect && (filterSelect.getAttribute ? filterSelect.getAttribute('data-bound') : (filterSelect.dataset ? filterSelect.dataset.bound : filterSelect._bound));
+  if (filterSelect && !isBoundBar) {
+    if (filterSelect.setAttribute) filterSelect.setAttribute('data-bound', 'true');
+    if (filterSelect.dataset) filterSelect.dataset.bound = 'true';
+    filterSelect._bound = true;
     filterSelect.addEventListener('change', () => {
       renderApproverBarChart();
     });
@@ -565,23 +571,31 @@ function unhoverDeptRow() {
 }
 
 function initChartFilterListeners() {
+  const isBound = (el) => el && (el.getAttribute ? el.getAttribute('data-bound') : (el.dataset ? el.dataset.bound : el._bound));
+  const setBound = (el) => {
+    if (!el) return;
+    if (el.setAttribute) el.setAttribute('data-bound', 'true');
+    if (el.dataset) el.dataset.bound = 'true';
+    el._bound = true;
+  };
+
   const empFilter = document.getElementById('filterEmpChartPeriod');
-  if (empFilter && !empFilter.dataset.bound) {
-    empFilter.dataset.bound = 'true';
+  if (empFilter && !isBound(empFilter)) {
+    setBound(empFilter);
     empFilter.addEventListener('change', () => {
       renderKaryawanDonutChart();
     });
   }
   const appFilter = document.getElementById('filterAppChartPeriod');
-  if (appFilter && !appFilter.dataset.bound) {
-    appFilter.dataset.bound = 'true';
+  if (appFilter && !isBound(appFilter)) {
+    setBound(appFilter);
     appFilter.addEventListener('change', () => {
       renderApproverBarChart();
     });
   }
   const adminDeptFilter = document.getElementById('filterAdminDeptPeriod');
-  if (adminDeptFilter && !adminDeptFilter.dataset.bound) {
-    adminDeptFilter.dataset.bound = 'true';
+  if (adminDeptFilter && !isBound(adminDeptFilter)) {
+    setBound(adminDeptFilter);
     adminDeptFilter.addEventListener('change', () => {
       renderAdminDeptChart();
     });

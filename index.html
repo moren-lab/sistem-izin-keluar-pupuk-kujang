@@ -312,7 +312,7 @@
                 <circle cx="9" cy="7" r="4"></circle>
                 <polyline points="16 11 18 13 22 9"></polyline>
               </svg>
-              <span>Atasan 1 (Manager)</span>
+              <span>Atasan 1: Hendra (Manager)</span>
             </button>
             <button class="role-switch-btn" id="btnSwitchApprover2">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -320,7 +320,7 @@
                 <circle cx="9" cy="7" r="4"></circle>
                 <circle cx="19" cy="11" r="2"></circle>
               </svg>
-              <span>Atasan 2 (Supervisor)</span>
+              <span>Atasan 2: Dewi (Supervisor)</span>
             </button>
             <button class="role-switch-btn" id="btnSwitchSecurity">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -580,11 +580,8 @@
               <div class="figma-filter-item">
                 <label class="figma-filter-lbl">Status</label>
                 <select id="filterEmpStatus" class="figma-filter-select">
-                  <option value="all">Semua Status</option>
+                  <option value="all">Semua Riwayat</option>
                   <option value="Selesai">Selesai</option>
-                  <option value="Sedang di Luar">Sedang di Luar</option>
-                  <option value="Disetujui">Disetujui</option>
-                  <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
                   <option value="Terlambat">Terlambat</option>
                   <option value="Ditolak">Ditolak</option>
                   <option value="Kedaluwarsa">Kedaluwarsa</option>
@@ -593,32 +590,43 @@
               </div>
             </div>
 
-            <!-- Results Subbar (Count + Card / List Switcher) -->
+            <!-- Results Subbar (Count + Card / List Switcher + Hapus Semua) -->
             <div class="figma-results-bar">
               <div id="figmaRiwayatCountMeta">
                 8 hasil • Semua waktu • Terbaru lebih dulu • QR hanya untuk izin aktif
               </div>
-              <div class="figma-view-switcher">
-                <button class="btn-figma-toggle active" id="btnEmpViewCard" title="Tampilan Kartu">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <button type="button" class="btn-figma-delete-all" id="btnEmpDeleteAllRiwayat"
+                  style="background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.15s ease;"
+                  onclick="deleteAllEmpRiwayat()" title="Hapus Seluruh Pengajuan di Riwayat">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>
-                  <span>Card</span>
+                  <span>Hapus Semua</span>
                 </button>
-                <button class="btn-figma-toggle" id="btnEmpViewTable" title="Tampilan List / Tabel">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12"></line>
-                    <line x1="8" y1="18" x2="21" y2="18"></line>
-                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                  </svg>
-                  <span>List</span>
-                </button>
+                <div class="figma-view-switcher">
+                  <button class="btn-figma-toggle active" id="btnEmpViewCard" title="Tampilan Kartu">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Card</span>
+                  </button>
+                  <button class="btn-figma-toggle" id="btnEmpViewTable" title="Tampilan List / Tabel">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <span>List</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1889,16 +1897,10 @@
             </div>
 
             <!-- Native hidden select for seamless form submission & validation -->
-            <select id="selectApprover" style="display: none;" tabindex="-1" aria-hidden="true" required>
+            <select id="selectApprover" style="display: none;" tabindex="-1" aria-hidden="true">
               <option value="">-- Belum Memilih Atasan --</option>
               <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan</option>
               <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan (Plt. Manager)</option>
-              <option value="Dr. Agus Priyanto, M.Eng.">Dr. Agus Priyanto, M.Eng. — VP Produksi & Utilitas</option>
-              <option value="Bambang Sutrisno, S.T.">Bambang Sutrisno, S.T. — Supervisi Pengamanan & K3</option>
-              <option value="Dr. Ahmad Subagja, M.M.">Dr. Ahmad Subagja, M.M. — VP SDM & Tata Kelola Organisasi</option>
-              <option value="Ir. Wahyu Hidayat, M.Sc.">Ir. Wahyu Hidayat, M.Sc. — Superintendent Pemeliharaan Listrik & Instrumen</option>
-              <option value="Siti Rahayu, S.T.">Siti Rahayu, S.T. — Kepala Seksi Logistik & Pergudangan Pabrik</option>
-              <option value="Dian Kusuma, S.T., M.Eng.">Dian Kusuma, S.T., M.Eng. — Manager Operasi Pabrik Kujang 1B</option>
             </select>
 
             <!-- Search Combobox Wrapper -->
@@ -2571,21 +2573,90 @@
             Sandi / OTP Darurat</strong>, atau <strong>(3) Scan Wajah Atasan di Tempat</strong>.
         </div>
 
-        <!-- Pilih Atasan untuk Notifikasi Pelacakan -->
+        <!-- Pilih Atasan untuk Notifikasi Pelacakan dengan Search Combobox -->
         <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label" for="emergApprover" style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-            Pilih Atasan untuk Notifikasi & Pelacakan <span style="color: var(--rose-danger);">*</span>
-          </label>
-          <select id="emergApprover" class="form-select" required style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;">
-            <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan (Atasan Langsung)</option>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" style="font-weight: 600; color: #334155; font-size: 0.8rem; margin: 0;">
+              Pilih Atasan untuk Notifikasi & Pelacakan <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <span class="approver-search-tip" id="emergApproverSearchTip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>Ketik / cari nama atasan anda</span>
+            </span>
+          </div>
+
+          <!-- Native hidden select for form submission -->
+          <select id="emergApprover" style="display: none;" tabindex="-1" aria-hidden="true">
+            <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan</option>
             <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan (Plt. Manager)</option>
-            <option value="Dr. Agus Priyanto, M.Eng.">Dr. Agus Priyanto, M.Eng. — VP Produksi & Utilitas</option>
-            <option value="Bambang Sutrisno, S.T.">Bambang Sutrisno, S.T. — Supervisi Pengamanan & K3</option>
-            <option value="Dr. Ahmad Subagja, M.M.">Dr. Ahmad Subagja, M.M. — VP SDM & Tata Kelola Organisasi</option>
-            <option value="Ir. Wahyu Hidayat, M.Sc.">Ir. Wahyu Hidayat, M.Sc. — Superintendent Pemeliharaan Listrik & Instrumen</option>
-            <option value="Siti Rahayu, S.T.">Siti Rahayu, S.T. — Kepala Seksi Logistik & Pergudangan Pabrik</option>
-            <option value="Dian Kusuma, S.T., M.Eng.">Dian Kusuma, S.T., M.Eng. — Manager Operasi Pabrik Kujang 1B</option>
           </select>
+
+          <!-- Search Combobox Wrapper for Emergency -->
+          <div class="approver-combobox-wrapper" id="emergApproverComboboxWrapper">
+            <div class="approver-input-box" id="emergApproverInputBox">
+              <span class="approver-input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
+              <input type="text" id="searchEmergApproverInput" class="form-input approver-search-input"
+                placeholder="Ketik/cari nama atasan anda..." autocomplete="off" spellcheck="false">
+              <button type="button" class="btn-clear-approver-search" id="btnClearEmergApproverSearch" title="Hapus / Reset" style="display: none;">
+                ✕
+              </button>
+              <button type="button" class="btn-toggle-approver-list" id="btnToggleEmergApproverList" title="Buka / Tutup Daftar Atasan">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Selected Card Preview -->
+            <div class="approver-selected-preview" id="emergApproverSelectedPreview" style="display: none;">
+              <div class="approver-selected-badge-status" style="background:#fee2e2; color:#b91c1c;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Atasan Terpilih</span>
+              </div>
+              <div class="approver-selected-card-inner">
+                <div class="approver-selected-avatar" id="selectedEmergApproverAvatar">HG</div>
+                <div class="approver-selected-meta">
+                  <div class="approver-selected-name" id="selectedEmergApproverName">Ir. Hendra Gunawan, M.T.</div>
+                  <div class="approver-selected-title" id="selectedEmergApproverTitle">Manager Rekayasa & Pemeliharaan</div>
+                </div>
+                <button type="button" class="btn-change-approver-choice" id="btnChangeEmergApproverChoice" title="Ganti pilihan atasan">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  <span>Ganti</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Floating Dropdown Suggestions / Search Results -->
+            <div class="approver-floating-dropdown" id="emergApproverFloatingDropdown" style="display: none;">
+              <div class="approver-before-search-banner" id="emergApproverBeforeSearchBanner">
+                <div class="before-search-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <span>Ketik / cari nama atasan anda</span>
+                </div>
+                <p class="before-search-text">Ketik nama atasan Anda di kolom pencarian, atau klik salah satu nama atasan pada daftar di bawah:</p>
+              </div>
+
+              <div class="approver-dropdown-header">
+                <span id="emergApproverDropdownSubtitle">Daftar Atasan Peninjau</span>
+                <span class="approver-found-badge" id="emergApproverFoundBadge">2 Atasan</span>
+              </div>
+
+              <div class="approver-items-list" id="emergApproverItemsList">
+                <!-- Generated dynamically via JS -->
+              </div>
+
+              <div class="approver-empty-state" id="emergApproverEmptyState" style="display: none;">
+                <div class="empty-icon">🔎</div>
+                <div class="empty-title">Nama Atasan Tidak Ditemukan</div>
+                <div class="empty-desc">Tidak ditemukan atasan dengan kata kunci "<b id="emergEmptySearchTerm"></b>". Pastikan ejaan nama sudah sesuai.</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Kategori Keperluan & Tipe Kepulangan (Side by side) -->
@@ -2927,6 +2998,8 @@
             style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">✏️ Edit Izin Ini</button>
           <button type="button" class="btn-emergency" id="btnBlockedCancelTicket"
             style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Batalkan Izin Ini</button>
+          <button type="button" class="btn-figma-primary" id="btnBlockedCancelAndNew"
+            style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem; background: #dc2626; border-color: #dc2626;">Batalkan & Buat Baru</button>
           <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
         </div>
       </div>
@@ -3342,18 +3415,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261021_24"></script>
-  <script src="js/modules/ui.js?v=20261021_24"></script>
-  <script src="js/modules/scheduler.js?v=20261021_24"></script>
-  <script src="js/modules/navigation.js?v=20261021_24"></script>
-  <script src="js/modules/karyawan.js?v=20261021_24"></script>
-  <script src="js/modules/approver.js?v=20261021_24"></script>
-  <script src="js/modules/security.js?v=20261021_24"></script>
-  <script src="js/modules/admin.js?v=20261021_24"></script>
-  <script src="js/modules/charts.js?v=20261021_24"></script>
-  <script src="js/modules/emergency.js?v=20261021_24"></script>
-  <script src="js/modules/modals.js?v=20261021_24"></script>
-  <script src="js/app.js?v=20261021_24"></script>
+  <script src="js/data/mockData.js?v=20261022_02"></script>
+  <script src="js/modules/ui.js?v=20261022_02"></script>
+  <script src="js/modules/scheduler.js?v=20261022_02"></script>
+  <script src="js/modules/navigation.js?v=20261022_02"></script>
+  <script src="js/modules/karyawan.js?v=20261022_02"></script>
+  <script src="js/modules/approver.js?v=20261022_02"></script>
+  <script src="js/modules/security.js?v=20261022_02"></script>
+  <script src="js/modules/admin.js?v=20261022_02"></script>
+  <script src="js/modules/charts.js?v=20261022_02"></script>
+  <script src="js/modules/emergency.js?v=20261022_02"></script>
+  <script src="js/modules/modals.js?v=20261022_02"></script>
+  <script src="js/app.js?v=20261022_02"></script>
 </body>
 
 </html>
