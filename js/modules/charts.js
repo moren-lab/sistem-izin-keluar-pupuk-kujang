@@ -357,10 +357,10 @@ function renderApproverBarChart() {
     <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; height: 130px; padding: 0.5rem 0.75rem 0 0.75rem; border-bottom: 2px solid #e2e8f0;"
          onmouseleave="window.unhoverApproverBar()">
       ${days.map((d, index) => {
-        const heightPct = Math.round((d.count / (max + 2)) * 100);
-        const isPeak = d.count === max;
-        const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
-        return `
+    const heightPct = Math.round((d.count / (max + 2)) * 100);
+    const isPeak = d.count === max;
+    const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
+    return `
           <div id="approverBarCol_${index}" class="chart-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 0.35rem; cursor: pointer; transition: all 0.2s ease; pointer-events: auto;"
             onmouseenter="window.hoverApproverBar('${d.label}', ${d.count}, '${pct}', ${index})"
             onmousemove="window.hoverApproverBar('${d.label}', ${d.count}, '${pct}', ${index})">
@@ -369,7 +369,7 @@ function renderApproverBarChart() {
             <span style="font-size: 0.75rem; font-weight: 700; color: ${isPeak ? '#0f766e' : '#64748b'}; margin-top: 4px;">${d.label}</span>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
 
     <!-- Approver Badge (Tanpa Persentase saat Idle) -->
@@ -512,9 +512,9 @@ function renderAdminTrafficChart() {
 
         <!-- Ultra-Sensitive Full-Height Vertical Hit Areas & Points -->
         ${pointsOut.map((p, i) => {
-          const isPeak = p.out === Math.max(...data.map(d => d.out));
-          const pct = ((p.out / total) * 100).toFixed(1).replace('.0', '');
-          return `
+    const isPeak = p.out === Math.max(...data.map(d => d.out));
+    const pct = ((p.out / total) * 100).toFixed(1).replace('.0', '');
+    return `
             <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
                onmouseenter="window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i})"
                onmousemove="window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i})">
@@ -527,7 +527,7 @@ function renderAdminTrafficChart() {
               ${i % 2 === 0 ? `<text x="${p.x}" y="${height - 4}" font-size="9" font-weight="700" fill="#64748b" text-anchor="middle">${p.hour}</text>` : ''}
             </g>
           `;
-        }).join('')}
+  }).join('')}
       </svg>
     </div>
 
@@ -641,12 +641,12 @@ function renderAdminDeptChart() {
   container.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 0.65rem;" onmouseleave="window.unhoverDeptRow()">
       ${depts.map((d, index) => {
-        const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
-        const barWidthPct = Math.round((d.count / (max + 2)) * 100);
-        const colors = ['#0f766e', '#0284c7', '#3b82f6', '#8b5cf6', '#64748b'];
-        const barColor = colors[index % colors.length];
+    const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
+    const barWidthPct = Math.round((d.count / (max + 2)) * 100);
+    const colors = ['#0f766e', '#0284c7', '#3b82f6', '#8b5cf6', '#64748b'];
+    const barColor = colors[index % colors.length];
 
-        return `
+    return `
           <div id="deptRow_${index}" class="chart-dept-row" style="cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease; pointer-events: auto;"
             onmouseenter="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${barColor}', ${index})"
             onmousemove="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${barColor}', ${index})">
@@ -661,7 +661,7 @@ function renderAdminDeptChart() {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
 
     <!-- Admin Dept Badge (Tanpa Persentase saat Idle) -->

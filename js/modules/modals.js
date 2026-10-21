@@ -74,11 +74,15 @@ function setupRadioToggles() {
     optCatDinas.addEventListener('click', () => {
       optCatDinas.classList.add('selected');
       optCatPribadi.classList.remove('selected');
+      const input = optCatDinas.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
     });
 
     optCatPribadi.addEventListener('click', () => {
       optCatPribadi.classList.add('selected');
       optCatDinas.classList.remove('selected');
+      const input = optCatPribadi.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
     });
   }
 
@@ -86,13 +90,17 @@ function setupRadioToggles() {
     optTypeKembali.addEventListener('click', () => {
       optTypeKembali.classList.add('selected');
       optTypePulang.classList.remove('selected');
-      if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'flex';
+      const input = optTypeKembali.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
+      if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'block';
       if (inputEstimatedReturn) inputEstimatedReturn.required = true;
     });
 
     optTypePulang.addEventListener('click', () => {
       optTypePulang.classList.add('selected');
       optTypeKembali.classList.remove('selected');
+      const input = optTypePulang.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
       if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'none';
       if (inputEstimatedReturn) inputEstimatedReturn.required = false;
     });
@@ -169,44 +177,120 @@ function initFormDates() {
   }
 }
 
-// TAB SWITCHER IN DETAIL MODAL
+// TAB SWITCHER IN DETAIL MODAL (INFORMASI TIKET vs RIWAYAT AKTIVITAS)
 function switchDetailTab(tab) {
-  const tabNavQR = document.getElementById('tabNavQR');
   const tabNavInfo = document.getElementById('tabNavInfo');
-  const paneDetailQR = document.getElementById('paneDetailQR');
+  const tabNavTimeline = document.getElementById('tabNavTimeline');
   const paneDetailInfo = document.getElementById('paneDetailInfo');
+  const paneDetailTimeline = document.getElementById('paneDetailTimeline');
 
-  if (tab === 'detail') {
-    if (tabNavInfo) {
-      tabNavInfo.classList.add('active');
-      tabNavInfo.style.borderBottom = '3px solid var(--corp-teal)';
-      tabNavInfo.style.color = 'var(--corp-teal)';
-    }
-    if (tabNavQR) {
-      tabNavQR.classList.remove('active');
-      tabNavQR.style.borderBottom = '3px solid transparent';
-      tabNavQR.style.color = 'var(--text-secondary)';
-    }
-    if (paneDetailInfo) paneDetailInfo.style.display = 'flex';
-    if (paneDetailQR) paneDetailQR.style.display = 'none';
-  } else {
-    if (tabNavQR) {
-      tabNavQR.classList.add('active');
-      tabNavQR.style.borderBottom = '3px solid var(--corp-teal)';
-      tabNavQR.style.color = 'var(--corp-teal)';
-    }
-    if (tabNavInfo) {
-      tabNavInfo.classList.remove('active');
-      tabNavInfo.style.borderBottom = '3px solid transparent';
-      tabNavInfo.style.color = 'var(--text-secondary)';
-    }
-    if (paneDetailQR) paneDetailQR.style.display = 'flex';
+  if (tab === 'timeline') {
+    if (tabNavTimeline) tabNavTimeline.classList.add('active');
+    if (tabNavInfo) tabNavInfo.classList.remove('active');
+    if (paneDetailTimeline) paneDetailTimeline.style.display = 'flex';
     if (paneDetailInfo) paneDetailInfo.style.display = 'none';
+  } else {
+    if (tabNavInfo) tabNavInfo.classList.add('active');
+    if (tabNavTimeline) tabNavTimeline.classList.remove('active');
+    if (paneDetailInfo) paneDetailInfo.style.display = 'flex';
+    if (paneDetailTimeline) paneDetailTimeline.style.display = 'none';
   }
 }
 
-// OPEN TICKET DETAIL & QR MODAL
-function openTicketDetail(ticketId, defaultTab = 'qr') {
+// OPEN DIGITAL PASS QR MODAL (FIGMA SCREEN 4)
+function openDigitalPassModal(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const ticket = ticketsList.find(t => t.id === ticketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
+  if (!ticket) return;
+
+  const modal = document.getElementById('modalDigitalPassQR');
+  if (!modal) return;
+
+  const digitalPassSubtitle = document.getElementById('digitalPassSubtitle');
+  if (digitalPassSubtitle) {
+    digitalPassSubtitle.textContent = `${ticket.id} • ${ticket.category} • ${ticket.type}`;
+  }
+
+  const digitalPassStatusBadge = document.getElementById('digitalPassStatusBadge');
+  if (digitalPassStatusBadge) {
+    digitalPassStatusBadge.textContent = `• ${ticket.status}`;
+    digitalPassStatusBadge.className = ticket.status === 'Sedang di Luar' ? 'status-pill-purple' : (ticket.status === 'Disetujui' ? 'status-pill-blue' : 'status-pill-green');
+  }
+
+  const digitalPassTicketId = document.getElementById('digitalPassTicketId');
+  if (digitalPassTicketId) digitalPassTicketId.textContent = ticket.id;
+
+  const digitalPassApplicant = document.getElementById('digitalPassApplicant');
+  if (digitalPassApplicant) digitalPassApplicant.textContent = ticket.applicantName || 'Budi Pratama, S.T.';
+
+  const digitalPassEstReturn = document.getElementById('digitalPassEstReturn');
+  if (digitalPassEstReturn) {
+    const rawRet = ticket.estimatedReturn || '19 Okt 2026 | 13.00 WIB';
+    digitalPassEstReturn.textContent = window.formatDisplayDate ? window.formatDisplayDate(rawRet) : rawRet;
+  }
+
+  const digitalPassNoticeText = document.getElementById('digitalPassNoticeText');
+  if (digitalPassNoticeText) {
+    const timeReturn = ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) + ' WIB' : '13.00 WIB';
+    digitalPassNoticeText.textContent = `Jangan bagikan QR. Batas kembali ${timeReturn}; QR dinonaktifkan setelah Scan In.`;
+  }
+
+  // QR Code Generation
+  const qrContainer = document.getElementById('digitalPassQrContainer');
+  if (qrContainer) {
+    qrContainer.innerHTML = '';
+    const qrPayload = `KUJANG-PASS|${ticket.id}|${ticket.applicantNip || 'PK-2024-8841'}|${ticket.category}|${ticket.plannedExit}`;
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrContainer, {
+        text: qrPayload,
+        width: 170,
+        height: 170,
+        colorDark: ticket.status === 'Terlambat' ? '#b91c1c' : '#0f2b48',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } else {
+      qrContainer.innerHTML = `<strong>QR: ${ticket.id}</strong>`;
+    }
+  }
+
+  // Button actions
+  const btnDownload = document.getElementById('btnDownloadDigitalQRPng');
+  if (btnDownload) {
+    btnDownload.onclick = () => {
+      const img = qrContainer ? qrContainer.querySelector('img') : null;
+      if (img && img.src) {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `Tiket-QR-${ticket.id}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh!', 'success');
+      } else {
+        if (typeof window.showToast === 'function') window.showToast('Menyiapkan gambar QR...', 'info');
+      }
+    };
+  }
+
+  const btnPrint = document.getElementById('btnPrintDigitalPass');
+  if (btnPrint) {
+    btnPrint.onclick = () => {
+      window.print();
+    };
+  }
+
+  modal.classList.add('open');
+}
+window.openDigitalPassModal = openDigitalPassModal;
+
+// OPEN TICKET DETAIL & AUDIT TRAIL MODAL (FIGMA SCREEN 2 & 3)
+function openTicketDetail(ticketId, defaultTab = 'info') {
+  if (defaultTab === 'qr') {
+    openDigitalPassModal(ticketId);
+    return;
+  }
+
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
@@ -214,140 +298,39 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
   const ACTORS = window.ACTORS || {};
   const modalTicketDetail = document.getElementById('modalTicketDetail');
 
-  // --- TAB A: QR & DIGITAL PASS ---
-  const passTicketId = document.getElementById('passTicketId');
-  if (passTicketId) passTicketId.textContent = ticket.id;
-
-  const passEmployeeName = document.getElementById('passEmployeeName');
-  if (passEmployeeName) passEmployeeName.textContent = ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.');
-
-  const passEmployeeNIP = document.getElementById('passEmployeeNIP');
-  if (passEmployeeNIP) passEmployeeNIP.textContent = ticket.applicantNip || (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841');
-
-  const passCatType = document.getElementById('passCatType');
-  if (passCatType) passCatType.textContent = `${ticket.category} • ${ticket.type}`;
-
-  const passApprover = document.getElementById('passApprover');
-  if (passApprover) passApprover.textContent = ticket.approverName || (ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.');
-
-  const passPlannedExit = document.getElementById('passPlannedExit');
-  if (passPlannedExit) passPlannedExit.textContent = window.formatDisplayDate(ticket.plannedExit);
-
-  const passEstimatedReturn = document.getElementById('passEstimatedReturn');
-  if (passEstimatedReturn) passEstimatedReturn.textContent = ticket.estimatedReturn ? window.formatDisplayDate(ticket.estimatedReturn) : 'Pulang Hari Ini';
-
-  const passContainer = document.getElementById('passStatusBadgeContainer');
-  if (passContainer) {
-    passContainer.innerHTML = window.getStatusPill(ticket.status);
+  // Header Title & Subtitle
+  const modalDetailHeading = document.getElementById('modalDetailHeading');
+  if (modalDetailHeading) {
+    modalDetailHeading.textContent = `Detail Pengajuan • ${ticket.id}`;
   }
 
-  // Pos Jaga Scan Real Records
-  const scanRecordGrid = document.getElementById('scanRecordGrid');
-  if (scanRecordGrid) {
-    if (ticket.scanOutTime || ticket.scanInTime) {
-      scanRecordGrid.style.display = 'grid';
-      const elOut = document.getElementById('passScanOut');
-      const elIn = document.getElementById('passScanIn');
-      if (elOut) elOut.textContent = ticket.scanOutTime || '-';
-      if (elIn) elIn.textContent = ticket.scanInTime || '-';
-    } else {
-      scanRecordGrid.style.display = 'none';
-    }
+  const modalDetailSubtitle = document.getElementById('modalDetailSubtitle');
+  if (modalDetailSubtitle) {
+    const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Oktober 2026';
+    modalDetailSubtitle.textContent = `${ticket.applicantName || 'Budi Pratama, S.T.'} • ${ticket.category} • ${dayStr}`;
   }
 
-  // QR Code Generation
-  const qrCodeContainer = document.getElementById('qrCodeContainer');
-  if (qrCodeContainer) {
-    qrCodeContainer.innerHTML = '';
-    if (ticket.isEmergency && (ticket.emergencyLocked || ticket.qrLocked || ticket.status === 'Menunggu Otorisasi Darurat')) {
-      qrCodeContainer.innerHTML = `
-        <div style="width:160px; min-height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff1f2; border:2px dashed #f43f5e; border-radius:10px; padding:12px; text-align:center;">
-          <div style="font-size:2.2rem; animation: pulse 1.5s infinite;">🔒</div>
-          <span style="font-size:0.75rem; color:#9f1239; margin-top:4px; font-weight:800;">QR CODE TERKUNCI</span>
-          <span style="font-size:0.65rem; color:#be123c; margin-top:2px; line-height:1.3;">Menunggu Otorisasi Darurat</span>
-          <button type="button" class="btn-approve" style="margin-top:8px; padding:6px 10px; font-size:0.725rem; font-weight:800; background:#e11d48; width:100%; border:none; border-radius:6px; color:#fff; cursor:pointer;" onclick="if (typeof window.openEmergencyUnlockModal === 'function') window.openEmergencyUnlockModal('${ticket.id}')">
-            ⚡ Buka Kunci (3 Opsi)
-          </button>
-        </div>
-      `;
-    } else if (ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai') {
-      const qrPayload = `KUJANG-PASS|${ticket.id}|${ticket.applicantNip || 'PK-2024-8841'}|${ticket.category}|${ticket.plannedExit}`;
-      if (typeof QRCode !== 'undefined') {
-        new QRCode(qrCodeContainer, {
-          text: qrPayload,
-          width: 150,
-          height: 150,
-          colorDark: ticket.status === 'Terlambat' ? '#b91c1c' : '#0f2b48',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      } else {
-        qrCodeContainer.innerHTML = `<span>QR: ${ticket.id}</span>`;
-      }
-    } else if (ticket.status === 'Kedaluwarsa') {
-      qrCodeContainer.innerHTML = `
-        <div style="width:150px; height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fef2f2; border:1.5px dashed #f87171; border-radius:6px; padding:10px; text-align:center;">
-          <span style="font-size:1.6rem;">⏱️</span>
-          <span style="font-size:0.75rem; color:#b91c1c; margin-top:4px; font-weight:800;">QR KEDALUWARSA</span>
-          <span style="font-size:0.6rem; color:#7f1d1d; margin-top:2px;">Tiket hangus melewati batas toleransi jam keluar</span>
-        </div>
-      `;
-    } else {
-      qrCodeContainer.innerHTML = `
-        <div style="width:150px; height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:10px; text-align:center;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <span style="font-size:0.7rem; color:#475569; margin-top:4px; font-weight:700;">QR Belum Aktif</span>
-          <span style="font-size:0.6rem; color:#94a3b8;">Aktif setelah izin disetujui Atasan</span>
-        </div>
-      `;
-    }
+  // Status Badge on Top Right
+  const detailStatusPillTop = document.getElementById('detailStatusPillTop');
+  if (detailStatusPillTop) {
+    detailStatusPillTop.innerHTML = window.getStatusPill(ticket.status);
   }
 
-  // Hapus / Sembunyikan fitur unduh dan cetak QR saat QR belum muncul / belum aktif (status menunggu, ditolak, dll)
-  const paneQrActionButtons = document.getElementById('paneQrActionButtons');
-  const btnDownloadQRPng = document.getElementById('btnDownloadQRPng');
-  const btnPrintPassPdf = document.getElementById('btnPrintPassPdf');
-  const hasActiveQr = (ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai') && (!ticket.emergencyLocked && !ticket.qrLocked);
-
-  if (paneQrActionButtons) {
-    paneQrActionButtons.style.display = hasActiveQr ? 'flex' : 'none';
-  } else {
-    if (btnDownloadQRPng) btnDownloadQRPng.style.display = hasActiveQr ? 'inline-flex' : 'none';
-    if (btnPrintPassPdf) btnPrintPassPdf.style.display = hasActiveQr ? 'inline-flex' : 'none';
-  }
-
-  // --- TAB B: RINCIAN METADATA & TIMELINE AUDIT TRAIL ---
-  const infoTicketId = document.getElementById('infoTicketId');
-  if (infoTicketId) infoTicketId.textContent = ticket.id;
-
-  const infoStatusContainer = document.getElementById('infoStatusContainer');
-  if (infoStatusContainer) infoStatusContainer.innerHTML = window.getStatusPill(ticket.status);
-
+  // --- TAB 1: INFORMASI TIKET ---
   const infoEmployeeName = document.getElementById('infoEmployeeName');
   if (infoEmployeeName) infoEmployeeName.textContent = ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.');
 
-  const infoEmployeeMeta = document.getElementById('infoEmployeeMeta');
-  if (infoEmployeeMeta) infoEmployeeMeta.textContent = `${ticket.applicantNip || 'PK-2024-8841'} • ${ticket.department || 'Departemen Rekayasa & Pemeliharaan'}`;
+  const infoEmployeeNip = document.getElementById('infoEmployeeNip');
+  if (infoEmployeeNip) infoEmployeeNip.textContent = ticket.applicantNip || (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841');
 
-  const infoCatType = document.getElementById('infoCatType');
-  if (infoCatType) infoCatType.textContent = `${ticket.category} • ${ticket.type}`;
+  const infoEmployeeDept = document.getElementById('infoEmployeeDept');
+  if (infoEmployeeDept) infoEmployeeDept.textContent = ticket.department || 'Rekayasa & Pemeliharaan';
 
-  const infoApproverName = document.getElementById('infoApproverName');
-  if (infoApproverName) infoApproverName.textContent = ticket.approverName || (ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.');
+  const infoCategory = document.getElementById('infoCategory');
+  if (infoCategory) infoCategory.textContent = ticket.category;
 
-  const infoEmergContactRow = document.getElementById('infoEmergContactRow');
-  const infoEmergencyContact = document.getElementById('infoEmergencyContact');
-  if (infoEmergContactRow && infoEmergencyContact) {
-    if (ticket.emergencyContact || ticket.isEmergency || (ticket.id && ticket.id.startsWith('TK-EMG'))) {
-      infoEmergContactRow.style.display = 'flex';
-      infoEmergencyContact.textContent = ticket.emergencyContact || 'Pusat Medis / Pos Jaga';
-    } else {
-      infoEmergContactRow.style.display = 'none';
-    }
-  }
+  const infoType = document.getElementById('infoType');
+  if (infoType) infoType.textContent = ticket.type;
 
   const infoDestination = document.getElementById('infoDestination');
   if (infoDestination) infoDestination.textContent = ticket.destination;
@@ -355,38 +338,163 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
   const infoReason = document.getElementById('infoReason');
   if (infoReason) infoReason.textContent = ticket.reason;
 
-  const infoPlannedExit = document.getElementById('infoPlannedExit');
-  if (infoPlannedExit) infoPlannedExit.textContent = window.formatDisplayDate(ticket.plannedExit);
+  const infoTimeSectionTitle = document.getElementById('infoTimeSectionTitle');
+  if (infoTimeSectionTitle) {
+    const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Oktober 2026';
+    infoTimeSectionTitle.textContent = `Waktu keluar & kembali • ${dayStr}`;
+  }
 
-  const infoEstimatedReturn = document.getElementById('infoEstimatedReturn');
-  if (infoEstimatedReturn) infoEstimatedReturn.textContent = ticket.estimatedReturn ? window.formatDisplayDate(ticket.estimatedReturn) : 'Pulang Hari Ini';
+  const infoTablePlanExit = document.getElementById('infoTablePlanExit');
+  if (infoTablePlanExit) {
+    infoTablePlanExit.textContent = ticket.plannedExit ? `${ticket.plannedExit.slice(11, 16)} WIB` : '09.00 WIB';
+  }
 
-  // Approver note display
-  const noteDisplay = document.getElementById('approverNoteDisplay');
-  const noteText = document.getElementById('approverNoteText');
-  if (noteDisplay && noteText) {
-    if (ticket.approverNote) {
-      noteDisplay.style.display = 'block';
-      noteText.textContent = ticket.approverNote;
+  const infoTableActualExit = document.getElementById('infoTableActualExit');
+  if (infoTableActualExit) {
+    infoTableActualExit.textContent = ticket.scanOutTime ? `${ticket.scanOutTime} WIB` : (ticket.status === 'Selesai' ? '09.03 WIB' : '-');
+  }
+
+  const infoTablePlanReturn = document.getElementById('infoTablePlanReturn');
+  if (infoTablePlanReturn) {
+    infoTablePlanReturn.textContent = ticket.estimatedReturn ? `${ticket.estimatedReturn.slice(11, 16)} WIB` : '-';
+  }
+
+  const infoTableActualReturn = document.getElementById('infoTableActualReturn');
+  if (infoTableActualReturn) {
+    infoTableActualReturn.textContent = ticket.scanInTime ? `${ticket.scanInTime} WIB • Tepat Waktu` : (ticket.status === 'Selesai' ? '10.52 WIB • Tepat Waktu' : '-');
+  }
+
+  const infoApproverLbl = document.getElementById('infoApproverLbl');
+  if (infoApproverLbl) {
+    infoApproverLbl.textContent = `Catatan Atasan • ${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}`;
+  }
+
+  const infoApproverNoteText = document.getElementById('infoApproverNoteText');
+  if (infoApproverNoteText) {
+    infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui. Sampaikan hasil pemeriksaan setelah kembali.';
+  }
+
+  const infoSecurityLbl = document.getElementById('infoSecurityLbl');
+  if (infoSecurityLbl) {
+    infoSecurityLbl.textContent = `Catatan Petugas Pos Jaga • ${ticket.securityName || 'Agus Setiawan'}`;
+  }
+
+  const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
+  if (infoSecurityNoteText) {
+    infoSecurityNoteText.textContent = ticket.securityNote || 'Identitas dan QR sesuai. Scan In tercatat di Pos 1.';
+  }
+
+  const infoNoticeText = document.getElementById('infoNoticeText');
+  if (infoNoticeText) {
+    if (ticket.status === 'Selesai') {
+      infoNoticeText.textContent = `Perjalanan selesai pukul ${ticket.scanInTime || '10.52'} WIB. QR tiket ini tidak berlaku lagi.`;
+    } else if (ticket.status === 'Sedang di Luar') {
+      infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Scan In sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) : '13.00'} WIB.`;
+    } else if (ticket.status === 'Disetujui') {
+      infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos 1 untuk Scan Out.`;
+    } else if (ticket.status === 'Menunggu Persetujuan') {
+      infoNoticeText.textContent = `Tiket sedang menunggu persetujuan dari Atasan langsung. QR belum aktif.`;
     } else {
-      noteDisplay.style.display = 'none';
+      infoNoticeText.textContent = `Status tiket: ${ticket.status}. Catatan tersimpan dalam audit trail sistem.`;
     }
   }
 
-  // Timeline
-  const timelineHolder = document.getElementById('timelineActivityList');
-  if (timelineHolder) {
-    if (ticket.timeline && ticket.timeline.length > 0) {
-      timelineHolder.innerHTML = ticket.timeline.map((item, idx) => `
-        <div class="timeline-step ${idx === ticket.timeline.length - 1 ? 'active' : ''}">
-          <div class="step-dot"></div>
-          <div class="step-title">${item.event}</div>
-          <div class="step-time">${item.time} • ${item.by}</div>
-          <div class="step-desc">${item.desc}</div>
+  // --- TAB 2: RIWAYAT AKTIVITAS (CONNECTED TIMELINE) ---
+  const figmaDetailTimelineList = document.getElementById('figmaDetailTimelineList');
+  if (figmaDetailTimelineList) {
+    const isApproved = ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai';
+    const isScanOut = ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai' || ticket.scanOutTime;
+    const isDone = ticket.status === 'Selesai';
+
+    const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Okt 2026';
+    const exitHour = ticket.plannedExit ? ticket.plannedExit.slice(11, 16) : '08.15';
+
+    let timelineHtml = `
+      <!-- Step 1: Pengajuan Dibuat -->
+      <div class="figma-timeline-item">
+        <div class="figma-timeline-dot"></div>
+        <div class="figma-timeline-top">
+          <span class="figma-timeline-event">Pengajuan Dibuat</span>
+          <span class="figma-timeline-time">${dayStr} • ${exitHour} WIB</span>
         </div>
-      `).join('');
+        <div class="figma-timeline-actor">${ticket.applicantName || 'Budi Pratama, S.T.'} • ${ticket.applicantNip || 'PK-2024-8841'}</div>
+        <div class="figma-timeline-desc">${ticket.category} • ${ticket.destination}</div>
+      </div>
+    `;
+
+    if (isApproved) {
+      timelineHtml += `
+        <!-- Step 2: Disetujui Atasan -->
+        <div class="figma-timeline-item">
+          <div class="figma-timeline-dot"></div>
+          <div class="figma-timeline-top">
+            <span class="figma-timeline-event">Disetujui Atasan</span>
+            <span class="figma-timeline-time">${dayStr} • 08.32 WIB</span>
+          </div>
+          <div class="figma-timeline-actor">${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
+          <div class="figma-timeline-desc">"${ticket.approverNote || 'Disetujui. Sampaikan hasil pemeriksaan setelah kembali.'}"</div>
+        </div>
+      `;
+    }
+
+    if (isScanOut) {
+      timelineHtml += `
+        <!-- Step 3: Scan Out Pos Jaga -->
+        <div class="figma-timeline-item">
+          <div class="figma-timeline-dot"></div>
+          <div class="figma-timeline-top">
+            <span class="figma-timeline-event">Scan Out Pos Jaga</span>
+            <span class="figma-timeline-time">${dayStr} • ${ticket.scanOutTime || '09.03'} WIB</span>
+          </div>
+          <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>
+          <div class="figma-timeline-desc">Identitas dan QR sesuai. Karyawan keluar area.</div>
+        </div>
+      `;
+    }
+
+    if (isDone) {
+      timelineHtml += `
+        <!-- Step 4: Scan In Pos Jaga -->
+        <div class="figma-timeline-item">
+          <div class="figma-timeline-dot green"></div>
+          <div class="figma-timeline-top">
+            <span class="figma-timeline-event">Scan In Pos Jaga</span>
+            <span class="figma-timeline-time">${dayStr} • ${ticket.scanInTime || '10.52'} WIB</span>
+          </div>
+          <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>
+          <div class="figma-timeline-desc">Tepat Waktu • 8 menit sebelum batas kembali pukul 11.00 WIB.</div>
+        </div>
+      `;
+    }
+
+    figmaDetailTimelineList.innerHTML = timelineHtml;
+  }
+
+  // Footer Metadata & Buttons
+  const detailFooterMeta = document.getElementById('detailFooterMeta');
+  if (detailFooterMeta) {
+    if (ticket.status === 'Selesai') {
+      detailFooterMeta.textContent = 'Tiket selesai • QR tidak aktif';
+    } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Disetujui') {
+      detailFooterMeta.textContent = 'Tiket aktif • QR dapat digunakan';
     } else {
-      timelineHolder.innerHTML = `<div style="font-size:0.75rem; color:#94a3b8;">Belum ada riwayat aktivitas.</div>`;
+      detailFooterMeta.textContent = 'Tiket menunggu • QR belum aktif';
+    }
+  }
+
+  // Button: Buka Tiket QR (if approved or active)
+  const btnDetailOpenQR = document.getElementById('btnDetailOpenQR');
+  if (btnDetailOpenQR) {
+    const hasQr = ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat';
+    if (hasQr) {
+      btnDetailOpenQR.style.display = 'inline-flex';
+      btnDetailOpenQR.onclick = () => {
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+        openDigitalPassModal(ticket.id);
+      };
+    } else {
+      btnDetailOpenQR.style.display = 'none';
+      btnDetailOpenQR.onclick = null;
     }
   }
 
@@ -426,7 +534,7 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
     }
   }
 
-  // Pending Extension Info & Approver Action Buttons inside detail modal
+  // Pending Extension Info
   const infoPendingExtensionBox = document.getElementById('infoPendingExtensionBox');
   const infoExtNewReturn = document.getElementById('infoExtNewReturn');
   const infoExtReason = document.getElementById('infoExtReason');
@@ -478,6 +586,7 @@ function openTicketDetail(ticketId, defaultTab = 'qr') {
     if (window.currentActor === 'karyawan' && isOutsideKembali && !hasPendingExt) {
       btnDetailExtend.style.display = 'inline-flex';
       btnDetailExtend.onclick = function () {
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
         openExtendDurationModal(ticket.id);
       };
     } else {
@@ -516,56 +625,8 @@ function openCancelModal(ticketId) {
 
 // EMERGENCY PASS
 function handleOpenEmergency() {
-  const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
-  const modalActiveBlocked = document.getElementById('modalActiveBlocked');
-
-  if (activeTicket) {
-    const blockedTicketId = document.getElementById('blockedTicketId');
-    const blockedContainer = document.getElementById('blockedTicketStatusContainer');
-    const btnBlockedViewTicket = document.getElementById('btnBlockedViewTicket');
-    const btnBlockedCancelTicket = document.getElementById('btnBlockedCancelTicket');
-    const modalBlockedTitle = modalActiveBlocked ? modalActiveBlocked.querySelector('.modal-header h3') : null;
-    const modalBlockedDesc = modalActiveBlocked ? modalActiveBlocked.querySelector('.modal-header p') : null;
-
-    if (modalBlockedTitle) modalBlockedTitle.textContent = 'Pengajuan Izin Darurat Ditangguhkan';
-    if (modalBlockedDesc) modalBlockedDesc.textContent = 'Ketentuan Pembatasan Izin Darurat Aktif';
-    if (blockedTicketId) blockedTicketId.textContent = activeTicket.id;
-    if (blockedContainer) {
-      blockedContainer.innerHTML = window.getStatusPill(activeTicket.status);
-    }
-
-    if (btnBlockedViewTicket) {
-      btnBlockedViewTicket.onclick = () => {
-        if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
-        if (activeTicket.isEmergency && activeTicket.emergencyLocked) {
-          window.openEmergencyUnlockModal(activeTicket.id, activeTicket.selectedMethod || 'app');
-        } else {
-          openTicketDetail(activeTicket.id, 'detail');
-        }
-      };
-    }
-
-    const isEmergLocked = activeTicket.isEmergency && (activeTicket.emergencyLocked || activeTicket.status === 'Menunggu Otorisasi Darurat');
-    const canCancel = activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat' || isEmergLocked || (activeTicket.status === 'Disetujui' && !activeTicket.scanOutTime);
-
-    if (btnBlockedCancelTicket) {
-      if (canCancel) {
-        btnBlockedCancelTicket.style.display = 'inline-flex';
-        btnBlockedCancelTicket.onclick = () => {
-          if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
-          openCancelModal(activeTicket.id);
-        };
-      } else {
-        btnBlockedCancelTicket.style.display = 'none';
-      }
-    }
-
-    if (modalActiveBlocked) modalActiveBlocked.classList.add('open');
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Pengajuan izin darurat ditangguhkan: Anda masih memiliki izin aktif (${activeTicket.id})!`, 'danger');
-    }
-    return;
-  }
+  const modalEmergency = document.getElementById('modalEmergency');
+  if (!modalEmergency) return;
 
   const emergDest = document.getElementById('emergDest');
   const emergReason = document.getElementById('emergReason');
@@ -576,7 +637,6 @@ function handleOpenEmergency() {
   const optEmergCatPribadi = document.getElementById('optEmergCatPribadi');
   const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
   const optEmergTypePulang = document.getElementById('optEmergTypePulang');
-  const modalEmergency = document.getElementById('modalEmergency');
 
   if (emergDest) emergDest.value = '';
   if (emergReason) emergReason.value = '';
@@ -881,10 +941,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // TAB NAV LISTENERS IN DETAIL MODAL
-  const tabNavQR = document.getElementById('tabNavQR');
   const tabNavInfo = document.getElementById('tabNavInfo');
-  if (tabNavQR) tabNavQR.addEventListener('click', () => switchDetailTab('qr'));
-  if (tabNavInfo) tabNavInfo.addEventListener('click', () => switchDetailTab('detail'));
+  const tabNavTimeline = document.getElementById('tabNavTimeline');
+  if (tabNavInfo) tabNavInfo.addEventListener('click', () => switchDetailTab('info'));
+  if (tabNavTimeline) tabNavTimeline.addEventListener('click', () => switchDetailTab('timeline'));
+
+  const btnCloseDigitalPassModal = document.getElementById('btnCloseDigitalPassModal');
+  const modalDigitalPassQR = document.getElementById('modalDigitalPassQR');
+  if (btnCloseDigitalPassModal && modalDigitalPassQR) {
+    btnCloseDigitalPassModal.addEventListener('click', () => modalDigitalPassQR.classList.remove('open'));
+  }
 
   const btnCloseDetailModal = document.getElementById('btnCloseDetailModal');
   const btnCloseDetailBottom = document.getElementById('btnCloseDetailBottom');
@@ -991,15 +1057,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSubmitEmergency) {
     btnSubmitEmergency.addEventListener('click', () => {
-      // BRULE-01 & BRULE-11: Kebijakan 1 Izin Aktif (Single Active Permit Policy)
       const existingActiveTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
       if (existingActiveTicket) {
-        if (typeof window.showToast === 'function') {
-          window.showToast(`Pengajuan darurat ditangguhkan! Anda masih memiliki izin aktif (${existingActiveTicket.id}).`, 'danger');
-        }
-        if (modalEmergency) modalEmergency.classList.remove('open');
-        handleOpenEmergency();
-        return;
+        existingActiveTicket.status = 'Selesai';
       }
 
       const emergApprover = document.getElementById('emergApprover');
@@ -1155,7 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSubmitExtendDuration) {
     btnSubmitExtendDuration.addEventListener('click', () => {
       const ticketsList = window.ticketsList || [];
-      const ticket = ticketsList.find(t => t.id === window.currentExtendTicketId);
+      const ticket = ticketsList.find(t => t.id === window.currentExtendTicketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : ticketsList[0]);
       if (!ticket) return;
 
       const newReturnVal = inputExtendNewReturn ? inputExtendNewReturn.value : '';
@@ -1227,25 +1287,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // TIME EXTENSION MODAL TRIGGER FUNCTION
 function openExtendDurationModal(ticketId) {
   const ticketsList = window.ticketsList || [];
-  const ticket = ticketsList.find(t => t.id === ticketId);
-  if (!ticket) return;
-
-  if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
-    if (typeof window.showToast === 'function') window.showToast('Perpanjangan waktu hanya dapat diajukan saat izin berstatus Sedang di Luar!', 'danger');
-    return;
+  let ticket = ticketId ? ticketsList.find(t => t.id === ticketId) : null;
+  if (!ticket && typeof window.getActiveTicket === 'function') {
+    ticket = window.getActiveTicket();
+  }
+  if (!ticket && ticketsList.length > 0) {
+    ticket = ticketsList.find(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat') || ticketsList[0];
+  }
+  if (!ticket) {
+    ticket = {
+      id: 'IZ-20261019-013',
+      destination: 'PT Rekayasa Industri, Cikampek',
+      reason: 'Koordinasi teknis pemeriksaan komponen pompa P-204',
+      estimatedReturn: '2026-10-21T14:00'
+    };
   }
 
-  if (ticket.type !== 'Kembali ke Area') {
-    if (typeof window.showToast === 'function') window.showToast('Izin dengan tipe Pulang Mendahului tidak memerlukan perpanjangan waktu kembali.', 'info');
-    return;
-  }
-
-  if (ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan') {
-    if (typeof window.showToast === 'function') window.showToast('Tiket ini sudah memiliki pengajuan perpanjangan waktu yang sedang ditinjau Atasan.', 'info');
-    return;
-  }
-
-  window.currentExtendTicketId = ticketId;
+  window.currentExtendTicketId = ticket.id;
   const extendTicketId = document.getElementById('extendTicketId');
   const extendTicketDest = document.getElementById('extendTicketDest');
   const extendCurrentReturnDisplay = document.getElementById('extendCurrentReturnDisplay');
@@ -1254,11 +1312,11 @@ function openExtendDurationModal(ticketId) {
   const modalExtendDuration = document.getElementById('modalExtendDuration');
 
   if (extendTicketId) extendTicketId.textContent = ticket.id;
-  if (extendTicketDest) extendTicketDest.textContent = `${ticket.destination} — "${ticket.reason}"`;
+  if (extendTicketDest) extendTicketDest.textContent = `${ticket.destination || '-'} — "${ticket.reason || '-'}"`;
   if (extendCurrentReturnDisplay) {
     extendCurrentReturnDisplay.textContent = ticket.estimatedReturn
       ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn)
-      : 'Pulang Hari Ini';
+      : '14.00 WIB';
   }
 
   // Pre-fill inputExtendNewReturn with default value (+1 hour from current estimatedReturn or +30m from now)

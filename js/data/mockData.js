@@ -3,7 +3,7 @@
  * Data State & Shared Storage
  */
 
-const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V4';
+const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V5';
 
 const ACTORS = {
   karyawan: {
@@ -76,107 +76,209 @@ const MOCK_APPROVERS = [
 
 let currentActor = 'karyawan'; // 'karyawan', 'approver', 'security', or 'admin'
 
-// Helper tanggal dinamis untuk data mock awal
-const _initNow = new Date();
-const _initPad = (n) => String(n).padStart(2, '0');
-const _initFmt = (dt) => `${dt.getFullYear()}-${_initPad(dt.getMonth() + 1)}-${_initPad(dt.getDate())}T${_initPad(dt.getHours())}:${_initPad(dt.getMinutes())}`;
-const _initTodayStr = `${_initNow.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][_initNow.getMonth()]} ${_initNow.getFullYear()}`;
-
-// Default mock tickets mendemonstrasikan seluruh variasi status perizinan (Disetujui, Terlambat, Kedaluwarsa, Selesai)
+// Figma Exact Mock Dataset (8 Tickets in Oct 2026 matching screenshots)
 const DEFAULT_TICKETS = [
   {
-    id: `TK-${_initNow.getFullYear()}${_initPad(_initNow.getMonth() + 1)}${_initPad(_initNow.getDate())}-001`,
+    id: 'IZ-20261019-013',
     applicantName: 'Budi Pratama, S.T.',
     applicantNip: 'PK-2024-8841',
     department: 'Departemen Rekayasa & Pemeliharaan',
     category: 'Dinas Kantor',
     type: 'Kembali ke Area',
-    destination: 'Kantor Pelayanan Pajak (KPP) Pratama Cikampek',
-    reason: 'Koordinasi verifikasi dan rekonsiliasi faktur pajak terpadu pengadaan alat berat.',
-    plannedExit: _initFmt(new Date(_initNow.getTime() - 120 * 60000)),
-    estimatedReturn: _initFmt(new Date(_initNow.getTime() - 60 * 60000)),
-    status: 'Selesai',
-    createdAt: `${_initTodayStr}, 08:30 WIB`,
+    destination: 'PT Rekayasa Industri, Cikampek',
+    reason: 'Koordinasi perbaikan pompa P-204',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-10-19T10:00',
+    estimatedReturn: '2026-10-19T13:00',
+    status: 'Sedang di Luar',
+    createdAt: '19 Okt 2026, 09.20 WIB',
     approverName: 'Ir. Hendra Gunawan, M.T.',
-    approverNote: 'Disetujui. Bawa berkas tanda terima resmi.',
-    scanOutTime: `${_initTodayStr}, 08:35 WIB (Pos 1 Gerbang Utama)`,
-    scanInTime: `${_initTodayStr}, 09:30 WIB (Pos 1 Gerbang Utama)`,
-    timeline: [
-      { event: 'Pengajuan Dibuat', time: `${_initTodayStr}, 08:30 WIB`, by: 'Budi Pratama (Karyawan)', desc: 'Pengajuan izin keluar area berhasil dikirim.' },
-      { event: 'Disetujui Atasan', time: `${_initTodayStr}, 08:45 WIB`, by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui. Bawa berkas tanda terima resmi.' },
-      { event: 'Scan Out Pos Jaga', time: `${_initTodayStr}, 08:35 WIB`, by: 'Sertu Agus (Pos 1)', desc: 'Validasi keluar berhasil.' },
-      { event: 'Scan In (Kembali)', time: `${_initTodayStr}, 09:30 WIB`, by: 'Sertu Agus (Pos 1)', desc: 'Karyawan kembali ke area pabrik tepat waktu. Tiket selesai.' }
-    ]
-  },
-  {
-    id: `TK-${_initNow.getFullYear()}${_initPad(_initNow.getMonth() + 1)}${_initPad(_initNow.getDate())}-002`,
-    applicantName: 'Agus Setiawan, A.Md.',
-    applicantNip: 'PK-2022-4419',
-    department: 'Departemen Operasi Pabrik 1',
-    category: 'Dinas Kantor',
-    type: 'Kembali ke Area',
-    destination: 'Workshop Kalibrasi Instrumen KIIC Karawang',
-    reason: 'Pengambilan modul sensor transmitter turbin pengganti pasca maintenance periodik.',
-    plannedExit: _initFmt(new Date(_initNow.getTime() - 240 * 60000)), // 4 jam lalu
-    estimatedReturn: _initFmt(new Date(_initNow.getTime() - 30 * 60000)), // 30 menit lalu (Melewati estimasi -> TERLAMBAT)
-    status: 'Terlambat',
-    createdAt: `${_initTodayStr}, 07:15 WIB`,
-    approverName: 'Ir. Hendra Gunawan, M.T.',
-    approverNote: 'Gunakan kendaraan operasional dinas.',
-    scanOutTime: `${_initTodayStr}, 07:30 WIB (Pos 1 Gerbang Utama)`,
+    approverTitle: 'Manajer Rekayasa & Pemeliharaan',
+    approverNote: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.',
+    scanOutTime: '19 Okt 2026, 10.05 WIB (Pos 1 Gerbang Utama)',
     scanInTime: null,
     timeline: [
-      { event: 'Pengajuan Dibuat', time: `${_initTodayStr}, 07:15 WIB`, by: 'Agus Setiawan', desc: 'Pengajuan dikirim.' },
-      { event: 'Disetujui Atasan', time: `${_initTodayStr}, 07:25 WIB`, by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
-      { event: 'Scan Out Pos Jaga', time: `${_initTodayStr}, 07:30 WIB`, by: 'Sertu Agus (Pos 1)', desc: 'Validasi keluar berhasil. Karyawan tercatat meninggalkan kawasan.' },
-      { event: 'Terdeteksi Terlambat', time: `${_initTodayStr}, 08:00 WIB`, by: 'Sistem Otomatis (Scheduler)', desc: 'Karyawan terdeteksi belum kembali dan belum Scan In melewati batas estimasi jam kembali.' }
+      { event: 'Pengajuan diajukan', time: '19 Okt 2026 • 09.20 WIB', by: 'Budi Pratama, S.T.', desc: 'Dinas Kantor • Kembali ke Area' },
+      { event: 'Disetujui oleh atasan', time: '19 Okt 2026 • 09.35 WIB', by: 'Ir. Hendra Gunawan, M.T. • Manajer Rekayasa & Pemeliharaan', desc: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.' },
+      { event: 'Scan Out tercatat', time: '19 Okt 2026 • 10.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 • Karyawan meninggalkan area' }
     ]
   },
   {
-    id: `TK-${_initNow.getFullYear()}${_initPad(_initNow.getMonth() + 1)}${_initPad(Math.max(1, _initNow.getDate() - 1))}-003`,
+    id: 'IZ-20261016-006',
+    applicantName: 'Budi Pratama, S.T.',
+    applicantNip: 'PK-2024-8841',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Dinas Kantor',
+    type: 'Kembali ke Area',
+    destination: 'Pelabuhan Cirebon',
+    reason: 'Pemeriksaan pengapalan kargo suku cadang pompa industri',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-10-16T09:00',
+    estimatedReturn: '2026-10-16T11:00',
+    status: 'Selesai',
+    createdAt: '16 Okt 2026, 08.15 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverNote: 'Disetujui. Selesai tepat waktu.',
+    scanOutTime: '16 Okt 2026, 09.05 WIB (Pos 1)',
+    scanInTime: '16 Okt 2026, 10.55 WIB (Pos 1)',
+    timeline: [
+      { event: 'Pengajuan Dibuat', time: '16 Okt 2026, 08.15 WIB', by: 'Budi Pratama', desc: 'Pengajuan izin dinas.' },
+      { event: 'Disetujui', time: '16 Okt 2026, 08.30 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
+      { event: 'Scan Out', time: '16 Okt 2026, 09.05 WIB', by: 'Pos 1', desc: 'Karyawan keluar.' },
+      { event: 'Scan In', time: '16 Okt 2026, 10.55 WIB', by: 'Pos 1', desc: 'Kembali ke area tepat waktu.' }
+    ]
+  },
+  {
+    id: 'IZ-20261014-003',
     applicantName: 'Budi Pratama, S.T.',
     applicantNip: 'PK-2024-8841',
     department: 'Departemen Rekayasa & Pemeliharaan',
     category: 'Urusan Pribadi',
     type: 'Kembali ke Area',
-    destination: 'Klinik Medika Pupuk Kujang',
-    reason: 'Pemeriksaan tensi darah berkala.',
-    plannedExit: _initFmt(new Date(_initNow.getTime() - 24 * 3600000)),
-    estimatedReturn: _initFmt(new Date(_initNow.getTime() - 22 * 3600000)),
-    status: 'Kedaluwarsa',
-    createdAt: `Kemarin, 09:00 WIB`,
+    destination: 'RSUD Karawang',
+    reason: 'Pemeriksaan laboratorium lanjutan',
+    transportMode: 'Kendaraan pribadi',
+    plannedExit: '2026-10-14T13:00',
+    estimatedReturn: '2026-10-14T14:30',
+    status: 'Selesai',
+    createdAt: '14 Okt 2026, 11.30 WIB',
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui.',
+    scanOutTime: '14 Okt 2026, 13.02 WIB (Pos 1)',
+    scanInTime: '14 Okt 2026, 14.25 WIB (Pos 1)',
+    timeline: [
+      { event: 'Pengajuan Dibuat', time: '14 Okt 2026, 11.30 WIB', by: 'Budi Pratama', desc: 'Izin urusan pribadi.' },
+      { event: 'Disetujui', time: '14 Okt 2026, 11.45 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
+      { event: 'Scan Out', time: '14 Okt 2026, 13.02 WIB', by: 'Pos 1', desc: 'Keluar gerbang.' },
+      { event: 'Scan In', time: '14 Okt 2026, 14.25 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
+    ]
+  },
+  {
+    id: 'IZ-20261012-005',
+    applicantName: 'Budi Pratama, S.T.',
+    applicantNip: 'PK-2024-8841',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Dinas Kantor',
+    type: 'Kembali ke Area',
+    destination: 'Kantor Distributor Bekasi',
+    reason: 'Serah terima invoice dan dokumen garansi komponen teknis',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-10-12T10:00',
+    estimatedReturn: '2026-10-12T12:00',
+    status: 'Selesai',
+    isLate: true,
+    lateMinutes: 10,
+    actualReturnTime: '12.10 WIB',
+    createdAt: '12 Okt 2026, 09.00 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverNote: 'Kembali terlambat 10 menit dikarenakan kepadatan jalur arteri Cikampek.',
+    scanOutTime: '12 Okt 2026, 10.04 WIB (Pos 1)',
+    scanInTime: '12 Okt 2026, 12.10 WIB (Pos 1)',
+    timeline: [
+      { event: 'Pengajuan Dibuat', time: '12 Okt 2026, 09.00 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
+      { event: 'Disetujui', time: '12 Okt 2026, 09.20 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
+      { event: 'Scan Out', time: '12 Okt 2026, 10.04 WIB', by: 'Pos 1', desc: 'Keluar area.' },
+      { event: 'Scan In Terlambat', time: '12 Okt 2026, 12.10 WIB', by: 'Pos 1', desc: 'Karyawan kembali 10 menit melewati estimasi 12.00 WIB.' }
+    ]
+  },
+  {
+    id: 'IZ-20261009-002',
+    applicantName: 'Budi Pratama, S.T.',
+    applicantNip: 'PK-2024-8841',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Urusan Pribadi',
+    type: 'Pulang Mendahului',
+    destination: 'Rumah (keperluan keluarga)',
+    reason: 'Urusan keluarga mendesak di rumah',
+    transportMode: 'Kendaraan pribadi',
+    plannedExit: '2026-10-09T15:00',
+    estimatedReturn: null,
+    status: 'Ditolak',
+    rejectionReason: 'Ditolak: alasan tidak memadai',
+    createdAt: '09 Okt 2026, 14.10 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverNote: 'Ditolak: alasan tidak memadai. Mohon koordinasikan dengan rekan kerja terlebih dahulu.',
     scanOutTime: null,
     scanInTime: null,
     timeline: [
-      { event: 'Pengajuan Dibuat', time: 'Kemarin, 09:00 WIB', by: 'Budi Pratama', desc: 'Tiket diajukan.' },
-      { event: 'Disetujui Atasan', time: 'Kemarin, 09:15 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
-      { event: 'Tiket Kedaluwarsa', time: 'Kemarin, 10:30 WIB', by: 'Sistem Otomatis (Scheduler)', desc: 'Tiket otomatis hangus karena tidak dipindai keluar melewati batas jam rencana keluar.' }
+      { event: 'Pengajuan Dibuat', time: '09 Okt 2026, 14.10 WIB', by: 'Budi Pratama', desc: 'Pengajuan pulang mendahului.' },
+      { event: 'Ditolak Atasan', time: '09 Okt 2026, 14.40 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Ditolak: alasan tidak memadai.' }
     ]
   },
   {
-    id: `TK-${_initNow.getFullYear()}${_initPad(_initNow.getMonth() + 1)}${_initPad(Math.max(1, _initNow.getDate() - 2))}-004`,
+    id: 'IZ-20261007-004',
+    applicantName: 'Budi Pratama, S.T.',
+    applicantNip: 'PK-2024-8841',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Dinas Kantor',
+    type: 'Kembali ke Area',
+    destination: 'Gudang Logistik Ciampei',
+    reason: 'Pengecekan spesifikasi valve dan seal cadangan',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-10-07T09:00',
+    estimatedReturn: '2026-10-07T12:00',
+    status: 'Selesai',
+    createdAt: '07 Okt 2026, 08.20 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverNote: 'Disetujui. Selesai tepat waktu.',
+    scanOutTime: '07 Okt 2026, 09.00 WIB (Pos 1)',
+    scanInTime: '07 Okt 2026, 11.50 WIB (Pos 1)',
+    timeline: [
+      { event: 'Pengajuan Dibuat', time: '07 Okt 2026, 08.20 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
+      { event: 'Disetujui', time: '07 Okt 2026, 08.40 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
+      { event: 'Scan Out', time: '07 Okt 2026, 09.00 WIB', by: 'Pos 1', desc: 'Keluar area.' },
+      { event: 'Scan In', time: '07 Okt 2026, 11.50 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
+    ]
+  },
+  {
+    id: 'IZ-20261005-001',
+    applicantName: 'Budi Pratama, S.T.',
+    applicantNip: 'PK-2024-8841',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Dinas Kantor',
+    type: 'Kembali ke Area',
+    destination: 'Balai Besar Uji Bahan Bandung',
+    reason: 'Pengujian sampel metalurgi pipa retak',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-10-05T08:00',
+    estimatedReturn: '2026-10-05T16:00',
+    status: 'Selesai',
+    createdAt: '05 Okt 2026, 07.15 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverNote: 'Disetujui.',
+    scanOutTime: '05 Okt 2026, 08.10 WIB (Pos 1)',
+    scanInTime: '05 Okt 2026, 15.45 WIB (Pos 1)',
+    timeline: [
+      { event: 'Pengajuan Dibuat', time: '05 Okt 2026, 07.15 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
+      { event: 'Disetujui', time: '05 Okt 2026, 07.30 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
+      { event: 'Scan Out', time: '05 Okt 2026, 08.10 WIB', by: 'Pos 1', desc: 'Keluar area.' },
+      { event: 'Scan In', time: '05 Okt 2026, 15.45 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
+    ]
+  },
+  {
+    id: 'IZ-20261002-001',
     applicantName: 'Budi Pratama, S.T.',
     applicantNip: 'PK-2024-8841',
     department: 'Departemen Rekayasa & Pemeliharaan',
     category: 'Urusan Pribadi',
     type: 'Kembali ke Area',
-    destination: 'Bank Mandiri KCP Cikampek',
-    reason: 'Pengurusan penggantian kartu ATM payroll yang tertelan mesin.',
-    plannedExit: _initFmt(new Date(_initNow.getTime() - 48 * 3600000)),
-    estimatedReturn: _initFmt(new Date(_initNow.getTime() - 46 * 3600000)),
+    destination: 'Poliklinik Darurat Medika',
+    reason: 'Penanganan alergi mendadak saat jam kerja',
+    transportMode: 'Kendaraan pribadi',
+    plannedExit: '2026-10-02T10:00',
+    estimatedReturn: '2026-10-02T12:00',
     status: 'Selesai',
-    createdAt: `2 hari lalu, 09:00 WIB`,
+    isEmergency: true,
+    createdAt: '02 Okt 2026, 09.50 WIB',
     approverName: 'Ir. Hendra Gunawan, M.T.',
-    approverNote: 'Disetujui, kembali tepat waktu.',
-    scanOutTime: `2 hari lalu, 11:05 WIB (Pos 1)`,
-    scanInTime: `2 hari lalu, 12:48 WIB (Pos 1)`,
+    approverNote: 'Izin darurat disetujui.',
+    scanOutTime: '02 Okt 2026, 09.55 WIB (Pos 1)',
+    scanInTime: '02 Okt 2026, 11.40 WIB (Pos 1)',
     timeline: [
-      { event: 'Pengajuan Dibuat', time: '2 hari lalu, 09:00 WIB', by: 'Budi Pratama', desc: 'Tiket diajukan.' },
-      { event: 'Disetujui Atasan', time: '2 hari lalu, 09:30 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
-      { event: 'Scan Out', time: '2 hari lalu, 11:05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Karyawan meninggalkan area pabrik.' },
-      { event: 'Scan In (Kembali)', time: '2 hari lalu, 12:48 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Karyawan kembali ke area pabrik tepat waktu. Tiket selesai.' }
+      { event: 'Pengajuan Darurat', time: '02 Okt 2026, 09.50 WIB', by: 'Budi Pratama', desc: 'Pengajuan darurat poliklinik.' },
+      { event: 'Otorisasi Atasan', time: '02 Okt 2026, 09.52 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Otorisasi darurat.' },
+      { event: 'Scan Out', time: '02 Okt 2026, 09.55 WIB', by: 'Pos 1', desc: 'Keluar area.' },
+      { event: 'Scan In', time: '02 Okt 2026, 11.40 WIB', by: 'Pos 1', desc: 'Kembali ke area.' }
     ]
   }
 ];

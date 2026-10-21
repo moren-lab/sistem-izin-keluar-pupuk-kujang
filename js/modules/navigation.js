@@ -85,6 +85,15 @@ function setKaryawanNav(navKey) {
   if (karyawanPengajuanPage) karyawanPengajuanPage.style.display = navKey === 'pengajuan' ? 'block' : 'none';
   if (karyawanRiwayatPage) karyawanRiwayatPage.style.display = navKey === 'riwayat' ? 'block' : 'none';
 
+  const breadcrumbRole = document.getElementById('breadcrumbRole');
+  const breadcrumbSubpage = document.getElementById('breadcrumbSubpage');
+  if (breadcrumbRole) breadcrumbRole.textContent = 'Karyawan';
+  if (breadcrumbSubpage) {
+    if (navKey === 'dashboard') breadcrumbSubpage.textContent = 'Dashboard';
+    else if (navKey === 'pengajuan') breadcrumbSubpage.textContent = 'Pengajuan Saya';
+    else if (navKey === 'riwayat') breadcrumbSubpage.textContent = 'Riwayat Pengajuan';
+  }
+
   if (typeof window.renderKaryawanView === 'function') {
     window.renderKaryawanView();
   }
