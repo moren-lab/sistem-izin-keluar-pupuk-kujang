@@ -334,17 +334,40 @@ function renderKaryawanDashboard() {
   // 1.2 Card: Izin aktif saya
   if (cardActivePermitSummary) {
     if (activeTicket) {
+      const isEmergTicket = Boolean(
+        activeTicket.isEmergency ||
+        activeTicket.status === 'Menunggu Otorisasi Darurat' ||
+        (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
+      );
+      const isEmergLocked = isEmergTicket && (
+        activeTicket.status === 'Menunggu Otorisasi Darurat' ||
+        activeTicket.emergencyLocked === true ||
+        activeTicket.qrLocked === true ||
+        (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Sedang di Luar' && activeTicket.status !== 'Selesai')
+      );
       const isPending = (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
       const isApproved = (activeTicket.status === 'Disetujui');
       const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
 
-      const col1Label = activeTicket.scanOutTime ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
-      const col1Val = activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+      const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
+      const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let actionButtonsHtml = '';
-      if (isPending) {
+      if (isEmergLocked) {
+        actionButtonsHtml = `
+          <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
+            <span>⚡ Otorisasi Darurat (Input Sandi / Scan Wajah)</span>
+          </button>
+          <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+            <span>Lihat Rincian</span>
+          </button>
+          <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan Izin</span>
+          </button>
+        `;
+      } else if (isPending) {
         actionButtonsHtml = `
           <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
             <span>Lihat Rincian</span>
@@ -372,6 +395,9 @@ function renderKaryawanDashboard() {
           </button>
           <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
             <span>Ajukan Perpanjangan</span>
+          </button>
+          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
+            <span>✓ Kembali ke Pabrik (Scan In)</span>
           </button>
         `;
       }
@@ -402,6 +428,18 @@ function renderKaryawanDashboard() {
             <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col2Val}</div>
           </div>
         </div>
+
+        ${isEmergLocked ? `
+          <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; margin-top: 0.85rem; font-size: 0.775rem;">
+            <div style="font-weight: 800; color: #9f1239; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span>🚨 Izin Darurat Menunggu Otorisasi</span>
+              <span class="tag-badge" style="background: #ffe4e6; color: #9f1239; font-weight: 800; border: 1px solid #fecdd3;">QR Terkunci</span>
+            </div>
+            <div style="color: #881337; margin-top: 0.3rem; line-height: 1.45;">
+              Sesuai SOP K3, QR Code terkunci sampai diotorisasi. Hubungi Atasan untuk meminta <strong>Kode Sandi OTP</strong> atau gunakan <strong>Scan Wajah</strong> langsung.
+            </div>
+          </div>
+        ` : ''}
 
         <div style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
@@ -632,17 +670,40 @@ function renderPengajuanSayaView() {
 
   // Left Column
   if (colPengajuanLeft) {
+    const isEmergTicket = Boolean(
+      activeTicket.isEmergency ||
+      activeTicket.status === 'Menunggu Otorisasi Darurat' ||
+      (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
+    );
+    const isEmergLocked = isEmergTicket && (
+      activeTicket.status === 'Menunggu Otorisasi Darurat' ||
+      activeTicket.emergencyLocked === true ||
+      activeTicket.qrLocked === true ||
+      (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Sedang di Luar' && activeTicket.status !== 'Selesai')
+    );
     const isPending = (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
     const isApproved = (activeTicket.status === 'Disetujui');
     const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
 
-    const col1Label = activeTicket.scanOutTime ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
-    const col1Val = activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+    const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
+    const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
     const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
     let actionButtonsHtml = '';
-    if (isPending) {
+    if (isEmergLocked) {
+      actionButtonsHtml = `
+        <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
+          <span>⚡ Otorisasi Darurat (Input Sandi / Scan Wajah)</span>
+        </button>
+        <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+          <span>Lihat Rincian</span>
+        </button>
+        <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+          <span>Batalkan Izin</span>
+        </button>
+      `;
+    } else if (isPending) {
       actionButtonsHtml = `
         <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
           <span>Lihat Rincian</span>
@@ -670,6 +731,9 @@ function renderPengajuanSayaView() {
         </button>
         <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
           <span>Ajukan Perpanjangan</span>
+        </button>
+        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
+          <span>✓ Kembali ke Pabrik (Scan In)</span>
         </button>
       `;
     }
@@ -702,6 +766,18 @@ function renderPengajuanSayaView() {
             <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col2Val}</div>
           </div>
         </div>
+
+        ${isEmergLocked ? `
+          <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; margin-top: 0.85rem; font-size: 0.775rem;">
+            <div style="font-weight: 800; color: #9f1239; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span>🚨 Izin Darurat Menunggu Otorisasi</span>
+              <span class="tag-badge" style="background: #ffe4e6; color: #9f1239; font-weight: 800; border: 1px solid #fecdd3;">QR Terkunci</span>
+            </div>
+            <div style="color: #881337; margin-top: 0.3rem; line-height: 1.45;">
+              Sesuai SOP K3, QR Code terkunci sampai diotorisasi. Hubungi Atasan untuk meminta <strong>Kode Sandi OTP</strong> atau gunakan <strong>Scan Wajah</strong> langsung.
+            </div>
+          </div>
+        ` : ''}
 
         <div style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}

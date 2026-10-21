@@ -3,7 +3,7 @@
  * Data State & Shared Storage
  */
 
-const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V5';
+const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V7';
 
 const ACTORS = {
   karyawan: {
@@ -90,17 +90,18 @@ const DEFAULT_TICKETS = [
     transportMode: 'Kendaraan dinas',
     plannedExit: '2026-10-19T10:00',
     estimatedReturn: '2026-10-19T13:00',
-    status: 'Sedang di Luar',
+    status: 'Selesai',
     createdAt: '19 Okt 2026, 09.20 WIB',
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverTitle: 'Manajer Rekayasa & Pemeliharaan',
     approverNote: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.',
     scanOutTime: '19 Okt 2026, 10.05 WIB (Pos 1 Gerbang Utama)',
-    scanInTime: null,
+    scanInTime: '19 Okt 2026, 12.50 WIB (Pos 1 Gerbang Utama)',
     timeline: [
       { event: 'Pengajuan diajukan', time: '19 Okt 2026 • 09.20 WIB', by: 'Budi Pratama, S.T.', desc: 'Dinas Kantor • Kembali ke Area' },
       { event: 'Disetujui oleh atasan', time: '19 Okt 2026 • 09.35 WIB', by: 'Ir. Hendra Gunawan, M.T. • Manajer Rekayasa & Pemeliharaan', desc: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.' },
-      { event: 'Scan Out tercatat', time: '19 Okt 2026 • 10.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 • Karyawan meninggalkan area' }
+      { event: 'Scan Out tercatat', time: '19 Okt 2026 • 10.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 • Karyawan meninggalkan area' },
+      { event: 'Scan In tercatat', time: '19 Okt 2026 • 12.50 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 • Karyawan kembali ke area pabrik' }
     ]
   },
   {
@@ -284,10 +285,13 @@ const DEFAULT_TICKETS = [
 ];
 
 function loadTickets() {
+  // Bersihkan cache dan data sesi lama otomatis agar simulasi selalu bersih
+  ['KUJANG_GATEPASS_TICKETS_V1', 'KUJANG_GATEPASS_TICKETS_V2', 'KUJANG_GATEPASS_TICKETS_V3', 'KUJANG_GATEPASS_TICKETS_V4', 'KUJANG_GATEPASS_TICKETS_V5', 'KUJANG_GATEPASS_TICKETS_V6'].forEach(k => localStorage.removeItem(k));
+
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_TICKETS));
-    return DEFAULT_TICKETS;
+    return JSON.parse(JSON.stringify(DEFAULT_TICKETS));
   }
   try {
     let list = JSON.parse(saved);
@@ -313,9 +317,27 @@ function loadTickets() {
     }
     return list;
   } catch (e) {
-    return DEFAULT_TICKETS;
+    return JSON.parse(JSON.stringify(DEFAULT_TICKETS));
   }
 }
+
+function resetAllTicketsToDefault() {
+  try {
+    localStorage.clear();
+  } catch (e) {}
+  window.ticketsList = JSON.parse(JSON.stringify(DEFAULT_TICKETS));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(window.ticketsList));
+  if (typeof window.switchRole === 'function') window.switchRole('karyawan');
+  if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav('dashboard');
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+  if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+  if (typeof window.showToast === 'function') window.showToast('✅ Seluruh proses simulasi berhasil direset ke 0! Anda kini dapat mulai mengajukan izin baru.', 'success');
+}
+window.resetAllTicketsToDefault = resetAllTicketsToDefault;
 
 const MOCK_USERS = [
   {

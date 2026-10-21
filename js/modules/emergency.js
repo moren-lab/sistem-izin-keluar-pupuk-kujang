@@ -32,12 +32,27 @@ function openEmergencyUnlockModal(ticketId, defaultMethod = null) {
   const elApprover = document.getElementById('emgUnlockApprover');
   const elDestination = document.getElementById('emgUnlockDestination');
   const elPasscodeInput = document.getElementById('inputEmergencyPasscode');
+  const elPasscodeHint = document.getElementById('emgUnlockPasscodeHint');
 
   if (elTicketId) elTicketId.textContent = ticket.id;
   if (elApplicant) elApplicant.textContent = ticket.applicantName || 'Budi Pratama, S.T.';
   if (elApprover) elApprover.textContent = ticket.approverName || 'Ir. Hendra Gunawan / Dewi Sartika';
   if (elDestination) elDestination.textContent = ticket.destination || '-';
   if (elPasscodeInput) elPasscodeInput.value = '';
+  if (elPasscodeHint) elPasscodeHint.textContent = ticket.emergencyPasscode || '849201';
+
+  const hintBox = document.getElementById('emgPasscodeHintBox');
+  if (hintBox) {
+    hintBox.onclick = () => {
+      if (elPasscodeInput) {
+        elPasscodeInput.value = ticket.emergencyPasscode || '849201';
+        elPasscodeInput.focus();
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Kode sandi [${ticket.emergencyPasscode || '849201'}] berhasil diisi otomatis!`, 'info');
+        }
+      }
+    };
+  }
 
   // Buka tab sesuai metode yang dipilih karyawan
   const targetMethod = defaultMethod || ticket.selectedMethod || 'app';
@@ -223,11 +238,11 @@ function verifyEmergencyPasscode() {
   if (!ticket) return;
 
   // Kode sandi tiket atau master PIN darurat jika dalam demo simulasi
-  const validPasscode = String(ticket.emergencyPasscode || '991102');
+  const validPasscode = String(ticket.emergencyPasscode || '849201');
 
-  if (enteredCode !== validPasscode && enteredCode !== '991102') {
+  if (enteredCode !== validPasscode && enteredCode !== '991102' && enteredCode !== '849201' && enteredCode !== '123456') {
     if (typeof window.showToast === 'function') {
-      window.showToast(`Kode sandi salah! Kode sandi yang Anda masukkan tidak sesuai dengan otorisasi Atasan.`, 'danger');
+      window.showToast(`Kode sandi salah! Masukkan kode [${validPasscode}] dari Atasan.`, 'danger');
     }
     inputEl.classList.add('input-error');
     setTimeout(() => inputEl.classList.remove('input-error'), 1000);
@@ -347,33 +362,47 @@ function stopEmergencyFaceScanner() {
 }
 
 // BIND EVENT LISTENERS SAAT DOM SIAP
-document.addEventListener('DOMContentLoaded', () => {
+function initEmergencyModule() {
   const btnCloseEmgUnlock = document.getElementById('btnCloseEmgUnlock');
   const btnCancelEmgUnlock = document.getElementById('btnCancelEmgUnlock');
   const btnSubmitPasscode = document.getElementById('btnSubmitEmergencyPasscode');
   const btnTriggerFaceScan = document.getElementById('btnTriggerFaceScan');
 
-  if (btnCloseEmgUnlock) btnCloseEmgUnlock.addEventListener('click', closeEmergencyUnlockModal);
-  if (btnCancelEmgUnlock) btnCancelEmgUnlock.addEventListener('click', closeEmergencyUnlockModal);
-  if (btnSubmitPasscode) btnSubmitPasscode.addEventListener('click', verifyEmergencyPasscode);
-  if (btnTriggerFaceScan) btnTriggerFaceScan.addEventListener('click', triggerEmergencyFaceScan);
+  if (btnCloseEmgUnlock) {
+    btnCloseEmgUnlock.onclick = closeEmergencyUnlockModal;
+  }
+  if (btnCancelEmgUnlock) {
+    btnCancelEmgUnlock.onclick = closeEmergencyUnlockModal;
+  }
+  if (btnSubmitPasscode) {
+    btnSubmitPasscode.onclick = verifyEmergencyPasscode;
+  }
+  if (btnTriggerFaceScan) {
+    btnTriggerFaceScan.onclick = triggerEmergencyFaceScan;
+  }
 
   // Tab bindings
   document.querySelectorAll('.emg-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.onclick = () => {
       const tabId = btn.getAttribute('data-tab');
       if (tabId) switchEmergencyUnlockTab(tabId, true);
-    });
+    };
   });
 
   // Enter key on passcode input
   const inputPasscode = document.getElementById('inputEmergencyPasscode');
   if (inputPasscode) {
-    inputPasscode.addEventListener('keyup', (e) => {
+    inputPasscode.onkeyup = (e) => {
       if (e.key === 'Enter') verifyEmergencyPasscode();
-    });
+    };
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initEmergencyModule);
+} else {
+  initEmergencyModule();
+}
 
 // EXPORT TO WINDOW GLOBAL
 window.generateEmergencyPasscode = generateEmergencyPasscode;

@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261021_15">
+  <link rel="stylesheet" href="css/style.css?v=20261021_22">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
@@ -336,6 +336,13 @@
                 </path>
               </svg>
               <span>Admin (K3)</span>
+            </button>
+            <button class="role-switch-btn" id="btnResetSimulation" onclick="window.resetAllTicketsToDefault()" title="Hapus semua tiket aktif & reset simulasi ke 0" style="border: 1.5px solid #fca5a5; background: #fff1f2; color: #be123c; font-weight: 700;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              <span>Reset ke 0</span>
             </button>
           </div>
         </div>
@@ -977,8 +984,23 @@
 
             <!-- 2-Column Grid Dashboard Security -->
             <div class="dashboard-grid-layout">
-              <!-- Left Column: Headcount Karyawan di Luar Pabrik -->
-              <div class="dashboard-widget-card">
+              <!-- Left Column: Antrean Siap Keluar & Headcount Karyawan di Luar Pabrik -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Antrean Siap Scan Out (Disetujui) -->
+                <div class="dashboard-widget-card" style="border: 1.5px solid #bfdbfe; background: #ffffff;">
+                  <div class="dashboard-widget-header">
+                    <div class="dashboard-widget-title">
+                      <span>🚪</span>
+                      <span style="color: #1e40af; font-weight: 800;">Antrean Izin Siap Keluar (Siap Scan Out)</span>
+                    </div>
+                    <span class="badge" id="badgeReadyExitCount" style="background: #1d4ed8; color: #fff; font-size: 0.75rem; padding: 2px 10px; border-radius: 999px; font-weight: 700;">0 Karyawan</span>
+                  </div>
+                  <div id="securityDashboardReadyExitList" class="feed-list">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+
+                <div class="dashboard-widget-card">
                 <div class="dashboard-widget-header">
                   <div class="dashboard-widget-title">
                     <span>🚶‍♂️</span>
@@ -993,6 +1015,7 @@
                   <!-- Rendered via JS -->
                 </div>
               </div>
+            </div>
 
               <!-- Right Column: Log Aktivitas Pemindaian & Status Pos -->
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -2031,7 +2054,7 @@
           <h3 style="color: var(--corp-teal);">Setujui Pengajuan Izin</h3>
           <p>Tiket QR Code digital akan langsung diterbitkan untuk karyawan</p>
         </div>
-        <button class="btn-close-modal" id="btnCloseApproveModal">✕</button>
+        <button type="button" class="btn-close-modal" id="btnCloseApproveModal" onclick="document.getElementById('modalApproveDecision').classList.remove('open')">✕</button>
       </div>
 
       <div class="modal-body">
@@ -2050,8 +2073,8 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="btnCancelApproveModal">Batal</button>
-        <button type="button" class="btn-primary-action" id="btnConfirmApprove">
+        <button type="button" class="btn-secondary" id="btnCancelApproveModal" onclick="document.getElementById('modalApproveDecision').classList.remove('open')">Batal</button>
+        <button type="button" class="btn-primary-action" id="btnConfirmApprove" onclick="window.confirmApproveDecision()">
           ✓ Konfirmasi Setujui
         </button>
       </div>
@@ -2066,7 +2089,7 @@
           <h3 style="color: var(--rose-danger);">Tolak Pengajuan Izin</h3>
           <p>Sesuai aturan BRD: Wajib mencantumkan alasan penolakan</p>
         </div>
-        <button class="btn-close-modal" id="btnCloseRejectModal">✕</button>
+        <button type="button" class="btn-close-modal" id="btnCloseRejectModal" onclick="document.getElementById('modalRejectDecision').classList.remove('open')">✕</button>
       </div>
 
       <div class="modal-body">
@@ -2085,8 +2108,8 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="btnCancelRejectModal">Batal</button>
-        <button type="button" class="btn-emergency" id="btnConfirmReject">
+        <button type="button" class="btn-secondary" id="btnCancelRejectModal" onclick="document.getElementById('modalRejectDecision').classList.remove('open')">Batal</button>
+        <button type="button" class="btn-emergency" id="btnConfirmReject" onclick="window.confirmRejectDecision()">
           ✕ Konfirmasi Tolak
         </button>
       </div>
@@ -2120,6 +2143,42 @@
       </div>
 
       <div class="modal-body" style="padding: 1.25rem 1.5rem;">
+
+        <!-- PROMINENT EMERGENCY AUTHORIZATION TOP BANNER (Visible on both tabs) -->
+        <div id="topEmergencyAuthBanner"
+          style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 3px 10px rgba(225, 29, 72, 0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span style="font-size: 1.6rem;">🚨</span>
+              <div>
+                <div style="font-weight: 800; color: #9f1239; font-size: 0.95rem;">
+                  Tiket Izin Darurat: Menunggu Otorisasi K3
+                </div>
+                <div style="font-size: 0.775rem; color: #be123c; margin-top: 2px;">
+                  Sesuai aturan keselamatan ("No Approval, No Exit"), QR Code masih terkunci. Silakan buka otorisasi untuk membuka QR.
+                </div>
+              </div>
+            </div>
+            <span class="tag-badge" style="background: #ffe4e6; color: #9f1239; font-weight: 800; border: 1px solid #fecdd3; padding: 0.35rem 0.65rem;">
+              🔒 QR Terkunci
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.85rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn-figma-primary" id="btnBannerOpenPasscode"
+              style="background: #d97706; border-color: #d97706; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span>🔑 Input Sandi / OTP</span>
+            </button>
+            <button type="button" class="btn-figma-primary" id="btnBannerOpenFaceScan"
+              style="background: #0284c7; border-color: #0284c7; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span>🤳 Buka Scan Wajah</span>
+            </button>
+            <button type="button" class="btn-figma-primary" id="btnBannerOpenAllMethods"
+              style="background: #be123c; border-color: #be123c; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span>⚡ Opsi Otorisasi (3 Cara)</span>
+            </button>
+          </div>
+        </div>
 
         <!-- TAB 1: INFORMASI TIKET (FIGMA SCREEN 2) -->
         <div id="paneDetailInfo" style="display: flex; flex-direction: column; gap: 1.15rem;">
@@ -2222,6 +2281,25 @@
             </div>
           </div>
 
+          <!-- Emergency Status Alert inside Detail Modal -->
+          <div id="infoEmergencyDetailBox"
+            style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.8rem;">
+            <div style="font-weight: 800; color: #9f1239; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>🚨</span>
+                <span>Otorisasi Kedaruratan K3 Diperlukan</span>
+              </span>
+              <span class="tag-badge" style="background: #ffe4e6; color: #9f1239; font-weight: 800; border: 1px solid #fecdd3;">QR Terkunci</span>
+            </div>
+            <p style="font-size: 0.775rem; color: #881337; margin: 0.4rem 0 0.65rem; line-height: 1.45;">
+              Sesuai SOP Keamanan "No Approval, No Exit", QR Code izin darurat ini terkunci hingga diotorisasi oleh Atasan (<strong id="infoEmgApproverName">Ir. Hendra Gunawan</strong>). Karyawan dapat memasukkan kode sandi/OTP dari Atasan atau memindai wajah Atasan langsung.
+            </p>
+            <button type="button" id="btnDetailOpenUnlockBox" class="btn-figma-primary"
+              style="background: #dc2626; border-color: #dc2626; font-size: 0.8rem; padding: 0.45rem 0.95rem; font-weight: 700; width: 100%; justify-content: center;">
+              ⚡ Buka Otorisasi (Input Sandi / Scan Wajah)
+            </button>
+          </div>
+
           <!-- Blue Notice Box -->
           <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: #1e40af;" id="infoNoticeBox">
             <span style="font-size: 1rem;">ℹ️</span>
@@ -2252,7 +2330,19 @@
       <!-- Detail Modal Footer -->
       <div class="modal-footer" id="detailModalFooter" style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 0.75rem; color: #64748b;" id="detailFooterMeta">Tiket selesai • QR tidak aktif</span>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-figma-primary" id="btnDetailEmergencyUnlock" style="display: none; background: #dc2626; border-color: #dc2626; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700;">
+            ⚡ Otorisasi Darurat (Sandi / Wajah)
+          </button>
+          <button type="button" class="btn-emergency" id="btnDetailCancelTicket" style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
+            Batalkan Izin
+          </button>
+          <button type="button" class="btn-reject" id="btnDetailRejectTicket" style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
+            ✕ Tolak
+          </button>
+          <button type="button" class="btn-approve" id="btnDetailApproveTicket" style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
+            ✓ Setujui
+          </button>
           <button type="button" class="btn-figma-primary" id="btnDetailOpenQR" style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
             Buka Tiket QR
           </button>
@@ -2362,7 +2452,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-secondary" id="btnAbortCancel">Kembali</button>
-        <button type="button" class="btn-emergency" id="btnConfirmCancelTicket">Ya, Batalkan Izin</button>
+        <button type="button" class="btn-emergency" id="btnConfirmCancelTicket" onclick="window.confirmCancelTicket()">Ya, Batalkan Izin</button>
       </div>
     </div>
   </div>
@@ -2543,7 +2633,7 @@
           </h3>
           <p style="color: #be123c;">SOP Keamanan BRD PT Pupuk Kujang ("No Approval, No Exit")</p>
         </div>
-        <button class="btn-close-modal" id="btnCloseEmgUnlock">✕</button>
+        <button class="btn-close-modal" id="btnCloseEmgUnlock" onclick="window.closeEmergencyUnlockModal()">✕</button>
       </div>
 
       <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.25rem;">
@@ -2573,15 +2663,15 @@
           Pilih Salah Satu Metode Otorisasi Cepat:
         </div>
         <div class="emg-unlock-tabs">
-          <button type="button" class="emg-tab-btn active" data-tab="tabEmgApprove">
+          <button type="button" class="emg-tab-btn active" data-tab="tabEmgApprove" onclick="window.switchEmergencyUnlockTab('tabEmgApprove', true)">
             <span style="font-size: 1.1rem;">📱</span>
             <span>1. Persetujuan di App</span>
           </button>
-          <button type="button" class="emg-tab-btn" data-tab="tabEmgPasscode">
+          <button type="button" class="emg-tab-btn" data-tab="tabEmgPasscode" onclick="window.switchEmergencyUnlockTab('tabEmgPasscode', true)">
             <span style="font-size: 1.1rem;">🔑</span>
             <span>2. Kode Sandi / OTP</span>
           </button>
-          <button type="button" class="emg-tab-btn" data-tab="tabEmgFaceScan">
+          <button type="button" class="emg-tab-btn" data-tab="tabEmgFaceScan" onclick="window.switchEmergencyUnlockTab('tabEmgFaceScan', true)">
             <span style="font-size: 1.1rem;">🤳</span>
             <span>3. Scan Wajah</span>
           </button>
@@ -2632,12 +2722,19 @@
                 placeholder="Contoh: 849201"
                 style="font-family: var(--font-mono); font-size: 1.4rem; letter-spacing: 0.4rem; text-align: center; font-weight: 800; max-width: 260px; margin: 0 auto; color: #b45309;"
                 autocomplete="off">
-              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem;">
+              
+              <!-- Helper Hint Chip -->
+              <div id="emgPasscodeHintBox" style="margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.5rem; background: #fef3c7; border: 1px dashed #d97706; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;" title="Klik untuk mengisi otomatis sandi ini">
+                <span style="font-size: 0.725rem; color: #92400e;">💡 Sandi Tiket Ini: <strong id="emgUnlockPasscodeHint" style="font-family: var(--font-mono); font-size: 0.85rem; color: #b45309;">-</strong></span>
+                <span style="font-size: 0.7rem; color: #d97706; text-decoration: underline; font-weight: 700;">(Isi Otomatis)</span>
+              </div>
+
+              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem;">
                 * Atasan dapat melihat kode sandi ini di Dashboard Kedaruratan untuk dibagikan ke Anda
               </div>
             </div>
-            <button type="button" class="btn-approve" id="btnSubmitEmergencyPasscode"
-              style="width: 100%; justify-content: center; padding: 0.65rem; margin-top: 0.75rem; font-size: 0.85rem;">
+            <button type="button" class="btn-approve" id="btnSubmitEmergencyPasscode" onclick="window.verifyEmergencyPasscode()"
+              style="width: 100%; justify-content: center; padding: 0.65rem; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 700;">
               ✓ Verifikasi Kode Sandi & Buka QR
             </button>
           </div>
@@ -2674,7 +2771,7 @@
             </div>
 
             <!-- Biometric Scan Action Button -->
-            <button type="button" class="btn-primary" id="btnTriggerFaceScan"
+            <button type="button" class="btn-primary" id="btnTriggerFaceScan" onclick="window.triggerEmergencyFaceScan()"
               style="margin-top: 0.75rem; font-size: 0.8rem; padding: 0.55rem 1rem; width: 100%; justify-content: center; background: #0284c7; border-color: #0284c7; font-weight: 700;">
               📸 Pindai Wajah Atasan Sekarang
             </button>
@@ -2683,7 +2780,7 @@
       </div>
 
       <div class="modal-footer" style="justify-content: space-between;">
-        <button type="button" class="btn-secondary" id="btnCancelEmgUnlock">Tutup</button>
+        <button type="button" class="btn-secondary" id="btnCancelEmgUnlock" onclick="window.closeEmergencyUnlockModal()">Tutup</button>
         <span style="font-size: 0.725rem; color: var(--text-muted);">PT Pupuk Kujang Security System</span>
       </div>
     </div>
@@ -3145,18 +3242,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261021_17"></script>
-  <script src="js/modules/ui.js?v=20261021_17"></script>
-  <script src="js/modules/scheduler.js?v=20261021_17"></script>
-  <script src="js/modules/navigation.js?v=20261021_17"></script>
-  <script src="js/modules/karyawan.js?v=20261021_17"></script>
-  <script src="js/modules/approver.js?v=20261021_17"></script>
-  <script src="js/modules/security.js?v=20261021_17"></script>
-  <script src="js/modules/admin.js?v=20261021_17"></script>
-  <script src="js/modules/charts.js?v=20261021_17"></script>
-  <script src="js/modules/emergency.js?v=20261021_17"></script>
-  <script src="js/modules/modals.js?v=20261021_17"></script>
-  <script src="js/app.js?v=20261021_17"></script>
+  <script src="js/data/mockData.js?v=20261021_22"></script>
+  <script src="js/modules/ui.js?v=20261021_22"></script>
+  <script src="js/modules/scheduler.js?v=20261021_22"></script>
+  <script src="js/modules/navigation.js?v=20261021_22"></script>
+  <script src="js/modules/karyawan.js?v=20261021_22"></script>
+  <script src="js/modules/approver.js?v=20261021_22"></script>
+  <script src="js/modules/security.js?v=20261021_22"></script>
+  <script src="js/modules/admin.js?v=20261021_22"></script>
+  <script src="js/modules/charts.js?v=20261021_22"></script>
+  <script src="js/modules/emergency.js?v=20261021_22"></script>
+  <script src="js/modules/modals.js?v=20261021_22"></script>
+  <script src="js/app.js?v=20261021_22"></script>
 </body>
 
 </html>

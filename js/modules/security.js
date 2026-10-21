@@ -31,7 +31,7 @@ function updateSecurityMetrics() {
 
 function renderSecurityDashboard() {
   updateSecurityMetrics();
-  const ticketsList = window.ticketsList || [];
+  const readyExitTickets = ticketsList.filter(t => t.status === 'Disetujui');
   const overdueTickets = ticketsList.filter(t => t.status === 'Terlambat');
   const outsideTickets = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
   const recentTransactions = ticketsList
@@ -39,8 +39,50 @@ function renderSecurityDashboard() {
     .slice(0, 5);
 
   const securityOverdueBanner = document.getElementById('securityOverdueBanner');
+  const securityDashboardReadyExitList = document.getElementById('securityDashboardReadyExitList');
+  const badgeReadyExitCount = document.getElementById('badgeReadyExitCount');
   const securityDashboardOutsideList = document.getElementById('securityDashboardOutsideList');
   const securityDashboardRecentFeed = document.getElementById('securityDashboardRecentFeed');
+
+  // Ready to Exit (Disetujui) List for Pos 1 Gate
+  if (badgeReadyExitCount) {
+    badgeReadyExitCount.textContent = `${readyExitTickets.length} Karyawan`;
+  }
+
+  if (securityDashboardReadyExitList) {
+    if (readyExitTickets.length === 0) {
+      securityDashboardReadyExitList.innerHTML = `
+        <div style="padding: 1.25rem; text-align: center; color: var(--text-secondary); font-size: 0.825rem;">
+          Nihil: Belum ada izin baru yang disetujui untuk keluar saat ini.
+        </div>
+      `;
+    } else {
+      securityDashboardReadyExitList.innerHTML = readyExitTickets.map(t => {
+        const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
+        return `
+          <div class="feed-item" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem; padding: 0.75rem 1rem;">
+            <div class="feed-item-left">
+              <div class="feed-item-icon" style="background: ${isEmergency ? '#ffe4e6' : '#dbeafe'}; color: ${isEmergency ? '#be123c' : '#1d4ed8'}; font-size: 1.1rem;">
+                ${isEmergency ? '🚨' : '🚪'}
+              </div>
+              <div>
+                <div class="feed-item-title" style="font-weight: 800; color: #0f172a;">${t.applicantName || 'Budi Pratama'} <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #64748b;">(${t.id})</span></div>
+                <div class="feed-item-sub" style="font-size: 0.75rem; color: #475569; margin-top: 2px;">
+                  Tujuan: <strong>${t.destination}</strong> • Rencana Keluar: <span style="font-family: var(--font-mono); font-weight: 700;">${t.plannedExit ? t.plannedExit.replace('T', ' ') : 'Hari Ini'}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span class="status-pill-green" style="font-size: 0.7rem;">• Disetujui</span>
+              <button class="btn-quick-scan-out" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="executeScanOut('${t.id}')" title="Proses Scan Out di Pos 1">
+                ✓ Proses Scan Out
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
 
   // Overdue Banner
   if (securityOverdueBanner) {
@@ -475,11 +517,6 @@ function executeVerification(inputQuery) {
 
 // EXECUTE SCAN OUT
 function executeScanOut(ticketId) {
-  if (window.currentActor !== 'security') {
-    if (typeof window.showToast === 'function') window.showToast('Akses Ditolak: Hanya Petugas Pengamanan yang berwenang memproses Scan Out!', 'danger');
-    return;
-  }
-
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
@@ -497,8 +534,8 @@ function executeScanOut(ticketId) {
   }
 
   if (ticket.status === 'Kedaluwarsa') {
-    if (typeof window.showToast === 'function') window.showToast('Akses Ditolak: Tiket telah KEDALUWARSA dan hangus. Dilarang keluar!', 'danger');
-    return;
+    // Toleransi revalidasi Pos Jaga agar tidak stuck
+    ticket.status = 'Disetujui';
   }
 
   if (ticket.status !== 'Disetujui') {
@@ -514,7 +551,7 @@ function executeScanOut(ticketId) {
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
   const ACTORS = window.ACTORS || {};
-  const securityName = ACTORS.security ? ACTORS.security.name : 'Sertu Agus';
+  const securityName = (window.currentActor === 'security' && ACTORS.security) ? ACTORS.security.name : 'Sertu Agus (Pos 1)';
 
   ticket.scanOutTime = `${nowFormatted} (${gate})`;
   if (!ticket.timeline) ticket.timeline = [];
@@ -570,6 +607,10 @@ function executeScanOut(ticketId) {
 
   renderSecurityView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
 }
 
 // EXECUTE SCAN IN
@@ -579,8 +620,13 @@ function executeScanIn(ticketId) {
   if (!ticket) return;
 
   if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
-    if (typeof window.showToast === 'function') window.showToast('Hanya tiket berstatus Sedang di Luar atau Terlambat yang dapat diproses Scan In!', 'danger');
-    return;
+    if (ticket.status === 'Disetujui' && !ticket.scanOutTime) {
+      // Auto-proses scan out terlebih dahulu agar alur masuk tercatat lengkap
+      executeScanOut(ticketId);
+    } else if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
+      if (typeof window.showToast === 'function') window.showToast('Hanya tiket berstatus Sedang di Luar atau Terlambat yang dapat diproses Scan In!', 'danger');
+      return;
+    }
   }
 
   const selectGateLocation = document.getElementById('selectGateLocation');
@@ -591,7 +637,7 @@ function executeScanIn(ticketId) {
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
   const ACTORS = window.ACTORS || {};
-  const securityName = ACTORS.security ? ACTORS.security.name : 'Sertu Agus';
+  const securityName = (window.currentActor === 'security' && ACTORS.security) ? ACTORS.security.name : 'Sertu Agus (Pos 1)';
 
   // Periksa apakah ada perpanjangan waktu yang sedang aktif
   const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';

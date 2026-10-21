@@ -37,17 +37,24 @@ function handleOpenNewRequest() {
     }
 
     const isEmergLocked = activeTicket.isEmergency && (activeTicket.emergencyLocked || activeTicket.status === 'Menunggu Otorisasi Darurat');
-    const canCancel = activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat' || isEmergLocked || (activeTicket.status === 'Disetujui' && !activeTicket.scanOutTime);
+    const canCancel = activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat' || isEmergLocked || (activeTicket.status === 'Disetujui' && !activeTicket.scanOutTime) || activeTicket.status === 'Kedaluwarsa';
 
     if (btnBlockedCancelTicket) {
+      btnBlockedCancelTicket.style.display = 'inline-flex';
       if (canCancel) {
-        btnBlockedCancelTicket.style.display = 'inline-flex';
+        btnBlockedCancelTicket.textContent = 'Batalkan Izin Ini';
         btnBlockedCancelTicket.onclick = () => {
           if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
           openCancelModal(activeTicket.id);
         };
       } else {
-        btnBlockedCancelTicket.style.display = 'none';
+        btnBlockedCancelTicket.textContent = 'Selesaikan Izin Ini (Scan In)';
+        btnBlockedCancelTicket.onclick = () => {
+          if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
+          if (typeof window.executeScanIn === 'function') {
+            window.executeScanIn(activeTicket.id);
+          }
+        };
       }
     }
 
@@ -313,7 +320,18 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   // Status Badge on Top Right
   const detailStatusPillTop = document.getElementById('detailStatusPillTop');
   if (detailStatusPillTop) {
-    detailStatusPillTop.innerHTML = window.getStatusPill(ticket.status);
+    const isEmergBadge = ticket.status === 'Menunggu Otorisasi Darurat' || (ticket.id && ticket.id.includes('-EMG-') && ticket.status !== 'Disetujui' && ticket.status !== 'Sedang di Luar' && ticket.status !== 'Selesai');
+    if (isEmergBadge) {
+      detailStatusPillTop.innerHTML = `
+        <button type="button" class="status-pill pending" 
+          style="cursor: pointer; background: #ffe4e6; color: #9f1239; border: 1.5px solid #fecdd3; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; padding: 0.35rem 0.75rem; border-radius: 999px;" 
+          onclick="window.openEmergencyUnlockModal('${ticket.id}')" title="Klik untuk membuka opsi Otorisasi Darurat">
+          <span>⚡ Menunggu Otorisasi Darurat</span>
+        </button>
+      `;
+    } else {
+      detailStatusPillTop.innerHTML = window.getStatusPill(ticket.status);
+    }
   }
 
   // --- TAB 1: INFORMASI TIKET ---
@@ -498,12 +516,125 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     }
   }
 
+  // Emergency Unlock Action Buttons, Top Banner & Info Box directly inside detail modal
+  const topEmergencyAuthBanner = document.getElementById('topEmergencyAuthBanner');
+  const btnBannerOpenPasscode = document.getElementById('btnBannerOpenPasscode');
+  const btnBannerOpenFaceScan = document.getElementById('btnBannerOpenFaceScan');
+  const btnBannerOpenAllMethods = document.getElementById('btnBannerOpenAllMethods');
+  const btnDetailEmergencyUnlock = document.getElementById('btnDetailEmergencyUnlock');
+  const infoEmergencyDetailBox = document.getElementById('infoEmergencyDetailBox');
+  const btnDetailOpenUnlockBox = document.getElementById('btnDetailOpenUnlockBox');
+
+  // Robust check: any emergency ticket waiting for authorization
+  const isEmergencyTicket = Boolean(
+    ticket.isEmergency === true || 
+    ticket.status === 'Menunggu Otorisasi Darurat' ||
+    (ticket.id && (ticket.id.includes('-EMG-') || ticket.id.startsWith('TK-EMG-')))
+  );
+  const isEmergLockedInDetail = isEmergencyTicket && (
+    ticket.status === 'Menunggu Otorisasi Darurat' ||
+    ticket.emergencyLocked === true ||
+    ticket.qrLocked === true ||
+    (ticket.status !== 'Disetujui' && ticket.status !== 'Sedang di Luar' && ticket.status !== 'Selesai' && ticket.status !== 'Ditolak' && ticket.status !== 'Dibatalkan')
+  );
+
+  // 1. Top Prominent Banner (Always visible at the top of detail modal)
+  if (topEmergencyAuthBanner) {
+    if (isEmergLockedInDetail) {
+      topEmergencyAuthBanner.style.display = 'block';
+      if (btnBannerOpenPasscode) {
+        btnBannerOpenPasscode.onclick = () => window.openEmergencyUnlockModal(ticket.id, 'passcode');
+      }
+      if (btnBannerOpenFaceScan) {
+        btnBannerOpenFaceScan.onclick = () => window.openEmergencyUnlockModal(ticket.id, 'facescan');
+      }
+      if (btnBannerOpenAllMethods) {
+        btnBannerOpenAllMethods.onclick = () => window.openEmergencyUnlockModal(ticket.id, 'app');
+      }
+    } else {
+      topEmergencyAuthBanner.style.display = 'none';
+      if (btnBannerOpenPasscode) btnBannerOpenPasscode.onclick = null;
+      if (btnBannerOpenFaceScan) btnBannerOpenFaceScan.onclick = null;
+      if (btnBannerOpenAllMethods) btnBannerOpenAllMethods.onclick = null;
+    }
+  }
+
+  // 2. Middle Info Box
+  if (infoEmergencyDetailBox) {
+    if (isEmergLockedInDetail) {
+      infoEmergencyDetailBox.style.display = 'block';
+      const elApproverName = document.getElementById('infoEmgApproverName');
+      if (elApproverName) elApproverName.textContent = ticket.approverName || 'Ir. Hendra Gunawan / Dewi Sartika';
+      if (btnDetailOpenUnlockBox) {
+        btnDetailOpenUnlockBox.onclick = () => window.openEmergencyUnlockModal(ticket.id);
+      }
+    } else {
+      infoEmergencyDetailBox.style.display = 'none';
+      if (btnDetailOpenUnlockBox) btnDetailOpenUnlockBox.onclick = null;
+    }
+  }
+
+  // 3. Footer Button (⚡ Otorisasi Darurat)
+  if (btnDetailEmergencyUnlock) {
+    if (isEmergLockedInDetail) {
+      btnDetailEmergencyUnlock.style.display = 'inline-flex';
+      btnDetailEmergencyUnlock.onclick = () => window.openEmergencyUnlockModal(ticket.id);
+    } else {
+      btnDetailEmergencyUnlock.style.display = 'none';
+      btnDetailEmergencyUnlock.onclick = null;
+    }
+  }
+
+  // Cancel Action Button directly inside detail modal
+  const btnDetailCancelTicket = document.getElementById('btnDetailCancelTicket');
+  const canCancelInDetail = (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
+  if (btnDetailCancelTicket) {
+    if (canCancelInDetail) {
+      btnDetailCancelTicket.style.display = 'inline-flex';
+      btnDetailCancelTicket.onclick = () => {
+        openCancelModal(ticket.id);
+      };
+    } else {
+      btnDetailCancelTicket.style.display = 'none';
+      btnDetailCancelTicket.onclick = null;
+    }
+  }
+
+  // Approver Action Buttons (Tolak / Setujui) directly inside detail modal
+  const btnDetailRejectTicket = document.getElementById('btnDetailRejectTicket');
+  const btnDetailApproveTicket = document.getElementById('btnDetailApproveTicket');
+  const isApproverActor = (window.currentActor === 'approver' || window.currentActor === 'approver2');
+  const isPendingDecision = (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat');
+
+  if (btnDetailRejectTicket && btnDetailApproveTicket) {
+    if (isApproverActor && isPendingDecision) {
+      btnDetailRejectTicket.style.display = 'inline-flex';
+      btnDetailApproveTicket.style.display = 'inline-flex';
+      btnDetailRejectTicket.onclick = () => {
+        if (typeof window.openRejectModal === 'function') {
+          window.openRejectModal(ticket.id);
+        }
+      };
+      btnDetailApproveTicket.onclick = () => {
+        if (typeof window.openApproveModal === 'function') {
+          window.openApproveModal(ticket.id);
+        }
+      };
+    } else {
+      btnDetailRejectTicket.style.display = 'none';
+      btnDetailApproveTicket.style.display = 'none';
+      btnDetailRejectTicket.onclick = null;
+      btnDetailApproveTicket.onclick = null;
+    }
+  }
+
   // Security Action Buttons (Scan Out / Scan In) directly inside detail modal
   const btnDetailScanOut = document.getElementById('btnDetailScanOut');
   const btnDetailScanIn = document.getElementById('btnDetailScanIn');
 
   if (btnDetailScanOut) {
-    if (window.currentActor === 'security' && ticket.status === 'Disetujui' && !ticket.scanOutTime) {
+    const canScanOut = (ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
+    if (canScanOut) {
       btnDetailScanOut.style.display = 'inline-flex';
       btnDetailScanOut.onclick = function () {
         if (typeof window.executeScanOut === 'function') {
@@ -518,9 +649,8 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   }
 
   if (btnDetailScanIn) {
-    const isSecurityOrAdmin = (window.currentActor === 'security' || window.currentActor === 'admin');
     const isOutsideToReturn = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && !ticket.scanInTime;
-    if (isSecurityOrAdmin && isOutsideToReturn) {
+    if (isOutsideToReturn) {
       btnDetailScanIn.style.display = 'inline-flex';
       btnDetailScanIn.onclick = function () {
         if (typeof window.executeScanIn === 'function') {
@@ -606,12 +736,22 @@ function openCancelModal(ticketId) {
   if (!ticket) return;
 
   const isEmergLocked = ticket.isEmergency && (ticket.emergencyLocked || ticket.status === 'Menunggu Otorisasi Darurat');
-  const canCancel = ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || isEmergLocked || (ticket.status === 'Disetujui' && !ticket.scanOutTime);
+  const isOutside = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat');
+  const isFinished = (ticket.status === 'Selesai' || ticket.status === 'Dibatalkan' || ticket.status === 'Ditolak');
+  const canCancel = !isOutside && !isFinished;
 
   if (!canCancel) {
-    if (typeof window.showToast === 'function') window.showToast('Tiket ini tidak dapat dibatalkan lagi.', 'danger');
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Scan In di Pos 1 untuk menyelesaikan izin.', 'danger');
+    }
     return;
   }
+
+  // Close other modals so cancel modal is cleanly visible
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+  const modalActiveBlocked = document.getElementById('modalActiveBlocked');
+  if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
 
   window.currentCancelTicketId = ticketId;
   const cancelTicketId = document.getElementById('cancelTicketId');
@@ -622,6 +762,56 @@ function openCancelModal(ticketId) {
   if (cancelReasonInput) cancelReasonInput.value = '';
   if (modalCancelRequest) modalCancelRequest.classList.add('open');
 }
+
+function confirmCancelTicket() {
+  const cancelReasonInput = document.getElementById('cancelReasonInput');
+  const reason = (cancelReasonInput && cancelReasonInput.value.trim()) || 'Dibatalkan mandiri oleh pemohon.';
+
+  const ticketsList = window.ticketsList || [];
+  const ticketId = window.currentCancelTicketId;
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (ticket) {
+    const ACTORS = window.ACTORS || {};
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+    ticket.status = 'Dibatalkan';
+    ticket.scanOutTime = null;
+    ticket.scanInTime = null;
+    ticket.emergencyLocked = false;
+    ticket.qrLocked = false;
+    if (!ticket.timeline) ticket.timeline = [];
+    ticket.timeline.push({
+      event: 'Pengajuan Dibatalkan',
+      time: nowFormatted,
+      by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+      desc: `Dibatalkan mandiri. Alasan: "${reason}".`
+    });
+
+    window.saveTickets(ticketsList);
+    
+    const modalCancelRequest = document.getElementById('modalCancelRequest');
+    if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+    const modalTicketDetail = document.getElementById('modalTicketDetail');
+    if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+    const modalActiveBlocked = document.getElementById('modalActiveBlocked');
+    if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Tiket #${ticketId} berhasil dibatalkan. Anda kini dapat mengajukan izin baru.`, 'success');
+    }
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+    if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+    if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+    if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+    if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+  }
+}
+
+window.openCancelModal = openCancelModal;
+window.confirmCancelTicket = confirmCancelTicket;
 
 // EMERGENCY PASS
 function handleOpenEmergency() {
@@ -988,45 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnAbortCancel) btnAbortCancel.addEventListener('click', () => modalCancelRequest.classList.remove('open'));
 
   if (btnConfirmCancelTicket) {
-    btnConfirmCancelTicket.addEventListener('click', () => {
-      const cancelReasonInput = document.getElementById('cancelReasonInput');
-      const reason = cancelReasonInput ? cancelReasonInput.value.trim() : '';
-      if (!reason) {
-        if (typeof window.showToast === 'function') window.showToast('Harap isi alasan pembatalan!', 'danger');
-        return;
-      }
-
-      const ticketsList = window.ticketsList || [];
-      const ticket = ticketsList.find(t => t.id === window.currentCancelTicketId);
-      if (ticket) {
-        const ACTORS = window.ACTORS || {};
-        const now = new Date();
-        const pad = (n) => String(n).padStart(2, '0');
-        const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
-
-        ticket.status = 'Dibatalkan';
-        ticket.emergencyLocked = false;
-        ticket.qrLocked = false;
-        if (!ticket.timeline) ticket.timeline = [];
-        ticket.timeline.push({
-          event: 'Pengajuan Dibatalkan',
-          time: nowFormatted,
-          by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
-          desc: `Dibatalkan mandiri. Alasan: "${reason}".`
-        });
-
-        window.saveTickets(ticketsList);
-        if (modalCancelRequest) modalCancelRequest.classList.remove('open');
-        if (typeof window.showToast === 'function') {
-          window.showToast(`Tiket #${window.currentCancelTicketId} berhasil dibatalkan. Anda kini dapat mengajukan izin baru.`, 'success');
-        }
-        if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-        if (typeof window.renderApproverView === 'function') window.renderApproverView();
-        if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-        if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
-        if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
-      }
-    });
+    btnConfirmCancelTicket.addEventListener('click', confirmCancelTicket);
   }
 
   // EMERGENCY PASS LISTENERS

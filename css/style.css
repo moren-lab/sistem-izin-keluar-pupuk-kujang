@@ -1535,6 +1535,17 @@ body.modal-open {
   visibility: visible;
 }
 
+#modalApproveDecision,
+#modalRejectDecision,
+#modalCancelRequest,
+#modalRejectExtension,
+#modalConfirmSummary,
+#modalActiveBlocked,
+#modalEmergencyUnlock,
+#modalLogoutConfirm {
+  z-index: 10050 !important;
+}
+
 .modal-card {
   background: #ffffff;
   border-radius: 14px;

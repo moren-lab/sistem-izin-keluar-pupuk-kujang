@@ -544,6 +544,9 @@ function openApproveModal(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
 
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+
   window.currentDecisionTicketId = ticketId;
   const approveTicketId = document.getElementById('approveTicketId');
   const approveEmployeeName = document.getElementById('approveEmployeeName');
@@ -561,6 +564,9 @@ function openRejectModal(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
 
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+
   window.currentDecisionTicketId = ticketId;
   const rejectTicketId = document.getElementById('rejectTicketId');
   const rejectEmployeeName = document.getElementById('rejectEmployeeName');
@@ -573,115 +579,165 @@ function openRejectModal(ticketId) {
   if (modalRejectDecision) modalRejectDecision.classList.add('open');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function confirmApproveDecision() {
+  const ticketsList = window.ticketsList || [];
+  const ticketId = window.currentDecisionTicketId;
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (!ticket) return;
+
+  const approveNoteInput = document.getElementById('approveNoteInput');
+  const note = (approveNoteInput && approveNoteInput.value.trim()) || 'Disetujui oleh Atasan langsung.';
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+  const ACTORS = window.ACTORS || {};
+  const isApprover2 = (window.currentActor === 'approver2');
+  const approverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+  const approverName = approverActor.name;
+  const approverTitle = approverActor.title || 'Atasan Peninjau';
+
+  ticket.status = 'Disetujui';
+  ticket.emergencyLocked = false;
+  ticket.qrLocked = false;
+  ticket.approverNote = note;
+  ticket.approvedAt = nowFormatted;
+  if (!ticket.timeline) ticket.timeline = [];
+  ticket.timeline.push(
+    {
+      event: 'Disetujui Atasan',
+      time: nowFormatted,
+      by: `${approverName} (${approverTitle})`,
+      desc: `Persetujuan diberikan. Catatan: "${note}"`
+    },
+    {
+      event: 'QR Code Diterbitkan',
+      time: nowFormatted,
+      by: 'Sistem Gerbang Digital',
+      desc: 'Tiket QR aktif resmi siap dipindai di Pos Jaga Utama.'
+    }
+  );
+
+  window.saveTickets(ticketsList);
+  
+  const modalApproveDecision = document.getElementById('modalApproveDecision');
+  if (modalApproveDecision) modalApproveDecision.classList.remove('open');
+  
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Tiket #${ticketId} berhasil disetujui oleh ${approverName}! QR Code otomatis terbit untuk karyawan.`, 'success');
+  }
+
+  // Immediately update counts and all views
+  updateApproverMetrics();
+  renderApproverDashboard();
+  renderApproverView();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+  if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+}
+
+function confirmRejectDecision() {
+  const rejectReasonInput = document.getElementById('rejectReasonInput');
+  const reason = (rejectReasonInput && rejectReasonInput.value.trim()) || 'Pengajuan tidak dapat disetujui saat ini sesuai pertimbangan operasional kerja.';
+
+  const ticketsList = window.ticketsList || [];
+  const ticketId = window.currentDecisionTicketId;
+  const ticket = ticketsList.find(t => t.id === ticketId);
+  if (!ticket) return;
+
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+  const ACTORS = window.ACTORS || {};
+  const isApprover2 = (window.currentActor === 'approver2');
+  const approverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+  const approverName = approverActor.name;
+  const approverTitle = approverActor.title || 'Atasan Peninjau';
+
+  ticket.status = 'Ditolak';
+  ticket.emergencyLocked = false;
+  ticket.qrLocked = false;
+  ticket.approverNote = `Ditolak: ${reason}`;
+  ticket.rejectedAt = nowFormatted;
+  if (!ticket.timeline) ticket.timeline = [];
+  ticket.timeline.push({
+    event: 'Ditolak Atasan',
+    time: nowFormatted,
+    by: `${approverName} (${approverTitle})`,
+    desc: `Alasan penolakan: "${reason}"`
+  });
+
+  window.saveTickets(ticketsList);
+
+  const modalRejectDecision = document.getElementById('modalRejectDecision');
+  if (modalRejectDecision) modalRejectDecision.classList.remove('open');
+
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Tiket #${ticketId} telah ditolak. Alasan tersimpan di riwayat pemohon.`, 'danger');
+  }
+
+  // Immediately update counts and all views
+  updateApproverMetrics();
+  renderApproverDashboard();
+  renderApproverView();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+  if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+}
+
+function quickApproveTicket(ticketId) {
+  window.currentDecisionTicketId = ticketId;
+  confirmApproveDecision();
+}
+
+window.confirmApproveDecision = confirmApproveDecision;
+window.confirmRejectDecision = confirmRejectDecision;
+window.quickApproveTicket = quickApproveTicket;
+
+function initApproverDecisionListeners() {
   const modalApproveDecision = document.getElementById('modalApproveDecision');
   const btnCloseApproveModal = document.getElementById('btnCloseApproveModal');
   const btnCancelApproveModal = document.getElementById('btnCancelApproveModal');
   const btnConfirmApprove = document.getElementById('btnConfirmApprove');
-  const approveNoteInput = document.getElementById('approveNoteInput');
 
   const modalRejectDecision = document.getElementById('modalRejectDecision');
   const btnCloseRejectModal = document.getElementById('btnCloseRejectModal');
   const btnCancelRejectModal = document.getElementById('btnCancelRejectModal');
   const btnConfirmReject = document.getElementById('btnConfirmReject');
-  const rejectReasonInput = document.getElementById('rejectReasonInput');
 
-  if (btnCloseApproveModal) btnCloseApproveModal.addEventListener('click', () => modalApproveDecision.classList.remove('open'));
-  if (btnCancelApproveModal) btnCancelApproveModal.addEventListener('click', () => modalApproveDecision.classList.remove('open'));
-
-  if (btnConfirmApprove) {
-    btnConfirmApprove.addEventListener('click', () => {
-      const ticketsList = window.ticketsList || [];
-      const ticket = ticketsList.find(t => t.id === window.currentDecisionTicketId);
-      if (!ticket) return;
-
-      const note = approveNoteInput.value.trim() || 'Disetujui oleh Atasan langsung.';
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
-
-      const ACTORS = window.ACTORS || {};
-      const isApprover2 = (window.currentActor === 'approver2');
-      const approverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
-      const approverName = approverActor.name;
-      const approverTitle = approverActor.title || 'Atasan Peninjau';
-
-      ticket.status = 'Disetujui';
-      ticket.approverNote = note;
-      if (!ticket.timeline) ticket.timeline = [];
-      ticket.timeline.push(
-        {
-          event: 'Disetujui Atasan',
-          time: nowFormatted,
-          by: `${approverName} (${approverTitle})`,
-          desc: `Persetujuan diberikan. Catatan: "${note}"`
-        },
-        {
-          event: 'QR Code Diterbitkan',
-          time: nowFormatted,
-          by: 'Sistem Gerbang Digital',
-          desc: 'Tiket QR aktif resmi siap dipindai di Pos Jaga Utama.'
-        }
-      );
-
-      window.saveTickets(ticketsList);
-      if (modalApproveDecision) modalApproveDecision.classList.remove('open');
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Tiket #${window.currentDecisionTicketId} berhasil disetujui oleh ${approverName}! QR Code otomatis terbit untuk karyawan.`, 'success');
-      }
-      renderApproverView();
-      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-      if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
-    });
+  if (btnCloseApproveModal && !btnCloseApproveModal.dataset.bound) {
+    btnCloseApproveModal.dataset.bound = 'true';
+    btnCloseApproveModal.addEventListener('click', () => modalApproveDecision && modalApproveDecision.classList.remove('open'));
+  }
+  if (btnCancelApproveModal && !btnCancelApproveModal.dataset.bound) {
+    btnCancelApproveModal.dataset.bound = 'true';
+    btnCancelApproveModal.addEventListener('click', () => modalApproveDecision && modalApproveDecision.classList.remove('open'));
+  }
+  if (btnConfirmApprove && !btnConfirmApprove.dataset.bound) {
+    btnConfirmApprove.dataset.bound = 'true';
+    btnConfirmApprove.addEventListener('click', confirmApproveDecision);
   }
 
-  if (btnCloseRejectModal) btnCloseRejectModal.addEventListener('click', () => modalRejectDecision.classList.remove('open'));
-  if (btnCancelRejectModal) btnCancelRejectModal.addEventListener('click', () => modalRejectDecision.classList.remove('open'));
-
-  if (btnConfirmReject) {
-    btnConfirmReject.addEventListener('click', () => {
-      const reason = rejectReasonInput.value.trim();
-      if (!reason) {
-        if (typeof window.showToast === 'function') window.showToast('Alasan penolakan wajib diisi sesuai aturan bisnis!', 'danger');
-        return;
-      }
-
-      const ticketsList = window.ticketsList || [];
-      const ticket = ticketsList.find(t => t.id === window.currentDecisionTicketId);
-      if (!ticket) return;
-
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
-
-      const ACTORS = window.ACTORS || {};
-      const isApprover2 = (window.currentActor === 'approver2');
-      const approverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
-      const approverName = approverActor.name;
-      const approverTitle = approverActor.title || 'Atasan Peninjau';
-
-      ticket.status = 'Ditolak';
-      ticket.emergencyLocked = false;
-      ticket.qrLocked = false;
-      ticket.approverNote = `Ditolak: ${reason}`;
-      if (!ticket.timeline) ticket.timeline = [];
-      ticket.timeline.push({
-        event: 'Ditolak Atasan',
-        time: nowFormatted,
-        by: `${approverName} (${approverTitle})`,
-        desc: `Alasan penolakan: "${reason}"`
-      });
-
-      window.saveTickets(ticketsList);
-      if (modalRejectDecision) modalRejectDecision.classList.remove('open');
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Tiket #${window.currentDecisionTicketId} telah ditolak. Alasan tersimpan di riwayat pemohon.`, 'danger');
-      }
-      renderApproverView();
-      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-    });
+  if (btnCloseRejectModal && !btnCloseRejectModal.dataset.bound) {
+    btnCloseRejectModal.dataset.bound = 'true';
+    btnCloseRejectModal.addEventListener('click', () => modalRejectDecision && modalRejectDecision.classList.remove('open'));
+  }
+  if (btnCancelRejectModal && !btnCancelRejectModal.dataset.bound) {
+    btnCancelRejectModal.dataset.bound = 'true';
+    btnCancelRejectModal.addEventListener('click', () => modalRejectDecision && modalRejectDecision.classList.remove('open'));
+  }
+  if (btnConfirmReject && !btnConfirmReject.dataset.bound) {
+    btnConfirmReject.dataset.bound = 'true';
+    btnConfirmReject.addEventListener('click', confirmRejectDecision);
   }
 
   // Reject Extension Modal Elements & Listeners
@@ -691,10 +747,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnConfirmRejectExt = document.getElementById('btnConfirmRejectExt');
   const rejectExtReasonInput = document.getElementById('rejectExtReasonInput');
 
-  if (btnCloseRejectExtModal) btnCloseRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
-  if (btnCancelRejectExtModal) btnCancelRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
+  if (btnCloseRejectExtModal && !btnCloseRejectExtModal.dataset.bound) {
+    btnCloseRejectExtModal.dataset.bound = 'true';
+    btnCloseRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
+  }
+  if (btnCancelRejectExtModal && !btnCancelRejectExtModal.dataset.bound) {
+    btnCancelRejectExtModal.dataset.bound = 'true';
+    btnCancelRejectExtModal.addEventListener('click', () => modalRejectExtension && modalRejectExtension.classList.remove('open'));
+  }
 
-  if (btnConfirmRejectExt) {
+  if (btnConfirmRejectExt && !btnConfirmRejectExt.dataset.bound) {
+    btnConfirmRejectExt.dataset.bound = 'true';
     btnConfirmRejectExt.addEventListener('click', () => {
       const reason = rejectExtReasonInput ? rejectExtReasonInput.value.trim() : '';
       if (!reason) {
@@ -705,7 +768,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalRejectExtension) modalRejectExtension.classList.remove('open');
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApproverDecisionListeners);
+} else {
+  initApproverDecisionListeners();
+}
 
 // DECISION FUNCTIONS FOR EXTENSION REQUESTS
 function approveExtensionRequest(ticketId) {
