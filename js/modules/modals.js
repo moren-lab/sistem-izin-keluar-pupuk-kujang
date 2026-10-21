@@ -66,6 +66,12 @@ function handleOpenNewRequest() {
   }
 
   initFormDates();
+  if (typeof window.resetApproverSearch === 'function') {
+    const selectApprover = document.getElementById('selectApprover');
+    if (!selectApprover || !selectApprover.value) {
+      window.resetApproverSearch();
+    }
+  }
   if (modalNewRequest) modalNewRequest.classList.add('open');
 }
 
@@ -156,6 +162,339 @@ function setupRadioToggles() {
       if (emergEstimatedReturn) emergEstimatedReturn.required = false;
     });
   }
+}
+
+// ===================================================================
+// FITUR SEARCH NAMA ATASAN DI PENGAJUAN KARYAWAN
+// ===================================================================
+
+function getApproverInitials(name) {
+  if (!name) return 'AT';
+  const cleaned = name.replace(/^(Ir\.|Dr\.|Drs\.|Prof\.)\s+/i, '').replace(/,\s*[A-Z\.\s]+$/i, '');
+  const parts = cleaned.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return cleaned.slice(0, 2).toUpperCase();
+}
+
+function highlightApproverMatch(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  return text.replace(regex, '<mark class="approver-highlight">$1</mark>');
+}
+
+function setupApproverSearch() {
+  const searchInput = document.getElementById('searchApproverInput');
+  const selectApprover = document.getElementById('selectApprover');
+  const btnClear = document.getElementById('btnClearApproverSearch');
+  const btnToggle = document.getElementById('btnToggleApproverList');
+  const dropdown = document.getElementById('approverFloatingDropdown');
+  const beforeSearchBanner = document.getElementById('approverBeforeSearchBanner');
+  const itemsList = document.getElementById('approverItemsList');
+  const emptyState = document.getElementById('approverEmptyState');
+  const emptySearchTerm = document.getElementById('emptySearchTerm');
+  const foundBadge = document.getElementById('approverFoundBadge');
+  const dropdownSubtitle = document.getElementById('approverDropdownSubtitle');
+  const selectedPreview = document.getElementById('approverSelectedPreview');
+  const selectedAvatar = document.getElementById('selectedApproverAvatar');
+  const selectedName = document.getElementById('selectedApproverName');
+  const selectedTitle = document.getElementById('selectedApproverTitle');
+  const btnChangeChoice = document.getElementById('btnChangeApproverChoice');
+  const comboboxWrapper = document.getElementById('approverComboboxWrapper');
+
+  if (!searchInput || !selectApprover || !dropdown) return;
+
+  let currentKeyboardIndex = -1;
+
+  function getApprovers() {
+    return window.MOCK_APPROVERS || [
+      {
+        nip: 'PK-2015-1002',
+        name: 'Ir. Hendra Gunawan, M.T.',
+        title: 'Manager Rekayasa & Pemeliharaan',
+        department: 'Departemen Rekayasa & Pemeliharaan',
+        isDirectSupervisor: true,
+        avatarBg: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'
+      },
+      {
+        nip: 'PK-2012-0845',
+        name: 'Dewi Sartika, S.T., M.M.',
+        title: 'Supervisor Operasional Lapangan (Plt. Manager)',
+        department: 'Departemen Rekayasa & Pemeliharaan',
+        isDirectSupervisor: false,
+        avatarBg: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
+      },
+      {
+        nip: 'PK-2010-0112',
+        name: 'Dr. Agus Priyanto, M.Eng.',
+        title: 'VP Produksi & Utilitas',
+        department: 'Direktorat Operasi Pabrik',
+        isDirectSupervisor: false,
+        avatarBg: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)'
+      },
+      {
+        nip: 'PK-2014-0331',
+        name: 'Bambang Sutrisno, S.T.',
+        title: 'Supervisi Pengamanan & K3',
+        department: 'Departemen Pengamanan & K3',
+        isDirectSupervisor: false,
+        avatarBg: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)'
+      }
+    ];
+  }
+
+  function renderList(query = '') {
+    currentKeyboardIndex = -1;
+    const cleanQuery = query.toLowerCase().trim();
+    const approvers = getApprovers();
+
+    if (!cleanQuery) {
+      // SEBELUM SEARCH: Tampilkan banner instruksi "Ketik / cari nama atasan anda"
+      if (beforeSearchBanner) beforeSearchBanner.style.display = 'flex';
+      if (dropdownSubtitle) dropdownSubtitle.textContent = 'Daftar Atasan Peninjau';
+      if (foundBadge) foundBadge.textContent = `${approvers.length} Atasan`;
+      if (emptyState) emptyState.style.display = 'none';
+      if (itemsList) itemsList.style.display = 'block';
+
+      renderItems(approvers, '');
+      return;
+    }
+
+    // SAAT MENGETIK (SEARCHING)
+    if (beforeSearchBanner) beforeSearchBanner.style.display = 'none';
+    const filtered = approvers.filter(a => {
+      return (
+        a.name.toLowerCase().includes(cleanQuery) ||
+        a.title.toLowerCase().includes(cleanQuery) ||
+        a.department.toLowerCase().includes(cleanQuery) ||
+        (a.nip && a.nip.toLowerCase().includes(cleanQuery))
+      );
+    });
+
+    if (filtered.length > 0) {
+      if (dropdownSubtitle) dropdownSubtitle.textContent = 'Hasil Pencarian Atasan';
+      if (foundBadge) foundBadge.textContent = `${filtered.length} Ditemukan`;
+      if (emptyState) emptyState.style.display = 'none';
+      if (itemsList) itemsList.style.display = 'block';
+      renderItems(filtered, cleanQuery);
+    } else {
+      if (dropdownSubtitle) dropdownSubtitle.textContent = 'Pencarian Atasan';
+      if (foundBadge) foundBadge.textContent = '0 Ditemukan';
+      if (itemsList) {
+        itemsList.innerHTML = '';
+        itemsList.style.display = 'none';
+      }
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        if (emptySearchTerm) emptySearchTerm.textContent = query;
+      }
+    }
+  }
+
+  function renderItems(list, cleanQuery) {
+    if (!itemsList) return;
+    itemsList.innerHTML = '';
+
+    list.forEach((approver, idx) => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'approver-item';
+      if (selectApprover.value === approver.name) {
+        itemEl.classList.add('is-selected');
+      }
+      itemEl.dataset.index = idx;
+      itemEl.dataset.name = approver.name;
+
+      const initials = getApproverInitials(approver.name);
+      const highlightedName = highlightApproverMatch(approver.name, cleanQuery);
+      const highlightedTitle = highlightApproverMatch(approver.title, cleanQuery);
+      const highlightedDept = highlightApproverMatch(approver.department, cleanQuery);
+      const avatarBg = approver.avatarBg || 'linear-gradient(135deg, #059669 0%, #0d9488 100%)';
+
+      const directTag = approver.isDirectSupervisor
+        ? `<span class="approver-item-tag" title="Atasan langsung divisi Anda">Atasan Langsung</span>`
+        : '';
+
+      itemEl.innerHTML = `
+        <div class="approver-item-avatar" style="background: ${avatarBg};">
+          ${initials}
+        </div>
+        <div class="approver-item-info">
+          <div class="approver-item-name-row">
+            <span class="approver-item-name">${highlightedName}</span>
+            <span class="approver-item-nip">${approver.nip || ''}</span>
+            ${directTag}
+          </div>
+          <div class="approver-item-role">${highlightedTitle}</div>
+          <div class="approver-item-dept">${highlightedDept}</div>
+        </div>
+        <div class="approver-item-cta">
+          <span>Pilih</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      `;
+
+      itemEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chooseApprover(approver);
+      });
+
+      itemsList.appendChild(itemEl);
+    });
+  }
+
+  function chooseApprover(approver) {
+    selectApprover.value = approver.name;
+    searchInput.value = approver.name;
+
+    // Tampilkan preview kartu atasan terpilih
+    if (selectedName) selectedName.textContent = approver.name;
+    if (selectedTitle) selectedTitle.textContent = `${approver.title} • ${approver.department}`;
+    if (selectedAvatar) {
+      selectedAvatar.textContent = getApproverInitials(approver.name);
+      selectedAvatar.style.background = approver.avatarBg || 'linear-gradient(135deg, #059669 0%, #0d9488 100%)';
+    }
+    if (selectedPreview) selectedPreview.style.display = 'flex';
+    if (btnClear) btnClear.style.display = 'flex';
+
+    closeDropdown();
+
+    // Trigger change on selectApprover for any observers
+    selectApprover.dispatchEvent(new Event('change', { bubbles: true }));
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Atasan peninjau dipilih: ${approver.name}`, 'info');
+    }
+  }
+
+  function openDropdown() {
+    dropdown.style.display = 'flex';
+    if (btnToggle) btnToggle.classList.add('open');
+    renderList(searchInput.value === selectApprover.value ? '' : searchInput.value);
+  }
+
+  function closeDropdown() {
+    dropdown.style.display = 'none';
+    if (btnToggle) btnToggle.classList.remove('open');
+    currentKeyboardIndex = -1;
+  }
+
+  function resetApproverSelection() {
+    selectApprover.value = '';
+    searchInput.value = '';
+    if (selectedPreview) selectedPreview.style.display = 'none';
+    if (btnClear) btnClear.style.display = 'none';
+    renderList('');
+  }
+
+  // EVENT LISTENERS
+  searchInput.addEventListener('focus', () => {
+    openDropdown();
+  });
+
+  searchInput.addEventListener('input', () => {
+    if (searchInput.value.trim().length > 0) {
+      if (btnClear) btnClear.style.display = 'flex';
+    } else {
+      if (btnClear) btnClear.style.display = 'none';
+      selectApprover.value = '';
+      if (selectedPreview) selectedPreview.style.display = 'none';
+    }
+    openDropdown();
+    renderList(searchInput.value);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (dropdown.style.display !== 'flex') {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        openDropdown();
+        e.preventDefault();
+        return;
+      }
+    }
+
+    const items = itemsList ? itemsList.querySelectorAll('.approver-item') : [];
+    if (items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      currentKeyboardIndex = (currentKeyboardIndex + 1) % items.length;
+      updateKeyboardFocus(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      currentKeyboardIndex = (currentKeyboardIndex - 1 + items.length) % items.length;
+      updateKeyboardFocus(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentKeyboardIndex >= 0 && currentKeyboardIndex < items.length) {
+        items[currentKeyboardIndex].click();
+      } else if (items.length === 1) {
+        items[0].click();
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeDropdown();
+    }
+  });
+
+  function updateKeyboardFocus(items) {
+    items.forEach((it, i) => {
+      if (i === currentKeyboardIndex) {
+        it.classList.add('keyboard-focus');
+        it.scrollIntoView({ block: 'nearest' });
+      } else {
+        it.classList.remove('keyboard-focus');
+      }
+    });
+  }
+
+  if (btnClear) {
+    btnClear.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetApproverSelection();
+      searchInput.focus();
+      openDropdown();
+    });
+  }
+
+  if (btnToggle) {
+    btnToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dropdown.style.display === 'flex') {
+        closeDropdown();
+      } else {
+        searchInput.focus();
+        openDropdown();
+      }
+    });
+  }
+
+  if (btnChangeChoice) {
+    btnChangeChoice.addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchInput.focus();
+      searchInput.select();
+      openDropdown();
+    });
+  }
+
+  // Click outside listener
+  document.addEventListener('click', (e) => {
+    if (comboboxWrapper && !comboboxWrapper.contains(e.target)) {
+      closeDropdown();
+    }
+  });
+
+  // Expose global methods
+  window.resetApproverSearch = resetApproverSelection;
+  window.chooseApproverByName = (approverName) => {
+    const approver = getApprovers().find(a => a.name === approverName);
+    if (approver) chooseApprover(approver);
+  };
+
+  // Initial render
+  renderList('');
 }
 
 function getFormattedDateTimeLocal(dt = new Date()) {
@@ -879,6 +1218,7 @@ function handleOpenEmergency() {
 document.addEventListener('DOMContentLoaded', () => {
   setupRadioToggles();
   initFormDates();
+  setupApproverSearch();
 
   // Setup batasan tanggal/waktu minimum (hari/tanggal sebelumnya tidak dapat dipilih)
   const inputPlannedExit = document.getElementById('inputPlannedExit');
@@ -1024,7 +1364,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const selectApprover = document.getElementById('selectApprover');
-      const approverName = selectApprover ? selectApprover.value : (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.');
+      if (!selectApprover || !selectApprover.value || selectApprover.value.trim() === '') {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap cari dan pilih nama atasan Anda terlebih dahulu!', 'warning');
+        }
+        const searchInput = document.getElementById('searchApproverInput');
+        if (searchInput) {
+          searchInput.focus();
+          const dropdown = document.getElementById('approverFloatingDropdown');
+          if (dropdown) dropdown.style.display = 'flex';
+        }
+        return;
+      }
+      const approverName = selectApprover.value;
 
       window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn, approverName };
 
@@ -1121,6 +1473,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       modalConfirmSummary.classList.remove('open');
       if (formNewRequest) formNewRequest.reset();
+      if (typeof window.resetApproverSearch === 'function') {
+        window.resetApproverSearch();
+      }
       window.pendingFormData = null;
 
       if (typeof window.showToast === 'function') {
@@ -1498,6 +1853,8 @@ function openExtendDurationModal(ticketId) {
 window.handleOpenNewRequest = handleOpenNewRequest;
 window.setupRadioToggles = setupRadioToggles;
 window.initFormDates = initFormDates;
+window.setupApproverSearch = setupApproverSearch;
+window.resetApproverSearch = typeof resetApproverSelection !== 'undefined' ? resetApproverSelection : window.resetApproverSearch;
 window.switchDetailTab = switchDetailTab;
 window.openTicketDetail = openTicketDetail;
 window.openCancelModal = openCancelModal;

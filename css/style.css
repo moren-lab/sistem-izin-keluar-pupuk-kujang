@@ -4862,4 +4862,499 @@ body.modal-open {
 
 .figma-radio-pill.selected .figma-radio-text {
   color: #1e40af;
-}
+}
+
+/* ===================================================================
+   KOMPONEN SEARCH ATASAN (PENGAJUAN KARYAWAN)
+   Pencarian Interaktif Atasan Langsung dengan Dropdown Autocomplete
+   =================================================================== */
+
+.approver-search-group {
+  position: relative;
+  width: 100%;
+}
+
+.approver-search-tip {
+  font-size: 0.72rem;
+  color: #1d4ed8;
+  font-weight: 600;
+  background: #eff6ff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid #dbeafe;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.approver-combobox-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.approver-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.approver-input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: #64748b;
+  z-index: 2;
+  transition: color 0.15s ease;
+}
+
+.approver-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0.55rem 4rem 0.55rem 2.35rem !important;
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 7px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.approver-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.approver-search-input:focus + .btn-clear-approver-search + .btn-toggle-approver-list,
+.approver-input-box:focus-within .approver-input-icon {
+  color: #2563eb;
+}
+
+.approver-search-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.btn-clear-approver-search {
+  position: absolute;
+  right: 2.15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  border: none;
+  color: #475569;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 3;
+}
+
+.btn-clear-approver-search:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.btn-toggle-approver-list {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  z-index: 3;
+}
+
+.btn-toggle-approver-list:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-toggle-approver-list.open svg {
+  transform: rotate(180deg);
+}
+
+/* FLOATING DROPDOWN MENU */
+.approver-floating-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  box-shadow: 0 14px 28px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.08);
+  z-index: 1060;
+  max-height: 310px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: approverDropdownSlide 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes approverDropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* SEBELUM SEARCH STATE BANNER */
+.approver-before-search-banner {
+  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+  border-bottom: 1px solid #dbeafe;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.before-search-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  letter-spacing: 0.3px;
+}
+
+.before-search-badge svg {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.before-search-text {
+  font-size: 0.72rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.approver-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.85rem 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fafafa;
+}
+
+.approver-found-badge {
+  background: #e2e8f0;
+  color: #334155;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.approver-items-list {
+  overflow-y: auto;
+  max-height: 220px;
+  padding: 0.35rem;
+}
+
+.approver-items-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.approver-items-list::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.approver-items-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.approver-items-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* APPROVER RESULT ITEM */
+.approver-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  margin-bottom: 3px;
+  background: #ffffff;
+  user-select: none;
+}
+
+.approver-item:hover,
+.approver-item.keyboard-focus {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.approver-item.is-selected {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.approver-item-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.approver-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.approver-item-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.approver-item-name {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.approver-item-nip {
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.approver-item-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.05rem 0.35rem;
+  border-radius: 9999px;
+  margin-left: auto;
+}
+
+.approver-item-role {
+  font-size: 0.72rem;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.approver-item-dept {
+  font-size: 0.67rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.approver-item-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #2563eb;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.approver-item:hover .approver-item-cta,
+.approver-item.keyboard-focus .approver-item-cta {
+  opacity: 1;
+}
+
+.approver-highlight {
+  background-color: #fef08a;
+  color: #854d0e;
+  font-weight: 800;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* EMPTY STATE */
+.approver-empty-state {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.approver-empty-state .empty-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.approver-empty-state .empty-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.approver-empty-state .empty-desc {
+  font-size: 0.74rem;
+  color: #64748b;
+  max-width: 320px;
+  line-height: 1.4;
+}
+
+/* SELECTED APPROVER CARD PREVIEW */
+.approver-selected-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  margin-top: 0.45rem;
+  animation: approverFadeIn 0.2s ease-out;
+}
+
+@keyframes approverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.approver-selected-badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #166534;
+  background: #dcfce7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.approver-selected-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.approver-selected-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.825rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+}
+
+.approver-selected-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.approver-selected-name {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.approver-selected-title {
+  font-size: 0.72rem;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.btn-change-approver-choice {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-change-approver-choice:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+

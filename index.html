@@ -1876,17 +1876,101 @@
             <span>Pengajuan diteruskan kepada atasan langsung. QR terbit setelah izin disetujui.</span>
           </div>
 
-          <!-- Pilih Atasan Langsung -->
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" for="selectApprover" style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-              Pilih Atasan Langsung <span style="color: var(--rose-danger);">*</span>
-            </label>
-            <select id="selectApprover" class="form-select" required style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;">
-              <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manajer Rekayasa & Pemeliharaan</option>
-              <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan</option>
+          <!-- Pilih Atasan Langsung (Searchable Autocomplete Combobox) -->
+          <div class="form-group approver-search-group" id="groupSelectApprover" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+              <label class="form-label" for="searchApproverInput" style="font-weight: 600; color: #334155; font-size: 0.8rem; margin: 0;">
+                Pilih Atasan Langsung <span style="color: var(--rose-danger);">*</span>
+              </label>
+              <span class="approver-search-tip" id="approverSearchTip">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Ketik / cari nama atasan anda</span>
+              </span>
+            </div>
+
+            <!-- Native hidden select for seamless form submission & validation -->
+            <select id="selectApprover" style="display: none;" tabindex="-1" aria-hidden="true" required>
+              <option value="">-- Belum Memilih Atasan --</option>
+              <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan</option>
+              <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan (Plt. Manager)</option>
               <option value="Dr. Agus Priyanto, M.Eng.">Dr. Agus Priyanto, M.Eng. — VP Produksi & Utilitas</option>
               <option value="Bambang Sutrisno, S.T.">Bambang Sutrisno, S.T. — Supervisi Pengamanan & K3</option>
+              <option value="Dr. Ahmad Subagja, M.M.">Dr. Ahmad Subagja, M.M. — VP SDM & Tata Kelola Organisasi</option>
+              <option value="Ir. Wahyu Hidayat, M.Sc.">Ir. Wahyu Hidayat, M.Sc. — Superintendent Pemeliharaan Listrik & Instrumen</option>
+              <option value="Siti Rahayu, S.T.">Siti Rahayu, S.T. — Kepala Seksi Logistik & Pergudangan Pabrik</option>
+              <option value="Dian Kusuma, S.T., M.Eng.">Dian Kusuma, S.T., M.Eng. — Manager Operasi Pabrik Kujang 1B</option>
             </select>
+
+            <!-- Search Combobox Wrapper -->
+            <div class="approver-combobox-wrapper" id="approverComboboxWrapper">
+              <div class="approver-input-box" id="approverInputBox">
+                <span class="approver-input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </span>
+                <input type="text" id="searchApproverInput" class="form-input approver-search-input"
+                  placeholder="Ketik/cari nama atasan anda..." autocomplete="off" spellcheck="false">
+                <button type="button" class="btn-clear-approver-search" id="btnClearApproverSearch" title="Hapus / Reset" style="display: none;">
+                  ✕
+                </button>
+                <button type="button" class="btn-toggle-approver-list" id="btnToggleApproverList" title="Buka / Tutup Daftar Atasan">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Selected Card Preview (Muncul setelah nama atasan di-klik) -->
+              <div class="approver-selected-preview" id="approverSelectedPreview" style="display: none;">
+                <div class="approver-selected-badge-status">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <span>Atasan Terpilih</span>
+                </div>
+                <div class="approver-selected-card-inner">
+                  <div class="approver-selected-avatar" id="selectedApproverAvatar">HG</div>
+                  <div class="approver-selected-meta">
+                    <div class="approver-selected-name" id="selectedApproverName">Ir. Hendra Gunawan, M.T.</div>
+                    <div class="approver-selected-title" id="selectedApproverTitle">Manager Rekayasa & Pemeliharaan</div>
+                  </div>
+                  <button type="button" class="btn-change-approver-choice" id="btnChangeApproverChoice" title="Ganti pilihan atasan">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>Ganti</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Floating Dropdown Suggestions / Search Results -->
+              <div class="approver-floating-dropdown" id="approverFloatingDropdown" style="display: none;">
+                <!-- Sebelum Search State Banner -->
+                <div class="approver-before-search-banner" id="approverBeforeSearchBanner">
+                  <div class="before-search-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span>Ketik / cari nama atasan anda</span>
+                  </div>
+                  <p class="before-search-text">Ketik nama atasan Anda di kolom pencarian, atau klik salah satu nama atasan pada daftar di bawah:</p>
+                </div>
+
+                <!-- Dropdown Header -->
+                <div class="approver-dropdown-header">
+                  <span id="approverDropdownSubtitle">Daftar Atasan Peninjau</span>
+                  <span class="approver-found-badge" id="approverFoundBadge">8 Atasan</span>
+                </div>
+
+                <!-- Items List -->
+                <div class="approver-items-list" id="approverItemsList">
+                  <!-- Generated dynamically via JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="approver-empty-state" id="approverEmptyState" style="display: none;">
+                  <div class="empty-icon">🔎</div>
+                  <div class="empty-title">Nama Atasan Tidak Ditemukan</div>
+                  <div class="empty-desc">Tidak ditemukan atasan dengan kata kunci "<b id="emptySearchTerm"></b>". Pastikan ejaan nama atau jabatan sudah sesuai.</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Kategori Keperluan & Tipe Kepulangan (Side by side) -->
