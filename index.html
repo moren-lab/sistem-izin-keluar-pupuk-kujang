@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261021_14">
+  <link rel="stylesheet" href="css/style.css?v=20261021_15">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
@@ -365,11 +365,8 @@
               <div>
                 <div class="figma-kicker-date">SENIN, 19 OKTOBER 2026</div>
                 <h1 class="figma-section-title">Ringkasan Perizinan</h1>
-                <p class="figma-section-sub">Pintasan Buat Pengajuan ke halaman Pengajuan Saya.</p>
+                <p class="figma-section-sub">Pantau status izin aktif dan ringkasan aktivitas perizinan Anda.</p>
               </div>
-              <button class="btn-figma-primary" onclick="handleOpenNewRequest()">
-                <span>+ Buat Pengajuan</span>
-              </button>
             </div>
 
             <!-- 3-Column Unified Stats Card -->
@@ -415,11 +412,11 @@
 
               <!-- Right Column: Donut Chart + Ketentuan + Kontak Pos 1 -->
               <div class="figma-col-right">
-                <!-- Card: Total Pengajuan Izin (Donut Chart) -->
-                <div class="figma-card">
-                  <div class="figma-card-header">
-                    <h3 class="figma-card-title">Total Pengajuan Izin</h3>
-                    <select id="filterEmpChartPeriod" class="figma-select-sm" title="Filter Periode">
+                <!-- Card: Total Pengajuan Izin (Donut Chart - Figma) -->
+                <div class="figma-card" style="border-radius: 16px; padding: 1.4rem 1.6rem;">
+                  <div class="figma-card-header" style="align-items: center; margin-bottom: 1.25rem;">
+                    <h3 class="figma-card-title" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; letter-spacing: -0.01em;">Total Pengajuan Izin</h3>
+                    <select id="filterEmpChartPeriod" class="figma-select-sm" title="Filter Periode" style="padding: 0.35rem 0.75rem; font-size: 0.825rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; font-weight: 600; cursor: pointer;">
                       <option value="month" selected>Bulan Ini</option>
                       <option value="year">Tahun Ini</option>
                       <option value="all">Semua Riwayat</option>
@@ -739,19 +736,24 @@
 
               <!-- Right Column: Monitor Bawahan di Luar Area & SOP -->
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Chart Approver: Tren Izin Tim Mingguan -->
-                <div class="dashboard-widget-card">
-                  <div class="dashboard-widget-header">
-                    <div class="dashboard-widget-title">
-                      <span>📈</span>
-                      <span>Tren Pengajuan Tim</span>
+                <!-- Chart Approver: Tren Izin Tim Mingguan / Bulanan (Figma Image 1) -->
+                <div class="dashboard-widget-card" style="padding: 1.25rem 1.5rem 1rem;">
+                  <div class="dashboard-widget-header" style="align-items: flex-start; margin-bottom: 0.5rem; border-bottom: none; padding-bottom: 0;">
+                    <div>
+                      <div class="dashboard-widget-title" style="font-size: 1.05rem; font-weight: 800; color: #0f172a; gap: 0.5rem;">
+                        <span>📈</span>
+                        <span>Volume pengajuan tim</span>
+                      </div>
+                      <p id="approverChartSubtitle" style="font-size: 0.775rem; color: #64748b; margin: 4px 0 0; font-weight: 500;">
+                        12–16 Okt 2026 • Puncak: Kamis, 8 pengajuan
+                      </p>
                     </div>
-                    <select id="filterAppChartPeriod" class="chart-filter-select" title="Filter Periode Tren Tim">
+                    <select id="filterAppChartPeriod" class="chart-filter-select" title="Filter Periode Tren Tim" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; font-weight: 600; cursor: pointer;">
                       <option value="week" selected>📅 Minggu Ini</option>
                       <option value="month">📅 Bulan Ini</option>
                     </select>
                   </div>
-                  <div id="chartApproverWeeklyContainer" style="padding: 0.5rem 0.25rem;">
+                  <div id="chartApproverWeeklyContainer" style="padding: 0.75rem 0 0.25rem;">
                     <!-- Rendered via JS -->
                   </div>
                 </div>
@@ -3143,18 +3145,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261021_14"></script>
-  <script src="js/modules/ui.js?v=20261021_14"></script>
-  <script src="js/modules/scheduler.js?v=20261021_14"></script>
-  <script src="js/modules/navigation.js?v=20261021_14"></script>
-  <script src="js/modules/karyawan.js?v=20261021_14"></script>
-  <script src="js/modules/approver.js?v=20261021_14"></script>
-  <script src="js/modules/security.js?v=20261021_14"></script>
-  <script src="js/modules/admin.js?v=20261021_14"></script>
-  <script src="js/modules/charts.js?v=20261021_14"></script>
-  <script src="js/modules/emergency.js?v=20261021_14"></script>
-  <script src="js/modules/modals.js?v=20261021_14"></script>
-  <script src="js/app.js?v=20261021_14"></script>
+  <script src="js/data/mockData.js?v=20261021_17"></script>
+  <script src="js/modules/ui.js?v=20261021_17"></script>
+  <script src="js/modules/scheduler.js?v=20261021_17"></script>
+  <script src="js/modules/navigation.js?v=20261021_17"></script>
+  <script src="js/modules/karyawan.js?v=20261021_17"></script>
+  <script src="js/modules/approver.js?v=20261021_17"></script>
+  <script src="js/modules/security.js?v=20261021_17"></script>
+  <script src="js/modules/admin.js?v=20261021_17"></script>
+  <script src="js/modules/charts.js?v=20261021_17"></script>
+  <script src="js/modules/emergency.js?v=20261021_17"></script>
+  <script src="js/modules/modals.js?v=20261021_17"></script>
+  <script src="js/app.js?v=20261021_17"></script>
 </body>
 
 </html>

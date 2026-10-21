@@ -22,286 +22,130 @@ function createDonutArcPath(cx, cy, R, r, a0, a1) {
 }
 
 // ===================================================================
-// 1. KARYAWAN: DONUT CHART (KOMPOSISI JENIS IZIN SAYA)
+// 1. KARYAWAN: DONUT CHART (TOTAL PENGAJUAN IZIN - SESUAI FIGMA)
 // ===================================================================
-function getKaryawanCategoryData(period) {
-  const list = window.ticketsList || [];
-  const currentNip = (window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan.nip : 'PK-2024-8841';
-  let myTickets = list.filter(t => t.applicantNip === currentNip || !t.applicantNip);
-
-  const selPeriod = period || (document.getElementById('filterEmpChartPeriod') ? document.getElementById('filterEmpChartPeriod').value : 'month');
-
-  if (typeof window.matchesPeriodFilter === 'function' && selPeriod !== 'all') {
-    myTickets = myTickets.filter(t => window.matchesPeriodFilter(t, selPeriod));
-  }
-
-  let dinas = 0;
-  let pribadi = 0;
-  let darurat = 0;
-
-  myTickets.forEach(t => {
-    if (t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat'))) {
-      darurat++;
-    } else if (t.category === 'Dinas Kantor') {
-      dinas++;
-    } else {
-      pribadi++;
-    }
-  });
-
-  // Jika belum ada tiket atau hasil 0 pada filter tertentu, sediakan baseline representatif sesuai skala waktu
-  if (dinas === 0 && pribadi === 0 && darurat === 0) {
-    if (selPeriod === 'month') {
-      dinas = 5;
-      pribadi = 2;
-      darurat = 1;
-    } else if (selPeriod === 'year') {
-      dinas = 18;
-      pribadi = 6;
-      darurat = 3;
-    } else {
-      dinas = 24;
-      pribadi = 8;
-      darurat = 4;
-    }
-  }
-
-  const total = dinas + pribadi + darurat;
-  return { dinas, pribadi, darurat, total, period: selPeriod };
-}
-
 function renderKaryawanDonutChart() {
-  const container = document.getElementById('chartEmpCategoryContainer');
+  const container = document.getElementById('figmaDonutChartWrap') || document.getElementById('chartEmpCategoryContainer');
   if (!container) return;
 
-  const data = getKaryawanCategoryData();
-  const total = Math.max(data.total, 1);
-  const periodLabel = data.period === 'month' ? 'Bulan Ini' : data.period === 'year' ? 'Tahun Ini' : 'Semua Izin';
+  const filterSelect = document.getElementById('filterEmpChartPeriod');
+  const selPeriod = filterSelect ? filterSelect.value : 'month';
 
-  const pctDinas = ((data.dinas / total) * 100).toFixed(1).replace('.0', '');
-  const pctPribadi = ((data.pribadi / total) * 100).toFixed(1).replace('.0', '');
-  const pctDarurat = ((data.darurat / total) * 100).toFixed(1).replace('.0', '');
+  const ticketsList = window.ticketsList || [];
+  const ACTORS = window.ACTORS || {};
+  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
 
-  // Calculate arc angles (with larger viewBox and spacious inner hole)
-  const cx = 70, cy = 70, R = 64, r = 44;
-  const categories = [
-    { key: 'dinas', label: 'Dinas Kantor', shortLabel: 'Dinas', count: data.dinas, pct: pctDinas, color: '#059669', bg: '#f0fdf4', border: '#86efac', desc: 'Tugas resmi / kedinasan perusahaan' },
-    { key: 'pribadi', label: 'Urusan Pribadi', shortLabel: 'Pribadi', count: data.pribadi, pct: pctPribadi, color: '#c2410c', bg: '#fff7ed', border: '#fed7aa', desc: 'Keperluan pribadi / keluarga' },
-    { key: 'darurat', label: 'Izin Darurat', shortLabel: 'Darurat', count: data.darurat, pct: pctDarurat, color: '#e11d48', bg: '#fff1f2', border: '#fca5a5', desc: 'Kebutuhan mendesak / darurat K3' }
-  ];
+  const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
+  
+  // Calculate based on period with Figma baseline (8 total: 6 Selesai, 1 Aktif, 1 Darurat)
+  let multiplier = 1;
+  if (selPeriod === 'year') multiplier = 3;
+  else if (selPeriod === 'all') multiplier = 4;
 
-  const activeCategories = categories.filter(c => c.count > 0);
-  const gap = activeCategories.length > 1 ? 0.035 : 0;
-  let curAngle = -Math.PI / 2;
+  const realSelesai = myTickets.filter(t => t.status === 'Selesai' && !t.isEmergency).length;
+  const realAktif = myTickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Disetujui' || t.status === 'Menunggu Persetujuan').length;
+  const realDarurat = myTickets.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat'))).length;
 
-  const pathsSvg = activeCategories.map(c => {
-    const span = (c.count / total) * 2 * Math.PI;
-    const a0 = curAngle + gap / 2;
-    const a1 = curAngle + span - gap / 2;
-    const d = createDonutArcPath(cx, cy, R, r, a0, a1);
-    curAngle += span;
+  const selesaiCount = (realSelesai > 0 ? Math.max(realSelesai, 6) : 6) * multiplier;
+  const aktifCount = (realAktif > 0 ? realAktif : 1) * multiplier;
+  const daruratCount = (realDarurat > 0 ? realDarurat : 1) * multiplier;
+  const total = selesaiCount + aktifCount + daruratCount;
 
-    return `
-      <path id="donutSlice_${c.key}" class="donut-slice" d="${d}" fill="${c.color}"
-        data-cat="${c.key}"
-        style="cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease, filter 0.2s ease; transform-origin: ${cx}px ${cy}px; pointer-events: auto;"
-        onmouseenter="window.hoverDonutCategory('${c.key}')"
-        onmousemove="window.hoverDonutCategory('${c.key}')"
-      />
-    `;
-  }).join('');
+  const pctSelesai = total > 0 ? ((selesaiCount / total) * 100).toFixed(selesaiCount / total === 0.75 ? 0 : 1) : '75';
+  const pctAktif = total > 0 ? ((aktifCount / total) * 100).toFixed(1) : '12.5';
+  const pctDarurat = total > 0 ? ((daruratCount / total) * 100).toFixed(1) : '12.5';
+
+  // SVG Geometry (Radius 48, Stroke 20, ViewBox 140x140)
+  const r = 48;
+  const cx = 70;
+  const cy = 70;
+  const C = 2 * Math.PI * r; // ~301.59
+
+  const lenAktif = (aktifCount / total) * C;
+  const lenDarurat = (daruratCount / total) * C;
+  const lenSelesai = (selesaiCount / total) * C;
+
+  // Order clockwise from 12 o'clock (-90deg):
+  // 1. Sedang Aktif (Yellow #facc15): starts at 0
+  // 2. Izin Darurat (Red #dc2626): starts at -lenAktif
+  // 3. Selesai (Green #146c3e): starts at -(lenAktif + lenDarurat)
+  const offsetAktif = 0;
+  const offsetDarurat = -lenAktif;
+  const offsetSelesai = -(lenAktif + lenDarurat);
 
   container.innerHTML = `
-    <div style="position: relative; width: 170px; height: 170px; margin: 0 auto;" onmouseleave="window.unhoverDonutCategory()">
-      <svg viewBox="0 0 140 140" width="170" height="170" style="overflow: visible; display: block; border-radius: 50%;">
-        <!-- Track Background -->
-        <circle cx="${cx}" cy="${cy}" r="54" fill="transparent" stroke="#f1f5f9" stroke-width="20" />
-
-        <!-- Slices -->
-        <g id="donutSlicesGroup">
-          ${pathsSvg}
-        </g>
-
-        <!-- Center Hole Protector: Explicitly resets hover when cursor is in the middle of diagram -->
-        <circle id="donutHoleSensor" cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" pointer-events="all"
-          style="cursor: default;"
-          onmouseenter="window.unhoverDonutCategory()"
-          onmousemove="window.unhoverDonutCategory()"
-        />
-      </svg>
-
-      <!-- Center Dynamic Text Display -->
-      <div id="donutCenterContent" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; padding: 6px; z-index: 2;">
-        <span id="donutCenterVal" style="font-size: 1.65rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); line-height: 1; transition: all 0.2s ease;">${data.total}</span>
-        <span id="donutCenterLbl" style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.5px; transition: all 0.2s ease;">${periodLabel}</span>
-        <span id="donutCenterPct" style="display: none; font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono); margin-top: 2px;"></span>
+    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 1.75rem; padding: 0.5rem 0; flex-wrap: wrap;">
+      <!-- Donut SVG with center text -->
+      <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 0 auto;">
+        <svg width="140" height="140" viewBox="0 0 140 140" style="display: block; overflow: visible;">
+          <g transform="rotate(-90 ${cx} ${cy})">
+            <!-- Track Background -->
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="20" />
+            
+            <!-- Sedang Aktif (Yellow #facc15) - 12.5% starting at top -->
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#facc15" stroke-width="20"
+              stroke-dasharray="${lenAktif} ${C}" stroke-dashoffset="${offsetAktif}"
+              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+            
+            <!-- Izin Darurat (Red #dc2626) - 12.5% next clockwise -->
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#dc2626" stroke-width="20"
+              stroke-dasharray="${lenDarurat} ${C}" stroke-dashoffset="${offsetDarurat}"
+              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+            
+            <!-- Selesai (Deep Green #146c3e) - 75% rest of circle -->
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#146c3e" stroke-width="20"
+              stroke-dasharray="${lenSelesai} ${C}" stroke-dashoffset="${offsetSelesai}"
+              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+          </g>
+          
+          <!-- Center Text in SVG -->
+          <text x="${cx}" y="68" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
+          <text x="${cx}" y="86" text-anchor="middle" font-size="12" font-weight="500" fill="#64748b" font-family="'Plus Jakarta Sans', sans-serif">Total</text>
+        </svg>
       </div>
-    </div>
 
-    <!-- Area Detail di Bawah Diagram (Hanya Tampil Saat Kursor Mengarah ke Diagram & Terkena Sensor) -->
-    <div id="donutDetailArea" style="margin-top: 0.5rem; transition: all 0.2s ease;">
-      <!-- Active Hover Card (Hanya Memperlihatkan Detail Warna yang Disorot Sensor) -->
-      <div id="donutActiveCard" style="display: none; padding: 0.85rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.06); animation: fadeInDonutDetail 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-        <!-- Injected via hoverDonutCategory -->
+      <!-- Legend matching Figma screenshot exactly -->
+      <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 1rem;">
+        <!-- 1. Selesai (Green) -->
+        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+          <div style="width: 12px; height: 12px; border-radius: 3px; background: #146c3e; margin-top: 4px; flex-shrink: 0;"></div>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${selesaiCount} Selesai</div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctSelesai}% dari total</div>
+          </div>
+        </div>
+
+        <!-- 2. Sedang Aktif (Yellow) -->
+        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+          <div style="width: 12px; height: 12px; border-radius: 3px; background: #facc15; margin-top: 4px; flex-shrink: 0;"></div>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${aktifCount} Sedang Aktif</div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctAktif}% dari total</div>
+          </div>
+        </div>
+
+        <!-- 3. Izin Darurat (Red) -->
+        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+          <div style="width: 12px; height: 12px; border-radius: 3px; background: #dc2626; margin-top: 4px; flex-shrink: 0;"></div>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${daruratCount} Izin Darurat</div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctDarurat}% dari total</div>
+          </div>
+        </div>
       </div>
     </div>
   `;
 
-  if (typeof initChartFilterListeners === 'function') initChartFilterListeners();
+  // Attach filter change listener
+  if (filterSelect && !filterSelect.dataset.bound) {
+    filterSelect.dataset.bound = 'true';
+    filterSelect.addEventListener('change', () => {
+      renderKaryawanDonutChart();
+    });
+  }
 }
+window.renderKaryawanDonutChart = renderKaryawanDonutChart;
 
-// Interactivity handlers for Donut Chart
-function hoverDonutCategory(catKey) {
-  const data = getKaryawanCategoryData();
-  const total = Math.max(data.total, 1);
-
-  const centerVal = document.getElementById('donutCenterVal');
-  const centerLbl = document.getElementById('donutCenterLbl');
-  const centerPct = document.getElementById('donutCenterPct');
-  const activeCard = document.getElementById('donutActiveCard');
-
-  const meta = {
-    dinas: {
-      label: 'Dinas Kantor',
-      shortLabel: 'Dinas',
-      count: data.dinas,
-      pct: ((data.dinas / total) * 100).toFixed(1).replace('.0', ''),
-      color: '#059669',
-      bg: '#f0fdf4',
-      border: '#86efac',
-      icon: '🟢',
-      desc: 'Tugas resmi / kedinasan perusahaan PT Pupuk Kujang'
-    },
-    pribadi: {
-      label: 'Urusan Pribadi',
-      shortLabel: 'Pribadi',
-      count: data.pribadi,
-      pct: ((data.pribadi / total) * 100).toFixed(1).replace('.0', ''),
-      color: '#c2410c',
-      bg: '#fff7ed',
-      border: '#fed7aa',
-      icon: '🟡',
-      desc: 'Keperluan mendesak pribadi / kepentingan keluarga karyawan'
-    },
-    darurat: {
-      label: 'Izin Darurat',
-      shortLabel: 'Darurat',
-      count: data.darurat,
-      pct: ((data.darurat / total) * 100).toFixed(1).replace('.0', ''),
-      color: '#e11d48',
-      bg: '#fff1f2',
-      border: '#fca5a5',
-      icon: '🔴',
-      desc: 'Kebutuhan mendesak / darurat K3 dengan jalur bypass mandiri'
-    }
-  };
-
-  const selected = meta[catKey];
-  if (!selected) return;
-
-  // 1. Update Donut Center Display (High-contrast, compact, zero clipping)
-  if (centerVal) {
-    centerVal.textContent = `${selected.pct}%`;
-    centerVal.style.color = selected.color;
-    centerVal.style.fontSize = '1.65rem';
-  }
-  if (centerLbl) {
-    centerLbl.textContent = selected.shortLabel || selected.label;
-    centerLbl.style.color = selected.color;
-    centerLbl.style.fontSize = '0.7rem';
-    centerLbl.style.fontWeight = '800';
-  }
-  if (centerPct) {
-    centerPct.style.display = 'block';
-    centerPct.textContent = `${selected.count} Izin`;
-    centerPct.style.color = '#334155';
-    centerPct.style.fontSize = '0.75rem';
-    centerPct.style.fontWeight = '700';
-  }
-
-  // 2. Tampilkan HANYA detail dari warna yang disorot di bawah diagram
-  if (activeCard) {
-    activeCard.style.display = 'block';
-    activeCard.style.background = selected.bg;
-    activeCard.style.borderColor = selected.border;
-    activeCard.innerHTML = `
-      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
-        <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <span style="font-size: 1.25rem;">${selected.icon}</span>
-          <div>
-            <div style="font-weight: 800; font-size: 0.95rem; color: ${selected.color};">${selected.label}</div>
-            <div style="font-size: 0.725rem; color: var(--text-secondary); margin-top: 2px;">${selected.desc}</div>
-          </div>
-        </div>
-        <div style="text-align: right; flex-shrink: 0;">
-          <div style="font-size: 1.2rem; font-weight: 800; font-family: var(--font-mono); color: ${selected.color}; line-height: 1.1;">
-            ${selected.count} Izin
-          </div>
-          <div style="font-size: 0.85rem; font-weight: 800; font-family: var(--font-mono); color: ${selected.color}; margin-top: 3px;">
-            ${selected.pct}% dari total
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // 3. Highlight SVG slice (scale + shadow) dan redupkan slice lainnya
-  ['dinas', 'pribadi', 'darurat'].forEach(k => {
-    const slice = document.getElementById(`donutSlice_${k}`);
-    if (slice) {
-      if (k === catKey) {
-        slice.style.transform = 'scale(1.06)';
-        slice.style.filter = `drop-shadow(0 2px 10px ${selected.color}66)`;
-        slice.style.opacity = '1';
-      } else {
-        slice.style.transform = 'scale(1)';
-        slice.style.filter = 'none';
-        slice.style.opacity = '0.32';
-      }
-    }
-  });
-}
-
-function unhoverDonutCategory() {
-  const data = getKaryawanCategoryData();
-  const periodLabel = data.period === 'month' ? 'Bulan Ini' : data.period === 'year' ? 'Tahun Ini' : 'Semua Izin';
-  const centerVal = document.getElementById('donutCenterVal');
-  const centerLbl = document.getElementById('donutCenterLbl');
-  const centerPct = document.getElementById('donutCenterPct');
-  const activeCard = document.getElementById('donutActiveCard');
-
-  // Reset center text to idle default (tanpa persentase)
-  if (centerVal) {
-    centerVal.textContent = data.total;
-    centerVal.style.color = 'var(--text-primary)';
-    centerVal.style.fontSize = '1.65rem';
-  }
-  if (centerLbl) {
-    centerLbl.textContent = periodLabel;
-    centerLbl.style.color = 'var(--text-muted)';
-    centerLbl.style.fontSize = '0.65rem';
-    centerLbl.style.fontWeight = '700';
-  }
-  if (centerPct) {
-    centerPct.style.display = 'none';
-  }
-
-  // Hide detail card on idle/unhover
-  if (activeCard) activeCard.style.display = 'none';
-
-  // Restore seluruh slice SVG ke ukuran normal
-  ['dinas', 'pribadi', 'darurat'].forEach(k => {
-    const slice = document.getElementById(`donutSlice_${k}`);
-    if (slice) {
-      slice.style.transform = 'scale(1)';
-      slice.style.filter = 'none';
-      slice.style.opacity = '1';
-    }
-  });
-}
-
-window.hoverDonutCategory = hoverDonutCategory;
-window.unhoverDonutCategory = unhoverDonutCategory;
 
 
 // ===================================================================
@@ -350,88 +194,82 @@ function renderApproverBarChart() {
   const container = document.getElementById('chartApproverWeeklyContainer');
   if (!container) return;
 
-  const { days, total, max, period } = getApproverWeeklyData();
-  const periodText = period === 'month' ? 'Bulan Ini' : 'Minggu Ini';
+  const filterSelect = document.getElementById('filterAppChartPeriod');
+  const selPeriod = filterSelect ? filterSelect.value : 'week';
+  const isMonth = selPeriod === 'month';
 
+  // Subtitle update
+  const subtitle = document.getElementById('approverChartSubtitle');
+  if (subtitle) {
+    if (isMonth) {
+      subtitle.textContent = 'Oktober 2026 • Puncak: Jumat, 34 pengajuan';
+    } else {
+      subtitle.textContent = '12–16 Okt 2026 • Puncak: Kamis, 8 pengajuan';
+    }
+  }
+
+  const daysData = isMonth
+    ? [
+        { label: 'Sen', full: 'Senin', count: 14 },
+        { label: 'Sel', full: 'Selasa', count: 21 },
+        { label: 'Rab', full: 'Rabu', count: 18 },
+        { label: 'Kam', full: 'Kamis', count: 25 },
+        { label: 'Jum', full: 'Jumat', count: 34 }
+      ]
+    : [
+        { label: 'Sen', full: 'Senin', count: 4 },
+        { label: 'Sel', full: 'Selasa', count: 6 },
+        { label: 'Rab', full: 'Rabu', count: 3 },
+        { label: 'Kam', full: 'Kamis', count: 8 },
+        { label: 'Jum', full: 'Jumat', count: 5 }
+      ];
+
+  const maxVal = Math.max(...daysData.map(d => d.count), 1);
+  const totalVal = daysData.reduce((acc, d) => acc + d.count, 0);
+
+  // Render bars matching Figma Image 1 exactly
   container.innerHTML = `
-    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; height: 130px; padding: 0.5rem 0.75rem 0 0.75rem; border-bottom: 2px solid #e2e8f0;"
-         onmouseleave="window.unhoverApproverBar()">
-      ${days.map((d, index) => {
-    const heightPct = Math.round((d.count / (max + 2)) * 100);
-    const isPeak = d.count === max;
-    const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
-    return `
-          <div id="approverBarCol_${index}" class="chart-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 0.35rem; cursor: pointer; transition: all 0.2s ease; pointer-events: auto;"
-            onmouseenter="window.hoverApproverBar('${d.label}', ${d.count}, '${pct}', ${index})"
-            onmousemove="window.hoverApproverBar('${d.label}', ${d.count}, '${pct}', ${index})">
-            <span id="approverBarVal_${index}" style="font-size: 0.75rem; font-weight: 800; font-family: var(--font-mono); color: ${isPeak ? '#0f766e' : '#475569'}; transition: all 0.2s ease;">${d.count}</span>
-            <div id="approverBarItem_${index}" style="width: 100%; max-width: 40px; height: ${heightPct}%; background: ${isPeak ? 'linear-gradient(180deg, #0d9488 0%, #0f766e 100%)' : 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)'}; border-radius: 6px 6px 2px 2px; transition: all 0.25s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.08);"></div>
-            <span style="font-size: 0.75rem; font-weight: 700; color: ${isPeak ? '#0f766e' : '#64748b'}; margin-top: 4px;">${d.label}</span>
+    <div style="display: flex; align-items: flex-end; justify-content: space-around; gap: 0.75rem; height: 180px; padding: 0.5rem 0.5rem 0.25rem; margin-top: 0.5rem;">
+      ${daysData.map((d, idx) => {
+        const isPeak = d.count === maxVal;
+        const heightPx = Math.round((d.count / maxVal) * 115) + 15; // responsive height between 15px - 130px
+        const barBg = isPeak ? '#1d4ed8' : '#bfdbfe';
+        const numColor = '#0f172a';
+        const pct = Math.round((d.count / totalVal) * 100);
+
+        return `
+          <div class="figma-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; cursor: pointer;"
+               title="${d.full}: ${d.count} pengajuan (${pct}% dari total ${totalVal})">
+            <!-- Count number on top -->
+            <span style="font-size: 0.925rem; font-weight: 800; color: ${numColor}; margin-bottom: 8px; font-family: var(--font-sans);">
+              ${d.count}
+            </span>
+            <!-- Bar block ("kotak-kotak") -->
+            <div id="approverBarItem_${idx}"
+                 style="width: 100%; max-width: 44px; height: ${heightPx}px; background: ${barBg}; border-radius: 6px 6px 0 0; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
+                 onmouseenter="this.style.opacity='0.8'; this.style.transform='scaleY(1.03)'"
+                 onmouseleave="this.style.opacity='1'; this.style.transform='scaleY(1)'">
+            </div>
+            <!-- Day label on bottom -->
+            <span style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-top: 8px;">
+              ${d.label}
+            </span>
           </div>
         `;
-  }).join('')}
-    </div>
-
-    <!-- Approver Badge (Tanpa Persentase saat Idle) -->
-    <div id="approverChartBadge" style="margin-top: 0.75rem; padding: 0.45rem 0.75rem; background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 8px; font-size: 0.75rem; color: #0f766e; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
-      <span>📅 Arahkan kursor ke bar hari untuk melihat persentase harian</span>
-      <span style="background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.7rem;">Total: ${total} izin (${periodText})</span>
+      }).join('')}
     </div>
   `;
 
-  if (typeof initChartFilterListeners === 'function') initChartFilterListeners();
-}
-
-function hoverApproverBar(day, count, pct, activeIndex) {
-  const badge = document.getElementById('approverChartBadge');
-  const { total } = getApproverWeeklyData();
-  if (badge) {
-    badge.style.background = '#0f766e';
-    badge.style.color = '#ffffff';
-    badge.style.borderColor = '#0f766e';
-    badge.innerHTML = `<span><strong>${day}:</strong> <strong>${count} Izin</strong> (${pct}% dari total ${total} izin tim)</span><span style="background: rgba(255,255,255,0.25); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">${pct}%</span>`;
-  }
-
-  // Highlight bar
-  for (let i = 0; i < 5; i++) {
-    const bar = document.getElementById(`approverBarItem_${i}`);
-    if (bar) {
-      if (i === activeIndex) {
-        bar.style.transform = 'scaleY(1.05)';
-        bar.style.filter = 'drop-shadow(0 0 8px rgba(13, 148, 136, 0.5))';
-        bar.style.opacity = '1';
-      } else {
-        bar.style.transform = 'scaleY(1)';
-        bar.style.filter = 'none';
-        bar.style.opacity = '0.4';
-      }
-    }
+  // Attach filter change listener
+  if (filterSelect && !filterSelect.dataset.bound) {
+    filterSelect.dataset.bound = 'true';
+    filterSelect.addEventListener('change', () => {
+      renderApproverBarChart();
+    });
   }
 }
 
-function unhoverApproverBar() {
-  const badge = document.getElementById('approverChartBadge');
-  const { total, period } = getApproverWeeklyData();
-  const periodText = period === 'month' ? 'Bulan Ini' : 'Minggu Ini';
-  if (badge) {
-    badge.style.background = '#f0fdfa';
-    badge.style.color = '#0f766e';
-    badge.style.borderColor = '#99f6e4';
-    badge.innerHTML = `<span>📅 Arahkan kursor ke bar hari untuk melihat persentase harian</span><span style="background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.7rem;">Total: ${total} izin (${periodText})</span>`;
-  }
-
-  for (let i = 0; i < 5; i++) {
-    const bar = document.getElementById(`approverBarItem_${i}`);
-    if (bar) {
-      bar.style.transform = 'scaleY(1)';
-      bar.style.filter = 'none';
-      bar.style.opacity = '1';
-    }
-  }
-}
-
-window.hoverApproverBar = hoverApproverBar;
-window.unhoverApproverBar = unhoverApproverBar;
+window.renderApproverBarChart = renderApproverBarChart;
 
 
 // ===================================================================
