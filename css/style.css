@@ -1718,6 +1718,15 @@ body.modal-open {
   background: var(--corp-teal-light);
 }
 
+.option-card.emerg-opt.selected {
+  border-color: #be123c !important;
+  background: #fff1f2 !important;
+}
+
+.option-card.emerg-opt.selected .option-name {
+  color: #9f1239;
+}
+
 .option-card input[type="radio"] {
   display: none;
 }

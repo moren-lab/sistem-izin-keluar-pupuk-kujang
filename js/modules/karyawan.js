@@ -360,6 +360,9 @@ function renderKaryawanDashboard() {
           <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
             <span>⚡ Otorisasi Darurat (Input Sandi / Scan Wajah)</span>
           </button>
+          <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>✏️ Edit Pengajuan</span>
+          </button>
           <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
             <span>Lihat Rincian</span>
           </button>
@@ -369,6 +372,9 @@ function renderKaryawanDashboard() {
         `;
       } else if (isPending) {
         actionButtonsHtml = `
+          <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>✏️ Edit Pengajuan</span>
+          </button>
           <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
             <span>Lihat Rincian</span>
           </button>
@@ -696,6 +702,9 @@ function renderPengajuanSayaView() {
         <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
           <span>⚡ Otorisasi Darurat (Input Sandi / Scan Wajah)</span>
         </button>
+        <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+          <span>✏️ Edit Pengajuan</span>
+        </button>
         <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
           <span>Lihat Rincian</span>
         </button>
@@ -705,6 +714,9 @@ function renderPengajuanSayaView() {
       `;
     } else if (isPending) {
       actionButtonsHtml = `
+        <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+          <span>✏️ Edit Pengajuan</span>
+        </button>
         <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
           <span>Lihat Rincian</span>
         </button>

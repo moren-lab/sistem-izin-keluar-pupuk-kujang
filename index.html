@@ -2261,6 +2261,10 @@
               style="background: #be123c; border-color: #be123c; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
               <span>⚡ Opsi Otorisasi (3 Cara)</span>
             </button>
+            <button type="button" class="btn-figma-secondary" id="btnBannerEditEmergency"
+              style="background: #ffffff; color: #9f1239; border: 1.5px solid #fecdd3; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <span>✏️ Edit Data Darurat</span>
+            </button>
           </div>
         </div>
 
@@ -2418,6 +2422,9 @@
           <button type="button" class="btn-figma-primary" id="btnDetailEmergencyUnlock" style="display: none; background: #dc2626; border-color: #dc2626; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700;">
             ⚡ Otorisasi Darurat (Sandi / Wajah)
           </button>
+          <button type="button" class="btn-figma-secondary" id="btnDetailEditTicket" style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 600;">
+            ✏️ Edit Pengajuan
+          </button>
           <button type="button" class="btn-emergency" id="btnDetailCancelTicket" style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
             Batalkan Izin
           </button>
@@ -2544,15 +2551,18 @@
   <!-- ================= MODAL 7: PENGAJUAN IZIN DARURAT (EMERGENCY) ================= -->
   <div class="modal-overlay" id="modalEmergency">
     <div class="modal-card" style="max-width: 820px; width: 95%;">
-      <div class="modal-header" style="padding: 1.25rem 1.5rem 0.75rem;">
+      <div class="modal-header" style="padding: 1.25rem 1.5rem 0.85rem; border-bottom: 1.5px solid #fecdd3; background: #fff1f2;">
         <div>
-          <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Formulir Izin Darurat • Rancangan</h3>
-          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Gunakan hanya untuk evakuasi atau keadaan mendesak • Semua data wajib diisi</p>
+          <h3 id="modalEmergencyTitle" style="font-size: 1.25rem; font-weight: 800; color: #9f1239; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2px;">
+            <span>🚨</span>
+            <span>Formulir Izin Darurat • Rancangan</span>
+          </h3>
+          <p id="modalEmergencySubtitle" style="font-size: 0.8rem; color: #be123c; margin: 0;">Gunakan hanya untuk evakuasi atau keadaan mendesak • Semua data wajib diisi</p>
         </div>
         <button class="btn-close-modal" id="btnCloseEmergencyModal" title="Tutup">✕</button>
       </div>
 
-      <div class="modal-body" style="padding: 0.75rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; max-height: 72vh; overflow-y: auto;">
+      <div class="modal-body" style="padding: 1rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; max-height: 72vh; overflow-y: auto;">
         <!-- Emergency Alert Banner -->
         <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
           <strong>🚨 Ketentuan BRULE-05 ("No Approval, No Exit"):</strong> Tiket darurat diterbitkan dengan status
@@ -2567,10 +2577,14 @@
             Pilih Atasan untuk Notifikasi & Pelacakan <span style="color: var(--rose-danger);">*</span>
           </label>
           <select id="emergApprover" class="form-select" required style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;">
-            <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manajer Rekayasa & Pemeliharaan</option>
-            <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan</option>
+            <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan (Atasan Langsung)</option>
+            <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan (Plt. Manager)</option>
             <option value="Dr. Agus Priyanto, M.Eng.">Dr. Agus Priyanto, M.Eng. — VP Produksi & Utilitas</option>
             <option value="Bambang Sutrisno, S.T.">Bambang Sutrisno, S.T. — Supervisi Pengamanan & K3</option>
+            <option value="Dr. Ahmad Subagja, M.M.">Dr. Ahmad Subagja, M.M. — VP SDM & Tata Kelola Organisasi</option>
+            <option value="Ir. Wahyu Hidayat, M.Sc.">Ir. Wahyu Hidayat, M.Sc. — Superintendent Pemeliharaan Listrik & Instrumen</option>
+            <option value="Siti Rahayu, S.T.">Siti Rahayu, S.T. — Kepala Seksi Logistik & Pergudangan Pabrik</option>
+            <option value="Dian Kusuma, S.T., M.Eng.">Dian Kusuma, S.T., M.Eng. — Manager Operasi Pabrik Kujang 1B</option>
           </select>
         </div>
 
@@ -2663,7 +2677,7 @@
             Pilih Metode Otorisasi Buka Kunci QR <span style="color: var(--rose-danger);">*</span>
           </label>
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label class="option-card selected" id="optEmergMethodApp"
+            <label class="option-card emerg-opt selected" id="optEmergMethodApp"
               style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px;">
               <input type="radio" name="emergMethod" value="app" checked>
               <div>
@@ -2672,7 +2686,7 @@
               </div>
             </label>
 
-            <label class="option-card" id="optEmergMethodPasscode"
+            <label class="option-card emerg-opt" id="optEmergMethodPasscode"
               style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px;">
               <input type="radio" name="emergMethod" value="passcode">
               <div>
@@ -2681,7 +2695,7 @@
               </div>
             </label>
 
-            <label class="option-card" id="optEmergMethodFaceScan"
+            <label class="option-card emerg-opt" id="optEmergMethodFaceScan"
               style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px;">
               <input type="radio" name="emergMethod" value="facescan">
               <div>
@@ -2906,9 +2920,11 @@
         </div>
       </div>
 
-      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
         <button type="button" class="btn-secondary" id="btnDismissBlockedModal">Tutup</button>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-figma-secondary" id="btnBlockedEditTicket"
+            style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">✏️ Edit Izin Ini</button>
           <button type="button" class="btn-emergency" id="btnBlockedCancelTicket"
             style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Batalkan Izin Ini</button>
           <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
@@ -3326,18 +3342,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261021_22"></script>
-  <script src="js/modules/ui.js?v=20261021_22"></script>
-  <script src="js/modules/scheduler.js?v=20261021_22"></script>
-  <script src="js/modules/navigation.js?v=20261021_22"></script>
-  <script src="js/modules/karyawan.js?v=20261021_22"></script>
-  <script src="js/modules/approver.js?v=20261021_22"></script>
-  <script src="js/modules/security.js?v=20261021_22"></script>
-  <script src="js/modules/admin.js?v=20261021_22"></script>
-  <script src="js/modules/charts.js?v=20261021_22"></script>
-  <script src="js/modules/emergency.js?v=20261021_22"></script>
-  <script src="js/modules/modals.js?v=20261021_22"></script>
-  <script src="js/app.js?v=20261021_22"></script>
+  <script src="js/data/mockData.js?v=20261021_23"></script>
+  <script src="js/modules/ui.js?v=20261021_23"></script>
+  <script src="js/modules/scheduler.js?v=20261021_23"></script>
+  <script src="js/modules/navigation.js?v=20261021_23"></script>
+  <script src="js/modules/karyawan.js?v=20261021_23"></script>
+  <script src="js/modules/approver.js?v=20261021_23"></script>
+  <script src="js/modules/security.js?v=20261021_23"></script>
+  <script src="js/modules/admin.js?v=20261021_23"></script>
+  <script src="js/modules/charts.js?v=20261021_23"></script>
+  <script src="js/modules/emergency.js?v=20261021_23"></script>
+  <script src="js/modules/modals.js?v=20261021_23"></script>
+  <script src="js/app.js?v=20261021_23"></script>
 </body>
 
 </html>
