@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261014_02">
+  <link rel="stylesheet" href="css/style.css?v=20261021_05">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
@@ -281,7 +281,15 @@
                 <circle cx="9" cy="7" r="4"></circle>
                 <polyline points="16 11 18 13 22 9"></polyline>
               </svg>
-              <span>Atasan</span>
+              <span>Atasan 1 (Manager)</span>
+            </button>
+            <button class="role-switch-btn" id="btnSwitchApprover2">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <circle cx="19" cy="11" r="2"></circle>
+              </svg>
+              <span>Atasan 2 (Supervisor)</span>
             </button>
             <button class="role-switch-btn" id="btnSwitchSecurity">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -384,7 +392,7 @@
               <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <!-- Chart Karyawan: Komposisi Jenis Izin Saya -->
                 <div class="dashboard-widget-card">
-                  
+
                   <div class="dashboard-widget-header">
                     <div class="dashboard-widget-title">
                       <span>📊</span>
@@ -666,7 +674,7 @@
                 <div class="dashboard-avatar-circle">👔</div>
                 <div class="dashboard-hero-text">
                   <h2>Pusat Persetujuan & Monitoring Bawahan</h2>
-                  <p>Ir. Hendra Gunawan, M.T. • Manager Rekayasa & Pemeliharaan • Prinsip: <strong>No Approval, No
+                  <p id="approverHeroSub">Ir. Hendra Gunawan, M.T. • Manager Rekayasa & Pemeliharaan • Prinsip: <strong>No Approval, No
                       Exit</strong></p>
                 </div>
               </div>
@@ -802,7 +810,7 @@
                     No Approval, No Exit</strong></p>
               </div>
               <div>
-                <span class="role-tag-pill role-approver" style="font-size: 0.8rem; padding: 4px 10px;">
+                <span class="role-tag-pill role-approver" id="approverProfilePill" style="font-size: 0.8rem; padding: 4px 10px;">
                   Approver: Ir. Hendra Gunawan, M.T. (Manager)
                 </span>
               </div>
@@ -1212,8 +1220,10 @@
               </div>
 
               <!-- TATA CARA PENGGUNAAN TERMINAL PEMINDAI QR & VERIFIKASI MANUAL -->
-              <div class="scanner-sop-guide" style="margin-top: 1.25rem; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 1.15rem 1.25rem; color: #e2e8f0;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+              <div class="scanner-sop-guide"
+                style="margin-top: 1.25rem; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 1.15rem 1.25rem; color: #e2e8f0;">
+                <div
+                  style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
                   <span style="font-size: 1.1rem;">📋</span>
                   <span style="font-weight: 800; font-size: 0.875rem; color: #f0f9ff; letter-spacing: -0.2px;">
                     Tata Cara Penggunaan Pemindai QR & Verifikasi Manual Pos Jaga
@@ -1222,28 +1232,39 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
                   <!-- Tata Cara Kamera Scan QR -->
-                  <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
-                    <div style="display: flex; align-items: center; gap: 0.4rem; color: #38bdf8; font-weight: 700; font-size: 0.8rem;">
+                  <div
+                    style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                    <div
+                      style="display: flex; align-items: center; gap: 0.4rem; color: #38bdf8; font-weight: 700; font-size: 0.8rem;">
                       <span>📷</span>
                       <span>1. Tata Cara Kamera Scan QR (Webcam / HP)</span>
                     </div>
-                    <ul style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.5; margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
-                      <li>Klik tombol <strong>"Aktifkan Kamera"</strong> untuk membuka kamera perangkat atau klik <strong>"Unggah Gambar QR"</strong> jika tiket berupa foto screenshot.</li>
+                    <ul
+                      style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.5; margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                      <li>Klik tombol <strong>"Aktifkan Kamera"</strong> untuk membuka kamera perangkat atau klik
+                        <strong>"Unggah Gambar QR"</strong> jika tiket berupa foto screenshot.</li>
                       <li>Arahkan kamera tegak lurus ke QR Code tiket karyawan dengan pencahayaan yang cukup.</li>
-                      <li>Sistem otomatis membaca tiket, memvalidasi masa berlaku, dan mencatat waktu Scan Out / Scan In di gerbang.</li>
+                      <li>Sistem otomatis membaca tiket, memvalidasi masa berlaku, dan mencatat waktu Scan Out / Scan In
+                        di gerbang.</li>
                     </ul>
                   </div>
 
                   <!-- Tata Cara Input Manual / Alat Barcode Scanner -->
-                  <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
-                    <div style="display: flex; align-items: center; gap: 0.4rem; color: #34d399; font-weight: 700; font-size: 0.8rem;">
+                  <div
+                    style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                    <div
+                      style="display: flex; align-items: center; gap: 0.4rem; color: #34d399; font-weight: 700; font-size: 0.8rem;">
                       <span>🏷️</span>
                       <span>2. Tata Cara Input Manual / Alat Barcode</span>
                     </div>
-                    <ul style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.5; margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                    <ul
+                      style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.5; margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
                       <li>Pilih tab <strong>"Input Manual / Barcode"</strong> pada panel di atas.</li>
-                      <li><strong>Alat Barcode Scanner (USB / Gun Scanner):</strong> Arahkan alat pemindai langsung ke barcode/QR tiket, nomor tiket otomatis terinput dan divalidasi.</li>
-                      <li><strong>Input Manual Petugas:</strong> Ketik Nomor Tiket (misal: <code>TK-20261015-689</code>) atau NIP pada kolom input, lalu tekan Enter atau klik tombol <strong>"Verifikasi Tiket"</strong>.</li>
+                      <li><strong>Alat Barcode Scanner (USB / Gun Scanner):</strong> Arahkan alat pemindai langsung ke
+                        barcode/QR tiket, nomor tiket otomatis terinput dan divalidasi.</li>
+                      <li><strong>Input Manual Petugas:</strong> Ketik Nomor Tiket (misal: <code>TK-20261015-689</code>)
+                        atau NIP pada kolom input, lalu tekan Enter atau klik tombol <strong>"Verifikasi
+                          Tiket"</strong>.</li>
                     </ul>
                   </div>
                 </div>
@@ -1482,10 +1503,13 @@
                     <span>🌊</span>
                     <div style="display: flex; flex-direction: column;">
                       <span style="font-size: 0.875rem; font-weight: 800; line-height: 1.2;">Jam Sibuk Gerbang</span>
-                      <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">07:00 – 17:00 WIB</span>
+                      <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">07:00 – 17:00
+                        WIB</span>
                     </div>
                   </div>
-                  <span style="font-size: 0.725rem; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1.5px solid #bae6fd; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">📅 Hari Ini</span>
+                  <span
+                    style="font-size: 0.725rem; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1.5px solid #bae6fd; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">📅
+                    Hari Ini</span>
                 </div>
                 <div id="chartAdminTrafficContainer" style="padding: 0.5rem 0.25rem;">
                   <!-- Rendered via JS -->
@@ -2259,24 +2283,34 @@
           <!-- KARTU INFORMASI PERPANJANGAN WAKTU (JIKA ADA PENGAJUAN) -->
           <div id="infoPendingExtensionBox"
             style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.8rem; margin-top: 0.75rem;">
-            <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+            <div
+              style="font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
               <span style="display: flex; align-items: center; gap: 0.4rem;">
                 <span>⏱️</span>
                 <span>Permohonan Perpanjangan Waktu Izin</span>
               </span>
-              <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Grace Period Aktif</span>
+              <span class="tag-badge"
+                style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Grace Period
+                Aktif</span>
             </div>
             <div style="margin-top: 0.45rem; color: #78350f; font-size: 0.775rem; line-height: 1.5;">
-              <div><strong>Waktu Kembali Baru:</strong> <span id="infoExtNewReturn" style="font-family: var(--font-mono); font-weight: 700; color: #92400e;">-</span></div>
-              <div style="margin-top: 2px;"><strong>Alasan Perpanjangan:</strong> <span id="infoExtReason">-</span></div>
-              <div style="margin-top: 5px; font-size: 0.725rem; color: #92400e; background: rgba(254,243,199,0.7); padding: 5px 8px; border-radius: 5px; border-left: 3px solid #f59e0b;">
-                🛡️ Status <em>Terlambat</em> dibekukan otomatis oleh sistem (Grace Period). Jika Anda telah tiba di pabrik, Anda tetap dapat melakukan <strong>Scan In</strong> di Pos Jaga tanpa terhalang.
+              <div><strong>Waktu Kembali Baru:</strong> <span id="infoExtNewReturn"
+                  style="font-family: var(--font-mono); font-weight: 700; color: #92400e;">-</span></div>
+              <div style="margin-top: 2px;"><strong>Alasan Perpanjangan:</strong> <span id="infoExtReason">-</span>
+              </div>
+              <div
+                style="margin-top: 5px; font-size: 0.725rem; color: #92400e; background: rgba(254,243,199,0.7); padding: 5px 8px; border-radius: 5px; border-left: 3px solid #f59e0b;">
+                🛡️ Status <em>Terlambat</em> dibekukan otomatis oleh sistem (Grace Period). Jika Anda telah tiba di
+                pabrik, Anda tetap dapat melakukan <strong>Scan In</strong> di Pos Jaga tanpa terhalang.
               </div>
             </div>
             <!-- Tombol Aksi Approver di dalam Detail Modal -->
-            <div id="approverExtActionBtns" style="display: none; margin-top: 0.65rem; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
-              <button type="button" class="btn-reject" id="btnDetailRejectExt" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">✕ Tolak Perpanjangan</button>
-              <button type="button" class="btn-approve" id="btnDetailApproveExt" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">✓ Setujui Perpanjangan</button>
+            <div id="approverExtActionBtns"
+              style="display: none; margin-top: 0.65rem; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
+              <button type="button" class="btn-reject" id="btnDetailRejectExt"
+                style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">✕ Tolak Perpanjangan</button>
+              <button type="button" class="btn-approve" id="btnDetailApproveExt"
+                style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">✓ Setujui Perpanjangan</button>
             </div>
           </div>
 
@@ -2316,7 +2350,8 @@
           </svg>
           <span>Konfirmasi Scan In (Masuk Kembali)</span>
         </button>
-        <button type="button" class="btn-primary-action" id="btnDetailExtend" style="display: none; background: #d97706; border-color: #d97706;">
+        <button type="button" class="btn-primary-action" id="btnDetailExtend"
+          style="display: none; background: #d97706; border-color: #d97706;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
@@ -2366,9 +2401,9 @@
         <div>
           <h3 style="color: var(--rose-danger); display: flex; align-items: center; gap: 0.4rem;">
             <span>🚨</span>
-            <span>Formulir Izin Keluar Darurat / Bypass</span>
+            <span>Formulir Izin Keluar Darurat (Emergency Pass)</span>
           </h3>
-          <p>Langsung Disetujui (Directly Approved) • Siap Scan di Pos Jaga</p>
+          <p>QR Code Terkunci (Locked) • 3 Opsi Otorisasi Cepat (App / Sandi / Scan Wajah)</p>
         </div>
         <button class="btn-close-modal" id="btnCloseEmergencyModal">✕</button>
       </div>
@@ -2376,9 +2411,7 @@
       <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
         <div
           style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
-          <strong>⚡ Bypass Persetujuan:</strong> Izin ini langsung berstatus <strong>Disetujui</strong> tanpa perlu
-          menunggu approval Atasan (khusus situasi mendesak / Atasan di luar kantor). QR Code keluar langsung aktif dan
-          otomatis terpantau di dashboard Atasan & Pos Jaga.
+          <strong>🚨 Ketentuan BRULE-05 ("No Approval, No Exit"):</strong> Tiket darurat diterbitkan dengan status <strong>QR Code Terkunci (Locked)</strong>. Setelah pengajuan, Anda dapat membuka kunci QR Code dengan salah satu dari 3 metode otorisasi cepat: <strong>(1) Persetujuan Langsung Atasan di App</strong>, <strong>(2) Kode Sandi / OTP Darurat</strong>, atau <strong>(3) Scan Wajah Atasan di Tempat</strong>.
         </div>
 
         <!-- Pilih Atasan untuk Notifikasi Pelacakan -->
@@ -2480,6 +2513,41 @@
             <input type="datetime-local" id="emergEstimatedReturn" class="form-input" required>
           </div>
         </div>
+
+        <!-- Pilihan Metode Otorisasi Awal -->
+        <div class="form-group" style="margin-top: 0.85rem;">
+          <label class="form-label">
+            Pilih Metode Otorisasi Buka Kunci QR <span style="color: var(--rose-danger);">*</span>
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label class="option-card selected" id="optEmergMethodApp" style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+              <input type="radio" name="emergMethod" value="app" checked>
+              <div>
+                <div class="option-name" style="font-size: 0.85rem; font-weight: 700;">📱 1. Persetujuan Langsung Atasan di App</div>
+                <div class="option-desc" style="font-size: 0.725rem; color: var(--text-secondary);">Menunggu Atasan mengklik persetujuan langsung 1-klik di aplikasinya</div>
+              </div>
+            </label>
+
+            <label class="option-card" id="optEmergMethodPasscode" style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+              <input type="radio" name="emergMethod" value="passcode">
+              <div>
+                <div class="option-name" style="font-size: 0.85rem; font-weight: 700;">🔑 2. Input Kata Sandi / OTP Otorisasi</div>
+                <div class="option-desc" style="font-size: 0.725rem; color: var(--text-secondary);">Minta kode 6-digit ke Atasan via Telp/WA (jika Atasan tidak membuka app)</div>
+              </div>
+            </label>
+
+            <label class="option-card" id="optEmergMethodFaceScan" style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+              <input type="radio" name="emergMethod" value="facescan">
+              <div>
+                <div class="option-name" style="font-size: 0.85rem; font-weight: 700;">🤳 3. Scan Wajah Atasan di Tempat</div>
+                <div class="option-desc" style="font-size: 0.725rem; color: var(--text-secondary);">Verifikasi biometrik wajah langsung melalui kamera ponsel pemohon</div>
+              </div>
+            </label>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">
+            * Anda dapat mengubah metode otorisasi ini kapan saja setelah pengajuan.
+          </div>
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -2487,8 +2555,144 @@
         <button type="button" class="btn-emergency" id="btnSubmitEmergency"
           style="display: flex; align-items: center; gap: 0.4rem;">
           <span>🚨</span>
-          <span>Terbitkan & Buka QR Izin Darurat</span>
+          <span>Terbitkan Tiket Darurat (QR Terkunci)</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 7B: OTORISASI CEPAT QR DARURAT (3 METODE) ================= -->
+  <div class="modal-overlay" id="modalEmergencyUnlock">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-header" style="border-bottom: 1.5px solid #fecdd3; background: #fff1f2;">
+        <div>
+          <h3 style="color: #9f1239; display: flex; align-items: center; gap: 0.45rem;">
+            <span>🚨</span>
+            <span>Otorisasi Buka Kunci QR Darurat</span>
+          </h3>
+          <p style="color: #be123c;">SOP Keamanan BRD PT Pupuk Kujang ("No Approval, No Exit")</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseEmgUnlock">✕</button>
+      </div>
+
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.25rem;">
+        <!-- Ringkasan Tiket Darurat -->
+        <div style="background: #fff8f8; border: 1px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tiket Darurat</span>
+            <strong id="emgUnlockTicketId" style="font-family: var(--font-mono); color: #b91c1c; font-size: 0.875rem;">TK-EMG-...</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.2rem;">
+            <span>Pemohon: <strong id="emgUnlockApplicant" style="color: var(--text-primary);">Budi Pratama, S.T.</strong></span>
+            <span>Tujuan: <strong id="emgUnlockDestination" style="color: var(--text-primary);">-</strong></span>
+          </div>
+          <div style="font-size: 0.725rem; color: #881337; margin-top: 0.2rem;">
+            Atasan Berwenang: <strong id="emgUnlockApprover">Ir. Hendra Gunawan, M.T. / Dewi Sartika</strong>
+          </div>
+        </div>
+
+        <!-- 3 Pilihan Tab Otorisasi Cepat -->
+        <div style="font-weight: 800; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+          Pilih Salah Satu Metode Otorisasi Cepat:
+        </div>
+        <div class="emg-unlock-tabs">
+          <button type="button" class="emg-tab-btn active" data-tab="tabEmgApprove">
+            <span style="font-size: 1.1rem;">📱</span>
+            <span>1. Persetujuan di App</span>
+          </button>
+          <button type="button" class="emg-tab-btn" data-tab="tabEmgPasscode">
+            <span style="font-size: 1.1rem;">🔑</span>
+            <span>2. Kode Sandi / OTP</span>
+          </button>
+          <button type="button" class="emg-tab-btn" data-tab="tabEmgFaceScan">
+            <span style="font-size: 1.1rem;">🤳</span>
+            <span>3. Scan Wajah</span>
+          </button>
+        </div>
+
+        <!-- PANE TAB 1: PERSETUJUAN DI APP -->
+        <div class="emg-tab-pane active" id="tabEmgApprove">
+          <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 1rem; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.25rem;">⏳</div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: #166534;">Menunggu Otorisasi 1-Klik Atasan</div>
+            <p style="font-size: 0.8rem; color: #15803d; margin-top: 0.35rem; line-height: 1.45;">
+              Atasan (Ir. Hendra Gunawan atau Dewi Sartika) menerima notifikasi prioritas tinggi di aplikasinya. Begitu Atasan menekan tombol <strong>⚡ Setujui Langsung</strong>, QR Code tiket Anda akan langsung terbuka secara otomatis.
+            </p>
+            <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed #bbf7d0; display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+              <span style="font-size: 0.725rem; color: #166534;">Simulasi Pengujian Cepat: Beralih ke Akun Atasan</span>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+                <button type="button" class="btn-card-detail" style="font-size: 0.75rem; background: #059669; color: #fff; border: none; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer;" onclick="window.switchRole('approver'); window.closeEmergencyUnlockModal();">
+                  Buka Dashboard Atasan 1 (Ir. Hendra) →
+                </button>
+                <button type="button" class="btn-card-detail" style="font-size: 0.75rem; background: #4f46e5; color: #fff; border: none; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer;" onclick="window.switchRole('approver2'); window.closeEmergencyUnlockModal();">
+                  Buka Dashboard Atasan 2 (Dewi Sartika) →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE TAB 2: KODE SANDI / OTP -->
+        <div class="emg-tab-pane" id="tabEmgPasscode">
+          <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 1rem;">
+            <div style="font-weight: 800; font-size: 0.875rem; color: #92400e; margin-bottom: 0.3rem;">
+              🔑 Masukkan 6-Digit Sandi Otorisasi Darurat
+            </div>
+            <p style="font-size: 0.775rem; color: #78350f; line-height: 1.45; margin-bottom: 0.75rem;">
+              Gunakan opsi ini jika Atasan sedang di luar pabrik / tidak memegang aplikasi. Hubungi Atasan via <strong>Telepon / WhatsApp</strong>, dan masukkan kode sandi yang diberikan Atasan di bawah ini:
+            </p>
+            <div class="form-group" style="text-align: center;">
+              <input type="text" id="inputEmergencyPasscode" class="form-input" maxlength="6" placeholder="Contoh: 849201"
+                style="font-family: var(--font-mono); font-size: 1.4rem; letter-spacing: 0.4rem; text-align: center; font-weight: 800; max-width: 260px; margin: 0 auto; color: #b45309;" autocomplete="off">
+              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem;">
+                * Atasan dapat melihat kode sandi ini di Dashboard Kedaruratan untuk dibagikan ke Anda
+              </div>
+            </div>
+            <button type="button" class="btn-approve" id="btnSubmitEmergencyPasscode" style="width: 100%; justify-content: center; padding: 0.65rem; margin-top: 0.75rem; font-size: 0.85rem;">
+              ✓ Verifikasi Kode Sandi & Buka QR
+            </button>
+          </div>
+        </div>
+
+        <!-- PANE TAB 3: SCAN WAJAH (FACE SCAN) ATASAN -->
+        <div class="emg-tab-pane" id="tabEmgFaceScan">
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 1rem; text-align: center;">
+            <div style="font-weight: 800; font-size: 0.875rem; color: var(--text-primary); margin-bottom: 0.25rem;">
+              🤳 Verifikasi Wajah (Face Scan) Atasan Langsung
+            </div>
+            <p style="font-size: 0.775rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+              Arahkan kamera ke wajah Atasan (Ir. Hendra Gunawan / Dewi Sartika) yang mendampingi Anda di lokasi:
+            </p>
+
+            <!-- Face Camera Container with Biometric Oval -->
+            <div class="emg-face-scanner-box">
+              <video id="emgFaceVideo" autoplay playsinline muted></video>
+              <div class="emg-face-oval" id="emgFaceScanRing">
+                <div class="emg-scan-laser"></div>
+              </div>
+            </div>
+
+            <!-- Progress & Detection Status -->
+            <div style="margin-top: 0.75rem;">
+              <div class="emg-progress-wrap">
+                <div class="emg-progress-bar" id="emgFaceProgressBar"></div>
+              </div>
+              <div id="emgFaceStatusText" style="font-size: 0.775rem; font-weight: 700; color: var(--text-primary); margin-top: 0.4rem;">
+                Mempersiapkan kamera...
+              </div>
+            </div>
+
+            <!-- Biometric Scan Action Button -->
+            <button type="button" class="btn-primary" id="btnTriggerFaceScan" style="margin-top: 0.75rem; font-size: 0.8rem; padding: 0.55rem 1rem; width: 100%; justify-content: center; background: #0284c7; border-color: #0284c7; font-weight: 700;">
+              📸 Pindai Wajah Atasan Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button type="button" class="btn-secondary" id="btnCancelEmgUnlock">Tutup</button>
+        <span style="font-size: 0.725rem; color: var(--text-muted);">PT Pupuk Kujang Security System</span>
       </div>
     </div>
   </div>
@@ -2529,9 +2733,12 @@
         </div>
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
         <button type="button" class="btn-secondary" id="btnDismissBlockedModal">Tutup</button>
-        <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button type="button" class="btn-emergency" id="btnBlockedCancelTicket" style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Batalkan Izin Ini</button>
+          <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2606,7 +2813,17 @@
               </div>
               <div style="font-size: 0.725rem; color: var(--text-secondary);">Manager Approver • NIP: PK-2015-1002</div>
             </div>
-            <span class="role-tag-pill role-approver">Atasan</span>
+            <span class="role-tag-pill role-approver">Atasan 1</span>
+          </div>
+
+          <div class="portal-user-option" data-role="approver2">
+            <div style="font-size: 1.3rem;">👩‍💼</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Dewi Sartika, S.T., M.M.
+              </div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisor Operasional (Plt) • NIP: PK-2012-0845</div>
+            </div>
+            <span class="role-tag-pill role-approver" style="background:#e0e7ff; color:#3730a3;">Atasan 2</span>
           </div>
 
           <div class="portal-user-option" data-role="security">
@@ -2712,18 +2929,27 @@
 
       <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
         <!-- Ringkasan Tiket Aktif -->
-        <div style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; font-size: 0.825rem;">
+        <div
+          style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; font-size: 0.825rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Nomor Tiket</span>
-            <strong id="extendTicketId" style="font-family: var(--font-mono); color: var(--corp-teal); font-size: 0.9rem;">-</strong>
+            <span
+              style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Nomor
+              Tiket</span>
+            <strong id="extendTicketId"
+              style="font-family: var(--font-mono); color: var(--corp-teal); font-size: 0.9rem;">-</strong>
           </div>
           <div style="margin-bottom: 0.35rem;">
-            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Tujuan & Keperluan</span>
+            <span
+              style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Tujuan
+              & Keperluan</span>
             <span id="extendTicketDest" style="font-weight: 600; color: var(--text-primary);">-</span>
           </div>
           <div>
-            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Estimasi Kembali Semula</span>
-            <span id="extendCurrentReturnDisplay" style="font-family: var(--font-mono); font-weight: 700; color: #b45309;">-</span>
+            <span
+              style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Estimasi
+              Kembali Semula</span>
+            <span id="extendCurrentReturnDisplay"
+              style="font-family: var(--font-mono); font-weight: 700; color: #b45309;">-</span>
           </div>
         </div>
 
@@ -2743,19 +2969,24 @@
             Alasan Perpanjangan Waktu <span style="color: var(--rose-danger);">*</span>
           </label>
           <textarea id="inputExtendReason" class="form-textarea" rows="3"
-            placeholder="Jelaskan alasan perpanjangan durasi (misal: antrean pengujian lab eksternal belum selesai, kemacetan lalu lintas, koordinasi dinas tambahan)..." required></textarea>
+            placeholder="Jelaskan alasan perpanjangan durasi (misal: antrean pengujian lab eksternal belum selesai, kemacetan lalu lintas, koordinasi dinas tambahan)..."
+            required></textarea>
         </div>
 
         <!-- Edukasi Grace Period & Safety -->
-        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.775rem; color: #92400e; line-height: 1.45;">
+        <div
+          style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.775rem; color: #92400e; line-height: 1.45;">
           <strong>🛡️ Grace Period & Prioritas Pos Jaga:</strong>
-          Setelah pengajuan dikirim, status <em>Terlambat</em> otomatis dibekukan (ditahan) selama menunggu persetujuan Atasan. Jika Anda telah tiba di pabrik sebelum Atasan merespons, Anda <strong>tetap dapat melakukan Scan In</strong> di Pos Jaga tanpa terhalang.
+          Setelah pengajuan dikirim, status <em>Terlambat</em> otomatis dibekukan (ditahan) selama menunggu persetujuan
+          Atasan. Jika Anda telah tiba di pabrik sebelum Atasan merespons, Anda <strong>tetap dapat melakukan Scan
+            In</strong> di Pos Jaga tanpa terhalang.
         </div>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn-secondary" id="btnCancelExtendModal">Batal</button>
-        <button type="button" class="btn-primary-action" id="btnSubmitExtendDuration" style="background: #b45309; border-color: #b45309;">
+        <button type="button" class="btn-primary-action" id="btnSubmitExtendDuration"
+          style="background: #b45309; border-color: #b45309;">
           Kirim Pengajuan Perpanjangan
         </button>
       </div>
@@ -2775,7 +3006,8 @@
 
       <div class="modal-body">
         <p style="font-size: 0.85rem; color: var(--text-primary);">
-          Anda menolak permohonan perpanjangan waktu untuk <strong id="rejectExtEmployeeName">-</strong> (<span id="rejectExtTicketId">TK-XXX</span>).
+          Anda menolak permohonan perpanjangan waktu untuk <strong id="rejectExtEmployeeName">-</strong> (<span
+            id="rejectExtTicketId">TK-XXX</span>).
         </p>
 
         <div class="form-group" style="margin-top: 0.75rem;">
@@ -2783,7 +3015,8 @@
             Alasan Penolakan <span style="color: var(--rose-danger);">* Wajib diisi</span>
           </label>
           <textarea id="rejectExtReasonInput" class="form-textarea"
-            placeholder="Jelaskan alasan penolakan perpanjangan waktu (misal: ada agenda rapat internal mendesak)..." required></textarea>
+            placeholder="Jelaskan alasan penolakan perpanjangan waktu (misal: ada agenda rapat internal mendesak)..."
+            required></textarea>
         </div>
       </div>
 
@@ -2931,17 +3164,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261015_06"></script>
-  <script src="js/modules/ui.js?v=20261015_06"></script>
-  <script src="js/modules/scheduler.js?v=20261015_06"></script>
-  <script src="js/modules/navigation.js?v=20261015_06"></script>
-  <script src="js/modules/karyawan.js?v=20261015_06"></script>
-  <script src="js/modules/approver.js?v=20261015_06"></script>
-  <script src="js/modules/security.js?v=20261015_06"></script>
-  <script src="js/modules/admin.js?v=20261015_06"></script>
-  <script src="js/modules/charts.js?v=20261015_06"></script>
-  <script src="js/modules/modals.js?v=20261015_06"></script>
-  <script src="js/app.js?v=20261015_06"></script>
+  <script src="js/data/mockData.js?v=20261021_06"></script>
+  <script src="js/modules/ui.js?v=20261021_06"></script>
+  <script src="js/modules/scheduler.js?v=20261021_06"></script>
+  <script src="js/modules/navigation.js?v=20261021_06"></script>
+  <script src="js/modules/karyawan.js?v=20261021_06"></script>
+  <script src="js/modules/approver.js?v=20261021_06"></script>
+  <script src="js/modules/security.js?v=20261021_06"></script>
+  <script src="js/modules/admin.js?v=20261021_06"></script>
+  <script src="js/modules/charts.js?v=20261021_06"></script>
+  <script src="js/modules/emergency.js?v=20261021_06"></script>
+  <script src="js/modules/modals.js?v=20261021_06"></script>
+  <script src="js/app.js?v=20261021_06"></script>
 </body>
 
 </html>

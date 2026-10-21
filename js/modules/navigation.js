@@ -21,7 +21,7 @@ function updateClock() {
   const now = new Date();
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  
+
   const day = days[now.getDay()];
   const d = now.getDate();
   const m = months[now.getMonth()];
@@ -220,6 +220,7 @@ function switchRole(role) {
 
   const btnSwitchKaryawan = document.getElementById('btnSwitchKaryawan');
   const btnSwitchApprover = document.getElementById('btnSwitchApprover');
+  const btnSwitchApprover2 = document.getElementById('btnSwitchApprover2');
   const btnSwitchSecurity = document.getElementById('btnSwitchSecurity');
   const btnSwitchAdmin = document.getElementById('btnSwitchAdmin');
 
@@ -239,6 +240,7 @@ function switchRole(role) {
 
   if (btnSwitchKaryawan) btnSwitchKaryawan.classList.remove('active');
   if (btnSwitchApprover) btnSwitchApprover.classList.remove('active', 'approver');
+  if (btnSwitchApprover2) btnSwitchApprover2.classList.remove('active', 'approver');
   if (btnSwitchSecurity) btnSwitchSecurity.classList.remove('active', 'security');
   if (btnSwitchAdmin) btnSwitchAdmin.classList.remove('active', 'admin');
 
@@ -265,7 +267,7 @@ function switchRole(role) {
     }
     if (sidebarUserName && ACTORS) sidebarUserName.textContent = ACTORS.karyawan.name;
     if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.karyawan.nip}`;
-    
+
     setKaryawanNav(currentKaryawanNav || 'dashboard');
     if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Karyawan (Budi Pratama)', 'info');
   } else if (role === 'approver') {
@@ -275,13 +277,28 @@ function switchRole(role) {
 
     if (roleBadge) {
       roleBadge.className = 'role-tag-pill role-approver';
-      roleBadge.textContent = 'Peran: Atasan (Manager)';
+      roleBadge.textContent = 'Peran: Atasan 1 (Manager)';
     }
     if (sidebarUserName && ACTORS) sidebarUserName.textContent = ACTORS.approver.name;
     if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.approver.nip}`;
 
     setApproverNav(currentApproverNav || 'dashboard');
-    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Atasan / Approver (Ir. Hendra Gunawan)', 'info');
+    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Atasan 1 / Approver (Ir. Hendra Gunawan)', 'info');
+  } else if (role === 'approver2') {
+    if (btnSwitchApprover2) btnSwitchApprover2.classList.add('active', 'approver');
+    if (viewApprover) viewApprover.style.display = 'block';
+    if (navApproverGroup) navApproverGroup.style.display = 'flex';
+
+    if (roleBadge) {
+      roleBadge.className = 'role-tag-pill role-approver';
+      roleBadge.textContent = 'Peran: Atasan 2 (Supervisor / Plt)';
+    }
+    const act2 = (ACTORS && ACTORS.approver2) ? ACTORS.approver2 : { name: 'Dewi Sartika, S.T., M.M.', nip: 'PK-2012-0845' };
+    if (sidebarUserName) sidebarUserName.textContent = act2.name;
+    if (sidebarUserSub) sidebarUserSub.textContent = `NIP: ${act2.nip}`;
+
+    setApproverNav(currentApproverNav || 'dashboard');
+    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Atasan 2 / Delegasi (Dewi Sartika)', 'info');
   } else if (role === 'security') {
     if (btnSwitchSecurity) btnSwitchSecurity.classList.add('active', 'security');
     if (viewSecurity) viewSecurity.style.display = 'block';
@@ -343,7 +360,7 @@ function updateMobileBottomNav(role) {
   // For Karyawan, Approver, and Security:
   mobileBottomNav.style.display = ''; // Let CSS media query control visibility
   if (bottomNavKaryawan) bottomNavKaryawan.style.display = role === 'karyawan' ? 'flex' : 'none';
-  if (bottomNavApprover) bottomNavApprover.style.display = role === 'approver' ? 'flex' : 'none';
+  if (bottomNavApprover) bottomNavApprover.style.display = (role === 'approver' || role === 'approver2') ? 'flex' : 'none';
   if (bottomNavSecurity) bottomNavSecurity.style.display = role === 'security' ? 'flex' : 'none';
 }
 window.updateMobileBottomNav = updateMobileBottomNav;
@@ -423,11 +440,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnSwitchKaryawan = document.getElementById('btnSwitchKaryawan');
   const btnSwitchApprover = document.getElementById('btnSwitchApprover');
+  const btnSwitchApprover2 = document.getElementById('btnSwitchApprover2');
   const btnSwitchSecurity = document.getElementById('btnSwitchSecurity');
   const btnSwitchAdmin = document.getElementById('btnSwitchAdmin');
 
   if (btnSwitchKaryawan) btnSwitchKaryawan.addEventListener('click', () => switchRole('karyawan'));
   if (btnSwitchApprover) btnSwitchApprover.addEventListener('click', () => switchRole('approver'));
+  if (btnSwitchApprover2) btnSwitchApprover2.addEventListener('click', () => switchRole('approver2'));
   if (btnSwitchSecurity) btnSwitchSecurity.addEventListener('click', () => switchRole('security'));
   if (btnSwitchAdmin) btnSwitchAdmin.addEventListener('click', () => switchRole('admin'));
 
@@ -471,7 +490,7 @@ function closeLogoutModal() {
 function executeLogout() {
   closeLogoutModal();
   if (typeof window.stopCameraScanner === 'function') {
-    try { window.stopCameraScanner(); } catch (e) {}
+    try { window.stopCameraScanner(); } catch (e) { }
   }
   closeMobileSidebar();
 

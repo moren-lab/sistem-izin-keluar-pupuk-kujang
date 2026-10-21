@@ -5,7 +5,7 @@
 
 function updateApproverMetrics() {
   const ticketsList = window.ticketsList || [];
-  const pendingInitial = ticketsList.filter(t => t.status === 'Menunggu Persetujuan').length;
+  const pendingInitial = ticketsList.filter(t => t.status !== 'Dibatalkan' && t.status !== 'Ditolak' && (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')).length;
   const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan').length;
   const pending = pendingInitial + pendingExtensions;
   const approved = ticketsList.filter(t => t.status === 'Disetujui').length;
@@ -36,6 +36,21 @@ function updateApproverMetrics() {
 
 function renderApproverDashboard() {
   updateApproverMetrics();
+
+  // Dynamic approver header based on active role (Ir. Hendra Gunawan vs Dewi Sartika)
+  const approverHeroSub = document.getElementById('approverHeroSub');
+  const approverProfilePill = document.getElementById('approverProfilePill');
+  const ACTORS = window.ACTORS || {};
+  const isApprover2 = (window.currentActor === 'approver2');
+  const currentApproverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+
+  if (approverHeroSub) {
+    approverHeroSub.innerHTML = `${currentApproverActor.name} • ${currentApproverActor.title} • Prinsip: <strong>No Approval, No Exit</strong>`;
+  }
+  if (approverProfilePill) {
+    approverProfilePill.textContent = `Approver: ${currentApproverActor.name} (${isApprover2 ? 'Atasan 2 / Delegasi' : 'Atasan 1 / Manager'})`;
+  }
+
   const ticketsList = window.ticketsList || [];
   const pendingTickets = ticketsList.filter(t => t.status === 'Menunggu Persetujuan');
   const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan');
@@ -45,14 +60,70 @@ function renderApproverDashboard() {
   const approverDashboardPendingList = document.getElementById('approverDashboardPendingList');
   const approverDashboardOutsideList = document.getElementById('approverDashboardOutsideList');
 
-  const emergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'));
+  // Emergency tickets breakdown: Locked (Need Authorization) vs Active (Monitoring)
+  const lockedEmergencyTickets = ticketsList.filter(t => t.isEmergency && t.status === 'Menunggu Otorisasi Darurat');
+  const activeEmergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !t.emergencyLocked && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'));
 
   // Urgent Attention Banner
   if (approverUrgentBanner) {
     let bannerHtml = '';
 
-    if (emergencyTickets.length > 0) {
-      const emg = emergencyTickets[0];
+    // 1. TIKET DARURAT BUTUH OTORISASI CEPAT (3 METODE)
+    if (lockedEmergencyTickets.length > 0) {
+      lockedEmergencyTickets.forEach(emg => {
+        bannerHtml += `
+          <div style="background: #fff1f2; border: 2px solid #e11d48; border-radius: 12px; padding: 1.1rem 1.35rem; margin-bottom: 0.85rem; box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15);">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
+                <div style="font-size: 1.8rem;">🚨</div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <span style="font-weight: 800; font-size: 0.95rem; color: #9f1239;">
+                      PERMOHONAN IZIN DARURAT (K3 / MEDIS)
+                    </span>
+                    <span class="status-pill emergency-locked" style="font-size: 0.65rem; padding: 2px 8px;">QR TERKUNCI</span>
+                  </div>
+                  <div style="font-size: 0.85rem; color: #881337; margin-top: 3px;">
+                    <strong>${emg.applicantName}</strong> (${emg.id}) • Tujuan: <strong>${emg.destination}</strong>
+                  </div>
+                  <div style="font-size: 0.775rem; color: #9f1239; margin-top: 2px; font-style: italic;">
+                    "Alasan Kedaruratan: ${emg.reason}"
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="btn-approve" style="padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 800; background: #059669; box-shadow: 0 2px 8px rgba(5,150,105,0.3);" onclick="window.emergencyDirectApprove('${emg.id}')">
+                  ⚡ 1. Setujui Langsung di App
+                </button>
+                <button type="button" class="btn-card-detail" style="padding: 0.5rem 0.85rem; font-size: 0.8rem;" onclick="openTicketDetail('${emg.id}', 'detail')">
+                  Lihat Tiket
+                </button>
+              </div>
+            </div>
+
+            <!-- Panel Opsi 2 & 3: Sandi Otorisasi & Scan Wajah -->
+            <div style="margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px dashed #fca5a5; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; background: #ffe4e6; padding: 0.65rem 0.95rem; border-radius: 8px;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <span style="font-size: 0.8rem; color: #881337; font-weight: 700;">🔑 2. Sandi Darurat:</span>
+                <span style="font-family: var(--font-mono); font-size: 1.15rem; font-weight: 800; color: #9f1239; background: #ffffff; padding: 2px 10px; border-radius: 6px; border: 1px solid #f43f5e; letter-spacing: 2px;">
+                  ${emg.emergencyPasscode || '849201'}
+                </span>
+                <button type="button" class="btn-card-detail" style="padding: 0.25rem 0.6rem; font-size: 0.725rem; background: #ffffff; border: 1px solid #fda4af;" onclick="navigator.clipboard.writeText('${emg.emergencyPasscode || '849201'}'); if (typeof window.showToast === 'function') window.showToast('Kode Sandi Darurat [${emg.emergencyPasscode || '849201'}] disalin! Berikan ke karyawan via Telp/WA.', 'info');">
+                  📋 Salin Sandi
+                </button>
+                <span style="font-size: 0.7rem; color: #9f1239;">(Bisa diberikan via Telp/WA jika Anda di luar kantor)</span>
+              </div>
+              <div style="font-size: 0.75rem; color: #881337;">
+                🤳 <strong>3. Scan Wajah:</strong> Tersedia di kamera ponsel pemohon jika Anda di tempat.
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    if (activeEmergencyTickets.length > 0) {
+      const emg = activeEmergencyTickets[0];
       const liveStatusText = emg.status === 'Disetujui' ? 'Menuju Pos Gerbang (Belum Keluar)' : (emg.status === 'Sedang di Luar' ? `Sedang di Luar (Scan Out: ${emg.scanOutTime || '-'})` : emg.status);
       bannerHtml += `
         <div style="background: #fff1f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.9rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
@@ -60,10 +131,10 @@ function renderApproverDashboard() {
             <div style="font-size: 1.4rem;">🚨</div>
             <div>
               <div style="font-weight: 800; font-size: 0.875rem; color: #9f1239;">
-                Monitoring Izin Darurat / Bypass Atasan (${emergencyTickets.length} Karyawan)
+                Monitoring Izin Darurat Aktif (${activeEmergencyTickets.length} Karyawan)
               </div>
               <div style="font-size: 0.775rem; color: #881337;">
-                ${emg.applicantName} • Tujuan: <strong>${emg.destination}</strong> • Status: <strong>${liveStatusText}</strong>
+                ${emg.applicantName} • Tujuan: <strong>${emg.destination}</strong> • Status: <strong>${liveStatusText}</strong> • Otorisasi: <em>${emg.emergencyUnlockMethod || 'Resmi'}</em>
               </div>
             </div>
           </div>
@@ -259,11 +330,11 @@ function renderApproverCards(list, containerElement) {
   target.innerHTML = `
     <div class="cards-grid">
       ${list.map(t => {
-        const isPending = t.status === 'Menunggu Persetujuan';
-        const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
-        const isDinas = t.category === 'Dinas Kantor';
+    const isPending = t.status === 'Menunggu Persetujuan';
+    const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
+    const isDinas = t.category === 'Dinas Kantor';
 
-        return `
+    return `
           <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : (isPending ? 'border-left: 4px solid var(--amber-warning);' : '')}">
             <div class="card-top">
               <div>
@@ -315,6 +386,41 @@ function renderApproverCards(list, containerElement) {
               </div>
             ` : ''}
 
+            ${isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
+              <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin: 0.65rem 0;">
+                <div style="font-weight: 800; color: #9f1239; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+                  <span>🚨 Hasil Penulisan Form Kedaruratan (K3/Medis)</span>
+                  <span class="tag-badge" style="background: #ffe4e6; color: #9f1239; font-weight: 800;">
+                    ${t.selectedMethod === 'passcode' ? '🔑 Cara: Sandi / OTP' : (t.selectedMethod === 'facescan' ? '🤳 Cara: Scan Wajah' : '📱 Cara: Persetujuan di App')}
+                  </span>
+                </div>
+                <div style="margin-top: 0.35rem; font-size: 0.75rem; color: #881337; line-height: 1.45;">
+                  <strong>Alasan:</strong> "${t.reason}" • <strong>Tujuan:</strong> ${t.destination}
+                </div>
+                ${t.selectedMethod === 'passcode' ? `
+                  <div style="margin-top: 0.5rem; background: #ffffff; border: 1.5px solid #f43f5e; border-radius: 6px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                      <div style="font-size: 0.7rem; color: #881337; font-weight: 700;">Kode Sandi Otorisasi (Boleh Diberikan ke Karyawan):</div>
+                      <div style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 900; color: #9f1239; letter-spacing: 2.5px;">
+                        ${t.emergencyPasscode || '849201'}
+                      </div>
+                    </div>
+                    <button type="button" class="btn-card-detail" style="font-size: 0.725rem; background: #ffe4e6; color: #9f1239; border: 1px solid #fda4af; padding: 0.35rem 0.7rem;" onclick="navigator.clipboard.writeText('${t.emergencyPasscode || '849201'}'); if (typeof window.showToast === 'function') window.showToast('Kode Sandi Darurat [${t.emergencyPasscode || '849201'}] disalin! Berikan ke karyawan via Telp/WA.', 'info');">
+                      📋 Salin Sandi
+                    </button>
+                  </div>
+                ` : (t.selectedMethod === 'facescan' ? `
+                  <div style="margin-top: 0.4rem; font-size: 0.75rem; color: #881337;">
+                    🤳 Pemohon meminta scan wajah langsung di ponselnya. Atau klik tombol di bawah untuk menyetujui langsung.
+                  </div>
+                ` : `
+                  <div style="margin-top: 0.4rem; font-size: 0.75rem; color: #881337;">
+                    📱 Pemohon menunggu persetujuan langsung 1-klik Anda di aplikasi ini.
+                  </div>
+                `)}
+              </div>
+            ` : ''}
+
             ${t.approverNote ? `
               <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.75rem;">
                 <strong>Catatan Keputusan:</strong> "${t.approverNote}"
@@ -342,6 +448,15 @@ function renderApproverCards(list, containerElement) {
                     ✓ Setujui Perpanjang
                   </button>
                 </div>
+              ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
+                <div class="approver-action-grid">
+                  <button class="btn-reject" onclick="openRejectModal('${t.id}')">
+                    ✕ Tolak Darurat
+                  </button>
+                  <button class="btn-approve" style="background:#059669; font-weight:800;" onclick="window.emergencyDirectApprove('${t.id}')">
+                    ✓ Validasi & Buka Kunci
+                  </button>
+                </div>
               ` : (isPending ? `
                 <div class="approver-action-grid">
                   <button class="btn-reject" onclick="openRejectModal('${t.id}')">
@@ -353,11 +468,11 @@ function renderApproverCards(list, containerElement) {
                 </div>
               ` : `
                 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Sudah Diputuskan</span>
-              `)}
+              `))}
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 }
@@ -379,9 +494,16 @@ function renderApproverView() {
     return;
   }
 
-  // 2. ANTRIAN PERSETUJUAN
+  // 2. ANTRIAN PERSETUJUAN (Termasuk Tiket Darurat Terkunci)
   if (currentApproverNav === 'antrian') {
-    const pendingList = ticketsList.filter(t => t.status === 'Menunggu Persetujuan' || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
+    const pendingList = ticketsList.filter(t => 
+      t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      (t.status === 'Menunggu Persetujuan' || 
+       t.status === 'Menunggu Otorisasi Darurat' || 
+       (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))
+    );
 
     if (pendingList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
@@ -479,7 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
       const ACTORS = window.ACTORS || {};
-      const approverName = ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
+      const isApprover2 = (window.currentActor === 'approver2');
+      const approverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+      const approverName = approverActor.name;
+      const approverTitle = approverActor.title || 'Atasan Peninjau';
 
       ticket.status = 'Disetujui';
       ticket.approverNote = note;
@@ -488,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           event: 'Disetujui Atasan',
           time: nowFormatted,
-          by: `${approverName} (Manager)`,
+          by: `${approverName} (${approverTitle})`,
           desc: `Persetujuan diberikan. Catatan: "${note}"`
         },
         {
@@ -502,9 +627,11 @@ document.addEventListener('DOMContentLoaded', () => {
       window.saveTickets(ticketsList);
       if (modalApproveDecision) modalApproveDecision.classList.remove('open');
       if (typeof window.showToast === 'function') {
-        window.showToast(`Tiket #${window.currentDecisionTicketId} berhasil disetujui! QR Code otomatis terbit untuk karyawan.`, 'success');
+        window.showToast(`Tiket #${window.currentDecisionTicketId} berhasil disetujui oleh ${approverName}! QR Code otomatis terbit untuk karyawan.`, 'success');
       }
       renderApproverView();
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
       if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
     });
   }
@@ -529,15 +656,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
       const ACTORS = window.ACTORS || {};
-      const approverName = ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
+      const isApprover2 = (window.currentActor === 'approver2');
+      const approverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
+      const approverName = approverActor.name;
+      const approverTitle = approverActor.title || 'Atasan Peninjau';
 
       ticket.status = 'Ditolak';
+      ticket.emergencyLocked = false;
+      ticket.qrLocked = false;
       ticket.approverNote = `Ditolak: ${reason}`;
       if (!ticket.timeline) ticket.timeline = [];
       ticket.timeline.push({
         event: 'Ditolak Atasan',
         time: nowFormatted,
-        by: `${approverName} (Manager)`,
+        by: `${approverName} (${approverTitle})`,
         desc: `Alasan penolakan: "${reason}"`
       });
 
@@ -547,6 +679,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.showToast(`Tiket #${window.currentDecisionTicketId} telah ditolak. Alasan tersimpan di riwayat pemohon.`, 'danger');
       }
       renderApproverView();
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     });
   }
 
@@ -669,6 +803,17 @@ function rejectExtensionRequest(ticketId, reason) {
 }
 
 // Expose globally
+window.updateApproverMetrics = updateApproverMetrics;
+window.renderApproverDashboard = renderApproverDashboard;
+window.renderApproverCards = renderApproverCards;
+window.renderApproverView = renderApproverView;
+window.openApproveModal = openApproveModal;
+window.openRejectModal = openRejectModal;
+window.approveExtensionRequest = approveExtensionRequest;
+window.openRejectExtensionModal = openRejectExtensionModal;
+window.rejectExtensionRequest = rejectExtensionRequest;
+window.approveEmergencyDirect = approveEmergencyDirect;
+window.rejectEmergencyDirect = rejectEmergencyDirect;
 window.updateApproverMetrics = updateApproverMetrics;
 window.renderApproverDashboard = renderApproverDashboard;
 window.renderApproverCards = renderApproverCards;

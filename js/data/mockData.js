@@ -19,7 +19,14 @@ const ACTORS = {
     name: 'Ir. Hendra Gunawan, M.T.',
     title: 'Manager Rekayasa & Pemeliharaan',
     department: 'Departemen Rekayasa & Pemeliharaan',
-    roleLabel: 'Atasan Peninjau / Approver'
+    roleLabel: 'Atasan 1 (Manager)'
+  },
+  approver2: {
+    nip: 'PK-2012-0845',
+    name: 'Dewi Sartika, S.T., M.M.',
+    title: 'Supervisor Operasional Lapangan (Plt. Manager)',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    roleLabel: 'Atasan 2 (Supervisor / Plt)'
   },
   security: {
     nip: 'SEC-2018-042',
@@ -188,6 +195,14 @@ function loadTickets() {
       if ((t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && t.status === 'Kedaluwarsa') {
         t.status = 'Disetujui';
         changed = true;
+      }
+      // Pastikan tiket yang dibatalkan atau ditolak tidak berstatus terkunci aktif
+      if (t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Selesai') {
+        if (t.emergencyLocked || t.qrLocked) {
+          t.emergencyLocked = false;
+          t.qrLocked = false;
+          changed = true;
+        }
       }
       return t;
     });

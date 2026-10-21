@@ -1,0 +1,1235 @@
+﻿Business Requirement Document (BRD)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Atribut
+	Keterangan
+	Kode Dokumen
+	
+
+	Nama Proyek
+	
+
+	Versi Dokumen
+	
+
+	Tanggal
+	
+
+	Disusun oleh
+	
+
+	
+
+DAFTAR ISI
+
+
+
+
+
+
+
+
+
+
+1. Latar Belakang
+PT Pupuk Kujang berupaya menjaga keamanan, ketertiban, dan kelancaran kegiatan operasional pabrik. Salah satu aspek pentingnya adalah pengendalian keluar-masuk Karyawan di area perusahaan. Karyawan yang perlu meninggalkan area pada jam kerja memerlukan proses izin yang jelas, tercatat, dan dapat dipertanggungjawabkan agar sesuai dengan ketentuan keamanan dan disiplin kerja yang berlaku.
+Saat ini, Karyawan yang keluar area pada jam kerja belum tercatat secara sistematis. Alasan keluar, waktu keluar, dan waktu kembali tidak terdokumentasi dengan lengkap, sehingga Departemen Pengamanan kesulitan memantau siapa yang sedang berada di luar area. Kondisi ini menyebabkan data untuk kebutuhan administrasi berisiko tidak tersimpan dengan jelas. Akibatnya, proses pemantauan, pengecekan ulang, maupun penelusuran terhadap aktivitas keluar area kurang efektif.
+Untuk mengatasi permasalahan tersebut, Departemen Teknologi Informasi mengembangkan aplikasi Perizinan Keluar Area Karyawan. Aplikasi ini dirancang untuk mengelola proses izin keluar area secara terintegrasi, mulai dari pengajuan oleh Karyawan, persetujuan oleh atasan, penerbitan tiket QR code, hingga pencatatan waktu keluar dan masuk oleh petugas pengamanan. Melalui aplikasi ini, proses perizinan akan beralih menjadi alur kerja digital yang lebih tertib, transparan, dan terstruktur. Dengan demikian, seluruh aktivitas keluar area dapat tercatat dengan baik demi mendukung keamanan dan ketertiban di lingkungan PT Pupuk Kujang.
+Berdasarkan pentingnya alur tersebut, Business Requirement Document (BRD) ini meliputi keseluruhan sistem secara utuh. Ruang lingkupnya mencakup pengajuan izin oleh Karyawan, persetujuan oleh Atasan, serta verifikasi keluar dan masuk oleh Petugas Pengamanan, sebagai acuan digitalisasi proses perizinan keluar area Karyawan di PT Pupuk Kujang.
+2. Tujuan
+Berikut adalah tujuan utama dari pengembangan aplikasi perizinan keluar area Karyawan:
+1. Mencatat aktivitas keluar area: Seluruh aktivitas Karyawan keluar area pada jam kerja tercatat, mulai dari pengajuan hingga Karyawan kembali.
+2. Mempermudah pengajuan izin: Karyawan dapat mengajukan izin beserta alasannya secara digital melalui aplikasi.
+3. Mempermudah persetujuan: Atasan dapat meninjau dan menyetujui atau menolak pengajuan secara digital, disertai catatan.
+4. Mempermudah verifikasi di pos jaga: Petugas pengamanan memverifikasi izin melalui pemindaian QR code, sehingga hanya Karyawan yang memiliki izin sah yang dapat keluar.
+5. Mendukung pemantauan dan administrasi: Departemen Pengamanan dapat memantau status Karyawan secara langsung, serta memperoleh data dan laporan yang terdokumentasi.
+3. Ruang Lingkup
+Ruang lingkup Business Requirement Document (BRD) ini mencakup kebutuhan bisnis aplikasi Perizinan Keluar Area Karyawan yang digunakan untuk mendukung pengelolaan izin keluar area pada jam kerja di Departemen Pengamanan PT Pupuk Kujang.
+Dokumen ini membahas kebutuhan bisnis dari sisi user, meliputi pengajuan izin (request) oleh Karyawan, persetujuan (approval) oleh atasan, penerbitan tiket QR code, verifikasi keluar dan masuk oleh petugas pengamanan di pos jaga, pemantauan status Karyawan secara real-time (monitoring), serta dokumentasi aktivitas keluar area. Aplikasi diperlakukan sebagai satu sistem terintegrasi untuk mendukung ketertiban, transparansi, dan keamanan dalam pengelolaan perizinan keluar area Karyawan di lingkungan perusahaan.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   1. In Scope
+
+
+Modul
+	Cakupan Kebutuhan Fungsional Bisnis (In Scope)
+	Pengajuan Izin (Sisi Karyawan) 
+	* Otentikasi dan Akses Aplikasi: Dilakukan melalui autentikasi KUJANG ID (login dan verifikasi OTP) pada Portal SAKTI, lalu membuka aplikasi Perizinan Keluar Area melalui menu Aplikasi Saya, yang dilengkapi dengan pembatasan hak akses menu sesuai dengan peran Karyawan.
+* Pembuatan Pengajuan Izin: Dilakukan melalui pengisian formulir tiket izin keluar area dengan memilih Kategori Keperluan (Dinas Kantor / Urusan Pribadi), Tipe Izin (Kembali ke Area / Pulang Mendahului), isian Alasan Izin, Lokasi/Tujuan, Rencana Jam Keluar, serta Perkiraan Jam Kembali (wajib diisi apabila memilih tipe kembali). 
+* Konfirmasi Pengajuan: Disediakan melalui dialog konfirmasi ringkasan data untuk memastikan seluruh informasi perizinan sudah sesuai sebelum pengajuan benar-benar dikirimkan kepada atasan. 
+* Dashboard Karyawan: Menyajikan tombol Buat Pengajuan untuk pembuatan tiket baru, daftar tiket pengajuan milik sendiri (Ticket Card) beserta status progresnya, dilengkapi fitur search, filter data (rentang tanggal dan status), serta pengaturan tampilan. 
+* Detail Tiket dan QR Code: Menyajikan Informasi Pengajuan, Detail Keperluan, Riwayat Aktivitas untuk melacak pergerakan status, serta tampilan Tiket QR Code digital (otomatis terbit setelah disetujui) yang dilengkapi fitur unduh gambar/PDF. 
+* Pembatalan Pengajuan: Hak akses Karyawan untuk membatalkan tiket izin yang telah diajukan secara mandiri, dengan ketentuan pembatalan hanya dapat dilakukan selama tiket belum dipindai keluar di pos jaga. 
+* Pengajuan Perpanjangan Waktu Izin (Extend Return Time): Hak akses Karyawan berstatus Sedang di Luar (tipe Kembali ke Area) untuk mengajukan perpanjangan estimasi waktu kembali sebelum jam kembali awal berakhir, dengan mencantumkan estimasi jam kembali baru dan alasan perpanjangan.
+* Pengajuan Izin Darurat (Emergency Pass): Jalur pengajuan izin kilat khusus kondisi darurat/kritis (seperti kecelakaan kerja, sakit mendadak, atau musibah keluarga). Formulir darurat memiliki isian lengkap, namun QR Code terkunci sampai salah satu dari 3 metode verifikasi dipenuhi: (1) Persetujuan langsung di aplikasi oleh Atasan, (2) Input Kode Sandi/OTP Otorisasi dari Atasan, atau (3) Verifikasi Scan Wajah (Face Verification). Setelah terverifikasi, QR Code darurat aktif dan siap dipindai di Pos Jaga. 
+* Visualisasi Komposisi Izin: Diagram: Donat interaktif (Donut Chart) pada dashboard Karyawan yang menyajikan perbandingan izin Dinas Kantor, Urusan Pribadi, dan Izin Darurat beserta persentase saat kursor menyentuh warna diagram. 
+	
+
+
+
+Persetujuan Izin (Sisi Atasan) 
+	* Antrean Persetujuan: Penyajian daftar pengajuan izin yang masuk dari bawahan langsung (Approval Card) untuk diputuskan, dilengkapi fitur pencarian (search), filter data (rentang tanggal dan status), serta rekap data antrean. 
+* Verifikasi Pengajuan: Akses ke Informasi Karyawan, Detail Keperluan, Waktu Keluar, dan Estimasi Kembali sebagai bahan pertimbangan manajerial sebelum mengambil keputusan. 
+* Komentar Atasan: Catatan atau arahan manajerial yang wajib diisi apabila Atasan menolak pengajuan, dan bersifat opsional apabila Atasan menyetujui pengajuan. 
+* Pengambilan Keputusan: Menerapkan prinsip No Approval, No Exit, dengan dua opsi tindakan keputusan:
+• Reject: Wajib mengisi Alasan Penolakan; pengajuan ditolak permanen dan status berubah menjadi Ditolak.
+• Approve: Catatan persetujuan bersifat opsional; status pengajuan berubah menjadi Disetujui dan sistem otomatis menerbitkan QR code. 
+* Pemberitahuan Status: Integrasi pembaruan status secara otomatis kembali ke dashboard Karyawan pemohon setelah keputusan ditetapkan.
+* Visualisasi Tren Pengajuan Tim: Diagram batang interaktif (Bar Chart) pada dashboard Atasan yang menyajikan tren volume pengajuan izin bawahan per hari kerja (Senin s/d Jumat).  
+	Verifikasi Pos Jaga (Sisi Petugas Pengamanan) 
+	* Antrean dan Pemindai QR: Penyajian antarmuka pemindai (Scanner) berbasis kamera peramban pos jaga untuk membaca QR code tiket Karyawan secara cepat dan responsif. 
+* Verifikasi Keabsahan Tiket: Sistem memvalidasi QR code secara instan dan menampilkan indikator visual kelayakan izin (Sah/Disetujui, Tidak Valid, Kedaluwarsa, Dibatalkan, atau Sudah Dipakai).
+* Pencatatan Keluar (Scan Out): Pencatatan otomatis timestamp waktu keluar riil saat QR dipindai keluar, yang secara otomatis mengubah status tiket menjadi Sedang di Luar (untuk izin kembali) atau langsung berstatus Selesai (untuk izin pulang mendahului). 
+* Pencatatan Masuk kembali (Tap in): Pencatatan otomatis timestamp waktu masuk saat Karyawan menempelkan Kartu Akses Kujang pada card reader gerbang masuk. Sistem mencocokkan identitas kartu dengan tiket berstatus Sedang di Luar, memvalidasi jam kedatangan (Tepat Waktu/Terlambat), mengubah status tiket menjadi Selesai, serta menonaktifkan tiket. 
+* Verifikasi Manual Lapangan (Fallback): Hak akses Petugas Pengamanan untuk memproses verifikasi izin darurat melalui pencarian NIP atau Nomor Tiket apabila layar ponsel karyawan rusak atau baterai habis (hanya untuk tiket yang telah berstatus Disetujui; tidak tersedia mekanisme QR darurat tanpa persetujuan), disertai kewajiban pencatatan alasan verifikasi manual ke dalam sistem. 
+* Ringkasan Pemantauan Pos Jaga: Menyajikan daftar dan jumlah Karyawan yang saat ini tercatat sedang berada di luar area perusahaan (Headcount Tracker). 
+* Validasi & Konfirmasi Izin Darurat: Kemampuan sistem Pos Jaga mengenali tiket berstatus darurat (Emergency Pass), memvalidasi fisik karyawan di gerbang, dan mencatat justifikasi kedaruratan sebelum memperbolehkan keluar.
+	
+
+
+
+Monitoring & Administrasi (Sisi Departemen Pengamanan / Admin) 
+	* Dashboard Monitoring: Menyajikan statistik perizinan harian, ringkasan status pengajuan, antrean persetujuan, serta daftar Karyawan yang sedang berada di luar area perusahaan secara real-time. 
+* Deteksi Keterlambatan Otomatis: Sistem secara otomatis menandai dan mengubah status tiket menjadi Terlambat apabila waktu operasional telah melewati perkiraan jam kembali yang diajukan dan Karyawan belum melakukan pemindaian masuk di pos jaga. 
+* Manajemen Masa Berlaku (Auto-Expiry): Sistem secara otomatis menghanguskan tiket dan mengubah status menjadi Kedaluwarsa apabila tiket yang telah disetujui tidak kunjung dipindai keluar melewati batas toleransi jam rencana keluar. 
+* Riwayat Aktivitas (Audit Trail): Penyajian log riwayat aktivitas lengkap yang mencatat setiap alur pergerakan status tiket, meliputi waktu kejadian (timestamp), identitas pelaku (user/system), serta catatan perubahan untuk keperluan penelusuran. 
+* Unduh Dokumen dan Rekap Data: Didukung oleh fitur Export untuk menyimpan rekapitulasi data perizinan ke format Excel (.xlsx) serta fitur Download PDF untuk mencetak laporan resmi pengamanan. 
+* Pengelolaan Pengguna dan Peran: Pengelolaan data master akun dan pemetaan hak akses pengguna (Karyawan, Atasan, Petugas Pengamanan, Admin) 
+* Pengelolaan Peran dan Hak Akses: Pemetaan peran dan hak akses pengguna aplikasi (Karyawan, Atasan, Petugas Pengamanan, Admin) berdasarkan akun dari KUJANG ID; pengelolaan master akun dan data pegawai berada di luar cakupan (lihat Out of Scope) 
+
+
+
+
+* Visualisasi Jam Sibuk & Sebaran Departemen: Penyajian grafik area interaktif lalu lintas gerbang (Traffic Chart 07:00–17:00) untuk memetakan jam-jam sibuk keluarnya karyawan, serta diagram batang horizontal frekuensi izin per departemen untuk analisis kepatuhan dan keamanan kawasan pabrik.
+
+
+	
+
+   2. Out of Scope
+Berikut adalah hal-hal yang tidak termasuk dalam cakupan pengembangan aplikasi Perizinan Keluar Area Karyawan:
+      1. Pengelolaan Sanksi dan Tindak Lanjut Pelanggaran: Sistem hanya mencatat dan menandai status Terlambat. Keputusan sanksi atas keterlambatan atau keluar tanpa izin berada di luar sistem.
+      2. Perizinan Cuti dan Perjalanan Dinas: Sistem tidak mencakup pengajuan cuti maupun perjalanan dinas, yang diproses melalui mekanisme lain.
+      3. Perizinan Tamu, Eksternal, Kendaraan, dan Material: Sistem tidak mencakup perizinan keluar-masuk tamu (visitor), pihak eksternal, rekanan/kontraktor, kendaraan, maupun angkutan material/pupuk, yang dikelola melalui prosedur tersendiri.
+      4. Integrasi Langsung dengan ERP/SAP dan Sistem Absensi: Sistem tidak terintegrasi secara otomatis dengan SAP maupun sistem absensi. Rekap data perizinan dan keterlambatan disediakan melalui fitur ekspor data untuk ditindaklanjuti secara terpisah.
+      5. Pelacakan Geografis (GPS Tracking): Sistem tidak melakukan pelacakan lokasi fisik Karyawan selama berada di luar kawasan PT Pupuk Kujang.
+      6. Pengadaan Perangkat Keras Khusus: Sistem tidak mencakup pengadaan fisik perangkat pemindai (dedicated barcode scanner). Aplikasi dirancang fleksibel menggunakan kamera perangkat pintar atau laptop pos jaga yang terhubung ke jaringan internal.
+      7. Pengembangan Aplikasi Berbasis Mobile (Native): Sistem tidak dikembangkan dalam bentuk aplikasi mobile native (.apk / .ipa), karena sistem diakses melalui peramban (browser) pada URL aplikasi internal perusahaan.
+      8. Pengembangan dan Pengelolaan Layanan KUJANG ID: Sistem tidak mencakup pengelolaan infrastruktur KUJANG ID, manajemen master akun dan data pegawai, maupun proses verifikasi OTP. Sistem hanya memanfaatkan layanan otentikasi KUJANG ID yang telah tersedia melalui integrasi API pada Portal SAKTI.
+
+
+
+
+
+
+4. Stakeholder
+Berikut pihak-pihak yang terlibat langsung maupun tidak langsung dalam proses bisnis yang didigitalisasi:
+Stakeholder
+	Peran / Kepentingan
+	Kategori
+	Karyawan
+	Mengajukan izin keluar area, melengkapi data yang diwajibkan, memantau status pengajuan, membatalkan pengajuan selama belum dipindai keluar, dan menampilkan QR Code ketika izin disetujui.
+	Internal – seluruh unit kerja
+	Atasan / Approver
+	Memeriksa pengajuan bawahan langsung yang berada dalam kewenangannya, kemudian menyetujui atau menolak pengajuan. Alasan penolakan wajib diisi; catatan persetujuan bersifat opsional.
+	Internal – atasan/unit kerja
+	Petugas Pengamanan (Security)
+	Memindai QR Code di pos jaga, melihat hasil validasi, mencatat waktu keluar dan waktu masuk kembali, serta melakukan verifikasi manual apabila QR Code tidak dapat dipindai.
+	Internal – Departemen Pengamanan
+	Admin
+	Memantau pengajuan, status, riwayat aktivitas, dan laporan, serta mengelola peran dan hak akses pengguna aplikasi sesuai kewenangannya.
+	Internal – administrator yang ditunjuk
+	Departemen Pengamanan
+	Berperan sebagai stakeholder proses bisnis yang membutuhkan pencatatan, pemantauan, dan dokumentasi aktivitas keluar area untuk mendukung keamanan serta administrasi.
+	Internal – pemilik proses bisnis
+	Departemen Teknologi Informasi
+	Mendukung perancangan, pengembangan, dan pemeliharaan aplikasi serta koordinasi integrasi autentikasi KUJANG ID melalui Portal SAKTI.
+	Internal – stakeholder teknis
+	
+
+5. As-Is Process (Proses Saat Ini)
+        Saat ini, proses perizinan keluar area Karyawan di PT Pupuk Kujang belum didukung oleh sistem pencatatan yang terintegrasi dan sistematis. Informasi mengenai alasan Karyawan meninggalkan area perusahaan, waktu keluar, serta waktu kembali belum terdokumentasi secara lengkap. Kondisi ini menyebabkan Departemen Pengamanan mengalami kesulitan dalam memantau Karyawan yang sedang berada di luar area perusahaan.
+        Proses yang berjalan saat ini belum menyediakan pencatatan terpusat yang dapat digunakan untuk memantau status perizinan dan menelusuri riwayat aktivitas keluar area secara efektif. Akibatnya, proses pengecekan ulang dan penelusuran informasi terkait aktivitas keluar area menjadi kurang optimal.
+Permasalahan utama pada proses saat ini meliputi:
+1. Pencatatan aktivitas: Informasi mengenai alasan keluar, waktu keluar, dan waktu kembali belum tercatat secara sistematis dan lengkap.
+2. Pemantauan Karyawan: Departemen Pengamanan mengalami kesulitan mengetahui Karyawan yang sedang berada di luar area perusahaan.
+3. Penelusuran informasi: Riwayat aktivitas keluar area belum terdokumentasi secara lengkap sehingga proses pengecekan ulang menjadi kurang efektif.
+4. Ketersediaan informasi: Belum tersedia pencatatan terintegrasi yang memudahkan pemantauan status perizinan dan penelusuran aktivitas keluar area.
+Berdasarkan kondisi tersebut, diperlukan proses perizinan yang lebih terstruktur melalui aplikasi, mulai dari pengajuan izin, persetujuan oleh Atasan, hingga validasi QR Code dan pencatatan waktu keluar oleh Petugas Pengamanan.
+6. To-Be Process (Proses Usulan)
+Proses usulan mengubah pengajuan dan verifikasi izin keluar area menjadi alur digital yang dapat ditelusuri. Karyawan membuat pengajuan, Atasan memberikan keputusan, dan QR Code digunakan oleh Petugas Pengamanan untuk memvalidasi izin serta mencatat waktu keluar. Admin memantau data dan laporan sesuai kewenangannya.
+No
+	Tahap
+	Aktor
+	Proses Usulan
+	Status / Output
+	1
+	Pengajuan izin
+	Karyawan
+	Karyawan masuk melalui KUJANG ID pada Portal SAKTI, membuka aplikasi, lalu mengisi form pengajuan (kategori keperluan, tipe izin, alasan, lokasi/tujuan, rencana jam keluar, dan perkiraan jam kembali untuk tipe Kembali ke Area) dan mengkonfirmasi ringkasan sebelum mengirim. Karyawan dapat membatalkan pengajuan selama tiket belum dipindai keluar.
+	Menunggu Persetujuan
+	2
+	Pemeriksaan dan keputusan
+	Atasan / Approver
+	Atasan meninjau rincian pengajuan lalu memilih Setujui (Approve) atau Tolak (Reject). Catatan persetujuan bersifat opsional; jika ditolak, alasan penolakan wajib diisi.
+	Disetujui / Ditolak
+	3
+	Penerbitan tiket QR
+	Sistem / Karyawan
+	Jika pengajuan disetujui, sistem otomatis menerbitkan tiket izin dengan QR Code yang terkait dengan karyawan dan pengajuan tersebut. QR Code tidak berlaku lagi bila tiket Kedaluwarsa, Dibatalkan, atau Selesai.
+	Tiket disetujui dengan QR Code
+	4
+	Validasi di pos jaga
+	Petugas Pengamanan
+	Petugas memindai QR Code. Sistem memeriksa apakah QR terkait dengan izin yang disetujui dan dapat diproses, sebelum waktu keluar dicatat. Jika QR tidak dapat dipindai, Petugas dapat menggunakan verifikasi manual dengan mencatat alasannya.
+	Waktu keluar tercatat; status Sedang di Luar (Kembali ke Area) atau Selesai (Pulang Mendahului)
+	5
+	Pencatatan masuk kembali
+	Karyawan / Sistem Gerbang 
+	Untuk izin Kembali ke Area, Karyawan menempelkan Kartu Akses Kujang pada card reader gerbang masuk. Sistem membaca identitas kartu, mencatat waktu masuk riil, mengevaluasi status keterlambatan (Tepat Waktu atau Terlambat), dan mengubah status tiket menjadi Selesai. 
+	Waktu masuk tercatat; status Selesai 
+	6
+	Monitoring dan dokumentasi
+	Admin
+	Admin memantau status pengajuan, tiket Terlambat dan Kedaluwarsa, riwayat aktivitas (audit trail), dan laporan perizinan sesuai hak akses. Rekap dapat diekspor ke Excel (.xlsx) dan PDF.
+	Data tersedia untuk pemantauan dan administrasi
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7. Business Rules
+Aturan bisnis berikut menjadi acuan bagi proses perizinan keluar area Karyawan. Aturan yang belum ditetapkan oleh pemilik proses bisnis ditandai untuk dikonfirmasi sebelum BRD difinalkan. 
+ID
+	Business Rule
+	Modul
+	BRULE-01
+	Pengajuan izin keluar area dibuat oleh Karyawan melalui aplikasi setelah autentikasi KUJANG ID, sehingga identitas pengguna dikenali oleh sistem.
+	Pengajuan
+	BRULE-02
+	Karyawan wajib mengisi Kategori Keperluan, Tipe Izin, Alasan, Lokasi/Tujuan, dan Rencana Jam Keluar sebelum mengirim pengajuan. Perkiraan Jam Kembali wajib diisi untuk tipe Kembali ke Area.
+	Pengajuan
+	BRULE-03
+	Setiap pengajuan harus diproses oleh Atasan yang berwenang terhadap Karyawan yang mengajukan izin.
+	Persetujuan
+	BRULE-04
+	Atasan dapat menyetujui atau menolak pengajuan. Alasan penolakan wajib diisi, sedangkan catatan persetujuan bersifat opsional. Pengajuan yang ditolak bersifat permanen dan tidak boleh diperlakukan sebagai izin yang disetujui.
+	Persetujuan
+	BRULE-05
+	QR Code diterbitkan setelah pengajuan disetujui Atasan (No Approval, No Exit). Khusus Jalur Izin Darurat (Emergency Pass), QR Code berstatus terkunci dan hanya diterbitkan/diaktifkan setelah terpenuhinya salah satu dari 3 metode otorisasi darurat: persetujuan langsung Atasan di aplikasi, input kode sandi, atau verifikasi scan wajah Atasan.
+	QR Code
+	BRULE-06
+	Petugas Pengamanan harus memvalidasi QR Code sebelum mencatat aktivitas keluar area.
+	Verifikasi
+	BRULE-07
+	Waktu keluar dicatat setelah QR Code dinyatakan valid dan proses keluar diproses oleh Petugas Pengamanan.
+	Pencatatan
+	BRULE-08
+	Sistem membatasi akses data dan fungsi berdasarkan peran Karyawan, Atasan, Petugas Pengamanan, dan Admin.
+	Hak Akses
+	BRULE-09
+	Admin berwenang memantau pengajuan, melihat riwayat aktivitas, dan mengakses laporan sesuai cakupan pengelolaannya; kewenangan ini tidak otomatis mencakup persetujuan izin atau perubahan catatan scan.
+	Monitoring
+	BRULE-10
+	Untuk tipe Kembali ke Area, pencatatan waktu kembali dilakukan melalui penempelan (Tap In) Kartu Akses Kujang pada card reader gerbang masuk. Sistem membaca identitas kartu karyawan, mencatat waktu masuk riil, mengevaluasi status keterlambatan (Tepat Waktu atau Terlambat), mengubah status tiket menjadi Selesai, dan memperbarui data headcount. Untuk tipe Pulang Mendahului, status langsung Selesai saat scan keluar di pos jaga. 
+	Pencatatan
+	BRULE-11
+	QR Code hanya berlaku untuk tiket yang telah disetujui dan tidak dapat dipakai ulang setelah tiket berstatus Selesai, Dibatalkan, atau Kadaluwarsa. Tiket yang tidak dipindai keluar. melewati batas toleransi rencana jam keluar 10 menit otomatis berstatus Kedaluwarsa. 
+	QR Code
+	BRULE-12
+	Karyawan dapat membatalkan pengajuan (sebelum maupun sesudah disetujui) selama tiket belum dipindai keluar di pos jaga; QR Code dinonaktifkan dan pembatalan dicatat pada riwayat aktivitas.
+	Pengajuan
+	BRULE-13
+	Aktivitas penting yang berkaitan dengan pengajuan, keputusan Atasan, dan pemindaian QR perlu memiliki riwayat yang dapat ditelusuri sesuai kebijakan perusahaan.
+	Audit Trail
+	BRULE-14
+	Pengajuan hanya diproses oleh Atasan langsung dari Karyawan yang mengajukan, sesuai struktur organisasi yang tersedia pada data perusahaan.
+	Persetujuan
+	BRULE-15
+	Sistem otomatis menandai tiket sebagai Terlambat apabila waktu operasional melewati perkiraan jam kembali (atau jam perpanjangan yang telah disetujui / dalam proses pengajuan) dan karyawan belum dipindai masuk di pos jaga. Sanksi atas keterlambatan berada di luar sistem.
+	Monitoring
+	BRULE-16
+	Verifikasi manual melalui pencarian NIP atau Nomor Tiket hanya dapat dilakukan oleh Petugas Pengamanan untuk tiket yang telah disetujui, dengan kewajiban mencatat alasan verifikasi manual ke dalam sistem.
+	Verifikasi
+	BRULE-17
+	Karyawan berstatus Sedang di Luar (tipe Kembali ke Area) berhak mengajukan permohonan perpanjangan estimasi jam kembali maksimal 1 (satu) kali sebelum estimasi jam kembali awal terlewati. Selama permohonan berstatus diajukan dan menunggu keputusan Atasan, tiket berada dalam status penangguhan sementara (Pending Extension Approval) sehingga tidak langsung ditandai Terlambat di Pos Jaga hingga batas waktu perpanjangan yang diajukan berakhir. 
+	Pengajuan dan Persetujuan 
+	BRULE-18
+	Apabila Karyawan telah tiba kembali dan melakukan penempelan (Tap In) Kartu Akses Kujang pada card reader gerbang sebelum Atasan sempat memberikan keputusan atas permohonan perpanjangan waktu, sistem secara otomatis mencatat kedatangan masuk (Tap In Sukses), mengubah status tiket menjadi Selesai, dan menutup permohonan perpanjangan secara otomatis (Auto-Close on Tap In) dengan mencatat waktu kedatangan riil pada log riwayat aktivitas (audit trail). 
+	
+
+	BRULE-19
+	Pengajuan Izin Darurat (Emergency Pass) hanya diperbolehkan untuk kondisi mendesak (K3/medis/musibah). Setelah form dikirimkan, QR Code darurat berada dalam status terkunci. QR Code baru akan aktif dan dapat dipindai di Pos Jaga setelah berhasil melewati salah satu dari 3 metode otorisasi darurat: (1) Konfirmasi manual/persetujuan langsung Atasan di aplikasi, (2) Input kode sandi yang dikirimkan sistem ke Atasan, atau (3) Verifikasi scan wajah Atasan melalui kamera perangkat Karyawan. Seluruh riwayat metode pembukaan kunci QR dicatat secara permanen pada log audit trail. 
+	Pengajuan dan Verifikasi Darurat
+	BRULE-20 
+	Tombol Unduh QR (PNG) dan Cetak Tiket / PDF hanya diaktifkan dan ditampilkan oleh sistem apabila tiket berada dalam status sah/aktif (Disetujui, Sedang di Luar, Terlambat, atau Selesai). Tombol ini otomatis disembunyikan total pada tiket berstatus Menunggu Persetujuan, Ditolak, Dibatalkan, atau Kedaluwarsa untuk mencegah penyalahgunaan dan pencetakan tiket yang belum berizin resmi. 
+	Keamanan dan Tiket Digital 
+	BRULE-21 
+	Sistem menyediakan fitur filter periode waktu dinamis (Hari Ini, Minggu Ini, Bulan Ini, Tahun Ini, dan Semua Waktu) pada riwayat Karyawan dan log Pos Jaga guna mempermudah audit penelusuran data operasional tanpa membebani performa peramban. 
+	Monitoring dan Riwayat 
+	BRULE-22
+	Karyawan hanya diperbolehkan memiliki maksimal 1 (satu) tiket izin berstatus aktif (Menunggu Persetujuan, Disetujui, Sedang di Luar, atau Terlambat). Sistem secara otomatis mengunci/menangguhkan formulir pengajuan baru sampai tiket aktif sebelumnya berstatus Selesai (telah Tap in di Pos Jaga), Ditolak oleh Atasan, atau Dibatalkan mandiri oleh Karyawan guna mencegah duplikasi izin ganda. 
+	Pengajuan Izin
+	
+
+8. Functional Requirements
+   1. Modul Login & Hak Akses
+
+
+ID
+	Kebutuhan Fungsional
+	Prioritas
+	FR-AUTH-01
+	Sistem menyediakan akses aplikasi bagi pengguna yang berwenang melalui autentikasi KUJANG ID (login dan verifikasi OTP) pada Portal SAKTI, serta mengidentifikasi peran pengguna setelah sesi diverifikasi.
+	Tinggi
+	FR-AUTH-02
+	Sistem membatasi menu, data, dan tindakan berdasarkan peran Karyawan, Atasan, Petugas Pengamanan, dan Admin.
+	Tinggi
+	
+
+   2. Modul Pengajuan Izin (Karyawan) 
+
+
+ID
+	Kebutuhan Fungsional
+	Prioritas
+	FR-KAR-01
+	Sistem menyediakan formulir untuk membuat pengajuan izin keluar area.
+	Tinggi
+	FR-KAR-02
+	Sistem menyediakan isian Kategori Keperluan (Dinas Kantor / Urusan Pribadi), Tipe Izin (Kembali ke Area / Pulang Mendahului), alasan, lokasi/tujuan, rencana jam keluar, dan perkiraan jam kembali (wajib untuk tipe Kembali ke Area).
+	Tinggi
+	FR-KAR-03
+	Sistem memvalidasi kelengkapan informasi wajib dan menampilkan dialog konfirmasi ringkasan sebelum pengajuan dikirim kepada Atasan.
+	Tinggi
+	FR-KAR-04
+	Sistem menampilkan status dan riwayat pengajuan milik Karyawan yang sedang login.
+	Tinggi
+	FR-KAR-05
+	Sistem menampilkan QR Code secara otomatis pada pengajuan yang telah disetujui dan menyediakan unduhan tiket QR dalam bentuk gambar atau PDF.
+	Tinggi
+	FR-KAR-06
+	Sistem memungkinkan Karyawan membatalkan pengajuan izin, sebelum maupun sesudah disetujui, selama Petugas Pengamanan belum mencatat waktu keluar melalui pemindaian QR Code. QR Code dinonaktifkan dan pembatalan tercatat pada riwayat aktivitas.
+	Sedang
+	FR-KAR-07
+	Sistem menyediakan fitur Ajukan Perpanjangan Waktu pada tiket aktif berstatus Sedang di Luar (tipe Kembali ke Area) sebelum jam kembali awal berakhir, dengan input perkiraan jam kembali baru dan alasan perpanjangan.
+	Sedang
+	FR-KAR-08
+	Sistem menyediakan tombol dan formulir kilat Izin Darurat (Emergency Pass) bagi Karyawan dengan isian lengkap: pemilihan Atasan, kategori keperluan, tipe kepulangan, lokasi tujuan, alasan kedaruratan, serta estimasi waktu. Setelah formulir dikirim, tiket diterbitkan dengan QR Code dalam kondisi terkunci. Sistem menyediakan 3 opsi verifikasi pembuka QR: (1) Menunggu persetujuan langsung Atasan di aplikasi, (2) Input kode sandi yang dikirimkan sistem ke Atasan, atau (3) Fitur kamera untuk verifikasi scan wajah Atasan. Setelah salah satu verifikasi terpenuhi, QR Code darurat otomatis aktif untuk dipindai di Pos Jaga. 
+	Tinggi
+	
+
+
+
+   3. Modul Persetujuan Izin (Atasan) 
+
+
+ID
+	Kebutuhan Fungsional
+	Prioritas
+	FR-ATASAN-01
+	Sistem menampilkan daftar pengajuan yang perlu ditinjau oleh Atasan sesuai kewenangannya.
+	Tinggi
+	FR-ATASAN-02
+	Sistem menampilkan rincian pengajuan agar Atasan dapat memeriksa informasi sebelum mengambil keputusan.
+	Tinggi
+	FR-ATASAN-03
+	Sistem menyediakan tindakan menyetujui atau menolak pengajuan izin.
+	Tinggi
+	FR-ATASAN-04
+	Sistem mencatat keputusan Atasan dan menampilkan hasilnya pada status pengajuan. Alasan penolakan wajib diisi; catatan persetujuan bersifat opsional.
+	Tinggi
+	FR-ATASAN-05
+	Sistem memberi notifikasi kepada Atasan ketika terdapat pengajuan baru yang perlu diputuskan. 
+	Sedang
+	FR-ATASAN-06
+	Sistem menampilkan notifikasi dan antrean peninjauan perpanjangan waktu dari bawahan, serta menyediakan aksi Setujui atau Tolak. Apabila bawahan telah melakukan Tap in terlebih dahulu, sistem secara otomatis menyelesaikan tiket dan menghapus permohonan dari antrian keputusan Atasan.
+	Sedang
+	FR-ATASAN-07
+	Sistem mengirimkan notifikasi darurat prioritas tinggi kepada Atasan begitu tiket darurat diterbitkan oleh bawahan, dan menyediakan riwayat justifikasi persetujuan susulan (post-audit review).
+	Sedang
+	
+
+   4. Modul Validasi QR & Pencatatan Keluar (Petugas Pengamanan) 
+
+
+ID
+	Kebutuhan Fungsional
+	Prioritas
+	FR-SEC-01
+	Sistem menyediakan fungsi pemindaian QR Code yang fleksibel bagi Petugas Pengamanan melalui 3 metode: Kamera peramban langsung (Live Camera), Unggah gambar QR dari galeri, dan Input manual kode tiket/barcode scanner. 
+	Tinggi
+	FR-SEC-02
+	Sistem menampilkan hasil validasi QR Code (Sah/Disetujui, Tidak Valid, Kedaluwarsa, Dibatalkan, atau Sudah Dipakai) agar Petugas Pengamanan dapat mengetahui apakah izin dapat diproses.
+	Tinggi
+	FR-SEC-03
+	Sistem mencatat waktu keluar setelah QR Code berhasil divalidasi, lalu mengubah status menjadi Sedang di Luar (tipe Kembali ke Area) atau Selesai (tipe Pulang Mendahului).
+	Tinggi
+	FR-SEC-04
+	Sistem menampilkan daftar Karyawan yang saat ini berstatus Sedang di Luar bagi Petugas Pengamanan.
+	Sedang
+	FR-SEC-05
+	Sistem menandai tiket darurat dengan visual pembeda (label khusus Darurat) pada antarmuka pemindai Pos Jaga, serta mencatat nama petugas pos jaga yang memvalidasi keberangkatan darurat karyawan.
+	Tinggi
+	
+
+   5. Modul Monitoring dan Administrasi (Admin)
+
+
+ID
+	Kebutuhan Fungsional
+	Prioritas
+	FR-ADM-01
+	Sistem menyediakan tampilan monitoring bagi Admin untuk melihat pengajuan dan status perizinan dalam cakupan pengelolaannya.
+	Tinggi
+	FR-ADM-02
+	Sistem memungkinkan Admin melihat riwayat aktivitas perizinan untuk kebutuhan pemantauan dan penelusuran.
+	Tinggi
+	FR-ADM-03
+	Sistem menyediakan laporan atau rekap perizinan bagi Admin, dapat diekspor ke Excel (.xlsx) dan diunduh dalam format PDF.
+	Sedang
+	FR-ADM-04
+	Sistem mencatat setiap perubahan status pengajuan beserta pelaku, waktu, dan perubahan yang terjadi sebagai riwayat aktivitas
+	Tinggi
+	FR-ADM-05
+	Sistem secara otomatis menandai tiket sebagai Terlambat apabila perkiraan jam kembali (termasuk penyesuaian jam perpanjangan waktu) terlewati tanpa pemindaian masuk, dan sebagai Kadaluarsa apabila tiket yang disetujui tidak dipindai keluar melewati batas toleransi rencana jam keluar; status tersebut ditampilkan pada monitoring.
+	Tinggi
+	FR-ADM-06
+	Sistem memungkinkan Admin memetakan peran dan hak akses pengguna aplikasi (Karyawan, Atasan, Petugas Pengamanan, Admin) berdasarkan akun dari KUJANG ID.
+	Sedang
+	
+
+
+
+
+
+   6. Modul Visualisasi dan Analisis Data (Dasboard Charts)
+
+
+ID
+	Kebutuhan Fungsional
+	Prioritas
+	FR-CHART-01
+	Sistem menyajikan diagram donat interaktif (Donut Chart) pada dashboard Karyawan yang menampilkan komposisi izin (Dinas Kantor, Urusan Pribadi, dan Izin Darurat), dilengkapi sensor sentuhan/kursor presisi tinggi (Hole Protector & Arc Sensors) yang menampilkan angka total saat idle dan persentase rincian tunggal saat warna disorot. 
+	Sedang 
+	FR-CHART-02
+	Sistem menyajikan diagram batang interaktif (Bar Chart) pada dashboard Atasan yang menampilkan tren volume pengajuan izin tim per hari kerja (Senin s/d Jumat), dilengkapi sensor batang dinamis dan indikator hari puncak (peak day). 
+	Sedang 
+	FR-CHART-03
+	Sistem menyajikan grafik area/garis (Traffic Line Chart) lalu lintas jam sibuk gerbang (07:00–17:00) dan diagram batang horizontal sebaran frekuensi izin per departemen pada dashboard Admin untuk mendukung pengawasan lalu lintas kawasan industri. 
+	Sedang 
+	
+
+9. Non-Functional Requirements
+
+
+ID
+	Kebutuhan Non Fungsional
+	Kategori
+	NFR-SEC-01
+	Aplikasi harus membatasi akses data dan fungsi sesuai peran pengguna yang telah ditetapkan.
+	Keamanan
+	NFR-SEC-02
+	Informasi pengajuan dan data aktivitas Karyawan harus terlindungi dari akses atau perubahan oleh pengguna yang tidak berwenang.
+	Keamanan
+	NFR-SEC-03
+	Proses pencatatan keluar area harus didahului validasi QR Code sesuai aturan bisnis.
+	Keamanan
+	NFR-AUD-01
+	Aktivitas penting, termasuk pengajuan, keputusan Atasan, dan pencatatan scan, perlu memiliki riwayat yang dapat ditelusuri sesuai kebijakan perusahaan.
+	Audit Trail
+	NFR-REL-01
+	Hasil validasi QR Code harus disajikan dengan jelas agar Petugas Pengamanan dapat membedakan izin yang dapat diproses dari izin yang tidak valid.
+	Keandalan
+	NFR-REL-02
+	Apabila QR Code tidak dapat dipindai atau divalidasi (misalnya layar ponsel rusak atau baterai habis), Petugas Pengamanan dapat menggunakan verifikasi manual atas tiket yang telah disetujui dengan mencatat alasannya.
+	Keandalan
+	NFR-PERF-01
+	Target waktu respons, jumlah pengguna, dan kebutuhan ketersediaan sistem mengikuti standar aplikasi internal yang berlaku; nilai targetnya perlu dikonfirmasi kepada tim TI. [PERLU KONFIRMASI]
+	Performa dan Ketersediaan
+	NFR-UX-01
+	Informasi status izin dan hasil validasi QR harus ditampilkan dengan istilah yang jelas dan mudah dipahami oleh masing-masing aktor.
+	Kemudahan Penggunaan
+	
+
+10. Use Case
+10.1 Modul Login & Hak Akses
+ID
+	Nama Use Case
+	Aktor
+	Deskripsi Singkat
+	UC-01
+	Masuk ke Aplikasi
+	Karyawan, Atasan, Petugas Pengamanan, Admin
+	Pengguna masuk melalui autentikasi KUJANG ID (login dan verifikasi OTP) pada Portal SAKTI, lalu membuka aplikasi Perizinan Keluar Area.
+	UC-02
+	Mengakses Fungsi Sesuai Hak Akses
+	Karyawan, Atasan, Petugas Pengamanan, Admin
+	Pengguna mengakses menu dan fungsi sesuai peran serta kewenangannya.
+	10.2 Modul Pengajuan Izin (Karyawan)
+ID
+	Nama Use Case
+	Aktor
+	Deskripsi Singkat
+	UC-03
+	Membuat Pengajuan Izin
+	Karyawan
+	Karyawan mengisi kategori keperluan, tipe izin, alasan, lokasi atau tujuan, rencana waktu keluar, serta perkiraan waktu kembali apabila diperlukan.
+	UC-04
+	Mengonfirmasi dan Mengirim Pengajuan
+	Karyawan
+	Karyawan memeriksa ringkasan informasi pengajuan sebelum mengirimkannya kepada Atasan.
+	UC-05
+	Melihat Daftar dan Status Pengajuan
+	Karyawan
+	Karyawan melihat tiket miliknya, memantau status pengajuan, serta mencari dan memfilter data berdasarkan rentang tanggal atau status.
+	UC-06
+	Melihat Detail Tiket dan Riwayat Aktivitas
+	Karyawan
+	Karyawan melihat informasi pengajuan, detail keperluan, dan riwayat perubahan status tiket miliknya.
+	UC-07
+	Menampilkan dan Mengunduh QR Code
+	Karyawan
+	Karyawan menampilkan QR Code setelah izin disetujui dan dapat mengunduh tiket QR dalam bentuk gambar atau PDF.
+	UC-08
+	Membatalkan Pengajuan Izin
+	Karyawan
+	Karyawan membatalkan tiket izin secara mandiri selama tiket belum dipindai keluar di pos jaga.
+	UC-09
+	Menerima Notifikasi Status Pengajuan
+	Karyawan
+	Karyawan menerima pembaruan status pengajuan (Menunggu Persetujuan, Disetujui, Ditolak, atau Dibatalkan) pada dashboard setelah keputusan atau pembatalan ditetapkan.
+	UC-10
+	Mengajukan Perpanjangan Waktu Kembali
+	Karyawan
+	Karyawan yang sedang berada di luar area mengajukan tambahan waktu kembali sebelum batas waktu awal berakhir dengan menyertakan alasan kendala di lapangan.
+	UC-11
+	Mengajukan Izin Darurat (Emergency Pass)
+	Karyawan
+	Karyawan mengisi formulir darurat lengkap. Tiket diterbitkan dengan status QR terkunci. Karyawan melakukan aktivasi QR melalui salah satu dari 3 metode otorisasi darurat: persetujuan langsung Atasan di aplikasi, input kode sandi/OTP dari Atasan, atau scan wajah Atasan via kamera. Setelah terverifikasi, QR Code darurat aktif untuk dipindai di Pos Jaga. 
+	UC-12 
+	Menganalisis Visualisasi Diagram Interaktif 
+	Karyawan
+	Pengguna melihat dan berinteraksi dengan diagram visual statistik  
+	10.3 Modul Persetujuan Izin (Atasan)
+
+
+ID
+	Nama Use Case
+	Aktor
+	Deskripsi Singkat
+	UC-13
+	Melihat Antrian Persetujuan
+	Atasan
+	Atasan melihat pengajuan dari bawahan langsung yang perlu diputuskan, serta mencari atau memfilter daftar pengajuan berdasarkan rentang tanggal dan status.
+	UC-14
+	Meninjau Detail Pengajuan
+	Atasan
+	Atasan memeriksa informasi Karyawan, detail keperluan, rencana waktu keluar, dan perkiraan waktu kembali sebelum memberikan keputusan.
+	UC-15
+	Menyetujui Pengajuan Izin
+	Atasan
+	Atasan menyetujui pengajuan. Catatan persetujuan bersifat opsional, status menjadi Disetujui, dan sistem menerbitkan QR Code.
+	UC-16
+	Menolak Pengajuan Izin
+	Atasan
+	Atasan menolak pengajuan dengan mengisi alasan penolakan (wajib). Status pengajuan berubah menjadi Ditolak dan hasilnya ditampilkan pada dashboard Karyawan.
+	UC-17
+	Memutuskan Permohonan Perpanjangan Waktu
+	Atasan
+	Atasan meninjau dan menyetujui atau menolak permohonan tambahan waktu dari bawahan, atau sistem menutup permohonan secara otomatis jika bawahan telah tiba dan Tap in terlebih dahulu.
+	UC-18
+	Menganalisis Visualisasi Diagram Interaktif
+	Atasan
+	Pengguna melihat dan berinteraksi dengan diagram visual statistik 
+	10.4 Modul Validasi QR & Pencatatan Keluar (Petugas Pengamanan) 
+        
+ID
+	Nama Use Case
+	Aktor
+	Deskripsi Singkat
+	UC-19
+	Memindai dan Memvalidasi QR Code
+	Petugas Pengamanan
+	Petugas memindai QR Code melalui 3 metode fleksibel: kamera perangkat langsung, unggah berkas gambar QR, atau input kode tiket manual. Sistem menampilkan hasil validasi keabsahan tiket secara instan. 
+	UC-20
+	Mencatat Waktu Keluar (Scan Out)
+	Petugas Pengamanan
+	Petugas memindai tiket yang valid. Sistem mencatat waktu keluar secara otomatis dan memperbarui status menjadi Sedang di Luar untuk izin kembali ke area atau Selesai untuk izin pulang mendahului.
+	UC-21
+	Mencatat Waktu Masuk Kembali (Tap In) 
+	Karyawan / Sistem Gerbang 
+	Karyawan menempelkan Kartu Akses Kujang  pada card reader gerbang masuk. Sistem membaca identitas kartu. mencatat waktu masuk. menandai status Tepat Waktu atau Terlambat. memperbarui status tiket menjadi Selesai, dan membuka akses masuk.
+	UC-22
+	Melakukan Verifikasi Manual Izin
+	Petugas Pengamanan
+	Petugas mencari tiket yang telah disetujui menggunakan NIP atau nomor tiket apabila QR Code tidak dapat dipindai, kemudian mencatat alasan verifikasi manual.
+	UC-23
+	Melihat Ringkasan Pemantauan Pos Jaga
+	Petugas Pengamanan
+	Petugas melihat daftar dan jumlah Karyawan yang tercatat sedang berada di luar area perusahaan.
+	UC-24
+	Memvalidasi Tiket Darurat di Pos Jaga
+	Petugas Pengamanan
+	Petugas memindai QR darurat, memastikan kondisi fisik karyawan/kendaraan darurat di gerbang, dan memproses Scan Out darurat.
+	10.5 Modul Monitoring dan Administrasi (Admin) 
+        
+ID
+	Nama Use Case
+	Aktor
+	Deskripsi Singkat
+	UC-25
+	Melihat Dashboard Monitoring
+	Admin
+	Admin melihat ringkasan statistik perizinan harian, status pengajuan, antrian persetujuan, dan daftar karyawan yang sedang berada di luar area secara real-time. 
+	UC-26
+	Memantau Status Terlambat dan Kedaluwarsa
+	Admin
+	Admin memantau tiket yang otomatis ditandai Terlambat karena melewati jam kembali tanpa pemindaian masuk, serta tiket yang Kedaluwarsa karena tidak digunakan keluar. 
+	UC-27
+	Melihat Riwayat Aktivitas (Audit Trail)
+	Admin
+	Admin menelusuri log riwayat aktivitas lengkap berdasarkan waktu, pelaku, dan perubahan status untuk keperluan investigasi keamanan. 
+	UC-28
+	Mengekspor Rekap Perizinan (Excel)
+	Admin
+	Admin mengekspor  rekapitulasi data perizinan ke dalam format excel (.xlsx).
+	UC-29
+	Mengunduh Laporan Pengamanan (PDF)
+	Admin
+	Admin mengunduh lembar laporan rekapitulasi resmi pengamanan dalam format dokumen cetak PDF. 
+	UC-30
+	Mengelola Peran dan Hak Akses
+	Admin
+	Admin memetakan peran dan hak akses pengguna aplikasi (Karyawan, Atasan, Petugas Pengamanan, Admin) sesuai kewenangannya; master akun dan data pegawai dikelola melalui KUJANG ID.
+	UC-31
+	Menganalisis Visualisasi Diagram Interaktif 
+	Admin
+	Pengguna melihat dan berinteraksi dengan diagram visual statistik 
+	
+
+11. Business Process Flow (BPMN)
+        11.1 Alur Proses Authentication & Access (Semua Aktor)
+   
+11.2 Alur Proses Request (Pengajuan Izin Karyawan)
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.3 Alur Proses Cancel Request
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.4 Alur Proses Pengajuan Perpanjangan Waktu Izin Keluar Pabrik (Extend Return Time)
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.5 Alur Proses Pengajuan dan Validasi Izin Darurat (Emergency Pass)
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.6 Alur Proses Approval
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.7 Alur Proses Security Scan Out  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.8 Alur Proses Pencatatan Masuk Kembali (Tap In Kartu Akses) 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.9 Alur Proses Monitoring
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11.10 Alur Proses Report Export
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+12. Lampiran
+Lampiran A. Matrix Hak Akses
+Fitur
+	Karyawan
+	Atasan
+	Petugas
+Pengamanan
+	Admin
+	Login
+	Ya
+	Ya
+	Ya
+	Ya
+	Dashboard
+	Ya
+	Ya
+	Ya
+	Ya
+	Pengajuan Izin Keluar Area
+	Ya
+	–
+	–
+	–
+	Melihat Status dan Riwayat Pengajuan Sendiri
+	Ya
+	–
+	–
+	–
+	Menampilkan QR Code Izin yang Disetujui
+	Ya
+	–
+	–
+	–
+	Membatalkan Pengajuan Izin (sebelum dipindai keluar)
+	Ya
+	–
+	–
+	–
+	Melihat Daftar Pengajuan sesuai Kewenangan
+	–
+	Ya
+	–
+	–
+	Meninjau Detail Pengajuan
+	–
+	Ya
+	–
+	–
+	Menyetujui Pengajuan Izin
+	–
+	Ya
+	–
+	–
+	Menolak Pengajuan Izin
+	–
+	Ya
+	–
+	–
+	Memindai dan Memvalidasi QR Code
+	–
+	–
+	Ya
+	–
+	Mencatat Waktu Keluar melalui Pemindaian Valid
+	–
+	–
+	Ya
+	–
+	Mencatat Waktu Masuk Kembali (Tap In) 
+	Ya
+	–
+	–
+	–
+	Verifikasi Manual Izin (NIP / Nomor Tiket)
+	–
+	–
+	Ya
+	–
+	Melihat Daftar Karyawan Sedang di Luar (Headcount)
+	–
+	–
+	Ya
+	Ya
+	Melacak Status dan Riwayat Izin Karyawan
+	–
+	Ya
+	Ya
+	–
+	Monitoring Status Perizinan
+	–
+	–
+	–
+	Ya
+	Melihat Riwayat Aktivitas Perizinan
+	–
+	–
+	–
+	Ya
+	Melihat Laporan/Rekap Perizinan
+	–
+	–
+	–
+	Ya
+	Memantau Tiket Terlambat dan Kedaluwarsa
+	–
+	–
+	–
+	Ya
+	Ekspor Rekap (.xlsx) dan Unduh Laporan PDF
+	–
+	–
+	–
+	Ya
+	Mengelola Peran dan Hak Akses Pengguna
+	–
+	–
+	–
+	Ya
+	Mengajukan Perpanjangan Waktu Kembali
+	Ya
+	–
+	–
+	–
+	Menyetujui / Menolak Perpanjangan Waktu
+	–
+	Ya
+	–
+	–
+	Mengajukan Izin Darurat (Emergency Pass)
+	Ya
+	-
+	-
+	-
+	Menerima Notifikasi Kedaruratan Bawahan
+	-
+	Ya
+	-
+	-
+	Memvalidasi & Scan Out Izin Darurat di Gerbang
+	-
+	-
+	Ya
+	-

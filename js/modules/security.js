@@ -95,6 +95,9 @@ function renderSecurityDashboard() {
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               ${window.getStatusPill(t.status)}
+              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 700;" onclick="executeScanIn('${t.id}')" title="Proses Scan In (Kembali Masuk Pabrik)">
+                Scan In
+              </button>
             </div>
           </div>
         `;
@@ -215,9 +218,15 @@ function renderSecurityCards(list, containerElement) {
 
               <div style="display:flex; gap:0.4rem;">
                 ${isReadyExit ? `
-                  <button class="btn-quick-scan-out" onclick="executeScanOut('${t.id}')">
+                  <button class="btn-quick-scan-out" onclick="executeScanOut('${t.id}')" title="Proses Scan Out (Meninggalkan Kawasan Pabrik)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    Proses Scan Out
+                    <span>Proses Scan Out</span>
+                  </button>
+                ` : ''}
+                ${(isOutside || isOverdue) ? `
+                  <button class="btn-quick-scan-in" onclick="executeScanIn('${t.id}')" title="Proses Scan In (Kembali Masuk Kawasan Pabrik)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span>Proses Scan In</span>
                   </button>
                 ` : ''}
               </div>
@@ -436,14 +445,24 @@ function executeVerification(inputQuery) {
   }
 
   // Status feedback alerts:
-  if (ticket.status === 'Kedaluwarsa') {
+  if (ticket.isEmergency && ticket.emergencyLocked) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`🚨 Akses Ditolak: Tiket Izin Darurat #${ticket.id} masih berstatus TERKUNCI! Belum dilakukan otorisasi darurat Atasan. Dilarang keluar!`, 'danger');
+    }
+  } else if (ticket.status === 'Kedaluwarsa') {
     if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} telah KEDALUWARSA dan hangus. Dilarang keluar pabrik!`, 'danger');
   } else if (ticket.status === 'Menunggu Persetujuan') {
     if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} belum disetujui Atasan. Dilarang keluar!`, 'warning');
   } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah keluar pabrik. Siap diproses Scan In (Masuk Kembali).`, 'info');
   } else if (ticket.status === 'Disetujui') {
-    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} valid dan disetujui. Siap diproses Scan Out!`, 'success');
+    if (ticket.isEmergency) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`🚨 PERINGATAN POS JAGA: Tiket Izin Darurat #${ticket.id} SAH (Diotorisasi: ${ticket.emergencyUnlockedBy || 'Resmi'}). Pastikan periksa kondisi fisik/kendaraan darurat sebelum Scan Out!`, 'warning');
+      }
+    } else {
+      if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} valid dan disetujui. Siap diproses Scan Out!`, 'success');
+    }
   } else if (ticket.status === 'Selesai') {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah selesai diproses.`, 'info');
   }
@@ -464,6 +483,13 @@ function executeScanOut(ticketId) {
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
+
+  if (ticket.isEmergency && ticket.emergencyLocked) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Akses Ditolak: Tiket Darurat #${ticket.id} masih TERKUNCI! Diperlukan otorisasi Atasan terlebih dahulu.`, 'danger');
+    }
+    return;
+  }
 
   if (ticket.scanOutTime) {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah pernah tercatat Scan Out (${ticket.scanOutTime}). Tidak dapat diproses berulang!`, 'danger');
@@ -493,7 +519,28 @@ function executeScanOut(ticketId) {
   ticket.scanOutTime = `${nowFormatted} (${gate})`;
   if (!ticket.timeline) ticket.timeline = [];
 
-  if (ticket.type === 'Pulang Mendahului') {
+  if (ticket.isEmergency) {
+    ticket.securityOfficerOut = `${securityName} (${gate})`;
+    if (ticket.type === 'Pulang Mendahului') {
+      ticket.status = 'Selesai';
+      ticket.timeline.push({
+        event: 'Scan Out Gerbang Darurat (Pulang)',
+        time: nowFormatted,
+        by: `${securityName} (${gate})`,
+        desc: `Petugas Pos Jaga memvalidasi fisik karyawan/ambulans dan mencatat justifikasi kedaruratan. Izin pulang mendahului selesai diproses. Otorisasi sebelumnya: ${ticket.emergencyUnlockedBy || 'Resmi'}.`
+      });
+      if (typeof window.showToast === 'function') window.showToast(`🚨 Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id} (Pulang Mendahului).`, 'success');
+    } else {
+      ticket.status = 'Sedang di Luar';
+      ticket.timeline.push({
+        event: 'Scan Out Gerbang Darurat',
+        time: nowFormatted,
+        by: `${securityName} (${gate})`,
+        desc: `Petugas Pos Jaga memvalidasi fisik karyawan/ambulans dan mencatat justifikasi kedaruratan di gerbang. Status: Sedang di Luar. Otorisasi sebelumnya: ${ticket.emergencyUnlockedBy || 'Resmi'}.`
+      });
+      if (typeof window.showToast === 'function') window.showToast(`🚨 Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id}. Gerbang dibuka.`, 'success');
+    }
+  } else if (ticket.type === 'Pulang Mendahului') {
     ticket.status = 'Selesai';
     ticket.timeline.push({
       event: 'Scan Out Pos Jaga (Pulang)',
@@ -602,6 +649,11 @@ function executeScanIn(ticketId) {
 
   renderSecurityView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.renderAdminView === 'function') window.renderAdminView();
+  if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
 }
 
 // CAMERA CONTROLLER

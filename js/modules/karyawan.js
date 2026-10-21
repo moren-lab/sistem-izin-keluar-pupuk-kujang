@@ -6,7 +6,7 @@
 function updateKaryawanMetrics() {
   const ticketsList = window.ticketsList || [];
   const total = ticketsList.length;
-  const pending = ticketsList.filter(t => t.status === 'Menunggu Persetujuan').length;
+  const pending = ticketsList.filter(t => t.status !== 'Dibatalkan' && t.status !== 'Ditolak' && (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')).length;
   const approved = ticketsList.filter(t => t.status === 'Disetujui').length;
   const outside = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat').length;
   const completed = ticketsList.filter(t => t.status === 'Selesai').length;
@@ -33,8 +33,9 @@ function updateKaryawanMetrics() {
   if (headingPendingBadge) headingPendingBadge.textContent = pending;
 
   // Active permit badge for Karyawan sidebar & mobile bottom nav (Pengajuan Saya)
-  const activeCount = ticketsList.filter(t => 
-    t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'
+  const activeCount = ticketsList.filter(t =>
+    t.status !== 'Dibatalkan' && t.status !== 'Ditolak' && t.status !== 'Selesai' && t.status !== 'Kedaluwarsa' &&
+    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat')
   ).length;
   if (sidebarEmpActiveBadge) {
     sidebarEmpActiveBadge.textContent = activeCount;
@@ -73,7 +74,8 @@ function filterEmpTickets() {
 
     // 1. Sidebar tab mode
     if (currentKaryawanNav === 'pengajuan') {
-      const isActive = t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
+      const isActive = t.status !== 'Dibatalkan' && t.status !== 'Ditolak' && t.status !== 'Selesai' && t.status !== 'Kedaluwarsa' &&
+        (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat');
       if (!isActive) return false;
     } else if (currentKaryawanNav === 'riwayat') {
       const isHistory = t.status === 'Selesai' || t.status === 'Kedaluwarsa' || t.status === 'Ditolak' || t.status === 'Dibatalkan';
@@ -111,8 +113,72 @@ function renderKaryawanDashboard() {
 
   if (karyawanDashboardActiveWidget) {
     if (activeTicket) {
+      const isEmergencyLocked = activeTicket.isEmergency && activeTicket.status === 'Menunggu Otorisasi Darurat';
       const isOverdue = activeTicket.status === 'Terlambat';
-      const canCancel = activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Disetujui';
+      const canCancel = activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat' || (activeTicket.status === 'Disetujui' && !activeTicket.scanOutTime);
+
+      if (isEmergencyLocked) {
+        karyawanDashboardActiveWidget.innerHTML = `
+          <div class="active-permit-standout" style="border: 2px solid #f43f5e; background: #fff1f2;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(225, 29, 72, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; animation: pulse 1.5s infinite;">
+                  🔒
+                </div>
+                <div>
+                  <div style="font-size: 0.725rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; color: #be123c;">
+                    IZIN KELUAR DARURAT (QR TERKUNCI)
+                  </div>
+                  <div style="font-size: 1.2rem; font-weight: 800; font-family: var(--font-mono); color: #9f1239; margin-top: 1px;">
+                    ${activeTicket.id}
+                  </div>
+                </div>
+              </div>
+              <div>${window.getStatusPill(activeTicket.status)}</div>
+            </div>
+
+            <div style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; font-size: 0.825rem; background: rgba(255,255,255,0.95); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid #fecdd3;">
+              <div>
+                <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Tujuan</span>
+                <strong style="color: var(--text-primary);">${activeTicket.destination}</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Alasan Kedaruratan</span>
+                <strong style="color: #9f1239;">"${activeTicket.reason}"</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Atasan Otorisasi</span>
+                <strong style="color: var(--text-primary);">${activeTicket.approverName || 'Ir. Hendra Gunawan / Dewi Sartika'}</strong>
+              </div>
+              <div>
+                <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Cara Otorisasi Terpilih</span>
+                <strong style="color: #be123c;">
+                  ${activeTicket.selectedMethod === 'passcode' ? '🔑 Input Kata Sandi / OTP' : (activeTicket.selectedMethod === 'facescan' ? '🤳 Scan Wajah Atasan' : '📱 Persetujuan di App')}
+                </strong>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div style="font-size: 0.775rem; color: #881337;">
+                ${activeTicket.selectedMethod === 'passcode' 
+                  ? '⏳ <strong>Menunggu Kode Sandi:</strong> Hubungi Atasan via Telp/WA untuk meminta 6-digit Sandi Darurat, lalu masukkan untuk membuka QR.'
+                  : (activeTicket.selectedMethod === 'facescan' 
+                    ? '🤳 <strong>Menunggu Scan Wajah:</strong> Hadapkan kamera ponsel ke wajah Atasan yang mendampingi di lokasi.'
+                    : '📱 <strong>Menunggu di App:</strong> Menunggu Atasan mengklik Setujui Langsung di aplikasinya.')}
+              </div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn-cancel-ticket" style="padding: 0.45rem 0.85rem; font-size: 0.775rem;" onclick="openCancelModal('${activeTicket.id}')">
+                  Batalkan Izin
+                </button>
+                <button class="btn-approve" style="padding: 0.45rem 0.95rem; font-size: 0.775rem; background: #e11d48; font-weight: 800;" onclick="openEmergencyUnlockModal('${activeTicket.id}')">
+                  ⚡ Buka / Ubah Cara Otorisasi (3 Opsi)
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
 
       karyawanDashboardActiveWidget.innerHTML = `
         <div class="active-permit-standout ${isOverdue ? 'overdue' : ''}">
@@ -158,10 +224,10 @@ function renderKaryawanDashboard() {
           <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div style="font-size: 0.775rem; color: var(--text-secondary);">
               ${activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan'
-                ? '<strong style="color: #b45309;">⏱️ Permohonan perpanjangan waktu sedang menunggu persetujuan Atasan (Grace Period Aktif).</strong>'
-                : (isOverdue 
-                    ? '<strong style="color: var(--rose-danger);">Segera kembali ke pabrik dan lakukan Scan In di Pos 1 Gerbang Utama!</strong>'
-                    : 'Tunjukkan QR Code pada petugas keamanan di Pos 1 saat melewati gerbang pabrik.')}
+          ? '<strong style="color: #b45309;">⏱️ Permohonan perpanjangan waktu sedang menunggu persetujuan Atasan (Grace Period Aktif).</strong>'
+          : (isOverdue
+            ? '<strong style="color: var(--rose-danger);">Segera kembali ke pabrik dan lakukan Scan In di Pos 1 Gerbang Utama!</strong>'
+            : 'Tunjukkan QR Code pada petugas keamanan di Pos 1 saat melewati gerbang pabrik.')}
             </div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               ${canCancel ? `
@@ -278,6 +344,8 @@ function renderKaryawanView() {
 
   // CHECK ACTIVE TICKET
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
+  const btnOpenEmergencyModal = document.getElementById('btnOpenEmergencyModal');
+
   if (activeTicket && currentKaryawanNav !== 'riwayat') {
     if (activePermitBanner) {
       activePermitBanner.style.display = 'flex';
@@ -290,6 +358,17 @@ function renderKaryawanView() {
       }
     }
 
+    if (btnOpenEmergencyModal) {
+      btnOpenEmergencyModal.classList.add('has-active-permit');
+      btnOpenEmergencyModal.title = 'Pengajuan darurat ditangguhkan: Anda masih memiliki tiket aktif (' + activeTicket.id + ')';
+      btnOpenEmergencyModal.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>Izin Darurat (Ditangguhkan)</span>
+      `;
+    }
+
     if (btnOpenNewRequestModal) {
       btnOpenNewRequestModal.classList.add('has-active-permit');
       btnOpenNewRequestModal.title = 'Pengajuan ditangguhkan: Anda masih memiliki tiket aktif (' + activeTicket.id + ')';
@@ -300,6 +379,17 @@ function renderKaryawanView() {
     }
   } else {
     if (activePermitBanner) activePermitBanner.style.display = 'none';
+    if (btnOpenEmergencyModal) {
+      btnOpenEmergencyModal.classList.remove('has-active-permit');
+      btnOpenEmergencyModal.title = 'Pengajuan Izin Darurat';
+      btnOpenEmergencyModal.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+        </svg>
+        <span>Izin Darurat</span>
+      `;
+    }
     if (!activeTicket && btnOpenNewRequestModal) {
       btnOpenNewRequestModal.classList.remove('has-active-permit');
       btnOpenNewRequestModal.title = 'Buat Pengajuan Izin Baru';
@@ -318,9 +408,17 @@ function renderKaryawanView() {
 
   // 2. PENGAJUAN SAYA (ACTIVE TICKETS)
   if (currentKaryawanNav === 'pengajuan') {
-    const activeList = ticketsList.filter(t => 
-      (t.applicantNip === myNip || !t.applicantNip) && 
-      (t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat')
+    const activeList = ticketsList.filter(t =>
+      (t.applicantNip === myNip || !t.applicantNip) &&
+      t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      t.status !== 'Kedaluwarsa' &&
+      (t.status === 'Menunggu Persetujuan' ||
+       t.status === 'Menunggu Otorisasi Darurat' ||
+       t.status === 'Disetujui' ||
+       t.status === 'Sedang di Luar' ||
+       t.status === 'Terlambat')
     );
 
     if (activeList.length === 0) {
@@ -367,10 +465,11 @@ function renderEmpCards(list, containerElement) {
   target.innerHTML = `
     <div class="cards-grid">
       ${list.map(t => {
-        const canCancel = t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui';
-        const isDinas = t.category === 'Dinas Kantor';
+    const isEmergLocked = t.isEmergency && t.status === 'Menunggu Otorisasi Darurat';
+    const canCancel = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || (t.status === 'Disetujui' && !t.scanOutTime));
+    const isDinas = t.category === 'Dinas Kantor';
 
-        return `
+    return `
           <div class="card-item">
             <div class="card-top">
               <div>
@@ -405,6 +504,29 @@ function renderEmpCards(list, containerElement) {
                 <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</div>
               </div>
             </div>
+
+            ${isEmergLocked ? `
+              <div style="background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 0.75rem 0.85rem; font-size: 0.8rem; margin-top: 0.4rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.25rem;">
+                  <span style="font-weight: 800; font-size: 0.825rem; color: #991b1b; display: flex; align-items: center; gap: 0.35rem;">
+                    🚨 IZIN DARURAT TERKUNCI (Perlu Otorisasi)
+                  </span>
+                  <span style="font-size: 0.725rem; background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5;">
+                    Metode: ${t.selectedMethod === 'passcode' ? '🔑 Input Kata Sandi' : (t.selectedMethod === 'facescan' ? '📷 Scan Wajah' : '📱 Persetujuan App')}
+                  </span>
+                </div>
+                <p style="font-size: 0.775rem; color: #7f1d1d; margin: 0 0 0.5rem 0; line-height: 1.4;">
+                  ${t.selectedMethod === 'passcode'
+                    ? 'Karyawan sedang menunggu Kata Sandi Otorisasi dari Atasan. Minta kode 6 digit ke Atasan (Ir. Hendra Gunawan / Dewi Sartika) lalu masukkan di sini untuk membuka tiket.'
+                    : (t.selectedMethod === 'facescan'
+                      ? 'Arahkan kamera ke wajah Atasan yang mendampingi di lokasi untuk verifikasi biometrik di tempat.'
+                      : 'Menunggu Atasan melakukan konfirmasi & persetujuan langsung 1-klik di aplikasi Atasan.')}
+                </p>
+                <button type="button" class="btn-emergency" style="width: 100%; justify-content: center; font-weight: 700; font-size: 0.8rem; padding: 0.5rem; background: #dc2626; color: #fff; border-color: #b91c1c; cursor: pointer;" onclick="window.openEmergencyUnlockModal('${t.id}', '${t.selectedMethod || 'app'}')">
+                  ⚡ ${t.selectedMethod === 'passcode' ? '🔑 Input Kata Sandi Otorisasi' : (t.selectedMethod === 'facescan' ? '📷 Mulai Scan Wajah Atasan' : '📱 Buka Otorisasi / Ubah Metode')}
+                </button>
+              </div>
+            ` : ''}
 
             ${t.scanOutTime ? `
               <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.5rem 0.75rem; font-size:0.75rem; color:#166534;">
@@ -448,6 +570,12 @@ function renderEmpCards(list, containerElement) {
                   <span>Lihat Rincian</span>
                 </button>
 
+                ${isEmergLocked ? `
+                  <button class="btn-primary" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px; background:#dc2626; border-color:#dc2626;" onclick="window.openEmergencyUnlockModal('${t.id}', '${t.selectedMethod || 'app'}')" title="Buka Kunci Tiket Darurat">
+                    ⚡ Buka Kunci
+                  </button>
+                ` : ''}
+
                 ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.type === 'Kembali ke Area' && !t.pendingExtension ? `
                   <button class="btn-secondary" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px; border:1.5px solid #d97706; color:#b45309; font-weight:700; background:#fff;" onclick="openExtendDurationModal('${t.id}')" title="Ajukan Perpanjangan Waktu">
                     ⏱️ Perpanjang
@@ -465,7 +593,7 @@ function renderEmpCards(list, containerElement) {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 }
@@ -491,12 +619,13 @@ function renderEmpTable(list, containerElement) {
         </thead>
         <tbody>
           ${list.map(t => {
-            const canCancel = t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui';
-            return `
+    const isEmergLocked = t.isEmergency && t.status === 'Menunggu Otorisasi Darurat';
+    const canCancel = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || (t.status === 'Disetujui' && !t.scanOutTime));
+    return `
               <tr>
                 <td>
                   <span style="font-family:var(--font-mono); font-weight:700;">${t.id}</span>
-                  <div style="font-size:0.7rem; color:var(--text-muted);">${t.createdAt.slice(0,10)}</div>
+                  <div style="font-size:0.7rem; color:var(--text-muted);">${t.createdAt.slice(0, 10)}</div>
                 </td>
                 <td>
                   <span class="tag-badge ${t.category === 'Dinas Kantor' ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
@@ -517,6 +646,11 @@ function renderEmpTable(list, containerElement) {
                     <button class="btn-card-detail" style="padding:0.35rem 0.65rem; font-size:0.725rem; min-height:30px;" onclick="openTicketDetail('${t.id}', 'detail')">
                       Lihat Rincian
                     </button>
+                    ${isEmergLocked ? `
+                      <button class="btn-emergency" style="padding:0.35rem 0.65rem; font-size:0.725rem; min-height:30px; background:#dc2626; color:#fff; border-color:#b91c1c;" onclick="window.openEmergencyUnlockModal('${t.id}', '${t.selectedMethod || 'app'}')">
+                        ⚡ Otorisasi
+                      </button>
+                    ` : ''}
                     ${canCancel ? `
                       <button class="btn-emergency" style="padding:0.35rem 0.55rem; font-size:0.725rem; min-height:30px;" onclick="openCancelModal('${t.id}')" title="Batalkan">✕</button>
                     ` : ''}
@@ -524,7 +658,7 @@ function renderEmpTable(list, containerElement) {
                 </td>
               </tr>
             `;
-          }).join('')}
+  }).join('')}
         </tbody>
       </table>
     </div>

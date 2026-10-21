@@ -6,9 +6,13 @@
 
 function getActiveTicket(nip = (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841')) {
   const list = window.ticketsList || [];
-  return list.find(t => 
-    (t.applicantNip === nip || !t.applicantNip) && 
-    (t.status === 'Menunggu Persetujuan' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat')
+  return list.find(t =>
+    (t.applicantNip === nip || !t.applicantNip) &&
+    t.status !== 'Dibatalkan' &&
+    t.status !== 'Ditolak' &&
+    t.status !== 'Selesai' &&
+    t.status !== 'Kedaluwarsa' &&
+    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat')
   );
 }
 

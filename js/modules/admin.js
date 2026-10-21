@@ -156,7 +156,7 @@ function updateAdminMetrics() {
   const adminHeadcountBig = document.getElementById('adminHeadcountBig');
   const adminHeadcountSub = document.getElementById('adminHeadcountSub');
   const adminEmergencyBanner = document.getElementById('adminEmergencyBanner');
-  
+
   if (adminHeadcountBig) {
     adminHeadcountBig.textContent = totalOutsideCount;
   }
@@ -569,7 +569,7 @@ function exportAdminExcel() {
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  
+
   const now = new Date();
   const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
   const filename = `Rekap_Izin_Keluar_Pupuk_Kujang_${dateStr}.csv`;
@@ -611,10 +611,10 @@ function renderAdminUsers() {
     const term = adminUserSearchTerm.toLowerCase();
     if (term) {
       const match = user.kujangId.toLowerCase().includes(term) ||
-                    user.nip.toLowerCase().includes(term) ||
-                    user.name.toLowerCase().includes(term) ||
-                    user.department.toLowerCase().includes(term) ||
-                    user.role.toLowerCase().includes(term);
+        user.nip.toLowerCase().includes(term) ||
+        user.name.toLowerCase().includes(term) ||
+        user.department.toLowerCase().includes(term) ||
+        user.role.toLowerCase().includes(term);
       if (!match) return false;
     }
     return true;

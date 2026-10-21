@@ -8,6 +8,8 @@ function getStatusPill(status) {
   switch (status) {
     case 'Disetujui': cls = 'approved'; break;
     case 'Menunggu Persetujuan': cls = 'pending'; break;
+    case 'Menunggu Otorisasi Darurat':
+    case 'Darurat Terkunci': cls = 'emergency-locked'; break;
     case 'Sedang di Luar': cls = 'outside'; break;
     case 'Terlambat': cls = 'overdue'; break;
     case 'Kedaluwarsa': cls = 'expired'; break;
