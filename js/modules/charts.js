@@ -40,6 +40,9 @@ function ensureChartTooltip() {
 }
 
 function showChartTooltip(e, data) {
+  // Suppress tooltip completely when user is viewing as Admin
+  if (window.currentActor === 'admin') return;
+
   const tip = ensureChartTooltip();
   const { title, count, total, percent, color, unit } = data;
   const unitStr = unit || 'pengajuan';
@@ -688,8 +691,7 @@ function renderAdminStatusChart() {
         const barWidthPct = Math.max(Math.round((st.count / maxVal) * 100), st.count > 0 ? 5 : 0);
         return `
           <div id="statusChartRow_${idx}" style="cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease;"
-               onclick="if(window.filterAdminStatusTracking) window.filterAdminStatusTracking('${st.key}')"
-               title="Klik untuk filter tabel: ${st.name}">
+               onclick="if(window.filterAdminStatusTracking) window.filterAdminStatusTracking('${st.key}')">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; margin-bottom: 3px;">
               <span style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">
                 <span style="width: 8px; height: 8px; border-radius: 50%; background: ${st.color}; display: inline-block;"></span>

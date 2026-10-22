@@ -126,7 +126,9 @@ function handleOpenNewRequest() {
   if (formNewRequest) formNewRequest.reset();
 
   initFormDates();
-  if (typeof window.resetApproverSearch === 'function') {
+  if (typeof window.chooseApproverByName === 'function') {
+    window.chooseApproverByName('Ir. Hendra Gunawan, M.T.');
+  } else if (typeof window.resetApproverSearch === 'function') {
     window.resetApproverSearch();
   }
   if (modalNewRequest) modalNewRequest.classList.add('open');
@@ -888,8 +890,14 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   }
 
   const ticketsList = window.ticketsList || [];
-  const ticket = ticketsList.find(t => t.id === ticketId);
-  if (!ticket) return;
+  const cleanId = String(ticketId || '').trim();
+  const ticket = ticketsList.find(t => t.id === cleanId || String(t.id).trim().toUpperCase() === cleanId.toUpperCase());
+  if (!ticket) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Tiket #${ticketId} tidak ditemukan di sistem.`, 'warning');
+    }
+    return;
+  }
 
   const ACTORS = window.ACTORS || {};
   const modalTicketDetail = document.getElementById('modalTicketDetail');
