@@ -291,11 +291,10 @@
         </div>
 
         <div class="navbar-right">
-          <!-- Figma Sample Data Meta -->
-          <div style="text-align: right; margin-right: 0.75rem;" class="hide-on-mobile">
-            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600;">Cuplikan data contoh</div>
-            <div style="font-size: 0.75rem; font-weight: 700; color: #1e293b;" id="liveDigitalClock">19 Okt 2026 • 11.00
-              WIB</div>
+          <!-- Real-Time Date & Time Clock (Single-Line Horizontal Display) -->
+          <div class="navbar-clock-pill hide-on-mobile">
+            <span class="pulsing-dot" style="width: 7px; height: 7px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); flex-shrink: 0;"></span>
+            <span id="liveDigitalClock" style="font-size: 0.78rem; font-weight: 700; color: #1e293b; white-space: nowrap; letter-spacing: -0.01em;">19 Okt 2026 • 11.00 WIB</span>
           </div>
           <!-- Multi-Actor Role Switcher (Karyawan | Atasan | Satpam) -->
           <div class="role-switcher-container" title="Beralih peran untuk menguji alur terintegrasi">
@@ -372,7 +371,6 @@
             <!-- Section Bar -->
             <div class="figma-section-bar">
               <div>
-                <div class="figma-kicker-date">SENIN, 19 OKTOBER 2026</div>
                 <h1 class="figma-section-title">Ringkasan Perizinan</h1>
                 <p class="figma-section-sub">Pantau status izin aktif dan ringkasan aktivitas perizinan Anda.</p>
               </div>
@@ -1507,9 +1505,8 @@
               </div>
             </div>
 
-            <!-- 3-Column Analytics Grid Admin: Jam Sibuk Gerbang, Sebaran Departemen & Komposisi Status -->
-            <div
-              style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.25rem; margin-top: 1.25rem;">
+            <!-- 2-Column Analytics Grid Admin: Jam Sibuk Gerbang & Sebaran Departemen (Revisi 2) -->
+            <div class="admin-analytics-grid-2col">
               <!-- Left Chart: Jam Sibuk Lalu Lintas Gerbang -->
               <div class="dashboard-widget-card">
                 <div class="dashboard-widget-header">
@@ -1530,7 +1527,7 @@
                 </div>
               </div>
 
-              <!-- Center Chart: Sebaran Frekuensi Izin per Departemen -->
+              <!-- Right Chart: Sebaran Frekuensi Izin per Departemen -->
               <div class="dashboard-widget-card">
                 <div class="dashboard-widget-header">
                   <div class="dashboard-widget-title">
@@ -1543,21 +1540,6 @@
                   </select>
                 </div>
                 <div id="chartAdminDeptContainer" style="padding: 0.5rem 0.25rem;">
-                  <!-- Rendered via JS -->
-                </div>
-              </div>
-
-              <!-- Right Chart: Komposisi 7 Status Perizinan (Interaktif) -->
-              <div class="dashboard-widget-card">
-                <div class="dashboard-widget-header">
-                  <div class="dashboard-widget-title">
-                    <span>📊</span>
-                    <span style="font-size: 0.875rem; font-weight: 800;">Komposisi Status Izin</span>
-                  </div>
-                  <span
-                    style="font-size: 0.725rem; font-weight: 700; color: #16a34a; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">⚡ Live</span>
-                </div>
-                <div id="chartAdminStatusContainer" style="padding: 0.25rem 0.25rem;">
                   <!-- Rendered via JS -->
                 </div>
               </div>
@@ -3460,20 +3442,30 @@
             <input type="email" id="adminInputEmail" class="form-input" placeholder="nama@pupuk-kujang.co.id">
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="adminInputDept">
+          <div class="form-group" style="position: relative;">
+            <label class="form-label" for="adminInputDeptSearch">
               Departemen / Unit Kerja <span style="color: var(--rose-danger);">*</span>
             </label>
-            <select id="adminInputDept" class="form-select" required>
-              <option value="Departemen Rekayasa & Pemeliharaan">Departemen Rekayasa & Pemeliharaan</option>
-              <option value="Departemen Pengamanan & K3">Departemen Pengamanan & K3</option>
-              <option value="Departemen Produksi Amonia-1A">Departemen Produksi Amonia-1A</option>
-              <option value="Departemen Produksi Urea-1B">Departemen Produksi Urea-1B</option>
-              <option value="Departemen SDM & Organisasi">Departemen SDM & Organisasi</option>
-              <option value="Departemen Logistik & Pergudangan">Departemen Logistik & Pergudangan</option>
-              <option value="Departemen Keuangan & Akuntansi">Departemen Keuangan & Akuntansi</option>
-              <option value="Biro Umum & Tata Usaha">Biro Umum & Tata Usaha</option>
-            </select>
+            <input type="hidden" id="adminInputDept" name="department" value="Departemen Rekayasa & Pemeliharaan" required>
+            <div class="searchable-dropdown" id="adminDeptSearchableDropdown">
+              <div class="searchable-dropdown-control">
+                <span class="searchable-dropdown-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
+                <input type="text" id="adminInputDeptSearch" class="searchable-dropdown-input" placeholder="Ketik nama departemen atau unit kerja..." autocomplete="off">
+                <button type="button" class="searchable-dropdown-clear" id="btnAdminDeptClear" title="Hapus teks pencarian" style="display: none;">✕</button>
+                <span class="searchable-dropdown-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </div>
+              <div class="searchable-dropdown-menu" id="adminDeptDropdownMenu" role="listbox">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+            <div id="adminDeptSelectedIndicator" class="searchable-dropdown-indicator">
+              <span>✓ Terpilih:</span>
+              <strong id="adminDeptSelectedText">Departemen Rekayasa & Pemeliharaan</strong>
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">

@@ -234,8 +234,9 @@ function renderAdminDashboard() {
               ${cleanStatusBadge(ticket.status)}
             </td>
             <td style="text-align: right;">
-              <button class="btn-action-sm outline" onclick="window.viewAdminTicketDetail('${ticket.id}')" title="Audit Detail Tiket">
-                Detail
+              <button type="button" class="btn-action-sm btn-admin-detail" onclick="window.viewAdminTicketDetail('${ticket.id}')" title="Audit Detail Tiket">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Detail</span>
               </button>
             </td>
           </tr>
@@ -252,15 +253,12 @@ function renderAdminDashboard() {
     renderAdminStatusTracking();
   }
 
-  // Render Charts for Admin
+  // Render Charts for Admin (Revisi 2: Komposisi Status Izin chart retired)
   if (typeof window.renderAdminTrafficChart === 'function') {
     window.renderAdminTrafficChart();
   }
   if (typeof window.renderAdminDeptChart === 'function') {
     window.renderAdminDeptChart();
-  }
-  if (typeof window.renderAdminStatusChart === 'function') {
-    window.renderAdminStatusChart();
   }
 }
 
@@ -418,14 +416,16 @@ function renderAdminAudit() {
           <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4;">${log.desc}</div>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button type="button" class="btn-action-sm outline" onclick="window.viewAdminTicketDetail('${log.ticketId}')" title="Lihat Rincian Tiket #${log.ticketId}" style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            <span>Rincian</span>
-          </button>
-          <button type="button" class="btn-figma-delete-single" onclick="window.deleteAdminAuditLog('${log.ticketId}', '${encodeURIComponent(log.time)}', '${encodeURIComponent(log.event)}')" title="Hapus Catatan Audit Peristiwa Ini" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.2rem; padding: 0.25rem 0.45rem; border-radius: 4px; margin-left: 0.35rem; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            <span>Hapus</span>
-          </button>
+          <div class="admin-action-btn-group">
+            <button type="button" class="btn-action-sm btn-admin-detail" onclick="window.viewAdminTicketDetail('${log.ticketId}')" title="Lihat Rincian Tiket #${log.ticketId}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>Rincian</span>
+            </button>
+            <button type="button" class="btn-action-sm btn-admin-danger" onclick="window.deleteAdminAuditLog('${log.ticketId}', '${encodeURIComponent(log.time)}', '${encodeURIComponent(log.event)}')" title="Hapus Catatan Audit Peristiwa Ini">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Hapus</span>
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -677,8 +677,15 @@ function openAdminUserModal(mode, kujangId) {
     if (inputName) inputName.value = '';
     const inputEmail = document.getElementById('adminInputEmail');
     if (inputEmail) inputEmail.value = '';
-    const inputDept = document.getElementById('adminInputDept');
-    if (inputDept) inputDept.value = 'Departemen Rekayasa & Pemeliharaan';
+    
+    // Set default department via searchable dropdown
+    if (typeof setAdminSelectedDept === 'function') {
+      setAdminSelectedDept('Departemen Rekayasa & Pemeliharaan');
+    } else {
+      const inputDept = document.getElementById('adminInputDept');
+      if (inputDept) inputDept.value = 'Departemen Rekayasa & Pemeliharaan';
+    }
+    
     const inputRole = document.getElementById('adminInputRoleKey');
     if (inputRole) inputRole.value = 'karyawan';
     const inputStatus = document.getElementById('adminInputStatus');
@@ -699,13 +706,25 @@ function openAdminUserModal(mode, kujangId) {
       if (inputName) inputName.value = user.name;
       const inputEmail = document.getElementById('adminInputEmail');
       if (inputEmail) inputEmail.value = user.email || '';
-      const inputDept = document.getElementById('adminInputDept');
-      if (inputDept) inputDept.value = user.department;
+      
+      // Set user department via searchable dropdown
+      if (typeof setAdminSelectedDept === 'function') {
+        setAdminSelectedDept(user.department || 'Departemen Rekayasa & Pemeliharaan');
+      } else {
+        const inputDept = document.getElementById('adminInputDept');
+        if (inputDept) inputDept.value = user.department;
+      }
+      
       const inputRole = document.getElementById('adminInputRoleKey');
       if (inputRole) inputRole.value = user.roleKey;
       const inputStatus = document.getElementById('adminInputStatus');
       if (inputStatus) inputStatus.value = user.status || 'Aktif';
     }
+  }
+
+  // Ensure dropdown is initialized and populated
+  if (typeof initAdminDeptSearchableDropdown === 'function') {
+    initAdminDeptSearchableDropdown();
   }
 
   modal.classList.add('open');
@@ -918,18 +937,26 @@ function renderAdminUsers() {
           <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">${u.lastLogin || '-'}</div>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button class="btn-action-sm outline" onclick="window.openAdminUserModal('edit', '${u.kujangId}')" title="Ubah Hak Akses" style="font-size: 0.725rem; padding: 3px 8px;">
-            Ubah
-          </button>
-          <button class="btn-action-sm outline" onclick="window.toggleUserAccess('${u.kujangId}')" title="${isRevoked ? 'Aktifkan Akses' : 'Cabut Akses'}" style="font-size: 0.725rem; padding: 3px 8px; margin-left: 3px; color: ${isRevoked ? '#059669' : '#d97706'}; border-color: ${isRevoked ? '#a7f3d0' : '#fcd34d'};">
-            ${isRevoked ? 'Beri Akses' : 'Cabut Akses'}
-          </button>
-          <button class="btn-action-sm outline" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Akun" style="font-size: 0.725rem; padding: 3px 8px; margin-left: 3px; color: #ef4444; border-color: #fca5a5;">
-            Hapus
-          </button>
-          <button class="btn-action-sm" onclick="window.switchRole('${u.roleKey}')" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" style="font-size: 0.725rem; padding: 3px 8px; margin-left: 3px; ${isRevoked ? 'opacity: 0.5; cursor: not-allowed;' : ''}">
-            Beralih
-          </button>
+          <div class="admin-action-btn-group">
+            <button type="button" class="btn-action-sm btn-admin-edit" onclick="window.openAdminUserModal('edit', '${u.kujangId}')" title="Ubah Hak Akses / Pengajuan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span>Ubah</span>
+            </button>
+            <button type="button" class="btn-action-sm ${isRevoked ? 'btn-admin-success' : 'btn-admin-warning'}" onclick="window.toggleUserAccess('${u.kujangId}')" title="${isRevoked ? 'Aktifkan Akses Pengguna' : 'Cabut Hak Akses Pengguna'}">
+              ${isRevoked
+                ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg><span>Beri Akses</span>`
+                : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Cabut Akses</span>`
+              }
+            </button>
+            <button type="button" class="btn-action-sm btn-admin-danger" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Hak Akses Akun">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Hapus</span>
+            </button>
+            <button type="button" class="btn-action-sm btn-admin-switch" onclick="window.switchRole('${u.roleKey}')" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" ${isRevoked ? 'disabled style="opacity: 0.45; cursor: not-allowed;"' : ''}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 8 20 11 17 14"></polyline><line x1="20" y1="11" x2="11" y2="11"></line></svg>
+              <span>Beralih</span>
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -1110,8 +1137,9 @@ function renderAdminStatusTracking() {
           </div>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button type="button" class="btn-action-sm outline" onclick="window.viewAdminTicketDetail('${t.id}')" title="Audit Detail Tiket">
-            Rincian
+          <button type="button" class="btn-action-sm btn-admin-detail" onclick="window.viewAdminTicketDetail('${t.id}')" title="Audit Detail Tiket">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Rincian</span>
           </button>
         </td>
       </tr>
@@ -1213,6 +1241,169 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ===================================================================
+// ADMIN DEPARTMENT SEARCHABLE DROPDOWN (REVISI 1)
+// ===================================================================
+const MASTER_DEPARTMENTS = [
+  'Departemen Rekayasa & Pemeliharaan',
+  'Departemen Pengamanan & K3',
+  'Departemen Produksi Amonia-1A',
+  'Departemen Produksi Urea-1B',
+  'Departemen SDM & Organisasi',
+  'Departemen Logistik & Pergudangan',
+  'Departemen Keuangan & Akuntansi',
+  'Biro Umum & Tata Usaha',
+  'Departemen Operasi Pabrik 1 & 2',
+  'Departemen SDM & Hubungan Industrial',
+  'Departemen Teknologi Informasi & Digitalisasi',
+  'Departemen Lingkungan & K3'
+];
+
+function getAllAvailableDepartments() {
+  const set = new Set(MASTER_DEPARTMENTS);
+  const users = window.MOCK_USERS || [];
+  users.forEach(u => { if (u.department) set.add(u.department); });
+  const tickets = window.ticketsList || [];
+  tickets.forEach(t => { if (t.department) set.add(t.department); });
+  return Array.from(set).sort();
+}
+
+function setAdminSelectedDept(deptName) {
+  const hiddenInput = document.getElementById('adminInputDept');
+  const searchInput = document.getElementById('adminInputDeptSearch');
+  const indicatorText = document.getElementById('adminDeptSelectedText');
+  const clearBtn = document.getElementById('btnAdminDeptClear');
+
+  if (hiddenInput) hiddenInput.value = deptName;
+  if (searchInput) searchInput.value = deptName;
+  if (indicatorText) indicatorText.textContent = deptName;
+  if (clearBtn) clearBtn.style.display = deptName ? 'flex' : 'none';
+
+  renderAdminDeptDropdownItems(deptName);
+}
+
+function renderAdminDeptDropdownItems(query = '') {
+  const menu = document.getElementById('adminDeptDropdownMenu');
+  if (!menu) return;
+
+  const currentVal = (document.getElementById('adminInputDept')?.value || '').trim();
+  const q = (query || '').toLowerCase().trim();
+  const allDepts = getAllAvailableDepartments();
+
+  const filtered = q
+    ? allDepts.filter(d => d.toLowerCase().includes(q))
+    : allDepts;
+
+  if (filtered.length === 0) {
+    menu.innerHTML = `
+      <div class="searchable-dropdown-empty">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6;">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+        <span>Departemen atau unit kerja tidak ditemukan</span>
+      </div>
+    `;
+    return;
+  }
+
+  menu.innerHTML = filtered.map(dept => {
+    const isSelected = dept === currentVal;
+    let displayHtml = dept;
+    if (q) {
+      const idx = dept.toLowerCase().indexOf(q);
+      if (idx !== -1) {
+        displayHtml = dept.substring(0, idx) +
+          `<strong style="color: var(--corp-teal, #059669); text-decoration: underline;">${dept.substring(idx, idx + q.length)}</strong>` +
+          dept.substring(idx + q.length);
+      }
+    }
+
+    return `
+      <div class="searchable-dropdown-item ${isSelected ? 'selected' : ''}"
+           role="option"
+           aria-selected="${isSelected}"
+           onclick="window.selectAdminDept('${dept.replace(/'/g, "\\'")}')">
+        <span>${displayHtml}</span>
+        ${isSelected ? '<span class="searchable-dropdown-item-mark">✓</span>' : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectAdminDept(deptName) {
+  setAdminSelectedDept(deptName);
+  closeAdminDeptDropdown();
+}
+
+function openAdminDeptDropdown() {
+  const dd = document.getElementById('adminDeptSearchableDropdown');
+  if (dd) {
+    dd.classList.add('open');
+    const searchInput = document.getElementById('adminInputDeptSearch');
+    renderAdminDeptDropdownItems(searchInput ? searchInput.value : '');
+  }
+}
+
+function closeAdminDeptDropdown() {
+  const dd = document.getElementById('adminDeptSearchableDropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+function initAdminDeptSearchableDropdown() {
+  const searchInput = document.getElementById('adminInputDeptSearch');
+  const clearBtn = document.getElementById('btnAdminDeptClear');
+  const dd = document.getElementById('adminDeptSearchableDropdown');
+  if (!searchInput || !dd) return;
+
+  if (searchInput.dataset.initialized) return;
+  searchInput.dataset.initialized = 'true';
+
+  searchInput.addEventListener('focus', () => {
+    openAdminDeptDropdown();
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+    openAdminDeptDropdown();
+    renderAdminDeptDropdownItems(val);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      searchInput.focus();
+      renderAdminDeptDropdownItems('');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!dd.contains(e.target)) {
+      closeAdminDeptDropdown();
+    }
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAdminDeptDropdown();
+    } else if (e.key === 'Enter') {
+      const firstItem = dd.querySelector('.searchable-dropdown-item');
+      if (firstItem) {
+        e.preventDefault();
+        firstItem.click();
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initAdminDeptSearchableDropdown();
+});
+
 // Expose globally
 window.updateAdminMetrics = updateAdminMetrics;
 window.renderAdminDashboard = renderAdminDashboard;
@@ -1231,3 +1422,13 @@ window.toggleUserAccess = toggleUserAccess;
 window.deleteAdminUser = deleteAdminUser;
 window.renderAdminStatusTracking = renderAdminStatusTracking;
 window.filterAdminStatusTracking = filterAdminStatusTracking;
+
+// Searchable dropdown exposures
+window.setAdminSelectedDept = setAdminSelectedDept;
+window.selectAdminDept = selectAdminDept;
+window.openAdminDeptDropdown = openAdminDeptDropdown;
+window.closeAdminDeptDropdown = closeAdminDeptDropdown;
+window.initAdminDeptSearchableDropdown = initAdminDeptSearchableDropdown;
+window.getAllAvailableDepartments = getAllAvailableDepartments;
+window.renderAdminDeptDropdownItems = renderAdminDeptDropdownItems;
+

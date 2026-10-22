@@ -409,25 +409,35 @@ body {
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
   margin-left: auto;
   min-width: 0;
-  max-width: calc(100% - 200px);
+  flex-shrink: 1;
 }
 
 .navbar-clock-pill {
-  display: flex;
-  align-items: center;
+  display: inline-flex !important;
+  align-items: center !important;
   gap: 0.5rem;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-full);
-  white-space: nowrap;
-  margin-left: 1rem;
+  white-space: nowrap !important;
   margin-right: 0.35rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+}
+
+#liveDigitalClock {
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow: visible !important;
+  display: inline-block !important;
+  letter-spacing: -0.01em;
 }
 
 @media (max-width: 1260px) {
@@ -5464,4 +5474,488 @@ body.modal-open {
   border-color: #94a3b8;
   color: #0f172a;
 }
+
+/* ===================================================================
+   SEARCHABLE DROPDOWN & AUTOCOMPLETE (REVISI 1: ADMIN USER ACCESS)
+   =================================================================== */
+.searchable-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-dropdown-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.searchable-dropdown-input {
+  width: 100%;
+  padding: 0.65rem 2.2rem 0.65rem 2.4rem;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  border-radius: var(--radius-md, 8px);
+  font-family: var(--font-main, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.85rem;
+  color: var(--text-primary, #0f172a);
+  background-color: #ffffff;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.searchable-dropdown-input:focus {
+  border-color: var(--corp-teal, #059669);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.searchable-dropdown-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #94a3b8;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchable-dropdown-clear {
+  position: absolute;
+  right: 2.25rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.searchable-dropdown-clear:hover {
+  color: #e11d48;
+}
+
+.searchable-dropdown-arrow {
+  position: absolute;
+  right: 0.75rem;
+  color: #64748b;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.searchable-dropdown.open .searchable-dropdown-arrow {
+  transform: rotate(180deg);
+  color: var(--corp-teal, #059669);
+}
+
+.searchable-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  z-index: 10050;
+  padding: 0.35rem;
+  display: none;
+  scrollbar-width: thin;
+}
+
+.searchable-dropdown.open .searchable-dropdown-menu {
+  display: block;
+  animation: dropdownFadeDown 0.18s ease-out;
+}
+
+@keyframes dropdownFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchable-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.825rem;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.35;
+}
+
+.searchable-dropdown-item:hover,
+.searchable-dropdown-item.focused {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.searchable-dropdown-item.selected {
+  background-color: #ecfdf5;
+  color: #047857;
+  font-weight: 700;
+}
+
+.searchable-dropdown-item-mark {
+  color: var(--corp-teal, #059669);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+}
+
+.searchable-dropdown-empty {
+  padding: 1.25rem 0.75rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.searchable-dropdown-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: #059669;
+  background: #f0fdf4;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #bbf7d0;
+  font-weight: 600;
+}
+
+/* ===================================================================
+   ADMIN BUTTON DESIGN SYSTEM (REVISI 3: ENTERPRISE REDESIGN)
+   =================================================================== */
+.btn-action-sm {
+  font-family: var(--font-main, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.38rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  vertical-align: middle;
+  background: #ffffff;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-action-sm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.btn-action-sm:active {
+  transform: translateY(0);
+}
+
+.btn-action-sm:focus-visible {
+  outline: 2px solid var(--corp-teal, #059669);
+  outline-offset: 1px;
+}
+
+.btn-action-sm.outline {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.btn-action-sm.outline:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* 1. Admin Edit Button (Subtle Neutral / Primary Accent) */
+.btn-admin-edit {
+  background: #ffffff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.btn-admin-edit:hover {
+  background: #eff6ff;
+  border-color: #60a5fa;
+  color: #1d4ed8;
+}
+
+/* 2. Admin Warning Toggle Button (Cabut Akses) */
+.btn-admin-warning {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.btn-admin-warning:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+/* 3. Admin Activate Toggle Button (Beri Akses) */
+.btn-admin-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.btn-admin-success:hover {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+/* 4. Admin Destructive Action (Hapus Akun / Hapus Log) */
+.btn-admin-danger {
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+.btn-admin-danger:hover {
+  background: #ffe4e6;
+  border-color: #f43f5e;
+  color: #be123c;
+}
+
+/* 5. Admin Switch Role Action (Beralih) */
+.btn-admin-switch {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-admin-switch:hover {
+  background: #0f2b48;
+  color: #ffffff;
+  border-color: #0f2b48;
+}
+
+/* 6. Admin Detail / View Action */
+.btn-admin-detail {
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-admin-detail:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Admin Table Action Cluster */
+.admin-action-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ===================================================================
+   ADMIN 2-COLUMN ANALYTICS GRID (REVISI 2)
+   =================================================================== */
+.admin-analytics-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 991px) {
+  .admin-analytics-grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================================================================
+   ENHANCED CHART COMPONENTS (REVISI 4: KARYAWAN, APPROVER, ADMIN)
+   =================================================================== */
+/* Karyawan Donut Chart Legend Chips */
+.donut-legend-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  margin-top: 0.85rem;
+  width: 100%;
+}
+
+.donut-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.donut-legend-chip:hover,
+.donut-legend-chip.active {
+  background: #ffffff;
+  border-color: #94a3b8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.donut-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.donut-legend-count {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Approver Bar Trend Styles */
+.approver-bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 0.75rem;
+  height: 190px;
+  padding: 0.75rem 0.5rem 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.approver-bar-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.approver-bar-column:hover {
+  transform: translateY(-2px);
+}
+
+.approver-bar-pillar {
+  width: 100%;
+  max-width: 44px;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.approver-bar-pillar.peak {
+  background: linear-gradient(180deg, #1d4ed8 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.approver-bar-pillar.normal {
+  background: linear-gradient(180deg, #93c5fd 0%, #bfdbfe 100%);
+}
+
+.approver-bar-pillar.normal:hover {
+  background: linear-gradient(180deg, #60a5fa 0%, #93c5fd 100%);
+}
+
+/* Department Ranked Row */
+.dept-rank-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dept-rank-row:hover {
+  background-color: #f8fafc;
+  transform: translateX(3px);
+}
+
+.dept-rank-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.dept-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #e2e8f0;
+  color: #334155;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.dept-rank-badge.top-1 {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.dept-rank-badge.top-2 {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.dept-rank-badge.top-3 {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.dept-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.dept-progress-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 

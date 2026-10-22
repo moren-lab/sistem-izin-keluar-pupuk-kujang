@@ -447,7 +447,9 @@ const MOCK_USERS = loadUsers();
 function saveTickets(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   window.ticketsList = data;
-  if (typeof window.renderAllCharts === 'function') {
+  if (typeof window.refreshAllDashboardData === 'function') {
+    window.refreshAllDashboardData();
+  } else if (typeof window.renderAllCharts === 'function') {
     window.renderAllCharts();
   }
 }
