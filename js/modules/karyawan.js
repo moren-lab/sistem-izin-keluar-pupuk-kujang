@@ -347,7 +347,9 @@ function renderKaryawanDashboard() {
         <div class="hero-strip-left">
           <span class="status-pill-green">• Siap Beroperasi</span>
           <span class="hero-strip-text">Status: Tidak Ada Perizinan Aktif</span>
-          <span class="hero-strip-sub">Anda sedang berada di area kerja operasional. Ajukan izin bila hendak meninggalkan area.</span>
+          <span class="hero-strip-sub">
+          
+          Ajukan izin bila hendak meninggalkan area.</span>
         </div>
         <button class="btn-hero-action" onclick="setKaryawanNav('pengajuan')">
           + Buat Pengajuan
