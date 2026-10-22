@@ -899,60 +899,58 @@
         <!-- ================= C. SECURITY / SATPAM (POS JAGA) VIEW ================= -->
         <div id="viewSecurity" style="display: none;">
 
-          <!-- C1. HALAMAN DASHBOARD SECURITY -->
+          <!-- C1. HALAMAN DASHBOARD SECURITY (FIGMA REDESIGN) -->
           <div id="securityDashboardPage">
-            <!-- Security Hero Welcome Banner -->
-            <div class="dashboard-hero-banner security-theme">
-              <div class="dashboard-hero-content">
-                <div class="dashboard-avatar-circle">🛡️</div>
-                <div class="dashboard-hero-text">
-                  <h2>Terminal Pos Jaga Pengamanan (Pos Utama)</h2>
-                  <p>Petugas Jaga: Sertu Agus • NIP: SEC-2018-042 • Departemen Pengamanan & K3 • PT Pupuk Kujang</p>
+            <!-- Figma Hero Dark Banner (Pos Jaga) -->
+            <div class="figma-hero-banner security-theme">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div class="figma-hero-top">
+                  <h2>Selamat bertugas, Sertu Agus 🛡️</h2>
+                  <p>Petugas Pengamanan • Pos 1 Gerbang Utama • Departemen Pengamanan & K3 • PT Pupuk Kujang</p>
                 </div>
-              </div>
-              <div class="dashboard-hero-actions">
-                <button class="btn-primary-action" style="background: #0284c7;" onclick="setSecurityNav('scanner')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
-                  <span>Buka Kamera Scanner QR</span>
-                </button>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <button class="btn-figma-secondary" onclick="setSecurityNav('scanner')" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.25);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    <span>Terminal Scan QR</span>
+                  </button>
+                  <button class="btn-figma-secondary" onclick="setSecurityNav('pelacakan')" style="background: #0284c7; color: #ffffff; border: none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Pelacakan di Luar</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Metrics Row Pos Jaga -->
-            <div class="stats-row" id="securityStatsRow" style="margin-top: 1.5rem;">
-              <div class="stat-box" id="statCardOutsideHeadcount">
-                <div class="stat-meta">
-                  <span class="stat-title">Sedang di Luar Pabrik (Headcount)</span>
-                  <span class="stat-number" id="statSecOutside" style="color: #0891b2;">0</span>
-                </div>
-                <div class="stat-icon cyan">🚶‍♂️</div>
+            <!-- Section Bar Pos Jaga -->
+            <div class="figma-section-bar">
+              <div>
+                <div class="figma-kicker-blue">TERMINAL OPERASIONAL • GERBANG POS 1 UTAMA</div>
+                <h1 class="figma-section-title">Ringkasan Pemantauan Gerbang</h1>
+                <p class="figma-section-sub">Pantau headcount keluar masuk, validasi QR Code digital, dan verifikasi izin darurat.</p>
               </div>
+            </div>
 
-              <div class="stat-box">
-                <div class="stat-meta">
-                  <span class="stat-title">Tiket Siap Keluar (Disetujui)</span>
-                  <span class="stat-number" id="statSecReadyExit" style="color: var(--corp-teal);">0</span>
-                </div>
-                <div class="stat-icon teal">🎫</div>
+            <!-- Unified Figma Stats Card (4-Column) -->
+            <div class="figma-stats-card figma-stats-4col" id="securityStatsRow">
+              <div class="figma-stat-col" id="statCardOutsideHeadcount" style="cursor: pointer;" onclick="setSecurityNav('pelacakan')" title="Klik untuk membuka pelacakan headcount">
+                <span class="figma-stat-label">Sedang di Luar (Headcount)</span>
+                <span class="figma-stat-number" id="statSecOutside" style="color: #0284c7;">0</span>
+                <span class="figma-stat-sub">Personel aktif di luar kawasan</span>
               </div>
-
-              <div class="stat-box">
-                <div class="stat-meta">
-                  <span class="stat-title">Scan Out Hari Ini</span>
-                  <span class="stat-number" id="statSecScanOutCount">0</span>
-                </div>
-                <div class="stat-icon blue">🚪</div>
+              <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('dashboard')" title="Izin disetujui siap gerbang">
+                <span class="figma-stat-label">Izin Siap Keluar (Scan Out)</span>
+                <span class="figma-stat-number" id="statSecReadyExit" style="color: #0d9488;">0</span>
+                <span class="figma-stat-sub">Disetujui atasan • Siap gerbang</span>
               </div>
-
-              <div class="stat-box">
-                <div class="stat-meta">
-                  <span class="stat-title">Scan In (Kembali) Hari Ini</span>
-                  <span class="stat-number" id="statSecScanInCount">0</span>
-                </div>
-                <div class="stat-icon slate">🏢</div>
+              <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('riwayat')" title="Total scan out hari ini">
+                <span class="figma-stat-label">Scan Out Hari Ini</span>
+                <span class="figma-stat-number" id="statSecScanOutCount" style="color: #2563eb;">0</span>
+                <span class="figma-stat-sub">Meninggalkan pos hari ini</span>
+              </div>
+              <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('riwayat')" title="Total scan in hari ini">
+                <span class="figma-stat-label">Scan In (Kembali)</span>
+                <span class="figma-stat-number" id="statSecScanInCount" style="color: #16a34a;">0</span>
+                <span class="figma-stat-sub">Kembali ke area pabrik</span>
               </div>
             </div>
 
@@ -961,67 +959,39 @@
               <!-- Rendered via JS -->
             </div>
 
-            <!-- Shortcut Action Cards -->
-            <div class="shortcut-card-grid" style="margin-top: 1.5rem;">
-              <div class="shortcut-action-card" onclick="setSecurityNav('scanner')">
-                <div class="shortcut-icon-wrap" style="background: #e0f2fe; color: #0284c7;">📟</div>
-                <div>
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pemindai QR & Manual
-                  </div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Pindai tiket dengan
-                    kamera live atau masukkan kode tiket</div>
-                </div>
-              </div>
-
-              <div class="shortcut-action-card" onclick="setSecurityNav('pelacakan')">
-                <div class="shortcut-icon-wrap" style="background: #ecfeff; color: #0891b2;">🚶‍♂️</div>
-                <div>
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Pelacakan di Luar</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Monitoring headcount
-                    muster roll & 1-klik Scan In</div>
-                </div>
-              </div>
-
-              <div class="shortcut-action-card" onclick="setSecurityNav('riwayat')">
-                <div class="shortcut-icon-wrap" style="background: #f1f5f9; color: #475569;">📋</div>
-                <div>
-                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Log Riwayat Gerbang
-                  </div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Arsip seluruh
-                    pemindaian Scan Out dan Scan In</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 2-Column Grid Dashboard Security -->
-            <div class="dashboard-grid-layout">
+            <!-- 2-Column Grid Dashboard Security (Figma Layout) -->
+            <div class="figma-grid-2col" style="margin-top: 1.25rem;">
               <!-- Left Column: Antrean Siap Keluar & Headcount Karyawan di Luar Pabrik -->
-              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Antrean Siap Scan Out (Disetujui) -->
-                <div class="dashboard-widget-card" style="border: 1.5px solid #bfdbfe; background: #ffffff;">
-                  <div class="dashboard-widget-header">
-                    <div class="dashboard-widget-title">
-                      <span>🚪</span>
-                      <span style="color: #1e40af; font-weight: 800;">Antrean Izin Siap Keluar (Siap Scan Out)</span>
+              <div class="figma-col-left">
+                <!-- Card: Antrean Izin Siap Keluar (Scan Out) -->
+                <div class="figma-card" style="border: 1.5px solid #bfdbfe;">
+                  <div class="figma-card-header">
+                    <div>
+                      <h3 class="figma-card-title" style="color: #1e40af; font-weight: 800; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>🚪</span>
+                        <span>Antrean Izin Siap Keluar (Scan Out)</span>
+                      </h3>
+                      <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0;">Karyawan berizin resmi yang siap divalidasi meninggalkan area pabrik</p>
                     </div>
-                    <span class="badge" id="badgeReadyExitCount"
-                      style="background: #1d4ed8; color: #fff; font-size: 0.75rem; padding: 2px 10px; border-radius: 999px; font-weight: 700;">0
-                      Karyawan</span>
+                    <span class="badge" id="badgeReadyExitCount" style="background: #1d4ed8; color: #fff; font-size: 0.75rem; padding: 3px 10px; border-radius: 999px; font-weight: 700; white-space: nowrap;">0 Karyawan</span>
                   </div>
                   <div id="securityDashboardReadyExitList" class="feed-list">
                     <!-- Rendered via JS -->
                   </div>
                 </div>
 
-                <div class="dashboard-widget-card">
-                  <div class="dashboard-widget-header">
-                    <div class="dashboard-widget-title">
-                      <span>🚶‍♂️</span>
-                      <span>Headcount: Karyawan Sedang di Luar Pabrik</span>
+                <!-- Card: Headcount Karyawan Sedang di Luar -->
+                <div class="figma-card">
+                  <div class="figma-card-header">
+                    <div>
+                      <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span>🚶‍♂️</span>
+                        <span>Headcount: Karyawan Sedang di Luar Area</span>
+                      </h3>
+                      <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0;">Personel di luar kawasan industri • Wajib Tap In / Scan In saat kembali</p>
                     </div>
-                    <button class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;"
-                      onclick="setSecurityNav('pelacakan')">
-                      Buka Pelacakan Lengkap →
+                    <button class="btn-figma-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setSecurityNav('pelacakan')">
+                      <span>Semua Headcount →</span>
                     </button>
                   </div>
                   <div id="securityDashboardOutsideList" class="feed-list">
@@ -1030,48 +1000,59 @@
                 </div>
               </div>
 
-              <!-- Right Column: Log Aktivitas Pemindaian & Status Pos -->
-              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <div class="dashboard-widget-card">
-                  <div class="dashboard-widget-header">
-                    <div class="dashboard-widget-title">
-                      <span>🕒</span>
-                      <span>Aktivitas Transaksi Gerbang Terkini</span>
-                    </div>
-                    <button class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.725rem;"
-                      onclick="setSecurityNav('riwayat')">
-                      Log Lengkap →
+              <!-- Right Column: Quick Terminal Shortcut & Log Transaksi & Ketentuan -->
+              <div class="figma-col-right">
+                <!-- Card: Terminal Cepat Pemindai QR & Input Tiket -->
+                <div class="figma-card" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-color: #cbd5e1;">
+                  <div class="figma-card-header">
+                    <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
+                      <span>📷</span>
+                      <span>Terminal Cepat Pos 1</span>
+                    </h3>
+                    <span class="role-tag-pill role-security">Siap Pindai</span>
+                  </div>
+                  <p style="font-size: 0.775rem; color: #475569; line-height: 1.4; margin-bottom: 0.85rem;">
+                    Buka kamera pemindai langsung atau masukkan nomor tiket/NIP untuk otorisasi cepat di gerbang.
+                  </p>
+                  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" class="btn-figma-primary" onclick="setSecurityNav('scanner')" style="background: #0284c7; color: #fff; border: none; flex: 1; padding: 0.55rem; font-size: 0.8rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-weight: 700;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                      <span>Buka Scanner Kamera</span>
                     </button>
+                    <button type="button" class="btn-figma-secondary" onclick="setSecurityNav('scanner')" style="padding: 0.55rem; font-size: 0.8rem; border-radius: 6px;">
+                      <span>Input NIP Manual</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card: Aktivitas Gerbang Terkini -->
+                <div class="figma-card">
+                  <div class="figma-card-header">
+                    <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
+                      <span>🕒</span>
+                      <span>Aktivitas Gerbang Terkini</span>
+                    </h3>
+                    <a href="javascript:void(0)" class="figma-card-link" onclick="setSecurityNav('riwayat')" style="font-size: 0.75rem; color: #0284c7; font-weight: 700; text-decoration: none;">Log Lengkap →</a>
                   </div>
                   <div id="securityDashboardRecentFeed" class="feed-list">
                     <!-- Rendered via JS -->
                   </div>
                 </div>
 
-                <div class="dashboard-widget-card" style="background: #f8fafc;">
-                  <div class="dashboard-widget-header">
-                    <div class="dashboard-widget-title">
+                <!-- Card: Ketentuan SOP Gerbang Pos Jaga -->
+                <div class="figma-card">
+                  <div class="figma-card-header">
+                    <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
                       <span>🛡️</span>
-                      <span>Status Pos Gerbang Pabrik</span>
-                    </div>
+                      <span>Ketentuan Pemeriksaan Pos Jaga</span>
+                    </h3>
                   </div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
-                    <div
-                      style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
-                      <span><strong>Pos 1 Gerbang Utama (Utara)</strong></span>
-                      <span class="status-pill approved" style="font-size: 0.7rem;">Aktif Operasional</span>
-                    </div>
-                    <div
-                      style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
-                      <span><strong>Pos 2 Gerbang Barat</strong></span>
-                      <span class="status-pill pending" style="font-size: 0.7rem;">Siaga / Patroli</span>
-                    </div>
-                    <div
-                      style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0;">
-                      <span><strong>Pos 3 Gerbang Timur</strong></span>
-                      <span class="status-pill pending" style="font-size: 0.7rem;">Siaga / Logistik</span>
-                    </div>
-                  </div>
+                  <ul class="figma-bullet-list">
+                    <li>Verifikasi kecocokan foto identitas digital dan nomor plat kendaraan dinas/pribadi.</li>
+                    <li>Tiket Izin Darurat (Emergency Pass) dapat langsung diproses setelah otorisasi terkonfirmasi.</li>
+                    <li>Konfirmasi kepulangan karyawan dilakukan dengan tombol <strong>Scan In / Tap In</strong>.</li>
+                    <li>Hubungi petugas pengawas K3 (Ext. 110) jika terdapat ketidaksesuaian data di gerbang.</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -1307,8 +1288,7 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Karyawan di Luar (Headcount)</h1>
-                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Scan In)
-                </p>
+                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Scan In)</p>
               </div>
               <div class="filters-group">
                 <select id="filterSecurityQueueTab" class="filter-select">
@@ -1321,13 +1301,12 @@
               </div>
             </div>
 
-            <div class="content-section" style="margin-top: 1.5rem;">
-              <div class="section-header-row">
-                <h2 class="section-heading">
-                  <span id="securitySectionHeading">Daftar Headcount Pos Jaga</span>
-                </h2>
-              </div>
+            <div class="figma-section-bar" style="margin-top: 1.25rem;">
+              <span class="figma-section-title" id="securitySectionHeading">Daftar Headcount Pos Jaga</span>
+              <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Pos 1 Gerbang Utama • PT Pupuk Kujang</span>
+            </div>
 
+            <div class="content-section" style="margin-top: 0.75rem;">
               <div id="containerSecurityQueue">
                 <!-- Rendered via JS -->
               </div>
@@ -1356,7 +1335,12 @@
               </div>
             </div>
 
-            <div class="content-section" style="margin-top: 1.5rem;">
+            <div class="figma-section-bar" style="margin-top: 1.25rem;">
+              <span class="figma-section-title">Log & Arsip Pemindaian Gerbang Pos 1</span>
+              <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Riwayat Scan Out & Kepulangan Personel</span>
+            </div>
+
+            <div class="content-section" style="margin-top: 0.75rem;">
               <!-- Toolbar Smart Riwayat Pemindaian Pos Jaga -->
               <div class="smart-toolbar" style="margin-bottom: 1.25rem;">
                 <div class="toolbar-search">

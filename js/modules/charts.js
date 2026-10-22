@@ -414,9 +414,8 @@ function renderAdminTrafficChart() {
     const pct = ((p.out / total) * 100).toFixed(1).replace('.0', '');
     return `
             <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
-               onmouseenter="window.showChartTooltip(event, { title: 'Pukul ' + '${p.hour}', count: ${p.out}, total: ${total}, percent: '${pct}', color: '#0284c7', unit: 'Scan Out' }); window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i});"
-               onmousemove="window.moveChartTooltip(event); window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i});"
-               onmouseleave="window.hideChartTooltip(); window.unhoverTrafficPoint();">
+               onmouseenter="window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i});"
+               onmouseleave="window.unhoverTrafficPoint();">
               <!-- Full-height vertical invisible hit strip -->
               <rect x="${p.x - slotWidth / 2}" y="0" width="${slotWidth}" height="${height}" fill="transparent" />
               <!-- Guide line (hidden by default) -->
@@ -430,9 +429,9 @@ function renderAdminTrafficChart() {
       </svg>
     </div>
 
-    <!-- Admin Traffic Badge (Tanpa Persentase saat Idle) -->
+    <!-- Admin Traffic Badge -->
     <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.45rem 0.75rem; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; color: #0369a1; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
-      <span>🕒 Arahkan kursor ke titik jam untuk melihat volume & persentase</span>
+      <span>🕒 Rekap Volume Lalu Lintas Jam Sibuk</span>
       <span style="color: #0284c7; font-weight: 700;">Total: ${total} Scan Out</span>
     </div>
   `;
@@ -471,7 +470,7 @@ function unhoverTrafficPoint() {
     badge.style.background = '#f0f9ff';
     badge.style.color = '#0369a1';
     badge.style.borderColor = '#bae6fd';
-    badge.innerHTML = `<span>🕒 Arahkan kursor ke titik jam untuk melihat volume & persentase</span><span style="color: #0284c7; font-weight: 700;">Total: ${total} Scan Out</span>`;
+    badge.innerHTML = `<span>🕒 Rekap Volume Lalu Lintas Jam Sibuk</span><span style="color: #0284c7; font-weight: 700;">Total: ${total} Scan Out</span>`;
   }
 
   for (let i = 0; i < 11; i++) {
@@ -546,10 +545,7 @@ function renderAdminDeptChart() {
     const barColor = colors[index % colors.length];
 
     return `
-          <div id="deptRow_${index}" class="chart-dept-row" style="cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease; pointer-events: auto;"
-            onmouseenter="window.showChartTooltip(event, { title: '${d.name.replace(/'/g, "\\'")}', count: ${d.count}, total: ${total}, percent: '${pct}', color: '${barColor}', unit: 'izin' }); window.hoverDeptRow('${d.name.replace(/'/g, "\\'")}', ${d.count}, '${pct}', '${barColor}', ${index});"
-            onmousemove="window.moveChartTooltip(event)"
-            onmouseleave="window.hideChartTooltip(); window.unhoverDeptRow();">
+          <div id="deptRow_${index}" class="chart-dept-row" style="padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease; pointer-events: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; margin-bottom: 4px;">
               <span style="font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${d.name}</span>
               <span id="deptCountLabel_${index}" style="font-family: var(--font-mono); font-weight: 800; color: ${barColor}; font-size: 0.8rem;">
@@ -612,7 +608,7 @@ function unhoverDeptRow() {
     badge.style.background = '#f8fafc';
     badge.style.borderColor = 'var(--border-color)';
     badge.style.color = 'var(--text-secondary)';
-    badge.innerHTML = `<span>🏢 Arahkan kursor ke bar departemen untuk detail persentase</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} izin (${periodText})</span>`;
+    badge.innerHTML = `<span>🏢 Sebaran Frekuensi Perizinan per Departemen</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} izin (${periodText})</span>`;
   }
 
   depts.forEach((d, i) => {
@@ -692,9 +688,6 @@ function renderAdminStatusChart() {
         const barWidthPct = Math.max(Math.round((st.count / maxVal) * 100), st.count > 0 ? 5 : 0);
         return `
           <div id="statusChartRow_${idx}" style="cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease;"
-               onmouseenter="window.showChartTooltip(event, { title: '${st.name}', count: ${st.count}, total: ${total}, percent: '${pct}', color: '${st.color}', unit: 'pengajuan' }); this.style.background='rgba(0,0,0,0.03)';"
-               onmousemove="window.moveChartTooltip(event)"
-               onmouseleave="window.hideChartTooltip(); this.style.background='transparent';"
                onclick="if(window.filterAdminStatusTracking) window.filterAdminStatusTracking('${st.key}')"
                title="Klik untuk filter tabel: ${st.name}">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; margin-bottom: 3px;">
@@ -714,7 +707,7 @@ function renderAdminStatusChart() {
       }).join('')}
     </div>
     <div style="margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.725rem; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
-      <span>💡 Arahkan kursor untuk tooltip persentase</span>
+      <span>Distribusi 7 Status Perizinan</span>
       <span style="font-weight: 700; color: #0f172a;">Total: ${list.length} Pengajuan</span>
     </div>
   `;

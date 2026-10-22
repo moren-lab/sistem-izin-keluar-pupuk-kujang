@@ -1120,10 +1120,14 @@ function renderAdminStatusTracking() {
 }
 
 function viewAdminTicketDetail(ticketId) {
-  if (typeof window.showTicketDetailModal === 'function') {
+  if (typeof window.openTicketDetail === 'function') {
+    window.openTicketDetail(ticketId, 'info');
+  } else if (typeof window.showTicketDetailModal === 'function') {
     window.showTicketDetailModal(ticketId);
   }
 }
+window.viewAdminTicketDetail = viewAdminTicketDetail;
+window.showTicketDetailModal = viewAdminTicketDetail;
 
 function renderAdminView() {
   const nav = window.currentAdminNav || 'dashboard';

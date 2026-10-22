@@ -4368,8 +4368,30 @@ body.modal-open {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.figma-stats-card.figma-stats-4col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.figma-hero-banner.security-theme {
+  background: linear-gradient(135deg, #0b2239 0%, #061320 100%);
+  box-shadow: 0 4px 14px rgba(6, 19, 32, 0.25);
+}
+
+.figma-hero-banner.security-theme .figma-hero-top p {
+  color: #7dd3fc;
+}
+
+@media (max-width: 992px) {
+  .figma-stats-card.figma-stats-4col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .figma-stats-card {
+    grid-template-columns: 1fr;
+  }
+  .figma-stats-card.figma-stats-4col {
     grid-template-columns: 1fr;
   }
   .figma-stat-col:not(:last-child) {

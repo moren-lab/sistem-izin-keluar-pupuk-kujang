@@ -248,11 +248,11 @@ function renderSecurityCards(list, containerElement) {
             <!-- Quick Action Buttons for Satpam -->
             <div class="card-actions-bar">
               <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
-                <button class="btn-card-qr" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'qr')" title="Buka Tiket & QR Code">
+                <button class="btn-card-qr" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'qr')" title="Buka Tiket & QR Code">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                   <span>Tiket & QR Code</span>
                 </button>
-                <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian">
+                <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                   <span>Lihat Rincian</span>
                 </button>
@@ -433,7 +433,7 @@ function renderSecurityLogTable(list, containerElement) {
         </thead>
         <tbody>
           ${list.map(t => `
-            <tr style="cursor: pointer;" onclick="openTicketDetail('${t.id}', 'detail')">
+            <tr style="cursor: pointer;" onclick="window.openTicketDetail('${t.id}', 'detail')">
               <td>
                 <span style="font-family:var(--font-mono); font-weight:700; color:var(--corp-teal);">${t.id}</span>
                 <div style="font-size:0.7rem; color:var(--text-muted);">${(t.createdAt || '').slice(0,10)}</div>
@@ -451,7 +451,7 @@ function renderSecurityLogTable(list, containerElement) {
               <td>${window.getStatusPill(t.status)}</td>
               <td style="text-align: right; white-space: nowrap;">
                 <div style="display: inline-flex; align-items: center; gap: 0.35rem; justify-content: flex-end;">
-                  <button class="btn-card-detail" style="padding:0.35rem 0.65rem; font-size:0.725rem;" onclick="event.stopPropagation(); openTicketDetail('${t.id}', 'detail')">
+                  <button class="btn-card-detail" style="padding:0.35rem 0.65rem; font-size:0.725rem;" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')">
                     Rincian Tiket
                   </button>
                   <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.55rem; border-radius: 4px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
