@@ -590,29 +590,44 @@ function renderKaryawanDonutChart() {
   const offsetDarurat = -lenAktif;
   const offsetSelesai = -(lenAktif + lenDarurat);
 
+  // Delegate to unified interactive charts engine or render clean donut
+  if (typeof window.renderKaryawanDonutChart === 'function' && window.renderKaryawanDonutChart !== renderKaryawanDonutChart) {
+    window.renderKaryawanDonutChart();
+    return;
+  }
+
   container.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 1.75rem; padding: 0.5rem 0; flex-wrap: wrap;">
-      <!-- Donut SVG with center text -->
-      <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 0 auto;">
-        <svg width="140" height="140" viewBox="0 0 140 140" style="display: block; overflow: visible;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem 0; width: 100%;">
+      <!-- Donut SVG with center text and interactive hover segments -->
+      <div style="position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+        <svg width="150" height="150" viewBox="0 0 140 140" style="display: block; overflow: visible;">
           <g transform="rotate(-90 ${cx} ${cy})">
             <!-- Track Background -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="20" />
             
-            <!-- Sedang Aktif (Yellow #facc15) - 12.5% starting at top -->
+            <!-- Sedang Aktif (Yellow #facc15) -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#facc15" stroke-width="20"
               stroke-dasharray="${lenAktif} ${C}" stroke-dashoffset="${offsetAktif}"
-              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+              style="transition: all 0.25s ease; cursor: pointer;"
+              onmouseenter="if(window.showChartTooltip) window.showChartTooltip(event, { title: 'Sedang Aktif', count: ${aktifCount}, total: ${total}, percent: '${pctAktif}', color: '#facc15', unit: 'pengajuan' }); this.setAttribute('stroke-width', '24');"
+              onmousemove="if(window.moveChartTooltip) window.moveChartTooltip(event)"
+              onmouseleave="if(window.hideChartTooltip) window.hideChartTooltip(); this.setAttribute('stroke-width', '20');" />
             
-            <!-- Izin Darurat (Red #dc2626) - 12.5% next clockwise -->
+            <!-- Izin Darurat (Red #dc2626) -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#dc2626" stroke-width="20"
               stroke-dasharray="${lenDarurat} ${C}" stroke-dashoffset="${offsetDarurat}"
-              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+              style="transition: all 0.25s ease; cursor: pointer;"
+              onmouseenter="if(window.showChartTooltip) window.showChartTooltip(event, { title: 'Izin Darurat', count: ${daruratCount}, total: ${total}, percent: '${pctDarurat}', color: '#dc2626', unit: 'pengajuan' }); this.setAttribute('stroke-width', '24');"
+              onmousemove="if(window.moveChartTooltip) window.moveChartTooltip(event)"
+              onmouseleave="if(window.hideChartTooltip) window.hideChartTooltip(); this.setAttribute('stroke-width', '20');" />
             
-            <!-- Selesai (Deep Green #146c3e) - 75% rest of circle -->
+            <!-- Selesai (Deep Green #146c3e) -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#146c3e" stroke-width="20"
               stroke-dasharray="${lenSelesai} ${C}" stroke-dashoffset="${offsetSelesai}"
-              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+              style="transition: all 0.25s ease; cursor: pointer;"
+              onmouseenter="if(window.showChartTooltip) window.showChartTooltip(event, { title: 'Selesai', count: ${selesaiCount}, total: ${total}, percent: '${pctSelesai}', color: '#146c3e', unit: 'pengajuan' }); this.setAttribute('stroke-width', '24');"
+              onmousemove="if(window.moveChartTooltip) window.moveChartTooltip(event)"
+              onmouseleave="if(window.hideChartTooltip) window.hideChartTooltip(); this.setAttribute('stroke-width', '20');" />
           </g>
           
           <!-- Center Text in SVG -->
@@ -620,35 +635,8 @@ function renderKaryawanDonutChart() {
           <text x="${cx}" y="86" text-anchor="middle" font-size="12" font-weight="500" fill="#64748b" font-family="'Plus Jakarta Sans', sans-serif">Total</text>
         </svg>
       </div>
-
-      <!-- Legend matching Figma screenshot exactly -->
-      <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 1rem;">
-        <!-- 1. Selesai (Green) -->
-        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-          <div style="width: 12px; height: 12px; border-radius: 3px; background: #146c3e; margin-top: 4px; flex-shrink: 0;"></div>
-          <div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${selesaiCount} Selesai</div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctSelesai}% dari total</div>
-          </div>
-        </div>
-
-        <!-- 2. Sedang Aktif (Yellow) -->
-        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-          <div style="width: 12px; height: 12px; border-radius: 3px; background: #facc15; margin-top: 4px; flex-shrink: 0;"></div>
-          <div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${aktifCount} Sedang Aktif</div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctAktif}% dari total</div>
-          </div>
-        </div>
-
-        <!-- 3. Izin Darurat (Red) -->
-        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-          <div style="width: 12px; height: 12px; border-radius: 3px; background: #dc2626; margin-top: 4px; flex-shrink: 0;"></div>
-          <div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${daruratCount} Izin Darurat</div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctDarurat}% dari total</div>
-          </div>
-        </div>
+      <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.75rem; text-align: center; font-weight: 500;">
+        💡 Arahkan kursor ke warna chart untuk detail persentase
       </div>
     </div>
   `;
