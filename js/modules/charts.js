@@ -36,7 +36,7 @@ function renderKaryawanDonutChart() {
   const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
 
   const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
-  
+
   // Calculate based on period with Figma baseline (8 total: 6 Selesai, 1 Aktif, 1 Darurat)
   let multiplier = 1;
   if (selPeriod === 'year') multiplier = 3;
@@ -213,19 +213,19 @@ function renderApproverBarChart() {
 
   const daysData = isMonth
     ? [
-        { label: 'Sen', full: 'Senin', count: 14 },
-        { label: 'Sel', full: 'Selasa', count: 21 },
-        { label: 'Rab', full: 'Rabu', count: 18 },
-        { label: 'Kam', full: 'Kamis', count: 25 },
-        { label: 'Jum', full: 'Jumat', count: 34 }
-      ]
+      { label: 'Sen', full: 'Senin', count: 14 },
+      { label: 'Sel', full: 'Selasa', count: 21 },
+      { label: 'Rab', full: 'Rabu', count: 18 },
+      { label: 'Kam', full: 'Kamis', count: 25 },
+      { label: 'Jum', full: 'Jumat', count: 34 }
+    ]
     : [
-        { label: 'Sen', full: 'Senin', count: 4 },
-        { label: 'Sel', full: 'Selasa', count: 6 },
-        { label: 'Rab', full: 'Rabu', count: 3 },
-        { label: 'Kam', full: 'Kamis', count: 8 },
-        { label: 'Jum', full: 'Jumat', count: 5 }
-      ];
+      { label: 'Sen', full: 'Senin', count: 4 },
+      { label: 'Sel', full: 'Selasa', count: 6 },
+      { label: 'Rab', full: 'Rabu', count: 3 },
+      { label: 'Kam', full: 'Kamis', count: 8 },
+      { label: 'Jum', full: 'Jumat', count: 5 }
+    ];
 
   const maxVal = Math.max(...daysData.map(d => d.count), 1);
   const totalVal = daysData.reduce((acc, d) => acc + d.count, 0);
@@ -234,13 +234,13 @@ function renderApproverBarChart() {
   container.innerHTML = `
     <div style="display: flex; align-items: flex-end; justify-content: space-around; gap: 0.75rem; height: 180px; padding: 0.5rem 0.5rem 0.25rem; margin-top: 0.5rem;">
       ${daysData.map((d, idx) => {
-        const isPeak = d.count === maxVal;
-        const heightPx = Math.round((d.count / maxVal) * 115) + 15; // responsive height between 15px - 130px
-        const barBg = isPeak ? '#1d4ed8' : '#bfdbfe';
-        const numColor = '#0f172a';
-        const pct = Math.round((d.count / totalVal) * 100);
+    const isPeak = d.count === maxVal;
+    const heightPx = Math.round((d.count / maxVal) * 115) + 15; // responsive height between 15px - 130px
+    const barBg = isPeak ? '#1d4ed8' : '#bfdbfe';
+    const numColor = '#0f172a';
+    const pct = Math.round((d.count / totalVal) * 100);
 
-        return `
+    return `
           <div class="figma-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; cursor: pointer;"
                title="${d.full}: ${d.count} pengajuan (${pct}% dari total ${totalVal})">
             <!-- Count number on top -->
@@ -259,7 +259,7 @@ function renderApproverBarChart() {
             </span>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 

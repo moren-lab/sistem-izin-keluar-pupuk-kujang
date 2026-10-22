@@ -553,7 +553,7 @@ function renderKaryawanDonutChart() {
   const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
 
   const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
-  
+
   // Calculate based on period with Figma baseline (8 total: 6 Selesai, 1 Aktif, 1 Darurat)
   let multiplier = 1;
   if (selPeriod === 'year') multiplier = 3;

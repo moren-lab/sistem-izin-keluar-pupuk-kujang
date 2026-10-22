@@ -431,10 +431,12 @@ body {
   .top-navbar {
     gap: 1.25rem;
   }
+
   .navbar-clock-pill {
     margin-left: 0.75rem;
     padding: 0.3rem 0.65rem;
   }
+
   .role-switch-btn {
     padding: 0.3rem 0.55rem;
     font-size: 0.725rem;
@@ -3964,9 +3966,20 @@ body.modal-open {
 }
 
 @keyframes emgLaserSweep {
-  0% { top: 5%; opacity: 0.3; }
-  50% { top: 90%; opacity: 1; }
-  100% { top: 5%; opacity: 0.3; }
+  0% {
+    top: 5%;
+    opacity: 0.3;
+  }
+
+  50% {
+    top: 90%;
+    opacity: 1;
+  }
+
+  100% {
+    top: 5%;
+    opacity: 0.3;
+  }
 }
 
 /* Progress bar scanner */
@@ -3995,9 +4008,19 @@ body.modal-open {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-6px);
+  }
+
+  75% {
+    transform: translateX(6px);
+  }
 }
 
 /* ===================================================================
@@ -4335,6 +4358,7 @@ body.modal-open {
   .figma-stats-card {
     grid-template-columns: 1fr;
   }
+
   .figma-stat-col:not(:last-child) {
     border-right: none !important;
     border-bottom: 1px solid #f1f5f9;
@@ -4386,7 +4410,8 @@ body.modal-open {
   }
 }
 
-.figma-col-left, .figma-col-right {
+.figma-col-left,
+.figma-col-right {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -4981,7 +5006,7 @@ body.modal-open {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.approver-search-input:focus + .btn-clear-approver-search + .btn-toggle-approver-list,
+.approver-search-input:focus+.btn-clear-approver-search+.btn-toggle-approver-list,
 .approver-input-box:focus-within .approver-input-icon {
   color: #2563eb;
 }
@@ -5068,6 +5093,7 @@ body.modal-open {
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -5321,6 +5347,7 @@ body.modal-open {
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -5405,4 +5432,3 @@ body.modal-open {
   border-color: #94a3b8;
   color: #0f172a;
 }
-
