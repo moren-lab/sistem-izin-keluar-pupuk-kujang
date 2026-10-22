@@ -247,12 +247,20 @@ function renderAdminDashboard() {
   // Render Recent Activity Feed for Admin
   renderAdminRecentFeed();
 
+  // Render Live 7-Status Tracking for Admin (Requirement 2)
+  if (typeof renderAdminStatusTracking === 'function') {
+    renderAdminStatusTracking();
+  }
+
   // Render Charts for Admin
   if (typeof window.renderAdminTrafficChart === 'function') {
     window.renderAdminTrafficChart();
   }
   if (typeof window.renderAdminDeptChart === 'function') {
     window.renderAdminDeptChart();
+  }
+  if (typeof window.renderAdminStatusChart === 'function') {
+    window.renderAdminStatusChart();
   }
 }
 
@@ -365,7 +373,7 @@ function renderAdminAudit() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
+        <td colspan="7" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
           <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
           <div style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">Tidak Ada Log Aktivitas yang Cocok</div>
           <div style="font-size: 0.775rem; margin-top: 0.2rem;">Silakan sesuaikan kata kunci atau filter peristiwa.</div>
@@ -409,9 +417,56 @@ function renderAdminAudit() {
         <td>
           <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4;">${log.desc}</div>
         </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <button type="button" class="btn-action-sm outline" onclick="window.viewAdminTicketDetail('${log.ticketId}')" title="Lihat Rincian Tiket #${log.ticketId}" style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>Rincian</span>
+          </button>
+          <button type="button" class="btn-figma-delete-single" onclick="window.deleteAdminAuditLog('${log.ticketId}', '${encodeURIComponent(log.time)}', '${encodeURIComponent(log.event)}')" title="Hapus Catatan Audit Peristiwa Ini" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.2rem; padding: 0.25rem 0.45rem; border-radius: 4px; margin-left: 0.35rem; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Hapus</span>
+          </button>
+        </td>
       </tr>
     `;
   }).join('');
+}
+
+// DELETE FEATURE FOR AUDIT TRAIL LOG (REQUIREMENT 7)
+function deleteAdminAuditLog(ticketId, encodedTime, encodedEvent) {
+  const time = decodeURIComponent(encodedTime);
+  const event = decodeURIComponent(encodedEvent);
+
+  if (!confirm(`Apakah Anda yakin ingin menghapus catatan audit [${event}] untuk tiket #${ticketId} pada ${time}? Tindakan ini memerlukan otorisasi administrator.`)) {
+    return;
+  }
+
+  const tickets = window.ticketsList || [];
+  const targetTicket = tickets.find(t => t.id === ticketId);
+  if (!targetTicket) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Tiket #${ticketId} tidak ditemukan.`, 'error');
+    }
+    return;
+  }
+
+  // Remove matching log from activityLog
+  if (Array.isArray(targetTicket.activityLog)) {
+    targetTicket.activityLog = targetTicket.activityLog.filter(l => !(l.time === time && l.event === event));
+  }
+
+  // Remove matching log from timeline
+  if (Array.isArray(targetTicket.timeline)) {
+    targetTicket.timeline = targetTicket.timeline.filter(l => !(l.time === time && l.event === event));
+  }
+
+  window.saveTickets(tickets);
+  renderAdminAudit();
+  renderAdminRecentFeed();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Catatan audit [${event}] untuk tiket #${ticketId} berhasil dihapus.`, 'info');
+  }
 }
 
 // ==========================================
@@ -596,8 +651,205 @@ function printAdminReport() {
 }
 
 // ==========================================
-// 5. USER ACCESS MANAGEMENT / KUJANG ID (FR-ADM-06, UC-24)
+// 5. USER ACCESS MANAGEMENT / KUJANG ID (FR-ADM-06, UC-24, REQUIREMENT 1)
 // ==========================================
+function openAdminUserModal(mode, kujangId) {
+  const modal = document.getElementById('modalAdminUserAccess');
+  const title = document.getElementById('modalAdminUserTitle');
+  const modeInput = document.getElementById('adminUserEditMode');
+  const origIdInput = document.getElementById('adminUserOriginalKujangId');
+  if (!modal) return;
+
+  modeInput.value = mode;
+  origIdInput.value = kujangId || '';
+
+  if (mode === 'add') {
+    if (title) title.textContent = 'Berikan Hak Akses Pengguna Baru';
+    const randNum = Math.floor(100000 + Math.random() * 900000);
+    const inputKujang = document.getElementById('adminInputKujangId');
+    if (inputKujang) {
+      inputKujang.value = `KJG-${randNum}`;
+      inputKujang.readOnly = false;
+    }
+    const inputNip = document.getElementById('adminInputNip');
+    if (inputNip) inputNip.value = '';
+    const inputName = document.getElementById('adminInputName');
+    if (inputName) inputName.value = '';
+    const inputEmail = document.getElementById('adminInputEmail');
+    if (inputEmail) inputEmail.value = '';
+    const inputDept = document.getElementById('adminInputDept');
+    if (inputDept) inputDept.value = 'Departemen Rekayasa & Pemeliharaan';
+    const inputRole = document.getElementById('adminInputRoleKey');
+    if (inputRole) inputRole.value = 'karyawan';
+    const inputStatus = document.getElementById('adminInputStatus');
+    if (inputStatus) inputStatus.value = 'Aktif';
+  } else {
+    if (title) title.textContent = 'Ubah Hak Akses Pengguna';
+    const users = window.MOCK_USERS || [];
+    const user = users.find(u => u.kujangId === kujangId);
+    if (user) {
+      const inputKujang = document.getElementById('adminInputKujangId');
+      if (inputKujang) {
+        inputKujang.value = user.kujangId;
+        inputKujang.readOnly = true;
+      }
+      const inputNip = document.getElementById('adminInputNip');
+      if (inputNip) inputNip.value = user.nip;
+      const inputName = document.getElementById('adminInputName');
+      if (inputName) inputName.value = user.name;
+      const inputEmail = document.getElementById('adminInputEmail');
+      if (inputEmail) inputEmail.value = user.email || '';
+      const inputDept = document.getElementById('adminInputDept');
+      if (inputDept) inputDept.value = user.department;
+      const inputRole = document.getElementById('adminInputRoleKey');
+      if (inputRole) inputRole.value = user.roleKey;
+      const inputStatus = document.getElementById('adminInputStatus');
+      if (inputStatus) inputStatus.value = user.status || 'Aktif';
+    }
+  }
+
+  modal.classList.add('open');
+}
+
+function closeAdminUserModal() {
+  const modal = document.getElementById('modalAdminUserAccess');
+  if (modal) modal.classList.remove('open');
+}
+
+function saveAdminUserAccess(event) {
+  if (event) event.preventDefault();
+  const mode = document.getElementById('adminUserEditMode').value;
+  const originalId = document.getElementById('adminUserOriginalKujangId').value;
+
+  const kujangId = document.getElementById('adminInputKujangId').value.trim();
+  const nip = document.getElementById('adminInputNip').value.trim();
+  const name = document.getElementById('adminInputName').value.trim();
+  const email = document.getElementById('adminInputEmail').value.trim() || `${nip.toLowerCase().replace(/[^a-z0-9]/g, '')}@pupuk-kujang.co.id`;
+  const department = document.getElementById('adminInputDept').value;
+  const roleKey = document.getElementById('adminInputRoleKey').value;
+  const status = document.getElementById('adminInputStatus').value;
+
+  if (!kujangId || !nip || !name) {
+    alert('Mohon lengkapi KUJANG ID, NIP, dan Nama Pengguna.');
+    return;
+  }
+
+  let roleLabel = 'Karyawan';
+  if (roleKey === 'approver') roleLabel = 'Atasan 1 (Manager)';
+  else if (roleKey === 'approver2') roleLabel = 'Atasan 2 (Supervisor / Plt)';
+  else if (roleKey === 'security') roleLabel = 'Petugas Pos Jaga (Satpam)';
+  else if (roleKey === 'admin') roleLabel = 'Administrator Pengamanan & K3';
+
+  let users = window.MOCK_USERS || [];
+
+  if (mode === 'add') {
+    if (users.some(u => u.kujangId.toLowerCase() === kujangId.toLowerCase())) {
+      alert(`KUJANG ID ${kujangId} sudah terdaftar dalam sistem.`);
+      return;
+    }
+    const newUser = {
+      kujangId,
+      nip,
+      name,
+      email,
+      department,
+      role: roleLabel,
+      roleKey,
+      status,
+      lastLogin: 'Baru saja didaftarkan'
+    };
+    users.unshift(newUser);
+  } else {
+    const idx = users.findIndex(u => u.kujangId === originalId || u.kujangId === kujangId);
+    if (idx !== -1) {
+      users[idx] = {
+        ...users[idx],
+        nip,
+        name,
+        email,
+        department,
+        role: roleLabel,
+        roleKey,
+        status
+      };
+    }
+  }
+
+  if (typeof window.saveUsers === 'function') {
+    window.saveUsers(users);
+  } else {
+    window.MOCK_USERS = users;
+  }
+
+  closeAdminUserModal();
+  renderAdminUsers();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Hak akses untuk ${name} (${kujangId}) berhasil disimpan.`, 'success');
+  }
+}
+
+function toggleUserAccess(kujangId) {
+  let users = window.MOCK_USERS || [];
+  const user = users.find(u => u.kujangId === kujangId);
+  if (!user) return;
+
+  if (user.roleKey === 'admin' && user.status === 'Aktif') {
+    const activeAdmins = users.filter(u => u.roleKey === 'admin' && u.status === 'Aktif');
+    if (activeAdmins.length <= 1) {
+      alert('Tidak dapat mencabut hak akses Administrator utama satu-satunya.');
+      return;
+    }
+  }
+
+  const willRevoke = user.status === 'Aktif';
+  const actionText = willRevoke ? 'mencabut hak akses' : 'mengaktifkan kembali hak akses';
+  if (!confirm(`Apakah Anda yakin ingin ${actionText} untuk akun ${user.name} (${user.kujangId})?`)) {
+    return;
+  }
+
+  user.status = willRevoke ? 'Dicabut' : 'Aktif';
+
+  if (typeof window.saveUsers === 'function') {
+    window.saveUsers(users);
+  }
+
+  renderAdminUsers();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Hak akses untuk ${user.name} berhasil ${user.status === 'Aktif' ? 'diaktifkan' : 'dicabut'}.`, user.status === 'Aktif' ? 'success' : 'warning');
+  }
+}
+
+function deleteAdminUser(kujangId) {
+  let users = window.MOCK_USERS || [];
+  const user = users.find(u => u.kujangId === kujangId);
+  if (!user) return;
+
+  if (user.roleKey === 'admin') {
+    alert('Akun Administrator Pengamanan & K3 tidak dapat dihapus untuk keamanan sistem.');
+    return;
+  }
+
+  if (!confirm(`Apakah Anda yakin ingin menghapus hak akses KUJANG ID ${kujangId} (${user.name})? Tindakan ini akan menghapus akun dari sistem.`)) {
+    return;
+  }
+
+  users = users.filter(u => u.kujangId !== kujangId);
+
+  if (typeof window.saveUsers === 'function') {
+    window.saveUsers(users);
+  } else {
+    window.MOCK_USERS = users;
+  }
+
+  renderAdminUsers();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Hak akses akun ${kujangId} berhasil dihapus dari direktori.`, 'info');
+  }
+}
+
 function renderAdminUsers() {
   const users = window.MOCK_USERS || [];
   const tbody = document.getElementById('adminUsersTableBody');
@@ -610,11 +862,11 @@ function renderAdminUsers() {
     }
     const term = adminUserSearchTerm.toLowerCase();
     if (term) {
-      const match = user.kujangId.toLowerCase().includes(term) ||
-        user.nip.toLowerCase().includes(term) ||
-        user.name.toLowerCase().includes(term) ||
-        user.department.toLowerCase().includes(term) ||
-        user.role.toLowerCase().includes(term);
+      const match = (user.kujangId || '').toLowerCase().includes(term) ||
+        (user.nip || '').toLowerCase().includes(term) ||
+        (user.name || '').toLowerCase().includes(term) ||
+        (user.department || '').toLowerCase().includes(term) ||
+        (user.role || '').toLowerCase().includes(term);
       if (!match) return false;
     }
     return true;
@@ -636,9 +888,14 @@ function renderAdminUsers() {
 
   tbody.innerHTML = filtered.map(u => {
     let roleClass = 'karyawan';
-    if (u.roleKey === 'approver') roleClass = 'approver';
+    if (u.roleKey === 'approver' || u.roleKey === 'approver2') roleClass = 'approver';
     else if (u.roleKey === 'security') roleClass = 'security';
     else if (u.roleKey === 'admin') roleClass = 'admin';
+
+    const isRevoked = u.status === 'Dicabut' || u.status === 'Nonaktif';
+    const statusBadge = isRevoked
+      ? `<span style="font-size: 0.75rem; color: #991b1b; font-weight: 700; background: #fee2e2; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">● Dicabut</span>`
+      : `<span style="font-size: 0.75rem; color: #166534; font-weight: 700; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">● Aktif</span>`;
 
     return `
       <tr>
@@ -651,20 +908,210 @@ function renderAdminUsers() {
           <div class="report-emp-name">${u.name}</div>
           <div class="report-emp-nip">NIP: ${u.nip}</div>
         </td>
-        <td style="font-size: 0.8rem; color: var(--text-secondary);">${u.email}</td>
+        <td style="font-size: 0.8rem; color: var(--text-secondary);">${u.email || '-'}</td>
         <td style="font-size: 0.825rem; color: #334155;">${u.department}</td>
         <td>
           <span class="user-role-badge ${roleClass}">${u.role}</span>
         </td>
         <td>
-          <span style="font-size: 0.75rem; color: #166534; font-weight: 600;">
-            ● ${u.status}
-          </span>
-          <div style="font-size: 0.7rem; color: var(--text-muted);">${u.lastLogin}</div>
+          ${statusBadge}
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">${u.lastLogin || '-'}</div>
         </td>
-        <td style="text-align: right;">
-          <button class="btn-action-sm outline" onclick="window.switchRole('${u.roleKey}')" title="Beralih ke peran ini">
-            Beralih Peran
+        <td style="text-align: right; white-space: nowrap;">
+          <button class="btn-action-sm outline" onclick="window.openAdminUserModal('edit', '${u.kujangId}')" title="Ubah Hak Akses" style="font-size: 0.725rem; padding: 3px 8px;">
+            Ubah
+          </button>
+          <button class="btn-action-sm outline" onclick="window.toggleUserAccess('${u.kujangId}')" title="${isRevoked ? 'Aktifkan Akses' : 'Cabut Akses'}" style="font-size: 0.725rem; padding: 3px 8px; margin-left: 3px; color: ${isRevoked ? '#059669' : '#d97706'}; border-color: ${isRevoked ? '#a7f3d0' : '#fcd34d'};">
+            ${isRevoked ? 'Beri Akses' : 'Cabut Akses'}
+          </button>
+          <button class="btn-action-sm outline" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Akun" style="font-size: 0.725rem; padding: 3px 8px; margin-left: 3px; color: #ef4444; border-color: #fca5a5;">
+            Hapus
+          </button>
+          <button class="btn-action-sm" onclick="window.switchRole('${u.roleKey}')" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" style="font-size: 0.725rem; padding: 3px 8px; margin-left: 3px; ${isRevoked ? 'opacity: 0.5; cursor: not-allowed;' : ''}">
+            Beralih
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ==========================================
+// 6. LIVE 7-STATUS TRACKING (REQUIREMENT 2)
+// ==========================================
+let adminTrackingStatusFilter = 'all';
+let adminTrackingSearchTerm = '';
+
+function canonicalStatus(rawStatus) {
+  const s = (rawStatus || '').trim().toLowerCase();
+  if (s.includes('menunggu')) return 'Menunggu Persetujuan';
+  if (s.includes('setuju') && !s.includes('menunggu')) return 'Setuju';
+  if (s.includes('tolak')) return 'Ditolak';
+  if (s.includes('daluwarsa') || s.includes('hangus')) return 'Kadaluwarsa';
+  if (s.includes('lambat')) return 'Terlambat';
+  if (s.includes('luar')) return 'Sedang di Luar';
+  if (s.includes('selesai')) return 'Selesai';
+  return rawStatus || 'Selesai';
+}
+
+function filterAdminStatusTracking(statusKey) {
+  adminTrackingStatusFilter = statusKey;
+  renderAdminStatusTracking();
+}
+
+function renderAdminStatusTracking() {
+  const pillsContainer = document.getElementById('adminStatusFilterPills');
+  const tbody = document.getElementById('adminStatusTrackingTableBody');
+  if (!pillsContainer || !tbody) return;
+
+  const tickets = window.ticketsList || [];
+
+  // Count by canonical status
+  const counts = {
+    'all': tickets.length,
+    'Menunggu Persetujuan': 0,
+    'Setuju': 0,
+    'Sedang di Luar': 0,
+    'Terlambat': 0,
+    'Selesai': 0,
+    'Kadaluwarsa': 0,
+    'Ditolak': 0
+  };
+
+  tickets.forEach(t => {
+    const cStatus = canonicalStatus(t.status);
+    if (counts[cStatus] !== undefined) {
+      counts[cStatus]++;
+    }
+  });
+
+  // Render Filter Pills
+  const filterKeys = [
+    { key: 'all', label: 'Semua Status', icon: '📋', count: counts['all'] },
+    { key: 'Menunggu Persetujuan', label: 'Menunggu Persetujuan', icon: '⏳', count: counts['Menunggu Persetujuan'] },
+    { key: 'Setuju', label: 'Setuju', icon: '✅', count: counts['Setuju'] },
+    { key: 'Sedang di Luar', label: 'Sedang di Luar', icon: '🚶', count: counts['Sedang di Luar'] },
+    { key: 'Terlambat', label: 'Terlambat', icon: '⚠️', count: counts['Terlambat'] },
+    { key: 'Selesai', label: 'Selesai', icon: '🏁', count: counts['Selesai'] },
+    { key: 'Kadaluwarsa', label: 'Kadaluwarsa', icon: '⌛', count: counts['Kadaluwarsa'] },
+    { key: 'Ditolak', label: 'Ditolak', icon: '❌', count: counts['Ditolak'] }
+  ];
+
+  pillsContainer.innerHTML = filterKeys.map(f => {
+    const isActive = adminTrackingStatusFilter === f.key;
+    const activeStyle = isActive
+      ? `background: #0f172a; color: #ffffff; border-color: #0f172a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1);`
+      : `background: #ffffff; color: var(--text-secondary); border-color: var(--border-color); font-weight: 500;`;
+
+    return `
+      <button type="button" class="status-tracking-pill-btn" onclick="window.filterAdminStatusTracking('${f.key}')"
+        style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.775rem; border: 1px solid var(--border-color); cursor: pointer; white-space: nowrap; transition: all 0.15s ease; ${activeStyle}">
+        <span>${f.icon}</span>
+        <span>${f.label}</span>
+        <span style="background: ${isActive ? 'rgba(255,255,255,0.25)' : '#f1f5f9'}; color: ${isActive ? '#ffffff' : 'var(--text-primary)'}; padding: 1px 6px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">
+          ${f.count}
+        </span>
+      </button>
+    `;
+  }).join('');
+
+  // Filter list
+  const filtered = tickets.filter(t => {
+    const cStatus = canonicalStatus(t.status);
+    if (adminTrackingStatusFilter !== 'all' && cStatus !== adminTrackingStatusFilter) {
+      return false;
+    }
+    const term = adminTrackingSearchTerm.toLowerCase();
+    if (term) {
+      const match = (t.id || '').toLowerCase().includes(term) ||
+        (t.applicantName || '').toLowerCase().includes(term) ||
+        (t.applicantNip || '').toLowerCase().includes(term) ||
+        (t.department || '').toLowerCase().includes(term) ||
+        (t.destination || '').toLowerCase().includes(term) ||
+        (t.reason || '').toLowerCase().includes(term);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
+          <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🔍</div>
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">Tidak Ada Data Perizinan yang Sesuai</div>
+          <div style="font-size: 0.775rem; margin-top: 0.2rem;">Coba sesuaikan kata kunci atau pilih filter status lainnya.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(t => {
+    const cStatus = canonicalStatus(t.status);
+
+    // Dynamic progression narrative
+    let progressionText = '';
+    let badgeColorClass = 'status-selesai';
+    if (cStatus === 'Menunggu Persetujuan') {
+      badgeColorClass = 'status-pending';
+      progressionText = 'Diajukan, menunggu telaah dan persetujuan atasan';
+    } else if (cStatus === 'Setuju') {
+      badgeColorClass = 'status-approved';
+      progressionText = 'Disetujui atasan, QR Code aktif siap Scan Out di gerbang';
+    } else if (cStatus === 'Sedang di Luar') {
+      badgeColorClass = 'status-outside';
+      progressionText = `Keluar via ${t.gateOut || 'Pos Gerbang'} (${t.scanOutTime || '-'})`;
+    } else if (cStatus === 'Terlambat') {
+      badgeColorClass = 'status-overdue';
+      progressionText = `Melewati batas kembali ${cleanEstimatedReturnDisplay(t.estimatedReturn, t.type)}`;
+    } else if (cStatus === 'Selesai') {
+      badgeColorClass = 'status-selesai';
+      progressionText = `Kembali lengkap via ${t.gateIn || 'Pos Gerbang'} (${t.scanInTime || '-'})`;
+    } else if (cStatus === 'Kadaluwarsa') {
+      badgeColorClass = 'status-expired';
+      progressionText = 'Tiket kedaluwarsa karena tidak digunakan keluar area';
+    } else if (cStatus === 'Ditolak') {
+      badgeColorClass = 'status-expired';
+      progressionText = `Ditolak oleh atasan: ${t.rejectReason || 'Alasan operasional'}`;
+    }
+
+    return `
+      <tr>
+        <td>
+          <a href="javascript:void(0)" onclick="window.viewAdminTicketDetail('${t.id}')" class="report-ticket-id" style="text-decoration: none; font-weight: 700; color: var(--primary-accent);">
+            ${t.id}
+          </a>
+          <div style="margin-top: 3px;">${cleanCategoryBadge(t.category)}</div>
+        </td>
+        <td>
+          <div class="report-emp-name">${t.applicantName}</div>
+          <div class="report-emp-nip">NIP: ${t.applicantNip}</div>
+        </td>
+        <td>
+          <div class="report-dept-name">${t.department}</div>
+        </td>
+        <td>
+          <div style="font-weight: 600; font-size: 0.825rem; color: var(--text-primary);">${t.destination || '-'}</div>
+          <div style="font-size: 0.725rem; color: var(--text-secondary); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.reason || ''}">
+            ${t.reason || '-'}
+          </div>
+        </td>
+        <td style="font-size: 0.775rem;">
+          <div><span style="color: var(--text-muted);">Keluar:</span> ${cleanScanDisplay(t.scanOutTime, t.gateOut)}</div>
+          <div style="margin-top: 2px;"><span style="color: var(--text-muted);">Estimasi:</span> ${cleanEstimatedReturnDisplay(t.estimatedReturn, t.type)}</div>
+        </td>
+        <td>
+          <span class="status-pill-subtle ${badgeColorClass}" style="margin-bottom: 3px;">
+            ${cStatus}
+          </span>
+          <div style="font-size: 0.725rem; color: var(--text-secondary); line-height: 1.3; max-width: 240px;">
+            ${progressionText}
+          </div>
+        </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <button type="button" class="btn-action-sm outline" onclick="window.viewAdminTicketDetail('${t.id}')" title="Audit Detail Tiket">
+            Rincian
           </button>
         </td>
       </tr>
@@ -752,15 +1199,31 @@ document.addEventListener('DOMContentLoaded', () => {
       renderAdminUsers();
     });
   }
+
+  const trackingSearch = document.getElementById('adminTrackingSearchInput');
+  if (trackingSearch) {
+    trackingSearch.addEventListener('input', (e) => {
+      adminTrackingSearchTerm = e.target.value;
+      renderAdminStatusTracking();
+    });
+  }
 });
 
 // Expose globally
 window.updateAdminMetrics = updateAdminMetrics;
 window.renderAdminDashboard = renderAdminDashboard;
 window.renderAdminAudit = renderAdminAudit;
+window.deleteAdminAuditLog = deleteAdminAuditLog;
 window.renderAdminReports = renderAdminReports;
 window.renderAdminUsers = renderAdminUsers;
 window.renderAdminView = renderAdminView;
 window.exportAdminExcel = exportAdminExcel;
 window.printAdminReport = printAdminReport;
 window.viewAdminTicketDetail = viewAdminTicketDetail;
+window.openAdminUserModal = openAdminUserModal;
+window.closeAdminUserModal = closeAdminUserModal;
+window.saveAdminUserAccess = saveAdminUserAccess;
+window.toggleUserAccess = toggleUserAccess;
+window.deleteAdminUser = deleteAdminUser;
+window.renderAdminStatusTracking = renderAdminStatusTracking;
+window.filterAdminStatusTracking = filterAdminStatusTracking;

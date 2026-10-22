@@ -331,7 +331,9 @@ function resetAllTicketsToDefault() {
 }
 window.resetAllTicketsToDefault = resetAllTicketsToDefault;
 
-const MOCK_USERS = [
+const USERS_STORAGE_KEY = 'KUJANG_GATEPASS_USERS_V2';
+
+const DEFAULT_USERS = [
   {
     kujangId: 'KJG-991024',
     nip: 'PK-2024-8841',
@@ -349,10 +351,21 @@ const MOCK_USERS = [
     name: 'Ir. Hendra Gunawan, M.T.',
     email: 'hendra.gunawan@pupuk-kujang.co.id',
     department: 'Departemen Rekayasa & Pemeliharaan',
-    role: 'Atasan (Approver)',
+    role: 'Atasan 1 (Manager)',
     roleKey: 'approver',
     status: 'Aktif',
     lastLogin: 'Hari ini, 07:45 WIB'
+  },
+  {
+    kujangId: 'KJG-881202',
+    nip: 'PK-2012-0845',
+    name: 'Dewi Sartika, S.T., M.M.',
+    email: 'dewi.sartika@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    role: 'Atasan 2 (Supervisor / Plt)',
+    roleKey: 'approver2',
+    status: 'Aktif',
+    lastLogin: 'Hari ini, 08:05 WIB'
   },
   {
     kujangId: 'KJG-774419',
@@ -404,12 +417,32 @@ const MOCK_USERS = [
     name: 'Dr. Ahmad Subagja, M.M.',
     email: 'ahmad.subagja@pupuk-kujang.co.id',
     department: 'Departemen SDM & Organisasi',
-    role: 'Atasan (Approver)',
+    role: 'Atasan 1 (Manager)',
     roleKey: 'approver',
     status: 'Aktif',
     lastLogin: 'Hari ini, 08:30 WIB'
   }
 ];
+
+function loadUsers() {
+  const saved = localStorage.getItem(USERS_STORAGE_KEY);
+  if (!saved) {
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
+    return JSON.parse(JSON.stringify(DEFAULT_USERS));
+  }
+  try {
+    return JSON.parse(saved);
+  } catch (e) {
+    return JSON.parse(JSON.stringify(DEFAULT_USERS));
+  }
+}
+
+function saveUsers(data) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data));
+  window.MOCK_USERS = data;
+}
+
+const MOCK_USERS = loadUsers();
 
 function saveTickets(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -428,7 +461,11 @@ let pendingFormData = null;
 
 // Expose variables globally on window
 window.STORAGE_KEY = STORAGE_KEY;
+window.USERS_STORAGE_KEY = USERS_STORAGE_KEY;
 window.ACTORS = ACTORS;
+window.DEFAULT_USERS = DEFAULT_USERS;
+window.loadUsers = loadUsers;
+window.saveUsers = saveUsers;
 window.MOCK_USERS = MOCK_USERS;
 window.loadTickets = loadTickets;
 window.saveTickets = saveTickets;

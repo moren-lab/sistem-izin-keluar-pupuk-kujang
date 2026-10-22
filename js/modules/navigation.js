@@ -247,6 +247,23 @@ function switchRole(role) {
   const sidebarUserName = document.getElementById('sidebarUserName');
   const sidebarUserSub = document.getElementById('sidebarUserSub');
 
+  // Check user access revocation (Admin Access Control)
+  const users = window.MOCK_USERS || [];
+  const matchedUser = users.find(u => u.roleKey === role);
+  if (matchedUser && (matchedUser.status === 'Dicabut' || matchedUser.status === 'Nonaktif')) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`⛔ Akses untuk ${matchedUser.name} (${matchedUser.role}) telah dicabut oleh Administrator!`, 'danger');
+    }
+    // Re-highlight the previous role button
+    const prevRole = window.currentActor || 'karyawan';
+    if (prevRole === 'karyawan' && btnSwitchKaryawan) btnSwitchKaryawan.classList.add('active');
+    else if (prevRole === 'approver' && btnSwitchApprover) btnSwitchApprover.classList.add('active', 'approver');
+    else if (prevRole === 'approver2' && btnSwitchApprover2) btnSwitchApprover2.classList.add('active', 'approver');
+    else if (prevRole === 'security' && btnSwitchSecurity) btnSwitchSecurity.classList.add('active', 'security');
+    else if (prevRole === 'admin' && btnSwitchAdmin) btnSwitchAdmin.classList.add('active', 'admin');
+    return false;
+  }
+
   if (btnSwitchKaryawan) btnSwitchKaryawan.classList.remove('active');
   if (btnSwitchApprover) btnSwitchApprover.classList.remove('active', 'approver');
   if (btnSwitchApprover2) btnSwitchApprover2.classList.remove('active', 'approver');
@@ -264,6 +281,11 @@ function switchRole(role) {
   if (navAdminGroup) navAdminGroup.style.display = 'none';
 
   const ACTORS = window.ACTORS;
+  if (matchedUser && ACTORS && ACTORS[role]) {
+    ACTORS[role].name = matchedUser.name;
+    ACTORS[role].nip = matchedUser.nip;
+    if (matchedUser.department) ACTORS[role].department = matchedUser.department;
+  }
 
   if (role === 'karyawan') {
     if (btnSwitchKaryawan) btnSwitchKaryawan.classList.add('active');
@@ -340,6 +362,14 @@ function switchRole(role) {
 
   // Update mobile bottom nav visibility & active role group (Excludes Admin)
   updateMobileBottomNav(role);
+
+  // Auto-scroll role switcher to keep active button in view
+  const activeBtn = document.querySelector('.role-switch-btn.active');
+  if (activeBtn) {
+    try {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    } catch (e) {}
+  }
 
   if (typeof window.renderAllCharts === 'function') {
     window.renderAllCharts();
@@ -481,9 +511,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnLoginSubmit) btnLoginSubmit.addEventListener('click', handleLoginSubmit);
 
+  initRoleSwitcherScroll();
+
   setInterval(updateClock, 1000);
   updateClock();
 });
+
+// HORIZONTAL SCROLL & DRAG SUPPORT FOR ROLE SWITCHER (REQUIREMENT 4)
+function initRoleSwitcherScroll() {
+  const container = document.querySelector('.role-switcher-container');
+  if (!container) return;
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  container.addEventListener('mousedown', (e) => {
+    isDown = true;
+    container.classList.add('grabbing');
+    startX = e.pageX - container.offsetLeft;
+    scrollLeft = container.scrollLeft;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDown) {
+      isDown = false;
+      container.classList.remove('grabbing');
+    }
+  });
+
+  container.addEventListener('mouseleave', () => {
+    isDown = false;
+    container.classList.remove('grabbing');
+  });
+
+  container.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 1.5; // Drag speed
+    container.scrollLeft = scrollLeft - walk;
+  });
+
+  // Mouse wheel horizontal scroll
+  container.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      container.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+}
 
 // LOGOUT & PORTAL AUTH FUNCTIONS
 function openLogoutModal() {
@@ -541,4 +618,5 @@ window.openLogoutModal = openLogoutModal;
 window.closeLogoutModal = closeLogoutModal;
 window.executeLogout = executeLogout;
 window.handleLoginSubmit = handleLoginSubmit;
+window.initRoleSwitcherScroll = initRoleSwitcherScroll;
 

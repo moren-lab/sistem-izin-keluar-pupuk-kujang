@@ -1,11 +1,79 @@
 /**
  * SISTEM PERIZINAN KELUAR AREA KARYAWAN - PT Pupuk Kujang Cikampek
  * Lightweight, Ultra-Sensitive Real-Time Interactive Chart Engine (SVG)
- * 1. Karyawan: High-Precision Donut Chart (Hover: Persentase + Total Dinas vs Pribadi vs Darurat, Hole Protector, Dynamic Single-Category Detail)
- * 2. Approver: Interactive Bar Chart (Tren Pengajuan Izin Tim per Hari Kerja)
- * 3. Admin: Interactive Traffic Chart (Jam Sibuk Lalu Lintas Gerbang 07:00 - 17:00)
- * 4. Admin: Interactive Department Chart (Sebaran Frekuensi per Departemen)
+ * 1. Floating Interactive Tooltip Engine (Nama status/kategori, Jumlah data, Persentase terhadap total)
+ * 2. Karyawan: High-Precision Donut Chart with Interactive Segments & Tooltips (No static legend)
+ * 3. Approver: Interactive Bar Chart (Tren Pengajuan Izin Tim per Hari Kerja)
+ * 4. Admin: Interactive Traffic Chart (Jam Sibuk Lalu Lintas Gerbang 07:00 - 17:00)
+ * 5. Admin: Interactive Department Chart (Sebaran Frekuensi per Departemen)
  */
+
+// ===================================================================
+// FLOATING INTERACTIVE TOOLTIP ENGINE (REQUIREMENT 3 & 5)
+// ===================================================================
+function ensureChartTooltip() {
+  let tip = document.getElementById('chartGlobalTooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'chartGlobalTooltip';
+    tip.className = 'chart-global-tooltip';
+    tip.style.cssText = `
+      position: fixed;
+      pointer-events: none;
+      z-index: 999999;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      transform: translate(-50%, -100%) translateY(-12px);
+      white-space: nowrap;
+    `;
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+
+function showChartTooltip(e, data) {
+  const tip = ensureChartTooltip();
+  const { title, count, total, percent, color, unit } = data;
+  const unitStr = unit || 'pengajuan';
+
+  tip.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 0.55rem;">
+      <span style="width: 10px; height: 10px; border-radius: 2.5px; background: ${color || '#2563eb'}; flex-shrink: 0; display: inline-block; box-shadow: 0 0 6px ${color || '#2563eb'};"></span>
+      <span style="font-weight: 500; letter-spacing: -0.2px;"><strong>${title}</strong> — ${percent}% dari total (${count} ${unitStr})</span>
+    </div>
+  `;
+
+  tip.style.opacity = '1';
+  tip.style.left = `${e.clientX}px`;
+  tip.style.top = `${e.clientY}px`;
+}
+
+function moveChartTooltip(e) {
+  const tip = document.getElementById('chartGlobalTooltip');
+  if (tip && tip.style.opacity === '1') {
+    tip.style.left = `${e.clientX}px`;
+    tip.style.top = `${e.clientY}px`;
+  }
+}
+
+function hideChartTooltip() {
+  const tip = document.getElementById('chartGlobalTooltip');
+  if (tip) {
+    tip.style.opacity = '0';
+  }
+}
+
+window.showChartTooltip = showChartTooltip;
+window.moveChartTooltip = moveChartTooltip;
+window.hideChartTooltip = hideChartTooltip;
 
 // Helper to calculate SVG donut arc path with precision
 function createDonutArcPath(cx, cy, R, r, a0, a1) {
@@ -22,7 +90,7 @@ function createDonutArcPath(cx, cy, R, r, a0, a1) {
 }
 
 // ===================================================================
-// 1. KARYAWAN: DONUT CHART (TOTAL PENGAJUAN IZIN - SESUAI FIGMA)
+// 1. KARYAWAN: DONUT CHART (TOTAL PENGAJUAN IZIN - TANPA RINGKASAN STATIS)
 // ===================================================================
 function renderKaryawanDonutChart() {
   const container = document.getElementById('figmaDonutChartWrap') || document.getElementById('chartEmpCategoryContainer');
@@ -73,29 +141,40 @@ function renderKaryawanDonutChart() {
   const offsetDarurat = -lenAktif;
   const offsetSelesai = -(lenAktif + lenDarurat);
 
+  // Render centered Donut Chart WITHOUT static summary (Requirement 5)
+  // Interactive tooltips trigger on hover over each slice (Requirement 3 & 5)
   container.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 1.75rem; padding: 0.5rem 0; flex-wrap: wrap;">
-      <!-- Donut SVG with center text -->
-      <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 0 auto;">
-        <svg width="140" height="140" viewBox="0 0 140 140" style="display: block; overflow: visible;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.75rem 0; width: 100%;">
+      <!-- Donut SVG with center text and interactive hover segments -->
+      <div style="position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+        <svg width="150" height="150" viewBox="0 0 140 140" style="display: block; overflow: visible;">
           <g transform="rotate(-90 ${cx} ${cy})">
             <!-- Track Background -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="20" />
             
-            <!-- Sedang Aktif (Yellow #facc15) - 12.5% starting at top -->
+            <!-- Sedang Aktif (Yellow #facc15) -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#facc15" stroke-width="20"
               stroke-dasharray="${lenAktif} ${C}" stroke-dashoffset="${offsetAktif}"
-              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+              style="transition: all 0.25s ease; cursor: pointer;"
+              onmouseenter="window.showChartTooltip(event, { title: 'Sedang Aktif', count: ${aktifCount}, total: ${total}, percent: '${pctAktif}', color: '#facc15', unit: 'pengajuan' }); this.setAttribute('stroke-width', '24');"
+              onmousemove="window.moveChartTooltip(event)"
+              onmouseleave="window.hideChartTooltip(); this.setAttribute('stroke-width', '20');" />
             
-            <!-- Izin Darurat (Red #dc2626) - 12.5% next clockwise -->
+            <!-- Izin Darurat (Red #dc2626) -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#dc2626" stroke-width="20"
               stroke-dasharray="${lenDarurat} ${C}" stroke-dashoffset="${offsetDarurat}"
-              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+              style="transition: all 0.25s ease; cursor: pointer;"
+              onmouseenter="window.showChartTooltip(event, { title: 'Izin Darurat', count: ${daruratCount}, total: ${total}, percent: '${pctDarurat}', color: '#dc2626', unit: 'pengajuan' }); this.setAttribute('stroke-width', '24');"
+              onmousemove="window.moveChartTooltip(event)"
+              onmouseleave="window.hideChartTooltip(); this.setAttribute('stroke-width', '20');" />
             
-            <!-- Selesai (Deep Green #146c3e) - 75% rest of circle -->
+            <!-- Selesai (Deep Green #146c3e) -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#146c3e" stroke-width="20"
               stroke-dasharray="${lenSelesai} ${C}" stroke-dashoffset="${offsetSelesai}"
-              style="transition: stroke-dasharray 0.3s ease, stroke-dashoffset 0.3s ease;" />
+              style="transition: all 0.25s ease; cursor: pointer;"
+              onmouseenter="window.showChartTooltip(event, { title: 'Selesai', count: ${selesaiCount}, total: ${total}, percent: '${pctSelesai}', color: '#146c3e', unit: 'pengajuan' }); this.setAttribute('stroke-width', '24');"
+              onmousemove="window.moveChartTooltip(event)"
+              onmouseleave="window.hideChartTooltip(); this.setAttribute('stroke-width', '20');" />
           </g>
           
           <!-- Center Text in SVG -->
@@ -103,35 +182,8 @@ function renderKaryawanDonutChart() {
           <text x="${cx}" y="86" text-anchor="middle" font-size="12" font-weight="500" fill="#64748b" font-family="'Plus Jakarta Sans', sans-serif">Total</text>
         </svg>
       </div>
-
-      <!-- Legend matching Figma screenshot exactly -->
-      <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 1rem;">
-        <!-- 1. Selesai (Green) -->
-        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-          <div style="width: 12px; height: 12px; border-radius: 3px; background: #146c3e; margin-top: 4px; flex-shrink: 0;"></div>
-          <div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${selesaiCount} Selesai</div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctSelesai}% dari total</div>
-          </div>
-        </div>
-
-        <!-- 2. Sedang Aktif (Yellow) -->
-        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-          <div style="width: 12px; height: 12px; border-radius: 3px; background: #facc15; margin-top: 4px; flex-shrink: 0;"></div>
-          <div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${aktifCount} Sedang Aktif</div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctAktif}% dari total</div>
-          </div>
-        </div>
-
-        <!-- 3. Izin Darurat (Red) -->
-        <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-          <div style="width: 12px; height: 12px; border-radius: 3px; background: #dc2626; margin-top: 4px; flex-shrink: 0;"></div>
-          <div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; line-height: 1.2;">${daruratCount} Izin Darurat</div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; margin-top: 2px;">${pctDarurat}% dari total</div>
-          </div>
-        </div>
+      <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.75rem; text-align: center; font-weight: 500;">
+        💡 Arahkan kursor ke warna chart untuk detail persentase
       </div>
     </div>
   `;
@@ -230,7 +282,7 @@ function renderApproverBarChart() {
   const maxVal = Math.max(...daysData.map(d => d.count), 1);
   const totalVal = daysData.reduce((acc, d) => acc + d.count, 0);
 
-  // Render bars matching Figma Image 1 exactly
+  // Render bars matching Figma Image 1 exactly with interactive tooltips (Requirement 3)
   container.innerHTML = `
     <div style="display: flex; align-items: flex-end; justify-content: space-around; gap: 0.75rem; height: 180px; padding: 0.5rem 0.5rem 0.25rem; margin-top: 0.5rem;">
       ${daysData.map((d, idx) => {
@@ -242,7 +294,9 @@ function renderApproverBarChart() {
 
         return `
           <div class="figma-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; cursor: pointer;"
-               title="${d.full}: ${d.count} pengajuan (${pct}% dari total ${totalVal})">
+               onmouseenter="window.showChartTooltip(event, { title: '${d.full}', count: ${d.count}, total: ${totalVal}, percent: ${pct}, color: '${barBg}', unit: 'pengajuan' })"
+               onmousemove="window.moveChartTooltip(event)"
+               onmouseleave="window.hideChartTooltip()">
             <!-- Count number on top -->
             <span style="font-size: 0.925rem; font-weight: 800; color: ${numColor}; margin-bottom: 8px; font-family: var(--font-sans);">
               ${d.count}
@@ -250,8 +304,8 @@ function renderApproverBarChart() {
             <!-- Bar block ("kotak-kotak") -->
             <div id="approverBarItem_${idx}"
                  style="width: 100%; max-width: 44px; height: ${heightPx}px; background: ${barBg}; border-radius: 6px 6px 0 0; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
-                 onmouseenter="this.style.opacity='0.8'; this.style.transform='scaleY(1.03)'"
-                 onmouseleave="this.style.opacity='1'; this.style.transform='scaleY(1)'">
+                 onmouseenter="this.style.opacity='0.8'; this.style.transform='scaleY(1.05)'; this.style.boxShadow='0 0 12px ${barBg}';"
+                 onmouseleave="this.style.opacity='1'; this.style.transform='scaleY(1)'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.05)';">
             </div>
             <!-- Day label on bottom -->
             <span style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-top: 8px;">
@@ -360,8 +414,9 @@ function renderAdminTrafficChart() {
     const pct = ((p.out / total) * 100).toFixed(1).replace('.0', '');
     return `
             <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
-               onmouseenter="window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i})"
-               onmousemove="window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i})">
+               onmouseenter="window.showChartTooltip(event, { title: 'Pukul ' + '${p.hour}', count: ${p.out}, total: ${total}, percent: '${pct}', color: '#0284c7', unit: 'Scan Out' }); window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i});"
+               onmousemove="window.moveChartTooltip(event); window.hoverTrafficPoint('${p.hour}', ${p.out}, '${pct}', ${p.x}, ${p.y}, ${i});"
+               onmouseleave="window.hideChartTooltip(); window.unhoverTrafficPoint();">
               <!-- Full-height vertical invisible hit strip -->
               <rect x="${p.x - slotWidth / 2}" y="0" width="${slotWidth}" height="${height}" fill="transparent" />
               <!-- Guide line (hidden by default) -->
@@ -492,8 +547,9 @@ function renderAdminDeptChart() {
 
     return `
           <div id="deptRow_${index}" class="chart-dept-row" style="cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease; pointer-events: auto;"
-            onmouseenter="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${barColor}', ${index})"
-            onmousemove="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${barColor}', ${index})">
+            onmouseenter="window.showChartTooltip(event, { title: '${d.name.replace(/'/g, "\\'")}', count: ${d.count}, total: ${total}, percent: '${pct}', color: '${barColor}', unit: 'izin' }); window.hoverDeptRow('${d.name.replace(/'/g, "\\'")}', ${d.count}, '${pct}', '${barColor}', ${index});"
+            onmousemove="window.moveChartTooltip(event)"
+            onmouseleave="window.hideChartTooltip(); window.unhoverDeptRow();">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; margin-bottom: 4px;">
               <span style="font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${d.name}</span>
               <span id="deptCountLabel_${index}" style="font-family: var(--font-mono); font-weight: 800; color: ${barColor}; font-size: 0.8rem;">
@@ -608,6 +664,63 @@ window.initChartFilterListeners = initChartFilterListeners;
 
 
 // ===================================================================
+// 5. ADMIN: INTERACTIVE STATUS DISTRIBUTION CHART (7 STATUS TRACKING)
+// ===================================================================
+function renderAdminStatusChart() {
+  const container = document.getElementById('chartAdminStatusContainer');
+  if (!container) return;
+
+  const list = window.ticketsList || [];
+  const total = Math.max(list.length, 1);
+
+  const statuses = [
+    { key: 'Selesai', name: 'Selesai', color: '#16a34a', count: list.filter(t => t.status === 'Selesai').length },
+    { key: 'Sedang di Luar', name: 'Sedang di Luar', color: '#0284c7', count: list.filter(t => t.status === 'Sedang di Luar').length },
+    { key: 'Disetujui', name: 'Setuju / Siap Keluar', color: '#0d9488', count: list.filter(t => t.status === 'Disetujui').length },
+    { key: 'Menunggu Persetujuan', name: 'Menunggu Persetujuan', color: '#f59e0b', count: list.filter(t => t.status === 'Menunggu Persetujuan').length },
+    { key: 'Terlambat', name: 'Terlambat', color: '#dc2626', count: list.filter(t => t.status === 'Terlambat').length },
+    { key: 'Ditolak', name: 'Ditolak', color: '#e11d48', count: list.filter(t => t.status === 'Ditolak').length },
+    { key: 'Kedaluwarsa', name: 'Kadaluwarsa', color: '#64748b', count: list.filter(t => t.status === 'Kedaluwarsa').length }
+  ];
+
+  const maxVal = Math.max(...statuses.map(s => s.count), 1);
+
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.25rem 0;">
+      ${statuses.map((st, idx) => {
+        const pct = ((st.count / total) * 100).toFixed(1).replace('.0', '');
+        const barWidthPct = Math.max(Math.round((st.count / maxVal) * 100), st.count > 0 ? 5 : 0);
+        return `
+          <div id="statusChartRow_${idx}" style="cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; transition: all 0.2s ease;"
+               onmouseenter="window.showChartTooltip(event, { title: '${st.name}', count: ${st.count}, total: ${total}, percent: '${pct}', color: '${st.color}', unit: 'pengajuan' }); this.style.background='rgba(0,0,0,0.03)';"
+               onmousemove="window.moveChartTooltip(event)"
+               onmouseleave="window.hideChartTooltip(); this.style.background='transparent';"
+               onclick="if(window.filterAdminStatusTracking) window.filterAdminStatusTracking('${st.key}')"
+               title="Klik untuk filter tabel: ${st.name}">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem; margin-bottom: 3px;">
+              <span style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${st.color}; display: inline-block;"></span>
+                ${st.name}
+              </span>
+              <span style="font-family: var(--font-mono); font-weight: 800; color: ${st.color}; font-size: 0.8rem;">
+                ${st.count} <span style="font-size: 0.7rem; font-weight: 600; opacity: 0.85;">(${pct}%)</span>
+              </span>
+            </div>
+            <div style="width: 100%; height: 7px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+              <div style="width: ${barWidthPct}%; height: 100%; background: ${st.color}; border-radius: 4px; transition: all 0.3s ease;"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div style="margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.725rem; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+      <span>💡 Arahkan kursor untuk tooltip persentase</span>
+      <span style="font-weight: 700; color: #0f172a;">Total: ${list.length} Pengajuan</span>
+    </div>
+  `;
+}
+
+// ===================================================================
 // RENDER ALL CHARTS ORCHESTRATOR
 // ===================================================================
 function renderAllCharts() {
@@ -620,6 +733,7 @@ function renderAllCharts() {
   } else if (role === 'admin') {
     renderAdminTrafficChart();
     renderAdminDeptChart();
+    renderAdminStatusChart();
   }
 }
 
@@ -628,6 +742,7 @@ window.renderKaryawanDonutChart = renderKaryawanDonutChart;
 window.renderApproverBarChart = renderApproverBarChart;
 window.renderAdminTrafficChart = renderAdminTrafficChart;
 window.renderAdminDeptChart = renderAdminDeptChart;
+window.renderAdminStatusChart = renderAdminStatusChart;
 window.renderAllCharts = renderAllCharts;
 
 document.addEventListener('DOMContentLoaded', () => {
