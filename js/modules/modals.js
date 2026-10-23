@@ -826,48 +826,119 @@ function getFormattedDateTimeLocal(dt = new Date()) {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
 
+// ===================================================================
 // VALIDASI BATAS MAKSIMAL PENGAJUAN (SEBELUM JAM PULANG KANTOR)
 // Hari biasa (Senin - Kamis): 07:00 - 16:00 WIB
 // Hari Jumat: 07:00 - 16:30 WIB
-function isWithinOperationalHours(date = new Date()) {
-  const day = date.getDay(); // 0: Minggu, 1: Senin, ..., 4: Kamis, 5: Jumat, 6: Sabtu
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const totalMinutes = hours * 60 + minutes;
-  const startMinutes = 7 * 60; // 07:00 WIB
+// ===================================================================
 
-  // Senin (1) sampai Kamis (4)
-  if (day >= 1 && day <= 4) {
-    const endMinutes = 16 * 60; // 16:00 WIB
-    const allowed = totalMinutes >= startMinutes && totalMinutes <= endMinutes;
-    return {
-      allowed,
-      scheduleText: 'Senin - Kamis pukul 07:00 - 16:00 WIB',
-      closingHour: '16:00',
-      closingMinutes: endMinutes
-    };
-  }
+function getClosingTimeForDate(date) {
+  const d = (typeof date === 'string') ? new Date(date) : date;
+  if (!d || isNaN(d.getTime())) return null;
+  const day = d.getDay(); // 0: Minggu, 1: Senin, ..., 4: Kamis, 5: Jumat, 6: Sabtu
 
-  // Hari Jumat (5)
   if (day === 5) {
-    const endMinutes = 16 * 60 + 30; // 16:30 WIB
-    const allowed = totalMinutes >= startMinutes && totalMinutes <= endMinutes;
     return {
-      allowed,
-      scheduleText: 'Jumat pukul 07:00 - 16:30 WIB',
-      closingHour: '16:30',
-      closingMinutes: endMinutes
+      day,
+      dayName: 'Jumat',
+      hour: 16,
+      minute: 30,
+      totalMinutes: 16 * 60 + 30,
+      closingStr: '16:30 WIB',
+      scheduleText: 'Jumat pukul 07:00 - 16:30 WIB'
     };
   }
 
-  // Hari Libur (Sabtu / Minggu)
+  if (day >= 1 && day <= 4) {
+    const dayNames = ['', 'Senin', 'Selasa', 'Rabu', 'Kamis'];
+    return {
+      day,
+      dayName: dayNames[day] || 'Senin - Kamis',
+      hour: 16,
+      minute: 0,
+      totalMinutes: 16 * 60,
+      closingStr: '16:00 WIB',
+      scheduleText: 'Senin - Kamis pukul 07:00 - 16:00 WIB'
+    };
+  }
+
   return {
-    allowed: false,
-    scheduleText: 'Senin - Kamis (07:00 - 16:00 WIB) atau Jumat (07:00 - 16:30 WIB)',
-    closingHour: 'Hari Libur',
-    closingMinutes: 0
+    day,
+    dayName: day === 6 ? 'Sabtu' : 'Minggu',
+    hour: 0,
+    minute: 0,
+    totalMinutes: 0,
+    closingStr: 'Hari Libur',
+    scheduleText: 'Hari Libur Akhir Pekan (Sabtu / Minggu)'
   };
 }
+
+function validateWorkingHours(dateInput, label = 'Waktu') {
+  if (!dateInput) return { valid: false, message: `${label} wajib diisi!` };
+  const d = (typeof dateInput === 'string') ? new Date(dateInput) : dateInput;
+  if (!d || isNaN(d.getTime())) return { valid: false, message: `Format ${label} tidak valid!` };
+
+  const day = d.getDay();
+  if (day === 0 || day === 6) {
+    return {
+      valid: false,
+      message: `${label} tidak dapat dipilih pada hari libur akhir pekan (${day === 6 ? 'Sabtu' : 'Minggu'}). Sistem perizinan hanya berlaku hari kerja Senin s/d Jumat!`
+    };
+  }
+
+  const hours = d.getHours();
+  const minutes = d.getMinutes();
+  const totalMins = hours * 60 + minutes;
+  const startMins = 7 * 60; // 07:00 WIB
+  const closingInfo = getClosingTimeForDate(d);
+
+  if (totalMins < startMins) {
+    return {
+      valid: false,
+      message: `${label} (${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} WIB) tidak boleh sebelum jam masuk kerja (minimal pukul 07:00 WIB)!`
+    };
+  }
+
+  if (totalMins > closingInfo.totalMinutes) {
+    return {
+      valid: false,
+      message: `${label} (${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} WIB) melebihi batas jam pulang kantor! Untuk hari ${closingInfo.dayName}, batas maksimal pengajuan dan kepulangan adalah pukul ${closingInfo.closingStr}.`
+    };
+  }
+
+  return { valid: true, closingInfo };
+}
+
+function setInputMaxByDate(inputEl, baseDate = new Date()) {
+  if (!inputEl) return;
+  const d = (typeof baseDate === 'string') ? new Date(baseDate) : baseDate;
+  if (!d || isNaN(d.getTime())) return;
+  const pad = (n) => String(n).padStart(2, '0');
+  const closing = getClosingTimeForDate(d);
+  if (closing && closing.totalMinutes > 0) {
+    inputEl.max = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
+  }
+}
+
+function isWithinOperationalHours(date = new Date()) {
+  const result = validateWorkingHours(date, 'Waktu saat ini');
+  if (!result.valid) {
+    return {
+      allowed: false,
+      scheduleText: result.message,
+      message: result.message
+    };
+  }
+  return {
+    allowed: true,
+    scheduleText: result.closingInfo.scheduleText,
+    closingHour: result.closingInfo.closingStr
+  };
+}
+
+window.getClosingTimeForDate = getClosingTimeForDate;
+window.validateWorkingHours = validateWorkingHours;
+window.setInputMaxByDate = setInputMaxByDate;
 window.isWithinOperationalHours = isWithinOperationalHours;
 
 function initFormDates() {
@@ -876,14 +947,15 @@ function initFormDates() {
   if (!inputPlannedExit) return;
 
   const now = new Date();
-  // Kunci batas waktu minimum ke waktu sekarang (hari atau tanggal sebelumnya tidak bisa dipilih)
   const currentMinStr = getFormattedDateTimeLocal(now);
   inputPlannedExit.min = currentMinStr;
   inputPlannedExit.value = ''; // Kosongkan saat form pertama kali dibuka
+  setInputMaxByDate(inputPlannedExit, now);
 
   if (inputEstimatedReturn) {
     inputEstimatedReturn.min = currentMinStr;
     inputEstimatedReturn.value = ''; // Kosongkan saat form pertama kali dibuka
+    setInputMaxByDate(inputEstimatedReturn, now);
   }
 }
 
@@ -1672,29 +1744,125 @@ document.addEventListener('DOMContentLoaded', () => {
   initFormDates();
   setupApproverSearch();
 
-  // Setup batasan tanggal/waktu minimum (hari/tanggal sebelumnya tidak dapat dipilih)
+  // Setup batasan tanggal/waktu minimum dan jam operasional kerja
   const inputPlannedExit = document.getElementById('inputPlannedExit');
   const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
-  if (inputPlannedExit) {
-    inputPlannedExit.addEventListener('change', () => {
-      const currentMin = getFormattedDateTimeLocal(new Date());
-      inputPlannedExit.min = currentMin;
-      if (inputPlannedExit.value && inputPlannedExit.value < currentMin) {
-        inputPlannedExit.value = currentMin;
-        if (typeof window.showToast === 'function') {
-          window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih!', 'warning');
-        }
-      }
-      if (inputEstimatedReturn) {
-        inputEstimatedReturn.min = inputPlannedExit.value || currentMin;
-        if (inputEstimatedReturn.value && inputEstimatedReturn.value <= inputPlannedExit.value) {
-          const exitDt = new Date(inputPlannedExit.value);
-          const newReturn = new Date(exitDt.getTime() + 60 * 60000);
-          inputEstimatedReturn.value = getFormattedDateTimeLocal(newReturn);
-        }
-      }
-    });
+  const emergPlannedExit = document.getElementById('emergPlannedExit');
+  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
 
+  function handleDateTimeInputValidation(inputEl, label, companionReturnEl) {
+    if (!inputEl || !inputEl.value) return;
+
+    const currentMin = getFormattedDateTimeLocal(new Date());
+    inputEl.min = currentMin;
+
+    if (inputEl.value < currentMin) {
+      inputEl.value = currentMin;
+      if (typeof window.showToast === 'function') {
+        window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih!', 'warning');
+      }
+    }
+
+    const d = new Date(inputEl.value);
+    if (!isNaN(d.getTime())) {
+      setInputMaxByDate(inputEl, d);
+      if (companionReturnEl) {
+        setInputMaxByDate(companionReturnEl, d);
+        companionReturnEl.min = inputEl.value;
+      }
+    }
+
+    const check = validateWorkingHours(inputEl.value, label);
+    if (!check.valid) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(check.message, 'danger');
+      }
+      inputEl.style.borderColor = '#e11d48';
+
+      // Otomatis sesuaikan atau batasi ke batas jam pulang hari itu
+      if (!isNaN(d.getTime())) {
+        const day = d.getDay();
+        if (day === 0 || day === 6) {
+          inputEl.value = '';
+        } else {
+          const closing = getClosingTimeForDate(d);
+          const pad = (n) => String(n).padStart(2, '0');
+          const totalMins = d.getHours() * 60 + d.getMinutes();
+          if (totalMins > closing.totalMinutes) {
+            inputEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
+          } else if (totalMins < 7 * 60) {
+            inputEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T07:00`;
+          }
+        }
+      }
+    } else {
+      inputEl.style.borderColor = '';
+    }
+
+    // Perbarui perkiraan kembali otomatis jika ada dan lebih kecil dari rencana keluar
+    if (companionReturnEl && inputEl.value) {
+      companionReturnEl.min = inputEl.value;
+      if (companionReturnEl.value && companionReturnEl.value <= inputEl.value) {
+        const exitDt = new Date(inputEl.value);
+        const newReturn = new Date(exitDt.getTime() + 60 * 60000);
+        const closing = getClosingTimeForDate(exitDt);
+        if (closing && (newReturn.getHours() * 60 + newReturn.getMinutes()) > closing.totalMinutes) {
+          newReturn.setHours(closing.hour, closing.minute, 0, 0);
+        }
+        companionReturnEl.value = getFormattedDateTimeLocal(newReturn);
+        setInputMaxByDate(companionReturnEl, exitDt);
+      }
+    }
+  }
+
+  function handleReturnInputValidation(returnEl, exitEl, label) {
+    if (!returnEl || !returnEl.value) return;
+
+    const minReturn = exitEl && exitEl.value ? exitEl.value : getFormattedDateTimeLocal(new Date());
+    returnEl.min = minReturn;
+
+    if (returnEl.value < minReturn) {
+      returnEl.value = minReturn;
+      if (typeof window.showToast === 'function') {
+        window.showToast('Perkiraan waktu kembali tidak boleh sebelum rencana waktu keluar!', 'warning');
+      }
+    }
+
+    const d = new Date(returnEl.value);
+    if (!isNaN(d.getTime())) {
+      setInputMaxByDate(returnEl, d);
+    }
+
+    const check = validateWorkingHours(returnEl.value, label);
+    if (!check.valid) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(check.message, 'danger');
+      }
+      returnEl.style.borderColor = '#e11d48';
+
+      if (!isNaN(d.getTime())) {
+        const day = d.getDay();
+        if (day === 0 || day === 6) {
+          returnEl.value = '';
+        } else {
+          const closing = getClosingTimeForDate(d);
+          const pad = (n) => String(n).padStart(2, '0');
+          const totalMins = d.getHours() * 60 + d.getMinutes();
+          if (totalMins > closing.totalMinutes) {
+            returnEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
+          } else if (totalMins < 7 * 60) {
+            returnEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T07:00`;
+          }
+        }
+      }
+    } else {
+      returnEl.style.borderColor = '';
+    }
+  }
+
+  if (inputPlannedExit) {
+    inputPlannedExit.addEventListener('change', () => handleDateTimeInputValidation(inputPlannedExit, 'Rencana waktu keluar', inputEstimatedReturn));
+    inputPlannedExit.addEventListener('blur', () => handleDateTimeInputValidation(inputPlannedExit, 'Rencana waktu keluar', inputEstimatedReturn));
     inputPlannedExit.addEventListener('input', () => {
       if (inputEstimatedReturn && inputPlannedExit.value) {
         inputEstimatedReturn.min = inputPlannedExit.value;
@@ -1703,50 +1871,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (inputEstimatedReturn) {
-    inputEstimatedReturn.addEventListener('change', () => {
-      const minReturn = inputPlannedExit && inputPlannedExit.value ? inputPlannedExit.value : getFormattedDateTimeLocal(new Date());
-      if (inputEstimatedReturn.value && inputEstimatedReturn.value < minReturn) {
-        inputEstimatedReturn.value = minReturn;
-        if (typeof window.showToast === 'function') {
-          window.showToast('Perkiraan waktu kembali tidak boleh sebelum rencana waktu keluar!', 'warning');
-        }
-      }
-    });
+    inputEstimatedReturn.addEventListener('change', () => handleReturnInputValidation(inputEstimatedReturn, inputPlannedExit, 'Perkiraan waktu kembali'));
+    inputEstimatedReturn.addEventListener('blur', () => handleReturnInputValidation(inputEstimatedReturn, inputPlannedExit, 'Perkiraan waktu kembali'));
   }
 
-  const emergPlannedExit = document.getElementById('emergPlannedExit');
-  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
   if (emergPlannedExit) {
-    emergPlannedExit.addEventListener('change', () => {
-      const currentMin = getFormattedDateTimeLocal(new Date());
-      emergPlannedExit.min = currentMin;
-      if (emergPlannedExit.value && emergPlannedExit.value < currentMin) {
-        emergPlannedExit.value = currentMin;
-        if (typeof window.showToast === 'function') {
-          window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih!', 'warning');
-        }
-      }
-      if (emergEstimatedReturn) {
-        emergEstimatedReturn.min = emergPlannedExit.value || currentMin;
-        if (emergEstimatedReturn.value && emergEstimatedReturn.value <= emergPlannedExit.value) {
-          const exitDt = new Date(emergPlannedExit.value);
-          const newReturn = new Date(exitDt.getTime() + 60 * 60000);
-          emergEstimatedReturn.value = getFormattedDateTimeLocal(newReturn);
-        }
+    emergPlannedExit.addEventListener('change', () => handleDateTimeInputValidation(emergPlannedExit, 'Rencana waktu keluar darurat', emergEstimatedReturn));
+    emergPlannedExit.addEventListener('blur', () => handleDateTimeInputValidation(emergPlannedExit, 'Rencana waktu keluar darurat', emergEstimatedReturn));
+    emergPlannedExit.addEventListener('input', () => {
+      if (emergEstimatedReturn && emergPlannedExit.value) {
+        emergEstimatedReturn.min = emergPlannedExit.value;
       }
     });
   }
 
   if (emergEstimatedReturn) {
-    emergEstimatedReturn.addEventListener('change', () => {
-      const minReturn = emergPlannedExit && emergPlannedExit.value ? emergPlannedExit.value : getFormattedDateTimeLocal(new Date());
-      if (emergEstimatedReturn.value && emergEstimatedReturn.value < minReturn) {
-        emergEstimatedReturn.value = minReturn;
-        if (typeof window.showToast === 'function') {
-          window.showToast('Perkiraan waktu kembali tidak boleh sebelum rencana waktu keluar!', 'warning');
-        }
-      }
-    });
+    emergEstimatedReturn.addEventListener('change', () => handleReturnInputValidation(emergEstimatedReturn, emergPlannedExit, 'Perkiraan waktu kembali darurat'));
+    emergEstimatedReturn.addEventListener('blur', () => handleReturnInputValidation(emergEstimatedReturn, emergPlannedExit, 'Perkiraan waktu kembali darurat'));
   }
 
   const btnOpenNewRequestModal = document.getElementById('btnOpenNewRequestModal');
@@ -1850,9 +1991,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (type === 'Kembali ke Area' && estimatedReturn && new Date(estimatedReturn) <= new Date(plannedExit)) {
-        if (typeof window.showToast === 'function') window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
+      // Validasi Rencana Waktu Keluar terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
+      const exitWorkCheck = validateWorkingHours(plannedExit, 'Rencana waktu keluar');
+      if (!exitWorkCheck.valid) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(exitWorkCheck.message, 'danger');
+        }
+        if (inputPlannedExit) {
+          inputPlannedExit.focus();
+          inputPlannedExit.style.borderColor = '#e11d48';
+        }
         return;
+      }
+
+      if (type === 'Kembali ke Area') {
+        if (estimatedReturn && new Date(estimatedReturn) <= new Date(plannedExit)) {
+          if (typeof window.showToast === 'function') window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
+          if (inputEstimatedReturn) inputEstimatedReturn.focus();
+          return;
+        }
+
+        // Validasi Perkiraan Waktu Kembali terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
+        const returnWorkCheck = validateWorkingHours(estimatedReturn, 'Perkiraan waktu kembali');
+        if (!returnWorkCheck.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(returnWorkCheck.message, 'danger');
+          }
+          if (inputEstimatedReturn) {
+            inputEstimatedReturn.focus();
+            inputEstimatedReturn.style.borderColor = '#e11d48';
+          }
+          return;
+        }
       }
 
       const selectApprover = document.getElementById('selectApprover');
@@ -2224,18 +2394,48 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (isKembali && !estimatedReturnVal) {
+      // Validasi Rencana Waktu Keluar Darurat terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
+      const emergExitCheck = validateWorkingHours(plannedExitVal, 'Rencana waktu keluar darurat');
+      if (!emergExitCheck.valid) {
         if (typeof window.showToast === 'function') {
-          window.showToast('Harap isi perkiraan waktu kembali!', 'danger');
+          window.showToast(emergExitCheck.message, 'danger');
+        }
+        if (emergPlannedExit) {
+          emergPlannedExit.focus();
+          emergPlannedExit.style.borderColor = '#e11d48';
         }
         return;
       }
 
-      if (isKembali && estimatedReturnVal && new Date(estimatedReturnVal) <= new Date(plannedExitVal)) {
-        if (typeof window.showToast === 'function') {
-          window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
+      if (isKembali) {
+        if (!estimatedReturnVal) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Harap isi perkiraan waktu kembali!', 'danger');
+          }
+          if (emergEstimatedReturn) emergEstimatedReturn.focus();
+          return;
         }
-        return;
+
+        if (new Date(estimatedReturnVal) <= new Date(plannedExitVal)) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
+          }
+          if (emergEstimatedReturn) emergEstimatedReturn.focus();
+          return;
+        }
+
+        // Validasi Perkiraan Waktu Kembali Darurat terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
+        const emergReturnCheck = validateWorkingHours(estimatedReturnVal, 'Perkiraan waktu kembali darurat');
+        if (!emergReturnCheck.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(emergReturnCheck.message, 'danger');
+          }
+          if (emergEstimatedReturn) {
+            emergEstimatedReturn.focus();
+            emergEstimatedReturn.style.borderColor = '#e11d48';
+          }
+          return;
+        }
       }
 
       // FITUR EDIT PENGAJUAN DARURAT
@@ -2604,6 +2804,16 @@ function openExtendDurationModal(ticketId) {
     inputExtendNewReturn.min = minVal;
     inputExtendNewReturn.max = maxVal;
     inputExtendNewReturn.value = defaultVal;
+    inputExtendNewReturn.onchange = () => {
+      if (!inputExtendNewReturn.value) return;
+      const check = validateWorkingHours(inputExtendNewReturn.value, 'Perkiraan waktu kembali perpanjangan');
+      if (!check.valid) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(check.message, 'danger');
+        }
+        inputExtendNewReturn.value = maxVal;
+      }
+    };
   }
   if (inputExtendReason) {
     inputExtendReason.value = '';
