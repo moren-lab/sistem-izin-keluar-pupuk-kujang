@@ -63,7 +63,7 @@ function handleOpenNewRequest() {
           openCancelModal(activeTicket.id);
         };
       } else {
-        btnBlockedCancelTicket.textContent = 'Selesaikan Izin Ini (Scan In)';
+        btnBlockedCancelTicket.textContent = 'Selesaikan Izin (Tap In Kartu Akses)';
         btnBlockedCancelTicket.onclick = () => {
           if (modalActiveBlocked) modalActiveBlocked.classList.remove('open');
           if (typeof window.executeScanIn === 'function') {
@@ -1078,10 +1078,10 @@ function openDigitalPassModal(ticketId) {
   const digitalPassNoticeText = document.getElementById('digitalPassNoticeText');
   if (digitalPassNoticeText) {
     if (ticket.status === 'Terlambat') {
-      digitalPassNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ TERLAMBAT: Melewati batas estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Scan In.</span>`;
+      digitalPassNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ TERLAMBAT: Melewati batas estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Tap In Kartu Akses.</span>`;
     } else {
       const timeReturn = ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) + ' WIB' : '13.00 WIB';
-      digitalPassNoticeText.textContent = `Jangan bagikan QR. Batas kembali ${timeReturn}; QR dinonaktifkan setelah Scan In.`;
+      digitalPassNoticeText.textContent = `Jangan bagikan QR. Batas kembali ${timeReturn}; QR dinonaktifkan setelah Tap In Kartu Akses.`;
     }
   }
 
@@ -1253,7 +1253,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
       ? `${scanInStr} • ${isLateTicket ? `Terlambat${ticket.lateMinutes ? ` (+${ticket.lateMinutes} mnt)` : ''}` : 'Tepat Waktu'}` 
       : (ticket.status === 'Selesai' 
           ? (ticket.isLate ? '10.52 WIB • Terlambat' : '10.52 WIB • Tepat Waktu') 
-          : (ticket.status === 'Terlambat' ? '⚠️ Belum Scan In (Terlambat)' : '-'));
+          : (ticket.status === 'Terlambat' ? '⚠️ Belum Tap In (Terlambat)' : '-'));
   }
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
@@ -1277,7 +1277,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
   if (infoSecurityNoteText) {
-    infoSecurityNoteText.textContent = ticket.securityNote || 'Identitas dan QR sesuai. Scan In tercatat di Pos 1.';
+    infoSecurityNoteText.textContent = ticket.securityNote || 'Identitas dan QR sesuai. Tap In Kartu Akses tercatat di Pos 1.';
   }
 
   const infoNoticeText = document.getElementById('infoNoticeText');
@@ -1287,9 +1287,9 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     } else if (ticket.status === 'Selesai') {
       infoNoticeText.textContent = `Perjalanan selesai pukul ${ticket.scanInTime || '10.52'} WIB. QR tiket ini tidak berlaku lagi.`;
     } else if (ticket.status === 'Terlambat') {
-      infoNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ PERINGATAN: Karyawan telah melewati batas waktu estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Scan In.</span>`;
+      infoNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ PERINGATAN: Karyawan telah melewati batas waktu estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Tap In Kartu Akses.</span>`;
     } else if (ticket.status === 'Sedang di Luar') {
-      infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Scan In sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) : '13.00'} WIB.`;
+      infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Tap In Kartu Akses sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) : '13.00'} WIB.`;
     } else if (ticket.status === 'Disetujui') {
       infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos 1 untuk Scan Out.`;
     } else if (ticket.status === 'Menunggu Persetujuan') {
@@ -1381,11 +1381,11 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
       if (isDone) {
         timelineHtml += `
-          <!-- Step 4: Scan In -->
+          <!-- Step 4: Tap In (Kartu Akses) -->
           <div class="figma-timeline-item">
             <div class="figma-timeline-dot green"></div>
             <div class="figma-timeline-top">
-              <span class="figma-timeline-event">Scan In</span>
+              <span class="figma-timeline-event">Tap In (Kartu Akses)</span>
               <span class="figma-timeline-time">${dayStr} • ${ticket.scanInTime || '10.52'} WIB</span>
             </div>
             <div class="figma-timeline-actor">Pos 1 • ${ticket.securityName || 'Agus Setiawan'}</div>

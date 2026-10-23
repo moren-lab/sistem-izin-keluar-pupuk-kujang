@@ -1,4 +1,28 @@
 /**
+ * Mendapatkan profil Petugas Pos Jaga aktif dari master MOCK_USERS
+ */
+function getCurrentSecurityActor() {
+  const users = window.MOCK_USERS || [];
+  const activeSec = users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
+  if (activeSec) {
+    if (window.ACTORS && window.ACTORS.security) {
+      window.ACTORS.security.name = activeSec.name;
+      window.ACTORS.security.nip = activeSec.nip;
+      if (activeSec.department) window.ACTORS.security.department = activeSec.department;
+    }
+    return activeSec;
+  }
+  return (window.ACTORS && window.ACTORS.security) || {
+    nip: 'SEC-2018-042',
+    name: 'Sertu Agus',
+    title: 'Petugas Pengamanan Pos 1',
+    department: 'Departemen Pengamanan & K3',
+    gateName: 'Pos 1 Gerbang Utama'
+  };
+}
+window.getCurrentSecurityActor = getCurrentSecurityActor;
+
+/**
  * SISTEM PERIZINAN KELUAR AREA KARYAWAN - PT Pupuk Kujang Cikampek
  * Security (Pos Jaga Satpam) Module: Dashboard, Scanner Engine, Headcount Pelacakan, Riwayat, Scan In / Scan Out
  */
@@ -30,6 +54,17 @@ function updateSecurityMetrics() {
 }
 
 function renderSecurityDashboard() {
+  const secActor = typeof getCurrentSecurityActor === 'function' ? getCurrentSecurityActor() : (window.ACTORS && window.ACTORS.security ? window.ACTORS.security : { name: 'Sertu Agus', role: 'Petugas Pengamanan' });
+  const secHeroGreeting = document.getElementById('secHeroGreeting');
+  const secHeroSub = document.getElementById('secHeroSub');
+  if (secHeroGreeting) {
+    secHeroGreeting.textContent = `Selamat bertugas, ${secActor.name} 🛡️`;
+  }
+  if (secHeroSub) {
+    const title = secActor.role || secActor.title || 'Petugas Pengamanan';
+    const dept = secActor.department || 'Departemen Pengamanan & K3';
+    secHeroSub.textContent = `${title} • Pos 1 Gerbang Utama • ${dept} • PT Pupuk Kujang`;
+  }
   updateSecurityMetrics();
   const readyExitTickets = ticketsList.filter(t => t.status === 'Disetujui');
   const overdueTickets = ticketsList.filter(t => t.status === 'Terlambat');
@@ -137,9 +172,7 @@ function renderSecurityDashboard() {
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               ${window.getStatusPill(t.status)}
-              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 700;" onclick="executeScanIn('${t.id}')" title="Proses Scan In (Kembali Masuk Pabrik)">
-                Scan In
-              </button>
+              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 700;" onclick="executeScanIn('${t.id}')" title="Proses Tap In (Kartu Akses Kujang / Card Reader)">💳 Tap In Kartu</button>
             </div>
           </div>
         `;
@@ -279,7 +312,7 @@ function renderSecurityCards(list, containerElement) {
                   </button>
                 ` : ''}
                 ${(isOutside || isOverdue) ? `
-                  <button class="btn-quick-scan-in" onclick="executeScanIn('${t.id}')" title="Proses Scan In (Kembali Masuk Kawasan Pabrik)">
+                  <button class="btn-quick-scan-in" onclick="executeScanIn('${t.id}')" title="Proses Tap In (Kartu Akses Kujang)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     <span>Proses Scan In</span>
                   </button>
@@ -437,6 +470,30 @@ function filterSecurityLogTickets() {
 
     return true;
   });
+
+  // Sorting Riwayat Pos Jaga (Terbaru / Terlama)
+  const sortSecurityLog = document.getElementById('sortSecurityLog');
+  const sortOrder = sortSecurityLog ? sortSecurityLog.value : 'desc';
+
+  filtered.sort((a, b) => {
+    const parseTime = (item) => {
+      const raw = item.scanOutTime || item.createdAt || item.plannedExit || 0;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
+    const tA = parseTime(a);
+    const tB = parseTime(b);
+    return sortOrder === 'asc' ? tA - tB : tB - tA;
+  });
+
+  if (sortSecurityLog && !sortSecurityLog._bound) {
+    sortSecurityLog._bound = true;
+    sortSecurityLog.addEventListener('change', () => {
+      renderSecurityView();
+    });
+  }
+
+  return filtered;
 }
 
 function renderSecurityLogTable(list, containerElement) {
@@ -451,7 +508,7 @@ function renderSecurityLogTable(list, containerElement) {
             <th>Pemohon & NIP</th>
             <th>Kategori & Tipe</th>
             <th>Waktu Scan Out</th>
-            <th>Waktu Scan In</th>
+            <th>Waktu Tap In (Kartu)</th>
             <th>Status</th>
             <th style="text-align: right;">Aksi</th>
           </tr>
@@ -531,7 +588,7 @@ function executeVerification(inputQuery) {
   } else if (ticket.status === 'Menunggu Persetujuan') {
     if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} belum disetujui Atasan. Dilarang keluar!`, 'warning');
   } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') {
-    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah keluar pabrik. Siap diproses Scan In (Masuk Kembali).`, 'info');
+    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah keluar pabrik. Siap diproses Tap In Kartu Akses (Masuk Kembali).`, 'info');
   } else if (ticket.status === 'Disetujui') {
     if (ticket.isEmergency) {
       if (typeof window.showToast === 'function') {
@@ -659,7 +716,7 @@ function executeScanIn(ticketId) {
       // Auto-proses scan out terlebih dahulu agar alur masuk tercatat lengkap
       executeScanOut(ticketId);
     } else if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
-      if (typeof window.showToast === 'function') window.showToast('Hanya tiket berstatus Sedang di Luar atau Terlambat yang dapat diproses Scan In!', 'danger');
+      if (typeof window.showToast === 'function') window.showToast('Hanya tiket berstatus Sedang di Luar atau Terlambat yang dapat diproses Tap In Kartu Akses!', 'danger');
       return;
     }
   }
@@ -699,13 +756,13 @@ function executeScanIn(ticketId) {
   ticket.status = 'Selesai';
   if (!ticket.timeline) ticket.timeline = [];
   ticket.timeline.push({
-    event: wasOverdue ? 'Scan In (Kembali Terlambat)' : 'Scan In (Kembali Masuk)',
+    event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Masuk)',
     time: nowFormatted,
     by: `${securityName} (${gate})`,
     desc: wasOverdue
       ? `Karyawan tiba kembali di kawasan pabrik MELEWATI estimasi waktu kembali (Terlambat). QR code dinonaktifkan permanen.`
       : (isCoveredByExtension 
-          ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu. Scan In berhasil, QR code dinonaktifkan.`
+          ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu. Tap In Kartu Akses berhasil, QR code dinonaktifkan.`
           : `Karyawan kembali tiba di kawasan pabrik. QR code dinonaktifkan permanen.`)
   });
 
@@ -732,8 +789,8 @@ function executeScanIn(ticketId) {
   if (typeof window.showToast === 'function') {
     window.showToast(
       wasOverdue 
-        ? `Scan In berhasil! Tiket #${ticket.id} selesai dicatat (Catatan: Kembali Terlambat).` 
-        : `Scan In berhasil! Karyawan telah tiba kembali. Tiket #${ticket.id} selesai.`,
+        ? `Tap In Kartu Akses berhasil! Tiket #${ticket.id} selesai dicatat (Catatan: Kembali Terlambat).` 
+        : `Tap In Kartu Akses berhasil! Karyawan telah tiba kembali. Tiket #${ticket.id} selesai.`,
       wasOverdue ? 'warning' : 'success'
     );
   }
@@ -1135,6 +1192,7 @@ window.renderSecurityLogTable = renderSecurityLogTable;
 window.executeVerification = executeVerification;
 window.executeScanOut = executeScanOut;
 window.executeScanIn = executeScanIn;
+window.executeTapIn = executeScanIn;
 window.startCameraScanner = startCameraScanner;
 window.stopCameraScanner = stopCameraScanner;
 window.handleCameraQrSuccess = handleCameraQrSuccess;

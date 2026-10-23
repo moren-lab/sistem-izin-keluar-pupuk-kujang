@@ -11,13 +11,39 @@ window.empCurrentPage = 1;
 window.empPageSize = 6;
 window.currentEmpViewMode = window.currentEmpViewMode || 'card';
 
+/**
+ * Mendapatkan profil Karyawan yang sedang aktif dari master MOCK_USERS
+ * Menyelesaikan bug sinkronisasi akun baru/pergantian pengguna (Moreno dsb.)
+ */
+function getCurrentEmployeeActor() {
+  const users = window.MOCK_USERS || [];
+  const activeEmp = users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+  if (activeEmp) {
+    if (window.ACTORS && window.ACTORS.karyawan) {
+      window.ACTORS.karyawan.name = activeEmp.name;
+      window.ACTORS.karyawan.nip = activeEmp.nip;
+      if (activeEmp.department) window.ACTORS.karyawan.department = activeEmp.department;
+      if (activeEmp.role) window.ACTORS.karyawan.title = activeEmp.role;
+    }
+    return activeEmp;
+  }
+  return (window.ACTORS && window.ACTORS.karyawan) || {
+    nip: 'PK-2024-8841',
+    name: 'Budi Pratama, S.T.',
+    title: 'Staf Rekayasa Mesin',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    approverName: 'Ir. Hendra Gunawan, M.T.'
+  };
+}
+window.getCurrentEmployeeActor = getCurrentEmployeeActor;
+
 function updateKaryawanMetrics() {
   const ticketsList = window.ticketsList || [];
-  const ACTORS = window.ACTORS || {};
-  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
+  const empActor = getCurrentEmployeeActor();
+  const myNip = empActor.nip || 'PK-2024-8841';
 
-  // Batasi hanya tiket milik Budi Pratama
-  const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
+  // Batasi hanya tiket milik akun yang sedang aktif
+  const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')));
   const totalMonth = myTickets.length;
 
   const completedTickets = myTickets.filter(t => t.status === 'Selesai');
@@ -73,8 +99,8 @@ function filterEmpTickets() {
   const filterEmpType = document.getElementById('filterEmpType');
   const filterEmpStatus = document.getElementById('filterEmpStatus');
 
-  const ACTORS = window.ACTORS || {};
-  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
+  const empActor = getCurrentEmployeeActor();
+  const myNip = empActor.nip || 'PK-2024-8841';
 
   const query = searchEmpInput ? searchEmpInput.value.trim().toLowerCase() : '';
   const period = filterEmpPeriod ? filterEmpPeriod.value : 'all';
@@ -86,8 +112,8 @@ function filterEmpTickets() {
   const RIWAYAT_STATUSES = ['selesai', 'terlambat', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
 
   const filtered = ticketsList.filter(t => {
-    // 0. Batasi ke akun Budi Pratama
-    const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841');
+    // 0. Batasi ke akun yang sedang aktif
+    const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841'));
     if (!isMyTicket) return false;
 
     // HANYA tiket berstatus riwayat yang diizinkan (mengecualikan status aktif seperti Menunggu Persetujuan, Menunggu Otorisasi Darurat, Disetujui, Sedang di Luar)
@@ -242,7 +268,7 @@ function buildActivePermitTimeline(activeTicket) {
     });
   }
 
-  // STEP 4: Scan In Kembali (or Pulang Mendahului)
+  // STEP 4: Tap In Kembali (or Pulang Mendahului)
   if (isOneWay) {
     steps.push({
       title: 'Pulang Mendahului',
@@ -253,22 +279,22 @@ function buildActivePermitTimeline(activeTicket) {
   } else {
     if (isCompleted) {
       steps.push({
-        title: 'Scan In tercatat',
+        title: 'Tap In Kartu Akses tercatat',
         time: timeScanIn,
-        desc: activeTicket.isLate ? 'Karyawan kembali ke area pabrik (Terlambat)' : 'Pos 1 • Karyawan kembali ke area pabrik tepat waktu',
+        desc: activeTicket.isLate ? 'Karyawan kembali ke area pabrik via Tap In (Terlambat)' : 'Pos 1 • Karyawan kembali ke area pabrik tepat waktu via Tap In',
         state: 'completed'
       });
     } else if (isOutside) {
       steps.push({
-        title: status === 'Terlambat' ? 'Scan In Terlambat (Segera ke Pos 1)' : 'Batas kembali ' + returnTimeStr,
-        time: status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Scan In di Pos 1',
-        desc: status === 'Terlambat' ? 'Segera lakukan Scan In di Pos 1 Gerbang Utama!' : 'Belum kembali ke area',
+        title: status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos 1)' : 'Batas kembali ' + returnTimeStr,
+        time: status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos 1',
+        desc: status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos 1 Gerbang Utama!' : 'Belum kembali ke area',
         state: status === 'Terlambat' ? 'active_overdue' : 'active_outside'
       });
     } else {
       steps.push({
         title: 'Batas kembali ' + returnTimeStr,
-        time: 'Scan In di Pos 1',
+        time: 'Tap In Kartu di Pos 1',
         desc: 'Belum kembali ke area',
         state: 'upcoming'
       });
@@ -330,8 +356,26 @@ function renderKaryawanDashboard() {
   const cardActivePermitSummary = document.getElementById('cardActivePermitSummary');
   const karyawanDashboardRecentList = document.getElementById('karyawanDashboardRecentList');
   const ticketsList = window.ticketsList || [];
-  const ACTORS = window.ACTORS || {};
-  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
+  const empActor = getCurrentEmployeeActor();
+  const myNip = empActor.nip || 'PK-2024-8841';
+
+  // Perbarui ucapan selamat datang di banner hero secara dinamis (sesuai akun login aktif)
+  const empHeroGreeting = document.getElementById('empHeroGreeting');
+  const empHeroSub = document.getElementById('empHeroSub');
+  if (empHeroGreeting) {
+    const nowH = new Date().getHours();
+    let timeGreeting = 'pagi';
+    if (nowH >= 11 && nowH < 15) timeGreeting = 'siang';
+    else if (nowH >= 15 && nowH < 18) timeGreeting = 'sore';
+    else if (nowH >= 18 || nowH < 5) timeGreeting = 'malam';
+    empHeroGreeting.textContent = `Selamat ${timeGreeting}, ${empActor.name} 👋`;
+  }
+  if (empHeroSub) {
+    const title = empActor.role || empActor.title || 'Staf Rekayasa Mesin';
+    const dept = empActor.department || 'Departemen Rekayasa & Pemeliharaan';
+    const approver = (window.ACTORS && window.ACTORS.karyawan && window.ACTORS.karyawan.approverName) || 'Ir. Hendra Gunawan, M.T.';
+    empHeroSub.textContent = `${title} • ${dept} • Atasan: ${approver}`;
+  }
 
   // 1.1 Hero Strip
   if (figmaHeroStrip) {
@@ -351,7 +395,7 @@ function renderKaryawanDashboard() {
       } else if (activeTicket.status === 'Terlambat') {
         statusPill = `<span class="status-pill-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:800; padding:2px 8px; border-radius:999px;">⚠️ Terlambat</span>`;
         statusText = `Status: Terlambat Kembali - ${activeTicket.id}`;
-        statusSub = `${activeTicket.category} • Batas waktu ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : ''} TELAH TERLEWAT! Segera Scan In di Pos 1.`;
+        statusSub = `${activeTicket.category} • Batas waktu ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : ''} TELAH TERLEWAT! Segera Tap In Kartu Akses di Pos 1.`;
       } else if (activeTicket.status === 'Sedang di Luar') {
         statusPill = `<span class="status-pill-purple">• Sedang di Luar</span>`;
         statusText = `Status: Izin Aktif - ${activeTicket.id}`;
@@ -469,7 +513,7 @@ function renderKaryawanDashboard() {
             </button>
           `}
           <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
-            <span>✓ Kembali ke Pabrik (Scan In)</span>
+            <span>✓ Tap In Kartu Akses (Masuk)</span>
           </button>
         `;
       }
@@ -529,7 +573,7 @@ function renderKaryawanDashboard() {
               <span class="tag-badge" style="background: #fee2e2; color: #b91c1c; font-weight: 800; border: 1px solid #fca5a5;">Status: Terlambat</span>
             </div>
             <div style="color: #7f1d1d; margin-top: 0.3rem; line-height: 1.45;">
-              Waktu perkiraan kembali telah terlampaui. Segera lakukan <strong>Scan In di Pos 1 Gerbang Utama</strong> atau ajukan <strong>Perpanjangan Waktu</strong> jika masih memerlukan durasi dinas tambahan.
+              Waktu perkiraan kembali telah terlampaui. Segera lakukan <strong>Tap In Kartu Akses di Pos 1 Gerbang Utama</strong> atau ajukan <strong>Perpanjangan Waktu</strong> jika masih memerlukan durasi dinas tambahan.
             </div>
           </div>
         ` : ''}
@@ -726,7 +770,7 @@ function renderPengajuanSayaView() {
           </button>
         `}
         <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
-          <span>✓ Kembali ke Pabrik (Scan In)</span>
+          <span>✓ Tap In Kartu Akses (Masuk)</span>
         </button>
       `;
     }

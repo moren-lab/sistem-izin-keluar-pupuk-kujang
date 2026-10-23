@@ -450,6 +450,18 @@ function getAdminTrafficData() {
     '15:00': 8, '16:00': 10, '17:00': 15
   };
 
+  const nowTime = new Date();
+  const curHourNum = nowTime.getHours();
+
+  // Zero-out future hours (di atas jam sekarang tidak boleh ada data / nol)
+  hours.forEach(hour => {
+    const hNum = parseInt(hour.split(':')[0], 10);
+    if (hNum > curHourNum) {
+      baseOut[hour] = 0;
+      baseIn[hour] = 0;
+    }
+  });
+
   list.forEach(t => {
     // Scan Out (Keluar Gerbang)
     const outTime = t.scanOutTime || t.plannedExit;
@@ -457,9 +469,7 @@ function getAdminTrafficData() {
       const match = outTime.match(/(\d{1,2}):\d{2}/);
       if (match) {
         const slot = match[1].padStart(2, '0') + ':00';
-        if (baseOut[slot] !== undefined) {
-          baseOut[slot]++;
-        }
+        if (baseOut[slot] !== undefined) { const slotH = parseInt(slot.split(':')[0], 10); if (slotH <= curHourNum) { baseOut[slot]++; } }
       }
     }
     // Scan In (Kembali Masuk Gerbang)
@@ -468,9 +478,7 @@ function getAdminTrafficData() {
       const match = inTime.match(/(\d{1,2}):\d{2}/);
       if (match) {
         const slot = match[1].padStart(2, '0') + ':00';
-        if (baseIn[slot] !== undefined) {
-          baseIn[slot]++;
-        }
+        if (baseIn[slot] !== undefined) { const slotH = parseInt(slot.split(':')[0], 10); if (slotH <= curHourNum) { baseIn[slot]++; } }
       }
     }
   });
@@ -622,7 +630,7 @@ function renderAdminTrafficChart() {
         </span>
         <span style="display: inline-flex; align-items: center; gap: 5px; color: #059669;">
           <span style="width: 10px; height: 10px; border-radius: 2px; background: #10b981; display: inline-block;"></span>
-          <span>Scan In (Masuk)</span>
+          <span>Tap In (Masuk)</span>
         </span>
       </div>
       <div style="display: inline-flex; align-items: center; gap: 5px; color: #dc2626; font-size: 0.72rem; background: #fef2f2; padding: 2px 7px; border-radius: 6px; border: 1px solid #fecaca;">
@@ -701,10 +709,10 @@ function renderAdminTrafficChart() {
 
     <!-- Admin Traffic Badge Summary (Realtime & Dual Metrics) -->
     <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; color: #0369a1; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
-      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Scan In</strong> (Puncak: ${peakHour} WIB)</span>
+      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
       <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
         <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
-        <span style="color: #059669;">↘️ Total In: ${totalIn}</span>
+        <span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span>
       </span>
     </div>
   `;
@@ -712,12 +720,20 @@ function renderAdminTrafficChart() {
 
 function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
   const badge = document.getElementById('adminTrafficBadge');
-  const sum = out + inVal;
+  const nowH = new Date().getHours();
+  const isFuture = (7 + activeIdx) > nowH;
+
   if (badge) {
     badge.style.background = 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
     badge.style.color = '#ffffff';
     badge.style.borderColor = '#0284c7';
-    badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Scan In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
+
+    if (isFuture || (out === 0 && inVal === 0 && (7 + activeIdx) >= nowH)) {
+      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>0 Scan Out</strong> • ↘️ <strong>0 Tap In</strong> <span style="font-size:0.75rem; opacity:0.85;">(Belum ada data aktivitas)</span></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">0 Personel</span>`;
+    } else {
+      const sum = out + inVal;
+      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Tap In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
+    }
   }
 
   for (let i = 0; i < 11; i++) {
@@ -759,7 +775,7 @@ function unhoverTrafficPoint() {
     badge.style.background = '#f0f9ff';
     badge.style.color = '#0369a1';
     badge.style.borderColor = '#bae6fd';
-    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Scan In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total In: ${totalIn}</span></span>`;
+    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span></span>`;
   }
 
   for (let i = 0; i < 11; i++) {

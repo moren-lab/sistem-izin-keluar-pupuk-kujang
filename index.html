@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261023_02">
+  <link rel="stylesheet" href="css/style.css?v=20261023_07">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
@@ -360,8 +360,8 @@
             <!-- Hero Dark Green Banner -->
             <div class="figma-hero-banner">
               <div class="figma-hero-top">
-                <h2>Selamat pagi, Budi Pratama, S.T. 👋</h2>
-                <p>Staf Rekayasa Mesin • Departemen Rekayasa & Pemeliharaan • Atasan: Ir. Hendra Gunawan, M.T.</p>
+                <h2 id="empHeroGreeting">Selamat pagi, Budi Pratama, S.T. 👋</h2>
+                <p id="empHeroSub">Staf Rekayasa Mesin • Departemen Rekayasa & Pemeliharaan • Atasan: Ir. Hendra Gunawan, M.T.</p>
               </div>
               <div class="figma-hero-strip" id="figmaHeroStrip">
                 <!-- Populated via JS -->
@@ -564,6 +564,14 @@
               </div>
 
               <div class="figma-filter-item">
+                <label class="figma-filter-lbl">Urutkan</label>
+                <select id="sortEmpRiwayat" class="figma-filter-select">
+                  <option value="desc">Terbaru</option>
+                  <option value="asc">Terlama</option>
+                </select>
+              </div>
+
+              <div class="figma-filter-item">
                 <label class="figma-filter-lbl">Kategori</label>
                 <select id="filterEmpCategory" class="figma-filter-select">
                   <option value="all">Semua Kategori</option>
@@ -590,14 +598,6 @@
                   <option value="Ditolak">Ditolak</option>
                   <option value="Kedaluwarsa">Kedaluwarsa</option>
                   <option value="Dibatalkan">Dibatalkan</option>
-                </select>
-              </div>
-
-              <div class="figma-filter-item">
-                <label class="figma-filter-lbl">Urutkan</label>
-                <select id="sortEmpRiwayat" class="figma-filter-select">
-                  <option value="desc">Terbaru</option>
-                  <option value="asc">Terlama</option>
                 </select>
               </div>
             </div>
@@ -874,7 +874,14 @@
                   <option value="outside">🚗 Khusus Karyawan Sedang di Luar</option>
                   <option value="pending">⏳ Khusus Antrean Menunggu Review</option>
                 </select>
-                <select id="sortApproverTracking" class="filter-select">
+                <select id="filterApproverPeriod" class="filter-select" title="Filter Periode Tanggal">
+                  <option value="all">📅 Semua Tanggal</option>
+                  <option value="today">Hari Ini</option>
+                  <option value="week">Minggu Ini</option>
+                  <option value="month">Bulan Ini</option>
+                  <option value="year">Tahun Ini</option>
+                </select>
+                <select id="sortApproverTracking" class="filter-select" title="Urutkan Waktu">
                   <option value="desc">Terbaru</option>
                   <option value="asc">Terlama</option>
                 </select>
@@ -916,8 +923,8 @@
             <div class="figma-hero-banner security-theme">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div class="figma-hero-top">
-                  <h2>Selamat bertugas, Sertu Agus 🛡️</h2>
-                  <p>Petugas Pengamanan • Pos 1 Gerbang Utama • Departemen Pengamanan & K3 • PT Pupuk Kujang</p>
+                  <h2 id="secHeroGreeting">Selamat bertugas, Sertu Agus 🛡️</h2>
+                  <p id="secHeroSub">Petugas Pengamanan • Pos 1 Gerbang Utama • Departemen Pengamanan & K3 • PT Pupuk Kujang</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                   <button class="btn-figma-secondary" onclick="setSecurityNav('scanner')" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.25);">
@@ -1094,7 +1101,7 @@
                       </path>
                       <circle cx="12" cy="13" r="4"></circle>
                     </svg>
-                    <span>Kamera Scan QR</span>
+                    <span>Kamera Scan QR (Scan Out)</span>
                   </button>
                   <button type="button" class="slider-tab" id="btnModeManualScan">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1103,7 +1110,7 @@
                       <rect x="14" y="14" width="7" height="7"></rect>
                       <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
-                    <span>Input Manual / Barcode</span>
+                    <span>Input Manual / Tap In Kartu Akses</span>
                   </button>
                 </div>
               </div>
@@ -1276,11 +1283,11 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Karyawan di Luar (Headcount)</h1>
-                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Scan In)</p>
+                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Tap In Kartu Akses)</p>
               </div>
               <div class="filters-group">
                 <select id="filterSecurityQueueTab" class="filter-select">
-                  <option value="outside">Karyawan Sedang di Luar (Perlu Scan In)</option>
+                  <option value="outside">Karyawan Sedang di Luar (Perlu Tap In Kartu Akses)</option>
                   <option value="overdue">⚠️ Karyawan Terlambat Kembali</option>
                   <option value="ready">Izin Siap Keluar (Disetujui Atasan)</option>
                   <option value="emergency">🚨 Khusus Izin Darurat / Bypass</option>
@@ -1349,6 +1356,11 @@
                     <option value="year">Tahun Ini</option>
                   </select>
 
+                  <select id="sortSecurityLog" class="filter-select" title="Urutkan Waktu">
+                    <option value="desc">Terbaru</option>
+                    <option value="asc">Terlama</option>
+                  </select>
+
                   <select id="filterSecurityLogCategory" class="filter-select">
                     <option value="all">Semua Kategori</option>
                     <option value="Dinas Kantor">Dinas Kantor</option>
@@ -1357,10 +1369,8 @@
 
                   <select id="filterSecurityLogStatus" class="filter-select">
                     <option value="all">Semua Status</option>
-                    <option value="Sedang di Luar">Sedang di Luar</option>
                     <option value="Selesai">Selesai (Kembali/Pulang)</option>
                     <option value="Terlambat">Terlambat</option>
-                    <option value="Disetujui">Siap Keluar (Disetujui)</option>
                   </select>
 
                   <div class="view-mode-group">
@@ -1675,11 +1685,18 @@
                   <option value="Disetujui">Persetujuan Atasan</option>
                   <option value="Ditolak">Penolakan Atasan</option>
                   <option value="Scan Out">Scan Out (Keluar)</option>
-                  <option value="Scan In">Scan In (Kembali)</option>
+                  <option value="Scan In">Tap In (Kembali)</option>
                   <option value="Terlambat">Keterlambatan</option>
                   <option value="Kedaluwarsa">Hangus / Expired</option>
                 </select>
-                <select id="sortAdminAudit" class="admin-select-filter">
+                <select id="adminAuditPeriodFilter" class="admin-select-filter" title="Filter Periode Tanggal">
+                  <option value="all">📅 Semua Tanggal</option>
+                  <option value="today">Hari Ini</option>
+                  <option value="week">Minggu Ini</option>
+                  <option value="month">Bulan Ini</option>
+                  <option value="year">Tahun Ini</option>
+                </select>
+                <select id="sortAdminAudit" class="admin-select-filter" title="Urutkan Waktu">
                   <option value="desc">Waktu Terbaru</option>
                   <option value="asc">Waktu Terlama</option>
                 </select>
@@ -1771,11 +1788,15 @@
             <!-- Report Filter Toolbar -->
             <div class="admin-filter-toolbar no-print" style="margin-top: 1rem;">
               <div class="admin-filter-group">
-                <select id="adminReportDateFilter" class="admin-select-filter">
+                <select id="adminReportDateFilter" class="admin-select-filter" title="Filter Periode Waktu">
                   <option value="today">Periode: Hari Ini</option>
                   <option value="week">Periode: 7 Hari Terakhir</option>
                   <option value="month">Periode: Bulan Ini</option>
                   <option value="all">Periode: Semua Riwayat</option>
+                </select>
+                <select id="sortAdminReport" class="admin-select-filter" title="Urutkan Waktu">
+                  <option value="desc">Terbaru</option>
+                  <option value="asc">Terlama</option>
                 </select>
                 <select id="adminReportStatusFilter" class="admin-select-filter">
                   <option value="all">Semua Status</option>
@@ -2516,7 +2537,7 @@
           <div
             style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: #1e40af;">
             <span style="font-size: 1rem;">ℹ️</span>
-            <span id="timelineNoticeText">Scan In menutup perjalanan dan menonaktifkan QR. Seluruh aktivitas tetap
+            <span id="timelineNoticeText">Tap In Kartu Akses menutup perjalanan dan menonaktifkan QR. Seluruh aktivitas tetap
               tersimpan pada tiket.</span>
           </div>
         </div>
@@ -2562,7 +2583,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
-            <span>Konfirmasi Scan In</span>
+            <span>Konfirmasi Tap In (Kartu Akses)</span>
           </button>
           <button type="button" class="btn-primary-action" id="btnDetailExtend"
             style="display: none; background: #d97706; border-color: #d97706; font-size: 0.8rem; padding: 0.45rem 0.85rem;">
@@ -3705,18 +3726,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261023_06"></script>
-  <script src="js/modules/ui.js?v=20261023_06"></script>
-  <script src="js/modules/scheduler.js?v=20261023_06"></script>
-  <script src="js/modules/navigation.js?v=20261023_06"></script>
-  <script src="js/modules/karyawan.js?v=20261023_06"></script>
-  <script src="js/modules/approver.js?v=20261023_06"></script>
-  <script src="js/modules/security.js?v=20261023_06"></script>
-  <script src="js/modules/admin.js?v=20261023_06"></script>
-  <script src="js/modules/charts.js?v=20261023_06"></script>
-  <script src="js/modules/emergency.js?v=20261023_06"></script>
-  <script src="js/modules/modals.js?v=20261023_06"></script>
-  <script src="js/app.js?v=20261023_06"></script>
+  <script src="js/data/mockData.js?v=20261023_07"></script>
+  <script src="js/modules/ui.js?v=20261023_07"></script>
+  <script src="js/modules/scheduler.js?v=20261023_07"></script>
+  <script src="js/modules/navigation.js?v=20261023_07"></script>
+  <script src="js/modules/karyawan.js?v=20261023_07"></script>
+  <script src="js/modules/approver.js?v=20261023_07"></script>
+  <script src="js/modules/security.js?v=20261023_07"></script>
+  <script src="js/modules/admin.js?v=20261023_07"></script>
+  <script src="js/modules/charts.js?v=20261023_07"></script>
+  <script src="js/modules/emergency.js?v=20261023_07"></script>
+  <script src="js/modules/modals.js?v=20261023_07"></script>
+  <script src="js/app.js?v=20261023_07"></script>
 </body>
 
 </html>

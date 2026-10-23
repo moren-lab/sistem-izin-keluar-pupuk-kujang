@@ -574,8 +574,7 @@ function exportAdminExcel() {
     'Alasan',
     'Scan Out (Waktu)',
     'Scan Out (Gerbang)',
-    'Scan In (Waktu)',
-    'Scan In (Gerbang)',
+    'Tap In (Waktu)', 'Tap In (Gerbang)',
     'Estimasi Kembali',
     'Status Akhir',
     'Atasan Penyetuju'
@@ -677,6 +676,16 @@ function openAdminUserModal(mode, kujangId) {
   modeInput.value = mode;
   origIdInput.value = kujangId || '';
 
+  // Kosongkan kolom pencarian dropdown saat modal dibuka (Sesuai Permintaan Revisi 4)
+  const searchDeptEl = document.getElementById('adminInputDeptSearch');
+  const searchRoleEl = document.getElementById('adminInputRoleSearch');
+  const clearDeptEl = document.getElementById('btnAdminDeptClear');
+  const clearRoleEl = document.getElementById('btnAdminRoleClear');
+  if (searchDeptEl) searchDeptEl.value = '';
+  if (searchRoleEl) searchRoleEl.value = '';
+  if (clearDeptEl) clearDeptEl.style.display = 'none';
+  if (clearRoleEl) clearRoleEl.style.display = 'none';
+
   if (mode === 'add') {
     if (title) title.textContent = 'Berikan Hak Akses Pengguna Baru';
     const randNum = Math.floor(100000 + Math.random() * 900000);
@@ -692,17 +701,16 @@ function openAdminUserModal(mode, kujangId) {
     const inputEmail = document.getElementById('adminInputEmail');
     if (inputEmail) inputEmail.value = '';
     
-    // Set default department via searchable dropdown
+    // Kosongkan pilihan awal untuk penambahan hak akses baru
     if (typeof setAdminSelectedDept === 'function') {
-      setAdminSelectedDept('Departemen Rekayasa & Pemeliharaan');
-    } else {
-      const inputDept = document.getElementById('adminInputDept');
-      if (inputDept) inputDept.value = 'Departemen Rekayasa & Pemeliharaan';
+      setAdminSelectedDept('');
+      const indDept = document.getElementById('adminDeptSelectedText');
+      if (indDept) indDept.textContent = 'Pilih Departemen / Unit Kerja';
     }
-    
-    // Set default role via searchable dropdown
     if (typeof setAdminSelectedRole === 'function') {
-      setAdminSelectedRole('approver', 'Manajer');
+      setAdminSelectedRole('', '');
+      const indRole = document.getElementById('adminRoleSelectedText');
+      if (indRole) indRole.textContent = 'Pilih Hak Akses & Jabatan';
     }
     const inputStatus = document.getElementById('adminInputStatus');
     if (inputStatus) inputStatus.value = 'Aktif';
@@ -748,6 +756,9 @@ function openAdminUserModal(mode, kujangId) {
     initAdminRoleSearchableDropdown();
   }
 
+  // Pastikan kolom input pencarian tetap kosong agar placeholder terlihat bersih
+  if (searchDeptEl) searchDeptEl.value = '';
+  if (searchRoleEl) searchRoleEl.value = '';
   modal.classList.add('open');
 }
 
@@ -1029,16 +1040,7 @@ function renderAdminUsers() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               <span>Ubah</span>
             </button>
-            <button type="button" class="btn-action-sm ${isRevoked ? 'btn-admin-success' : 'btn-admin-warning'}" onclick="${isRevoked ? `window.openAdminUserModal('edit', '${u.kujangId}')` : `window.toggleUserAccess('${u.kujangId}')`}" title="${isRevoked ? 'Berikan Hak Akses Pengguna' : 'Cabut Hak Akses Pengguna'}">
-              ${isRevoked
-                ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg><span>Beri Akses</span>`
-                : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Cabut Akses</span>`
-              }
-            </button>
-            <button type="button" class="btn-action-sm btn-admin-danger" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Hak Akses Akun">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              <span>Hapus</span>
-            </button>
+            
             <button type="button" class="btn-action-sm btn-admin-switch" onclick="window.switchRole('${u.roleKey}')" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" ${isRevoked ? 'disabled style="opacity: 0.45; cursor: not-allowed;"' : ''}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 8 20 11 17 14"></polyline><line x1="20" y1="11" x2="11" y2="11"></line></svg>
               <span>Beralih</span>

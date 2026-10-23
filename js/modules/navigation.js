@@ -304,7 +304,7 @@ function switchRole(role) {
     if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.karyawan.nip}`;
 
     setKaryawanNav(currentKaryawanNav || 'dashboard');
-    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Karyawan (Budi Pratama)', 'info');
+    if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Karyawan (${ACTORS.karyawan.name})`, 'info');
   } else if (role === 'approver') {
     if (btnSwitchApprover) btnSwitchApprover.classList.add('active', 'approver');
     if (viewApprover) viewApprover.style.display = 'block';
@@ -347,7 +347,7 @@ function switchRole(role) {
     if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.security.nip} • ${ACTORS.security.gateName}`;
 
     setSecurityNav(currentSecurityNav || 'dashboard');
-    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Pos Jaga Pengamanan (Sertu Agus)', 'info');
+    if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Pos Jaga Pengamanan (${ACTORS.security.name})`, 'info');
   } else if (role === 'admin') {
     if (btnSwitchAdmin) btnSwitchAdmin.classList.add('active', 'admin');
     if (viewAdmin) viewAdmin.style.display = 'block';

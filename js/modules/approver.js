@@ -717,6 +717,19 @@ function renderApproverView() {
       list = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     }
 
+    // Filter Periode Tanggal (Disamping Fitur Sort)
+    const filterAppPeriod = document.getElementById('filterApproverPeriod');
+    const period = filterAppPeriod ? filterAppPeriod.value : 'all';
+    if (period !== 'all' && typeof window.matchesPeriodFilter === 'function') {
+      list = list.filter(t => window.matchesPeriodFilter(t, period));
+    }
+    if (filterAppPeriod && !filterAppPeriod._bound) {
+      filterAppPeriod._bound = true;
+      filterAppPeriod.addEventListener('change', () => {
+        renderApproverView();
+      });
+    }
+
     // Sorting Pelacakan (Terbaru / Terlama)
     const sortAppEl = document.getElementById('sortApproverTracking');
     const sortAppOrder = sortAppEl ? sortAppEl.value : 'desc';

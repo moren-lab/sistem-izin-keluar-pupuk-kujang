@@ -440,6 +440,27 @@ function loadUsers() {
 function saveUsers(data) {
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data));
   window.MOCK_USERS = data;
+  // Sinkronisasi aktor aktif secara otomatis (activeEmpSync)
+  const activeEmpSync = data.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+  if (activeEmpSync && window.ACTORS && window.ACTORS.karyawan) {
+    window.ACTORS.karyawan.name = activeEmpSync.name;
+    window.ACTORS.karyawan.nip = activeEmpSync.nip;
+    if (activeEmpSync.department) window.ACTORS.karyawan.department = activeEmpSync.department;
+    if (activeEmpSync.role) window.ACTORS.karyawan.title = activeEmpSync.role;
+  }
+  const activeSecSync = data.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
+  if (activeSecSync && window.ACTORS && window.ACTORS.security) {
+    window.ACTORS.security.name = activeSecSync.name;
+    window.ACTORS.security.nip = activeSecSync.nip;
+    if (activeSecSync.department) window.ACTORS.security.department = activeSecSync.department;
+  }
+  const sideNameEl = document.getElementById('sidebarUserName');
+  const sideSubEl = document.getElementById('sidebarUserSub');
+  const curRole = window.currentActor || 'karyawan';
+  if (sideNameEl && sideSubEl && window.ACTORS && window.ACTORS[curRole]) {
+    sideNameEl.textContent = window.ACTORS[curRole].name;
+    sideSubEl.textContent = 'NIP: ' + window.ACTORS[curRole].nip;
+  }
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
   }

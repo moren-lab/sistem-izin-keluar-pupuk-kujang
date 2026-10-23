@@ -4398,15 +4398,53 @@ body.modal-open {
 }
 
 @media (max-width: 768px) {
+  /* 3 kotak: 3 kolom berjajar horizontal berdampingan dengan pembatas vertikal (Gambar 4) */
   .figma-stats-card {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr) !important;
   }
+  .figma-stats-card .figma-stat-col {
+    padding: 0.85rem 0.5rem !important;
+  }
+  .figma-stats-card .figma-stat-col:not(:last-child) {
+    border-right: 1px solid #f1f5f9 !important;
+    border-bottom: none !important;
+  }
+  .figma-stats-card .figma-stat-label {
+    font-size: 0.68rem !important;
+    line-height: 1.25;
+  }
+  .figma-stats-card .figma-stat-number {
+    font-size: 1.45rem !important;
+    margin-top: 2px;
+  }
+  .figma-stats-card .figma-stat-sub {
+    font-size: 0.625rem !important;
+    line-height: 1.25;
+    margin-top: 2px;
+  }
+
+  /* 4 kotak: 2 di atas, 2 di bawah */
   .figma-stats-card.figma-stats-4col {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
   }
-  .figma-stat-col:not(:last-child) {
+  .figma-stats-card.figma-stats-4col .figma-stat-col {
+    padding: 0.85rem 0.75rem !important;
+  }
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(1),
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(3) {
+    border-right: 1px solid #f1f5f9 !important;
+  }
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(2),
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(4) {
     border-right: none !important;
-    border-bottom: 1px solid #f1f5f9;
+  }
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(1),
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(2) {
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(3),
+  .figma-stats-card.figma-stats-4col .figma-stat-col:nth-child(4) {
+    border-bottom: none !important;
   }
 }
 
