@@ -331,7 +331,7 @@ function resetAllTicketsToDefault() {
 }
 window.resetAllTicketsToDefault = resetAllTicketsToDefault;
 
-const USERS_STORAGE_KEY = 'KUJANG_GATEPASS_USERS_V2';
+const USERS_STORAGE_KEY = 'KUJANG_GATEPASS_USERS_V3';
 
 const DEFAULT_USERS = [
   {
@@ -419,7 +419,7 @@ const DEFAULT_USERS = [
     department: 'Departemen SDM & Organisasi',
     role: 'Atasan 1 (Manager)',
     roleKey: 'approver',
-    status: 'Aktif',
+    status: 'Dicabut',
     lastLogin: 'Hari ini, 08:30 WIB'
   }
 ];
@@ -440,9 +440,40 @@ function loadUsers() {
 function saveUsers(data) {
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data));
   window.MOCK_USERS = data;
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
 }
 
 const MOCK_USERS = loadUsers();
+
+// Fungsi sentral untuk mendapatkan seluruh Atasan yang HAK AKSESNYA AKTIF
+function getActiveApprovers() {
+  const users = (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
+  const approverUsers = users.filter(u => {
+    const isApproverRole = u.roleKey === 'approver' || u.roleKey === 'approver2' || 
+                           (u.role && (u.role.toLowerCase().includes('atasan') || u.role.toLowerCase().includes('manager') || u.role.toLowerCase().includes('supervisor')));
+    return isApproverRole && u.status === 'Aktif';
+  });
+
+  const avatarPalettes = [
+    'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
+    'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
+    'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+    'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+    'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
+    'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)'
+  ];
+
+  return approverUsers.map((u, idx) => ({
+    nip: u.nip || '',
+    name: u.name,
+    title: u.role || (u.roleKey === 'approver' ? 'Atasan 1 (Manager)' : 'Atasan 2 (Supervisor / Plt)'),
+    department: u.department || 'Departemen Rekayasa & Pemeliharaan',
+    isDirectSupervisor: idx === 0,
+    avatarBg: avatarPalettes[idx % avatarPalettes.length]
+  }));
+}
 
 function saveTickets(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -469,6 +500,7 @@ window.DEFAULT_USERS = DEFAULT_USERS;
 window.loadUsers = loadUsers;
 window.saveUsers = saveUsers;
 window.MOCK_USERS = MOCK_USERS;
+window.getActiveApprovers = getActiveApprovers;
 window.loadTickets = loadTickets;
 window.saveTickets = saveTickets;
 window.ticketsList = ticketsList;
@@ -478,5 +510,16 @@ window.currentEmpViewMode = currentEmpViewMode;
 window.currentDecisionTicketId = currentDecisionTicketId;
 window.currentCancelTicketId = currentCancelTicketId;
 window.pendingFormData = pendingFormData;
-window.MOCK_APPROVERS = MOCK_APPROVERS;
+
+// Properti getter dinamis agar setiap pembacaan window.MOCK_APPROVERS selalu mengembalikan atasan aktif
+try {
+  Object.defineProperty(window, 'MOCK_APPROVERS', {
+    get: function() {
+      return getActiveApprovers();
+    },
+    configurable: true
+  });
+} catch (e) {
+  window.MOCK_APPROVERS = getActiveApprovers();
+}
 

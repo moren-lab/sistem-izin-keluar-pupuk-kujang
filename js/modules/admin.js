@@ -802,6 +802,9 @@ function saveAdminUserAccess(event) {
 
   closeAdminUserModal();
   renderAdminUsers();
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
 
   if (typeof window.showToast === 'function') {
     window.showToast(`Hak akses untuk ${name} (${kujangId}) berhasil disimpan.`, 'success');
@@ -834,6 +837,9 @@ function toggleUserAccess(kujangId) {
   }
 
   renderAdminUsers();
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
 
   if (typeof window.showToast === 'function') {
     window.showToast(`Hak akses untuk ${user.name} berhasil ${user.status === 'Aktif' ? 'diaktifkan' : 'dicabut'}.`, user.status === 'Aktif' ? 'success' : 'warning');
@@ -863,6 +869,9 @@ function deleteAdminUser(kujangId) {
   }
 
   renderAdminUsers();
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
 
   if (typeof window.showToast === 'function') {
     window.showToast(`Hak akses akun ${kujangId} berhasil dihapus dari direktori.`, 'info');

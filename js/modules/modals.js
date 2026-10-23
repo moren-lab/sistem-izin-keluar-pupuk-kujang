@@ -126,8 +126,13 @@ function handleOpenNewRequest() {
   if (formNewRequest) formNewRequest.reset();
 
   initFormDates();
-  if (typeof window.chooseApproverByName === 'function') {
-    window.chooseApproverByName('Ir. Hendra Gunawan, M.T.');
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
+  const activeApps = typeof window.getActiveApprovers === 'function' ? window.getActiveApprovers() : [];
+  const defaultApp = activeApps.find(a => a.name === 'Ir. Hendra Gunawan, M.T.') || activeApps[0];
+  if (defaultApp && typeof window.chooseApproverByName === 'function') {
+    window.chooseApproverByName(defaultApp.name, true);
   } else if (typeof window.resetApproverSearch === 'function') {
     window.resetApproverSearch();
   }
@@ -180,8 +185,13 @@ function openEditNormalModal(ticket) {
   if (btnSubmitNewRequest) btnSubmitNewRequest.textContent = 'Lanjutkan & Simpan Perubahan';
 
   // 1. Pilih atasan langsung (combobox)
-  if (typeof window.chooseApproverByName === 'function' && ticket.approverName) {
-    window.chooseApproverByName(ticket.approverName);
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
+  const activeAppsForEdit = typeof window.getActiveApprovers === 'function' ? window.getActiveApprovers() : [];
+  const targetApp = activeAppsForEdit.find(a => a.name === ticket.approverName) || activeAppsForEdit[0];
+  if (targetApp && typeof window.chooseApproverByName === 'function') {
+    window.chooseApproverByName(targetApp.name, true);
   }
 
   // 2. Kategori Keperluan & Tipe Kepulangan
@@ -238,13 +248,13 @@ function openEditEmergencyModal(ticket) {
   }
 
   // 1. Pilih atasan untuk Notifikasi & Pelacakan
-  const emergApprover = document.getElementById('emergApprover');
-  const targetApprover = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
-  if (emergApprover) {
-    emergApprover.value = targetApprover;
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
   }
-  if (typeof window.chooseEmergApproverByName === 'function') {
-    window.chooseEmergApproverByName(targetApprover);
+  const activeEmergAppsForEdit = typeof window.getActiveApprovers === 'function' ? window.getActiveApprovers() : [];
+  const targetEmergApp = activeEmergAppsForEdit.find(a => a.name === ticket.approverName) || activeEmergAppsForEdit[0];
+  if (targetEmergApp && typeof window.chooseEmergApproverByName === 'function') {
+    window.chooseEmergApproverByName(targetEmergApp.name, true);
   }
 
   // 2. Kategori Keperluan & Tipe Kepulangan
@@ -431,24 +441,21 @@ function setupSingleApproverCombobox(cfg) {
   let currentKeyboardIndex = -1;
 
   function getApprovers() {
-    return window.MOCK_APPROVERS || [
-      {
-        nip: 'PK-2015-1002',
-        name: 'Ir. Hendra Gunawan, M.T.',
-        title: 'Manager Rekayasa & Pemeliharaan',
-        department: 'Departemen Rekayasa & Pemeliharaan',
-        isDirectSupervisor: true,
-        avatarBg: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'
-      },
-      {
-        nip: 'PK-2012-0845',
-        name: 'Dewi Sartika, S.T., M.M.',
-        title: 'Supervisor Operasional Lapangan (Plt. Manager)',
-        department: 'Departemen Rekayasa & Pemeliharaan',
-        isDirectSupervisor: false,
-        avatarBg: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
-      }
-    ];
+    if (typeof window.getActiveApprovers === 'function') {
+      return window.getActiveApprovers();
+    }
+    return window.MOCK_APPROVERS || [];
+  }
+
+  function syncSelectOptions() {
+    if (!selectApprover) return;
+    const currentVal = selectApprover.value;
+    const approvers = getApprovers();
+    selectApprover.innerHTML = `<option value="">-- Belum Memilih Atasan --</option>` +
+      approvers.map(a => `<option value="${a.name}">${a.name} — ${a.title}</option>`).join('');
+    if (approvers.some(a => a.name === currentVal)) {
+      selectApprover.value = currentVal;
+    }
   }
 
   function renderList(query = '') {
@@ -686,19 +693,46 @@ function setupSingleApproverCombobox(cfg) {
     }
   });
 
+  syncSelectOptions();
   renderList('');
 
   return {
     chooseApproverByName: (name, silent = false) => {
       const app = getApprovers().find(a => a.name === name);
-      if (app) chooseApprover(app, silent);
+      if (app) {
+        chooseApprover(app, silent);
+      } else {
+        const approvers = getApprovers();
+        if (approvers.length > 0) {
+          chooseApprover(approvers[0], silent);
+        } else {
+          resetApproverSelection();
+        }
+      }
     },
-    resetApproverSelection
+    resetApproverSelection,
+    refresh: () => {
+      syncSelectOptions();
+      const currentSelected = selectApprover.value;
+      const approvers = getApprovers();
+      const stillActive = approvers.find(a => a.name === currentSelected);
+      if (currentSelected && !stillActive) {
+        if (approvers.length > 0) {
+          chooseApprover(approvers[0], true);
+        } else {
+          resetApproverSelection();
+        }
+      }
+      renderList(searchInput.value === selectApprover.value ? '' : searchInput.value);
+    }
   };
 }
 
+let regApproverComboboxInstance = null;
+let emgApproverComboboxInstance = null;
+
 function setupApproverSearch() {
-  const reg = setupSingleApproverCombobox({
+  regApproverComboboxInstance = setupSingleApproverCombobox({
     searchInputId: 'searchApproverInput',
     selectApproverId: 'selectApprover',
     btnClearId: 'btnClearApproverSearch',
@@ -718,12 +752,12 @@ function setupApproverSearch() {
     comboboxWrapperId: 'approverComboboxWrapper'
   });
 
-  if (reg) {
-    window.resetApproverSearch = reg.resetApproverSelection;
-    window.chooseApproverByName = reg.chooseApproverByName;
+  if (regApproverComboboxInstance) {
+    window.resetApproverSearch = regApproverComboboxInstance.resetApproverSelection;
+    window.chooseApproverByName = regApproverComboboxInstance.chooseApproverByName;
   }
 
-  const emg = setupSingleApproverCombobox({
+  emgApproverComboboxInstance = setupSingleApproverCombobox({
     searchInputId: 'searchEmergApproverInput',
     selectApproverId: 'emergApprover',
     btnClearId: 'btnClearEmergApproverSearch',
@@ -743,11 +777,21 @@ function setupApproverSearch() {
     comboboxWrapperId: 'emergApproverComboboxWrapper'
   });
 
-  if (emg) {
-    window.resetEmergApproverSearch = emg.resetApproverSelection;
-    window.chooseEmergApproverByName = emg.chooseApproverByName;
+  if (emgApproverComboboxInstance) {
+    window.resetEmergApproverSearch = emgApproverComboboxInstance.resetApproverSelection;
+    window.chooseEmergApproverByName = emgApproverComboboxInstance.chooseEmergApproverByName;
   }
 }
+
+function syncApproversToForms() {
+  if (regApproverComboboxInstance && typeof regApproverComboboxInstance.refresh === 'function') {
+    regApproverComboboxInstance.refresh();
+  }
+  if (emgApproverComboboxInstance && typeof emgApproverComboboxInstance.refresh === 'function') {
+    emgApproverComboboxInstance.refresh();
+  }
+}
+window.syncApproversToForms = syncApproversToForms;
 
 function getFormattedDateTimeLocal(dt = new Date()) {
   const pad = (n) => String(n).padStart(2, '0');
@@ -1492,9 +1536,15 @@ function handleOpenEmergency() {
   }
 
   const emergApprover = document.getElementById('emergApprover');
-  if (emergApprover) emergApprover.selectedIndex = 0;
-  if (typeof window.chooseEmergApproverByName === 'function') {
-    window.chooseEmergApproverByName('Ir. Hendra Gunawan, M.T.', true);
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
+  const activeEmergApps = typeof window.getActiveApprovers === 'function' ? window.getActiveApprovers() : [];
+  const defaultEmergApp = activeEmergApps.find(a => a.name === 'Ir. Hendra Gunawan, M.T.') || activeEmergApps[0];
+  if (defaultEmergApp && typeof window.chooseEmergApproverByName === 'function') {
+    window.chooseEmergApproverByName(defaultEmergApp.name, true);
+  } else if (typeof window.resetEmergApproverSearch === 'function') {
+    window.resetEmergApproverSearch();
   }
 
   const emergDest = document.getElementById('emergDest');

@@ -1000,29 +1000,6 @@
 
               <!-- Right Column: Quick Terminal Shortcut & Log Transaksi & Ketentuan -->
               <div class="figma-col-right">
-                <!-- Card: Terminal Cepat Pemindai QR & Input Tiket -->
-                <div class="figma-card" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-color: #cbd5e1;">
-                  <div class="figma-card-header">
-                    <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
-                      <span>📷</span>
-                      <span>Terminal Cepat Pos 1</span>
-                    </h3>
-                    <span class="role-tag-pill role-security">Siap Pindai</span>
-                  </div>
-                  <p style="font-size: 0.775rem; color: #475569; line-height: 1.4; margin-bottom: 0.85rem;">
-                    Buka kamera pemindai langsung atau masukkan nomor tiket/NIP untuk otorisasi cepat di gerbang.
-                  </p>
-                  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button type="button" class="btn-figma-primary" onclick="setSecurityNav('scanner')" style="background: #0284c7; color: #fff; border: none; flex: 1; padding: 0.55rem; font-size: 0.8rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-weight: 700;">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                      <span>Buka Scanner Kamera</span>
-                    </button>
-                    <button type="button" class="btn-figma-secondary" onclick="setSecurityNav('scanner')" style="padding: 0.55rem; font-size: 0.8rem; border-radius: 6px;">
-                      <span>Input NIP Manual</span>
-                    </button>
-                  </div>
-                </div>
-
                 <!-- Card: Aktivitas Gerbang Terkini -->
                 <div class="figma-card">
                   <div class="figma-card-header">
@@ -1518,9 +1495,11 @@
                         WIB</span>
                     </div>
                   </div>
-                  <span
-                    style="font-size: 0.725rem; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1.5px solid #bae6fd; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">📅
-                    Hari Ini</span>
+                  <span id="adminTrafficLiveIndicator"
+                    style="font-size: 0.725rem; font-weight: 700; color: #059669; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
+                    <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+                    <span>Realtime • Live</span>
+                  </span>
                 </div>
                 <div id="chartAdminTrafficContainer" style="padding: 0.5rem 0.25rem;">
                   <!-- Rendered via JS -->
@@ -3638,18 +3617,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261022_30"></script>
-  <script src="js/modules/ui.js?v=20261022_30"></script>
-  <script src="js/modules/scheduler.js?v=20261022_30"></script>
-  <script src="js/modules/navigation.js?v=20261022_30"></script>
-  <script src="js/modules/karyawan.js?v=20261022_30"></script>
-  <script src="js/modules/approver.js?v=20261022_30"></script>
-  <script src="js/modules/security.js?v=20261022_30"></script>
-  <script src="js/modules/admin.js?v=20261022_30"></script>
-  <script src="js/modules/charts.js?v=20261022_30"></script>
-  <script src="js/modules/emergency.js?v=20261022_30"></script>
-  <script src="js/modules/modals.js?v=20261022_30"></script>
-  <script src="js/app.js?v=20261022_30"></script>
+  <script src="js/data/mockData.js?v=20261023_01"></script>
+  <script src="js/modules/ui.js?v=20261023_01"></script>
+  <script src="js/modules/scheduler.js?v=20261023_01"></script>
+  <script src="js/modules/navigation.js?v=20261023_01"></script>
+  <script src="js/modules/karyawan.js?v=20261023_01"></script>
+  <script src="js/modules/approver.js?v=20261023_01"></script>
+  <script src="js/modules/security.js?v=20261023_01"></script>
+  <script src="js/modules/admin.js?v=20261023_01"></script>
+  <script src="js/modules/charts.js?v=20261023_01"></script>
+  <script src="js/modules/emergency.js?v=20261023_01"></script>
+  <script src="js/modules/modals.js?v=20261023_01"></script>
+  <script src="js/app.js?v=20261023_01"></script>
 </body>
 
 </html>
