@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261022_30">
+  <link rel="stylesheet" href="css/style.css?v=20261023_01">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
@@ -2021,46 +2021,34 @@
             </div>
           </div>
 
-          <!-- Kategori Keperluan & Tipe Kepulangan (Side by side) -->
+          <!-- Kategori Keperluan & Tipe Kepulangan (Side by side Dropdowns) -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <!-- Kategori Keperluan -->
+            <!-- Kategori Keperluan Dropdown -->
             <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label"
+              <label class="form-label" for="selectReqCategory"
                 style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
                 Kategori Keperluan <span style="color: var(--rose-danger);">*</span>
               </label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                <label class="figma-radio-pill selected" id="optCatDinas">
-                  <input type="radio" name="reqCategory" value="Dinas Kantor" checked style="display: none;">
-                  <span class="figma-radio-circle"></span>
-                  <span class="figma-radio-text">Dinas Kantor</span>
-                </label>
-                <label class="figma-radio-pill" id="optCatPribadi">
-                  <input type="radio" name="reqCategory" value="Urusan Pribadi" style="display: none;">
-                  <span class="figma-radio-circle"></span>
-                  <span class="figma-radio-text">Urusan Pribadi</span>
-                </label>
-              </div>
+              <select id="selectReqCategory" name="reqCategory" class="form-select" required
+                style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px; width: 100%; background-color: #ffffff;">
+                <option value="">-- Pilih Kategori --</option>
+                <option value="Dinas Kantor">Dinas Kantor</option>
+                <option value="Urusan Pribadi">Urusan Pribadi</option>
+              </select>
             </div>
 
-            <!-- Tipe Kepulangan -->
+            <!-- Tipe Kepulangan Dropdown -->
             <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label"
+              <label class="form-label" for="selectReqType"
                 style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
                 Tipe Kepulangan <span style="color: var(--rose-danger);">*</span>
               </label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                <label class="figma-radio-pill selected" id="optTypeKembali">
-                  <input type="radio" name="reqType" value="Kembali ke Area" checked style="display: none;">
-                  <span class="figma-radio-circle"></span>
-                  <span class="figma-radio-text">Kembali ke Area</span>
-                </label>
-                <label class="figma-radio-pill" id="optTypePulang">
-                  <input type="radio" name="reqType" value="Pulang Mendahului" style="display: none;">
-                  <span class="figma-radio-circle"></span>
-                  <span class="figma-radio-text">Pulang Mendahului</span>
-                </label>
-              </div>
+              <select id="selectReqType" name="reqType" class="form-select" required
+                style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px; width: 100%; background-color: #ffffff;">
+                <option value="">-- Pilih Tipe Kepulangan --</option>
+                <option value="Kembali ke Area">Kembali ke Area</option>
+                <option value="Pulang Mendahului">Pulang Mendahului (Tidak Kembali)</option>
+              </select>
             </div>
           </div>
 
@@ -2355,9 +2343,15 @@
             </div>
           </div>
 
-          <!-- Middle Card: Kategori, Tipe, Lokasi, Alasan -->
+          <!-- Middle Card: Sifat Izin, Kategori, Tipe, Lokasi, Alasan -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.95rem 1rem;">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 0.75rem;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div>
+                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Sifat Izin</span>
+                <div id="infoEmergencyBadge" style="margin-top: 2px;">
+                  <span class="tag-badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">Biasa</span>
+                </div>
+              </div>
               <div>
                 <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Kategori</span>
                 <strong style="font-size: 0.825rem; color: #0f172a;" id="infoCategory">Dinas Kantor</strong>
@@ -2701,6 +2695,7 @@
           </label>
           <select id="emergApprover" class="form-select" required
             style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;">
+            <option value="">-- Pilih Atasan Peninjau --</option>
             <option value="Ir. Hendra Gunawan, M.T.">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan (Atasan
               Langsung)</option>
             <option value="Dewi Sartika, S.T., M.M.">Dewi Sartika, S.T., M.M. — Supervisor Operasional Lapangan (Plt.
@@ -2716,46 +2711,34 @@
           </select>
         </div>
 
-        <!-- Kategori Keperluan & Tipe Kepulangan (Side by side) -->
+        <!-- Kategori Keperluan & Tipe Kepulangan (Side by side Dropdowns) -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-          <!-- Kategori Keperluan -->
+          <!-- Kategori Keperluan Dropdown -->
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label"
+            <label class="form-label" for="selectEmergCategory"
               style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
               Kategori Keperluan <span style="color: var(--rose-danger);">*</span>
             </label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-              <label class="figma-radio-pill selected" id="optEmergCatDinas">
-                <input type="radio" name="emergCategory" value="Dinas Kantor" checked style="display: none;">
-                <span class="figma-radio-circle"></span>
-                <span class="figma-radio-text">Dinas Kantor</span>
-              </label>
-              <label class="figma-radio-pill" id="optEmergCatPribadi">
-                <input type="radio" name="emergCategory" value="Urusan Pribadi" style="display: none;">
-                <span class="figma-radio-circle"></span>
-                <span class="figma-radio-text">Urusan Pribadi</span>
-              </label>
-            </div>
+            <select id="selectEmergCategory" name="emergCategory" class="form-select" required
+              style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px; width: 100%; background-color: #ffffff;">
+              <option value="">-- Pilih Kategori --</option>
+              <option value="Dinas Kantor">Dinas Kantor</option>
+              <option value="Urusan Pribadi">Urusan Pribadi</option>
+            </select>
           </div>
 
-          <!-- Tipe Kepulangan -->
+          <!-- Tipe Kepulangan Dropdown -->
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label"
+            <label class="form-label" for="selectEmergType"
               style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
               Tipe Kepulangan <span style="color: var(--rose-danger);">*</span>
             </label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-              <label class="figma-radio-pill selected" id="optEmergTypeKembali">
-                <input type="radio" name="emergType" value="Kembali ke Area" checked style="display: none;">
-                <span class="figma-radio-circle"></span>
-                <span class="figma-radio-text">Kembali ke Area</span>
-              </label>
-              <label class="figma-radio-pill" id="optEmergTypePulang">
-                <input type="radio" name="emergType" value="Pulang Mendahului" style="display: none;">
-                <span class="figma-radio-circle"></span>
-                <span class="figma-radio-text">Pulang Mendahului</span>
-              </label>
-            </div>
+            <select id="selectEmergType" name="emergType" class="form-select" required
+              style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px; width: 100%; background-color: #ffffff;">
+              <option value="">-- Pilih Tipe Kepulangan --</option>
+              <option value="Kembali ke Area">Kembali ke Area</option>
+              <option value="Pulang Mendahului">Pulang Mendahului (Tidak Kembali)</option>
+            </select>
           </div>
         </div>
 
@@ -3335,6 +3318,71 @@
         <button type="button" class="btn-figma-primary" id="btnSubmitExtendDuration"
           style="background: #1d4ed8; border-color: #1d4ed8; color: white; padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600;">
           Kirim Permohonan Perpanjangan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: DETAIL PENGAJUAN PERPANJANGAN (DENGAN BATALKAN PERPANJANGAN) ================= -->
+  <div class="modal-overlay" id="modalPendingExtensionDetail">
+    <div class="modal-card" style="max-width: 580px; width: 95%;">
+      <div class="modal-header" style="padding: 1.25rem 1.5rem 0.75rem;">
+        <div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⏱️</span>
+            <span>Detail Pengajuan Perpanjangan Waktu</span>
+          </h3>
+          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+            Status permohonan perpanjangan waktu kembali karyawan
+          </p>
+        </div>
+        <button class="btn-close-modal" id="btnClosePendingExtModal" onclick="closePendingExtensionDetailModal()" title="Tutup">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Status Banner -->
+        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.3rem;">⏳</span>
+            <div>
+              <div style="font-size: 0.825rem; font-weight: 800; color: #92400e;">Menunggu Persetujuan Atasan</div>
+              <div style="font-size: 0.725rem; color: #b45309;">Grace period aktif: Penandaan terlambat ditangguhkan sementara.</div>
+            </div>
+          </div>
+          <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a; font-size: 0.7rem;">PROSES REVIEW</span>
+        </div>
+
+        <!-- Detail Fields -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.825rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #64748b; font-weight: 600;">Nomor Tiket:</span>
+            <strong id="pendingExtTicketId" style="font-family: var(--font-mono); color: #0f172a;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #64748b; font-weight: 600;">Jadwal Kembali Semula:</span>
+            <span id="pendingExtOldReturn" style="font-family: var(--font-mono); font-weight: 700; color: #475569;">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #bfdbfe;">
+            <span style="color: #1e40af; font-weight: 700;">Usulan Jam Kembali Baru:</span>
+            <span id="pendingExtNewReturn" style="font-family: var(--font-mono); font-weight: 800; color: #1d4ed8; font-size: 0.9rem;">-</span>
+          </div>
+          <div>
+            <span style="color: #64748b; font-weight: 600; display: block; margin-bottom: 2px;">Alasan Perpanjangan Waktu:</span>
+            <div id="pendingExtReason" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.6rem 0.75rem; color: #1e293b; line-height: 1.45; font-style: italic;">-</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;">
+            <span>Diajukan pada:</span>
+            <span id="pendingExtRequestedAt" style="font-weight: 600;">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; border-top: 1px solid #f1f5f9;">
+        <button type="button" class="btn-figma-danger" id="btnCancelPendingExtension" onclick="executeCancelPendingExtension()" style="background: #fff1f2; color: #be123c; border: 1.5px solid #fecdd3; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
+          ✕ Batalkan Perpanjangan
+        </button>
+        <button type="button" class="btn-secondary" onclick="closePendingExtensionDetailModal()" style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 6px;">
+          Tutup
         </button>
       </div>
     </div>

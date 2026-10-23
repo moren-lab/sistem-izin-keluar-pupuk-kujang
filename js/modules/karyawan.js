@@ -422,31 +422,47 @@ function renderKaryawanDashboard() {
           </button>
         `;
       } else if (isOutside) {
+        const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         actionButtonsHtml = `
           <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
             <span>Buka QR Izin</span>
           </button>
-          <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
-            <span>Ajukan Perpanjangan</span>
-          </button>
+          ${hasPendingExt ? `
+            <button class="btn-figma-secondary" style="background:#fef3c7; color:#92400e; border-color:#fde68a; font-weight:700;" onclick="openPendingExtensionDetailModal('${activeTicket.id}')">
+              <span>⏱️ Detail Ajukan Perpanjangan</span>
+            </button>
+          ` : `
+            <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
+              <span>Ajukan Perpanjangan</span>
+            </button>
+          `}
           <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
             <span>✓ Kembali ke Pabrik (Scan In)</span>
           </button>
         `;
       }
 
+      const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
+
       cardActivePermitSummary.innerHTML = `
         <div class="figma-card-header">
-          <h3 class="figma-card-title">Izin aktif saya</h3>
+          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>Izin aktif saya</span>
+            ${isEmergency ? `<span class="tag-badge" style="background:#ffe4e6; color:#9f1239; border:1.5px solid #fecdd3; font-weight:800; font-size:0.7rem; padding:2px 8px; border-radius:999px;">🚨 DARURAT</span>` : ''}
+          </h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Rincian</a>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
           <div>
-            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${activeTicket.id}</div>
+            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+              <span>${activeTicket.id}</span>
+              ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
+            </div>
             <div style="font-size: 0.8rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
             <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} • ${activeTicket.reason}</div>
           </div>
-          <div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            ${isEmergency ? `<span class="tag-badge" style="background:#fee2e2; color:#b91c1c; font-weight:800; font-size:0.7rem; border:1px solid #fca5a5;">🚨 DARURAT</span>` : ''}
             ${window.getStatusPill(activeTicket.status)}
           </div>
         </div>
@@ -651,33 +667,49 @@ function renderPengajuanSayaView() {
         </button>
       `;
     } else if (isOutside) {
+      const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
       actionButtonsHtml = `
         <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
           <span>Buka QR Izin</span>
         </button>
-        <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
-          <span>Ajukan Perpanjangan</span>
-        </button>
+        ${hasPendingExt ? `
+          <button class="btn-figma-secondary" style="background:#fef3c7; color:#92400e; border-color:#fde68a; font-weight:700;" onclick="openPendingExtensionDetailModal('${activeTicket.id}')">
+            <span>⏱️ Detail Ajukan Perpanjangan</span>
+          </button>
+        ` : `
+          <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
+            <span>Ajukan Perpanjangan</span>
+          </button>
+        `}
         <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
           <span>✓ Kembali ke Pabrik (Scan In)</span>
         </button>
       `;
     }
 
+    const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
+
     colPengajuanLeft.innerHTML = `
       <!-- Card 1: Izin aktif saya -->
       <div class="figma-card">
         <div class="figma-card-header">
-          <h3 class="figma-card-title">Izin aktif saya</h3>
+          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>Izin aktif saya</span>
+            ${isEmergency ? `<span class="tag-badge" style="background:#ffe4e6; color:#9f1239; border:1.5px solid #fecdd3; font-weight:800; font-size:0.7rem; padding:2px 8px; border-radius:999px;">🚨 DARURAT</span>` : ''}
+          </h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Rincian</a>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
           <div>
-            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${activeTicket.id}</div>
+            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+              <span>${activeTicket.id}</span>
+              ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
+            </div>
             <div style="font-size: 0.8rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
             <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} • ${activeTicket.reason}</div>
           </div>
-          <div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            ${isEmergency ? `<span class="tag-badge" style="background:#fee2e2; color:#b91c1c; font-weight:800; font-size:0.7rem; border:1px solid #fca5a5;">🚨 DARURAT</span>` : ''}
             ${window.getStatusPill(activeTicket.status)}
           </div>
         </div>
@@ -756,17 +788,30 @@ function renderPengajuanSayaView() {
         <div class="figma-card-header">
           <h3 class="figma-card-title">Perlu tambahan waktu?</h3>
         </div>
-        ${isOutside ? `
+        ${isOutside ? (activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan' ? `
+          <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 800; color: #92400e; font-size: 0.8rem;">
+              <span>⏳</span>
+              <span>Permohonan Perpanjangan Sedang Ditinjau</span>
+            </div>
+            <div style="font-size: 0.75rem; color: #b45309; margin-top: 3px;">
+              Usulan jam kembali baru: <strong>${activeTicket.pendingExtension.newEstimatedReturn ? activeTicket.pendingExtension.newEstimatedReturn.replace('T', ' ') : '-'}</strong>. Penandaan terlambat ditangguhkan sementara.
+            </div>
+          </div>
+          <button class="btn-figma-secondary" style="background:#fef3c7; color:#92400e; border-color:#fde68a; font-weight:700; width: 100%; justify-content: center;" onclick="openPendingExtensionDetailModal('${activeTicket.id}')">
+            <span>⏱️ Detail Ajukan Perpanjangan</span>
+          </button>
+        ` : `
           <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin: 0 0 0.65rem 0;">
             Sampaikan kendala di lapangan dan usulan jam kembali baru sebelum pukul ${activeTicket.estimatedReturn ? activeTicket.estimatedReturn.slice(11, 16) + ' WIB' : '13.00 WIB'}.
           </p>
           <p style="font-size: 0.725rem; color: #64748b; line-height: 1.4; margin: 0 0 1rem 0;">
-            Maksimal 1 kali sebelum batas kembali. Saat menunggu keputusan, penandaan terlambat ditangguhkan hingga jam diajukan.
+            Hanya dapat diajukan hari ini sebelum jam pulang kerja (Senin-Kamis 16:00 WIB, Jumat 16:30 WIB).
           </p>
           <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
             <span>Ajukan Perpanjangan</span>
           </button>
-        ` : `
+        `) : `
           <p style="font-size: 0.8rem; color: #64748b; line-height: 1.5; margin: 0 0 0.75rem 0;">
             Perpanjangan waktu hanya dapat diajukan setelah Anda melakukan Scan Out di pos gerbang dan sedang berada di luar area.
           </p>

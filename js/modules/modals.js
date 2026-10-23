@@ -125,15 +125,24 @@ function handleOpenNewRequest() {
   const formNewRequest = document.getElementById('formNewRequest');
   if (formNewRequest) formNewRequest.reset();
 
+  // Reset dropdowns & fields agar form benar-benar kosong saat pertama kali dibuka
+  const selectReqCategory = document.getElementById('selectReqCategory');
+  const selectReqType = document.getElementById('selectReqType');
+  const inputDestination = document.getElementById('inputDestination');
+  const inputReason = document.getElementById('inputReason');
+  const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
+  if (selectReqCategory) selectReqCategory.value = '';
+  if (selectReqType) selectReqType.value = '';
+  if (inputDestination) inputDestination.value = '';
+  if (inputReason) inputReason.value = '';
+  if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'block';
+
   initFormDates();
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
   }
-  const activeApps = typeof window.getActiveApprovers === 'function' ? window.getActiveApprovers() : [];
-  const defaultApp = activeApps.find(a => a.name === 'Ir. Hendra Gunawan, M.T.') || activeApps[0];
-  if (defaultApp && typeof window.chooseApproverByName === 'function') {
-    window.chooseApproverByName(defaultApp.name, true);
-  } else if (typeof window.resetApproverSearch === 'function') {
+  // Tidak memilih atasan secara default agar form kosong sebelum diisi pengguna
+  if (typeof window.resetApproverSearch === 'function') {
     window.resetApproverSearch();
   }
   if (modalNewRequest) modalNewRequest.classList.add('open');
@@ -195,20 +204,15 @@ function openEditNormalModal(ticket) {
   }
 
   // 2. Kategori Keperluan & Tipe Kepulangan
-  const optCatDinas = document.getElementById('optCatDinas');
-  const optCatPribadi = document.getElementById('optCatPribadi');
-  if (ticket.category === 'Urusan Pribadi') {
-    if (optCatPribadi) optCatPribadi.click();
-  } else {
-    if (optCatDinas) optCatDinas.click();
-  }
-
-  const optTypeKembali = document.getElementById('optTypeKembali');
-  const optTypePulang = document.getElementById('optTypePulang');
-  if (ticket.type === 'Pulang Mendahului') {
-    if (optTypePulang) optTypePulang.click();
-  } else {
-    if (optTypeKembali) optTypeKembali.click();
+  const selectReqCategory = document.getElementById('selectReqCategory');
+  const selectReqType = document.getElementById('selectReqType');
+  const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
+  if (selectReqCategory) selectReqCategory.value = ticket.category || 'Dinas Perusahaan';
+  if (selectReqType) {
+    selectReqType.value = ticket.type || 'Kembali ke Area';
+    if (groupEstimatedReturn) {
+      groupEstimatedReturn.style.display = ticket.type === 'Pulang Mendahului' ? 'none' : 'block';
+    }
   }
 
   // 3. Lokasi / Tujuan Keluar & 4. Alasan Keperluan Izin
@@ -258,20 +262,15 @@ function openEditEmergencyModal(ticket) {
   }
 
   // 2. Kategori Keperluan & Tipe Kepulangan
-  const optEmergCatDinas = document.getElementById('optEmergCatDinas');
-  const optEmergCatPribadi = document.getElementById('optEmergCatPribadi');
-  if (ticket.category === 'Urusan Pribadi') {
-    if (optEmergCatPribadi) optEmergCatPribadi.click();
-  } else {
-    if (optEmergCatDinas) optEmergCatDinas.click();
-  }
-
-  const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
-  const optEmergTypePulang = document.getElementById('optEmergTypePulang');
-  if (ticket.type === 'Pulang Mendahului') {
-    if (optEmergTypePulang) optEmergTypePulang.click();
-  } else {
-    if (optEmergTypeKembali) optEmergTypeKembali.click();
+  const selectEmergCategory = document.getElementById('selectEmergCategory');
+  const selectEmergType = document.getElementById('selectEmergType');
+  const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
+  if (selectEmergCategory) selectEmergCategory.value = ticket.category || 'Dinas Kantor';
+  if (selectEmergType) {
+    selectEmergType.value = ticket.type || 'Kembali ke Area';
+    if (emergGroupEstimatedReturn) {
+      emergGroupEstimatedReturn.style.display = ticket.type === 'Pulang Mendahului' ? 'none' : 'block';
+    }
   }
 
   // 3. Lokasi / Tujuan Keluar & 4. Alasan Kedaruratan
@@ -308,12 +307,43 @@ function openEditEmergencyModal(ticket) {
 }
 
 function setupRadioToggles() {
+  // Dropdown Tipe Kepulangan (Form Pengajuan Biasa)
+  const selectReqType = document.getElementById('selectReqType');
+  const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
+  const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
+  if (selectReqType) {
+    selectReqType.addEventListener('change', () => {
+      if (selectReqType.value === 'Pulang Mendahului') {
+        if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'none';
+        if (inputEstimatedReturn) inputEstimatedReturn.required = false;
+      } else {
+        if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'block';
+        if (inputEstimatedReturn) inputEstimatedReturn.required = true;
+      }
+    });
+  }
+
+  // Dropdown Tipe Kepulangan (Form Izin Darurat)
+  const selectEmergType = document.getElementById('selectEmergType');
+  const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
+  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
+  if (selectEmergType) {
+    selectEmergType.addEventListener('change', () => {
+      if (selectEmergType.value === 'Pulang Mendahului') {
+        if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'none';
+        if (emergEstimatedReturn) emergEstimatedReturn.required = false;
+      } else {
+        if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
+        if (emergEstimatedReturn) emergEstimatedReturn.required = true;
+      }
+    });
+  }
+
+  // Backwards compatibility for legacy radio buttons if present
   const optCatDinas = document.getElementById('optCatDinas');
   const optCatPribadi = document.getElementById('optCatPribadi');
   const optTypeKembali = document.getElementById('optTypeKembali');
   const optTypePulang = document.getElementById('optTypePulang');
-  const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
-  const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
 
   if (optCatDinas && optCatPribadi) {
     optCatDinas.addEventListener('click', () => {
@@ -373,8 +403,6 @@ function setupRadioToggles() {
   // Emergency radio toggles (Tipe: Kembali vs Pulang Mendahului)
   const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
   const optEmergTypePulang = document.getElementById('optEmergTypePulang');
-  const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
-  const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
   if (optEmergTypeKembali && optEmergTypePulang) {
     optEmergTypeKembali.addEventListener('click', () => {
       optEmergTypeKembali.classList.add('selected');
@@ -798,24 +826,64 @@ function getFormattedDateTimeLocal(dt = new Date()) {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
 
+// VALIDASI BATAS MAKSIMAL PENGAJUAN (SEBELUM JAM PULANG KANTOR)
+// Hari biasa (Senin - Kamis): 07:00 - 16:00 WIB
+// Hari Jumat: 07:00 - 16:30 WIB
+function isWithinOperationalHours(date = new Date()) {
+  const day = date.getDay(); // 0: Minggu, 1: Senin, ..., 4: Kamis, 5: Jumat, 6: Sabtu
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const totalMinutes = hours * 60 + minutes;
+  const startMinutes = 7 * 60; // 07:00 WIB
+
+  // Senin (1) sampai Kamis (4)
+  if (day >= 1 && day <= 4) {
+    const endMinutes = 16 * 60; // 16:00 WIB
+    const allowed = totalMinutes >= startMinutes && totalMinutes <= endMinutes;
+    return {
+      allowed,
+      scheduleText: 'Senin - Kamis pukul 07:00 - 16:00 WIB',
+      closingHour: '16:00',
+      closingMinutes: endMinutes
+    };
+  }
+
+  // Hari Jumat (5)
+  if (day === 5) {
+    const endMinutes = 16 * 60 + 30; // 16:30 WIB
+    const allowed = totalMinutes >= startMinutes && totalMinutes <= endMinutes;
+    return {
+      allowed,
+      scheduleText: 'Jumat pukul 07:00 - 16:30 WIB',
+      closingHour: '16:30',
+      closingMinutes: endMinutes
+    };
+  }
+
+  // Hari Libur (Sabtu / Minggu)
+  return {
+    allowed: false,
+    scheduleText: 'Senin - Kamis (07:00 - 16:00 WIB) atau Jumat (07:00 - 16:30 WIB)',
+    closingHour: 'Hari Libur',
+    closingMinutes: 0
+  };
+}
+window.isWithinOperationalHours = isWithinOperationalHours;
+
 function initFormDates() {
   const inputPlannedExit = document.getElementById('inputPlannedExit');
   const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
   if (!inputPlannedExit) return;
 
   const now = new Date();
-  const futureExit = new Date(now.getTime() + 15 * 60000);
-  const futureReturn = new Date(now.getTime() + 120 * 60000);
-
   // Kunci batas waktu minimum ke waktu sekarang (hari atau tanggal sebelumnya tidak bisa dipilih)
   const currentMinStr = getFormattedDateTimeLocal(now);
   inputPlannedExit.min = currentMinStr;
-  inputPlannedExit.value = getFormattedDateTimeLocal(futureExit);
+  inputPlannedExit.value = ''; // Kosongkan saat form pertama kali dibuka
 
   if (inputEstimatedReturn) {
-    // Estimasi kembali minimal harus sama atau setelah rencana keluar
-    inputEstimatedReturn.min = inputPlannedExit.value || currentMinStr;
-    inputEstimatedReturn.value = getFormattedDateTimeLocal(futureReturn);
+    inputEstimatedReturn.min = currentMinStr;
+    inputEstimatedReturn.value = ''; // Kosongkan saat form pertama kali dibuka
   }
 }
 
@@ -952,10 +1020,13 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     modalDetailHeading.textContent = `Detail Pengajuan • ${ticket.id}`;
   }
 
+  const isTicketEmerg = Boolean(ticket.isEmergency || (ticket.id && ticket.id.includes('-EMG-')) || ticket.status === 'Menunggu Otorisasi Darurat');
+
   const modalDetailSubtitle = document.getElementById('modalDetailSubtitle');
   if (modalDetailSubtitle) {
     const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Oktober 2026';
-    modalDetailSubtitle.textContent = `${ticket.applicantName || 'Budi Pratama, S.T.'} • ${ticket.category} • ${dayStr}`;
+    const emergLabel = isTicketEmerg ? '<span style="background:#ffe4e6; color:#9f1239; border:1px solid #fecdd3; padding:1px 7px; border-radius:4px; font-weight:800; font-size:0.75rem;">🚨 DARURAT</span> • ' : '';
+    modalDetailSubtitle.innerHTML = `${ticket.applicantName || 'Budi Pratama, S.T.'} • ${emergLabel}${ticket.category} • ${dayStr}`;
   }
 
   // Status Badge on Top Right
@@ -976,6 +1047,15 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   }
 
   // --- TAB 1: INFORMASI TIKET ---
+  const infoEmergencyBadge = document.getElementById('infoEmergencyBadge');
+  if (infoEmergencyBadge) {
+    if (isTicketEmerg) {
+      infoEmergencyBadge.innerHTML = `<span style="display:inline-flex; align-items:center; gap:5px; background:#ffe4e6; color:#9f1239; border:1px solid #fecdd3; padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;">🚨 DARURAT (Evakuasi / Mendesak)</span>`;
+    } else {
+      infoEmergencyBadge.innerHTML = `<span style="display:inline-flex; align-items:center; gap:5px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;">📋 Biasa (Reguler)</span>`;
+    }
+  }
+
   const infoEmployeeName = document.getElementById('infoEmployeeName');
   if (infoEmployeeName) infoEmployeeName.textContent = ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.');
 
@@ -1535,45 +1615,29 @@ function handleOpenEmergency() {
     btnSubmitEmergency.textContent = 'Terbitkan QR Darurat';
   }
 
-  const emergApprover = document.getElementById('emergApprover');
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
   }
-  const activeEmergApps = typeof window.getActiveApprovers === 'function' ? window.getActiveApprovers() : [];
-  const defaultEmergApp = activeEmergApps.find(a => a.name === 'Ir. Hendra Gunawan, M.T.') || activeEmergApps[0];
-  if (defaultEmergApp && typeof window.chooseEmergApproverByName === 'function') {
-    window.chooseEmergApproverByName(defaultEmergApp.name, true);
-  } else if (typeof window.resetEmergApproverSearch === 'function') {
+  // Tidak memilih atasan secara default agar form kosong saat dibuka
+  if (typeof window.resetEmergApproverSearch === 'function') {
     window.resetEmergApproverSearch();
   }
+  const emergApprover = document.getElementById('emergApprover');
+  if (emergApprover) emergApprover.value = '';
 
   const emergDest = document.getElementById('emergDest');
   const emergReason = document.getElementById('emergReason');
   const emergPlannedExit = document.getElementById('emergPlannedExit');
   const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
   const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
-  const optEmergCatDinas = document.getElementById('optEmergCatDinas');
-  const optEmergCatPribadi = document.getElementById('optEmergCatPribadi');
-  const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
-  const optEmergTypePulang = document.getElementById('optEmergTypePulang');
+  const selectEmergCategory = document.getElementById('selectEmergCategory');
+  const selectEmergType = document.getElementById('selectEmergType');
 
   if (emergDest) emergDest.value = '';
   if (emergReason) emergReason.value = '';
-
-  // Reset toggles to default
-  if (optEmergCatDinas && optEmergCatPribadi) {
-    optEmergCatDinas.classList.add('selected');
-    optEmergCatPribadi.classList.remove('selected');
-    const input = optEmergCatDinas.querySelector('input[type="radio"]');
-    if (input) input.checked = true;
-  }
-  if (optEmergTypeKembali && optEmergTypePulang) {
-    optEmergTypeKembali.classList.add('selected');
-    optEmergTypePulang.classList.remove('selected');
-    const input = optEmergTypeKembali.querySelector('input[type="radio"]');
-    if (input) input.checked = true;
-    if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
-  }
+  if (selectEmergCategory) selectEmergCategory.value = '';
+  if (selectEmergType) selectEmergType.value = '';
+  if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
 
   // Reset emergency authorization method to default (app)
   const optEmergMethodApp = document.getElementById('optEmergMethodApp');
@@ -1587,19 +1651,17 @@ function handleOpenEmergency() {
     if (input) input.checked = true;
   }
 
-  // Initialize dates
+  // Tanggal dan waktu dikosongkan (hanya diberi batasan minimum hari ini)
   const now = new Date();
-  const futureExit = new Date(now.getTime() + 10 * 60000); // 10 menit ke depan
-  const futureReturn = new Date(now.getTime() + 120 * 60000); // 2 jam ke depan
   const currentMinStr = getFormattedDateTimeLocal(now);
 
   if (emergPlannedExit) {
     emergPlannedExit.min = currentMinStr;
-    emergPlannedExit.value = getFormattedDateTimeLocal(futureExit);
+    emergPlannedExit.value = '';
   }
   if (emergEstimatedReturn) {
-    emergEstimatedReturn.min = emergPlannedExit ? emergPlannedExit.value : currentMinStr;
-    emergEstimatedReturn.value = getFormattedDateTimeLocal(futureReturn);
+    emergEstimatedReturn.min = currentMinStr;
+    emergEstimatedReturn.value = '';
   }
 
   if (modalEmergency) modalEmergency.classList.add('open');
@@ -1722,6 +1784,16 @@ document.addEventListener('DOMContentLoaded', () => {
     formNewRequest.addEventListener('submit', (e) => {
       e.preventDefault();
 
+      // Validasi Batas Maksimal Pengajuan (Sebelum Jam Pulang Kantor)
+      // Hari biasa: 07:00 - 16:00, Jumat: 07:00 - 16:30
+      const workHoursCheck = isWithinOperationalHours(new Date());
+      if (!workHoursCheck.allowed) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Pengajuan izin hanya dapat dilakukan sebelum jam pulang kantor (${workHoursCheck.scheduleText})!`, 'danger');
+        }
+        return;
+      }
+
       if (!window.editingTicketId && typeof window.getActiveTicket === 'function' && window.getActiveTicket()) {
         if (typeof window.showToast === 'function') window.showToast('Gagal mengajukan: Anda masih memiliki tiket izin yang sedang aktif!', 'danger');
         modalNewRequest.classList.remove('open');
@@ -1732,13 +1804,40 @@ document.addEventListener('DOMContentLoaded', () => {
       const inputReason = document.getElementById('inputReason');
       const inputPlannedExit = document.getElementById('inputPlannedExit');
       const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
+      const selectReqCategory = document.getElementById('selectReqCategory');
+      const selectReqType = document.getElementById('selectReqType');
 
-      const category = formNewRequest.reqCategory.value;
-      const type = formNewRequest.reqType.value;
+      const category = selectReqCategory ? selectReqCategory.value : (formNewRequest.reqCategory ? formNewRequest.reqCategory.value : '');
+      const type = selectReqType ? selectReqType.value : (formNewRequest.reqType ? formNewRequest.reqType.value : '');
       const destination = inputDestination ? inputDestination.value.trim() : '';
       const reason = inputReason ? inputReason.value.trim() : '';
       const plannedExit = inputPlannedExit ? inputPlannedExit.value : '';
       const estimatedReturn = type === 'Kembali ke Area' ? (inputEstimatedReturn ? inputEstimatedReturn.value : null) : null;
+
+      if (!category) {
+        if (typeof window.showToast === 'function') window.showToast('Harap pilih kategori keperluan!', 'warning');
+        if (selectReqCategory) selectReqCategory.focus();
+        return;
+      }
+      if (!type) {
+        if (typeof window.showToast === 'function') window.showToast('Harap pilih tipe kepulangan!', 'warning');
+        if (selectReqType) selectReqType.focus();
+        return;
+      }
+      if (!destination || !reason) {
+        if (typeof window.showToast === 'function') window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'warning');
+        return;
+      }
+      if (!plannedExit) {
+        if (typeof window.showToast === 'function') window.showToast('Harap isi rencana waktu keluar!', 'warning');
+        if (inputPlannedExit) inputPlannedExit.focus();
+        return;
+      }
+      if (type === 'Kembali ke Area' && !estimatedReturn) {
+        if (typeof window.showToast === 'function') window.showToast('Harap isi perkiraan waktu kembali!', 'warning');
+        if (inputEstimatedReturn) inputEstimatedReturn.focus();
+        return;
+      }
 
       // Validasi proteksi tanggal masa lampau (hari/tanggal sebelumnya tidak dapat dipilih)
       const now = new Date();
@@ -2049,9 +2148,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSubmitEmergency) {
     btnSubmitEmergency.addEventListener('click', () => {
+      // Validasi Batas Maksimal Pengajuan Darurat (Sebelum Jam Pulang Kantor)
+      const workHoursCheck = isWithinOperationalHours(new Date());
+      if (!workHoursCheck.allowed) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Pengajuan izin darurat hanya dapat dilakukan sebelum jam pulang kantor (${workHoursCheck.scheduleText})!`, 'danger');
+        }
+        return;
+      }
+
       const emergApprover = document.getElementById('emergApprover');
-      const optEmergCatDinas = document.getElementById('optEmergCatDinas');
-      const optEmergTypeKembali = document.getElementById('optEmergTypeKembali');
+      const selectEmergCategory = document.getElementById('selectEmergCategory');
+      const selectEmergType = document.getElementById('selectEmergType');
       const emergDest = document.getElementById('emergDest');
       const emergReason = document.getElementById('emergReason');
       const emergPlannedExit = document.getElementById('emergPlannedExit');
@@ -2059,13 +2167,34 @@ document.addEventListener('DOMContentLoaded', () => {
       const checkedMethodInput = document.querySelector('input[name="emergMethod"]:checked');
       const selectedMethod = checkedMethodInput ? checkedMethodInput.value : 'app';
 
-      const approverVal = emergApprover ? emergApprover.value : 'Ir. Hendra Gunawan, M.T.';
-      const isDinas = optEmergCatDinas ? optEmergCatDinas.classList.contains('selected') : true;
-      const categoryVal = isDinas ? 'Dinas Kantor' : 'Urusan Pribadi';
+      const approverVal = emergApprover ? emergApprover.value.trim() : '';
+      const categoryVal = selectEmergCategory ? selectEmergCategory.value : '';
+      const typeVal = selectEmergType ? selectEmergType.value : '';
 
-      const isKembali = optEmergTypeKembali ? optEmergTypeKembali.classList.contains('selected') : true;
-      const typeVal = isKembali ? 'Kembali ke Area' : 'Pulang Mendahului';
+      if (!approverVal) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap cari dan pilih nama atasan peninjau darurat!', 'danger');
+        }
+        return;
+      }
 
+      if (!categoryVal) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap pilih kategori keperluan darurat!', 'danger');
+        }
+        if (selectEmergCategory) selectEmergCategory.focus();
+        return;
+      }
+
+      if (!typeVal) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap pilih tipe kepulangan darurat!', 'danger');
+        }
+        if (selectEmergType) selectEmergType.focus();
+        return;
+      }
+
+      const isKembali = typeVal === 'Kembali ke Area';
       const dest = emergDest ? emergDest.value.trim() : '';
       const reason = emergReason ? emergReason.value.trim() : '';
       const plannedExitVal = emergPlannedExit ? emergPlannedExit.value : '';
@@ -2296,6 +2425,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const newReturnDate = new Date(newReturnVal);
       const now = new Date();
+
+      // 1. Validasi Jam Operasional Kantor (Hanya bisa diajukan sebelum jam pulang)
+      const workHoursCheck = isWithinOperationalHours(now);
+      if (!workHoursCheck.allowed) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`, 'danger');
+        }
+        return;
+      }
+
+      // 2. Validasi Tanggal: Hanya boleh HARI INI (tidak bisa hari sebelumnya atau besok)
+      const returnDay = newReturnDate.getDate();
+      const returnMonth = newReturnDate.getMonth();
+      const returnYear = newReturnDate.getFullYear();
+      if (returnDay !== now.getDate() || returnMonth !== now.getMonth() || returnYear !== now.getFullYear()) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Perpanjangan waktu hanya dapat diajukan untuk hari ini (tidak dapat memilih hari kemarin atau besok)!', 'danger');
+        }
+        return;
+      }
+
+      // 3. Validasi Jam Kembali: Tidak boleh melewati batas jam pulang kantor hari ini
+      const dayOfWeek = now.getDay();
+      const returnHours = newReturnDate.getHours();
+      const returnMins = newReturnDate.getMinutes();
+      const returnTotalMins = returnHours * 60 + returnMins;
+      const maxAllowedMins = (dayOfWeek === 5) ? (16 * 60 + 30) : (16 * 60);
+      const closingStr = (dayOfWeek === 5) ? '16:30 WIB' : '16:00 WIB';
+
+      if (returnTotalMins > maxAllowedMins) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
+        }
+        return;
+      }
+
       if (isNaN(newReturnDate.getTime()) || newReturnDate.getTime() <= now.getTime()) {
         if (typeof window.showToast === 'function') window.showToast('Perkiraan waktu kembali baru harus lebih lambat dari waktu saat ini!', 'danger');
         return;
@@ -2350,6 +2515,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // MODAL DETAIL AJUKAN PERPANJANGAN & PEMBATALAN
+  const modalPendingExtensionDetail = document.getElementById('modalPendingExtensionDetail');
+  const btnClosePendingExtModal = document.getElementById('btnClosePendingExtModal');
+  const btnDismissPendingExtModal = document.getElementById('btnDismissPendingExtModal');
+  const btnCancelExtensionAction = document.getElementById('btnCancelExtensionAction');
+
+  if (btnClosePendingExtModal) {
+    btnClosePendingExtModal.addEventListener('click', closePendingExtensionDetailModal);
+  }
+  if (btnDismissPendingExtModal) {
+    btnDismissPendingExtModal.addEventListener('click', closePendingExtensionDetailModal);
+  }
+  if (btnCancelExtensionAction) {
+    btnCancelExtensionAction.addEventListener('click', executeCancelPendingExtension);
+  }
 });
 
 // TIME EXTENSION MODAL TRIGGER FUNCTION
@@ -2371,6 +2552,22 @@ function openExtendDurationModal(ticketId) {
     };
   }
 
+  // Jika sudah mengajukan perpanjangan dan masih menunggu persetujuan, langsung arahkan ke modal detail perpanjangan
+  if (ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan') {
+    openPendingExtensionDetailModal(ticket.id);
+    return;
+  }
+
+  // Cek jam operasional saat ini
+  const now = new Date();
+  const workHoursCheck = isWithinOperationalHours(now);
+  if (!workHoursCheck.allowed) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`, 'danger');
+    }
+    return;
+  }
+
   window.currentExtendTicketId = ticket.id;
   const extendTicketId = document.getElementById('extendTicketId');
   const extendTicketDest = document.getElementById('extendTicketDest');
@@ -2387,27 +2584,126 @@ function openExtendDurationModal(ticketId) {
       : '14.00 WIB';
   }
 
-  // Pre-fill inputExtendNewReturn with default value (+1 hour from current estimatedReturn or +30m from now)
-  const now = new Date();
+  // Kunci batas waktu: HANYA HARI INI dan MAKSIMAL SEBELUM JAM PULANG
   const pad = (n) => String(n).padStart(2, '0');
-  let baseDate = ticket.estimatedReturn ? new Date(ticket.estimatedReturn) : new Date();
-  if (isNaN(baseDate.getTime()) || baseDate.getTime() <= now.getTime()) {
-    baseDate = new Date(now.getTime() + 60 * 60000); // 1 jam dari sekarang
-  } else {
-    baseDate = new Date(baseDate.getTime() + 60 * 60000); // 1 jam dari jadwal semula
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const dayOfWeek = now.getDay();
+  const closingHourStr = (dayOfWeek === 5) ? '16:30' : '16:00';
+  const minVal = `${todayStr}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const maxVal = `${todayStr}T${closingHourStr}`;
+
+  // Usulkan default return (+30 menit dari sekarang, dibatasi max jam closing)
+  let proposedMinutes = now.getTime() + 30 * 60000;
+  let proposedDate = new Date(proposedMinutes);
+  let defaultVal = `${todayStr}T${pad(proposedDate.getHours())}:${pad(proposedDate.getMinutes())}`;
+  if (defaultVal > maxVal) {
+    defaultVal = maxVal;
   }
-  const defaultVal = `${baseDate.getFullYear()}-${pad(baseDate.getMonth() + 1)}-${pad(baseDate.getDate())}T${pad(baseDate.getHours())}:${pad(baseDate.getMinutes())}`;
-  const minVal = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
   if (inputExtendNewReturn) {
-    inputExtendNewReturn.value = defaultVal;
     inputExtendNewReturn.min = minVal;
+    inputExtendNewReturn.max = maxVal;
+    inputExtendNewReturn.value = defaultVal;
   }
   if (inputExtendReason) {
     inputExtendReason.value = '';
   }
 
   if (modalExtendDuration) modalExtendDuration.classList.add('open');
+}
+
+// MODAL DETAIL AJUKAN PERPANJANGAN & PEMBATALAN
+function openPendingExtensionDetailModal(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  let ticket = ticketId ? ticketsList.find(t => t.id === ticketId) : null;
+  if (!ticket && typeof window.getActiveTicket === 'function') {
+    ticket = window.getActiveTicket();
+  }
+  if (!ticket || !ticket.pendingExtension) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada pengajuan perpanjangan yang sedang menunggu persetujuan.', 'warning');
+    }
+    return;
+  }
+
+  window.currentPendingExtTicketId = ticket.id;
+  const ext = ticket.pendingExtension;
+
+  const modal = document.getElementById('modalPendingExtensionDetail');
+  const pendingExtTicketId = document.getElementById('pendingExtTicketId');
+  const pendingExtOriginalReturn = document.getElementById('pendingExtOriginalReturn');
+  const pendingExtProposedReturn = document.getElementById('pendingExtProposedReturn');
+  const pendingExtReason = document.getElementById('pendingExtReason');
+  const pendingExtRequestedAt = document.getElementById('pendingExtRequestedAt');
+  const pendingExtStatusBadge = document.getElementById('pendingExtStatusBadge');
+
+  if (pendingExtTicketId) pendingExtTicketId.textContent = ticket.id;
+  if (pendingExtOriginalReturn) {
+    pendingExtOriginalReturn.textContent = ext.oldEstimatedReturn 
+      ? (window.formatDisplayDate ? window.formatDisplayDate(ext.oldEstimatedReturn) : ext.oldEstimatedReturn)
+      : (ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : '-');
+  }
+  if (pendingExtProposedReturn) {
+    pendingExtProposedReturn.textContent = ext.newEstimatedReturn 
+      ? (window.formatDisplayDate ? window.formatDisplayDate(ext.newEstimatedReturn) : ext.newEstimatedReturn)
+      : '-';
+  }
+  if (pendingExtReason) pendingExtReason.textContent = ext.reason || '-';
+  if (pendingExtRequestedAt) pendingExtRequestedAt.textContent = ext.requestedAt || '-';
+  if (pendingExtStatusBadge) {
+    pendingExtStatusBadge.textContent = ext.status || 'Menunggu Persetujuan';
+  }
+
+  if (modal) modal.classList.add('open');
+}
+
+function closePendingExtensionDetailModal() {
+  const modal = document.getElementById('modalPendingExtensionDetail');
+  if (modal) modal.classList.remove('open');
+}
+
+function executeCancelPendingExtension() {
+  const ticketsList = window.ticketsList || [];
+  const ticketId = window.currentPendingExtTicketId;
+  const ticket = ticketsList.find(t => t.id === ticketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
+
+  if (!ticket || !ticket.pendingExtension) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Pengajuan perpanjangan tidak ditemukan atau sudah diproses.', 'warning');
+    }
+    closePendingExtensionDetailModal();
+    return;
+  }
+
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+  if (!ticket.timeline) ticket.timeline = [];
+  ticket.timeline.push({
+    event: 'Pembatalan Pengajuan Perpanjangan',
+    time: nowFormatted,
+    by: `${ticket.applicantName || 'Budi Pratama'} (Karyawan)`,
+    desc: `Karyawan membatalkan pengajuan perpanjangan waktu kembali (semula diajukan hingga ${window.formatDisplayDate ? window.formatDisplayDate(ticket.pendingExtension.newEstimatedReturn) : ticket.pendingExtension.newEstimatedReturn}).`
+  });
+
+  // Hapus permohonan perpanjangan yang tertunda
+  delete ticket.pendingExtension;
+
+  window.saveTickets(ticketsList);
+  closePendingExtensionDetailModal();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Pengajuan perpanjangan izin #${ticket.id} berhasil dibatalkan.`, 'info');
+  }
+
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    window.openTicketDetail(ticket.id, 'detail');
+  }
 }
 
 // Expose globally
@@ -2421,4 +2717,7 @@ window.openTicketDetail = openTicketDetail;
 window.openCancelModal = openCancelModal;
 window.handleOpenEmergency = handleOpenEmergency;
 window.openExtendDurationModal = openExtendDurationModal;
+window.openPendingExtensionDetailModal = openPendingExtensionDetailModal;
+window.closePendingExtensionDetailModal = closePendingExtensionDetailModal;
+window.executeCancelPendingExtension = executeCancelPendingExtension;
 window.openEditTicketModal = openEditTicketModal;
