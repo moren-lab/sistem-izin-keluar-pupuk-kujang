@@ -42,7 +42,11 @@ function updateKaryawanMetrics() {
   if (statEmpActiveCount) statEmpActiveCount.textContent = activeCount;
   if (statEmpActiveSub) {
     if (activeCount > 0) {
-      statEmpActiveSub.textContent = activeTicket.status === 'Sedang di Luar' ? 'Sedang di luar area' : activeTicket.status;
+      if (activeTicket.status === 'Terlambat') {
+        statEmpActiveSub.innerHTML = '<span style="color:#b91c1c; font-weight:800;">⚠️ Terlambat Kembali</span>';
+      } else {
+        statEmpActiveSub.textContent = activeTicket.status === 'Sedang di Luar' ? 'Sedang di luar area' : activeTicket.status;
+      }
     } else {
       statEmpActiveSub.textContent = 'Tidak ada izin aktif';
     }
@@ -344,8 +348,12 @@ function renderKaryawanDashboard() {
         statusPill = `<span class="status-pill-green">• Disetujui</span>`;
         statusText = `Status: Izin Disetujui - ${activeTicket.id}`;
         statusSub = `${activeTicket.category} • QR Siap Digunakan di Pos 1 • Jadwal Keluar ${activeTicket.plannedExit ? activeTicket.plannedExit.slice(11, 16) + ' WIB' : ''}`;
-      } else if (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat') {
-        statusPill = `<span class="status-pill-purple">• ${activeTicket.status}</span>`;
+      } else if (activeTicket.status === 'Terlambat') {
+        statusPill = `<span class="status-pill-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:800; padding:2px 8px; border-radius:999px;">⚠️ Terlambat</span>`;
+        statusText = `Status: Terlambat Kembali - ${activeTicket.id}`;
+        statusSub = `${activeTicket.category} • Batas waktu ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : ''} TELAH TERLEWAT! Segera Scan In di Pos 1.`;
+      } else if (activeTicket.status === 'Sedang di Luar') {
+        statusPill = `<span class="status-pill-purple">• Sedang di Luar</span>`;
         statusText = `Status: Izin Aktif - ${activeTicket.id}`;
         statusSub = `${activeTicket.category} • Scan Out ${activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : '10.05 WIB'} • Batas kembali ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '13.00 WIB'}`;
       }
@@ -397,7 +405,13 @@ function renderKaryawanDashboard() {
       const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
       const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
-      const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
+      const col2Val = activeTicket.type === 'Pulang Mendahului' 
+        ? 'Pulang Mendahului' 
+        : (activeTicket.estimatedReturn 
+            ? (activeTicket.status === 'Terlambat' 
+                ? `<span style="color:#dc2626; font-weight:800;">${window.formatDisplayDate(activeTicket.estimatedReturn)} (Terlewat)</span>` 
+                : window.formatDisplayDate(activeTicket.estimatedReturn)) 
+            : '-');
 
       let actionButtonsHtml = '';
       if (isEmergLocked) {
@@ -504,6 +518,18 @@ function renderKaryawanDashboard() {
             </div>
             <div style="color: #881337; margin-top: 0.3rem; line-height: 1.45;">
               Sesuai SOP K3, QR Code terkunci sampai diotorisasi. Hubungi Atasan untuk meminta <strong>Kode Sandi OTP</strong> atau gunakan <strong>Scan Wajah</strong> langsung.
+            </div>
+          </div>
+        ` : ''}
+
+        ${activeTicket.status === 'Terlambat' ? `
+          <div style="background: #fef2f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; margin-top: 0.85rem; font-size: 0.775rem;">
+            <div style="font-weight: 800; color: #991b1b; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span>⚠️ PERINGATAN KETERLAMBATAN</span>
+              <span class="tag-badge" style="background: #fee2e2; color: #b91c1c; font-weight: 800; border: 1px solid #fca5a5;">Status: Terlambat</span>
+            </div>
+            <div style="color: #7f1d1d; margin-top: 0.3rem; line-height: 1.45;">
+              Waktu perkiraan kembali telah terlampaui. Segera lakukan <strong>Scan In di Pos 1 Gerbang Utama</strong> atau ajukan <strong>Perpanjangan Waktu</strong> jika masih memerlukan durasi dinas tambahan.
             </div>
           </div>
         ` : ''}
@@ -983,12 +1009,20 @@ function renderEmpCards(list, containerElement) {
           </div>
         `;
 
-    if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || t.status === 'Terlambat') {
+    if (t.status === 'Terlambat') {
+      topBorderColor = '#dc2626'; // red
+      statusPillHtml = `<span class="status-pill-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px;">• Terlambat</span>`;
+      calloutBoxHtml = `
+            <div style="background: #fef2f2; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #991b1b; font-weight: 600;">
+              ⚠️ Melewati batas estimasi kembali • Belum Scan In di Pos 1
+            </div>
+          `;
+    } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
       topBorderColor = '#d97706'; // amber
       statusPillHtml = `<span class="status-pill-amber">• Selesai • Terlambat ${t.lateMinutes || 10} mnt</span>`;
       calloutBoxHtml = `
             <div style="background: #fffbeb; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #b45309; font-weight: 600;">
-              Kembali ${t.actualReturnTime || '12.10 WIB'} • +${t.lateMinutes || 10} menit dari estimasi
+              Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} • +${t.lateMinutes || 10} menit dari estimasi
             </div>
           `;
     } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
@@ -1061,7 +1095,7 @@ function renderEmpCards(list, containerElement) {
             <!-- Action Buttons -->
             <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.5rem;">
               <div style="display: flex; gap: 0.5rem; align-items: center;">
-                ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
+                ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui' || t.status === 'Terlambat') ? `
                   <button class="btn-figma-primary" style="padding: 0.45rem 1rem; font-size: 0.775rem;" onclick="openTicketDetail('${t.id}', 'qr')">
                     Buka QR Izin
                   </button>
@@ -1106,9 +1140,12 @@ function renderEmpTable(list, containerElement) {
     let catatanHtml = `<span style="color: #475569;">Tepat waktu • Disetujui Hendra Gunawan</span>`;
     let tindakanHtml = `<a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Rincian</a>`;
 
-    if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || t.status === 'Terlambat') {
+    if (t.status === 'Terlambat') {
+      statusPillHtml = `<span class="status-pill-red" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px;">• Terlambat</span>`;
+      catatanHtml = `<span style="color: #b91c1c; font-weight:700;">⚠️ Melewati estimasi kembali • Belum Scan In</span>`;
+    } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
       statusPillHtml = `<span class="status-pill-amber">• Selesai • Terlambat ${t.lateMinutes || 10} mnt</span>`;
-      catatanHtml = `<span style="color: #b45309;">Kembali ${t.actualReturnTime || '12.10 WIB'} • +${t.lateMinutes || 10} menit</span>`;
+      catatanHtml = `<span style="color: #b45309;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} • +${t.lateMinutes || 10} menit</span>`;
     } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
       statusPillHtml = `<span class="status-pill-red">• Ditolak</span>`;
       catatanHtml = `<span style="color: #b91c1c;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
@@ -1165,6 +1202,9 @@ function renderEmpTable(list, containerElement) {
  * Main Karyawan View Router
  */
 function renderKaryawanView() {
+  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+    window.checkOverdueAndExpiredTickets(true);
+  }
   updateKaryawanMetrics();
   const currentKaryawanNav = window.currentKaryawanNav || 'dashboard';
 

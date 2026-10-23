@@ -3,7 +3,18 @@
  * UI Utilities, Status Pills, Sound Effects, and Notifications
  */
 
-function getStatusPill(status) {
+function getStatusPill(status, ticket) {
+  if (typeof status === 'object' && status !== null) {
+    ticket = status;
+    status = ticket.status;
+  }
+
+  const isLateCompleted = (status === 'Selesai') && ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
+  if (isLateCompleted) {
+    const lateMnt = ticket.lateMinutes ? ` ${ticket.lateMinutes} mnt` : '';
+    return `<span class="status-pill overdue" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px;">• Selesai (Terlambat${lateMnt})</span>`;
+  }
+
   let cls = 'pending';
   switch (status) {
     case 'Disetujui': cls = 'approved'; break;

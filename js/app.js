@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof window.setAdminNav === 'function') window.setAdminNav('dashboard');
   if (typeof window.switchRole === 'function') window.switchRole('karyawan');
 
-  // Background Scheduler: periksa status Terlambat & Kedaluwarsa secara berkala setiap 30 detik
+  // Background Scheduler: periksa status Terlambat & Kedaluwarsa secara berkala setiap 2 detik (real-time responsiveness)
   setInterval(() => {
     if (typeof window.checkOverdueAndExpiredTickets === 'function') {
       window.checkOverdueAndExpiredTickets(false);
@@ -132,5 +132,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.updateAdminMetrics === 'function') {
       window.updateAdminMetrics();
     }
-  }, 30000);
+  }, 2000);
+
+  // Periksa langsung ketika user kembali ke tab browser / membuka kunci layar laptop
+  window.addEventListener('focus', () => {
+    if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+      window.checkOverdueAndExpiredTickets(false);
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && typeof window.checkOverdueAndExpiredTickets === 'function') {
+      window.checkOverdueAndExpiredTickets(false);
+    }
+  });
 });

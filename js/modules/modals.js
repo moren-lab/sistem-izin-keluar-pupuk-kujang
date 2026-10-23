@@ -1037,6 +1037,10 @@ function switchDetailTab(tab) {
 
 // OPEN DIGITAL PASS QR MODAL (FIGMA SCREEN 4)
 function openDigitalPassModal(ticketId) {
+  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+    window.checkOverdueAndExpiredTickets(true);
+  }
+
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
   if (!ticket) return;
@@ -1052,7 +1056,11 @@ function openDigitalPassModal(ticketId) {
   const digitalPassStatusBadge = document.getElementById('digitalPassStatusBadge');
   if (digitalPassStatusBadge) {
     digitalPassStatusBadge.textContent = `• ${ticket.status}`;
-    digitalPassStatusBadge.className = ticket.status === 'Sedang di Luar' ? 'status-pill-purple' : (ticket.status === 'Disetujui' ? 'status-pill-blue' : 'status-pill-green');
+    digitalPassStatusBadge.className = ticket.status === 'Terlambat'
+      ? 'status-pill-red'
+      : (ticket.status === 'Sedang di Luar'
+          ? 'status-pill-purple'
+          : (ticket.status === 'Disetujui' ? 'status-pill-blue' : 'status-pill-green'));
   }
 
   const digitalPassTicketId = document.getElementById('digitalPassTicketId');
@@ -1069,8 +1077,12 @@ function openDigitalPassModal(ticketId) {
 
   const digitalPassNoticeText = document.getElementById('digitalPassNoticeText');
   if (digitalPassNoticeText) {
-    const timeReturn = ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) + ' WIB' : '13.00 WIB';
-    digitalPassNoticeText.textContent = `Jangan bagikan QR. Batas kembali ${timeReturn}; QR dinonaktifkan setelah Scan In.`;
+    if (ticket.status === 'Terlambat') {
+      digitalPassNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ TERLAMBAT: Melewati batas estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Scan In.</span>`;
+    } else {
+      const timeReturn = ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) + ' WIB' : '13.00 WIB';
+      digitalPassNoticeText.textContent = `Jangan bagikan QR. Batas kembali ${timeReturn}; QR dinonaktifkan setelah Scan In.`;
+    }
   }
 
   // QR Code Generation
@@ -1124,6 +1136,10 @@ window.openDigitalPassModal = openDigitalPassModal;
 
 // OPEN TICKET DETAIL & AUDIT TRAIL MODAL (FIGMA SCREEN 2 & 3)
 function openTicketDetail(ticketId, defaultTab = 'info') {
+  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+    window.checkOverdueAndExpiredTickets(true);
+  }
+
   if (defaultTab === 'qr') {
     openDigitalPassModal(ticketId);
     return;
@@ -1170,7 +1186,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
         </button>
       `;
     } else {
-      detailStatusPillTop.innerHTML = window.getStatusPill(ticket.status);
+      detailStatusPillTop.innerHTML = window.getStatusPill(ticket.status, ticket);
     }
   }
 
@@ -1218,7 +1234,8 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoTableActualExit = document.getElementById('infoTableActualExit');
   if (infoTableActualExit) {
-    infoTableActualExit.textContent = ticket.scanOutTime ? `${ticket.scanOutTime} WIB` : (ticket.status === 'Selesai' ? '09.03 WIB' : '-');
+    const scanOutStr = ticket.scanOutTime ? (ticket.scanOutTime.includes('WIB') ? ticket.scanOutTime : `${ticket.scanOutTime} WIB`) : '';
+    infoTableActualExit.textContent = scanOutStr || (ticket.status === 'Selesai' ? '09.03 WIB' : '-');
   }
 
   const infoTablePlanReturn = document.getElementById('infoTablePlanReturn');
@@ -1228,7 +1245,15 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoTableActualReturn = document.getElementById('infoTableActualReturn');
   if (infoTableActualReturn) {
-    infoTableActualReturn.textContent = ticket.scanInTime ? `${ticket.scanInTime} WIB • Tepat Waktu` : (ticket.status === 'Selesai' ? '10.52 WIB • Tepat Waktu' : '-');
+    const isLateTicket = ticket.isLate || ticket.status === 'Terlambat' || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]'));
+    const scanInStr = ticket.scanInTime 
+      ? (ticket.scanInTime.includes('WIB') ? ticket.scanInTime : `${ticket.scanInTime} WIB`)
+      : '';
+    infoTableActualReturn.textContent = scanInStr 
+      ? `${scanInStr} • ${isLateTicket ? `Terlambat${ticket.lateMinutes ? ` (+${ticket.lateMinutes} mnt)` : ''}` : 'Tepat Waktu'}` 
+      : (ticket.status === 'Selesai' 
+          ? (ticket.isLate ? '10.52 WIB • Terlambat' : '10.52 WIB • Tepat Waktu') 
+          : (ticket.status === 'Terlambat' ? '⚠️ Belum Scan In (Terlambat)' : '-'));
   }
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
@@ -1261,6 +1286,8 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
       infoNoticeText.innerHTML = `Pengajuan ini dialihkan oleh pemohon ke <strong>${ticket.approverName}</strong> pada ${ticket.reassignedAt || 'hari ini'} dan menunggu keputusan persetujuan.`;
     } else if (ticket.status === 'Selesai') {
       infoNoticeText.textContent = `Perjalanan selesai pukul ${ticket.scanInTime || '10.52'} WIB. QR tiket ini tidak berlaku lagi.`;
+    } else if (ticket.status === 'Terlambat') {
+      infoNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ PERINGATAN: Karyawan telah melewati batas waktu estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Scan In.</span>`;
     } else if (ticket.status === 'Sedang di Luar') {
       infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Scan In sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) : '13.00'} WIB.`;
     } else if (ticket.status === 'Disetujui') {

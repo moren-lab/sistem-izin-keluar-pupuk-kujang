@@ -192,17 +192,24 @@ function renderSecurityCards(list, containerElement) {
         const isReadyExit = t.status === 'Disetujui';
         const isOutside = t.status === 'Sedang di Luar';
         const isOverdue = t.status === 'Terlambat';
+        const isLateCompleted = (t.status === 'Selesai') && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0));
         const isExpired = t.status === 'Kedaluwarsa';
         const isDinas = t.category === 'Dinas Kantor';
 
+        const borderColor = isReadyExit ? 'var(--corp-teal)' 
+                          : (isOverdue ? 'var(--rose-danger)' 
+                          : (isLateCompleted ? '#d97706' 
+                          : (isOutside ? '#0891b2' 
+                          : (isExpired ? '#94a3b8' : ''))));
+
         return `
-          <div class="card-item" style="${isReadyExit ? 'border-left: 4px solid var(--corp-teal);' : (isOverdue ? 'border-left: 4px solid var(--rose-danger);' : (isOutside ? 'border-left: 4px solid #0891b2;' : (isExpired ? 'border-left: 4px solid #94a3b8;' : '')))}">
+          <div class="card-item" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''}">
             <div class="card-top">
               <div>
                 <span class="card-id-num">${t.id}</span>
                 <div class="card-created-meta">Diajukan: ${t.createdAt}</div>
               </div>
-              ${window.getStatusPill(t.status)}
+              ${window.getStatusPill(t.status, t)}
             </div>
 
             <!-- Employee badge in gate view -->
@@ -236,6 +243,12 @@ function renderSecurityCards(list, containerElement) {
               </div>
             ` : ''}
 
+            ${isLateCompleted ? `
+              <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b45309; font-weight:700;">
+                ⚠️ Karyawan kembali melewati estimasi waktu (+${t.lateMinutes || 10} menit terlambat).
+              </div>
+            ` : ''}
+
             ${isExpired ? `
               <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#475569;">
                 ⏱️ Tiket telah kedaluwarsa & hangus (+10 menit dari rencana keluar). Dilarang diproses keluar.
@@ -243,7 +256,7 @@ function renderSecurityCards(list, containerElement) {
             ` : ''}
 
             ${t.scanOutTime ? `<div style="font-size:0.75rem; color:#065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-            ${t.scanInTime ? `<div style="font-size:0.75rem; color:#0e7490;"><strong>Scan In:</strong> ${t.scanInTime}</div>` : ''}
+            ${t.scanInTime ? `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Scan In:</strong> ${t.scanInTime}</div>` : ''}
 
             <!-- Quick Action Buttons for Satpam -->
             <div class="card-actions-bar">
@@ -285,6 +298,9 @@ function renderSecurityCards(list, containerElement) {
 }
 
 function renderSecurityView() {
+  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+    window.checkOverdueAndExpiredTickets(true);
+  }
   updateSecurityMetrics();
   const currentSecurityNav = window.currentSecurityNav || 'dashboard';
   const ticketsList = window.ticketsList || [];
@@ -398,7 +414,16 @@ function filterSecurityLogTickets() {
     if (category !== 'all' && t.category !== category) return false;
 
     // Filter Status
-    if (status !== 'all' && t.status !== status) return false;
+    if (status !== 'all') {
+      if (status === 'Terlambat') {
+        const isLate = t.status === 'Terlambat' || t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]'));
+        if (!isLate) return false;
+      } else if (status === 'Selesai') {
+        if (t.status !== 'Selesai') return false;
+      } else if (t.status !== status) {
+        return false;
+      }
+    }
 
     // Search query
     if (query) {
@@ -448,7 +473,7 @@ function renderSecurityLogTable(list, containerElement) {
               </td>
               <td style="font-family:var(--font-mono); font-size:0.775rem;">${t.scanOutTime || '-'}</td>
               <td style="font-family:var(--font-mono); font-size:0.775rem;">${t.scanInTime || '-'}</td>
-              <td>${window.getStatusPill(t.status)}</td>
+              <td>${window.getStatusPill(t.status, t)}</td>
               <td style="text-align: right; white-space: nowrap;">
                 <div style="display: inline-flex; align-items: center; gap: 0.35rem; justify-content: flex-end;">
                   <button class="btn-card-detail" style="padding:0.35rem 0.65rem; font-size:0.725rem;" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')">
@@ -653,14 +678,24 @@ function executeScanIn(ticketId) {
   const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';
   let isCoveredByExtension = false;
   if (hasPendingExt && ticket.pendingExtension.newEstimatedReturn) {
-    const extTime = new Date(ticket.pendingExtension.newEstimatedReturn);
-    if (!isNaN(extTime.getTime()) && now.getTime() <= extTime.getTime()) {
+    const extTime = typeof window.parseTicketDateTime === 'function' ? window.parseTicketDateTime(ticket.pendingExtension.newEstimatedReturn) : new Date(ticket.pendingExtension.newEstimatedReturn);
+    if (extTime && !isNaN(extTime.getTime()) && now.getTime() <= extTime.getTime()) {
       isCoveredByExtension = true;
     }
   }
 
-  const wasOverdue = ticket.status === 'Terlambat' && !isCoveredByExtension;
+  const returnTime = typeof window.parseTicketDateTime === 'function' ? window.parseTicketDateTime(ticket.estimatedReturn) : new Date(ticket.estimatedReturn);
+  const isPastReturn = returnTime && !isNaN(returnTime.getTime()) && (now.getTime() > returnTime.getTime());
+  const wasOverdue = (ticket.status === 'Terlambat' || isPastReturn) && !isCoveredByExtension;
+  if (wasOverdue) {
+    ticket.isLate = true;
+    if (returnTime && !isNaN(returnTime.getTime())) {
+      ticket.lateMinutes = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
+    }
+  }
+
   ticket.scanInTime = `${nowFormatted} (${gate})${wasOverdue ? ' [Terlambat]' : ''}`;
+  ticket.actualReturnTime = `${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
   ticket.status = 'Selesai';
   if (!ticket.timeline) ticket.timeline = [];
   ticket.timeline.push({

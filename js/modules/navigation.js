@@ -264,6 +264,10 @@ function switchRole(role) {
     return false;
   }
 
+  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+    window.checkOverdueAndExpiredTickets(true);
+  }
+
   if (btnSwitchKaryawan) btnSwitchKaryawan.classList.remove('active');
   if (btnSwitchApprover) btnSwitchApprover.classList.remove('active', 'approver');
   if (btnSwitchApprover2) btnSwitchApprover2.classList.remove('active', 'approver');
