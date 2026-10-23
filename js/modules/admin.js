@@ -344,7 +344,21 @@ function renderAdminAudit() {
     });
   });
 
-  allLogs.reverse();
+  const sortAuditEl = document.getElementById('sortAdminAudit');
+  const sortAuditOrder = sortAuditEl ? sortAuditEl.value : 'desc';
+
+  const parseLogTime = (tStr) => {
+    if (!tStr) return 0;
+    const clean = tStr.replace(' WIB', '').trim();
+    const d = new Date(clean);
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+  };
+
+  allLogs.sort((a, b) => {
+    const tA = parseLogTime(a.time);
+    const tB = parseLogTime(b.time);
+    return sortAuditOrder === 'asc' ? tA - tB : tB - tA;
+  });
 
   // Filter
   const filtered = allLogs.filter(item => {
@@ -686,8 +700,10 @@ function openAdminUserModal(mode, kujangId) {
       if (inputDept) inputDept.value = 'Departemen Rekayasa & Pemeliharaan';
     }
     
-    const inputRole = document.getElementById('adminInputRoleKey');
-    if (inputRole) inputRole.value = 'karyawan';
+    // Set default role via searchable dropdown
+    if (typeof setAdminSelectedRole === 'function') {
+      setAdminSelectedRole('approver', 'Manajer');
+    }
     const inputStatus = document.getElementById('adminInputStatus');
     if (inputStatus) inputStatus.value = 'Aktif';
   } else {
@@ -715,16 +731,21 @@ function openAdminUserModal(mode, kujangId) {
         if (inputDept) inputDept.value = user.department;
       }
       
-      const inputRole = document.getElementById('adminInputRoleKey');
-      if (inputRole) inputRole.value = user.roleKey;
+      // Set user role via searchable dropdown
+      if (typeof setAdminSelectedRole === 'function') {
+        setAdminSelectedRole(user.roleKey, user.role);
+      }
       const inputStatus = document.getElementById('adminInputStatus');
       if (inputStatus) inputStatus.value = user.status || 'Aktif';
     }
   }
 
-  // Ensure dropdown is initialized and populated
+  // Ensure dropdowns are initialized and populated
   if (typeof initAdminDeptSearchableDropdown === 'function') {
     initAdminDeptSearchableDropdown();
+  }
+  if (typeof initAdminRoleSearchableDropdown === 'function') {
+    initAdminRoleSearchableDropdown();
   }
 
   modal.classList.add('open');
@@ -746,6 +767,7 @@ function saveAdminUserAccess(event) {
   const email = document.getElementById('adminInputEmail').value.trim() || `${nip.toLowerCase().replace(/[^a-z0-9]/g, '')}@pupuk-kujang.co.id`;
   const department = document.getElementById('adminInputDept').value;
   const roleKey = document.getElementById('adminInputRoleKey').value;
+  const roleTitleInput = document.getElementById('adminInputRoleTitle')?.value || '';
   const status = document.getElementById('adminInputStatus').value;
 
   if (!kujangId || !nip || !name) {
@@ -753,13 +775,38 @@ function saveAdminUserAccess(event) {
     return;
   }
 
-  let roleLabel = 'Karyawan';
+  let users = window.MOCK_USERS || [];
+
+  // ===================================================================
+  // REVISI LOGIKA PART 1: 1 JABATAN / ROLE HANYA BISA DIAKSES 1 ORANG
+  // Mencegah penimpaan akun pejabat aktif
+  // ===================================================================
+  if (status === 'Aktif') {
+    const roleDef = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey && r.isSingleSeat);
+    if (roleDef) {
+      const targetId = originalId || kujangId;
+      const existingOccupant = users.find(u => u.kujangId !== targetId && u.status === 'Aktif' && u.roleKey === roleKey);
+      if (existingOccupant) {
+        alert(
+          `⛔ GAGAL MEMBERIKAN HAK AKSES!\n\n` +
+          `Jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}] saat ini sedang aktif dipegang oleh:\n` +
+          `• Nama: ${existingOccupant.name}\n` +
+          `• NIP: ${existingOccupant.nip}\n` +
+          `• KUJANG ID: ${existingOccupant.kujangId}\n\n` +
+          `Sesuai tata kelola PT Pupuk Kujang, 1 jabatan manajerial/struktural hanya dapat diakses oleh 1 orang pejabat aktif.\n` +
+          `Sistem TIDAK MENGIZINKAN menimpa akun atasan aktif secara langsung.\n\n` +
+          `Silakan cabut (revoke) hak akses ${existingOccupant.name} terlebih dahulu melalui direktori akun jika Anda ingin mengalihkan jabatan ini kepada ${name}.`
+        );
+        return;
+      }
+    }
+  }
+
+  let roleLabel = roleTitleInput || 'Karyawan Pemohon';
   if (roleKey === 'approver') roleLabel = 'Atasan 1 (Manager)';
   else if (roleKey === 'approver2') roleLabel = 'Atasan 2 (Supervisor / Plt)';
   else if (roleKey === 'security') roleLabel = 'Petugas Pos Jaga (Satpam)';
   else if (roleKey === 'admin') roleLabel = 'Administrator Pengamanan & K3';
-
-  let users = window.MOCK_USERS || [];
 
   if (mode === 'add') {
     if (users.some(u => u.kujangId.toLowerCase() === kujangId.toLowerCase())) {
@@ -825,6 +872,29 @@ function toggleUserAccess(kujangId) {
   }
 
   const willRevoke = user.status === 'Aktif';
+
+  // REVISI LOGIKA PART 1: Jika hendak mengaktifkan kembali hak akses ("Beri Akses"),
+  // pastikan jabatan yang bersifat 1 orang (single-seat) tidak sedang dipegang pejabat lain
+  if (!willRevoke) {
+    const roleDef = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === user.roleKey && r.isSingleSeat);
+    if (roleDef) {
+      const existingOccupant = users.find(u => u.kujangId !== user.kujangId && u.status === 'Aktif' && u.roleKey === user.roleKey);
+      if (existingOccupant) {
+        alert(
+          `⛔ TIDAK DAPAT MENGAKTIFKAN HAK AKSES!\n\n` +
+          `Hak akses jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}] untuk ${user.name} tidak dapat diaktifkan karena saat ini sedang aktif dipegang oleh:\n` +
+          `• Nama: ${existingOccupant.name}\n` +
+          `• NIP: ${existingOccupant.nip}\n` +
+          `• KUJANG ID: ${existingOccupant.kujangId}\n\n` +
+          `Ketentuan Sistem: 1 jabatan manajerial/struktural hanya boleh diakses oleh 1 pejabat aktif.\n` +
+          `Sistem mencegah penimpaan akun atasan aktif secara otomatis.\n\n` +
+          `Harap cabut hak akses ${existingOccupant.name} terlebih dahulu jika ingin mengembalikan akses jabatan ini kepada ${user.name}.`
+        );
+        return;
+      }
+    }
+  }
+
   const actionText = willRevoke ? 'mencabut hak akses' : 'mengaktifkan kembali hak akses';
   if (!confirm(`Apakah Anda yakin ingin ${actionText} untuk akun ${user.name} (${user.kujangId})?`)) {
     return;
@@ -900,6 +970,14 @@ function renderAdminUsers() {
     return true;
   });
 
+  const sortUsersEl = document.getElementById('sortAdminUsers');
+  const sortUsersOrder = sortUsersEl ? sortUsersEl.value : 'desc';
+  filtered.sort((a, b) => {
+    const idA = a.kujangId || '';
+    const idB = b.kujangId || '';
+    return sortUsersOrder === 'asc' ? idA.localeCompare(idB) : idB.localeCompare(idA);
+  });
+
   if (countEl) countEl.textContent = `${filtered.length} Akun Terdaftar`;
 
   if (filtered.length === 0) {
@@ -951,7 +1029,7 @@ function renderAdminUsers() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               <span>Ubah</span>
             </button>
-            <button type="button" class="btn-action-sm ${isRevoked ? 'btn-admin-success' : 'btn-admin-warning'}" onclick="window.toggleUserAccess('${u.kujangId}')" title="${isRevoked ? 'Aktifkan Akses Pengguna' : 'Cabut Hak Akses Pengguna'}">
+            <button type="button" class="btn-action-sm ${isRevoked ? 'btn-admin-success' : 'btn-admin-warning'}" onclick="${isRevoked ? `window.openAdminUserModal('edit', '${u.kujangId}')` : `window.toggleUserAccess('${u.kujangId}')`}" title="${isRevoked ? 'Berikan Hak Akses Pengguna' : 'Cabut Hak Akses Pengguna'}">
               ${isRevoked
                 ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg><span>Beri Akses</span>`
                 : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Cabut Akses</span>`
@@ -1409,8 +1487,260 @@ function initAdminDeptSearchableDropdown() {
   });
 }
 
+// ===================================================================
+// ADMIN ROLE & JABATAN SEARCHABLE DROPDOWN (REVISI 2: 1 ROLE = 1 ORANG)
+// ===================================================================
+const AVAILABLE_ROLES_JABATAN = [
+  {
+    roleKey: 'approver',
+    hakAkses: 'Atasan (Approver)',
+    jabatan: 'Manajer',
+    fullTitle: 'Atasan 1 (Manager)',
+    isSingleSeat: true,
+    description: 'Persetujuan izin keluar area karyawan, delegasi, dan pemantauan bawahan.'
+  },
+  {
+    roleKey: 'approver2',
+    hakAkses: 'Atasan (Approver)',
+    jabatan: 'Supervisor / Plt',
+    fullTitle: 'Atasan 2 (Supervisor / Plt)',
+    isSingleSeat: true,
+    description: 'Persetujuan delegasi / supervisi operasional saat Manager berhalangan.'
+  },
+  {
+    roleKey: 'karyawan',
+    hakAkses: 'Karyawan',
+    jabatan: 'Staf Rekayasa & Pemeliharaan',
+    fullTitle: 'Karyawan Pemohon',
+    isSingleSeat: false,
+    description: 'Pengajuan izin dinas kantor atau pribadi serta izin darurat K3.'
+  },
+  {
+    roleKey: 'karyawan',
+    hakAkses: 'Karyawan',
+    jabatan: 'Staf Operasional Pabrik',
+    fullTitle: 'Karyawan Pemohon',
+    isSingleSeat: false,
+    description: 'Pengajuan izin operasional shift dan tugas luar area pabrik.'
+  },
+  {
+    roleKey: 'karyawan',
+    hakAkses: 'Karyawan',
+    jabatan: 'Staf Administrasi & K3',
+    fullTitle: 'Karyawan Pemohon',
+    isSingleSeat: false,
+    description: 'Pengajuan izin urusan personal dan operasional kantor pusat.'
+  },
+  {
+    roleKey: 'security',
+    hakAkses: 'Petugas Pos Jaga (Satpam)',
+    jabatan: 'Komandan Regu Pos Jaga',
+    fullTitle: 'Petugas Pos Jaga (Satpam)',
+    isSingleSeat: false,
+    description: 'Verifikasi barcode QR Scan Out dan Scan In di Pos 1 Gerbang Utama.'
+  },
+  {
+    roleKey: 'security',
+    hakAkses: 'Petugas Pos Jaga (Satpam)',
+    jabatan: 'Anggota Regu Pos Gerbang 1',
+    fullTitle: 'Petugas Pos Jaga (Satpam)',
+    isSingleSeat: false,
+    description: 'Pemeriksaan tiket fisik dan pemindaian di Pos Gerbang Utama.'
+  },
+  {
+    roleKey: 'admin',
+    hakAkses: 'Administrator Pengamanan & K3',
+    jabatan: 'Super Admin K3 & Keamanan',
+    fullTitle: 'Administrator Pengamanan & K3',
+    isSingleSeat: true,
+    description: 'Pengendalian hak akses KUJANG ID, investigasi audit trail, dan rekapitulasi data.'
+  }
+];
+
+function setAdminSelectedRole(roleKey, jabatanOrTitle) {
+  const hiddenRoleKey = document.getElementById('adminInputRoleKey');
+  const hiddenRoleTitle = document.getElementById('adminInputRoleTitle');
+  const searchInput = document.getElementById('adminInputRoleSearch');
+  const indicatorText = document.getElementById('adminRoleSelectedText');
+  const clearBtn = document.getElementById('btnAdminRoleClear');
+
+  let match = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey && (r.jabatan === jabatanOrTitle || r.fullTitle === jabatanOrTitle));
+  if (!match) {
+    match = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey) || AVAILABLE_ROLES_JABATAN[0];
+  }
+
+  const roleKeyVal = match.roleKey;
+  const roleTitleVal = match.fullTitle;
+  const displayText = `${match.hakAkses} • ${match.jabatan}`;
+
+  if (hiddenRoleKey) hiddenRoleKey.value = roleKeyVal;
+  if (hiddenRoleTitle) hiddenRoleTitle.value = roleTitleVal;
+  if (searchInput) searchInput.value = displayText;
+  if (indicatorText) indicatorText.textContent = displayText;
+  if (clearBtn) clearBtn.style.display = displayText ? 'flex' : 'none';
+
+  renderAdminRoleDropdownItems(searchInput ? searchInput.value : '');
+}
+
+function renderAdminRoleDropdownItems(query = '') {
+  const menu = document.getElementById('adminRoleDropdownMenu');
+  if (!menu) return;
+
+  const currentRoleKey = document.getElementById('adminInputRoleKey')?.value || 'karyawan';
+  const currentKujangId = document.getElementById('adminInputKujangId')?.value || '';
+  const users = window.MOCK_USERS || [];
+  const q = (query || '').toLowerCase().trim();
+
+  const filtered = q
+    ? AVAILABLE_ROLES_JABATAN.filter(r => 
+        r.hakAkses.toLowerCase().includes(q) ||
+        r.jabatan.toLowerCase().includes(q) ||
+        r.fullTitle.toLowerCase().includes(q) ||
+        r.description.toLowerCase().includes(q)
+      )
+    : AVAILABLE_ROLES_JABATAN;
+
+  if (filtered.length === 0) {
+    menu.innerHTML = `
+      <div class="searchable-dropdown-empty">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6;">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+        <span>Hak akses atau jabatan tidak ditemukan</span>
+      </div>
+    `;
+    return;
+  }
+
+  menu.innerHTML = filtered.map(item => {
+    let occupant = null;
+    let isOccupiedByOther = false;
+    if (item.isSingleSeat) {
+      occupant = users.find(u => u.roleKey === item.roleKey && u.status === 'Aktif');
+      if (occupant && occupant.kujangId !== currentKujangId) {
+        isOccupiedByOther = true;
+      }
+    }
+
+    const isSelected = item.roleKey === currentRoleKey;
+
+    let badgeHtml = '';
+    if (item.isSingleSeat) {
+      if (isOccupiedByOther) {
+        badgeHtml = `<span style="font-size: 0.7rem; font-weight: 700; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 2px 7px; border-radius: 999px;">● Sedang Aktif: ${occupant.name}</span>`;
+      } else {
+        badgeHtml = `<span style="font-size: 0.7rem; font-weight: 700; color: #166534; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 999px;">✓ Tersedia</span>`;
+      }
+    } else {
+      badgeHtml = `<span style="font-size: 0.7rem; font-weight: 700; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 2px 7px; border-radius: 999px;">Multi-User</span>`;
+    }
+
+    return `
+      <div class="searchable-dropdown-item ${isSelected ? 'selected' : ''}"
+           role="option"
+           style="display: flex; flex-direction: column; gap: 3px; padding: 0.6rem 0.85rem;"
+           onclick="window.selectAdminRole('${item.roleKey}', '${item.jabatan.replace(/'/g, "\\'")}')">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="font-weight: 700; font-size: 0.85rem; color: #0f172a;">
+            ${item.hakAkses} <span style="color: var(--text-muted); font-weight: 400;">—</span> <span style="color: var(--primary-accent);">${item.jabatan}</span>
+          </div>
+          ${badgeHtml}
+        </div>
+        <div style="font-size: 0.725rem; color: #64748b; line-height: 1.35;">
+          ${item.description}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectAdminRole(roleKey, jabatan) {
+  setAdminSelectedRole(roleKey, jabatan);
+  closeAdminRoleDropdown();
+}
+
+function openAdminRoleDropdown() {
+  const dd = document.getElementById('adminRoleSearchableDropdown');
+  if (dd) {
+    dd.classList.add('open');
+    const searchInput = document.getElementById('adminInputRoleSearch');
+    renderAdminRoleDropdownItems(searchInput ? searchInput.value : '');
+  }
+}
+
+function closeAdminRoleDropdown() {
+  const dd = document.getElementById('adminRoleSearchableDropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+function initAdminRoleSearchableDropdown() {
+  const searchInput = document.getElementById('adminInputRoleSearch');
+  const clearBtn = document.getElementById('btnAdminRoleClear');
+  const dd = document.getElementById('adminRoleSearchableDropdown');
+  if (!searchInput || !dd) return;
+
+  if (searchInput.dataset.initialized) return;
+  searchInput.dataset.initialized = 'true';
+
+  searchInput.addEventListener('focus', () => {
+    openAdminRoleDropdown();
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+    openAdminRoleDropdown();
+    renderAdminRoleDropdownItems(val);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      searchInput.focus();
+      renderAdminRoleDropdownItems('');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!dd.contains(e.target)) {
+      closeAdminRoleDropdown();
+    }
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAdminRoleDropdown();
+    } else if (e.key === 'Enter') {
+      const firstItem = dd.querySelector('.searchable-dropdown-item');
+      if (firstItem) {
+        e.preventDefault();
+        firstItem.click();
+      }
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initAdminDeptSearchableDropdown();
+  initAdminRoleSearchableDropdown();
+
+  const sortUsers = document.getElementById('sortAdminUsers');
+  if (sortUsers) {
+    sortUsers.addEventListener('change', () => {
+      renderAdminUsers();
+    });
+  }
+
+  const sortAudit = document.getElementById('sortAdminAudit');
+  if (sortAudit) {
+    sortAudit.addEventListener('change', () => {
+      renderAdminAudit();
+    });
+  }
 });
 
 // Expose globally
@@ -1440,4 +1770,13 @@ window.closeAdminDeptDropdown = closeAdminDeptDropdown;
 window.initAdminDeptSearchableDropdown = initAdminDeptSearchableDropdown;
 window.getAllAvailableDepartments = getAllAvailableDepartments;
 window.renderAdminDeptDropdownItems = renderAdminDeptDropdownItems;
+
+// Searchable Role exposures
+window.AVAILABLE_ROLES_JABATAN = AVAILABLE_ROLES_JABATAN;
+window.setAdminSelectedRole = setAdminSelectedRole;
+window.selectAdminRole = selectAdminRole;
+window.openAdminRoleDropdown = openAdminRoleDropdown;
+window.closeAdminRoleDropdown = closeAdminRoleDropdown;
+window.initAdminRoleSearchableDropdown = initAdminRoleSearchableDropdown;
+window.renderAdminRoleDropdownItems = renderAdminRoleDropdownItems;
 

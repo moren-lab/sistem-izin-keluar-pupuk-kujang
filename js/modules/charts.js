@@ -544,20 +544,71 @@ function renderAdminTrafficChart() {
   const pointsOut = data.map((d, i) => {
     const x = padLeft + (i / (data.length - 1)) * plotW;
     const y = padTop + plotH - (d.out / (maxVal * 1.18)) * plotH;
-    return { x, y, hour: d.hour, val: d.out };
+    return { x, y, hour: d.hour, val: d.out, hourNum: 7 + i };
   });
 
   const pointsIn = data.map((d, i) => {
     const x = padLeft + (i / (data.length - 1)) * plotW;
     const y = padTop + plotH - (d.in / (maxVal * 1.18)) * plotH;
-    return { x, y, hour: d.hour, val: d.in };
+    return { x, y, hour: d.hour, val: d.in, hourNum: 7 + i };
   });
 
-  const pathDOut = `M ${pointsOut[0].x},${pointsOut[0].y} ` + pointsOut.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
-  const areaDOut = `${pathDOut} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+  // ===================================================================
+  // CUTOFF LOGIKA: Di atas jam sekarang TIDAK ADA GRAFIK (Requirement 7)
+  // Misalnya jam 12.00, maka jam 12.00 ke atas tidak ada garis grafiknya.
+  // ===================================================================
+  let pathDOut = '';
+  let areaDOut = '';
+  let pathDIn = '';
+  let areaDIn = '';
+  let nowYOut = padTop + plotH;
+  let nowYIn = padTop + plotH;
 
-  const pathDIn = `M ${pointsIn[0].x},${pointsIn[0].y} ` + pointsIn.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
-  const areaDIn = `${pathDIn} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+  if (curDecHour >= 7) {
+    if (curDecHour >= 17) {
+      // Seluruh jam operasional (07:00 - 17:00) sudah lewat
+      pathDOut = `M ${pointsOut[0].x},${pointsOut[0].y} ` + pointsOut.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
+      areaDOut = `${pathDOut} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+
+      pathDIn = `M ${pointsIn[0].x},${pointsIn[0].y} ` + pointsIn.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
+      areaDIn = `${pathDIn} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+    } else {
+      // Masih dalam rentang 07:00 s/d 17:00 -> potong tepat di jam & menit sekarang (currentX)
+      const maxPassedIndex = Math.min(Math.floor(curDecHour - 7), data.length - 1);
+      const passedPointsOut = pointsOut.slice(0, maxPassedIndex + 1);
+      const passedPointsIn = pointsIn.slice(0, maxPassedIndex + 1);
+
+      const p0Out = pointsOut[maxPassedIndex];
+      const p1Out = pointsOut[Math.min(maxPassedIndex + 1, pointsOut.length - 1)];
+      const p0In = pointsIn[maxPassedIndex];
+      const p1In = pointsIn[Math.min(maxPassedIndex + 1, pointsIn.length - 1)];
+
+      const spanX = (p1Out.x - p0Out.x) || 1;
+      const tFrac = Math.max(0, Math.min(1, (currentX - p0Out.x) / spanX));
+      nowYOut = p0Out.y + tFrac * (p1Out.y - p0Out.y);
+      nowYIn = p0In.y + tFrac * (p1In.y - p0In.y);
+
+      // Garis Scan Out hanya sampai currentX
+      pathDOut = `M ${passedPointsOut[0].x},${passedPointsOut[0].y}`;
+      for (let k = 1; k < passedPointsOut.length; k++) {
+        pathDOut += ` L ${passedPointsOut[k].x},${passedPointsOut[k].y}`;
+      }
+      if (currentX > passedPointsOut[passedPointsOut.length - 1].x) {
+        pathDOut += ` L ${currentX},${nowYOut}`;
+      }
+      areaDOut = `${pathDOut} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+
+      // Garis Scan In hanya sampai currentX
+      pathDIn = `M ${passedPointsIn[0].x},${passedPointsIn[0].y}`;
+      for (let k = 1; k < passedPointsIn.length; k++) {
+        pathDIn += ` L ${passedPointsIn[k].x},${passedPointsIn[k].y}`;
+      }
+      if (currentX > passedPointsIn[passedPointsIn.length - 1].x) {
+        pathDIn += ` L ${currentX},${nowYIn}`;
+      }
+      areaDIn = `${pathDIn} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+    }
+  }
 
   const slotWidth = plotW / (data.length - 1);
 
@@ -633,10 +684,14 @@ function renderAdminTrafficChart() {
                onmouseleave="window.unhoverTrafficPoint();">
               <rect x="${ptOut.x - slotWidth / 2}" y="0" width="${slotWidth}" height="${height}" fill="transparent" />
               <line id="trafficGuideLine_${i}" x1="${ptOut.x}" y1="${padTop}" x2="${ptOut.x}" y2="${padTop + plotH}" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="3,3" style="display: none;" />
-              <!-- Out Point -->
-              <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
-              <!-- In Point -->
-              <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="#ffffff" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
+              <!-- Out Point (Hanya muncul jika jam sudah berjalan) -->
+              ${(7 + i) <= curH ? `
+                <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
+              ` : ''}
+              <!-- In Point (Hanya muncul jika jam sudah berjalan) -->
+              ${(7 + i) <= curH ? `
+                <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="#ffffff" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
+              ` : ''}
               ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${isCurrentSlot ? '#0f172a' : '#64748b'}" text-anchor="middle">${d.hour}</text>` : ''}
             </g>
           `;

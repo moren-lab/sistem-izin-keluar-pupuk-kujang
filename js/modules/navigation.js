@@ -249,7 +249,7 @@ function switchRole(role) {
 
   // Check user access revocation (Admin Access Control)
   const users = window.MOCK_USERS || [];
-  const matchedUser = users.find(u => u.roleKey === role);
+  const matchedUser = users.find(u => u.roleKey === role && u.status === 'Aktif') || users.find(u => u.roleKey === role);
   if (matchedUser && (matchedUser.status === 'Dicabut' || matchedUser.status === 'Nonaktif')) {
     if (typeof window.showToast === 'function') {
       window.showToast(`⛔ Akses untuk ${matchedUser.name} (${matchedUser.role}) telah dicabut oleh Administrator!`, 'danger');

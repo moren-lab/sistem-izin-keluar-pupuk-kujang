@@ -559,6 +559,12 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                   <span>Lihat Rincian</span>
                 </button>
+                ${isTrackingView ? `
+                  <button type="button" class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px; color:#e11d48; border-color:#fecdd3; background:#fff1f2; display:inline-flex; align-items:center; gap:0.25rem;" onclick="window.deleteApproverTicket('${t.id}')" title="Hapus catatan izin dari pelacakan">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Hapus</span>
+                  </button>
+                ` : ''}
               </div>
 
               ${isTicketReassignedFromCurrentApprover(t) ? `
@@ -709,6 +715,29 @@ function renderApproverView() {
       list = ticketsList.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
     } else if (mode === 'outside') {
       list = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+    }
+
+    // Sorting Pelacakan (Terbaru / Terlama)
+    const sortAppEl = document.getElementById('sortApproverTracking');
+    const sortAppOrder = sortAppEl ? sortAppEl.value : 'desc';
+
+    list = [...list];
+    list.sort((a, b) => {
+      const parseD = (t) => {
+        const raw = t.createdAt || t.plannedExit || 0;
+        const d = new Date(raw);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      };
+      const dA = parseD(a);
+      const dB = parseD(b);
+      return sortAppOrder === 'asc' ? dA - dB : dB - dA;
+    });
+
+    if (sortAppEl && !sortAppEl._bound) {
+      sortAppEl._bound = true;
+      sortAppEl.addEventListener('change', () => {
+        renderApproverView();
+      });
     }
 
     if (list.length === 0) {
@@ -1063,6 +1092,48 @@ function rejectExtensionRequest(ticketId, reason) {
   }
 }
 
+// FITUR HAPUS DI PELACAKAN KARYAWAN (HAK AKSES ATASAN)
+function deleteApproverTicket(ticketId) {
+  if (!confirm(`Apakah Anda yakin ingin menghapus catatan permohonan izin #${ticketId} dari pelacakan?`)) {
+    return;
+  }
+  let tickets = window.ticketsList || [];
+  const idx = tickets.findIndex(t => t.id === ticketId);
+  if (idx !== -1) {
+    const deleted = tickets[idx];
+    tickets.splice(idx, 1);
+    window.ticketsList = tickets;
+    if (typeof window.saveTickets === 'function') {
+      window.saveTickets(tickets);
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Catatan izin #${ticketId} (${deleted.applicantName || 'Karyawan'}) berhasil dihapus dari pelacakan.`, 'info');
+    }
+    renderApproverView();
+  }
+}
+
+function clearApproverTrackingHistory() {
+  let tickets = window.ticketsList || [];
+  const finishedTickets = tickets.filter(t => t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa');
+  if (finishedTickets.length === 0) {
+    alert('Tidak ada riwayat permohonan selesai atau ditolak untuk dibersihkan.');
+    return;
+  }
+  if (!confirm(`Hapus ${finishedTickets.length} riwayat izin yang sudah selesai/diputuskan dari pelacakan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`)) {
+    return;
+  }
+  tickets = tickets.filter(t => !(t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa'));
+  window.ticketsList = tickets;
+  if (typeof window.saveTickets === 'function') {
+    window.saveTickets(tickets);
+  }
+  if (typeof window.showToast === 'function') {
+    window.showToast(`${finishedTickets.length} riwayat permohonan selesai telah dihapus dari pelacakan.`, 'info');
+  }
+  renderApproverView();
+}
+
 // Expose globally
 window.updateApproverMetrics = updateApproverMetrics;
 window.renderApproverDashboard = renderApproverDashboard;
@@ -1073,3 +1144,5 @@ window.openRejectModal = openRejectModal;
 window.approveExtensionRequest = approveExtensionRequest;
 window.openRejectExtensionModal = openRejectExtensionModal;
 window.rejectExtensionRequest = rejectExtensionRequest;
+window.deleteApproverTicket = deleteApproverTicket;
+window.clearApproverTrackingHistory = clearApproverTrackingHistory;

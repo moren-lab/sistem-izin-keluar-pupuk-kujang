@@ -81,7 +81,7 @@ function filterEmpTickets() {
   // Status resmi yang diizinkan untuk Riwayat Pengajuan
   const RIWAYAT_STATUSES = ['selesai', 'terlambat', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
 
-  return ticketsList.filter(t => {
+  const filtered = ticketsList.filter(t => {
     // 0. Batasi ke akun Budi Pratama
     const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841');
     if (!isMyTicket) return false;
@@ -126,8 +126,26 @@ function filterEmpTickets() {
       if (!matchId && !matchReason && !matchDest) return false;
     }
 
+
     return true;
   });
+
+  // Sorting Riwayat (Terbaru / Terlama)
+  const sortEmpEl = document.getElementById('sortEmpRiwayat');
+  const sortEmpOrder = sortEmpEl ? sortEmpEl.value : 'desc';
+
+  filtered.sort((a, b) => {
+    const parseTime = (item) => {
+      const raw = item.createdAt || item.plannedExit || 0;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
+    const tA = parseTime(a);
+    const tB = parseTime(b);
+    return sortEmpOrder === 'asc' ? tA - tB : tB - tA;
+  });
+
+  return filtered;
 }
 
 /**
@@ -1188,7 +1206,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterEmpType = document.getElementById('filterEmpType');
   const filterEmpStatus = document.getElementById('filterEmpStatus');
 
-  [searchEmpInput, filterEmpPeriod, filterEmpCategory, filterEmpType, filterEmpStatus].forEach(el => {
+  [searchEmpInput, filterEmpPeriod, filterEmpCategory, filterEmpType, filterEmpStatus, document.getElementById('sortEmpRiwayat')].forEach(el => {
     if (el) {
       el.addEventListener('input', () => {
         window.empCurrentPage = 1;
