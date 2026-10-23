@@ -307,6 +307,55 @@ function openEditEmergencyModal(ticket) {
 }
 
 function setupRadioToggles() {
+  // Dropdown Kategori Keperluan (Form Pengajuan Biasa)
+  const selectReqCategory = document.getElementById('selectReqCategory');
+  if (selectReqCategory) {
+    selectReqCategory.addEventListener('change', () => {
+      const isDinas = isDinasCategory(selectReqCategory.value);
+      const inputPlannedExit = document.getElementById('inputPlannedExit');
+      const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
+      if (isDinas) {
+        // Dinas Kantor: Bebaskan pemilihan tanggal hari ini, besok, atau hari kerja selanjutnya
+        if (inputPlannedExit) inputPlannedExit.removeAttribute('max');
+        if (inputEstimatedReturn) inputEstimatedReturn.removeAttribute('max');
+      } else if (selectReqCategory.value === 'Urusan Pribadi') {
+        // Urusan Pribadi: Kunci batas ke hari ini saja
+        const now = new Date();
+        setInputMaxByDate(inputPlannedExit, now);
+        setInputMaxByDate(inputEstimatedReturn, now);
+        if (inputPlannedExit && inputPlannedExit.value) {
+          const d = new Date(inputPlannedExit.value);
+          if (d.getDate() !== now.getDate() || d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) {
+            inputPlannedExit.value = '';
+            if (inputEstimatedReturn) inputEstimatedReturn.value = '';
+            if (typeof window.showToast === 'function') {
+              window.showToast('Untuk Urusan Pribadi, perizinan hanya berlaku untuk hari ini.', 'info');
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Dropdown Kategori Keperluan (Form Izin Darurat)
+  const selectEmergCategory = document.getElementById('selectEmergCategory');
+  if (selectEmergCategory) {
+    selectEmergCategory.addEventListener('change', () => {
+      const isDinas = isDinasCategory(selectEmergCategory.value);
+      const emergPlannedExit = document.getElementById('emergPlannedExit');
+      const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
+      if (isDinas) {
+        // Izin Darurat Dinas: Bebaskan pemilihan tanggal besok dan selanjutnya
+        if (emergPlannedExit) emergPlannedExit.removeAttribute('max');
+        if (emergEstimatedReturn) emergEstimatedReturn.removeAttribute('max');
+      } else if (selectEmergCategory.value === 'Urusan Pribadi') {
+        const now = new Date();
+        setInputMaxByDate(emergPlannedExit, now);
+        setInputMaxByDate(emergEstimatedReturn, now);
+      }
+    });
+  }
+
   // Dropdown Tipe Kepulangan (Form Pengajuan Biasa)
   const selectReqType = document.getElementById('selectReqType');
   const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
@@ -936,10 +985,17 @@ function isWithinOperationalHours(date = new Date()) {
   };
 }
 
+function isDinasCategory(category) {
+  if (!category) return false;
+  const cat = String(category).toLowerCase();
+  return cat.includes('dinas');
+}
+
 window.getClosingTimeForDate = getClosingTimeForDate;
 window.validateWorkingHours = validateWorkingHours;
 window.setInputMaxByDate = setInputMaxByDate;
 window.isWithinOperationalHours = isWithinOperationalHours;
+window.isDinasCategory = isDinasCategory;
 
 function initFormDates() {
   const inputPlannedExit = document.getElementById('inputPlannedExit');
@@ -950,12 +1006,12 @@ function initFormDates() {
   const currentMinStr = getFormattedDateTimeLocal(now);
   inputPlannedExit.min = currentMinStr;
   inputPlannedExit.value = ''; // Kosongkan saat form pertama kali dibuka
-  setInputMaxByDate(inputPlannedExit, now);
+  inputPlannedExit.removeAttribute('max'); // Bebaskan agar dapat memilih hari besok dan selanjutnya untuk Dinas Kantor
 
   if (inputEstimatedReturn) {
     inputEstimatedReturn.min = currentMinStr;
     inputEstimatedReturn.value = ''; // Kosongkan saat form pertama kali dibuka
-    setInputMaxByDate(inputEstimatedReturn, now);
+    inputEstimatedReturn.removeAttribute('max');
   }
 }
 
@@ -1730,10 +1786,12 @@ function handleOpenEmergency() {
   if (emergPlannedExit) {
     emergPlannedExit.min = currentMinStr;
     emergPlannedExit.value = '';
+    emergPlannedExit.removeAttribute('max');
   }
   if (emergEstimatedReturn) {
     emergEstimatedReturn.min = currentMinStr;
     emergEstimatedReturn.value = '';
+    emergEstimatedReturn.removeAttribute('max');
   }
 
   if (modalEmergency) modalEmergency.classList.add('open');
@@ -1763,12 +1821,42 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Identifikasi kategori pengajuan (Dinas Kantor vs Urusan Pribadi)
+    let catVal = '';
+    if (inputEl.id === 'emergPlannedExit' || inputEl.id === 'emergEstimatedReturn') {
+      const selectEmergCategory = document.getElementById('selectEmergCategory');
+      catVal = selectEmergCategory ? selectEmergCategory.value : '';
+    } else {
+      const selectReqCategory = document.getElementById('selectReqCategory');
+      catVal = selectReqCategory ? selectReqCategory.value : '';
+    }
+    const isDinas = isDinasCategory(catVal);
+
     const d = new Date(inputEl.value);
-    if (!isNaN(d.getTime())) {
-      setInputMaxByDate(inputEl, d);
+    const now = new Date();
+
+    if (isDinas || !catVal) {
+      // Dinas Kantor (atau form baru dibuka sebelum memilih kategori): Bebaskan pemilihan hari besok dan selanjutnya
+      inputEl.removeAttribute('max');
       if (companionReturnEl) {
-        setInputMaxByDate(companionReturnEl, d);
+        companionReturnEl.removeAttribute('max');
         companionReturnEl.min = inputEl.value;
+      }
+    } else {
+      // Urusan Pribadi: Kunci batas tanggal ke hari ini saja
+      setInputMaxByDate(inputEl, now);
+      if (companionReturnEl) {
+        setInputMaxByDate(companionReturnEl, now);
+        companionReturnEl.min = inputEl.value;
+      }
+
+      if (!isNaN(d.getTime())) {
+        if (d.getDate() !== now.getDate() || d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) {
+          inputEl.value = currentMin;
+          if (typeof window.showToast === 'function') {
+            window.showToast('Untuk Urusan Pribadi, perizinan hanya berlaku untuk hari ini.', 'warning');
+          }
+        }
       }
     }
 
@@ -1810,7 +1898,11 @@ document.addEventListener('DOMContentLoaded', () => {
           newReturn.setHours(closing.hour, closing.minute, 0, 0);
         }
         companionReturnEl.value = getFormattedDateTimeLocal(newReturn);
-        setInputMaxByDate(companionReturnEl, exitDt);
+        if (!isDinas && catVal === 'Urusan Pribadi') {
+          setInputMaxByDate(companionReturnEl, now);
+        } else {
+          companionReturnEl.removeAttribute('max');
+        }
       }
     }
   }
@@ -1828,9 +1920,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Identifikasi kategori pengajuan
+    let catVal = '';
+    if (returnEl.id === 'emergPlannedExit' || returnEl.id === 'emergEstimatedReturn') {
+      const selectEmergCategory = document.getElementById('selectEmergCategory');
+      catVal = selectEmergCategory ? selectEmergCategory.value : '';
+    } else {
+      const selectReqCategory = document.getElementById('selectReqCategory');
+      catVal = selectReqCategory ? selectReqCategory.value : '';
+    }
+    const isDinas = isDinasCategory(catVal);
+
     const d = new Date(returnEl.value);
-    if (!isNaN(d.getTime())) {
-      setInputMaxByDate(returnEl, d);
+    const now = new Date();
+
+    if (isDinas || !catVal) {
+      returnEl.removeAttribute('max');
+    } else {
+      setInputMaxByDate(returnEl, now);
+      if (!isNaN(d.getTime())) {
+        if (d.getDate() !== now.getDate() || d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) {
+          returnEl.value = minReturn;
+          if (typeof window.showToast === 'function') {
+            window.showToast('Untuk Urusan Pribadi, perizinan hanya berlaku untuk hari ini.', 'warning');
+          }
+        }
+      }
     }
 
     const check = validateWorkingHours(returnEl.value, label);
@@ -1991,6 +2106,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Validasi: Urusan Pribadi hanya berlaku untuk hari ini
+      if (!isDinasCategory(category)) {
+        const exitD = new Date(plannedExit);
+        if (exitD.getDate() !== now.getDate() || exitD.getMonth() !== now.getMonth() || exitD.getFullYear() !== now.getFullYear()) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Untuk keperluan Urusan Pribadi, izin keluar hanya berlaku untuk hari ini!', 'warning');
+          }
+          if (inputPlannedExit) inputPlannedExit.focus();
+          return;
+        }
+      }
+
       // Validasi Rencana Waktu Keluar terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
       const exitWorkCheck = validateWorkingHours(plannedExit, 'Rencana waktu keluar');
       if (!exitWorkCheck.valid) {
@@ -2009,6 +2136,18 @@ document.addEventListener('DOMContentLoaded', () => {
           if (typeof window.showToast === 'function') window.showToast('Perkiraan jam kembali harus lebih besar dari rencana jam keluar!', 'danger');
           if (inputEstimatedReturn) inputEstimatedReturn.focus();
           return;
+        }
+
+        // Validasi: Urusan Pribadi perkiraan kembali harus hari ini
+        if (!isDinasCategory(category)) {
+          const retD = new Date(estimatedReturn);
+          if (retD.getDate() !== now.getDate() || retD.getMonth() !== now.getMonth() || retD.getFullYear() !== now.getFullYear()) {
+            if (typeof window.showToast === 'function') {
+              window.showToast('Untuk keperluan Urusan Pribadi, perkiraan waktu kembali harus pada hari ini!', 'warning');
+            }
+            if (inputEstimatedReturn) inputEstimatedReturn.focus();
+            return;
+          }
         }
 
         // Validasi Perkiraan Waktu Kembali terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
@@ -2394,6 +2533,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Validasi: Urusan Pribadi darurat hanya berlaku untuk hari ini
+      if (!isDinasCategory(categoryVal)) {
+        const exitD = new Date(plannedExitVal);
+        if (exitD.getDate() !== nowCheck.getDate() || exitD.getMonth() !== nowCheck.getMonth() || exitD.getFullYear() !== nowCheck.getFullYear()) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Untuk keperluan Urusan Pribadi, izin darurat hanya berlaku untuk hari ini!', 'warning');
+          }
+          if (emergPlannedExit) emergPlannedExit.focus();
+          return;
+        }
+      }
+
       // Validasi Rencana Waktu Keluar Darurat terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
       const emergExitCheck = validateWorkingHours(plannedExitVal, 'Rencana waktu keluar darurat');
       if (!emergExitCheck.valid) {
@@ -2422,6 +2573,18 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           if (emergEstimatedReturn) emergEstimatedReturn.focus();
           return;
+        }
+
+        // Validasi: Urusan Pribadi perkiraan kembali darurat harus hari ini
+        if (!isDinasCategory(categoryVal)) {
+          const retD = new Date(estimatedReturnVal);
+          if (retD.getDate() !== nowCheck.getDate() || retD.getMonth() !== nowCheck.getMonth() || retD.getFullYear() !== nowCheck.getFullYear()) {
+            if (typeof window.showToast === 'function') {
+              window.showToast('Untuk keperluan Urusan Pribadi, perkiraan waktu kembali darurat harus pada hari ini!', 'warning');
+            }
+            if (emergEstimatedReturn) emergEstimatedReturn.focus();
+            return;
+          }
         }
 
         // Validasi Perkiraan Waktu Kembali Darurat terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
@@ -2626,7 +2789,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newReturnDate = new Date(newReturnVal);
       const now = new Date();
 
-      // 1. Validasi Jam Operasional Kantor (Hanya bisa diajukan sebelum jam pulang)
+      // 1. Validasi Jam Operasional Kantor (Hanya bisa diajukan sebelum jam pulang saat pengajuan perpanjangan dibuat)
       const workHoursCheck = isWithinOperationalHours(now);
       if (!workHoursCheck.allowed) {
         if (typeof window.showToast === 'function') {
@@ -2635,30 +2798,43 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 2. Validasi Tanggal: Hanya boleh HARI INI (tidak bisa hari sebelumnya atau besok)
-      const returnDay = newReturnDate.getDate();
-      const returnMonth = newReturnDate.getMonth();
-      const returnYear = newReturnDate.getFullYear();
-      if (returnDay !== now.getDate() || returnMonth !== now.getMonth() || returnYear !== now.getFullYear()) {
-        if (typeof window.showToast === 'function') {
-          window.showToast('Perpanjangan waktu hanya dapat diajukan untuk hari ini (tidak dapat memilih hari kemarin atau besok)!', 'danger');
-        }
-        return;
-      }
+      const isDinas = isDinasCategory(ticket.category);
 
-      // 3. Validasi Jam Kembali: Tidak boleh melewati batas jam pulang kantor hari ini
-      const dayOfWeek = now.getDay();
-      const returnHours = newReturnDate.getHours();
-      const returnMins = newReturnDate.getMinutes();
-      const returnTotalMins = returnHours * 60 + returnMins;
-      const maxAllowedMins = (dayOfWeek === 5) ? (16 * 60 + 30) : (16 * 60);
-      const closingStr = (dayOfWeek === 5) ? '16:30 WIB' : '16:00 WIB';
-
-      if (returnTotalMins > maxAllowedMins) {
-        if (typeof window.showToast === 'function') {
-          window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
+      if (!isDinas) {
+        // 2. Validasi Tanggal untuk Urusan Pribadi: Hanya boleh HARI INI
+        const returnDay = newReturnDate.getDate();
+        const returnMonth = newReturnDate.getMonth();
+        const returnYear = newReturnDate.getFullYear();
+        if (returnDay !== now.getDate() || returnMonth !== now.getMonth() || returnYear !== now.getFullYear()) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Perpanjangan waktu Urusan Pribadi hanya dapat diajukan untuk hari ini!', 'danger');
+          }
+          return;
         }
-        return;
+
+        // 3. Validasi Jam Kembali: Tidak boleh melewati batas jam pulang kantor hari ini
+        const dayOfWeek = now.getDay();
+        const returnHours = newReturnDate.getHours();
+        const returnMins = newReturnDate.getMinutes();
+        const returnTotalMins = returnHours * 60 + returnMins;
+        const maxAllowedMins = (dayOfWeek === 5) ? (16 * 60 + 30) : (16 * 60);
+        const closingStr = (dayOfWeek === 5) ? '16:30 WIB' : '16:00 WIB';
+
+        if (returnTotalMins > maxAllowedMins) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
+          }
+          return;
+        }
+      } else {
+        // Dinas Kantor: Boleh memilih hari besok dan hari-hari kerja selanjutnya sesuai rencana
+        const extendWorkCheck = validateWorkingHours(newReturnVal, 'Perkiraan waktu kembali perpanjangan');
+        if (!extendWorkCheck.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(extendWorkCheck.message, 'danger');
+          }
+          return;
+        }
       }
 
       if (isNaN(newReturnDate.getTime()) || newReturnDate.getTime() <= now.getTime()) {
@@ -2784,7 +2960,7 @@ function openExtendDurationModal(ticketId) {
       : '14.00 WIB';
   }
 
-  // Kunci batas waktu: HANYA HARI INI dan MAKSIMAL SEBELUM JAM PULANG
+  // Kunci batas waktu: HANYA HARI INI untuk Urusan Pribadi, BEBAS HARI BESOK & SETERUSNYA untuk Dinas Kantor
   const pad = (n) => String(n).padStart(2, '0');
   const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   const dayOfWeek = now.getDay();
@@ -2792,28 +2968,57 @@ function openExtendDurationModal(ticketId) {
   const minVal = `${todayStr}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const maxVal = `${todayStr}T${closingHourStr}`;
 
-  // Usulkan default return (+30 menit dari sekarang, dibatasi max jam closing)
-  let proposedMinutes = now.getTime() + 30 * 60000;
-  let proposedDate = new Date(proposedMinutes);
-  let defaultVal = `${todayStr}T${pad(proposedDate.getHours())}:${pad(proposedDate.getMinutes())}`;
-  if (defaultVal > maxVal) {
-    defaultVal = maxVal;
+  const isDinas = isDinasCategory(ticket.category);
+
+  // Usulkan default return (+30 menit dari sekarang atau estimasi lama)
+  let baseTime = now.getTime();
+  if (ticket.estimatedReturn) {
+    const oldD = new Date(ticket.estimatedReturn);
+    if (!isNaN(oldD.getTime()) && oldD.getTime() > baseTime) {
+      baseTime = oldD.getTime();
+    }
   }
+  let proposedDate = new Date(baseTime + 30 * 60000);
+  let defaultVal = `${proposedDate.getFullYear()}-${pad(proposedDate.getMonth() + 1)}-${pad(proposedDate.getDate())}T${pad(proposedDate.getHours())}:${pad(proposedDate.getMinutes())}`;
 
   if (inputExtendNewReturn) {
     inputExtendNewReturn.min = minVal;
-    inputExtendNewReturn.max = maxVal;
-    inputExtendNewReturn.value = defaultVal;
-    inputExtendNewReturn.onchange = () => {
-      if (!inputExtendNewReturn.value) return;
-      const check = validateWorkingHours(inputExtendNewReturn.value, 'Perkiraan waktu kembali perpanjangan');
-      if (!check.valid) {
-        if (typeof window.showToast === 'function') {
-          window.showToast(check.message, 'danger');
+    if (isDinas) {
+      // Dinas Kantor: Bebaskan pemilihan tanggal hari ini, besok, atau hari kerja selanjutnya
+      inputExtendNewReturn.removeAttribute('max');
+      inputExtendNewReturn.value = defaultVal;
+      inputExtendNewReturn.onchange = () => {
+        if (!inputExtendNewReturn.value) return;
+        const check = validateWorkingHours(inputExtendNewReturn.value, 'Perkiraan waktu kembali perpanjangan');
+        if (!check.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(check.message, 'danger');
+          }
+          const selD = new Date(inputExtendNewReturn.value);
+          if (!isNaN(selD.getTime())) {
+            const closing = getClosingTimeForDate(selD);
+            if (closing) {
+              inputExtendNewReturn.value = `${selD.getFullYear()}-${pad(selD.getMonth() + 1)}-${pad(selD.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
+            }
+          }
         }
-        inputExtendNewReturn.value = maxVal;
-      }
-    };
+      };
+    } else {
+      // Urusan Pribadi: Kunci batas waktu ke hari ini sebelum jam pulang kantor
+      if (defaultVal > maxVal) defaultVal = maxVal;
+      inputExtendNewReturn.max = maxVal;
+      inputExtendNewReturn.value = defaultVal;
+      inputExtendNewReturn.onchange = () => {
+        if (!inputExtendNewReturn.value) return;
+        const check = validateWorkingHours(inputExtendNewReturn.value, 'Perkiraan waktu kembali perpanjangan');
+        if (!check.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(check.message, 'danger');
+          }
+          inputExtendNewReturn.value = maxVal;
+        }
+      };
+    }
   }
   if (inputExtendReason) {
     inputExtendReason.value = '';
