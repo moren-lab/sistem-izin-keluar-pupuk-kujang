@@ -1276,11 +1276,13 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const infoTableActualReturn = document.getElementById('infoTableActualReturn');
   if (infoTableActualReturn) {
     const isLateTicket = ticket.isLate || ticket.status === 'Terlambat' || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]'));
-    const scanInStr = ticket.scanInTime 
+    let scanInStr = ticket.scanInTime 
       ? (ticket.scanInTime.includes('WIB') ? ticket.scanInTime : `${ticket.scanInTime} WIB`)
       : '';
+    scanInStr = scanInStr.replace(/\s*\[Terlambat\]/gi, '').trim();
+    const lateFormatted = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes) : `${ticket.lateMinutes} mnt`;
     infoTableActualReturn.textContent = scanInStr 
-      ? `${scanInStr} — ${isLateTicket ? `Terlambat${ticket.lateMinutes ? ` (+${ticket.lateMinutes} mnt)` : ''}` : 'Tepat Waktu'}` 
+      ? `${scanInStr} — ${isLateTicket ? `Terlambat${ticket.lateMinutes ? ` (+${lateFormatted})` : ''}` : 'Tepat Waktu'}` 
       : (ticket.status === 'Selesai' 
           ? (ticket.isLate ? '10.52 WIB — Terlambat' : '10.52 WIB — Tepat Waktu') 
           : (ticket.status === 'Terlambat' ? '⚠️ Belum Tap In (Terlambat)' : '-'));
@@ -1618,7 +1620,8 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   if (btnDetailScanIn) {
     const isOutsideToReturn = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && !ticket.scanInTime;
-    if (isOutsideToReturn) {
+    const isKaryawan = (window.currentActor === 'karyawan');
+    if (isOutsideToReturn && isKaryawan) {
       btnDetailScanIn.style.display = 'inline-flex';
       btnDetailScanIn.onclick = function () {
         if (typeof window.executeScanIn === 'function') {

@@ -337,7 +337,7 @@ function renderApproverDashboard() {
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
                 <span style="font-weight: 700; font-size: 0.75rem; color: ${t.category === 'Dinas Kantor' ? '#059669' : '#d97706'};">${t.category}</span>
               </div>
-              ${window.getStatusPill(t.status)}
+              ${window.getStatusPill(t.status, t)}
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
               <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
@@ -368,7 +368,7 @@ function renderApproverDashboard() {
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
                 <span style="color: #92400e; font-weight: 800; font-size: 0.725rem;">↳ Dialihkan ke ${t.approverName}</span>
               </div>
-              <div>${window.getStatusPill(t.status)}</div>
+              <div>${window.getStatusPill(t.status, t)}</div>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
               <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
@@ -419,7 +419,7 @@ function renderApproverDashboard() {
                 </div>
               </div>
             </div>
-            <div>${window.getStatusPill(t.status)}</div>
+            <div>${window.getStatusPill(t.status, t)}</div>
           </div>
         `;
       }).join('');
@@ -451,7 +451,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 <span class="card-id-num">${t.id}</span>
                 <div class="card-created-meta">Diajukan: ${t.createdAt}</div>
               </div>
-              ${window.getStatusPill(t.status)}
+              ${window.getStatusPill(t.status, t)}
             </div>
 
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">

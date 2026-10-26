@@ -83,6 +83,10 @@ function cleanEstimatedReturnDisplay(returnStr, permitType) {
  * Returns calm, legible status badges (no loud neon pills)
  */
 function cleanStatusBadge(status, ticket) {
+  if (typeof status === 'object' && status !== null) {
+    ticket = status;
+    status = ticket.status;
+  }
   if (typeof window.getCleanEmpStatus === 'function') {
     return window.getCleanEmpStatus(status, ticket);
   }
@@ -218,7 +222,7 @@ function renderAdminDashboard() {
               ${cleanEstimatedReturnDisplay(ticket.estimatedReturn, ticket.type)}
             </td>
             <td>
-              ${cleanStatusBadge(ticket.status)}
+              ${cleanStatusBadge(ticket.status, ticket)}
             </td>
             <td style="text-align: right;">
               <button type="button" class="btn-card-detail" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; min-height: 32px;" onclick="window.viewAdminTicketDetail('${ticket.id}')" title="Audit Detail Tiket">
@@ -535,7 +539,7 @@ function renderAdminReports() {
           ${cleanEstimatedReturnDisplay(t.estimatedReturn, t.type)}
         </td>
         <td style="text-align: center;">
-          ${cleanStatusBadge(t.status)}
+          ${cleanStatusBadge(t.status, t)}
         </td>
       </tr>
     `;
@@ -602,6 +606,12 @@ function exportAdminExcel() {
       estReturn = t.estimatedReturn.includes('T') ? t.estimatedReturn.split('T')[1] + ' WIB' : t.estimatedReturn;
     }
 
+    let finalStatus = t.status || '-';
+    if (t.status === 'Selesai' && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0))) {
+      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
+      finalStatus = `Selesai (Terlambat ${lateStr})`;
+    }
+
     return [
       `"${t.id}"`,
       `"${t.createdAt || t.createdDate || '-'}"`,
@@ -616,7 +626,7 @@ function exportAdminExcel() {
       `"${inTime}"`,
       `"${inGate}"`,
       `"${estReturn}"`,
-      `"${t.status || '-'}"`,
+      `"${finalStatus}"`,
       `"${(t.approverName || '-').replace(/"/g, '""')}"`
     ];
   });

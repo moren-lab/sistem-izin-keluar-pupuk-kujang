@@ -3,6 +3,40 @@
  * UI Utilities, Status Pills, Sound Effects, and Notifications
  */
 
+/**
+ * Format durasi keterlambatan sesuai permintaan bisnis:
+ * - Jika < 60 menit: "XX mnt" (atau "XX menit")
+ * - Jika >= 60 menit dan < 1440 menit (24 jam): disebut per jam saja (e.g. "1 jam", "2 jam")
+ * - Jika >= 1440 menit (24 jam): disebut per hari saja (e.g. "1 hari", "2 hari")
+ */
+function formatLateDuration(lateMinutes) {
+  const m = Number(lateMinutes) || 0;
+  if (m <= 0) return '';
+  if (m >= 1440) {
+    const days = Math.floor(m / 1440);
+    return `${days} hari`;
+  }
+  if (m >= 60) {
+    const hours = Math.floor(m / 60);
+    return `${hours} jam`;
+  }
+  return `${m} mnt`;
+}
+
+function formatLateDurationFull(lateMinutes) {
+  const m = Number(lateMinutes) || 0;
+  if (m <= 0) return '';
+  if (m >= 1440) {
+    const days = Math.floor(m / 1440);
+    return `${days} hari`;
+  }
+  if (m >= 60) {
+    const hours = Math.floor(m / 60);
+    return `${hours} jam`;
+  }
+  return `${m} menit`;
+}
+
 function getStatusPill(status, ticket) {
   if (typeof status === 'object' && status !== null) {
     ticket = status;
@@ -15,8 +49,8 @@ function getStatusPill(status, ticket) {
 
   const isLateCompleted = (status === 'Selesai') && ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
   if (isLateCompleted) {
-    const lateMnt = ticket.lateMinutes ? ` ${ticket.lateMinutes} mnt` : '';
-    return `<span style="font-weight: 700; font-size: 0.8125rem; color: #b45309; letter-spacing: -0.01em;">Selesai (Terlambat${lateMnt})</span>`;
+    const lateStr = formatLateDuration(ticket.lateMinutes || 10);
+    return `<span style="font-weight: 700; font-size: 0.8125rem; color: #b45309; letter-spacing: -0.01em;">Selesai (Terlambat ${lateStr})</span>`;
   }
 
   let color = '#059669';
@@ -158,6 +192,8 @@ function closeDeleteConfirmModal() {
   if (modal) modal.classList.remove('open');
 }
 
+window.formatLateDuration = formatLateDuration;
+window.formatLateDurationFull = formatLateDurationFull;
 window.formatDisplayDate = formatDisplayDate;
 window.playScannerBeep = playScannerBeep;
 window.showToast = showToast;

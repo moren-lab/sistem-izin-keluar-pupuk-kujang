@@ -599,26 +599,48 @@ function renderKaryawanDashboard() {
 
     if (completedItems.length === 0) {
       karyawanDashboardRecentList.innerHTML = `
-        <div style="padding: 1rem 0; text-align: center; color: #94a3b8; font-size: 0.8rem;">
+        <div style="padding: 1.25rem 0; text-align: center; color: #94a3b8; font-size: 0.825rem;">
           Belum ada riwayat pengajuan selesai.
         </div>
       `;
     } else {
       karyawanDashboardRecentList.innerHTML = completedItems.map((t, idx) => {
-        const exitHour = t.plannedExit ? t.plannedExit.slice(11, 16) : '09.00';
-        const returnHour = t.estimatedReturn ? t.estimatedReturn.slice(11, 16) : '11.00';
+        const exitHour = t.plannedExit ? t.plannedExit.slice(11, 16) : '09:00';
+        const returnHour = t.estimatedReturn ? t.estimatedReturn.slice(11, 16) : '11:00';
         const timeSpan = `${exitHour}–${returnHour} WIB`;
-        const dayMonth = t.createdAt ? t.createdAt.slice(0, 6) : '16 Okt';
+
+        // Format tanggal secara akurat (hindari .slice(0,6) yang menghasilkan "2026-1")
+        let dayMonth = 'Hari ini';
+        if (t.createdAt) {
+          const parsed = typeof window.parseTicketDateTime === 'function' ? window.parseTicketDateTime(t.createdAt) : new Date(t.createdAt);
+          if (parsed && !isNaN(parsed.getTime())) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            dayMonth = `${parsed.getDate()} ${months[parsed.getMonth()]}`;
+          } else {
+            dayMonth = t.createdAt.split(',')[0].trim();
+          }
+        }
 
         return `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0; ${idx < completedItems.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''} gap: 0.75rem; flex-wrap: wrap;">
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${t.id}</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">${dayMonth} — ${t.category}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; ${idx < completedItems.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''} gap: 1rem; flex-wrap: wrap;">
+            <!-- Kolom 1: ID Tiket & Kategori -->
+            <div style="min-width: 170px; flex: 1;">
+              <div style="font-size: 0.875rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; letter-spacing: -0.2px;">${t.id}</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px; font-weight: 500;">${dayMonth} — ${t.category}</div>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span style="font-size: 0.775rem; color: #475569; font-weight: 600;">${timeSpan}</span>
+
+            <!-- Kolom 2: Rentang Waktu (Kolom terpisah teratur agar waktu rapi sejajar) -->
+            <div style="min-width: 125px; text-align: right;">
+              <span style="font-size: 0.8rem; color: #334155; font-weight: 600; font-family: var(--font-mono);">${timeSpan}</span>
+            </div>
+
+            <!-- Kolom 3: Status Pill (Lebar teratur agar tidak menabrak waktu) -->
+            <div style="min-width: 190px; text-align: left;">
               ${getCleanEmpStatus(t.status || 'Selesai', t)}
+            </div>
+
+            <!-- Kolom 4: Aksi Detail Pengajuan -->
+            <div style="min-width: 110px; text-align: right;">
               <a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>
             </div>
           </div>
@@ -1035,7 +1057,8 @@ function getCleanEmpStatus(status, ticket) {
 
   if (status === 'Selesai') {
     if (ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || ticket.lateMinutes > 0)) {
-      label = `Selesai (Terlambat ${ticket.lateMinutes || 10} mnt)`;
+      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes || 10) : `${ticket.lateMinutes || 10} mnt`;
+      label = `Selesai (Terlambat ${lateStr})`;
       color = '#b45309';
     } else {
       label = 'Selesai';
@@ -1081,78 +1104,103 @@ function renderEmpCards(list, containerElement) {
   target.innerHTML = `
     <div class="figma-card-grid">
       ${list.map(t => {
-        let catatanText = `Tepat waktu — Disetujui ${t.approverName || 'Atasan'}`;
-        let catatanColor = '#475569';
+        let catatanText = `✓ Tepat waktu — Disetujui ${t.approverName || 'Atasan'}`;
+        let catatanColor = '#059669';
+        let catatanBg = '#f0fdf4';
+        let catatanBorder = '#dcfce7';
 
         if (t.status === 'Terlambat') {
           catatanText = '⚠️ Melewati batas estimasi kembali — Belum Scan In di Pos 1';
           catatanColor = '#b91c1c';
+          catatanBg = '#fef2f2';
+          catatanBorder = '#fecaca';
         } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-          catatanText = `Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} — +${t.lateMinutes || 10} menit dari estimasi`;
+          const lateFull = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
+          catatanText = `⏱️ Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} — +${lateFull} dari estimasi`;
           catatanColor = '#b45309';
+          catatanBg = '#fffbeb';
+          catatanBorder = '#fde68a';
         } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
-          catatanText = t.rejectionReason || 'Ditolak: alasan tidak memadai';
+          catatanText = `✕ ${t.rejectionReason || 'Ditolak: alasan tidak memadai'}`;
           catatanColor = '#b91c1c';
+          catatanBg = '#fef2f2';
+          catatanBorder = '#fecaca';
         } else if (t.status === 'Kedaluwarsa' || t.status === 'Kadaluwarsa') {
-          catatanText = 'Waktu berlaku izin habis sebelum verifikasi scan keluar';
+          catatanText = '⏱️ Waktu berlaku izin habis sebelum verifikasi scan keluar';
           catatanColor = '#64748b';
+          catatanBg = '#f8fafc';
+          catatanBorder = '#e2e8f0';
         } else if (t.status === 'Dibatalkan' || (t.status || '').toLowerCase().includes('batal')) {
-          catatanText = 'Pengajuan izin dibatalkan oleh pemohon';
+          catatanText = '✕ Pengajuan izin dibatalkan oleh pemohon';
           catatanColor = '#64748b';
+          catatanBg = '#f8fafc';
+          catatanBorder = '#e2e8f0';
         }
 
-        const dateStr = t.createdAt ? t.createdAt.slice(0, 11) : '19 Okt 2026';
+        // Format tanggal secara rapi & manusiawi (contoh: 26 Okt 2026)
+        let dateStr = 'Hari ini';
+        if (t.createdAt) {
+          const parsed = typeof window.parseTicketDateTime === 'function' ? window.parseTicketDateTime(t.createdAt) : new Date(t.createdAt);
+          if (parsed && !isNaN(parsed.getTime())) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            dateStr = `${parsed.getDate()} ${months[parsed.getMonth()]} ${parsed.getFullYear()}`;
+          } else {
+            dateStr = t.createdAt.split(',')[0].trim();
+          }
+        }
+
         const scheduleWithDay = formatTicketScheduleWithDay(t);
+        const isDinas = t.category === 'Dinas Kantor';
 
         return `
-          <div class="figma-grid-item" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem; background: #ffffff; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <!-- Header ID & Status (Clean typography, no box, no •) -->
+          <div class="figma-grid-item" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem; background: #ffffff; display: flex; flex-direction: column; gap: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+            <!-- Header ID & Status -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
               <div>
-                <div style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${t.id}</div>
-                <div style="font-size: 0.725rem; color: #94a3b8; margin-top: 2px;">Diajukan ${dateStr}</div>
+                <div style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; letter-spacing: -0.2px;">${t.id}</div>
+                <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; font-weight: 500;">Diajukan ${dateStr}</div>
               </div>
               <div style="text-align: right;">${getCleanEmpStatus(t.status, t)}</div>
             </div>
 
-            <!-- Tags -->
-            <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
-              <span class="figma-tag-badge" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;">${t.category}</span>
-              <span class="figma-tag-badge" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;">${t.type}</span>
+            <!-- Tags Kategori & Tipe Izin -->
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+              <span class="figma-tag-badge" style="${isDinas ? 'background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;' : 'background: #fefce8; color: #a16207; border: 1px solid #fef08a;'} font-weight: 600; font-size: 0.725rem; padding: 0.2rem 0.55rem; border-radius: 6px;">${t.category}</span>
+              <span class="figma-tag-badge" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; font-size: 0.725rem; padding: 0.2rem 0.55rem; border-radius: 6px;">${t.type}</span>
             </div>
 
-            <!-- Fields with Rencana Waktu including Hari -->
-            <div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.775rem;">
-              <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
-                <span style="color: #64748b;">Tujuan keluar</span>
+            <!-- Detail Box (Tujuan, Keperluan, Rencana Waktu) -->
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 0.75rem 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.775rem;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                <span style="color: #64748b; font-weight: 500;">Tujuan keluar</span>
                 <span style="color: #0f172a; font-weight: 700; text-align: right;">${t.destination}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
-                <span style="color: #64748b;">Keperluan</span>
-                <span style="color: #0f172a; font-weight: 700; text-align: right; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</span>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                <span style="color: #64748b; font-weight: 500;">Keperluan</span>
+                <span style="color: #0f172a; font-weight: 600; text-align: right; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; gap: 0.5rem; align-items: flex-start;">
-                <span style="color: #64748b; white-space: nowrap; font-size: 0.775rem;">Rencana waktu</span>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.45rem; border-top: 1px dashed #e2e8f0;">
+                <span style="color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
                 <div style="text-align: right;">${scheduleWithDay}</div>
               </div>
             </div>
 
-            <!-- Note (Clean text without colored box) -->
-            <div style="font-size: 0.75rem; color: ${catatanColor}; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; line-height: 1.4; font-weight: 500;">
+            <!-- Note Banner (Sesuai status) -->
+            <div style="font-size: 0.75rem; color: ${catatanColor}; background: ${catatanBg}; border: 1px solid ${catatanBorder}; border-radius: 6px; padding: 0.45rem 0.65rem; line-height: 1.4; font-weight: 600;">
               ${catatanText}
             </div>
 
-            <!-- Action Buttons -->
-            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.5rem; border-top: 1px solid #f8fafc;">
+            <!-- Action Buttons Footer -->
+            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.65rem; border-top: 1px solid #f1f5f9;">
               <div style="display: flex; gap: 0.65rem; align-items: center;">
                 ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui' || t.status === 'Terlambat') ? `
-                  <button class="btn-figma-primary" style="padding: 0.4rem 0.85rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'qr')">
+                  <button class="btn-figma-primary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'qr')">
                     Buka QR Izin
                   </button>
                 ` : ''}
-                <a href="#" class="figma-card-link" style="font-size: 0.775rem;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>
+                <a href="#" class="figma-card-link" style="font-size: 0.8rem; font-weight: 700; color: #0284c7;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan →</a>
               </div>
-              <button type="button" class="btn-figma-delete-single" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.5rem; border-radius: 4px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+              <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fee2e2; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.55rem; border-radius: 6px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 <span>Hapus</span>
               </button>
@@ -1193,7 +1241,8 @@ function renderEmpTable(list, containerElement) {
     if (t.status === 'Terlambat') {
       catatanHtml = `<span style="color: #b91c1c; font-weight: 600;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
     } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-      catatanHtml = `<span style="color: #b45309; font-weight: 500;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} (+${t.lateMinutes || 10} mnt)</span>`;
+      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
+      catatanHtml = `<span style="color: #b45309; font-weight: 500;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} (+${lateStr})</span>`;
     } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
       catatanHtml = `<span style="color: #b91c1c;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
     } else if (t.status === 'Kedaluwarsa' || t.status === 'Kadaluwarsa') {

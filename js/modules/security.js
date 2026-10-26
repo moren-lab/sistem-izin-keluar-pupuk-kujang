@@ -173,8 +173,7 @@ function renderSecurityDashboard() {
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-              ${window.getStatusPill(t.status)}
-              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 700;" onclick="executeScanIn('${t.id}')" title="Proses Tap In (Kartu Akses Kujang / Card Reader)">Tap In Kartu</button>
+              ${window.getStatusPill(t.status, t)}
             </div>
           </div>
         `;
@@ -216,7 +215,7 @@ function renderSecurityDashboard() {
   }
 }
 
-function renderSecurityCards(list, containerElement) {
+function renderSecurityCards(list, containerElement, isHistoryMode = false) {
   const containerSecurityQueue = document.getElementById('containerSecurityQueue');
   const target = containerElement || containerSecurityQueue;
   if (!target) return;
@@ -274,13 +273,13 @@ function renderSecurityCards(list, containerElement) {
 
             ${isOverdue ? `
               <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b91c1c; font-weight:700;">
-                Karyawan terlambat kembali! Segera proses Scan In saat tiba di pos jaga.
+                Karyawan terlambat kembali! Wajib melakukan Tap In Kartu Akses saat tiba di kawasan.
               </div>
             ` : ''}
 
             ${isLateCompleted ? `
               <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b45309; font-weight:700;">
-                Karyawan kembali melewati estimasi waktu (+${t.lateMinutes || 10} menit terlambat).
+                Karyawan kembali melewati estimasi waktu (+${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`} terlambat).
               </div>
             ` : ''}
 
@@ -307,19 +306,13 @@ function renderSecurityCards(list, containerElement) {
               </div>
 
               <div style="display:flex; gap:0.4rem; align-items: center;">
-                ${isReadyExit ? `
+                ${(isReadyExit && !isHistoryMode) ? `
                   <button class="btn-quick-scan-out" onclick="executeScanOut('${t.id}')" title="Proses Scan Out (Meninggalkan Kawasan Pabrik)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     <span>Proses Scan Out</span>
                   </button>
                 ` : ''}
-                ${(isOutside || isOverdue) ? `
-                  <button class="btn-quick-scan-in" onclick="executeScanIn('${t.id}')" title="Proses Tap In (Kartu Akses Kujang)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    <span>Proses Scan In</span>
-                  </button>
-                ` : ''}
-                <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.6rem; border-radius: 6px; transition: background 0.15s; margin-left: 0.25rem;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'pelacakan')" title="Hapus Data #${t.id}">
+                <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.6rem; border-radius: 6px; transition: background 0.15s; margin-left: 0.25rem;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', '${isHistoryMode ? 'riwayat' : 'pelacakan'}')" title="Hapus Data #${t.id}">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
                 </button>
@@ -404,7 +397,7 @@ function renderSecurityView() {
     if (window.currentSecurityLogViewMode === 'table') {
       renderSecurityLogTable(filteredLog, containerSecurityLog);
     } else {
-      renderSecurityCards(filteredLog, containerSecurityLog);
+      renderSecurityCards(filteredLog, containerSecurityLog, true);
     }
     return;
   }
@@ -532,7 +525,8 @@ function renderSecurityLogTable(list, containerElement) {
             } else if (t.status === 'Terlambat') {
               catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
             } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-              catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${t.lateMinutes || 10} mnt)</span>`;
+              const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
+              catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
             } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
               catatanHtml = `<span style="color: #b91c1c; font-size: 0.725rem;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
             } else if (t.status === 'Kedaluwarsa') {
@@ -614,7 +608,7 @@ function executeVerification(inputQuery) {
   } else if (ticket.status === 'Menunggu Persetujuan') {
     if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} belum disetujui Atasan. Dilarang keluar!`, 'warning');
   } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') {
-    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah keluar pabrik. Siap diproses Tap In Kartu Akses (Masuk Kembali).`, 'info');
+    if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sedang di luar kawasan. Tap In Masuk dilakukan oleh Karyawan bersangkutan.`, 'info');
   } else if (ticket.status === 'Disetujui') {
     if (ticket.isEmergency) {
       if (typeof window.showToast === 'function') {
