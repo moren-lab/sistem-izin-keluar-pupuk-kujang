@@ -16,8 +16,6 @@ window.currentAdminNav = currentAdminNav;
 // CLOCK
 function updateClock() {
   const liveDigitalClock = document.getElementById('liveDigitalClock');
-  if (!liveDigitalClock) return;
-
   const now = new Date();
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -31,7 +29,14 @@ function updateClock() {
   const mm = pad(now.getMinutes());
   const ss = pad(now.getSeconds());
 
-  liveDigitalClock.textContent = `${day}, ${d} ${m} ${y} — ${hh}:${mm}:${ss} WIB`;
+  if (liveDigitalClock) {
+    liveDigitalClock.textContent = `${day}, ${d} ${m} ${y} — ${hh}:${mm}:${ss} WIB`;
+  }
+
+  // Sinkronisasi otomatis status tiket (Terlambat & Kedaluwarsa) setiap detik mengikuti jam sistem laptop user
+  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+    window.checkOverdueAndExpiredTickets(true);
+  }
 }
 
 // SIDEBAR TOGGLING

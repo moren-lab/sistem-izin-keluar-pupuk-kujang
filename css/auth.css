@@ -1,0 +1,625 @@
+/* ==========================================================================
+   KUJANG ID - IDENTITY PROVIDER PT PUPUK KUJANG
+   Modern Corporate Authentication Styles (Clean, Professional, No AI Slop)
+   ========================================================================== */
+
+/* Fullscreen Auth Overlay */
+.kujang-auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #f1f5f9;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.04) 0px, transparent 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0f172a;
+}
+
+/* Centered Auth Card for PC & Mobile */
+.kujang-auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.02);
+  padding: 2rem 2rem 1.75rem;
+  margin: auto;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 576px) {
+  .kujang-auth-overlay {
+    padding: 0;
+    align-items: flex-start;
+    background: #ffffff;
+  }
+  .kujang-auth-card {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+/* Stepper Bar (1 Pilih akun, 2 Verifikasi OTP, 3 Masuk SAKTI) */
+.kujang-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  position: relative;
+}
+
+.kujang-step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #94a3b8;
+  position: relative;
+  z-index: 2;
+}
+
+.kujang-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.kujang-step-item.active {
+  color: #0f172a;
+}
+
+.kujang-step-item.active .kujang-step-num {
+  background: #059669;
+  color: #ffffff;
+}
+
+.kujang-step-item.completed {
+  color: #059669;
+}
+
+.kujang-step-item.completed .kujang-step-num {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+/* Brand Header */
+.kujang-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.kujang-logo-box {
+  width: 44px;
+  height: 44px;
+  background: #0f172a;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+}
+
+.kujang-brand-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.kujang-brand-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Tabs Switcher: TKO, TKNO, Tamu/Eksternal */
+.kujang-tabs-wrap {
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 4px;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0.65rem;
+}
+
+.kujang-tab-btn {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: #475569;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kujang-tab-btn:hover {
+  color: #0f172a;
+}
+
+.kujang-tab-btn.active {
+  background: #059669;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+}
+
+.kujang-tabs-caption {
+  font-size: 0.775rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+/* Section Title Pill */
+.kujang-section-pill {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+/* Login Method Buttons (Identik, ESS, DOF) */
+.kujang-method-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.kujang-method-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.kujang-method-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+}
+
+/* Color strips on the left */
+.kujang-method-card.identik::before { background: #059669; }
+.kujang-method-card.ess::before { background: #2563eb; }
+.kujang-method-card.dof::before { background: #1d4ed8; }
+
+.kujang-method-card:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+.kujang-method-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kujang-method-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.kujang-method-card.identik .kujang-method-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+.kujang-method-card.ess .kujang-method-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.kujang-method-card.dof .kujang-method-icon {
+  background: #eef2ff;
+  color: #1d4ed8;
+}
+
+.kujang-method-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.kujang-method-desc {
+  font-size: 0.775rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.kujang-method-arrow {
+  color: #94a3b8;
+  font-size: 1.25rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.kujang-method-card:hover .kujang-method-arrow {
+  color: #0f172a;
+  transform: translateX(3px);
+}
+
+/* Note under methods */
+.kujang-methods-note {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+/* Security Notice Box (Light Cream, Clean) */
+.kujang-security-box {
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.kujang-security-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #854d0e;
+  margin-bottom: 0.45rem;
+}
+
+.kujang-security-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.75rem;
+  color: #713f12;
+  line-height: 1.55;
+}
+
+/* Demo Mockup Accordion Guide */
+.kujang-demo-accordion {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.kujang-demo-toggle {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: none;
+  background: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kujang-demo-toggle:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.kujang-demo-content {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: none;
+}
+
+.kujang-demo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.kujang-chip-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.kujang-chip-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   FORM LOGIN & OTP VERIFICATION STEPS
+   ========================================================================== */
+
+.kujang-back-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem 0;
+}
+
+.kujang-back-btn:hover {
+  color: #059669;
+}
+
+.kujang-form-group {
+  margin-bottom: 1.15rem;
+}
+
+.kujang-form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.kujang-input-wrap {
+  position: relative;
+}
+
+.kujang-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.kujang-input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.kujang-btn-primary {
+  width: 100%;
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 0.925rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.kujang-btn-primary:hover {
+  background: #047857;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+
+/* OTP 6-Digit Inputs */
+.kujang-otp-grid {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.kujang-otp-digit {
+  width: 48px;
+  height: 54px;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.kujang-otp-digit:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Floating Simulated WhatsApp Notification */
+.kujang-wa-popup {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 1000000;
+  background: #ffffff;
+  border: 1px solid #bbf7d0;
+  border-left: 5px solid #22c55e;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 1rem 1.15rem;
+  max-width: 360px;
+  animation: slideInDown 0.3s ease;
+  font-family: inherit;
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.kujang-wa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.kujang-wa-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #15803d;
+}
+
+.kujang-wa-time {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.kujang-wa-body {
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.kujang-wa-otp-code {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 2px;
+  font-family: monospace;
+  margin: 0.4rem 0;
+}
+
+.kujang-wa-action-btn {
+  background: #22c55e;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 0.4rem;
+}
+
+.kujang-wa-action-btn:hover {
+  background: #16a34a;
+}
+
+/* User Account Badge in App Header */
+.kujang-user-topbar-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.35rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+}
+
+.kujang-user-topbar-avatar {
+  font-size: 1.15rem;
+}
+
+.kujang-user-topbar-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kujang-user-topbar-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.kujang-user-topbar-role {
+  font-size: 0.675rem;
+  color: #64748b;
+}
+
+.kujang-btn-logout-header {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.775rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s;
+}
+
+.kujang-btn-logout-header:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}

@@ -6,9 +6,11 @@
 
 /**
  * Robust date-time parser supporting:
- * - ISO string: "2026-10-23T15:00"
- * - Space separated: "2026-10-23 15:00"
- * - Indonesian text format: "23 Okt 2026 | 15.00 WIB" / "19 Oktober 2026, 13:00"
+ * - ISO string: "2026-10-26T12:30", "2026-10-26T12:30:00"
+ * - Space separated: "2026-10-26 12:30"
+ * - Time only: "12:30", "12.30", "12:30 WIB" (otomatis dipasangkan dengan tanggal hari ini)
+ * - Indonesian text format: "26 Okt 2026, 12:30 WIB", "26 Oktober 2026 12.30"
+ * - Slash date format: "26/10/2026 12:30"
  * - Date object & timestamps
  */
 function parseTicketDateTime(val) {
@@ -20,16 +22,27 @@ function parseTicketDateTime(val) {
   }
   if (typeof val !== 'string') return null;
 
-  // 1. Standard ISO parser (handles 2026-10-23T15:00:00 etc)
-  let d = new Date(val);
+  const raw = val.trim();
+
+  // 1. Format hanya jam: "12:30", "12.30", "12:30 WIB", "12:30:00"
+  const timeOnlyMatch = raw.match(/^(\d{1,2})[:.](\d{2})(?:[:.]\d{2})?(?:\s*WIB)?$/i);
+  if (timeOnlyMatch) {
+    const now = new Date();
+    const h = parseInt(timeOnlyMatch[1], 10);
+    const m = parseInt(timeOnlyMatch[2], 10);
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+  }
+
+  // 2. Standard ISO parser (handles 2026-10-26T12:30 etc)
+  let d = new Date(raw);
   if (!isNaN(d.getTime())) return d;
 
-  // 2. Space separated ISO format (2026-10-23 15:00)
-  const cleanIso = val.trim().replace(' ', 'T');
+  // 3. Space separated ISO format (2026-10-26 12:30)
+  const cleanIso = raw.replace(' ', 'T');
   d = new Date(cleanIso);
   if (!isNaN(d.getTime())) return d;
 
-  // 3. Indonesian text date format parsing
+  // 4. Indonesian text date format: "26 Okt 2026, 12:30 WIB" / "26 Oktober 2026 12.30"
   const indonesianMonths = {
     'jan': 0, 'januari': 0,
     'feb': 1, 'februari': 1,
@@ -44,23 +57,36 @@ function parseTicketDateTime(val) {
     'nov': 10, 'november': 10,
     'des': 11, 'desember': 11, 'dec': 11
   };
-  const match = val.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}).*?(\d{1,2})[:.](\d{2})/);
-  if (match) {
-    const day = parseInt(match[1], 10);
-    const monthKey = match[2].toLowerCase();
-    const year = parseInt(match[3], 10);
-    const hour = parseInt(match[4], 10);
-    const minute = parseInt(match[5], 10);
+
+  const idMatch = raw.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}).*?(\d{1,2})[:.](\d{2})/);
+  if (idMatch) {
+    const day = parseInt(idMatch[1], 10);
+    const monthKey = idMatch[2].toLowerCase().slice(0, 3);
+    const year = parseInt(idMatch[3], 10);
+    const hour = parseInt(idMatch[4], 10);
+    const minute = parseInt(idMatch[5], 10);
     if (indonesianMonths[monthKey] !== undefined) {
-      return new Date(year, indonesianMonths[monthKey], day, hour, minute);
+      return new Date(year, indonesianMonths[monthKey], day, hour, minute, 0);
     }
+  }
+
+  // 5. Slash format: "26/10/2026 12:30"
+  const slashMatch = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}).*?(\d{1,2})[:.](\d{2})/);
+  if (slashMatch) {
+    const day = parseInt(slashMatch[1], 10);
+    const month = parseInt(slashMatch[2], 10) - 1;
+    const year = parseInt(slashMatch[3], 10);
+    const hour = parseInt(slashMatch[4], 10);
+    const minute = parseInt(slashMatch[5], 10);
+    return new Date(year, month, day, hour, minute, 0);
   }
 
   return null;
 }
 
 function getActiveTicket(nip = (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841')) {
-  const list = window.ticketsList || [];
+  // Ambil tiket terbaru dari window.ticketsList atau localStorage
+  const list = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
   return list.find(t =>
     (t.applicantNip === nip || !t.applicantNip) &&
     t.status !== 'Dibatalkan' &&
@@ -71,8 +97,13 @@ function getActiveTicket(nip = (window.ACTORS && window.ACTORS.karyawan ? window
   );
 }
 
+/**
+ * Pengecekan otomatis tiket Terlambat & Kedaluwarsa
+ * Berjalan setiap detik secara real-time mengikuti jam sistem laptop user
+ */
 function checkOverdueAndExpiredTickets(silent = true) {
-  const list = window.ticketsList || [];
+  // Selalu pastikan membaca array tiket termutakhir
+  const list = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
   const now = new Date();
   let hasChanges = false;
   let newlyOverdue = 0;
@@ -84,11 +115,13 @@ function checkOverdueAndExpiredTickets(silent = true) {
 
   list.forEach(ticket => {
     const statusNormalized = (ticket.status || '').trim();
+    const isEmergencyTicket = Boolean(ticket.isEmergency || (ticket.id && (ticket.id.includes('-EMG-') || ticket.id.startsWith('TK-EMG'))));
 
+    // -------------------------------------------------------------------------
     // 1. KEDALUWARSA (BRULE-11):
-    // Tiket reguler yang telah Disetujui tapi tidak kunjung dipindai keluar melewati toleransi rencana jam keluar (+10 menit)
-    // PENTING: Tiket Darurat / Bypass (isEmergency) TIDAK hangus otomatis agar tetap aktif dan dapat dipindai di pos jaga.
-    const isEmergencyTicket = ticket.isEmergency || (ticket.id && ticket.id.startsWith('TK-EMG'));
+    // Tiket yang telah Disetujui tapi tidak kunjung dipindai keluar melewati toleransi rencana jam keluar (+10 menit)
+    // Tiket Darurat / Bypass tidak hangus otomatis.
+    // -------------------------------------------------------------------------
     if (!isEmergencyTicket && statusNormalized === 'Disetujui' && ticket.plannedExit && !ticket.scanOutTime) {
       const exitTime = parseTicketDateTime(ticket.plannedExit);
       const toleranceMs = 10 * 60 * 1000; // toleransi 10 menit
@@ -106,37 +139,58 @@ function checkOverdueAndExpiredTickets(silent = true) {
       }
     }
 
+    // -------------------------------------------------------------------------
     // 2. TERLAMBAT (BRULE-15 & FR-MON-02):
     // Karyawan berstatus Sedang di Luar (Kembali ke Area) tapi waktu saat ini telah melewati perkiraan jam kembali
+    // -------------------------------------------------------------------------
     const isOutside = statusNormalized.toLowerCase() === 'sedang di luar';
+    const isAlreadyLate = statusNormalized.toLowerCase() === 'terlambat';
     const isReturnTrip = ticket.type !== 'Pulang Mendahului' || (ticket.type && ticket.type.toLowerCase().includes('kembali')) || Boolean(ticket.estimatedReturn);
 
-    if (isOutside && isReturnTrip && ticket.estimatedReturn && !ticket.scanInTime) {
+    if ((isOutside || isAlreadyLate) && isReturnTrip && ticket.estimatedReturn && !ticket.scanInTime) {
       const returnTime = parseTicketDateTime(ticket.estimatedReturn);
-      if (returnTime && !isNaN(returnTime.getTime()) && (now.getTime() > returnTime.getTime())) {
+
+      if (returnTime && !isNaN(returnTime.getTime())) {
         // PERIKSA GRACE PERIOD PENGAJUAN PERPANJANGAN WAKTU
         const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';
+        let gracePeriodActive = false;
         if (hasPendingExt && ticket.pendingExtension.newEstimatedReturn) {
           const extTime = parseTicketDateTime(ticket.pendingExtension.newEstimatedReturn);
           if (extTime && !isNaN(extTime.getTime()) && now.getTime() <= extTime.getTime()) {
-            // GRACE PERIOD AKTIF: Karyawan telah mengajukan perpanjangan waktu dan waktu baru belum terlewati.
-            // Status dibekukan tetap 'Sedang di Luar' agar karyawan tidak divonis terlambat saat atasan belum merespons.
-            return;
+            gracePeriodActive = true;
           }
         }
 
-        ticket.status = 'Terlambat';
-        ticket.isLate = true;
-        ticket.lateMinutes = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
-        if (!ticket.timeline) ticket.timeline = [];
-        ticket.timeline.push({
-          event: 'Status Terlambat',
-          time: nowFormatted,
-          by: 'Sistem Otomatis (Scheduler)',
-          desc: `Karyawan belum melakukan Scan In kembali setelah batas waktu estimasi kembali (${window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn}). Terlambat ${ticket.lateMinutes} menit.`
-        });
-        hasChanges = true;
-        newlyOverdue++;
+        if (now.getTime() > returnTime.getTime()) {
+          // WAKTU SAAT INI MELEWATI BATAS KEMBALI
+          if (!gracePeriodActive && ticket.status !== 'Terlambat') {
+            ticket.status = 'Terlambat';
+            ticket.isLate = true;
+            ticket.lateMinutes = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
+            if (!ticket.timeline) ticket.timeline = [];
+            ticket.timeline.push({
+              event: 'Status Terlambat',
+              time: nowFormatted,
+              by: 'Sistem Otomatis (Scheduler)',
+              desc: `Karyawan belum melakukan Scan In kembali setelah batas waktu estimasi kembali (${window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn}). Terlambat ${ticket.lateMinutes} menit.`
+            });
+            hasChanges = true;
+            newlyOverdue++;
+          } else if (ticket.status === 'Terlambat') {
+            // Update kalkulasi menit keterlambatan berjalan
+            const currentLateMins = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
+            if (ticket.lateMinutes !== currentLateMins) {
+              ticket.lateMinutes = currentLateMins;
+              hasChanges = true;
+            }
+          }
+        } else if (now.getTime() <= returnTime.getTime() && ticket.status === 'Terlambat') {
+          // Jika waktu laptop dimundurkan oleh user sebelum jam kembali, pulihkan status ke 'Sedang di Luar'
+          ticket.status = 'Sedang di Luar';
+          ticket.isLate = false;
+          ticket.lateMinutes = 0;
+          hasChanges = true;
+        }
       }
     }
   });
@@ -145,25 +199,37 @@ function checkOverdueAndExpiredTickets(silent = true) {
     if (typeof window.saveTickets === 'function') {
       window.saveTickets(list);
     }
+
     if (!silent && typeof window.showToast === 'function') {
-      if (newlyOverdue > 0) window.showToast(`⚠️ Perhatian: ${newlyOverdue} tiket ditandai TERLAMBAT kembali!`, 'danger');
+      if (newlyOverdue > 0) window.showToast(`⚠️ Perhatian: ${newlyOverdue} izin keluar melewati batas kembali (TERLAMBAT)!`, 'danger');
       if (newlyExpired > 0) window.showToast(`Informasi: ${newlyExpired} tiket otomatis KEDALUWARSA.`, 'info');
     }
+
     // Update all metrics
     if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
     if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
     if (typeof window.updateAdminMetrics === 'function') window.updateAdminMetrics();
 
-    // Re-render active view
-    if (window.currentActor === 'karyawan' && typeof window.renderKaryawanView === 'function') {
-      window.renderKaryawanView();
-    } else if (window.currentActor === 'approver' && typeof window.renderApproverView === 'function') {
-      window.renderApproverView();
-    } else if (window.currentActor === 'security' && typeof window.renderSecurityView === 'function') {
-      window.renderSecurityView();
-    } else if (window.currentActor === 'admin' && typeof window.renderAdminView === 'function') {
-      window.renderAdminView();
+    // Re-render antarmuka yang sedang aktif dilihat oleh user di layar
+    if (typeof document !== 'undefined') {
+      const viewKaryawan = document.getElementById('viewKaryawan');
+      const viewApprover = document.getElementById('viewApprover');
+      const viewSecurity = document.getElementById('viewSecurity');
+      const viewAdmin = document.getElementById('viewAdmin');
+
+      if (viewKaryawan && viewKaryawan.style.display !== 'none' && typeof window.renderKaryawanView === 'function') {
+        window.renderKaryawanView();
+      }
+      if (viewApprover && viewApprover.style.display !== 'none' && typeof window.renderApproverView === 'function') {
+        window.renderApproverView();
+      }
+      if (viewSecurity && viewSecurity.style.display !== 'none' && typeof window.renderSecurityView === 'function') {
+        window.renderSecurityView();
+      }
+      if (viewAdmin && viewAdmin.style.display !== 'none' && typeof window.renderAdminView === 'function') {
+        window.renderAdminView();
+      }
     }
   }
 }
@@ -172,4 +238,3 @@ function checkOverdueAndExpiredTickets(silent = true) {
 window.parseTicketDateTime = parseTicketDateTime;
 window.getActiveTicket = getActiveTicket;
 window.checkOverdueAndExpiredTickets = checkOverdueAndExpiredTickets;
-

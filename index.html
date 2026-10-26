@@ -9,11 +9,226 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="css/style.css?v=20261026_1140">
+  <link rel="stylesheet" href="css/auth.css?v=20261026_1220">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
 
 <body>
+
+  <!-- ================= KUJANG ID AUTH OVERLAY (GATEKEEPER) ================= -->
+  <div id="kujangAuthOverlay" class="kujang-auth-overlay" style="display: none;">
+    <div class="kujang-auth-card">
+
+      <!-- Stepper 3 Tahap -->
+      <div class="kujang-stepper">
+        <div class="kujang-step-item active" id="kujangStepItem1">
+          <span class="kujang-step-num">1</span>
+          <span>Pilih akun</span>
+        </div>
+        <div class="kujang-step-item" id="kujangStepItem2">
+          <span class="kujang-step-num">2</span>
+          <span>Verifikasi OTP</span>
+        </div>
+        <div class="kujang-step-item" id="kujangStepItem3">
+          <span class="kujang-step-num">3</span>
+          <span>Masuk SAKTI</span>
+        </div>
+      </div>
+
+      <!-- Brand Header -->
+      <div class="kujang-brand-header">
+        <div class="kujang-logo-box">K</div>
+        <div>
+          <div class="kujang-brand-title">KUJANG ID</div>
+          <div class="kujang-brand-sub">Identity Provider · PT Pupuk Kujang</div>
+        </div>
+      </div>
+
+      <!-- STEP 1A: PILIH METODE LOGIN (SESUAI GAMBAR MOCKUP) -->
+      <div id="kujangStepMethods">
+        <!-- Tabs Switcher: TKO (Focus), TKNO, Tamu/Eksternal -->
+        <div class="kujang-tabs-wrap">
+          <button type="button" class="kujang-tab-btn active" id="tabKujangTKO">TKO</button>
+          <button type="button" class="kujang-tab-btn" id="tabKujangTKNO" onclick="window.showToast('Silakan pilih tab TKO untuk simulasi perizinan', 'info')">TKNO</button>
+          <button type="button" class="kujang-tab-btn" id="tabKujangTamu" onclick="window.showToast('Silakan pilih tab TKO untuk simulasi perizinan', 'info')">Tamu / Eksternal</button>
+        </div>
+        <div class="kujang-tabs-caption">Pilih tipe akun Anda terlebih dahulu</div>
+
+        <div class="kujang-section-pill">Pilih metode login sesuai akun Anda</div>
+
+        <!-- 3 Metode Login -->
+        <div class="kujang-method-list">
+          <!-- 1. Identik / PI Smart -->
+          <div class="kujang-method-card identik" onclick="window.selectKujangMethod('identik')">
+            <div class="kujang-method-left">
+              <div class="kujang-method-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 9"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="kujang-method-name">Identik / PI Smart</div>
+                <div class="kujang-method-desc">Akun Pupuk Indonesia Group</div>
+              </div>
+            </div>
+            <div class="kujang-method-arrow">→</div>
+          </div>
+
+          <!-- 2. ESS -->
+          <div class="kujang-method-card ess" onclick="window.selectKujangMethod('ess')">
+            <div class="kujang-method-left">
+              <div class="kujang-method-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="kujang-method-name">ESS</div>
+                <div class="kujang-method-desc">Employee Self Service</div>
+              </div>
+            </div>
+            <div class="kujang-method-arrow">→</div>
+          </div>
+
+          <!-- 3. DOF -->
+          <div class="kujang-method-card dof" onclick="window.selectKujangMethod('dof')">
+            <div class="kujang-method-left">
+              <div class="kujang-method-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <div>
+                <div class="kujang-method-name">DOF</div>
+                <div class="kujang-method-desc">Digital Office</div>
+              </div>
+            </div>
+            <div class="kujang-method-arrow">→</div>
+          </div>
+        </div>
+
+        <div class="kujang-methods-note">
+          Karyawan Organik PKC tidak memasukkan username/password di sini. Pilih salah satu metode di atas untuk diarahkan ke halaman login masing-masing.
+        </div>
+
+        <!-- Perhatian: Keamanan Akun -->
+        <div class="kujang-security-box">
+          <div class="kujang-security-title">
+            <span>⚠️</span>
+            <span>Perhatian: Keamanan Akun</span>
+          </div>
+          <ul class="kujang-security-list">
+            <li>Akun terkunci otomatis setelah 3x login gagal</li>
+            <li>Jangan bagikan password atau kode OTP kepada siapapun</li>
+            <li>Hubungi IT Support ext. 1234 jika akun terkunci</li>
+          </ul>
+        </div>
+
+        <!-- Petunjuk demo mockup accordion -->
+        <div class="kujang-demo-accordion">
+          <button type="button" class="kujang-demo-toggle" id="kujangDemoToggle">
+            <span>▶ Petunjuk demo mockup & Akun Cepat</span>
+            <span class="kujang-accordion-arrow">▶</span>
+          </button>
+          <div class="kujang-demo-content" id="kujangDemoContent">
+            <div style="font-size: 0.75rem; color: #64748b; line-height: 1.45;">
+              Pilih salah satu aktor untuk mengisi akun demo (password: <strong>123</strong>):
+            </div>
+            <div class="kujang-demo-chips">
+              <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('karyawan')">👨‍💼 Karyawan</button>
+              <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('atasan1')">👔 Atasan 1</button>
+              <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('atasan2')">💼 Atasan 2</button>
+              <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('posjaga')">🛡️ Pos Jaga</button>
+              <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('admin')">⚙️ Admin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 1B: FORM LOGIN USERNAME & PASSWORD -->
+      <div id="kujangStepLoginForm" style="display: none;">
+        <button type="button" class="kujang-back-btn" onclick="window.showKujangMethodStep()">
+          <span>← Kembali ke Pilihan Metode</span>
+        </button>
+
+        <div style="margin-bottom: 1.25rem;">
+          <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;" id="kujangSelectedMethodTitle">Identik / PI Smart</div>
+          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Masukkan kredensial akun PT Pupuk Kujang Anda</div>
+        </div>
+
+        <form id="kujangLoginForm" onsubmit="window.handleKujangLoginSubmit(event); return false;">
+          <div class="kujang-form-group">
+            <label class="kujang-form-label" for="kujangInputUser">Username / NIP / Email</label>
+            <input type="text" id="kujangInputUser" class="kujang-input" placeholder="contoh: karyawan atau atasan1" autocomplete="username" required>
+          </div>
+
+          <div class="kujang-form-group">
+            <label class="kujang-form-label" for="kujangInputPass">Kata Sandi (Password)</label>
+            <input type="password" id="kujangInputPass" class="kujang-input" placeholder="masukkan kata sandi (demo: 123)" autocomplete="current-password" required>
+          </div>
+
+          <div id="kujangLoginError" style="display: none; background: #fef2f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 0.6rem 0.85rem; color: #b91c1c; font-size: 0.775rem; font-weight: 600; margin-bottom: 1rem;"></div>
+
+          <button type="submit" class="kujang-btn-primary" id="btnKujangSubmitLogin">
+            <span>Lanjutkan ke Verifikasi OTP</span>
+            <span>→</span>
+          </button>
+        </form>
+
+        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+          <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.4rem; font-weight: 600;">Pilih Cepat untuk Demo:</div>
+          <div class="kujang-demo-chips">
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('karyawan')">👨‍💼 Karyawan</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('atasan1')">👔 Atasan 1</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('atasan2')">💼 Atasan 2</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('posjaga')">🛡️ Pos Jaga</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('admin')">⚙️ Admin</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: VERIFIKASI OTP WHATSAPP -->
+      <div id="kujangStepOtp" style="display: none;">
+        <button type="button" class="kujang-back-btn" onclick="window.selectKujangMethod('identik')">
+          <span>← Kembali</span>
+        </button>
+
+        <div style="text-align: center; margin-bottom: 1.25rem;">
+          <div style="width: 52px; height: 52px; background: #ecfdf5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 0.75rem;">
+            💬
+          </div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Verifikasi OTP WhatsApp</div>
+          <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem; line-height: 1.45; max-width: 380px; margin-left: auto; margin-right: auto;">
+            Kode 6 digit telah dikirimkan ke nomor WhatsApp terdaftar:<br>
+            <strong id="kujangOtpTargetPhone" style="color: #0f172a; font-family: monospace; font-size: 0.875rem;">+62 812-****-8841</strong>
+          </p>
+        </div>
+
+        <div class="kujang-otp-grid">
+          <input type="text" maxlength="1" class="kujang-otp-digit" inputmode="numeric" autocomplete="one-time-code">
+          <input type="text" maxlength="1" class="kujang-otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="kujang-otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="kujang-otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="kujang-otp-digit" inputmode="numeric">
+          <input type="text" maxlength="1" class="kujang-otp-digit" inputmode="numeric">
+        </div>
+
+        <div id="kujangOtpError" style="display: none; background: #fef2f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 0.6rem 0.85rem; color: #b91c1c; font-size: 0.775rem; font-weight: 600; text-align: center; margin-bottom: 1rem;"></div>
+
+        <button type="button" class="kujang-btn-primary" id="btnKujangVerifyOtp" onclick="window.handleKujangOtpVerify()">
+          <span>Verifikasi & Masuk SAKTI</span>
+        </button>
+
+        <div style="text-align: center; margin-top: 1.15rem; font-size: 0.775rem; color: #64748b;">
+          Tidak menerima kode? <a href="#" onclick="window.handleKujangLoginSubmit(); return false;" style="color: #059669; font-weight: 700; text-decoration: none;">Kirim ulang OTP</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <div class="app-layout">
 
@@ -343,6 +558,16 @@
                 <path d="M3 3v5h5"></path>
               </svg>
               <span>Reset ke 0</span>
+            </button>
+            <button class="role-switch-btn" id="btnKujangLogoutNav" onclick="window.kujangLogout()"
+              title="Keluar akun dan kembali ke KUJANG ID"
+              style="border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 700;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Ganti Akun (Logout)</span>
             </button>
           </div>
         </div>
@@ -3762,18 +3987,20 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261026_1214"></script>
-  <script src="js/modules/ui.js?v=20261026_1214"></script>
-  <script src="js/modules/scheduler.js?v=20261026_1214"></script>
-  <script src="js/modules/navigation.js?v=20261026_1214"></script>
-  <script src="js/modules/karyawan.js?v=20261026_1214"></script>
-  <script src="js/modules/approver.js?v=20261026_1214"></script>
-  <script src="js/modules/security.js?v=20261026_1214"></script>
-  <script src="js/modules/admin.js?v=20261026_1214"></script>
-  <script src="js/modules/charts.js?v=20261026_1214"></script>
-  <script src="js/modules/emergency.js?v=20261026_1214"></script>
-  <script src="js/modules/modals.js?v=20261026_1214"></script>
-  <script src="js/app.js?v=20261026_1214"></script>
+  <script src="js/data/mockData.js?v=20261026_1330"></script>
+  <script src="js/data/authData.js?v=20261026_1330"></script>
+  <script src="js/modules/ui.js?v=20261026_1330"></script>
+  <script src="js/modules/scheduler.js?v=20261026_1330"></script>
+  <script src="js/modules/navigation.js?v=20261026_1330"></script>
+  <script src="js/modules/karyawan.js?v=20261026_1330"></script>
+  <script src="js/modules/approver.js?v=20261026_1330"></script>
+  <script src="js/modules/security.js?v=20261026_1330"></script>
+  <script src="js/modules/admin.js?v=20261026_1330"></script>
+  <script src="js/modules/charts.js?v=20261026_1330"></script>
+  <script src="js/modules/emergency.js?v=20261026_1330"></script>
+  <script src="js/modules/modals.js?v=20261026_1330"></script>
+  <script src="js/app.js?v=20261026_1330"></script>
+  <script src="js/modules/auth.js?v=20261026_1330"></script>
 </body>
 
 </html>
