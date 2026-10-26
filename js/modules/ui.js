@@ -9,27 +9,31 @@ function getStatusPill(status, ticket) {
     status = ticket.status;
   }
 
+  if (typeof window.getCleanEmpStatus === 'function') {
+    return window.getCleanEmpStatus(status, ticket);
+  }
+
   const isLateCompleted = (status === 'Selesai') && ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
   if (isLateCompleted) {
     const lateMnt = ticket.lateMinutes ? ` ${ticket.lateMinutes} mnt` : '';
-    return `<span class="status-pill overdue" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px;">Selesai (Terlambat${lateMnt})</span>`;
+    return `<span style="font-weight: 700; font-size: 0.8125rem; color: #b45309; letter-spacing: -0.01em;">Selesai (Terlambat${lateMnt})</span>`;
   }
 
-  let cls = 'pending';
+  let color = '#059669';
   switch (status) {
-    case 'Disetujui': cls = 'approved'; break;
-    case 'Menunggu Persetujuan': cls = 'pending'; break;
+    case 'Disetujui': color = '#059669'; break;
+    case 'Menunggu Persetujuan': color = '#d97706'; break;
     case 'Menunggu Otorisasi Darurat':
-    case 'Darurat Terkunci': cls = 'emergency-locked'; break;
-    case 'Sedang di Luar': cls = 'outside'; break;
-    case 'Terlambat': cls = 'overdue'; break;
-    case 'Kedaluwarsa': cls = 'expired'; break;
-    case 'Selesai': cls = 'completed'; break;
-    case 'Ditolak': cls = 'rejected'; break;
-    case 'Dibatalkan': cls = 'cancelled'; break;
-    default: cls = 'pending';
+    case 'Darurat Terkunci': color = '#b91c1c'; break;
+    case 'Sedang di Luar': color = '#0284c7'; break;
+    case 'Terlambat': color = '#dc2626'; break;
+    case 'Kedaluwarsa': color = '#64748b'; break;
+    case 'Selesai': color = '#059669'; break;
+    case 'Ditolak': color = '#dc2626'; break;
+    case 'Dibatalkan': color = '#94a3b8'; break;
+    default: color = '#d97706';
   }
-  return `<span class="status-pill ${cls}">${status}</span>`;
+  return `<span style="font-weight: 700; font-size: 0.8125rem; color: ${color}; letter-spacing: -0.01em;">${status}</span>`;
 }
 
 function formatDisplayDate(dateStr) {

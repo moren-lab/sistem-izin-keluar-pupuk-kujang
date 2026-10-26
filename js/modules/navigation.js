@@ -142,6 +142,15 @@ function setApproverNav(navKey) {
   if (navKey === 'dashboard' && typeof window.renderApproverBarChart === 'function') {
     window.renderApproverBarChart();
   }
+
+  const breadcrumbRole = document.getElementById('breadcrumbRole');
+  const breadcrumbSubpage = document.getElementById('breadcrumbSubpage');
+  if (breadcrumbRole) breadcrumbRole.textContent = (window.currentActor === 'approver2') ? 'Atasan 2' : 'Atasan 1';
+  if (breadcrumbSubpage) {
+    if (navKey === 'dashboard') breadcrumbSubpage.textContent = 'Dashboard';
+    else if (navKey === 'antrian') breadcrumbSubpage.textContent = 'Antrian Persetujuan';
+    else if (navKey === 'pelacakan') breadcrumbSubpage.textContent = 'Pelacakan Izin Karyawan';
+  }
 }
 
 function setSecurityNav(navKey) {
@@ -186,6 +195,16 @@ function setSecurityNav(navKey) {
   if (typeof window.renderSecurityView === 'function') {
     window.renderSecurityView();
   }
+
+  const breadcrumbRole = document.getElementById('breadcrumbRole');
+  const breadcrumbSubpage = document.getElementById('breadcrumbSubpage');
+  if (breadcrumbRole) breadcrumbRole.textContent = 'Pos Jaga';
+  if (breadcrumbSubpage) {
+    if (navKey === 'dashboard') breadcrumbSubpage.textContent = 'Dashboard';
+    else if (navKey === 'scanner') breadcrumbSubpage.textContent = 'Pemindai QR';
+    else if (navKey === 'pelacakan') breadcrumbSubpage.textContent = 'Pelacakan Personel';
+    else if (navKey === 'riwayat') breadcrumbSubpage.textContent = 'Riwayat Pos Jaga';
+  }
 }
 
 function setAdminNav(navKey) {
@@ -219,6 +238,16 @@ function setAdminNav(navKey) {
   if (navKey === 'dashboard') {
     if (typeof window.renderAdminTrafficChart === 'function') window.renderAdminTrafficChart();
     if (typeof window.renderAdminDeptChart === 'function') window.renderAdminDeptChart();
+  }
+
+  const breadcrumbRole = document.getElementById('breadcrumbRole');
+  const breadcrumbSubpage = document.getElementById('breadcrumbSubpage');
+  if (breadcrumbRole) breadcrumbRole.textContent = 'Admin';
+  if (breadcrumbSubpage) {
+    if (navKey === 'dashboard') breadcrumbSubpage.textContent = 'Monitoring Headcount';
+    else if (navKey === 'audit') breadcrumbSubpage.textContent = 'Audit Trail & Log';
+    else if (navKey === 'report') breadcrumbSubpage.textContent = 'Rekapitulasi Data';
+    else if (navKey === 'users') breadcrumbSubpage.textContent = 'Hak Akses KUJANG ID';
   }
 }
 
@@ -373,12 +402,16 @@ function switchRole(role) {
   // Update mobile bottom nav visibility & active role group (Excludes Admin)
   updateMobileBottomNav(role);
 
-  // Auto-scroll role switcher to keep active button in view
+  // Keep active button in view safely without shifting desktop navbar or parent elements
+  const roleContainer = document.querySelector('.role-switcher-container');
   const activeBtn = document.querySelector('.role-switch-btn.active');
-  if (activeBtn) {
+  if (roleContainer && activeBtn && window.innerWidth <= 768) {
     try {
-      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      const offset = activeBtn.offsetLeft - (roleContainer.clientWidth / 2) + (activeBtn.clientWidth / 2);
+      roleContainer.scrollTo({ left: Math.max(0, offset), behavior: 'smooth' });
     } catch (e) {}
+  } else if (roleContainer && window.innerWidth > 768) {
+    roleContainer.scrollLeft = 0;
   }
 
   if (typeof window.renderAllCharts === 'function') {

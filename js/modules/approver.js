@@ -335,7 +335,7 @@ function renderApproverDashboard() {
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
-                <span class="tag-badge ${t.category === 'Dinas Kantor' ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
+                <span style="font-weight: 700; font-size: 0.75rem; color: ${t.category === 'Dinas Kantor' ? '#059669' : '#d97706'};">${t.category}</span>
               </div>
               ${window.getStatusPill(t.status)}
             </div>
@@ -366,9 +366,9 @@ function renderApproverDashboard() {
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
-                <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; font-size: 0.7rem;">↳ DIALIHKAN KE ${t.approverName.toUpperCase()}</span>
+                <span style="color: #92400e; font-weight: 800; font-size: 0.725rem;">↳ Dialihkan ke ${t.approverName}</span>
               </div>
-              <span class="tag-badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">Status: ${t.status}</span>
+              <div>${window.getStatusPill(t.status)}</div>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
               <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
@@ -380,7 +380,7 @@ function renderApproverDashboard() {
               <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
                 Rencana: ${t.plannedExit ? t.plannedExit.replace('T', ' ') : '-'}
               </span>
-              <button class="btn-card-detail" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Lihat Rincian Status</button>
+              <button class="btn-card-detail" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Detail pengajuan</button>
             </div>
           </div>
         `;
@@ -411,7 +411,7 @@ function renderApproverDashboard() {
               <div>
                 <div class="feed-item-title" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
                   <span>${t.applicantName} — ${t.destination}</span>
-                  ${isEmergency ? '<span class="tag-badge" style="background:#ffe4e6; color:#b91c1c; font-weight:800; font-size:0.65rem;">🚨 DARURAT</span>' : ''}
+                  ${isEmergency ? '<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">🚨 DARURAT</span>' : ''}
                 </div>
                 <div class="feed-item-sub">
                   ${t.id} — Est. Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
@@ -459,7 +459,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
                 <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
               </div>
-              <span class="tag-badge ${isEmergency ? '' : (isDinas ? 'tag-dinas' : 'tag-pribadi')}" style="${isEmergency ? 'background:#ffe4e6; color:#b91c1c; font-weight:800;' : ''}">${isEmergency ? '🚨 ' + t.category : t.category}</span>
+              <span style="font-weight: 700; font-size: 0.75rem; color: ${isEmergency ? '#b91c1c' : (isDinas ? '#059669' : '#d97706')};">${isEmergency ? '🚨 ' + t.category : t.category}</span>
             </div>
 
             ${isTicketReassignedFromCurrentApprover(t) ? `
@@ -483,15 +483,10 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               <span><strong>Tujuan:</strong> ${t.destination}</span>
             </div>
 
-            <div class="card-details-box">
-              <div>
-                <span style="font-size:0.675rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Rencana Keluar</span>
-                <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.plannedExit.replace('T', ' ')}</div>
-              </div>
-              <div style="color:#cbd5e1;">→</div>
-              <div style="text-align: right;">
-                <span style="font-size:0.675rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Estimasi Kembali</span>
-                <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.65rem 0.85rem; margin: 0.35rem 0;">
+              <div style="font-size: 0.675rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Rencana Waktu</div>
+              <div style="margin-top: 3px;">
+                ${typeof window.formatTicketScheduleWithDay === 'function' ? window.formatTicketScheduleWithDay(t) : `<div style="font-family: var(--font-mono); font-size: 0.775rem; font-weight: 700; color: #0f172a;">${t.plannedExit.replace('T', ' ')} → ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang'}</div>`}
               </div>
             </div>
 
@@ -499,7 +494,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; margin: 0.5rem 0;">
                 <div style="font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between;">
                   <span>⏱️ Permohonan Perpanjangan Waktu</span>
-                  <span class="tag-badge" style="background:#fef3c7; color:#92400e;">Grace Period</span>
+                  <span style="font-size:0.75rem; font-weight:700; color:#b45309;">Grace Period</span>
                 </div>
                 <div style="margin-top: 0.35rem; color: #78350f; font-size: 0.775rem; line-height: 1.4;">
                   <div><strong>Waktu Baru:</strong> <strong style="color: #b45309;">${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong></div>
@@ -512,7 +507,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin: 0.65rem 0;">
                 <div style="font-weight: 800; color: #9f1239; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
                   <span>🚨 Hasil Penulisan Form Kedaruratan (K3/Medis)</span>
-                  <span class="tag-badge" style="background: #ffe4e6; color: #9f1239; font-weight: 800;">
+                  <span style="color: #9f1239; font-weight: 800; font-size: 0.75rem;">
                     ${t.selectedMethod === 'passcode' ? '🔑 Cara: Sandi / OTP' : (t.selectedMethod === 'facescan' ? '🤳 Cara: Scan Wajah' : '📱 Cara: Persetujuan di App')}
                   </span>
                 </div>
@@ -551,16 +546,16 @@ function renderApproverCards(list, containerElement, isTracking = false) {
 
             <div class="card-actions-bar">
               <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
-                <button class="btn-card-qr" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'qr')" title="Buka Tiket Digital & QR Code">
+                <button class="btn-figma-primary" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'qr')" title="Buka Tiket Digital & QR Code">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                  <span>Tiket & QR Code</span>
+                  <span>Buka QR Izin</span>
                 </button>
                 <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Lihat Rincian</span>
+                  <span>Detail pengajuan</span>
                 </button>
                 ${isTrackingView ? `
-                  <button type="button" class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px; color:#e11d48; border-color:#fecdd3; background:#fff1f2; display:inline-flex; align-items:center; gap:0.25rem;" onclick="window.deleteApproverTicket('${t.id}')" title="Hapus catatan izin dari pelacakan">
+                  <button type="button" class="btn-figma-delete-single" onclick="window.deleteApproverTicket('${t.id}')" title="Hapus catatan izin dari pelacakan">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     <span>Hapus</span>
                   </button>
@@ -568,19 +563,16 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
 
               ${isTicketReassignedFromCurrentApprover(t) ? `
-                <span style="font-size:0.75rem; color:#92400e; background:#fef3c7; border:1px solid #fde68a; padding:0.3rem 0.7rem; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
-                  <span style="width:7px; height:7px; border-radius:50%; background:#d97706; display:inline-block;"></span>
+                <span style="font-size:0.75rem; color:#92400e; font-weight:700;">
                   Dialihkan ke ${t.approverName}
                 </span>
               ` : (isTrackingView ? (
                 (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
-                  <span style="font-size:0.75rem; color:#b45309; background:#fffbeb; border:1px solid #fde68a; padding:0.3rem 0.7rem; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
-                    <span style="width:7px; height:7px; border-radius:50%; background:#d97706; display:inline-block;"></span>
+                  <span style="font-size:0.75rem; color:#b45309; font-weight:700;">
                     Belum Diputuskan
                   </span>
                 ` : `
-                  <span style="font-size:0.75rem; color:#047857; background:#ecfdf5; border:1px solid #a7f3d0; padding:0.3rem 0.7rem; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
-                    <span style="width:7px; height:7px; border-radius:50%; background:#059669; display:inline-block;"></span>
+                  <span style="font-size:0.75rem; color:#047857; font-weight:700;">
                     Sudah Diputuskan
                   </span>
                 `

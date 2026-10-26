@@ -977,6 +977,7 @@ const DAYS_OF_WEEK_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 
 const MONTHS_SHORT_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
 function formatTicketScheduleWithDay(t) {
+  if (!t) return '-';
   const dExit = (typeof window.parseTicketDateTime === 'function') 
     ? (window.parseTicketDateTime(t.plannedExit) || window.parseTicketDateTime(t.createdAt)) 
     : new Date(t.plannedExit || t.createdAt);
@@ -991,9 +992,16 @@ function formatTicketScheduleWithDay(t) {
     const pad = (n) => String(n).padStart(2, '0');
     plannedTimeStr = `${pad(dExit.getHours())}:${pad(dExit.getMinutes())}`;
   } else {
+    const rawExit = t.plannedExit || t.createdAt || '';
+    const match = rawExit.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+    if (match) {
+      dateFormatted = `${match[1]} ${match[2]} ${match[3]}`;
+    } else {
+      dateFormatted = t.createdAt ? t.createdAt.slice(0, 11) : '26 Okt 2026';
+    }
+    const tMatch = rawExit.match(/(\d{1,2})[:.](\d{2})/);
+    plannedTimeStr = tMatch ? `${tMatch[1].padStart(2, '0')}:${tMatch[2]}` : '10:00';
     dayName = 'Senin';
-    dateFormatted = t.createdAt ? t.createdAt.slice(0, 11) : '19 Okt 2026';
-    plannedTimeStr = t.plannedExit ? t.plannedExit.slice(11, 16).replace('.', ':') : '10:00';
   }
 
   let returnTimeStr = '';
@@ -1003,19 +1011,22 @@ function formatTicketScheduleWithDay(t) {
       : new Date(t.estimatedReturn);
     if (dReturn && !isNaN(dReturn.getTime())) {
       const pad = (n) => String(n).padStart(2, '0');
-      if (dExit && dReturn.toDateString() !== dExit.toDateString()) {
+      if (dExit && !isNaN(dExit.getTime()) && dReturn.toDateString() !== dExit.toDateString()) {
         const retDay = DAYS_OF_WEEK_ID[dReturn.getDay()];
         returnTimeStr = `${retDay}, ${pad(dReturn.getHours())}:${pad(dReturn.getMinutes())} WIB`;
       } else {
         returnTimeStr = `${pad(dReturn.getHours())}:${pad(dReturn.getMinutes())} WIB`;
       }
     } else {
-      returnTimeStr = `${t.estimatedReturn.slice(11, 16).replace('.', ':')} WIB`;
+      const tMatch = String(t.estimatedReturn).match(/(\d{1,2})[:.](\d{2})/);
+      returnTimeStr = tMatch ? `${tMatch[1].padStart(2, '0')}:${tMatch[2]} WIB` : `${t.estimatedReturn.slice(11, 16).replace('.', ':')} WIB`;
     }
+  } else if (t.type === 'Pulang Mendahului' || t.type === 'Tidak Kembali (Pulang)') {
+    returnTimeStr = '(Pulang)';
   }
 
   const timePart = returnTimeStr ? `${plannedTimeStr} – ${returnTimeStr}` : `${plannedTimeStr} WIB`;
-  return `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${dayName}, ${dateFormatted}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${timePart}</div>`;
+  return `<div style="font-weight: 700; color: #0f172a; font-size: 0.785rem; white-space: nowrap;">${dayName}, ${dateFormatted}</div><div style="font-size: 0.74rem; color: #475569; font-family: var(--font-mono); font-weight: 500; margin-top: 2px; white-space: nowrap;">${timePart}</div>`;
 }
 
 function getCleanEmpStatus(status, ticket) {
@@ -1120,9 +1131,9 @@ function renderEmpCards(list, containerElement) {
                 <span style="color: #64748b;">Keperluan</span>
                 <span style="color: #0f172a; font-weight: 700; text-align: right; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline;">
-                <span style="color: #64748b; white-space: nowrap;">Rencana waktu</span>
-                <span style="color: #0f172a; font-weight: 700; text-align: right;">${scheduleWithDay}</span>
+              <div style="display: flex; justify-content: space-between; gap: 0.5rem; align-items: flex-start;">
+                <span style="color: #64748b; white-space: nowrap; font-size: 0.775rem;">Rencana waktu</span>
+                <div style="text-align: right;">${scheduleWithDay}</div>
               </div>
             </div>
 

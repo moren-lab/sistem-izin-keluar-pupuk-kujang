@@ -466,20 +466,26 @@ body {
 .role-switcher-container {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   background: #f1f5f9;
   border: 1.5px solid #cbd5e1;
   border-radius: var(--radius-full);
-  padding: 4px 6px;
+  padding: 3px 5px;
   overflow-x: auto;
   max-width: 100%;
   white-space: nowrap;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
   cursor: grab;
   user-select: none;
+}
+
+.role-switcher-container::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
 }
 
 .role-switcher-container.grabbing {
@@ -1525,8 +1531,8 @@ body {
 
 .btn-card-detail {
   background: #ffffff;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  color: #059669;
+  border: 1px solid #a7f3d0;
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.85rem;
   font-size: 0.775rem;
@@ -1540,9 +1546,9 @@ body {
 }
 
 .btn-card-detail:hover {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-  border-color: #cbd5e1;
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #059669;
 }
 
 /* APPROVER BUTTONS */
@@ -2693,111 +2699,87 @@ body.modal-open {
   font-family: var(--font-mono);
 }
 
-/* SUBTLE STATUS PILLS (CALM & LEGIBLE) */
+/* SUBTLE STATUS PILLS (CLEAN TYPOGRAPHY - NO BOX) */
 .status-pill-subtle {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.725rem;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
   white-space: nowrap;
-  min-width: 80px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 .status-pill-subtle.status-selesai {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  color: #059669;
 }
 
 .status-pill-subtle.status-outside {
-  background: #ecfeff;
-  color: #0e7490;
-  border: 1px solid #cffafe;
+  color: #0284c7;
 }
 
 .status-pill-subtle.status-overdue {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fee2e2;
+  color: #dc2626;
   font-weight: 700;
 }
 
 .status-pill-subtle.status-expired {
-  background: #f8fafc;
   color: #64748b;
-  border: 1px solid #e2e8f0;
 }
 
 .status-pill-subtle.status-approved {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #d1fae5;
+  color: #059669;
 }
 
 .status-pill-subtle.status-pending {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fef3c7;
+  color: #d97706;
 }
 
 .status-pill-subtle.status-rejected {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fee2e2;
+  color: #dc2626;
 }
 
-/* AUDIT TRAIL PILLS (SUBTLE) */
+/* AUDIT TRAIL PILLS (CLEAN TYPOGRAPHY - NO BOX) */
 .audit-pill {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.725rem;
-  font-weight: 600;
+  font-size: 0.775rem;
+  font-weight: 700;
   white-space: nowrap;
-  background: #f1f5f9;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   color: #334155;
-  border: 1px solid #e2e8f0;
 }
 
 .audit-pill.event-approve {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: #dcfce7;
+  color: #059669 !important;
 }
 
 .audit-pill.event-reject {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #fee2e2;
+  color: #dc2626 !important;
 }
 
 .audit-pill.event-out {
-  background: #fffbeb;
-  color: #92400e;
-  border-color: #fef3c7;
+  color: #d97706 !important;
 }
 
 .audit-pill.event-in {
-  background: #ecfeff;
-  color: #0e7490;
-  border-color: #cffafe;
+  color: #0284c7 !important;
 }
 
 .audit-pill.event-overdue {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #fecaca;
-  font-weight: 700;
+  color: #dc2626 !important;
+  font-weight: 800 !important;
 }
 
 .audit-pill.event-expire {
-  background: #f8fafc;
-  color: #64748b;
-  border-color: #e2e8f0;
+  color: #64748b !important;
 }
 
 /* Filter Toolbar */
@@ -4081,8 +4063,8 @@ body.modal-open {
 }
 
 .brand-icon-box {
-  background: #1d68d8 !important;
-  box-shadow: 0 4px 10px rgba(29, 104, 216, 0.3) !important;
+  background: #059669 !important;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3) !important;
   border-radius: 8px !important;
   flex-shrink: 0 !important;
 }
@@ -4278,7 +4260,7 @@ body.modal-open {
 .figma-kicker-date {
   font-size: 0.725rem;
   font-weight: 800;
-  color: #1d68d8;
+  color: #059669;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -4286,7 +4268,7 @@ body.modal-open {
 .figma-kicker-blue {
   font-size: 0.725rem;
   font-weight: 800;
-  color: #1d68d8;
+  color: #059669;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   margin-bottom: 2px;
@@ -4664,24 +4646,40 @@ body.modal-open {
   gap: 0.3rem;
 }
 
-/* Hilangkan box background dan border status di seluruh area Karyawan */
+/* Hilangkan box background dan border status di SELURUH area (Karyawan, Atasan 1 & 2, Admin, Pos Jaga, Modal, Riwayat) */
+.status-pill,
+.status-pill-subtle,
+.status-pill-purple,
+.status-pill-green,
+.status-pill-amber,
+.status-pill-red,
+.status-pill-gray,
+.status-pill-blue,
+.status-pill.approved,
+.status-pill.pending,
+.status-pill.outside,
+.status-pill.completed,
+.status-pill.rejected,
+.status-pill.cancelled,
+.status-pill.overdue,
+.status-pill.expired,
+.status-pill.emergency-locked,
 #viewKaryawan .status-pill,
-#viewKaryawan .status-pill-purple,
-#viewKaryawan .status-pill-green,
-#viewKaryawan .status-pill-amber,
-#viewKaryawan .status-pill-red,
-#viewKaryawan .status-pill-gray,
+#viewApprover .status-pill,
+#viewAdmin .status-pill,
+#viewSecurity .status-pill,
 #digitalPassModal .status-pill,
-#digitalPassModal .status-pill-purple,
-#digitalPassModal .status-pill-green,
-#digitalPassModal .status-pill-amber,
-#digitalPassModal .status-pill-red,
-#digitalPassModal .status-pill-blue {
+#ticketDetailModal .status-pill,
+#decisionModal .status-pill,
+.report-category-pill,
+.audit-pill {
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
 }
 
 /* Figma Filter Toolbar */
@@ -4924,9 +4922,9 @@ body.modal-open {
 }
 
 .figma-tab-btn.active {
-  color: #2563eb;
+  color: #059669;
   font-weight: 700;
-  border-bottom: 2px solid #2563eb;
+  border-bottom: 2px solid #059669;
 }
 
 /* Connected Vertical Timeline (Figma Screenshot 3) */
@@ -4964,9 +4962,9 @@ body.modal-open {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #2563eb;
+  background: #059669;
   border: 2px solid #ffffff;
-  box-shadow: 0 0 0 2px #93c5fd;
+  box-shadow: 0 0 0 2px #a7f3d0;
 }
 
 .figma-timeline-dot.green {
@@ -5026,8 +5024,8 @@ body.modal-open {
 }
 
 .figma-radio-pill.selected {
-  border-color: #2563eb;
-  background: #eff6ff;
+  border-color: #059669;
+  background: #ecfdf5;
 }
 
 .figma-radio-circle {
@@ -5044,9 +5042,9 @@ body.modal-open {
 }
 
 .figma-radio-pill.selected .figma-radio-circle {
-  border-color: #2563eb;
-  background: #2563eb;
-  box-shadow: inset 0 0 0 3px #eff6ff;
+  border-color: #059669;
+  background: #059669;
+  box-shadow: inset 0 0 0 3px #ecfdf5;
 }
 
 .figma-radio-text {
@@ -5056,7 +5054,7 @@ body.modal-open {
 }
 
 .figma-radio-pill.selected .figma-radio-text {
-  color: #1e40af;
+  color: #065f46;
 }
 
 /* ===================================================================
@@ -5123,14 +5121,14 @@ body.modal-open {
 
 .approver-search-input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #059669;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
 }
 
 .approver-search-input:focus + .btn-clear-approver-search + .btn-toggle-approver-list,
 .approver-input-box:focus-within .approver-input-icon {
-  color: #2563eb;
+  color: #059669;
 }
 
 .approver-search-input::placeholder {
@@ -5403,7 +5401,7 @@ body.modal-open {
   gap: 0.2rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #2563eb;
+  color: #059669;
   opacity: 0;
   transition: opacity 0.15s ease;
   flex-shrink: 0;
@@ -5765,14 +5763,14 @@ body.modal-open {
 /* 1. Admin Edit Button (Subtle Neutral / Primary Accent) */
 .btn-admin-edit {
   background: #ffffff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  color: #059669;
+  border: 1px solid #a7f3d0;
 }
 
 .btn-admin-edit:hover {
-  background: #eff6ff;
-  border-color: #60a5fa;
-  color: #1d4ed8;
+  background: #ecfdf5;
+  border-color: #059669;
+  color: #047857;
 }
 
 /* 2. Admin Warning Toggle Button (Cabut Akses) */

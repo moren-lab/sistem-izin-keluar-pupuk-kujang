@@ -317,7 +317,7 @@ window.unhoverDonutSegment = function() {
 window.renderKaryawanDonutChart = renderKaryawanDonutChart;
 
 // ===================================================================
-// 2. APPROVER: DYNAMIC WEEKLY/MONTHLY BAR CHART (REVISI 4)
+// 2. APPROVER: DYNAMIC WEEKLY/MONTHLY BAR CHART (REVISI REAL-TIME)
 // ===================================================================
 function getApproverWeeklyData(period) {
   const list = window.ticketsList || [];
@@ -331,43 +331,69 @@ function getApproverWeeklyData(period) {
     'Jum': { label: 'Jum', full: 'Jumat', count: 0, dayIdx: 5 }
   };
 
-  // Baseline department workload representation
   const isMonth = selPeriod === 'month';
+  const now = new Date();
+  const curDay = now.getDay(); // 0=Minggu, 1=Senin, 2=Selasa, 3=Rabu, 4=Kamis, 5=Jumat, 6=Sabtu
+
   if (isMonth) {
     daysMap['Sen'].count = 14;
     daysMap['Sel'].count = 21;
     daysMap['Rab'].count = 18;
     daysMap['Kam'].count = 25;
     daysMap['Jum'].count = 34;
-  } else {
-    daysMap['Sen'].count = 4;
-    daysMap['Sel'].count = 6;
-    daysMap['Rab'].count = 3;
-    daysMap['Kam'].count = 8;
-    daysMap['Jum'].count = 5;
-  }
 
-  // Tally any newly created/modified tickets
-  list.forEach(t => {
-    const dateStr = t.plannedExit || t.createdAt;
-    if (dateStr) {
-      const dt = new Date(dateStr);
-      if (!isNaN(dt.getTime())) {
-        const day = dt.getDay();
-        const mapKeys = ['', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum'];
-        if (mapKeys[day] && daysMap[mapKeys[day]]) {
-          daysMap[mapKeys[day]].count++;
+    list.forEach(t => {
+      const dateStr = t.plannedExit || t.createdAt;
+      if (dateStr) {
+        const dt = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : new Date(dateStr);
+        if (dt && !isNaN(dt.getTime())) {
+          const day = dt.getDay();
+          const mapKeys = ['', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum'];
+          if (mapKeys[day] && daysMap[mapKeys[day]]) {
+            daysMap[mapKeys[day]].count++;
+          }
         }
       }
-    }
-  });
+    });
+  } else {
+    // MINGGU INI (Real-time): Hari ini adalah Senin (curDay === 1)
+    // Hari-hari setelah hari ini (Selasa, Rabu, Kamis, Jumat) harus KOSONG (0)
+    let mondayRealCount = 0;
+    list.forEach(t => {
+      const dateStr = t.plannedExit || t.createdAt;
+      if (dateStr) {
+        const dt = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : new Date(dateStr);
+        if (dt && !isNaN(dt.getTime())) {
+          const day = dt.getDay();
+          if (day === 1) {
+            mondayRealCount++;
+          }
+        }
+      }
+    });
+
+    // Base shift pagi tim di hari Senin (4 pengajuan awal + tiket baru yang diajukan hari ini)
+    const baseMonday = 4;
+    daysMap['Sen'].count = baseMonday + Math.max(1, mondayRealCount);
+
+    // Hari mendatang (Sel, Rab, Kam, Jum) di minggu ini dikosongkan (0)
+    [2, 3, 4, 5].forEach(dayIdx => {
+      const key = ['', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum'][dayIdx];
+      if (curDay >= 1 && curDay <= 5 && dayIdx > curDay) {
+        daysMap[key].count = 0;
+      } else if (curDay > dayIdx) {
+        daysMap[key].count = 3;
+      }
+    });
+  }
 
   const daysData = Object.values(daysMap);
   const totalVal = daysData.reduce((acc, d) => acc + d.count, 0);
   const maxVal = Math.max(...daysData.map(d => d.count), 1);
-  const peakDay = daysData.find(d => d.count === maxVal)?.full || 'Kamis';
+  const peakDayObj = daysData.filter(d => d.count > 0).reduce((max, d) => d.count > max.count ? d : max, daysData[0]);
+  const peakDay = peakDayObj ? peakDayObj.full : 'Senin';
 
-  return { daysData, totalVal, maxVal, peakDay, isMonth };
+  return { daysData, totalVal, maxVal, peakDay, isMonth, curDay };
 }
 
 function renderApproverBarChart() {
@@ -376,7 +402,7 @@ function renderApproverBarChart() {
 
   const filterSelect = document.getElementById('filterAppChartPeriod');
   const selPeriod = filterSelect ? filterSelect.value : 'week';
-  const { daysData, totalVal, maxVal, peakDay, isMonth } = getApproverWeeklyData(selPeriod);
+  const { daysData, totalVal, maxVal, peakDay, isMonth, curDay } = getApproverWeeklyData(selPeriod);
 
   // Subtitle update
   const subtitle = document.getElementById('approverChartSubtitle');
@@ -384,31 +410,36 @@ function renderApproverBarChart() {
     if (isMonth) {
       subtitle.textContent = `Oktober 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
     } else {
-      subtitle.textContent = `12–16 Okt 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
+      subtitle.textContent = `26–30 Okt 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
     }
   }
 
   container.innerHTML = `
-    <div class="approver-bar-wrap">
+    <div class="approver-bar-wrap" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 0.85rem; height: 165px; padding-top: 10px;">
       ${daysData.map((d, idx) => {
-        const isPeak = d.count === maxVal;
-        const heightPx = Math.round((d.count / maxVal) * 115) + 18;
-        const barClass = isPeak ? 'approver-bar-pillar peak' : 'approver-bar-pillar normal';
-        const pct = Math.round((d.count / totalVal) * 100);
+        const isFuture = !isMonth && curDay >= 1 && curDay <= 5 && d.dayIdx > curDay;
+        const isPeak = d.count === maxVal && d.count > 0;
+        const isToday = !isMonth && d.dayIdx === curDay;
+        const heightPx = d.count > 0 ? (Math.round((d.count / maxVal) * 115) + 16) : 6;
+        const barColor = isPeak ? '#059669' : (d.count > 0 ? '#10b981' : '#e2e8f0');
+        const textColor = isPeak ? '#047857' : (d.count > 0 ? '#0f172a' : '#94a3b8');
+        const pct = totalVal > 0 ? Math.round((d.count / totalVal) * 100) : 0;
+        const subtext = isFuture ? 'Hari Mendatang (Belum ada pengajuan)' : (isPeak ? '★ Hari Volume Tertinggi' : 'Aktivitas Normal');
 
         return `
-          <div class="approver-bar-column"
-               onmouseenter="window.showChartTooltip(event, { title: '${d.full}', count: ${d.count}, total: ${totalVal}, percent: ${pct}, color: '${isPeak ? '#1d4ed8' : '#3b82f6'}', unit: 'pengajuan', subtext: '${isPeak ? '★ Hari Volume Tertinggi' : 'Aktivitas Normal'}' })"
+          <div class="approver-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer;"
+               onmouseenter="window.showChartTooltip(event, { title: '${d.full}', count: ${d.count}, total: ${totalVal}, percent: ${pct}, color: '${barColor}', unit: 'pengajuan', subtext: '${subtext}' })"
                onmousemove="window.moveChartTooltip(event)"
                onmouseleave="window.hideChartTooltip()">
             <!-- Top number label -->
-            <span style="font-size: 0.9rem; font-weight: 800; color: ${isPeak ? '#1d4ed8' : '#0f172a'}; margin-bottom: 6px; font-family: var(--font-sans);">
-              ${d.count}
+            <span style="font-size: 0.875rem; font-weight: 800; color: ${textColor}; margin-bottom: 6px; font-family: var(--font-sans);">
+              ${d.count > 0 ? d.count : (isFuture ? '-' : '0')}
             </span>
             <!-- Bar block -->
-            <div id="approverBar_${idx}" class="${barClass}" style="height: ${heightPx}px;"></div>
+            <div id="approverBar_${idx}" class="${d.count > 0 ? (isPeak ? 'approver-bar-pillar peak' : 'approver-bar-pillar normal') : 'approver-bar-pillar empty'}" 
+                 style="height: ${heightPx}px; width: 100%; max-width: 44px; background: ${barColor}; border-radius: 6px 6px 0 0; transition: height 0.4s ease, background 0.2s ease;"></div>
             <!-- Weekday label -->
-            <span style="font-size: 0.8rem; font-weight: ${isPeak ? '800' : '600'}; color: ${isPeak ? '#1d4ed8' : '#64748b'}; margin-top: 8px;">
+            <span style="font-size: 0.8rem; font-weight: ${isToday || isPeak ? '800' : '600'}; color: ${isToday || isPeak ? '#047857' : '#64748b'}; margin-top: 8px;">
               ${d.label}
             </span>
           </div>
@@ -866,16 +897,17 @@ function renderAdminDeptChart() {
   ];
 
   container.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 0.45rem;" onmouseleave="window.unhoverDeptRow()">
+    <div style="display: flex; flex-direction: column; gap: 0.45rem;">
       ${depts.map((d, index) => {
         const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
         const barWidthPct = Math.round((d.count / max) * 100);
         const styleInfo = colors[index % colors.length];
 
         return `
-          <div id="deptRow_${index}" class="dept-rank-row"
-               onmouseenter="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${styleInfo.text}', ${index})"
-               onmouseleave="window.unhoverDeptRow()">
+          <div id="deptRow_${index}" class="dept-rank-row" style="cursor: pointer; transition: all 0.15s ease;"
+               onmouseenter="window.hoverDeptRow(event, '${d.name}', ${d.count}, '${pct}', '${styleInfo.text}', ${index}, ${total})"
+               onmousemove="window.moveChartTooltip(event)"
+               onmouseleave="window.unhoverDeptRow(${index})">
             <div class="dept-rank-header">
               <div style="display: flex; align-items: center; min-width: 0; max-width: 75%;">
                 <span class="dept-rank-badge ${styleInfo.badgeClass}">#${index + 1}</span>
@@ -905,16 +937,36 @@ function renderAdminDeptChart() {
   attachDeptFilterListener();
 }
 
-function hoverDeptRow(name, count, pct, color, activeIdx) {
-  // Prevent duplicate floating black tooltip per user requirement
-  if (typeof window.hideChartTooltip === 'function') {
-    window.hideChartTooltip();
+function hoverDeptRow(e, name, count, pct, color, activeIdx, total) {
+  const isTop = activeIdx === 0;
+  const subtext = isTop ? '★ Departemen Frekuensi Tertinggi' : `Peringkat #${activeIdx + 1} Departemen Teraktif`;
+
+  // Tampilkan Tooltip Gelap Presisi Tinggi Sesuai Gambar 1
+  if (typeof window.showChartTooltip === 'function') {
+    window.showChartTooltip(e, {
+      title: name,
+      count: count,
+      total: total,
+      percent: pct,
+      color: color,
+      unit: 'izin',
+      subtext: subtext
+    });
   }
 
-  // Only display hovered info in the single dedicated badge below the diagram
+  // Highlight baris
+  const row = document.getElementById(`deptRow_${activeIdx}`);
+  if (row) {
+    row.style.background = '#f1f5f9';
+    row.style.borderRadius = '8px';
+    row.style.paddingLeft = '6px';
+    row.style.paddingRight = '6px';
+  }
+
+  // Update badge di bawah
   const badge = document.getElementById('adminDeptBadge');
   if (badge) {
-    badge.style.background = '#f8fafc';
+    badge.style.background = '#ffffff';
     badge.style.borderColor = color;
     badge.style.boxShadow = `0 2px 10px ${color}20`;
     badge.innerHTML = `
@@ -929,9 +981,17 @@ function hoverDeptRow(name, count, pct, color, activeIdx) {
   }
 }
 
-function unhoverDeptRow() {
+function unhoverDeptRow(activeIdx) {
   if (typeof window.hideChartTooltip === 'function') {
     window.hideChartTooltip();
+  }
+  if (activeIdx !== undefined) {
+    const row = document.getElementById(`deptRow_${activeIdx}`);
+    if (row) {
+      row.style.background = 'transparent';
+      row.style.paddingLeft = '0';
+      row.style.paddingRight = '0';
+    }
   }
   const badge = document.getElementById('adminDeptBadge');
   const { total, period } = getAdminDeptData();

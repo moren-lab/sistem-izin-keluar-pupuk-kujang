@@ -82,41 +82,28 @@ function cleanEstimatedReturnDisplay(returnStr, permitType) {
 /**
  * Returns calm, legible status badges (no loud neon pills)
  */
-function cleanStatusBadge(status) {
-  let badgeClass = 'status-pill-subtle status-selesai';
-  let label = status || 'Selesai';
-
-  if (status === 'Sedang di Luar') {
-    badgeClass = 'status-pill-subtle status-outside';
-    label = 'Sedang di Luar';
-  } else if (status === 'Terlambat') {
-    badgeClass = 'status-pill-subtle status-overdue';
-    label = 'Terlambat';
-  } else if (status === 'Kedaluwarsa') {
-    badgeClass = 'status-pill-subtle status-expired';
-    label = 'Kedaluwarsa';
-  } else if (status === 'Disetujui') {
-    badgeClass = 'status-pill-subtle status-approved';
-    label = 'Disetujui';
-  } else if (status === 'Menunggu Persetujuan') {
-    badgeClass = 'status-pill-subtle status-pending';
-    label = 'Menunggu Review';
-  } else if (status === 'Ditolak') {
-    badgeClass = 'status-pill-subtle status-rejected';
-    label = 'Ditolak';
+function cleanStatusBadge(status, ticket) {
+  if (typeof window.getCleanEmpStatus === 'function') {
+    return window.getCleanEmpStatus(status, ticket);
   }
-
-  return `<span class="${badgeClass}">${label}</span>`;
+  let color = '#059669';
+  if (status === 'Sedang di Luar') color = '#0284c7';
+  else if (status === 'Terlambat') color = '#dc2626';
+  else if (status === 'Kedaluwarsa') color = '#64748b';
+  else if (status === 'Disetujui') color = '#059669';
+  else if (status === 'Menunggu Persetujuan') color = '#d97706';
+  else if (status === 'Ditolak') color = '#dc2626';
+  return `<span style="font-weight: 700; font-size: 0.8125rem; color: ${color}; letter-spacing: -0.01em;">${status || 'Selesai'}</span>`;
 }
 
 /**
- * Returns clean category tags (Dinas vs Pribadi)
+ * Returns clean category tags (Dinas vs Pribadi) - Clean typography without box
  */
 function cleanCategoryBadge(category) {
   const isDinas = category === 'Dinas Kantor';
   const label = isDinas ? 'Dinas Kantor' : 'Urusan Pribadi';
-  const cls = isDinas ? 'cat-dinas' : 'cat-pribadi';
-  return `<span class="report-category-pill ${cls}">${label}</span>`;
+  const color = isDinas ? '#059669' : '#d97706';
+  return `<span style="font-weight: 600; font-size: 0.75rem; color: ${color};">${label}</span>`;
 }
 
 // ==========================================
@@ -234,7 +221,7 @@ function renderAdminDashboard() {
               ${cleanStatusBadge(ticket.status)}
             </td>
             <td style="text-align: right;">
-              <button type="button" class="btn-action-sm btn-admin-detail" onclick="window.viewAdminTicketDetail('${ticket.id}')" title="Audit Detail Tiket">
+              <button type="button" class="btn-card-detail" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; min-height: 32px;" onclick="window.viewAdminTicketDetail('${ticket.id}')" title="Audit Detail Tiket">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <span>Detail</span>
               </button>
