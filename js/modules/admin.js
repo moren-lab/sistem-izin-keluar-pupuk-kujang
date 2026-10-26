@@ -756,9 +756,11 @@ function openAdminUserModal(mode, kujangId) {
     initAdminRoleSearchableDropdown();
   }
 
-  // Pastikan kolom input pencarian tetap kosong agar placeholder terlihat bersih
-  if (searchDeptEl) searchDeptEl.value = '';
-  if (searchRoleEl) searchRoleEl.value = '';
+  // Pastikan kolom input pencarian kosong hanya saat penambahan akun baru agar placeholder terlihat
+  if (mode === 'add') {
+    if (searchDeptEl) searchDeptEl.value = '';
+    if (searchRoleEl) searchRoleEl.value = '';
+  }
   modal.classList.add('open');
 }
 

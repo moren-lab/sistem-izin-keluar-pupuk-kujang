@@ -437,23 +437,79 @@ function loadUsers() {
   }
 }
 
-function saveUsers(data) {
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data));
-  window.MOCK_USERS = data;
-  // Sinkronisasi aktor aktif secara otomatis (activeEmpSync)
-  const activeEmpSync = data.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+// Helper sentral untuk mendapatkan Atasan Utama (Hak Akses Utama / Atasan 1) yang sedang aktif
+function getPrimaryApprover() {
+  const users = (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
+  return users.find(u => u.roleKey === 'approver' && u.status === 'Aktif') || null;
+}
+window.getPrimaryApprover = getPrimaryApprover;
+
+// Sinkronisasi seluruh aktor sistem dari data direktori pengguna (MOCK_USERS)
+function syncActorsFromUsers(data) {
+  const users = data || (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
+
+  // 1. Sinkronisasi Karyawan Pemohon
+  const activeEmpSync = users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
   if (activeEmpSync && window.ACTORS && window.ACTORS.karyawan) {
     window.ACTORS.karyawan.name = activeEmpSync.name;
     window.ACTORS.karyawan.nip = activeEmpSync.nip;
     if (activeEmpSync.department) window.ACTORS.karyawan.department = activeEmpSync.department;
     if (activeEmpSync.role) window.ACTORS.karyawan.title = activeEmpSync.role;
   }
-  const activeSecSync = data.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
+
+  // 2. Sinkronisasi Atasan Utama (Approver 1 / Manager)
+  const primaryApprover = users.find(u => u.roleKey === 'approver' && u.status === 'Aktif');
+  if (window.ACTORS) {
+    if (primaryApprover) {
+      window.ACTORS.approver = {
+        nip: primaryApprover.nip || 'PK-2015-1002',
+        name: primaryApprover.name,
+        title: primaryApprover.role || 'Manager Rekayasa & Pemeliharaan',
+        department: primaryApprover.department || 'Departemen Rekayasa & Pemeliharaan',
+        roleLabel: 'Atasan 1 (Manager)'
+      };
+      if (window.ACTORS.karyawan) {
+        window.ACTORS.karyawan.approverName = primaryApprover.name;
+      }
+    } else {
+      window.ACTORS.approver = null;
+      if (window.ACTORS.karyawan) {
+        window.ACTORS.karyawan.approverName = '';
+      }
+    }
+  }
+
+  // 3. Sinkronisasi Atasan 2 (Supervisor Operasional / Plt)
+  const secondaryApprover = users.find(u => u.roleKey === 'approver2' && u.status === 'Aktif');
+  if (window.ACTORS) {
+    if (secondaryApprover) {
+      window.ACTORS.approver2 = {
+        nip: secondaryApprover.nip || 'PK-2012-0845',
+        name: secondaryApprover.name,
+        title: secondaryApprover.role || 'Supervisor Operasional Lapangan (Plt. Manager)',
+        department: secondaryApprover.department || 'Departemen Rekayasa & Pemeliharaan',
+        roleLabel: 'Atasan 2 (Supervisor / Plt)'
+      };
+    } else {
+      window.ACTORS.approver2 = null;
+    }
+  }
+
+  // 4. Sinkronisasi Petugas Pengamanan / Security
+  const activeSecSync = users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
   if (activeSecSync && window.ACTORS && window.ACTORS.security) {
     window.ACTORS.security.name = activeSecSync.name;
     window.ACTORS.security.nip = activeSecSync.nip;
     if (activeSecSync.department) window.ACTORS.security.department = activeSecSync.department;
   }
+}
+window.syncActorsFromUsers = syncActorsFromUsers;
+
+function saveUsers(data) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data));
+  window.MOCK_USERS = data;
+  syncActorsFromUsers(data);
+
   const sideNameEl = document.getElementById('sidebarUserName');
   const sideSubEl = document.getElementById('sidebarUserSub');
   const curRole = window.currentActor || 'karyawan';
@@ -464,9 +520,16 @@ function saveUsers(data) {
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
   }
+  if (typeof window.renderKaryawanDashboard === 'function') {
+    window.renderKaryawanDashboard();
+  }
+  if (typeof window.renderKaryawanView === 'function') {
+    window.renderKaryawanView();
+  }
 }
 
 const MOCK_USERS = loadUsers();
+syncActorsFromUsers(MOCK_USERS);
 
 // Fungsi sentral untuk mendapatkan seluruh Atasan yang HAK AKSESNYA AKTIF
 function getActiveApprovers() {
@@ -491,7 +554,7 @@ function getActiveApprovers() {
     name: u.name,
     title: u.role || (u.roleKey === 'approver' ? 'Atasan 1 (Manager)' : 'Atasan 2 (Supervisor / Plt)'),
     department: u.department || 'Departemen Rekayasa & Pemeliharaan',
-    isDirectSupervisor: idx === 0,
+    isDirectSupervisor: u.roleKey === 'approver',
     avatarBg: avatarPalettes[idx % avatarPalettes.length]
   }));
 }

@@ -318,7 +318,8 @@ function switchRole(role) {
     if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.approver.nip}`;
 
     setApproverNav(currentApproverNav || 'dashboard');
-    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Atasan 1 / Approver (Ir. Hendra Gunawan)', 'info');
+    const approverDispName = (ACTORS && ACTORS.approver && ACTORS.approver.name) ? ACTORS.approver.name : (matchedUser ? matchedUser.name : 'Approver');
+    if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Atasan 1 / Approver (${approverDispName})`, 'info');
   } else if (role === 'approver2') {
     if (btnSwitchApprover2) btnSwitchApprover2.classList.add('active', 'approver');
     if (viewApprover) viewApprover.style.display = 'block';

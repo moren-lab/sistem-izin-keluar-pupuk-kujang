@@ -370,11 +370,23 @@ function renderKaryawanDashboard() {
     else if (nowH >= 18 || nowH < 5) timeGreeting = 'malam';
     empHeroGreeting.textContent = `Selamat ${timeGreeting}, ${empActor.name} 👋`;
   }
+  const primaryApprover = (typeof window.getPrimaryApprover === 'function') 
+    ? window.getPrimaryApprover() 
+    : (window.ACTORS && window.ACTORS.karyawan && window.ACTORS.karyawan.approverName ? { name: window.ACTORS.karyawan.approverName } : null);
+
   if (empHeroSub) {
     const title = empActor.role || empActor.title || 'Staf Rekayasa Mesin';
     const dept = empActor.department || 'Departemen Rekayasa & Pemeliharaan';
-    const approver = (window.ACTORS && window.ACTORS.karyawan && window.ACTORS.karyawan.approverName) || 'Ir. Hendra Gunawan, M.T.';
-    empHeroSub.textContent = `${title} • ${dept} • Atasan: ${approver}`;
+    if (primaryApprover && primaryApprover.name) {
+      empHeroSub.textContent = `${title} • ${dept} • Atasan: ${primaryApprover.name}`;
+    } else {
+      empHeroSub.textContent = `${title} • ${dept} • Atasan anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain`;
+    }
+  }
+
+  const empNoApproverNotice = document.getElementById('empNoApproverNotice');
+  if (empNoApproverNotice) {
+    empNoApproverNotice.style.display = primaryApprover ? 'none' : 'flex';
   }
 
   // 1.1 Hero Strip
@@ -387,7 +399,7 @@ function renderKaryawanDashboard() {
       if (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat') {
         statusPill = `<span class="status-pill-amber">• Menunggu Persetujuan</span>`;
         statusText = `Status: Izin Diajukan - ${activeTicket.id}`;
-        statusSub = `${activeTicket.category} • Menunggu Persetujuan Atasan (${activeTicket.approverName || 'Ir. Hendra Gunawan, M.T.'})`;
+        statusSub = `${activeTicket.category} • Menunggu Persetujuan Atasan (${activeTicket.approverName || (primaryApprover ? primaryApprover.name : 'Atasan Langsung')})`;
       } else if (activeTicket.status === 'Disetujui') {
         statusPill = `<span class="status-pill-green">• Disetujui</span>`;
         statusText = `Status: Izin Disetujui - ${activeTicket.id}`;

@@ -145,6 +145,29 @@ function handleOpenNewRequest() {
   if (typeof window.resetApproverSearch === 'function') {
     window.resetApproverSearch();
   }
+
+  const primaryApprover = typeof window.getPrimaryApprover === 'function' ? window.getPrimaryApprover() : null;
+  const approverDirectNotice = document.getElementById('approverDirectNotice');
+  if (approverDirectNotice) {
+    if (primaryApprover && primaryApprover.name) {
+      approverDirectNotice.style.background = '#eff6ff';
+      approverDirectNotice.style.borderColor = '#dbeafe';
+      approverDirectNotice.style.color = '#1d4ed8';
+      approverDirectNotice.innerHTML = `
+        <span style="font-size: 0.95rem;">ℹ️</span>
+        <span>Pengajuan diteruskan kepada atasan langsung (<strong>${primaryApprover.name}</strong>). QR terbit setelah izin disetujui.</span>
+      `;
+    } else {
+      approverDirectNotice.style.background = '#fff1f2';
+      approverDirectNotice.style.borderColor = '#fecdd3';
+      approverDirectNotice.style.color = '#9f1239';
+      approverDirectNotice.innerHTML = `
+        <span style="font-size: 0.95rem;">⚠️</span>
+        <span><strong>Atasan anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain.</strong> Silakan ketik dan pilih salah satu atasan peninjau aktif di bawah.</span>
+      `;
+    }
+  }
+
   if (modalNewRequest) modalNewRequest.classList.add('open');
 }
 
@@ -664,12 +687,14 @@ function setupSingleApproverCombobox(cfg) {
 
   function openDropdown() {
     dropdown.style.display = 'flex';
+    if (comboboxWrapper) comboboxWrapper.style.zIndex = '1050';
     if (btnToggle) btnToggle.classList.add('open');
     renderList(searchInput.value === selectApprover.value ? '' : searchInput.value);
   }
 
   function closeDropdown() {
     dropdown.style.display = 'none';
+    if (comboboxWrapper) comboboxWrapper.style.zIndex = '';
     if (btnToggle) btnToggle.classList.remove('open');
     currentKeyboardIndex = -1;
   }
@@ -1779,6 +1804,12 @@ function handleOpenEmergency() {
   }
   const emergApprover = document.getElementById('emergApprover');
   if (emergApprover) emergApprover.value = '';
+
+  const primaryApprover = typeof window.getPrimaryApprover === 'function' ? window.getPrimaryApprover() : null;
+  const emergNoApproverNotice = document.getElementById('emergNoApproverNotice');
+  if (emergNoApproverNotice) {
+    emergNoApproverNotice.style.display = primaryApprover ? 'none' : 'flex';
+  }
 
   const emergDest = document.getElementById('emergDest');
   const emergReason = document.getElementById('emergReason');
