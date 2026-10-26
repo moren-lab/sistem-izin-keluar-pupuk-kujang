@@ -31,7 +31,7 @@ function updateClock() {
   const mm = pad(now.getMinutes());
   const ss = pad(now.getSeconds());
 
-  liveDigitalClock.textContent = `${day}, ${d} ${m} ${y} • ${hh}:${mm}:${ss} WIB`;
+  liveDigitalClock.textContent = `${day}, ${d} ${m} ${y} — ${hh}:${mm}:${ss} WIB`;
 }
 
 // SIDEBAR TOGGLING
@@ -345,7 +345,7 @@ function switchRole(role) {
       roleBadge.textContent = 'Peran: Petugas Pengamanan';
     }
     if (sidebarUserName && ACTORS) sidebarUserName.textContent = ACTORS.security.name;
-    if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.security.nip} • ${ACTORS.security.gateName}`;
+    if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.security.nip} — ${ACTORS.security.gateName}`;
 
     setSecurityNav(currentSecurityNav || 'dashboard');
     if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Pos Jaga Pengamanan (${ACTORS.security.name})`, 'info');
@@ -359,7 +359,7 @@ function switchRole(role) {
       roleBadge.textContent = 'Peran: Administrator Pengamanan & K3';
     }
     if (sidebarUserName && ACTORS) sidebarUserName.textContent = ACTORS.admin.name;
-    if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.admin.nip} • ${ACTORS.admin.office}`;
+    if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.admin.nip} — ${ACTORS.admin.office}`;
 
     setAdminNav(currentAdminNav || 'dashboard');
     if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Administrator Pengamanan & K3 (Bambang Sutrisno)', 'info');

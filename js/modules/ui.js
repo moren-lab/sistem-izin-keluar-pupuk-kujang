@@ -12,7 +12,7 @@ function getStatusPill(status, ticket) {
   const isLateCompleted = (status === 'Selesai') && ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
   if (isLateCompleted) {
     const lateMnt = ticket.lateMinutes ? ` ${ticket.lateMinutes} mnt` : '';
-    return `<span class="status-pill overdue" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px;">• Selesai (Terlambat${lateMnt})</span>`;
+    return `<span class="status-pill overdue" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px;">Selesai (Terlambat${lateMnt})</span>`;
   }
 
   let cls = 'pending';
@@ -38,7 +38,7 @@ function formatDisplayDate(dateStr) {
   if (isNaN(d.getTime())) return dateStr;
   const pad = (n) => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} • ${pad(d.getHours())}:${pad(d.getMinutes())} WIB`;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())} WIB`;
 }
 
 function playScannerBeep() {
@@ -126,8 +126,38 @@ function matchesPeriodFilter(ticket, period) {
   return true;
 }
 
+// UNIVERSAL DELETE CONFIRMATION MODAL
+function openDeleteConfirmModal({ title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.', onConfirm }) {
+  const modal = document.getElementById('modalDeleteConfirm');
+  const titleEl = document.getElementById('deleteModalTitle');
+  const msgEl = document.getElementById('deleteModalMessage');
+  const btnExec = document.getElementById('btnExecuteDeleteConfirm');
+  if (!modal) {
+    if (confirm(message.replace(/<[^>]+>/g, ''))) {
+      if (typeof onConfirm === 'function') onConfirm();
+    }
+    return;
+  }
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.innerHTML = message;
+  if (btnExec) {
+    btnExec.onclick = () => {
+      closeDeleteConfirmModal();
+      if (typeof onConfirm === 'function') onConfirm();
+    };
+  }
+  modal.classList.add('open');
+}
+
+function closeDeleteConfirmModal() {
+  const modal = document.getElementById('modalDeleteConfirm');
+  if (modal) modal.classList.remove('open');
+}
+
 window.formatDisplayDate = formatDisplayDate;
 window.playScannerBeep = playScannerBeep;
 window.showToast = showToast;
 window.matchesPeriodFilter = matchesPeriodFilter;
+window.openDeleteConfirmModal = openDeleteConfirmModal;
+window.closeDeleteConfirmModal = closeDeleteConfirmModal;
 

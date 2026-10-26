@@ -58,12 +58,12 @@ function renderSecurityDashboard() {
   const secHeroGreeting = document.getElementById('secHeroGreeting');
   const secHeroSub = document.getElementById('secHeroSub');
   if (secHeroGreeting) {
-    secHeroGreeting.textContent = `Selamat bertugas, ${secActor.name} 🛡️`;
+    secHeroGreeting.textContent = `Selamat bertugas, ${secActor.name}`;
   }
   if (secHeroSub) {
     const title = secActor.role || secActor.title || 'Petugas Pengamanan';
     const dept = secActor.department || 'Departemen Pengamanan & K3';
-    secHeroSub.textContent = `${title} • Pos 1 Gerbang Utama • ${dept} • PT Pupuk Kujang`;
+    secHeroSub.textContent = `${title} — Pos 1 Gerbang Utama — ${dept} — PT Pupuk Kujang`;
   }
   updateSecurityMetrics();
   const readyExitTickets = ticketsList.filter(t => t.status === 'Disetujui');
@@ -97,20 +97,20 @@ function renderSecurityDashboard() {
         return `
           <div class="feed-item" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem; padding: 0.75rem 1rem;">
             <div class="feed-item-left">
-              <div class="feed-item-icon" style="background: ${isEmergency ? '#ffe4e6' : '#dbeafe'}; color: ${isEmergency ? '#be123c' : '#1d4ed8'}; font-size: 1.1rem;">
-                ${isEmergency ? '🚨' : '🚪'}
+              <div class="feed-item-icon" style="background: ${isEmergency ? '#ffe4e6' : '#dbeafe'}; color: ${isEmergency ? '#be123c' : '#1d4ed8'}; font-size: 0.75rem; font-weight: 800;">
+                ${isEmergency ? 'EMG' : 'REG'}
               </div>
               <div>
                 <div class="feed-item-title" style="font-weight: 800; color: #0f172a;">${t.applicantName || 'Budi Pratama'} <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #64748b;">(${t.id})</span></div>
                 <div class="feed-item-sub" style="font-size: 0.75rem; color: #475569; margin-top: 2px;">
-                  Tujuan: <strong>${t.destination}</strong> • Rencana Keluar: <span style="font-family: var(--font-mono); font-weight: 700;">${t.plannedExit ? t.plannedExit.replace('T', ' ') : 'Hari Ini'}</span>
+                  Tujuan: <strong>${t.destination}</strong> — Rencana Keluar: <span style="font-family: var(--font-mono); font-weight: 700;">${t.plannedExit ? t.plannedExit.replace('T', ' ') : 'Hari Ini'}</span>
                 </div>
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-              <span class="status-pill-green" style="font-size: 0.7rem;">• Disetujui</span>
+              <span class="status-pill-green" style="font-size: 0.7rem;">Disetujui</span>
               <button class="btn-quick-scan-out" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="executeScanOut('${t.id}')" title="Proses Scan Out di Pos 1">
-                ✓ Proses Scan Out
+                Proses Scan Out
               </button>
             </div>
           </div>
@@ -126,7 +126,9 @@ function renderSecurityDashboard() {
       securityOverdueBanner.innerHTML = `
         <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="font-size: 1.4rem;">🚨</div>
+            <div style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fee2e2; color: #dc2626; flex-shrink: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
             <div>
               <div style="font-weight: 800; font-size: 0.9rem; color: #991b1b;">
                 PERINGATAN GERBANG: Ada ${overdueTickets.length} Karyawan Terlambat Kembali ke Pabrik!
@@ -160,19 +162,19 @@ function renderSecurityDashboard() {
         return `
           <div class="feed-item" style="${isOverdue ? 'border-left: 3px solid var(--rose-danger); background: #fff5f5;' : ''}">
             <div class="feed-item-left">
-              <div class="feed-item-icon" style="background: ${isOverdue ? 'var(--rose-light)' : '#e0f2fe'}; color: ${isOverdue ? 'var(--rose-danger)' : '#0284c7'};">
-                ${isOverdue ? '⚠️' : '🚶‍♂️'}
+              <div class="feed-item-icon" style="background: ${isOverdue ? 'var(--rose-light)' : '#e0f2fe'}; color: ${isOverdue ? 'var(--rose-danger)' : '#0284c7'}; font-size: 0.75rem; font-weight: 800;">
+                ${isOverdue ? 'LATE' : 'OUT'}
               </div>
               <div>
                 <div class="feed-item-title">${t.applicantName || 'Budi Pratama'} (${t.id})</div>
                 <div class="feed-item-sub">
-                  Tujuan: ${t.destination} • Rencana Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
+                  Tujuan: ${t.destination} — Rencana Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
                 </div>
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               ${window.getStatusPill(t.status)}
-              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 700;" onclick="executeScanIn('${t.id}')" title="Proses Tap In (Kartu Akses Kujang / Card Reader)">💳 Tap In Kartu</button>
+              <button class="btn-quick-scan-in" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 700;" onclick="executeScanIn('${t.id}')" title="Proses Tap In (Kartu Akses Kujang / Card Reader)">Tap In Kartu</button>
             </div>
           </div>
         `;
@@ -194,8 +196,8 @@ function renderSecurityDashboard() {
         return `
           <div class="feed-item">
             <div class="feed-item-left">
-              <div class="feed-item-icon" style="background: ${isScanIn ? '#d1fae5' : '#e0f2fe'}; color: ${isScanIn ? '#059669' : '#0284c7'};">
-                ${isScanIn ? '🏢' : '🚪'}
+              <div class="feed-item-icon" style="background: ${isScanIn ? '#d1fae5' : '#e0f2fe'}; color: ${isScanIn ? '#059669' : '#0284c7'}; font-size: 0.75rem; font-weight: 800;">
+                ${isScanIn ? 'IN' : 'OUT'}
               </div>
               <div>
                 <div class="feed-item-title">${t.applicantName || 'Budi Pratama'} (${t.id})</div>
@@ -221,7 +223,7 @@ function renderSecurityCards(list, containerElement) {
 
   target.innerHTML = `
     <div class="cards-grid">
-      ${list.map(t => {
+      ${list.filter(t => !t.deletedBySecurity).map(t => {
         const isReadyExit = t.status === 'Disetujui';
         const isOutside = t.status === 'Sedang di Luar';
         const isOverdue = t.status === 'Terlambat';
@@ -249,7 +251,7 @@ function renderSecurityCards(list, containerElement) {
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
               <div>
                 <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} • ${t.department || 'Rekayasa Mesin'}</div>
+                <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
               </div>
               <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
             </div>
@@ -272,19 +274,19 @@ function renderSecurityCards(list, containerElement) {
 
             ${isOverdue ? `
               <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b91c1c; font-weight:700;">
-                ⚠️ Karyawan terlambat kembali! Segera proses Scan In saat tiba di pos jaga.
+                Karyawan terlambat kembali! Segera proses Scan In saat tiba di pos jaga.
               </div>
             ` : ''}
 
             ${isLateCompleted ? `
               <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b45309; font-weight:700;">
-                ⚠️ Karyawan kembali melewati estimasi waktu (+${t.lateMinutes || 10} menit terlambat).
+                Karyawan kembali melewati estimasi waktu (+${t.lateMinutes || 10} menit terlambat).
               </div>
             ` : ''}
 
             ${isExpired ? `
               <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#475569;">
-                ⏱️ Tiket telah kedaluwarsa & hangus (+10 menit dari rencana keluar). Dilarang diproses keluar.
+                Tiket telah kedaluwarsa & hangus (+10 menit dari rencana keluar). Dilarang diproses keluar.
               </div>
             ` : ''}
 
@@ -428,6 +430,9 @@ function filterSecurityLogTickets() {
   const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
 
   return ticketsList.filter(t => {
+    // Abaikan jika sudah dihapus dari pos jaga
+    if (t.deletedBySecurity) return false;
+
     // Hak akses: jika peran adalah Karyawan, batasi riwayat hanya miliknya
     if (currentActor === 'karyawan') {
       const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841');
@@ -500,50 +505,71 @@ function renderSecurityLogTable(list, containerElement) {
   if (!containerElement) return;
 
   containerElement.innerHTML = `
-    <div class="table-responsive">
-      <table class="data-table">
+    <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+      <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
-            <th>Nomor Tiket</th>
-            <th>Pemohon & NIP</th>
-            <th>Kategori & Tipe</th>
-            <th>Waktu Scan Out</th>
-            <th>Waktu Tap In (Kartu)</th>
-            <th>Status</th>
-            <th style="text-align: right;">Aksi</th>
+            <th style="min-width: 170px;">Nomor tiket / kategori & tipe</th>
+            <th style="min-width: 220px;">Tujuan & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 145px;">Rencana waktu</th>
+            <th style="white-space: nowrap; min-width: 95px;">Status</th>
+            <th style="min-width: 200px;">Catatan</th>
+            <th style="text-align: right; white-space: nowrap; min-width: 90px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
-          ${list.map(t => `
-            <tr style="cursor: pointer;" onclick="window.openTicketDetail('${t.id}', 'detail')">
-              <td>
-                <span style="font-family:var(--font-mono); font-weight:700; color:var(--corp-teal);">${t.id}</span>
-                <div style="font-size:0.7rem; color:var(--text-muted);">${(t.createdAt || '').slice(0,10)}</div>
-              </td>
-              <td>
-                <div style="font-weight:700; color:var(--text-primary);">${t.applicantName || 'Budi Pratama'}</div>
-                <div style="font-size:0.725rem; color:var(--text-secondary);">${t.applicantNip || 'PK-2024-8841'}</div>
-              </td>
-              <td>
-                <span class="tag-badge ${t.category === 'Dinas Kantor' ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
-                <div style="font-size:0.725rem; color:var(--text-secondary); margin-top:2px;">${t.type}</div>
-              </td>
-              <td style="font-family:var(--font-mono); font-size:0.775rem;">${t.scanOutTime || '-'}</td>
-              <td style="font-family:var(--font-mono); font-size:0.775rem;">${t.scanInTime || '-'}</td>
-              <td>${window.getStatusPill(t.status, t)}</td>
-              <td style="text-align: right; white-space: nowrap;">
-                <div style="display: inline-flex; align-items: center; gap: 0.35rem; justify-content: flex-end;">
-                  <button class="btn-card-detail" style="padding:0.35rem 0.65rem; font-size:0.725rem;" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')">
-                    Rincian Tiket
-                  </button>
-                  <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.55rem; border-radius: 4px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    <span>Hapus</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `).join('')}
+          ${list.map(t => {
+            const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
+            
+            let catatanHtml = `<span style="color: #475569;">Tepat waktu — Disetujui ${t.approverName || 'Atasan'}</span>`;
+            if (t.scanInTime && t.scanOutTime) {
+              const outSimple = t.scanOutTime.replace(/ \(Pos 1.*\)/, '');
+              const inSimple = t.scanInTime.replace(/ \(Pos 1.*\)/, '');
+              catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Scan In: ${inSimple}</span>`;
+            } else if (t.scanOutTime) {
+              const outSimple = t.scanOutTime.replace(/ \(Pos 1.*\)/, '');
+              catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+            } else if (t.status === 'Terlambat') {
+              catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
+            } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
+              catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${t.lateMinutes || 10} mnt)</span>`;
+            } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
+              catatanHtml = `<span style="color: #b91c1c; font-size: 0.725rem;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
+            } else if (t.status === 'Kedaluwarsa') {
+              catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Kedaluwarsa sebelum scan keluar</span>`;
+            } else if (t.status === 'Dibatalkan') {
+              catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Pengajuan dibatalkan oleh pemohon</span>`;
+            }
+
+            const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function' 
+              ? window.formatTicketScheduleWithDay(t) 
+              : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+
+            let tindakanHtml = `
+              <a href="#" class="figma-card-link" style="font-size: 0.775rem;" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>
+              <button type="button" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.65rem; display: inline-flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Hapus
+              </button>
+            `;
+
+            return `
+              <tr>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 700; font-family: var(--font-mono); color: #0f172a; font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${t.category} — ${t.type}</div>
+                </td>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 600; color: #0f172a; font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: #475569;">(${t.destination})</span></div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 3px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
+                </td>
+                <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
+                <td style="vertical-align: middle; line-height: 1.45;">${catatanHtml}</td>
+                <td style="text-align: right; white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+              </tr>
+            `;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -581,7 +607,7 @@ function executeVerification(inputQuery) {
   // Status feedback alerts:
   if (ticket.isEmergency && ticket.emergencyLocked) {
     if (typeof window.showToast === 'function') {
-      window.showToast(`🚨 Akses Ditolak: Tiket Izin Darurat #${ticket.id} masih berstatus TERKUNCI! Belum dilakukan otorisasi darurat Atasan. Dilarang keluar!`, 'danger');
+      window.showToast(`Akses Ditolak: Tiket Izin Darurat #${ticket.id} masih berstatus TERKUNCI! Belum dilakukan otorisasi darurat Atasan. Dilarang keluar!`, 'danger');
     }
   } else if (ticket.status === 'Kedaluwarsa') {
     if (typeof window.showToast === 'function') window.showToast(`Akses Ditolak: Tiket #${ticket.id} telah KEDALUWARSA dan hangus. Dilarang keluar pabrik!`, 'danger');
@@ -592,7 +618,7 @@ function executeVerification(inputQuery) {
   } else if (ticket.status === 'Disetujui') {
     if (ticket.isEmergency) {
       if (typeof window.showToast === 'function') {
-        window.showToast(`🚨 PERINGATAN POS JAGA: Tiket Izin Darurat #${ticket.id} SAH (Diotorisasi: ${ticket.emergencyUnlockedBy || 'Resmi'}). Pastikan periksa kondisi fisik/kendaraan darurat sebelum Scan Out!`, 'warning');
+        window.showToast(`PERINGATAN POS JAGA: Tiket Izin Darurat #${ticket.id} SAH (Diotorisasi: ${ticket.emergencyUnlockedBy || 'Resmi'}). Pastikan periksa kondisi fisik/kendaraan darurat sebelum Scan Out!`, 'warning');
       }
     } else {
       if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} valid dan disetujui. Siap diproses Scan Out!`, 'success');
@@ -658,7 +684,7 @@ function executeScanOut(ticketId) {
         by: `${securityName} (${gate})`,
         desc: `Petugas Pos Jaga memvalidasi fisik karyawan/ambulans dan mencatat justifikasi kedaruratan. Izin pulang mendahului selesai diproses. Otorisasi sebelumnya: ${ticket.emergencyUnlockedBy || 'Resmi'}.`
       });
-      if (typeof window.showToast === 'function') window.showToast(`🚨 Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id} (Pulang Mendahului).`, 'success');
+      if (typeof window.showToast === 'function') window.showToast(`Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id} (Pulang Mendahului).`, 'success');
     } else {
       ticket.status = 'Sedang di Luar';
       ticket.timeline.push({
@@ -667,7 +693,7 @@ function executeScanOut(ticketId) {
         by: `${securityName} (${gate})`,
         desc: `Petugas Pos Jaga memvalidasi fisik karyawan/ambulans dan mencatat justifikasi kedaruratan di gerbang. Status: Sedang di Luar. Otorisasi sebelumnya: ${ticket.emergencyUnlockedBy || 'Resmi'}.`
       });
-      if (typeof window.showToast === 'function') window.showToast(`🚨 Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id}. Gerbang dibuka.`, 'success');
+      if (typeof window.showToast === 'function') window.showToast(`Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id}. Gerbang dibuka.`, 'success');
     }
   } else if (ticket.type === 'Pulang Mendahului') {
     ticket.status = 'Selesai';
@@ -848,7 +874,7 @@ async function startCameraScanner(selectedCameraId = null) {
 
     if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'none';
     if (cameraScanOverlay) cameraScanOverlay.style.display = 'flex';
-    if (cameraScanStatus) cameraScanStatus.textContent = '🟢 Kamera aktif: Arahkan ke QR Code tiket...';
+    if (cameraScanStatus) cameraScanStatus.textContent = 'Kamera aktif: Arahkan ke QR Code tiket...';
 
     await html5QrScannerInstance.start(
       targetCamera,
@@ -867,7 +893,7 @@ async function startCameraScanner(selectedCameraId = null) {
     console.error('Camera Scanner Error:', err);
     if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'flex';
     if (cameraScanOverlay) cameraScanOverlay.style.display = 'none';
-    if (cameraScanStatus) cameraScanStatus.textContent = '⚠️ Izin kamera ditolak atau kamera tidak terdeteksi.';
+    if (cameraScanStatus) cameraScanStatus.textContent = 'Izin kamera ditolak atau kamera tidak terdeteksi.';
     if (typeof window.showToast === 'function') window.showToast('Gagal mengaktifkan kamera: ' + (err.message || err), 'danger');
   }
 }
@@ -892,7 +918,7 @@ async function stopCameraScanner() {
   if (btnStopCamera) btnStopCamera.style.display = 'none';
   if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'flex';
   if (cameraScanOverlay) cameraScanOverlay.style.display = 'none';
-  if (cameraScanStatus) cameraScanStatus.textContent = '💡 Arahkan kamera ke QR Code Tiket Izin Karyawan.';
+  if (cameraScanStatus) cameraScanStatus.textContent = 'Arahkan kamera ke QR Code Tiket Izin Karyawan.';
 }
 
 function handleCameraQrSuccess(decodedText) {
@@ -914,7 +940,7 @@ function handleCameraQrSuccess(decodedText) {
   const cameraScanStatus = document.getElementById('cameraScanStatus');
 
   if (inputScanTicketCode) inputScanTicketCode.value = searchId;
-  if (cameraScanStatus) cameraScanStatus.textContent = `✅ QR Terbaca: ${searchId}`;
+  if (cameraScanStatus) cameraScanStatus.textContent = `QR Terbaca: ${searchId}`;
   if (typeof window.showToast === 'function') window.showToast(`QR Code Terbaca: ${searchId}!`, 'success');
 
   executeVerification(searchId);
@@ -1046,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const cameraScanStatus = document.getElementById('cameraScanStatus');
       try {
-        if (cameraScanStatus) cameraScanStatus.textContent = '⏳ Memindai berkas gambar QR...';
+        if (cameraScanStatus) cameraScanStatus.textContent = 'Memindai berkas gambar QR...';
 
         if (isCameraScanningActive) {
           await stopCameraScanner();
@@ -1065,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (err) {
         console.warn('QR file scan error:', err);
-        if (cameraScanStatus) cameraScanStatus.textContent = '⚠️ QR Code tidak terdeteksi di dalam foto.';
+        if (cameraScanStatus) cameraScanStatus.textContent = 'QR Code tidak terdeteksi di dalam foto.';
         if (typeof window.showToast === 'function') window.showToast('Gagal memindai: QR Code tidak ditemukan di dalam gambar.', 'danger');
       } finally {
         inputScanQrFile.value = '';
@@ -1163,22 +1189,31 @@ function closeScanMethodPicker() {
 // DELETE FUNCTION FOR SECURITY RIWAYAT & PELACAKAN (REQUIREMENT 6)
 function deleteSecurityTicket(ticketId, source) {
   const isPelacakan = source === 'pelacakan';
-  const label = isPelacakan ? 'data pelacakan karyawan di luar' : 'riwayat pos jaga';
-  if (!confirm(`Apakah Anda yakin ingin menghapus ${label} untuk pengajuan #${ticketId}? Tindakan ini tidak dapat dibatalkan.`)) {
-    return;
-  }
+  const label = isPelacakan ? 'data pelacakan pos jaga' : 'riwayat pos jaga';
 
-  let ticketsList = window.ticketsList || [];
-  ticketsList = ticketsList.filter(t => t.id !== ticketId);
-  window.saveTickets(ticketsList);
+  const handler = () => {
+    let ticketsList = window.ticketsList || [];
+    const t = ticketsList.find(x => x.id === ticketId);
+    if (t) {
+      t.deletedBySecurity = true;
+      window.saveTickets(ticketsList);
+    }
 
-  renderSecurityView();
-  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-  if (typeof window.renderApproverView === 'function') window.renderApproverView();
-  if (typeof window.renderAdminView === 'function') window.renderAdminView();
+    renderSecurityView();
 
-  if (typeof window.showToast === 'function') {
-    window.showToast(`Pengajuan #${ticketId} berhasil dihapus dari ${label}.`, 'info');
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Pengajuan #${ticketId} berhasil dihapus dari ${label}.`, 'info');
+    }
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: isPelacakan ? 'Hapus Data Pelacakan' : 'Hapus Riwayat Pos Jaga',
+      message: 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.',
+      onConfirm: handler
+    });
+  } else if (confirm('Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.')) {
+    handler();
   }
 }
 

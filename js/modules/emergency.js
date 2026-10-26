@@ -158,7 +158,7 @@ function unlockEmergencyTicket(ticketId, method, authorizerName, extraNote) {
   ticket.emergencyUnlockMethod = method;
   ticket.emergencyUnlockedBy = authorizerName;
   ticket.emergencyUnlockedAt = nowFormatted;
-  ticket.approverNote = `🚨 [Otorisasi Darurat Sah]: QR Code dibuka melalui "${method}" oleh ${authorizerName}. ${extraNote || ''}`;
+  ticket.approverNote = `[Otorisasi Darurat Sah]: QR Code dibuka melalui "${method}" oleh ${authorizerName}. ${extraNote || ''}`;
 
   if (!ticket.timeline) ticket.timeline = [];
   ticket.timeline.push(
@@ -183,7 +183,7 @@ function unlockEmergencyTicket(ticketId, method, authorizerName, extraNote) {
 
   // Toast Notifikasi Sukses
   if (typeof window.showToast === 'function') {
-    window.showToast(`🚨 BERHASIL! QR Code Darurat #${ticket.id} telah TERBUKA & AKTIF via ${method}!`, 'success');
+    window.showToast(`BERHASIL! QR Code Darurat #${ticket.id} telah TERBUKA & AKTIF via ${method}!`, 'success');
   }
 
   // Refresh semua tampilan

@@ -382,9 +382,9 @@ function renderApproverBarChart() {
   const subtitle = document.getElementById('approverChartSubtitle');
   if (subtitle) {
     if (isMonth) {
-      subtitle.textContent = `Oktober 2026 • Total: ${totalVal} pengajuan • Puncak: ${peakDay}, ${maxVal} pengajuan`;
+      subtitle.textContent = `Oktober 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
     } else {
-      subtitle.textContent = `12–16 Okt 2026 • Total: ${totalVal} pengajuan • Puncak: ${peakDay}, ${maxVal} pengajuan`;
+      subtitle.textContent = `12–16 Okt 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
     }
   }
 
@@ -709,7 +709,7 @@ function renderAdminTrafficChart() {
 
     <!-- Admin Traffic Badge Summary (Realtime & Dual Metrics) -->
     <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; color: #0369a1; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
-      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
+      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
       <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
         <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
         <span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span>
@@ -729,10 +729,10 @@ function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
     badge.style.borderColor = '#0284c7';
 
     if (isFuture || (out === 0 && inVal === 0 && (7 + activeIdx) >= nowH)) {
-      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>0 Scan Out</strong> • ↘️ <strong>0 Tap In</strong> <span style="font-size:0.75rem; opacity:0.85;">(Belum ada data aktivitas)</span></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">0 Personel</span>`;
+      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>0 Scan Out</strong> — ↘️ <strong>0 Tap In</strong> <span style="font-size:0.75rem; opacity:0.85;">(Belum ada data aktivitas)</span></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">0 Personel</span>`;
     } else {
       const sum = out + inVal;
-      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Tap In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
+      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> — ↘️ <strong>${inVal} Tap In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
     }
   }
 
@@ -775,7 +775,7 @@ function unhoverTrafficPoint() {
     badge.style.background = '#f0f9ff';
     badge.style.color = '#0369a1';
     badge.style.borderColor = '#bae6fd';
-    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span></span>`;
+    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span></span>`;
   }
 
   for (let i = 0; i < 11; i++) {

@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261023_07">
+  <link rel="stylesheet" href="css/style.css?v=20261026_1140">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
 </head>
@@ -41,7 +41,6 @@
         </a>
         <div class="sidebar-brand-subtitle">
           <h4>Perizinan Keluar Area</h4>
-          <p id="sidebarRoleContextSubtitle">Ruang kerja Karyawan</p>
         </div>
         <button class="btn-sidebar-close-mobile" id="btnCloseSidebarMobile" title="Tutup Menu">✕</button>
       </div>
@@ -252,7 +251,7 @@
             <div
               style="font-size: 0.825rem; font-weight: 700; color: #ffffff; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
               id="sidebarUserName">Budi Pratama, S.T.</div>
-            <div style="font-size: 0.7rem; color: #8fa899;" id="sidebarUserSub">Karyawan • Rekayasa & Pemeliharaan</div>
+            <div style="font-size: 0.7rem; color: #8fa899;" id="sidebarUserSub">Karyawan — Rekayasa & Pemeliharaan</div>
           </div>
         </div>
         <button type="button" class="btn-sidebar-logout" id="btnSidebarLogout" title="Keluar dari sesi KUJANG ID"
@@ -294,7 +293,7 @@
           <!-- Real-Time Date & Time Clock (Single-Line Horizontal Display) -->
           <div class="navbar-clock-pill hide-on-mobile">
             <span class="pulsing-dot" style="width: 7px; height: 7px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); flex-shrink: 0;"></span>
-            <span id="liveDigitalClock" style="font-size: 0.78rem; font-weight: 700; color: #1e293b; white-space: nowrap; letter-spacing: -0.01em;">19 Okt 2026 • 11.00 WIB</span>
+            <span id="liveDigitalClock" style="font-size: 0.78rem; font-weight: 700; color: #1e293b; white-space: nowrap; letter-spacing: -0.01em;">19 Okt 2026 — 11.00 WIB</span>
           </div>
           <!-- Multi-Actor Role Switcher (Karyawan | Atasan | Satpam) -->
           <div class="role-switcher-container" title="Beralih peran untuk menguji alur terintegrasi">
@@ -361,7 +360,7 @@
             <div class="figma-hero-banner">
               <div class="figma-hero-top">
                 <h2 id="empHeroGreeting">Selamat pagi, Budi Pratama, S.T. 👋</h2>
-                <p id="empHeroSub">Staf Rekayasa Mesin • Departemen Rekayasa & Pemeliharaan • Atasan: Ir. Hendra Gunawan, M.T.</p>
+                <p id="empHeroSub">Staf Rekayasa Mesin — Departemen Rekayasa & Pemeliharaan — Atasan: Ir. Hendra Gunawan, M.T.</p>
                 <div id="empNoApproverNotice" style="display: none; background: rgba(254, 226, 226, 0.95); border: 1.5px solid #f87171; border-radius: 8px; padding: 0.55rem 0.85rem; color: #991b1b; font-size: 0.82rem; font-weight: 700; margin-top: 0.5rem; align-items: center; gap: 0.5rem;">
                   <span>⚠️</span>
                   <span>Atasan anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain</span>
@@ -390,7 +389,7 @@
               <div class="figma-stat-col">
                 <span class="figma-stat-label">Izin selesai</span>
                 <span class="figma-stat-number" id="statEmpCompletedCount">6</span>
-                <span class="figma-stat-sub" id="statEmpCompletedSub">5 tepat waktu • 1 terlambat</span>
+                <span class="figma-stat-sub" id="statEmpCompletedSub">5 tepat waktu, 1 terlambat</span>
               </div>
               <div class="figma-stat-col">
                 <span class="figma-stat-label">Izin aktif</span>
@@ -459,7 +458,7 @@
                     <h3 class="figma-card-title">Kontak Pos Jaga 1</h3>
                   </div>
                   <div class="figma-contact-content">
-                    <div class="figma-contact-badge">Petugas Pengamanan • 24 jam</div>
+                    <div class="figma-contact-badge">Petugas Pengamanan — 24 jam</div>
                     <div class="figma-contact-phone">Ekstensi 110 / 0264 316 110</div>
                     <div class="figma-contact-sub">Hubungi petugas jika terjadi kendala pemindaian QR.</div>
                   </div>
@@ -473,7 +472,6 @@
             <!-- Section Bar -->
             <div class="figma-section-bar">
               <div>
-                <div class="figma-kicker-blue">RUANG KERJA KARYAWAN</div>
                 <h1 class="figma-section-title">Pengajuan Saya</h1>
                 <p class="figma-section-sub">Pantau izin berjalan, akses QR digital, dan kelola waktu kembali.</p>
               </div>
@@ -488,18 +486,7 @@
               </div>
             </div>
 
-            <!-- Info Alert Banner (Light Blue) -->
-            <div class="figma-info-banner" id="activePermitBanner">
-              <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                <span id="activePermitBannerText">Anda sedang di luar area. Pengajuan baru dikunci selama izin aktif.
-                  Batas kembali 13.00 WIB.</span>
-              </div>
-            </div>
+
 
             <!-- 2-Column Grid Layout -->
             <div class="figma-grid-2col" style="margin-top: 1.25rem;">
@@ -537,9 +524,8 @@
             <!-- Section Bar -->
             <div class="figma-section-bar">
               <div>
-                <div class="figma-kicker-blue">RUANG KERJA KARYAWAN</div>
                 <h1 class="figma-section-title">Riwayat Pengajuan</h1>
-                <p class="figma-section-sub">Seluruh pengajuan izin milik Budi Pratama, S.T. • NIP PK-2024-8841</p>
+                <p class="figma-section-sub">Seluruh pengajuan izin milik Budi Pratama, S.T. — NIP PK-2024-8841</p>
               </div>
             </div>
 
@@ -609,7 +595,7 @@
             <!-- Results Subbar (Count + Card / List Switcher) -->
             <div class="figma-results-bar">
               <div id="figmaRiwayatCountMeta">
-                8 hasil • Semua waktu • Terbaru lebih dulu • QR hanya untuk izin aktif
+                8 pengajuan ditemukan (urutan terbaru)
               </div>
               <div class="figma-view-switcher">
                 <button class="btn-figma-toggle active" id="btnEmpViewCard" title="Tampilan Kartu">
@@ -680,7 +666,7 @@
                 <div class="dashboard-avatar-circle">👔</div>
                 <div class="dashboard-hero-text">
                   <h2>Pusat Persetujuan & Monitoring Bawahan</h2>
-                  <p id="approverHeroSub">Ir. Hendra Gunawan, M.T. • Manager Rekayasa & Pemeliharaan • Prinsip:
+                  <p id="approverHeroSub">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan — Prinsip:
                     <strong>No Approval, No
                       Exit</strong>
                   </p>
@@ -769,7 +755,7 @@
                       </div>
                       <p id="approverChartSubtitle"
                         style="font-size: 0.775rem; color: #64748b; margin: 4px 0 0; font-weight: 500;">
-                        12–16 Okt 2026 • Puncak: Kamis, 8 pengajuan
+                        12–16 Okt 2026 — Puncak: Kamis, 8 pengajuan
                       </p>
                     </div>
                     <select id="filterAppChartPeriod" class="chart-filter-select" title="Filter Periode Tren Tim"
@@ -807,10 +793,10 @@
                     </div>
                   </div>
                   <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
-                    <p>• <strong>Dinas Kantor:</strong> Verifikasi urgensi pekerjaan dan kelengkapan dokumen tugas.</p>
-                    <p style="margin-top: 6px;">• <strong>Urusan Pribadi:</strong> Diberikan secara proporsional dengan
+                    <p>- <strong>Dinas Kantor:</strong> Verifikasi urgensi pekerjaan dan kelengkapan dokumen tugas.</p>
+                    <p style="margin-top: 6px;">- <strong>Urusan Pribadi:</strong> Diberikan secara proporsional dengan
                       estimasi waktu kembali yang wajar.</p>
-                    <p style="margin-top: 6px;">• <strong>Penolakan:</strong> Wajib menyertakan catatan alasan penolakan
+                    <p style="margin-top: 6px;">- <strong>Penolakan:</strong> Wajib menyertakan catatan alasan penolakan
                       yang jelas bagi pemohon.</p>
                   </div>
                 </div>
@@ -823,7 +809,7 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1 id="approverHeadingTitle">Antrian Persetujuan Izin Bawahan</h1>
-                <p id="approverHeadingSub">Tinjau dan putuskan permohonan izin bawahan langsung Anda • <strong>Prinsip:
+                <p id="approverHeadingSub">Tinjau dan putuskan permohonan izin bawahan langsung Anda — <strong>Prinsip:
                     No Approval, No Exit</strong></p>
               </div>
               <div>
@@ -927,8 +913,8 @@
             <div class="figma-hero-banner security-theme">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div class="figma-hero-top">
-                  <h2 id="secHeroGreeting">Selamat bertugas, Sertu Agus 🛡️</h2>
-                  <p id="secHeroSub">Petugas Pengamanan • Pos 1 Gerbang Utama • Departemen Pengamanan & K3 • PT Pupuk Kujang</p>
+                  <h2 id="secHeroGreeting">Selamat bertugas, Sertu Agus</h2>
+                  <p id="secHeroSub">Petugas Pengamanan — Pos 1 Gerbang Utama — Departemen Pengamanan & K3 — PT Pupuk Kujang</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                   <button class="btn-figma-secondary" onclick="setSecurityNav('scanner')" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.25);">
@@ -946,7 +932,7 @@
             <!-- Section Bar Pos Jaga -->
             <div class="figma-section-bar">
               <div>
-                <div class="figma-kicker-blue">TERMINAL OPERASIONAL • GERBANG POS 1 UTAMA</div>
+                <div class="figma-kicker-blue">TERMINAL OPERASIONAL — GERBANG POS 1 UTAMA</div>
                 <h1 class="figma-section-title">Ringkasan Pemantauan Gerbang</h1>
                 <p class="figma-section-sub">Pantau headcount keluar masuk, validasi QR Code digital, dan verifikasi izin darurat.</p>
               </div>
@@ -962,7 +948,7 @@
               <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('dashboard')" title="Izin disetujui siap gerbang">
                 <span class="figma-stat-label">Izin Siap Keluar (Scan Out)</span>
                 <span class="figma-stat-number" id="statSecReadyExit" style="color: #0d9488;">0</span>
-                <span class="figma-stat-sub">Disetujui atasan • Siap gerbang</span>
+                <span class="figma-stat-sub">Disetujui atasan — Siap gerbang</span>
               </div>
               <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('riwayat')" title="Total scan out hari ini">
                 <span class="figma-stat-label">Scan Out Hari Ini</span>
@@ -989,8 +975,7 @@
                 <div class="figma-card" style="border: 1.5px solid #bfdbfe;">
                   <div class="figma-card-header">
                     <div>
-                      <h3 class="figma-card-title" style="color: #1e40af; font-weight: 800; display: flex; align-items: center; gap: 0.4rem;">
-                        <span>🚪</span>
+                      <h3 class="figma-card-title" style="color: #1e40af; font-weight: 800;">
                         <span>Antrean Izin Siap Keluar (Scan Out)</span>
                       </h3>
                       <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0;">Karyawan berizin resmi yang siap divalidasi meninggalkan area pabrik</p>
@@ -1006,11 +991,10 @@
                 <div class="figma-card">
                   <div class="figma-card-header">
                     <div>
-                      <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
-                        <span>🚶‍♂️</span>
+                      <h3 class="figma-card-title">
                         <span>Headcount: Karyawan Sedang di Luar Area</span>
                       </h3>
-                      <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0;">Personel di luar kawasan industri • Wajib Tap In / Scan In saat kembali</p>
+                      <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0;">Personel di luar kawasan industri — Wajib Tap In / Scan In saat kembali</p>
                     </div>
                     <button class="btn-figma-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setSecurityNav('pelacakan')">
                       <span>Semua Headcount →</span>
@@ -1027,8 +1011,7 @@
                 <!-- Card: Aktivitas Gerbang Terkini -->
                 <div class="figma-card">
                   <div class="figma-card-header">
-                    <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
-                      <span>🕒</span>
+                    <h3 class="figma-card-title">
                       <span>Aktivitas Gerbang Terkini</span>
                     </h3>
                     <a href="javascript:void(0)" class="figma-card-link" onclick="setSecurityNav('riwayat')" style="font-size: 0.75rem; color: #0284c7; font-weight: 700; text-decoration: none;">Log Lengkap →</a>
@@ -1041,8 +1024,7 @@
                 <!-- Card: Ketentuan SOP Gerbang Pos Jaga -->
                 <div class="figma-card">
                   <div class="figma-card-header">
-                    <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
-                      <span>🛡️</span>
+                    <h3 class="figma-card-title">
                       <span>Ketentuan Pemeriksaan Pos Jaga</span>
                     </h3>
                   </div>
@@ -1067,7 +1049,7 @@
               </div>
               <div>
                 <span class="role-tag-pill role-security" style="font-size: 0.8rem; padding: 4px 10px;">
-                  Petugas Jaga: Sertu Agus • Pos 1
+                  Petugas Jaga: Sertu Agus — Pos 1
                 </span>
               </div>
             </div>
@@ -1076,7 +1058,9 @@
             <div class="security-scanner-panel" id="securityScannerPanel" style="margin-top: 1.25rem;">
               <div class="scanner-top-row">
                 <div class="scanner-title-badge">
-                  <div class="scanner-icon">📟</div>
+                  <div class="scanner-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  </div>
                   <div>
                     <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.2px;">Terminal Verifikasi Tiket &
                       Kamera Scan QR</h3>
@@ -1136,7 +1120,7 @@
                     </select>
                   </div>
                   <div>
-                    <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">🟢 Kamera Live Berjalan</span>
+                    <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">Kamera Live Berjalan</span>
                   </div>
                 </div>
 
@@ -1204,7 +1188,7 @@
                 </div>
 
                 <div id="cameraScanStatus" class="camera-status-pill">
-                  💡 Arahkan kamera ke QR Code Tiket Izin Karyawan atau unggah gambar QR untuk memvalidasi.
+                  Arahkan kamera ke QR Code Tiket Izin Karyawan atau unggah gambar QR untuk memvalidasi.
                 </div>
               </div>
 
@@ -1233,7 +1217,6 @@
                 style="margin-top: 1.25rem; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 1.15rem 1.25rem; color: #e2e8f0;">
                 <div
                   style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                  <span style="font-size: 1.1rem;">📋</span>
                   <span style="font-weight: 800; font-size: 0.875rem; color: #f0f9ff; letter-spacing: -0.2px;">
                     Tata Cara Penggunaan Pemindai QR & Verifikasi Manual Pos Jaga
                   </span>
@@ -1245,7 +1228,6 @@
                     style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
                     <div
                       style="display: flex; align-items: center; gap: 0.4rem; color: #38bdf8; font-weight: 700; font-size: 0.8rem;">
-                      <span>📷</span>
                       <span>1. Tata Cara Kamera Scan QR (Webcam / HP)</span>
                     </div>
                     <ul
@@ -1264,7 +1246,6 @@
                     style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem;">
                     <div
                       style="display: flex; align-items: center; gap: 0.4rem; color: #34d399; font-weight: 700; font-size: 0.8rem;">
-                      <span>🏷️</span>
                       <span>2. Tata Cara Input Manual / Alat Barcode</span>
                     </div>
                     <ul
@@ -1287,14 +1268,14 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Karyawan di Luar (Headcount)</h1>
-                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik • Verifikasi kepulangan (Tap In Kartu Akses)</p>
+                <p>Daftar seluruh karyawan yang sedang berada di luar kawasan pabrik — Verifikasi kepulangan (Tap In Kartu Akses)</p>
               </div>
               <div class="filters-group">
                 <select id="filterSecurityQueueTab" class="filter-select">
                   <option value="outside">Karyawan Sedang di Luar (Perlu Tap In Kartu Akses)</option>
-                  <option value="overdue">⚠️ Karyawan Terlambat Kembali</option>
+                  <option value="overdue">Karyawan Terlambat Kembali</option>
                   <option value="ready">Izin Siap Keluar (Disetujui Atasan)</option>
-                  <option value="emergency">🚨 Khusus Izin Darurat / Bypass</option>
+                  <option value="emergency">Khusus Izin Darurat / Bypass</option>
                   <option value="all">Semua Riwayat Pemindaian Pos Jaga</option>
                 </select>
               </div>
@@ -1302,7 +1283,7 @@
 
             <div class="figma-section-bar" style="margin-top: 1.25rem;">
               <span class="figma-section-title" id="securitySectionHeading">Daftar Headcount Pos Jaga</span>
-              <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Pos 1 Gerbang Utama • PT Pupuk Kujang</span>
+              <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Pos 1 Gerbang Utama — PT Pupuk Kujang</span>
             </div>
 
             <div class="content-section" style="margin-top: 0.75rem;">
@@ -1353,7 +1334,7 @@
 
                 <div class="filters-group">
                   <select id="filterSecurityLogPeriod" class="filter-select" title="Filter Periode Waktu">
-                    <option value="all">📅 Semua Waktu</option>
+                    <option value="all">Semua Waktu</option>
                     <option value="today">Hari Ini</option>
                     <option value="week">Minggu Ini</option>
                     <option value="month">Bulan Ini</option>
@@ -1442,7 +1423,7 @@
               <div class="page-title-wrap">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                   <span class="role-badge-neutral">Pengawasan & K3</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);">•</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">—</span>
                   <span style="font-size: 0.75rem; color: var(--text-secondary);">Bambang Sutrisno, S.T. (Supervisi
                     Pusat)</span>
                 </div>
@@ -1525,7 +1506,7 @@
                   <span id="adminTrafficLiveIndicator"
                     style="font-size: 0.725rem; font-weight: 700; color: #059669; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;">
                     <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
-                    <span>Realtime • Live</span>
+                    <span>Realtime — Live</span>
                   </span>
                 </div>
                 <div id="chartAdminTrafficContainer" style="padding: 0.5rem 0.25rem;">
@@ -1743,7 +1724,7 @@
                 <div>
                   <h2 style="font-size: 1.25rem; font-weight: 800; color: #000000; margin: 0;">PT PUPUK KUJANG CIKAMPEK
                   </h2>
-                  <div style="font-size: 0.8rem; color: #333333; margin-top: 2px;">Departemen Pengamanan & K3 • Biro
+                  <div style="font-size: 0.8rem; color: #333333; margin-top: 2px;">Departemen Pengamanan & K3 — Biro
                     Umum & Tata Usaha</div>
                   <div style="font-size: 0.95rem; font-weight: 700; margin-top: 6px; text-decoration: underline;">
                     REKAPITULASI PERIZINAN KELUAR AREA PABRIK (GATE PASS AUDIT REPORT)
@@ -1930,8 +1911,8 @@
       <div class="modal-header" style="padding: 1.25rem 1.5rem 0.75rem;">
         <div>
           <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Formulir Pengajuan Izin Keluar Area</h3>
-          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;" id="modalNewSubtitle">Budi Pratama, S.T. •
-            PK-2024-8841 • Rekayasa & Pemeliharaan</p>
+          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;" id="modalNewSubtitle">Budi Pratama, S.T. —
+            PK-2024-8841 — Rekayasa & Pemeliharaan</p>
         </div>
         <button class="btn-close-modal" id="btnCloseNewModal" title="Tutup">✕</button>
       </div>
@@ -1939,12 +1920,8 @@
       <form id="formNewRequest" novalidate>
         <div class="modal-body"
           style="padding: 0.75rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
-          <!-- Blue Notice Banner -->
-          <div id="approverDirectNotice"
-            style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 0.65rem 0.85rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #1d4ed8;">
-            <span style="font-size: 0.95rem;">ℹ️</span>
-            <span>Pengajuan diteruskan kepada atasan langsung. QR terbit setelah izin disetujui.</span>
-          </div>
+         
+         
 
           <!-- Pilih Atasan Langsung (Searchable Autocomplete Combobox) -->
           <div class="form-group approver-search-group" id="groupSelectApprover" style="margin-bottom: 0;">
@@ -2151,7 +2128,7 @@
           <button type="button" class="btn-secondary" id="btnCancelNewModal"
             style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 6px;">Batal</button>
           <button type="submit" class="btn-figma-primary" id="btnSubmitNewRequest"
-            style="background: #1d4ed8; border-color: #1d4ed8; padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600;">
+            style="background: #059669; border-color: #059669; padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600;">
             Lanjutkan Konfirmasi
           </button>
         </div>
@@ -2301,10 +2278,10 @@
     <div class="modal-card" style="max-width: 820px; width: 95%;">
       <div class="modal-header" style="padding: 1.25rem 1.5rem 1rem;">
         <div>
-          <h3 id="modalDetailHeading" style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Detail Pengajuan •
+          <h3 id="modalDetailHeading" style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Detail Pengajuan —
             IZ-20261016-006</h3>
-          <p id="modalDetailSubtitle" style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Budi Pratama, S.T. •
-            Dinas Kantor • 16 Oktober 2026</p>
+          <p id="modalDetailSubtitle" style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Budi Pratama, S.T. —
+            Dinas Kantor — 16 Oktober 2026</p>
         </div>
         <button class="btn-close-modal" id="btnCloseDetailModal" title="Tutup">✕</button>
       </div>
@@ -2321,7 +2298,7 @@
           </button>
         </div>
         <div id="detailStatusPillTop">
-          <span class="status-pill-green">• Selesai</span>
+          <span class="status-pill-green">Selesai</span>
         </div>
       </div>
 
@@ -2329,24 +2306,20 @@
 
         <!-- PROMINENT EMERGENCY AUTHORIZATION TOP BANNER (Visible on both tabs) -->
         <div id="topEmergencyAuthBanner"
-          style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 3px 10px rgba(225, 29, 72, 0.08);">
+          style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
           <div
             style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <span style="font-size: 1.6rem;">🚨</span>
-              <div>
-                <div style="font-weight: 800; color: #9f1239; font-size: 0.95rem;">
-                  Tiket Izin Darurat: Menunggu Otorisasi K3
-                </div>
-                <div style="font-size: 0.775rem; color: #be123c; margin-top: 2px;">
-                  Sesuai aturan keselamatan ("No Approval, No Exit"), QR Code masih terkunci. Silakan buka otorisasi
-                  untuk membuka QR.
-                </div>
+            <div>
+              <div style="font-weight: 800; color: #b91c1c; font-size: 0.95rem;">
+                Tiket Izin Darurat: Menunggu Otorisasi K3
+              </div>
+              <div style="font-size: 0.775rem; color: #475569; margin-top: 2px;">
+                Sesuai aturan keselamatan ("No Approval, No Exit"), QR Code masih terkunci. Silakan buka otorisasi
+                untuk membuka QR.
               </div>
             </div>
-            <span class="tag-badge"
-              style="background: #ffe4e6; color: #9f1239; font-weight: 800; border: 1px solid #fecdd3; padding: 0.35rem 0.65rem;">
-              🔒 QR Terkunci
+            <span style="color: #b91c1c; font-weight: 700; font-size: 0.8rem;">
+              QR Terkunci
             </span>
           </div>
 
@@ -2423,7 +2396,7 @@
           <div>
             <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;"
               id="infoTimeSectionTitle">
-              Waktu keluar & kembali • 16 Oktober 2026
+              Waktu keluar & kembali — 16 Oktober 2026
             </div>
             <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
               <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
@@ -2446,7 +2419,7 @@
                     <td style="padding: 0.65rem 0.85rem; color: #334155; font-weight: 500;">Waktu Kembali</td>
                     <td style="padding: 0.65rem 0.85rem; color: #64748b;" id="infoTablePlanReturn">11.00 WIB</td>
                     <td style="padding: 0.65rem 0.85rem; font-weight: 600; color: #059669;" id="infoTableActualReturn">
-                      10.52 WIB • Tepat Waktu</td>
+                      10.52 WIB — Tepat Waktu</td>
                   </tr>
                 </tbody>
               </table>
@@ -2457,13 +2430,13 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" id="infoNotesContainer">
             <div>
               <span style="font-size: 0.725rem; color: #64748b; display: block; font-weight: 600;"
-                id="infoApproverLbl">Catatan Atasan • Ir. Hendra Gunawan, M.T.</span>
+                id="infoApproverLbl">Catatan Atasan — Ir. Hendra Gunawan, M.T.</span>
               <p style="font-size: 0.8rem; color: #334155; margin-top: 2px; line-height: 1.4;"
                 id="infoApproverNoteText">Disetujui. Sampaikan hasil pemeriksaan setelah kembali.</p>
             </div>
             <div>
               <span style="font-size: 0.725rem; color: #64748b; display: block; font-weight: 600;"
-                id="infoSecurityLbl">Catatan Petugas Pos Jaga • Agus Setiawan</span>
+                id="infoSecurityLbl">Catatan Petugas Pos Jaga — Agus Setiawan</span>
               <p style="font-size: 0.8rem; color: #334155; margin-top: 2px; line-height: 1.4;"
                 id="infoSecurityNoteText">Identitas dan QR sesuai. Scan In tercatat di Pos 1.</p>
             </div>
@@ -2471,18 +2444,17 @@
 
           <!-- Extension Alert Box (if any) -->
           <div id="infoPendingExtensionBox"
-            style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.8rem;">
+            style="display: none; background: #ffffff; border: 1px solid #e2e8f0; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.8rem;">
             <div
-              style="font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
-              <span>⏱️ Permohonan Perpanjangan Waktu Izin</span>
+              style="font-weight: 700; color: #0f172a; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span>Permohonan Perpanjangan Waktu Izin</span>
               <span class="tag-badge"
-                style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Grace Period
-                Aktif</span>
+                style="background: #f8fafc; color: #475569; font-weight: 600; border: 1px solid #e2e8f0;">Grace Period Aktif</span>
             </div>
-            <div style="margin-top: 0.45rem; color: #78350f; font-size: 0.775rem; line-height: 1.5;">
+            <div style="margin-top: 0.45rem; color: #475569; font-size: 0.775rem; line-height: 1.5;">
               <div><strong>Waktu Kembali Baru:</strong> <span id="infoExtNewReturn"
-                  style="font-family: var(--font-mono); font-weight: 700; color: #92400e;">-</span></div>
-              <div style="margin-top: 2px;"><strong>Alasan:</strong> <span id="infoExtReason">-</span></div>
+                  style="font-family: var(--font-mono); font-weight: 700; color: #0f172a;">-</span></div>
+              <div style="margin-top: 2px;"><strong>Alasan:</strong> <span id="infoExtReason" style="color: #334155;">-</span></div>
             </div>
             <div id="approverExtActionBtns"
               style="display: none; margin-top: 0.65rem; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
@@ -2495,54 +2467,33 @@
 
           <!-- Emergency Status Alert inside Detail Modal -->
           <div id="infoEmergencyDetailBox"
-            style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.8rem;">
+            style="display: none; margin-bottom: 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem;">
             <div
-              style="font-weight: 800; color: #9f1239; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
-              <span style="display: flex; align-items: center; gap: 0.4rem;">
-                <span>🚨</span>
-                <span>Otorisasi Kedaruratan K3 Diperlukan</span>
-              </span>
-              <span class="tag-badge"
-                style="background: #ffe4e6; color: #9f1239; font-weight: 800; border: 1px solid #fecdd3;">QR
-                Terkunci</span>
+              style="font-weight: 800; color: #b91c1c; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span>Otorisasi Kedaruratan K3 Diperlukan</span>
+              <span style="color: #b91c1c; font-weight: 700; font-size: 0.75rem;">QR Terkunci</span>
             </div>
-            <p style="font-size: 0.775rem; color: #881337; margin: 0.4rem 0 0.65rem; line-height: 1.45;">
+            <p style="font-size: 0.775rem; color: #475569; margin: 0.4rem 0 0.65rem; line-height: 1.45;">
               Sesuai SOP Keamanan "No Approval, No Exit", QR Code izin darurat ini terkunci hingga diotorisasi oleh
               Atasan (<strong id="infoEmgApproverName">Ir. Hendra Gunawan</strong>). Karyawan dapat memasukkan kode
               sandi/OTP dari Atasan atau memindai wajah Atasan langsung.
             </p>
             <button type="button" id="btnDetailOpenUnlockBox" class="btn-figma-primary"
               style="background: #dc2626; border-color: #dc2626; font-size: 0.8rem; padding: 0.45rem 0.95rem; font-weight: 700; width: 100%; justify-content: center;">
-              ⚡ Buka Otorisasi (Input Sandi / Scan Wajah)
+              Buka Otorisasi (Input Sandi / Scan Wajah)
             </button>
-          </div>
-
-          <!-- Blue Notice Box -->
-          <div
-            style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: #1e40af;"
-            id="infoNoticeBox">
-            <span style="font-size: 1rem;">ℹ️</span>
-            <span id="infoNoticeText">Perjalanan selesai pukul 10.52 WIB. QR tiket ini tidak berlaku lagi.</span>
           </div>
         </div>
 
         <!-- TAB 2: RIWAYAT AKTIVITAS (FIGMA SCREEN 3) -->
         <div id="paneDetailTimeline" style="display: none; flex-direction: column; gap: 1rem;">
           <div style="font-size: 0.75rem; color: #64748b;">
-            Jejak perjalanan tiket • Seluruh waktu dalam WIB
+            Jejak perjalanan tiket — Seluruh waktu dalam WIB
           </div>
 
           <!-- Connected Dynamic Timeline -->
           <div class="figma-timeline-connected" id="figmaDetailTimelineList">
             <!-- Rendered dynamically via JS -->
-          </div>
-
-          <!-- Blue Notice Box -->
-          <div
-            style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.65rem; font-size: 0.8rem; color: #1e40af;">
-            <span style="font-size: 1rem;">ℹ️</span>
-            <span id="timelineNoticeText">Tap In Kartu Akses menutup perjalanan dan menonaktifkan QR. Seluruh aktivitas tetap
-              tersimpan pada tiket.</span>
           </div>
         </div>
 
@@ -2551,7 +2502,7 @@
       <!-- Detail Modal Footer -->
       <div class="modal-footer" id="detailModalFooter"
         style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.75rem; color: #64748b;" id="detailFooterMeta">Tiket selesai • QR tidak aktif</span>
+        <span style="font-size: 0.75rem; color: #64748b;" id="detailFooterMeta">Tiket selesai — QR tidak aktif</span>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <button type="button" class="btn-figma-primary" id="btnDetailEmergencyUnlock"
             style="display: none; background: #dc2626; border-color: #dc2626; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700;">
@@ -2608,15 +2559,15 @@
       <div class="modal-header">
         <div>
           <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Tiket Izin Digital</h3>
-          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;" id="digitalPassSubtitle">IZ-20261019-013 •
-            Dinas Kantor • Kembali ke Area</p>
+          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;" id="digitalPassSubtitle">IZ-20261019-013 —
+            Dinas Kantor — Kembali ke Area</p>
         </div>
         <button class="btn-close-modal" id="btnCloseDigitalPassModal" title="Tutup">✕</button>
       </div>
 
       <div class="modal-body" style="text-align: center; gap: 0.85rem; padding: 1.25rem 1.5rem;">
         <div id="digitalPassStatusBadgeWrap">
-          <span class="status-pill-purple" id="digitalPassStatusBadge">• Sedang di Luar</span>
+          <span id="digitalPassStatusBadge" style="font-weight: 700; font-size: 0.8rem; color: #7e22ce;">Sedang di Luar</span>
         </div>
         <p style="font-size: 0.85rem; color: #475569; font-weight: 600; margin: 0;" id="digitalPassInstruction">
           Tunjukkan QR Code ini kepada Petugas Pengamanan di Pos 1
@@ -2629,7 +2580,7 @@
           <!-- QR rendered via JS -->
         </div>
         <div style="font-size: 0.725rem; color: #94a3b8; font-weight: 600;">
-          DEMO • QR ilustratif, bukan kredensial izin
+          DEMO — QR ilustratif, bukan kredensial izin
         </div>
 
         <!-- 3-Column Metadata Card -->
@@ -2709,34 +2660,25 @@
   <div class="modal-overlay" id="modalEmergency">
     <div class="modal-card" style="max-width: 820px; width: 95%;">
       <div class="modal-header"
-        style="padding: 1.25rem 1.5rem 0.85rem; border-bottom: 1.5px solid #fecdd3; background: #fff1f2;">
+        style="padding: 1.25rem 1.5rem 0.85rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
         <div>
           <h3 id="modalEmergencyTitle"
-            style="font-size: 1.25rem; font-weight: 800; color: #9f1239; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2px;">
-            <span>🚨</span>
-            <span>Formulir Izin Darurat • Rancangan</span>
+            style="font-size: 1.25rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2px;">
+            <span>Formulir Izin Darurat — Rancangan</span>
           </h3>
-          <p id="modalEmergencySubtitle" style="font-size: 0.8rem; color: #be123c; margin: 0;">Gunakan hanya untuk
-            evakuasi atau keadaan mendesak • Semua data wajib diisi</p>
+          <p id="modalEmergencySubtitle" style="font-size: 0.8rem; color: #64748b; margin: 0;">Gunakan hanya untuk
+            evakuasi atau keadaan mendesak — Semua data wajib diisi</p>
         </div>
         <button class="btn-close-modal" id="btnCloseEmergencyModal" title="Tutup">✕</button>
       </div>
 
       <div class="modal-body"
         style="padding: 1rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; max-height: 72vh; overflow-y: auto;">
-        <!-- Emergency Alert Banner -->
-        <div
-          style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #9f1239; line-height: 1.45;">
-          <strong>🚨 Ketentuan BRULE-05 ("No Approval, No Exit"):</strong> Tiket darurat diterbitkan dengan status
-          <strong>QR Code Terkunci (Locked)</strong>. Setelah pengajuan, Anda dapat membuka kunci QR Code dengan salah
-          satu dari 3 metode otorisasi cepat: <strong>(1) Persetujuan Langsung Atasan di App</strong>, <strong>(2) Kode
-            Sandi / OTP Darurat</strong>, atau <strong>(3) Scan Wajah Atasan di Tempat</strong>.
-        </div>
+        
 
         <!-- Notice jika Atasan Utama Tidak Tersedia -->
-        <div id="emergNoApproverNotice" style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 0.65rem 0.9rem; font-size: 0.8rem; color: #9f1239; font-weight: 600; align-items: center; gap: 0.5rem;">
-          <span>⚠️</span>
-          <span>Atasan anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain.</span>
+        <div id="emergNoApproverNotice" style="display: none; padding: 0.25rem 0; font-size: 0.8rem; color: #dc2626; font-weight: 600; align-items: center; gap: 0.5rem;">
+          <span>Atasan Anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain.</span>
         </div>
 
         <!-- Pilih Atasan untuk Notifikasi Pelacakan (Searchable Autocomplete Combobox) -->
@@ -2986,13 +2928,12 @@
   <!-- ================= MODAL 7B: OTORISASI CEPAT QR DARURAT (3 METODE) ================= -->
   <div class="modal-overlay" id="modalEmergencyUnlock">
     <div class="modal-card" style="max-width: 540px;">
-      <div class="modal-header" style="border-bottom: 1.5px solid #fecdd3; background: #fff1f2;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; background: #ffffff;">
         <div>
-          <h3 style="color: #9f1239; display: flex; align-items: center; gap: 0.45rem;">
-            <span>🚨</span>
+          <h3 style="color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
             <span>Otorisasi Buka Kunci QR Darurat</span>
           </h3>
-          <p style="color: #be123c;">SOP Keamanan BRD PT Pupuk Kujang ("No Approval, No Exit")</p>
+          <p style="color: #64748b;">SOP Keamanan BRD PT Pupuk Kujang ("No Approval, No Exit")</p>
         </div>
         <button class="btn-close-modal" id="btnCloseEmgUnlock" onclick="window.closeEmergencyUnlockModal()">✕</button>
       </div>
@@ -3000,13 +2941,13 @@
       <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.25rem;">
         <!-- Ringkasan Tiket Darurat -->
         <div
-          style="background: #fff8f8; border: 1px solid #fecdd3; border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin-bottom: 1rem;">
+          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin-bottom: 1rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
             <span
               style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Tiket
               Darurat</span>
             <strong id="emgUnlockTicketId"
-              style="font-family: var(--font-mono); color: #b91c1c; font-size: 0.875rem;">TK-EMG-...</strong>
+              style="font-family: var(--font-mono); color: #0f172a; font-size: 0.875rem;">TK-EMG-...</strong>
           </div>
           <div
             style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.2rem;">
@@ -3014,7 +2955,7 @@
                 S.T.</strong></span>
             <span>Tujuan: <strong id="emgUnlockDestination" style="color: var(--text-primary);">-</strong></span>
           </div>
-          <div style="font-size: 0.725rem; color: #881337; margin-top: 0.2rem;">
+          <div style="font-size: 0.725rem; color: #475569; margin-top: 0.2rem;">
             Atasan Berwenang: <strong id="emgUnlockApprover">Ir. Hendra Gunawan, M.T. / Dewi Sartika</strong>
           </div>
         </div>
@@ -3026,17 +2967,14 @@
         <div class="emg-unlock-tabs">
           <button type="button" class="emg-tab-btn active" data-tab="tabEmgApprove"
             onclick="window.switchEmergencyUnlockTab('tabEmgApprove', true)">
-            <span style="font-size: 1.1rem;">📱</span>
             <span>1. Persetujuan di App</span>
           </button>
           <button type="button" class="emg-tab-btn" data-tab="tabEmgPasscode"
             onclick="window.switchEmergencyUnlockTab('tabEmgPasscode', true)">
-            <span style="font-size: 1.1rem;">🔑</span>
             <span>2. Kode Sandi / OTP</span>
           </button>
           <button type="button" class="emg-tab-btn" data-tab="tabEmgFaceScan"
             onclick="window.switchEmergencyUnlockTab('tabEmgFaceScan', true)">
-            <span style="font-size: 1.1rem;">🤳</span>
             <span>3. Scan Wajah</span>
           </button>
         </div>
@@ -3045,11 +2983,10 @@
         <div class="emg-tab-pane active" id="tabEmgApprove">
           <div
             style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 1rem; text-align: center;">
-            <div style="font-size: 2rem; margin-bottom: 0.25rem;">⏳</div>
             <div style="font-weight: 800; font-size: 0.95rem; color: #166534;">Menunggu Otorisasi 1-Klik Atasan</div>
             <p style="font-size: 0.8rem; color: #15803d; margin-top: 0.35rem; line-height: 1.45;">
               Atasan (Ir. Hendra Gunawan atau Dewi Sartika) menerima notifikasi prioritas tinggi di aplikasinya. Begitu
-              Atasan menekan tombol <strong>⚡ Setujui Langsung</strong>, QR Code tiket Anda akan langsung terbuka secara
+              Atasan menekan tombol <strong>Setujui Langsung</strong>, QR Code tiket Anda akan langsung terbuka secara
               otomatis.
             </p>
             <div
@@ -3075,7 +3012,7 @@
         <div class="emg-tab-pane" id="tabEmgPasscode">
           <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 1rem;">
             <div style="font-weight: 800; font-size: 0.875rem; color: #92400e; margin-bottom: 0.3rem;">
-              🔑 Masukkan 6-Digit Sandi Otorisasi Darurat
+              Masukkan 6-Digit Sandi Otorisasi Darurat
             </div>
             <p style="font-size: 0.775rem; color: #78350f; line-height: 1.45; margin-bottom: 0.75rem;">
               Gunakan opsi ini jika Atasan sedang di luar pabrik / tidak memegang aplikasi. Hubungi Atasan via
@@ -3091,7 +3028,7 @@
               <div id="emgPasscodeHintBox"
                 style="margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.5rem; background: #fef3c7; border: 1px dashed #d97706; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;"
                 title="Klik untuk mengisi otomatis sandi ini">
-                <span style="font-size: 0.725rem; color: #92400e;">💡 Sandi Tiket Ini: <strong
+                <span style="font-size: 0.725rem; color: #92400e;">Sandi Tiket Ini: <strong
                     id="emgUnlockPasscodeHint"
                     style="font-family: var(--font-mono); font-size: 0.85rem; color: #b45309;">-</strong></span>
                 <span style="font-size: 0.7rem; color: #d97706; text-decoration: underline; font-weight: 700;">(Isi
@@ -3105,7 +3042,7 @@
             <button type="button" class="btn-approve" id="btnSubmitEmergencyPasscode"
               onclick="window.verifyEmergencyPasscode()"
               style="width: 100%; justify-content: center; padding: 0.65rem; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 700;">
-              ✓ Verifikasi Kode Sandi & Buka QR
+              Verifikasi Kode Sandi & Buka QR
             </button>
           </div>
         </div>
@@ -3115,7 +3052,7 @@
           <div
             style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 1rem; text-align: center;">
             <div style="font-weight: 800; font-size: 0.875rem; color: var(--text-primary); margin-bottom: 0.25rem;">
-              🤳 Verifikasi Wajah (Face Scan) Atasan Langsung
+              Verifikasi Wajah (Face Scan) Atasan Langsung
             </div>
             <p style="font-size: 0.775rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
               Arahkan kamera ke wajah Atasan (Ir. Hendra Gunawan / Dewi Sartika) yang mendampingi Anda di lokasi:
@@ -3144,7 +3081,7 @@
             <button type="button" class="btn-primary" id="btnTriggerFaceScan"
               onclick="window.triggerEmergencyFaceScan()"
               style="margin-top: 0.75rem; font-size: 0.8rem; padding: 0.55rem 1rem; width: 100%; justify-content: center; background: #0284c7; border-color: #0284c7; font-weight: 700;">
-              📸 Pindai Wajah Atasan Sekarang
+              Pindai Wajah Atasan Sekarang
             </button>
           </div>
         </div>
@@ -3172,8 +3109,8 @@
       <div class="modal-body">
         <div style="text-align: center; padding: 0.5rem 0;">
           <div
-            style="width: 54px; height: 54px; border-radius: 50%; background: var(--amber-light); border: 2px solid var(--amber-border); color: var(--amber-warning); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
-            ⚠️
+            style="width: 54px; height: 54px; border-radius: 50%; background: var(--amber-light); border: 2px solid var(--amber-border); color: var(--amber-warning); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
           </div>
           <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem;">
             Anda Masih Memiliki Izin Aktif
@@ -3187,23 +3124,46 @@
             style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-top: 1rem; text-align: left; font-size: 0.8rem;">
             <strong style="color: var(--text-primary);">Kebijakan Sistem:</strong>
             <p style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.4;">
-              Karyawan tidak diperkenankan mengajukan izin baru sebelum tiket aktif saat ini diselesaikan (telah kembali
-              dan <em>Scan In</em> di Pos Jaga), dibatalkan mandiri, atau ditolak oleh Atasan.
+              Karyawan tidak diperkenankan mengajukan izin baru sebelum tiket aktif saat ini diselesaikan, dibatalkan mandiri, atau ditolak oleh Atasan.
             </p>
           </div>
         </div>
       </div>
 
       <div class="modal-footer"
-        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-        <button type="button" class="btn-secondary" id="btnDismissBlockedModal">Tutup</button>
-        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" class="btn-figma-secondary" id="btnBlockedEditTicket"
-            style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">✏️ Edit Izin Ini</button>
-          <button type="button" class="btn-emergency" id="btnBlockedCancelTicket"
-            style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Batalkan Izin Ini</button>
-          <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
+        style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <button type="button" class="btn-figma-secondary" id="btnBlockedEditTicket"
+          style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Edit Izin Ini</button>
+        <button type="button" class="btn-emergency" id="btnBlockedCancelTicket"
+          style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Batalkan Izin Ini</button>
+        <button type="button" class="btn-primary-action" id="btnBlockedViewTicket">Lihat Izin Aktif Ini</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL KONFIRMASI HAPUS RIWAYAT ================= -->
+  <div class="modal-overlay" id="modalDeleteConfirm">
+    <div class="modal-card" style="max-width: 440px; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);">
+      <div class="modal-header" style="padding: 1.15rem 1.25rem 0.85rem; border-bottom: 1px solid #f1f5f9; background: #ffffff;">
+        <div>
+          <h3 id="deleteModalTitle" style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Konfirmasi Hapus</h3>
         </div>
+        <button class="btn-close-modal" id="btnCloseDeleteConfirm" style="color: #64748b;" onclick="window.closeDeleteConfirmModal()">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem; font-size: 0.875rem; color: #334155; line-height: 1.5;">
+        <p id="deleteModalMessage" style="margin: 0;">
+          Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.
+        </p>
+      </div>
+
+      <div class="modal-footer" style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: flex-end; gap: 0.65rem;">
+        <button type="button" class="btn-secondary" id="btnCancelDeleteConfirm" onclick="window.closeDeleteConfirmModal()" style="padding: 0.45rem 1rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600;">
+          Cancel
+        </button>
+        <button type="button" id="btnExecuteDeleteConfirm" style="background: #0284c7; color: #ffffff; border: 1px solid #0284c7; padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.15s;">
+          OK
+        </button>
       </div>
     </div>
   </div>
@@ -3214,7 +3174,7 @@
       <div class="modal-header">
         <div>
           <h3 style="color: #dc2626;">Konfirmasi Logout</h3>
-          <p>Portal Otentikasi KUJANG ID • PT Pupuk Kujang</p>
+          <p>Portal Otentikasi KUJANG ID — PT Pupuk Kujang</p>
         </div>
         <button class="btn-close-modal" id="btnCloseLogoutModal">✕</button>
       </div>
@@ -3252,7 +3212,7 @@
           🔐
         </div>
         <h2 style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px;">Portal SAKTI KUJANG ID</h2>
-        <p style="font-size: 0.785rem; color: #93c5fd; margin-top: 0.25rem;">Sistem Perizinan Keluar Area • PT Pupuk
+        <p style="font-size: 0.785rem; color: #93c5fd; margin-top: 0.25rem;">Sistem Perizinan Keluar Area — PT Pupuk
           Kujang</p>
       </div>
 
@@ -3266,7 +3226,7 @@
             <div style="font-size: 1.3rem;">👷</div>
             <div style="flex: 1;">
               <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Budi Pratama, S.T.</div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Karyawan Pemohon • NIP: PK-2024-8841</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Karyawan Pemohon — NIP: PK-2024-8841</div>
             </div>
             <span class="role-tag-pill role-karyawan">Karyawan</span>
           </div>
@@ -3276,7 +3236,7 @@
             <div style="flex: 1;">
               <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Ir. Hendra Gunawan, M.T.
               </div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Manager Approver • NIP: PK-2015-1002</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Manager Approver — NIP: PK-2015-1002</div>
             </div>
             <span class="role-tag-pill role-approver">Atasan 1</span>
           </div>
@@ -3286,7 +3246,7 @@
             <div style="flex: 1;">
               <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Dewi Sartika, S.T., M.M.
               </div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisor Operasional (Plt) • NIP:
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisor Operasional (Plt) — NIP:
                 PK-2012-0845</div>
             </div>
             <span class="role-tag-pill role-approver" style="background:#e0e7ff; color:#3730a3;">Atasan 2</span>
@@ -3296,7 +3256,7 @@
             <div style="font-size: 1.3rem;">👮</div>
             <div style="flex: 1;">
               <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Sertu Agus</div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Petugas Pos 1 Gerbang • NIP: SEC-2018-042
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Petugas Pos 1 Gerbang — NIP: SEC-2018-042
               </div>
             </div>
             <span class="role-tag-pill role-security">Pos Jaga</span>
@@ -3307,7 +3267,7 @@
             <div style="flex: 1;">
               <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Bambang Sutrisno, S.T.
               </div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisi K3 & Keamanan • NIP:
+              <div style="font-size: 0.725rem; color: var(--text-secondary);">Supervisi K3 & Keamanan — NIP:
                 ADM-2016-019</div>
             </div>
             <span class="role-tag-pill role-admin">Admin</span>
@@ -3328,7 +3288,7 @@
       <div class="modal-header">
         <div>
           <h3 style="color: var(--corp-teal);">Pilih Metode Pemindaian QR</h3>
-          <p>Terminal Pos Jaga • PT Pupuk Kujang</p>
+          <p>Terminal Pos Jaga — PT Pupuk Kujang</p>
         </div>
         <button class="btn-close-modal" id="btnCloseScanMethodPicker">✕</button>
       </div>
@@ -3385,7 +3345,7 @@
       <div class="modal-header" style="padding: 1.25rem 1.5rem 0.75rem;">
         <div>
           <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Permohonan Perpanjangan Waktu Izin</h3>
-          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Budi Pratama, S.T. • PK-2024-8841 • Rekayasa &
+          <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Budi Pratama, S.T. — PK-2024-8841 — Rekayasa &
             Pemeliharaan</p>
         </div>
         <button class="btn-close-modal" id="btnCloseExtendModal" title="Tutup">✕</button>
@@ -3393,12 +3353,10 @@
 
       <div class="modal-body"
         style="padding: 0.75rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; max-height: 72vh; overflow-y: auto;">
-        <!-- Blue Notice Banner -->
+        <!-- Notice Banner -->
         <div
-          style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 0.65rem 0.85rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #1d4ed8;">
-          <span style="font-size: 0.95rem;">ℹ️</span>
-          <span>Permohonan perpanjangan diteruskan kepada atasan langsung. Grace period aktif selama proses
-            peninjauan.</span>
+          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: #475569;">
+          <span>Permohonan perpanjangan diteruskan kepada atasan langsung. Grace period aktif selama proses peninjauan.</span>
         </div>
 
         <!-- Ringkasan Tiket Aktif -->
@@ -3464,8 +3422,7 @@
     <div class="modal-card" style="max-width: 580px; width: 95%;">
       <div class="modal-header" style="padding: 1.25rem 1.5rem 0.75rem;">
         <div>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
-            <span>⏱️</span>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a;">
             <span>Detail Pengajuan Perpanjangan Waktu</span>
           </h3>
           <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
@@ -3476,16 +3433,10 @@
       </div>
 
       <div class="modal-body" style="padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Status Banner -->
-        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span style="font-size: 1.3rem;">⏳</span>
-            <div>
-              <div style="font-size: 0.825rem; font-weight: 800; color: #92400e;">Menunggu Persetujuan Atasan</div>
-              <div style="font-size: 0.725rem; color: #b45309;">Grace period aktif: Penandaan terlambat ditangguhkan sementara.</div>
-            </div>
-          </div>
-          <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a; font-size: 0.7rem;">PROSES REVIEW</span>
+        <!-- Status Information -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="font-size: 0.825rem; font-weight: 700; color: #0f172a;">Menunggu Persetujuan Atasan</div>
+          <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px;">Grace period aktif: Penandaan terlambat ditangguhkan sementara.</div>
         </div>
 
         <!-- Detail Fields -->
@@ -3498,9 +3449,9 @@
             <span style="color: #64748b; font-weight: 600;">Jadwal Kembali Semula:</span>
             <span id="pendingExtOldReturn" style="font-family: var(--font-mono); font-weight: 700; color: #475569;">-</span>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #bfdbfe;">
-            <span style="color: #1e40af; font-weight: 700;">Usulan Jam Kembali Baru:</span>
-            <span id="pendingExtNewReturn" style="font-family: var(--font-mono); font-weight: 800; color: #1d4ed8; font-size: 0.9rem;">-</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #64748b; font-weight: 600;">Usulan Jam Kembali Baru:</span>
+            <span id="pendingExtNewReturn" style="font-family: var(--font-mono); font-weight: 700; color: #0f172a; font-size: 0.85rem;">-</span>
           </div>
           <div>
             <span style="color: #64748b; font-weight: 600; display: block; margin-bottom: 2px;">Alasan Perpanjangan Waktu:</span>
@@ -3811,18 +3762,18 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261023_07"></script>
-  <script src="js/modules/ui.js?v=20261023_07"></script>
-  <script src="js/modules/scheduler.js?v=20261023_07"></script>
-  <script src="js/modules/navigation.js?v=20261023_07"></script>
-  <script src="js/modules/karyawan.js?v=20261023_07"></script>
-  <script src="js/modules/approver.js?v=20261023_07"></script>
-  <script src="js/modules/security.js?v=20261023_07"></script>
-  <script src="js/modules/admin.js?v=20261023_07"></script>
-  <script src="js/modules/charts.js?v=20261023_07"></script>
-  <script src="js/modules/emergency.js?v=20261023_07"></script>
-  <script src="js/modules/modals.js?v=20261023_07"></script>
-  <script src="js/app.js?v=20261023_07"></script>
+  <script src="js/data/mockData.js?v=20261026_1214"></script>
+  <script src="js/modules/ui.js?v=20261026_1214"></script>
+  <script src="js/modules/scheduler.js?v=20261026_1214"></script>
+  <script src="js/modules/navigation.js?v=20261026_1214"></script>
+  <script src="js/modules/karyawan.js?v=20261026_1214"></script>
+  <script src="js/modules/approver.js?v=20261026_1214"></script>
+  <script src="js/modules/security.js?v=20261026_1214"></script>
+  <script src="js/modules/admin.js?v=20261026_1214"></script>
+  <script src="js/modules/charts.js?v=20261026_1214"></script>
+  <script src="js/modules/emergency.js?v=20261026_1214"></script>
+  <script src="js/modules/modals.js?v=20261026_1214"></script>
+  <script src="js/app.js?v=20261026_1214"></script>
 </body>
 
 </html>

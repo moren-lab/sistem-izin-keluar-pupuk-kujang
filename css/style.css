@@ -4526,11 +4526,12 @@ body.modal-open {
 .figma-card-link {
   font-size: 0.775rem;
   font-weight: 700;
-  color: #1d68d8;
+  color: #059669;
   text-decoration: none;
 }
 
 .figma-card-link:hover {
+  color: #047857;
   text-decoration: underline;
 }
 
@@ -4564,7 +4565,7 @@ body.modal-open {
 }
 
 .figma-bullet-list li::before {
-  content: "•";
+  content: "–";
   position: absolute;
   left: 0;
   color: #059669;
@@ -4661,6 +4662,26 @@ body.modal-open {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+/* Hilangkan box background dan border status di seluruh area Karyawan */
+#viewKaryawan .status-pill,
+#viewKaryawan .status-pill-purple,
+#viewKaryawan .status-pill-green,
+#viewKaryawan .status-pill-amber,
+#viewKaryawan .status-pill-red,
+#viewKaryawan .status-pill-gray,
+#digitalPassModal .status-pill,
+#digitalPassModal .status-pill-purple,
+#digitalPassModal .status-pill-green,
+#digitalPassModal .status-pill-amber,
+#digitalPassModal .status-pill-red,
+#digitalPassModal .status-pill-blue {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Figma Filter Toolbar */
@@ -4770,9 +4791,28 @@ body.modal-open {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-top: 0.85rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.figma-table-card::-webkit-scrollbar {
+  height: 6px;
+}
+
+.figma-table-card::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 3px;
+}
+
+.figma-table-card::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.figma-table-card::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .figma-table {
@@ -5031,12 +5071,12 @@ body.modal-open {
 
 .approver-search-tip {
   font-size: 0.72rem;
-  color: #1d4ed8;
+  color: #059669;
   font-weight: 600;
-  background: #eff6ff;
+  background: #ecfdf5;
   padding: 0.15rem 0.5rem;
   border-radius: 9999px;
-  border: 1px solid #dbeafe;
+  border: 1px solid #a7f3d0;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -5183,8 +5223,8 @@ body.modal-open {
 
 /* SEBELUM SEARCH STATE BANNER */
 .approver-before-search-banner {
-  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
-  border-bottom: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  border-bottom: 1px solid #a7f3d0;
   padding: 0.65rem 0.85rem;
   display: flex;
   flex-direction: column;
@@ -5197,12 +5237,12 @@ body.modal-open {
   gap: 0.35rem;
   font-size: 0.74rem;
   font-weight: 700;
-  color: #1d4ed8;
+  color: #059669;
   letter-spacing: 0.3px;
 }
 
 .before-search-badge svg {
-  color: #2563eb;
+  color: #059669;
   flex-shrink: 0;
 }
 

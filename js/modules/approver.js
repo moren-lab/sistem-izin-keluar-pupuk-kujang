@@ -93,7 +93,7 @@ function renderApproverDashboard() {
   const currentApproverActor = isApprover2 ? (ACTORS.approver2 || { name: 'Dewi Sartika, S.T., M.M.', title: 'Supervisor Operasional (Plt)' }) : (ACTORS.approver || { name: 'Ir. Hendra Gunawan, M.T.', title: 'Manager Rekayasa & Pemeliharaan' });
 
   if (approverHeroSub) {
-    approverHeroSub.innerHTML = `${currentApproverActor.name} • ${currentApproverActor.title} • Prinsip: <strong>No Approval, No Exit</strong>`;
+    approverHeroSub.innerHTML = `${currentApproverActor.name} — ${currentApproverActor.title} — Prinsip: <strong>No Approval, No Exit</strong>`;
   }
   if (approverProfilePill) {
     approverProfilePill.textContent = `Approver: ${currentApproverActor.name} (${isApprover2 ? 'Atasan 2 / Delegasi' : 'Atasan 1 / Manager'})`;
@@ -166,7 +166,7 @@ function renderApproverDashboard() {
                     <span class="status-pill emergency-locked" style="font-size: 0.65rem; padding: 2px 8px;">QR TERKUNCI</span>
                   </div>
                   <div style="font-size: 0.85rem; color: #881337; margin-top: 3px;">
-                    <strong>${emg.applicantName}</strong> (${emg.id}) • Tujuan: <strong>${emg.destination}</strong>
+                    <strong>${emg.applicantName}</strong> (${emg.id}) — Tujuan: <strong>${emg.destination}</strong>
                   </div>
                   <div style="font-size: 0.775rem; color: #9f1239; margin-top: 2px; font-style: italic;">
                     "Alasan Kedaruratan: ${emg.reason}"
@@ -216,7 +216,7 @@ function renderApproverDashboard() {
                 Monitoring Izin Darurat Aktif (${activeEmergencyTickets.length} Karyawan)
               </div>
               <div style="font-size: 0.775rem; color: #881337;">
-                ${emg.applicantName} • Tujuan: <strong>${emg.destination}</strong> • Status: <strong>${liveStatusText}</strong> • Otorisasi: <em>${emg.emergencyUnlockMethod || 'Resmi'}</em>
+                ${emg.applicantName} — Tujuan: <strong>${emg.destination}</strong> — Status: <strong>${liveStatusText}</strong> — Otorisasi: <em>${emg.emergencyUnlockMethod || 'Resmi'}</em>
               </div>
             </div>
           </div>
@@ -243,7 +243,7 @@ function renderApproverDashboard() {
             </div>
           </div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <button class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${extFirst.id}', 'detail')">Rincian</button>
+            <button class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${extFirst.id}', 'detail')">Detail pengajuan</button>
             <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openRejectExtensionModal('${extFirst.id}')">✕ Tolak</button>
             <button class="btn-approve" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="approveExtensionRequest('${extFirst.id}')">✓ Setujui</button>
           </div>
@@ -307,7 +307,7 @@ function renderApproverDashboard() {
               <span class="tag-badge" style="background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; font-weight: 700;">Sedang di Luar</span>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
             </div>
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.775rem; color: #92400e; line-height: 1.45;">
               <div><strong>Estimasi Kembali Semula:</strong> ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : '-'}</div>
@@ -319,7 +319,7 @@ function renderApproverDashboard() {
                 Diajukan: ${t.pendingExtension.requestedAt}
               </span>
               <div style="display: flex; gap: 0.35rem;">
-                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Rincian</button>
+                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Detail pengajuan</button>
                 <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectExtensionModal('${t.id}')">✕ Tolak</button>
                 <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="approveExtensionRequest('${t.id}')">✓ Setujui</button>
               </div>
@@ -340,7 +340,7 @@ function renderApproverDashboard() {
               ${window.getStatusPill(t.status)}
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
             </div>
             <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4;">
               "${t.reason}"
@@ -350,7 +350,7 @@ function renderApproverDashboard() {
                 Keluar: ${t.plannedExit.replace('T', ' ')}
               </span>
               <div style="display: flex; gap: 0.35rem;">
-                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Rincian</button>
+                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')">Detail pengajuan</button>
                 <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectModal('${t.id}')">✕ Tolak</button>
                 <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openApproveModal('${t.id}')">✓ Setujui</button>
               </div>
@@ -371,7 +371,7 @@ function renderApproverDashboard() {
               <span class="tag-badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">Status: ${t.status}</span>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) • Tujuan: <strong>${t.destination}</strong>
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
             </div>
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; color: #92400e; line-height: 1.45;">
               Pengajuan ini dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangan statusnya.
@@ -410,12 +410,12 @@ function renderApproverDashboard() {
               </div>
               <div>
                 <div class="feed-item-title" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-                  <span>${t.applicantName} • ${t.destination}</span>
+                  <span>${t.applicantName} — ${t.destination}</span>
                   ${isEmergency ? '<span class="tag-badge" style="background:#ffe4e6; color:#b91c1c; font-weight:800; font-size:0.65rem;">🚨 DARURAT</span>' : ''}
                 </div>
                 <div class="feed-item-sub">
-                  ${t.id} • Est. Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
-                  ${t.emergencyContact ? ` • Kontak: <strong style="color: #9f1239;">${t.emergencyContact}</strong>` : ''}
+                  ${t.id} — Est. Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
+                  ${t.emergencyContact ? ` — Kontak: <strong style="color: #9f1239;">${t.emergencyContact}</strong>` : ''}
                 </div>
               </div>
             </div>
@@ -457,7 +457,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
               <div>
                 <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} • ${t.department || 'Rekayasa Mesin'}</div>
+                <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
               </div>
               <span class="tag-badge ${isEmergency ? '' : (isDinas ? 'tag-dinas' : 'tag-pribadi')}" style="${isEmergency ? 'background:#ffe4e6; color:#b91c1c; font-weight:800;' : ''}">${isEmergency ? '🚨 ' + t.category : t.category}</span>
             </div>
@@ -517,7 +517,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   </span>
                 </div>
                 <div style="margin-top: 0.35rem; font-size: 0.75rem; color: #881337; line-height: 1.45;">
-                  <strong>Alasan:</strong> "${t.reason}" • <strong>Tujuan:</strong> ${t.destination}
+                  <strong>Alasan:</strong> "${t.reason}" — <strong>Tujuan:</strong> ${t.destination}
                 </div>
                 ${t.selectedMethod === 'passcode' ? `
                   <div style="margin-top: 0.5rem; background: #ffffff; border: 1.5px solid #f43f5e; border-radius: 6px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
@@ -708,13 +708,13 @@ function renderApproverView() {
   // 3. PELACAKAN IZIN KARYAWAN
   if (currentApproverNav === 'pelacakan') {
     const mode = filterAppViewMode ? filterAppViewMode.value : 'all';
-    let list = ticketsList;
+    let list = ticketsList.filter(t => !t.deletedByApprover);
     if (mode === 'pending') {
-      list = ticketsList.filter(t => t.status === 'Menunggu Persetujuan');
+      list = list.filter(t => t.status === 'Menunggu Persetujuan');
     } else if (mode === 'emergency') {
-      list = ticketsList.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+      list = list.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
     } else if (mode === 'outside') {
-      list = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+      list = list.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     }
 
     // Filter Periode Tanggal (Disamping Fitur Sort)
@@ -1107,44 +1107,66 @@ function rejectExtensionRequest(ticketId, reason) {
 
 // FITUR HAPUS DI PELACAKAN KARYAWAN (HAK AKSES ATASAN)
 function deleteApproverTicket(ticketId) {
-  if (!confirm(`Apakah Anda yakin ingin menghapus catatan permohonan izin #${ticketId} dari pelacakan?`)) {
-    return;
-  }
-  let tickets = window.ticketsList || [];
-  const idx = tickets.findIndex(t => t.id === ticketId);
-  if (idx !== -1) {
-    const deleted = tickets[idx];
-    tickets.splice(idx, 1);
-    window.ticketsList = tickets;
-    if (typeof window.saveTickets === 'function') {
-      window.saveTickets(tickets);
+  const handler = () => {
+    let tickets = window.ticketsList || [];
+    const target = tickets.find(t => t.id === ticketId);
+    if (target) {
+      target.deletedByApprover = true;
+      if (typeof window.saveTickets === 'function') {
+        window.saveTickets(tickets);
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Catatan izin #${ticketId} berhasil dihapus dari pelacakan Atasan.`, 'info');
+      }
+      renderApproverView();
     }
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Catatan izin #${ticketId} (${deleted.applicantName || 'Karyawan'}) berhasil dihapus dari pelacakan.`, 'info');
-    }
-    renderApproverView();
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Hapus dari Pelacakan',
+      message: 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.',
+      onConfirm: handler
+    });
+  } else if (confirm('Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.')) {
+    handler();
   }
 }
 
 function clearApproverTrackingHistory() {
   let tickets = window.ticketsList || [];
-  const finishedTickets = tickets.filter(t => t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa');
+  const finishedTickets = tickets.filter(t => !t.deletedByApprover && (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa'));
   if (finishedTickets.length === 0) {
-    alert('Tidak ada riwayat permohonan selesai atau ditolak untuk dibersihkan.');
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada riwayat permohonan selesai atau ditolak untuk dibersihkan.', 'warning');
+    } else {
+      alert('Tidak ada riwayat permohonan selesai atau ditolak untuk dibersihkan.');
+    }
     return;
   }
-  if (!confirm(`Hapus ${finishedTickets.length} riwayat izin yang sudah selesai/diputuskan dari pelacakan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`)) {
-    return;
+
+  const handler = () => {
+    finishedTickets.forEach(t => {
+      t.deletedByApprover = true;
+    });
+    if (typeof window.saveTickets === 'function') {
+      window.saveTickets(tickets);
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast(`${finishedTickets.length} riwayat permohonan selesai telah dihapus dari pelacakan Atasan.`, 'info');
+    }
+    renderApproverView();
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Hapus Riwayat Selesai',
+      message: `Hapus <strong>${finishedTickets.length}</strong> riwayat izin yang sudah selesai/diputuskan dari pelacakan Atasan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`,
+      onConfirm: handler
+    });
+  } else if (confirm(`Hapus ${finishedTickets.length} riwayat izin yang sudah selesai/diputuskan dari pelacakan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`)) {
+    handler();
   }
-  tickets = tickets.filter(t => !(t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa'));
-  window.ticketsList = tickets;
-  if (typeof window.saveTickets === 'function') {
-    window.saveTickets(tickets);
-  }
-  if (typeof window.showToast === 'function') {
-    window.showToast(`${finishedTickets.length} riwayat permohonan selesai telah dihapus dari pelacakan.`, 'info');
-  }
-  renderApproverView();
 }
 
 // Expose globally

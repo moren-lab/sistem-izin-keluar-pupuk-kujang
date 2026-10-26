@@ -90,10 +90,10 @@ const DEFAULT_TICKETS = [
     scanOutTime: '19 Okt 2026, 10.05 WIB (Pos 1 Gerbang Utama)',
     scanInTime: '19 Okt 2026, 12.50 WIB (Pos 1 Gerbang Utama)',
     timeline: [
-      { event: 'Pengajuan diajukan', time: '19 Okt 2026 • 09.20 WIB', by: 'Budi Pratama, S.T.', desc: 'Dinas Kantor • Kembali ke Area' },
-      { event: 'Disetujui oleh atasan', time: '19 Okt 2026 • 09.35 WIB', by: 'Ir. Hendra Gunawan, M.T. • Manajer Rekayasa & Pemeliharaan', desc: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.' },
-      { event: 'Scan Out tercatat', time: '19 Okt 2026 • 10.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 • Karyawan meninggalkan area' },
-      { event: 'Scan In tercatat', time: '19 Okt 2026 • 12.50 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 • Karyawan kembali ke area pabrik' }
+      { event: 'Pengajuan diajukan', time: '19 Okt 2026, 09.20 WIB', by: 'Budi Pratama, S.T.', desc: 'Dinas Kantor — Kembali ke Area' },
+      { event: 'Disetujui oleh atasan', time: '19 Okt 2026, 09.35 WIB', by: 'Ir. Hendra Gunawan, M.T. — Manajer Rekayasa & Pemeliharaan', desc: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.' },
+      { event: 'Scan Out tercatat', time: '19 Okt 2026, 10.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 — Karyawan meninggalkan area' },
+      { event: 'Scan In tercatat', time: '19 Okt 2026, 12.50 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 — Karyawan kembali ke area pabrik' }
     ]
   },
   {

@@ -433,7 +433,7 @@ function renderAdminAudit() {
           <div class="admin-action-btn-group">
             <button type="button" class="btn-action-sm btn-admin-detail" onclick="window.viewAdminTicketDetail('${log.ticketId}')" title="Lihat Rincian Tiket #${log.ticketId}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              <span>Rincian</span>
+              <span>Detail pengajuan</span>
             </button>
             <button type="button" class="btn-action-sm btn-admin-danger" onclick="window.deleteAdminAuditLog('${log.ticketId}', '${encodeURIComponent(log.time)}', '${encodeURIComponent(log.event)}')" title="Hapus Catatan Audit Peristiwa Ini">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -803,9 +803,9 @@ function saveAdminUserAccess(event) {
         alert(
           `⛔ GAGAL MEMBERIKAN HAK AKSES!\n\n` +
           `Jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}] saat ini sedang aktif dipegang oleh:\n` +
-          `• Nama: ${existingOccupant.name}\n` +
-          `• NIP: ${existingOccupant.nip}\n` +
-          `• KUJANG ID: ${existingOccupant.kujangId}\n\n` +
+          `- Nama: ${existingOccupant.name}\n` +
+          `- NIP: ${existingOccupant.nip}\n` +
+          `- KUJANG ID: ${existingOccupant.kujangId}\n\n` +
           `Sesuai tata kelola PT Pupuk Kujang, 1 jabatan manajerial/struktural hanya dapat diakses oleh 1 orang pejabat aktif.\n` +
           `Sistem TIDAK MENGIZINKAN menimpa akun atasan aktif secara langsung.\n\n` +
           `Silakan cabut (revoke) hak akses ${existingOccupant.name} terlebih dahulu melalui direktori akun jika Anda ingin mengalihkan jabatan ini kepada ${name}.`
@@ -896,9 +896,9 @@ function toggleUserAccess(kujangId) {
         alert(
           `⛔ TIDAK DAPAT MENGAKTIFKAN HAK AKSES!\n\n` +
           `Hak akses jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}] untuk ${user.name} tidak dapat diaktifkan karena saat ini sedang aktif dipegang oleh:\n` +
-          `• Nama: ${existingOccupant.name}\n` +
-          `• NIP: ${existingOccupant.nip}\n` +
-          `• KUJANG ID: ${existingOccupant.kujangId}\n\n` +
+          `- Nama: ${existingOccupant.name}\n` +
+          `- NIP: ${existingOccupant.nip}\n` +
+          `- KUJANG ID: ${existingOccupant.kujangId}\n\n` +
           `Ketentuan Sistem: 1 jabatan manajerial/struktural hanya boleh diakses oleh 1 pejabat aktif.\n` +
           `Sistem mencegah penimpaan akun atasan aktif secara otomatis.\n\n` +
           `Harap cabut hak akses ${existingOccupant.name} terlebih dahulu jika ingin mengembalikan akses jabatan ini kepada ${user.name}.`
@@ -1230,7 +1230,7 @@ function renderAdminStatusTracking() {
         <td style="text-align: right; white-space: nowrap;">
           <button type="button" class="btn-action-sm btn-admin-detail" onclick="window.viewAdminTicketDetail('${t.id}')" title="Audit Detail Tiket">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <span>Rincian</span>
+            <span>Detail pengajuan</span>
           </button>
         </td>
       </tr>
@@ -1575,7 +1575,7 @@ function setAdminSelectedRole(roleKey, jabatanOrTitle) {
 
   const roleKeyVal = match.roleKey;
   const roleTitleVal = match.fullTitle;
-  const displayText = `${match.hakAkses} • ${match.jabatan}`;
+  const displayText = `${match.hakAkses} — ${match.jabatan}`;
 
   if (hiddenRoleKey) hiddenRoleKey.value = roleKeyVal;
   if (hiddenRoleTitle) hiddenRoleTitle.value = roleTitleVal;
