@@ -414,6 +414,9 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
         const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
         const gateBadgeHtml = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
+        const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function' 
+          ? window.formatTicketScheduleWithDay(t) 
+          : `<div style="font-weight: 600; color: var(--text-primary); font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
 
         // A. SPECIAL AIRY LAYOUT FOR RIWAYAT MODE (isHistoryMode === true)
         if (isHistoryMode) {
@@ -436,11 +439,22 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
               </div>
 
-              <!-- Destination & Gate Pos Badge -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.6rem;">
-                <div><strong>Tujuan:</strong> ${t.destination}</div>
-                <div>${gateBadgeHtml}</div>
+              <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
+              <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Tujuan keluar</span>
+                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.destination}">${t.destination}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Keperluan</span>
+                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</span>
+                </div>
+                <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
+                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
+                  <div class="detail-schedule-val" style="text-align: right;">${scheduleWithDay}</div>
+                </div>
               </div>
+
 
               <!-- Realization Summary Row (Scan Out & Scan In) -->
               <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem;">
@@ -499,21 +513,25 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; font-size:0.8rem; color:var(--text-secondary);">
-              <div><strong>Tujuan:</strong> ${t.destination}</div>
-              <div>${gateBadgeHtml}</div>
+            <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
+            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.4rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Tujuan keluar</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.destination}">${t.destination}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Keperluan</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</span>
+              </div>
+              <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
+                <div class="detail-schedule-val" style="text-align: right;">${scheduleWithDay}</div>
+              </div>
             </div>
 
-            <div class="card-details-box">
-              <div>
-                <span style="font-size:0.675rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Rencana Keluar</span>
-                <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.plannedExit.replace('T', ' ')}</div>
-              </div>
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:600; align-self:center;">s/d</div>
-              <div style="text-align: right;">
-                <span style="font-size:0.675rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Estimasi Kembali</span>
-                <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</div>
-              </div>
+            <!-- Pos Gate Badge -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.4rem;">
+              ${gateBadgeHtml}
             </div>
 
             ${isOverdue ? `

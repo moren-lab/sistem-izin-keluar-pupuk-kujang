@@ -338,7 +338,7 @@ function renderApproverDashboard() {
             <div style="font-size: 0.825rem; color: var(--text-primary);">
               <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
             </div>
-            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4;">
+            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">
               "${t.reason}"
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem;">
@@ -470,19 +470,19 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : '')}
 
-            <div style="font-size:0.85rem; color:var(--text-primary); line-height:1.4;">
-              <strong>Alasan Izin:</strong> "${t.reason}"
-            </div>
-
-            <div style="font-size:0.8rem; color:var(--text-secondary); display:flex; align-items:center; gap:0.35rem;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span><strong>Tujuan:</strong> ${t.destination}</span>
-            </div>
-
-            <div class="approver-schedule-box">
-              <div style="font-size: 0.675rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Rencana Waktu</div>
-              <div style="margin-top: 3px;">
-                ${typeof window.formatTicketScheduleWithDay === 'function' ? window.formatTicketScheduleWithDay(t) : `<div class="schedule-time-text">${t.plannedExit.replace('T', ' ')} → ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang'}</div>`}
+            <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
+            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.4rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Tujuan keluar</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.destination}">${t.destination}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Keperluan</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</span>
+              </div>
+              <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
+                <div class="detail-schedule-val" style="text-align: right;">${typeof window.formatTicketScheduleWithDay === 'function' ? window.formatTicketScheduleWithDay(t) : `<div class="schedule-time-text">${t.plannedExit.replace('T', ' ')} → ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang'}</div>`}</div>
               </div>
             </div>
 
@@ -535,7 +535,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
             ` : ''}
 
             ${t.approverNote ? `
-              <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.75rem;">
+              <div style="background:var(--bg-subtle, #f8fafc); border:1px solid var(--border-color); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Catatan Keputusan: ${(t.approverNote || '').replace(/"/g, '&quot;')}">
                 <strong>Catatan Keputusan:</strong> "${t.approverNote}"
               </div>
             ` : ''}
@@ -635,6 +635,83 @@ function renderApproverCards(list, containerElement, isTracking = false) {
   `;
 }
 
+window.currentApproverViewMode = window.currentApproverViewMode || 'card';
+
+/**
+ * Render Figma List / Table untuk Pelacakan Izin Karyawan di Atasan
+ */
+function renderApproverTable(list, containerElement) {
+  const target = containerElement || document.getElementById('containerApproverRequests');
+  if (!target) return;
+
+  target.innerHTML = `
+    <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+      <table class="figma-table" style="min-width: 980px;">
+        <thead>
+          <tr>
+            <th style="min-width: 160px;">Nomor Tiket & Kategori</th>
+            <th style="min-width: 180px;">Pemohon & Departemen</th>
+            <th style="min-width: 200px;">Tujuan & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
+            <th style="white-space: nowrap; min-width: 95px;">Status</th>
+            <th style="min-width: 180px;">Catatan Keputusan</th>
+            <th style="text-align: right; white-space: nowrap; min-width: 100px;">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(t => {
+            const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
+            const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
+              ? window.formatTicketScheduleWithDay(t)
+              : `<div style="font-weight: 600; color: var(--text-primary); font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+
+            let catatanHtml = `<span style="color: var(--text-muted); font-size: 0.75rem;">-</span>`;
+            if (t.approverNote) {
+              catatanHtml = `<span style="color: var(--text-primary); font-size: 0.75rem; font-style: italic;" title="${(t.approverNote || '').replace(/"/g, '&quot;')}">"${t.approverNote}"</span>`;
+            } else if (t.rejectionReason) {
+              catatanHtml = `<span style="color: #ef4444; font-size: 0.75rem;" title="${(t.rejectionReason || '').replace(/"/g, '&quot;')}">${t.rejectionReason}</span>`;
+            } else if (t.reassignedTo) {
+              catatanHtml = `<span style="color: #f59e0b; font-size: 0.725rem;">Dialihkan ke ${t.reassignedTo}</span>`;
+            }
+
+            const canDelete = t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa';
+            let tindakanHtml = `
+              <a href="#" class="figma-card-link" style="font-size: 0.775rem;" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>
+              ${canDelete ? `
+                <button type="button" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.65rem; display: inline-flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  Hapus
+                </button>
+              ` : ''}
+            `;
+
+            return `
+              <tr>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
+                </td>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || '-'}</div>
+                </td>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.destination}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</div>
+                </td>
+                <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
+                <td style="vertical-align: middle; line-height: 1.45;">${catatanHtml}</td>
+                <td style="text-align: right; white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 function renderApproverView() {
   updateApproverMetrics();
   const currentApproverNav = window.currentApproverNav || 'dashboard';
@@ -718,27 +795,54 @@ function renderApproverView() {
 
   // 3. PELACAKAN IZIN KARYAWAN
   if (currentApproverNav === 'pelacakan') {
-    const mode = filterAppViewMode ? filterAppViewMode.value : 'all';
     let list = ticketsList.filter(t => !t.deletedByApprover);
-    if (mode === 'pending') {
-      list = list.filter(t => t.status === 'Menunggu Persetujuan');
-    } else if (mode === 'emergency') {
-      list = list.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
-    } else if (mode === 'outside') {
-      list = list.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+
+    // Filter Pencarian (Cari tiket, alasan, tujuan, pemohon, NIP, departemen)
+    const searchAppInput = document.getElementById('searchApproverInput');
+    const searchVal = searchAppInput ? searchAppInput.value.trim().toLowerCase() : '';
+    if (searchVal) {
+      list = list.filter(t => 
+        (t.id && t.id.toLowerCase().includes(searchVal)) ||
+        (t.applicantName && t.applicantName.toLowerCase().includes(searchVal)) ||
+        (t.applicantNip && t.applicantNip.toLowerCase().includes(searchVal)) ||
+        (t.destination && t.destination.toLowerCase().includes(searchVal)) ||
+        (t.reason && t.reason.toLowerCase().includes(searchVal)) ||
+        (t.department && t.department.toLowerCase().includes(searchVal))
+      );
     }
 
-    // Filter Periode Tanggal (Disamping Fitur Sort)
+    // Filter Periode Tanggal
     const filterAppPeriod = document.getElementById('filterApproverPeriod');
     const period = filterAppPeriod ? filterAppPeriod.value : 'all';
     if (period !== 'all' && typeof window.matchesPeriodFilter === 'function') {
       list = list.filter(t => window.matchesPeriodFilter(t, period));
     }
-    if (filterAppPeriod && !filterAppPeriod._bound) {
-      filterAppPeriod._bound = true;
-      filterAppPeriod.addEventListener('change', () => {
-        renderApproverView();
-      });
+
+    // Filter Kategori
+    const filterAppCat = document.getElementById('filterApproverCategory');
+    const catVal = filterAppCat ? filterAppCat.value : 'all';
+    if (catVal !== 'all') {
+      list = list.filter(t => t.category === catVal);
+    }
+
+    // Filter Tipe Izin
+    const filterAppType = document.getElementById('filterApproverType');
+    const typeVal = filterAppType ? filterAppType.value : 'all';
+    if (typeVal !== 'all') {
+      list = list.filter(t => t.type === typeVal);
+    }
+
+    // Filter Status
+    const filterAppStatus = document.getElementById('filterApproverStatus');
+    const statusVal = filterAppStatus ? filterAppStatus.value : 'all';
+    if (statusVal === 'emergency') {
+      list = list.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+    } else if (statusVal === 'outside') {
+      list = list.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+    } else if (statusVal === 'pending') {
+      list = list.filter(t => t.status === 'Menunggu Persetujuan');
+    } else if (statusVal !== 'all') {
+      list = list.filter(t => t.status === statusVal);
     }
 
     // Sorting Pelacakan (Terbaru / Terlama)
@@ -757,11 +861,12 @@ function renderApproverView() {
       return sortAppOrder === 'asc' ? dA - dB : dB - dA;
     });
 
-    if (sortAppEl && !sortAppEl._bound) {
-      sortAppEl._bound = true;
-      sortAppEl.addEventListener('change', () => {
-        renderApproverView();
-      });
+    // Sinkronisasi status aktif tombol toggle Card vs List
+    const btnApproverViewCard = document.getElementById('btnApproverViewCard');
+    const btnApproverViewTable = document.getElementById('btnApproverViewTable');
+    if (btnApproverViewCard && btnApproverViewTable) {
+      btnApproverViewCard.classList.toggle('active', window.currentApproverViewMode !== 'table');
+      btnApproverViewTable.classList.toggle('active', window.currentApproverViewMode === 'table');
     }
 
     if (list.length === 0) {
@@ -771,7 +876,12 @@ function renderApproverView() {
     }
 
     if (emptyApproverBox) emptyApproverBox.style.display = 'none';
-    renderApproverCards(list, containerApproverRequests);
+    if (window.currentApproverViewMode === 'table') {
+      renderApproverTable(list, containerApproverRequests);
+    } else {
+      renderApproverCards(list, containerApproverRequests, true);
+    }
+    return;
   }
 }
 
@@ -1184,6 +1294,7 @@ function clearApproverTrackingHistory() {
 window.updateApproverMetrics = updateApproverMetrics;
 window.renderApproverDashboard = renderApproverDashboard;
 window.renderApproverCards = renderApproverCards;
+window.renderApproverTable = renderApproverTable;
 window.renderApproverView = renderApproverView;
 window.openApproveModal = openApproveModal;
 window.openRejectModal = openRejectModal;
@@ -1192,3 +1303,41 @@ window.openRejectExtensionModal = openRejectExtensionModal;
 window.rejectExtensionRequest = rejectExtensionRequest;
 window.deleteApproverTicket = deleteApproverTicket;
 window.clearApproverTrackingHistory = clearApproverTrackingHistory;
+
+// Wire Filter and View Switcher listeners for Approver Pelacakan
+document.addEventListener('DOMContentLoaded', () => {
+  const btnApproverViewCard = document.getElementById('btnApproverViewCard');
+  const btnApproverViewTable = document.getElementById('btnApproverViewTable');
+
+  if (btnApproverViewCard) {
+    btnApproverViewCard.addEventListener('click', () => {
+      window.currentApproverViewMode = 'card';
+      btnApproverViewCard.classList.add('active');
+      if (btnApproverViewTable) btnApproverViewTable.classList.remove('active');
+      renderApproverView();
+    });
+  }
+
+  if (btnApproverViewTable) {
+    btnApproverViewTable.addEventListener('click', () => {
+      window.currentApproverViewMode = 'table';
+      btnApproverViewTable.classList.add('active');
+      if (btnApproverViewCard) btnApproverViewCard.classList.remove('active');
+      renderApproverView();
+    });
+  }
+
+  const searchApproverInput = document.getElementById('searchApproverInput');
+  const filterApproverPeriod = document.getElementById('filterApproverPeriod');
+  const sortApproverTracking = document.getElementById('sortApproverTracking');
+  const filterApproverCategory = document.getElementById('filterApproverCategory');
+  const filterApproverType = document.getElementById('filterApproverType');
+  const filterApproverStatus = document.getElementById('filterApproverStatus');
+
+  [searchApproverInput, filterApproverPeriod, sortApproverTracking, filterApproverCategory, filterApproverType, filterApproverStatus].forEach(el => {
+    if (el) {
+      el.addEventListener('input', () => renderApproverView());
+      el.addEventListener('change', () => renderApproverView());
+    }
+  });
+});

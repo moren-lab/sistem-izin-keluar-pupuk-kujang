@@ -139,17 +139,15 @@ function setApproverNav(navKey) {
   if (approverPelacakanPage) approverPelacakanPage.style.display = (navKey === 'pelacakan' || navKey === 'tim' || navKey === 'riwayat') ? 'block' : 'none';
 
   if (navKey === 'tim') {
+    const filterApproverStatus = document.getElementById('filterApproverStatus');
+    if (filterApproverStatus) filterApproverStatus.value = 'Sedang di Luar';
     const filterAppViewMode = document.getElementById('filterAppViewMode');
-    if (filterAppViewMode) {
-      filterAppViewMode.value = 'outside';
-      if (typeof window.filterApproverRequests === 'function') window.filterApproverRequests();
-    }
+    if (filterAppViewMode) filterAppViewMode.value = 'outside';
   } else if (navKey === 'riwayat') {
+    const filterApproverStatus = document.getElementById('filterApproverStatus');
+    if (filterApproverStatus) filterApproverStatus.value = 'all';
     const filterAppViewMode = document.getElementById('filterAppViewMode');
-    if (filterAppViewMode) {
-      filterAppViewMode.value = 'all';
-      if (typeof window.filterApproverRequests === 'function') window.filterApproverRequests();
-    }
+    if (filterAppViewMode) filterAppViewMode.value = 'all';
   }
 
   if (typeof window.renderApproverView === 'function') {

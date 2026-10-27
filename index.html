@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261027_1425">
+  <link rel="stylesheet" href="css/style.css?v=20261027_1745">
   <link rel="stylesheet" href="css/auth.css?v=20261027_1425">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
@@ -873,7 +873,7 @@
             <!-- Results Subbar (Count + Card / List Switcher) -->
             <div class="figma-results-bar">
               <div id="figmaRiwayatCountMeta">
-                8 pengajuan ditemukan (urutan terbaru)
+
               </div>
               <div class="figma-view-switcher">
                 <button class="btn-figma-toggle active" id="btnEmpViewCard" title="Tampilan Kartu">
@@ -1133,26 +1133,8 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Izin Karyawan</h1>
-
               </div>
               <div class="filters-group" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <select id="filterAppViewMode" class="filter-select">
-                  <option value="all">Semua Riwayat Keputusan & Status</option>
-                  <option value="emergency">🚨 Khusus Izin Darurat / Bypass Atasan</option>
-                  <option value="outside">🚗 Khusus Karyawan Sedang di Luar</option>
-                  <option value="pending">⏳ Khusus Antrean Menunggu Review</option>
-                </select>
-                <select id="filterApproverPeriod" class="filter-select" title="Filter Periode Tanggal">
-                  <option value="all">📅 Semua Tanggal</option>
-                  <option value="today">Hari Ini</option>
-                  <option value="week">Minggu Ini</option>
-                  <option value="month">Bulan Ini</option>
-                  <option value="year">Tahun Ini</option>
-                </select>
-                <select id="sortApproverTracking" class="filter-select" title="Urutkan Waktu">
-                  <option value="desc">Terbaru</option>
-                  <option value="asc">Terlama</option>
-                </select>
                 <button type="button" class="btn-figma-secondary btn-clear-history" id="btnClearApproverTracking"
                   onclick="window.clearApproverTrackingHistory()"
                   title="Hapus seluruh riwayat pengajuan yang sudah berstatus selesai atau dibatalkan">
@@ -1161,6 +1143,99 @@
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>
                   <span>Hapus Riwayat Selesai</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Figma Filter Toolbar (Pelacakan Izin Karyawan) Sesuai Gambar 2 -->
+            <div class="figma-filter-toolbar">
+              <div class="figma-search-wrap">
+                <label class="figma-filter-lbl">Cari pengajuan</label>
+                <div class="figma-search-input-box">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="searchApproverInput" placeholder="Cari tiket, alasan, atau tujuan">
+                </div>
+              </div>
+
+              <div class="figma-filter-item">
+                <label class="figma-filter-lbl">Tanggal pengajuan</label>
+                <select id="filterApproverPeriod" class="figma-filter-select">
+                  <option value="all">Semua Waktu</option>
+                  <option value="today">Hari Ini</option>
+                  <option value="week">Minggu Ini</option>
+                  <option value="month">Bulan Ini</option>
+                  <option value="year">Tahun Ini</option>
+                </select>
+              </div>
+
+              <div class="figma-filter-item">
+                <label class="figma-filter-lbl">Urutkan</label>
+                <select id="sortApproverTracking" class="figma-filter-select">
+                  <option value="desc">Terbaru</option>
+                  <option value="asc">Terlama</option>
+                </select>
+              </div>
+
+              <div class="figma-filter-item">
+                <label class="figma-filter-lbl">Kategori</label>
+                <select id="filterApproverCategory" class="figma-filter-select">
+                  <option value="all">Semua Kategori</option>
+                  <option value="Dinas Kantor">Dinas Kantor</option>
+                  <option value="Urusan Pribadi">Urusan Pribadi</option>
+                </select>
+              </div>
+
+              <div class="figma-filter-item">
+                <label class="figma-filter-lbl">Tipe Izin</label>
+                <select id="filterApproverType" class="figma-filter-select">
+                  <option value="all">Semua Tipe Izin</option>
+                  <option value="Kembali ke Area">Kembali ke Area</option>
+                  <option value="Pulang Mendahului">Pulang Mendahului</option>
+                </select>
+              </div>
+
+              <div class="figma-filter-item">
+                <label class="figma-filter-lbl">Status</label>
+                <select id="filterApproverStatus" class="figma-filter-select">
+                  <option value="all">Semua Status</option>
+                  <option value="Disetujui">Disetujui</option>
+                  <option value="Sedang di Luar">Sedang di Luar</option>
+                  <option value="Selesai">Selesai</option>
+                  <option value="Terlambat">Terlambat</option>
+                  <option value="Ditolak">Ditolak</option>
+                  <option value="Kedaluwarsa">Kedaluwarsa</option>
+                  <option value="Dibatalkan">Dibatalkan</option>
+                  <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
+                  <option value="emergency">🚨 Khusus Izin Darurat</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Results Subbar (Card / List Switcher) Sesuai Gambar 2 -->
+            <div class="figma-results-bar" style="display: flex; justify-content: flex-end; align-items: center; margin: 0.75rem 0 1rem 0;">
+              <div class="figma-view-switcher">
+                <button class="btn-figma-toggle active" id="btnApproverViewCard" title="Tampilan Kartu">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <span>Card</span>
+                </button>
+                <button class="btn-figma-toggle" id="btnApproverViewTable" title="Tampilan List / Tabel">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                  </svg>
+                  <span>List</span>
                 </button>
               </div>
             </div>
@@ -1238,10 +1313,9 @@
             <!-- Section Bar Pos Jaga -->
             <div class="figma-section-bar">
               <div>
-                <div class="figma-kicker-blue">TERMINAL OPERASIONAL — GERBANG POS 1 UTAMA</div>
+                
                 <h1 class="figma-section-title">Ringkasan Pemantauan Gerbang</h1>
-                <p class="figma-section-sub">Pantau headcount keluar masuk, validasi QR Code digital, dan verifikasi
-                  izin darurat.</p>
+              
               </div>
             </div>
 
@@ -2011,8 +2085,7 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                  <span class="role-badge-neutral">Audit Log</span>
-                  <span style="font-size: 0.75rem; color: var(--text-secondary);">BRULE-13 (Immutable Trail)</span>
+              
                 </div>
                 <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px;">
                   Audit Trail & Log Investigasi Aktivitas
@@ -4406,20 +4479,20 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261027_1425"></script>
-  <script src="js/data/authData.js?v=20261027_1425"></script>
-  <script src="js/modules/ui.js?v=20261027_1425"></script>
-  <script src="js/modules/scheduler.js?v=20261027_1425"></script>
-  <script src="js/modules/navigation.js?v=20261027_1425"></script>
-  <script src="js/modules/karyawan.js?v=20261027_1425"></script>
-  <script src="js/modules/approver.js?v=20261027_1425"></script>
-  <script src="js/modules/security.js?v=20261027_1425"></script>
-  <script src="js/modules/admin.js?v=20261027_1425"></script>
-  <script src="js/modules/charts.js?v=20261027_1425"></script>
-  <script src="js/modules/emergency.js?v=20261027_1425"></script>
-  <script src="js/modules/modals.js?v=20261027_1425"></script>
-  <script src="js/app.js?v=20261027_1425"></script>
-  <script src="js/modules/auth.js?v=20261027_1425"></script>
+  <script src="js/data/mockData.js?v=20261027_1745"></script>
+  <script src="js/data/authData.js?v=20261027_1745"></script>
+  <script src="js/modules/ui.js?v=20261027_1745"></script>
+  <script src="js/modules/scheduler.js?v=20261027_1745"></script>
+  <script src="js/modules/navigation.js?v=20261027_1758"></script>
+  <script src="js/modules/karyawan.js?v=20261027_1758"></script>
+  <script src="js/modules/approver.js?v=20261027_1758"></script>
+  <script src="js/modules/security.js?v=20261027_1746"></script>
+  <script src="js/modules/admin.js?v=20261027_1745"></script>
+  <script src="js/modules/charts.js?v=20261027_1745"></script>
+  <script src="js/modules/emergency.js?v=20261027_1745"></script>
+  <script src="js/modules/modals.js?v=20261027_1745"></script>
+  <script src="js/app.js?v=20261027_1745"></script>
+  <script src="js/modules/auth.js?v=20261027_1745"></script>
 </body>
 
 </html>

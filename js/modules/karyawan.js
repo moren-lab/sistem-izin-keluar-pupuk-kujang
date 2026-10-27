@@ -917,9 +917,6 @@ function renderRiwayatView() {
   if (emptyEmpBox) emptyEmpBox.style.display = 'none';
   if (figmaEmpPaginationBar) figmaEmpPaginationBar.style.display = 'flex';
 
-  if (figmaRiwayatCountMeta) {
-    figmaRiwayatCountMeta.textContent = `${filtered.length} pengajuan ditemukan (urutan terbaru)`;
-  }
 
   // Pagination calculation
   const totalItems = filtered.length;
