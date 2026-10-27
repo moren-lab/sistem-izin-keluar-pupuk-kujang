@@ -8,8 +8,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261026_1140">
-  <link rel="stylesheet" href="css/auth.css?v=20261026_1220">
+  <link rel="stylesheet" href="css/style.css?v=20261027_0945">
+  <link rel="stylesheet" href="css/auth.css?v=20261027_0945">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
   <script>
     (function () {
@@ -581,8 +581,22 @@
             <!-- Hero Dark Green Banner -->
             <div class="figma-hero-banner">
               <div class="figma-hero-top">
-                <h2 id="empHeroGreeting">Selamat pagi, Budi Pratama, S.T. 👋</h2>
-                <p id="empHeroSub">Staf Rekayasa Mesin — Departemen Rekayasa & Pemeliharaan — Atasan: Ir. Hendra Gunawan, M.T.</p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; width: 100%;">
+                  <div>
+                    <h2 id="empHeroGreeting">Selamat pagi, Budi Pratama, S.T. 👋</h2>
+                    <p id="empHeroSub">Staf Rekayasa Mesin — Departemen Rekayasa & Pemeliharaan — Atasan: Ir. Hendra Gunawan, M.T.</p>
+                  </div>
+                  <!-- Modern Toggle Switch Button (No Text) di atas chart dashboard -->
+                  <div class="dash-theme-toggle-container" title="Beralih Mode Gelap / Terang">
+                    <label class="modern-theme-switch" for="themeSwitchEmp" title="Beralih Mode Gelap / Terang">
+                      <input type="checkbox" id="themeSwitchEmp" class="theme-switch-input" onchange="window.toggleDarkMode()">
+                      <span class="theme-switch-slider">
+                        <span class="theme-switch-icon sun">☀️</span>
+                        <span class="theme-switch-icon moon">🌙</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
                 <div id="empNoApproverNotice" style="display: none; background: rgba(254, 226, 226, 0.95); border: 1.5px solid #f87171; border-radius: 8px; padding: 0.55rem 0.85rem; color: #991b1b; font-size: 0.82rem; font-weight: 700; margin-top: 0.5rem; align-items: center; gap: 0.5rem;">
                   <span>⚠️</span>
                   <span>Atasan anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain</span>
@@ -599,10 +613,6 @@
                 <h1 class="figma-section-title">Ringkasan Perizinan</h1>
                 <p class="figma-section-sub">Pantau status izin aktif dan ringkasan aktivitas perizinan Anda.</p>
               </div>
-              <button type="button" class="dashboard-theme-toggle-btn" onclick="window.toggleDarkMode()" title="Klik untuk beralih mode Tampilan Gelap / Terang">
-                <span class="theme-icon-wrap" id="dashThemeIconEmp">🌙</span>
-                <span class="theme-text-wrap" id="dashThemeLabelEmp">Mode Gelap</span>
-              </button>
             </div>
 
             <!-- 3-Column Unified Stats Card -->
@@ -897,16 +907,41 @@
                   </p>
                 </div>
               </div>
-              <div class="dashboard-hero-actions" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <div class="dashboard-hero-actions" style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
                 <button class="btn-primary-action" style="background: #0f766e;" onclick="setApproverNav('antrian')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                   <span>Review Antrian Izin</span>
                 </button>
-                <button type="button" class="dashboard-theme-toggle-btn on-banner" onclick="window.toggleDarkMode()" title="Klik untuk beralih mode Tampilan Gelap / Terang">
-                  <span class="theme-icon-wrap" id="dashThemeIconApp">🌙</span>
-                  <span class="theme-text-wrap" id="dashThemeLabelApp">Mode Gelap</span>
+                <!-- Tombol Kecil Alihkan Wewenang ke Atasan Lain (Revisi 4) -->
+                <button type="button" id="btnToggleDelegation" class="btn-delegation-toggle" onclick="window.toggleDelegationAuthority()" title="Alihkan wewenang persetujuan izin ke Atasan 2 (Dewi Sartika) saat cuti atau tugas luar">
+                  <span class="delegation-icon">🔄</span>
+                  <span id="delegationBtnLabel">Alihkan Wewenang (Cuti/Dinas)</span>
+                </button>
+                <!-- Modern Toggle Switch Button (No Text) -->
+                <label class="modern-theme-switch" for="themeSwitchApp" title="Beralih Mode Gelap / Terang">
+                  <input type="checkbox" id="themeSwitchApp" class="theme-switch-input" onchange="window.toggleDarkMode()">
+                  <span class="theme-switch-slider">
+                    <span class="theme-switch-icon sun">☀️</span>
+                    <span class="theme-switch-icon moon">🌙</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Banner Pemberitahuan Wewenang Sedang Dialihkan (Revisi 4) -->
+            <div id="approverDelegationActiveBanner" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 0.75rem 1.15rem; margin-top: 1rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <span style="font-size: 1.25rem;">🛡️</span>
+                  <div>
+                    <div style="font-size: 0.85rem; font-weight: 700; color: #10b981;">Wewenang Dialihkan ke Atasan 2 (Dewi Sartika, S.T., M.M.)</div>
+                    <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 1px;">Saat karyawan membuat izin baru, nama yang otomatis terpilih adalah Atasan 2, sementara Atasan 1 berstatus sedang tidak tersedia.</div>
+                  </div>
+                </div>
+                <button type="button" class="btn-action-sm" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;" onclick="window.toggleDelegationAuthority()">
+                  Kembalikan ke Atasan 1
                 </button>
               </div>
             </div>
@@ -1153,10 +1188,13 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Pelacakan di Luar</span>
                   </button>
-                  <button type="button" class="dashboard-theme-toggle-btn on-banner" onclick="window.toggleDarkMode()" title="Klik untuk beralih mode Tampilan Gelap / Terang">
-                    <span class="theme-icon-wrap" id="dashThemeIconSec">🌙</span>
-                    <span class="theme-text-wrap" id="dashThemeLabelSec">Mode Gelap</span>
-                  </button>
+                  <label class="modern-theme-switch" for="themeSwitchSec" title="Beralih Mode Gelap / Terang">
+                    <input type="checkbox" id="themeSwitchSec" class="theme-switch-input" onchange="window.toggleDarkMode()">
+                    <span class="theme-switch-slider">
+                      <span class="theme-switch-icon sun">☀️</span>
+                      <span class="theme-switch-icon moon">🌙</span>
+                    </span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -1714,10 +1752,13 @@
                   Pantauan terpusat mobilitas personel di luar kawasan industri dan penelusuran audit trail perizinan.
                 </p>
               </div>
-              <button type="button" class="dashboard-theme-toggle-btn" onclick="window.toggleDarkMode()" title="Klik untuk beralih mode Tampilan Gelap / Terang">
-                <span class="theme-icon-wrap" id="dashThemeIconAdm">🌙</span>
-                <span class="theme-text-wrap" id="dashThemeLabelAdm">Mode Gelap</span>
-              </button>
+              <label class="modern-theme-switch" for="themeSwitchAdm" title="Beralih Mode Gelap / Terang">
+                <input type="checkbox" id="themeSwitchAdm" class="theme-switch-input" onchange="window.toggleDarkMode()">
+                <span class="theme-switch-slider">
+                  <span class="theme-switch-icon sun">☀️</span>
+                  <span class="theme-switch-icon moon">🌙</span>
+                </span>
+              </label>
             </div>
 
             <!-- Subtle Auditor Strip (BRULE-09) -->
@@ -4076,20 +4117,20 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261026_1330"></script>
-  <script src="js/data/authData.js?v=20261026_1330"></script>
-  <script src="js/modules/ui.js?v=20261026_1330"></script>
-  <script src="js/modules/scheduler.js?v=20261026_1330"></script>
-  <script src="js/modules/navigation.js?v=20261026_1330"></script>
-  <script src="js/modules/karyawan.js?v=20261026_1330"></script>
-  <script src="js/modules/approver.js?v=20261026_1330"></script>
-  <script src="js/modules/security.js?v=20261026_1330"></script>
-  <script src="js/modules/admin.js?v=20261026_1330"></script>
-  <script src="js/modules/charts.js?v=20261026_1330"></script>
-  <script src="js/modules/emergency.js?v=20261026_1330"></script>
-  <script src="js/modules/modals.js?v=20261026_1330"></script>
-  <script src="js/app.js?v=20261026_1330"></script>
-  <script src="js/modules/auth.js?v=20261026_1330"></script>
+  <script src="js/data/mockData.js?v=20261027_0945"></script>
+  <script src="js/data/authData.js?v=20261027_0945"></script>
+  <script src="js/modules/ui.js?v=20261027_0945"></script>
+  <script src="js/modules/scheduler.js?v=20261027_0945"></script>
+  <script src="js/modules/navigation.js?v=20261027_0945"></script>
+  <script src="js/modules/karyawan.js?v=20261027_0945"></script>
+  <script src="js/modules/approver.js?v=20261027_0945"></script>
+  <script src="js/modules/security.js?v=20261027_0945"></script>
+  <script src="js/modules/admin.js?v=20261027_0945"></script>
+  <script src="js/modules/charts.js?v=20261027_0945"></script>
+  <script src="js/modules/emergency.js?v=20261027_0945"></script>
+  <script src="js/modules/modals.js?v=20261027_0945"></script>
+  <script src="js/app.js?v=20261027_0945"></script>
+  <script src="js/modules/auth.js?v=20261027_0945"></script>
 </body>
 
 </html>

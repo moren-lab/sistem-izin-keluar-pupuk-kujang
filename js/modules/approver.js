@@ -84,6 +84,7 @@ function updateApproverMetrics() {
 
 function renderApproverDashboard() {
   updateApproverMetrics();
+  updateDelegationButtonUI();
 
   // Dynamic approver header based on active role (Ir. Hendra Gunawan vs Dewi Sartika)
   const approverHeroSub = document.getElementById('approverHeroSub');
@@ -1184,6 +1185,63 @@ function clearApproverTrackingHistory() {
   }
 }
 
+function toggleDelegationAuthority() {
+  const current = (typeof localStorage !== 'undefined' && localStorage.getItem('kujang_delegasi_wewenang') === 'true');
+  const next = !current;
+  try {
+    localStorage.setItem('kujang_delegasi_wewenang', next ? 'true' : 'false');
+  } catch (e) {}
+
+  updateDelegationButtonUI(next);
+
+  if (next) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wewenang dialihkan: Pengajuan izin baru otomatis memilih Atasan 2 (Dewi Sartika).', 'success');
+    }
+  } else {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Pengalihan nonaktif: Wewenang persetujuan kembali normal ke Atasan 1 (Ir. Hendra Gunawan).', 'info');
+    }
+  }
+
+  // Sinkronkan form dan dashboard
+  if (typeof window.syncApproversToForms === 'function') {
+    window.syncApproversToForms();
+  }
+  if (typeof renderApproverDashboard === 'function') {
+    renderApproverDashboard();
+  }
+  if (typeof window.renderKaryawanDashboard === 'function') {
+    window.renderKaryawanDashboard();
+  }
+}
+
+function updateDelegationButtonUI(forcedState) {
+  const isActive = typeof forcedState === 'boolean' 
+    ? forcedState 
+    : (typeof localStorage !== 'undefined' && localStorage.getItem('kujang_delegasi_wewenang') === 'true');
+
+  const btn = document.getElementById('btnToggleDelegation');
+  const label = document.getElementById('delegationBtnLabel');
+  const banner = document.getElementById('approverDelegationActiveBanner');
+
+  if (btn) {
+    if (isActive) {
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      if (label) label.textContent = 'Wewenang Dialihkan (Atasan 2)';
+    } else {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+      if (label) label.textContent = 'Alihkan Wewenang (Cuti/Dinas)';
+    }
+  }
+
+  if (banner) {
+    banner.style.display = isActive ? 'block' : 'none';
+  }
+}
+
 // Expose globally
 window.updateApproverMetrics = updateApproverMetrics;
 window.renderApproverDashboard = renderApproverDashboard;
@@ -1196,3 +1254,5 @@ window.openRejectExtensionModal = openRejectExtensionModal;
 window.rejectExtensionRequest = rejectExtensionRequest;
 window.deleteApproverTicket = deleteApproverTicket;
 window.clearApproverTrackingHistory = clearApproverTrackingHistory;
+window.toggleDelegationAuthority = toggleDelegationAuthority;
+window.updateDelegationButtonUI = updateDelegationButtonUI;

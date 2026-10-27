@@ -314,7 +314,7 @@ function unhoverKaryawanDonut() {
   if (badge) {
     badge.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.75rem; color: #64748b; font-weight: 500; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem 0.85rem; width: 100%; text-align: center;">
-        💡 Arahkan kursor ke warna chart untuk detail persentase
+
       </div>
     `;
   }
@@ -392,33 +392,53 @@ function getApproverWeeklyData(period) {
       }
     });
   } else {
-    // MINGGU INI (Real-time): Hari ini adalah Senin (curDay === 1)
-    // Hari-hari setelah hari ini (Selasa, Rabu, Kamis, Jumat) harus KOSONG (0)
-    let mondayRealCount = 0;
+    // MINGGU INI (Real-time): Pantau setiap hari (Senin - Jumat) secara dinamis
+    const realCounts = { Sen: 0, Sel: 0, Rab: 0, Kam: 0, Jum: 0 };
+    const mapKeys = ['', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum'];
+
     list.forEach(t => {
+      // Prioritaskan tanggal rencana waktu keluar atau waktu pengajuan
       const dateStr = t.plannedExit || t.createdAt;
       if (dateStr) {
-        const dt = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : new Date(dateStr);
+        let dt = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : null;
+        if (!dt || isNaN(dt.getTime())) {
+          dt = new Date(dateStr);
+        }
         if (dt && !isNaN(dt.getTime())) {
-          const day = dt.getDay();
-          if (day === 1) {
-            mondayRealCount++;
+          const day = dt.getDay(); // 1=Sen, 2=Sel, 3=Rab, 4=Kam, 5=Jum
+          if (day >= 1 && day <= 5) {
+            const key = mapKeys[day];
+            if (key) realCounts[key]++;
+          }
+        } else {
+          // Fallback parsing format '2026-10-27' atau teks
+          const m = String(dateStr).match(/2026-10-(\d{2})/);
+          if (m) {
+            const dom = parseInt(m[1], 10);
+            // 26=Sen(1), 27=Sel(2), 28=Rab(3), 29=Kam(4), 30=Jum(5)
+            const dIdx = dom - 25;
+            if (dIdx >= 1 && dIdx <= 5) {
+              realCounts[mapKeys[dIdx]]++;
+            }
           }
         }
       }
     });
 
-    // Base shift pagi tim di hari Senin (4 pengajuan awal + tiket baru yang diajukan hari ini)
-    const baseMonday = 4;
-    daysMap['Sen'].count = baseMonday + Math.max(1, mondayRealCount);
+    // Senin: Base shift pagi 4 pengajuan + tiket Senin yang masuk
+    daysMap['Sen'].count = 4 + (realCounts['Sen'] || 0);
 
-    // Hari mendatang (Sel, Rab, Kam, Jum) di minggu ini dikosongkan (0)
-    [2, 3, 4, 5].forEach(dayIdx => {
-      const key = ['', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum'][dayIdx];
-      if (curDay >= 1 && curDay <= 5 && dayIdx > curDay) {
-        daysMap[key].count = 0;
+    // Selasa (Hari ini) sampai Jumat:
+    // Tampilkan jumlah pengajuan aktual untuk hari tersebut. Jika ada pengajuan baru, batang langsung naik!
+    ['Sel', 'Rab', 'Kam', 'Jum'].forEach((key, idx) => {
+      const dayIdx = idx + 2; // 2=Sel, 3=Rab, 4=Kam, 5=Jum
+      const c = realCounts[key] || 0;
+      if (c > 0) {
+        daysMap[key].count = c;
       } else if (curDay > dayIdx) {
-        daysMap[key].count = 3;
+        daysMap[key].count = 2; // hari lampau di minggu ini
+      } else {
+        daysMap[key].count = 0; // hari ini (belum ada) atau hari mendatang
       }
     });
   }
@@ -942,6 +962,7 @@ function renderAdminDeptChart() {
 
   const { depts, total, max, period } = getAdminDeptData();
   const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
+  const dark = typeof isThemeDark === 'function' ? isThemeDark() : (typeof document !== 'undefined' && document.body ? document.body.classList.contains('theme-dark') : false);
 
   const colors = [
     { bar: 'linear-gradient(90deg, #059669 0%, #10b981 100%)', text: '#059669', badgeClass: 'top-1' },

@@ -15,9 +15,12 @@
   /**
    * Ambil data user yang sedang login di tab ini
    */
+  /**
+   * Ambil data user yang sedang login di tab / browser ini
+   */
   window.getKujangCurrentUser = function () {
     try {
-      const stored = sessionStorage.getItem('kujang_current_user');
+      const stored = localStorage.getItem('kujang_current_user') || sessionStorage.getItem('kujang_current_user');
       return stored ? JSON.parse(stored) : null;
     } catch (e) {
       return null;
@@ -25,14 +28,18 @@
   };
 
   /**
-   * Set user login di tab ini
+   * Set user login di browser ini
    */
   window.setKujangCurrentUser = function (user) {
-    if (!user) {
-      sessionStorage.removeItem('kujang_current_user');
-    } else {
-      sessionStorage.setItem('kujang_current_user', JSON.stringify(user));
-    }
+    try {
+      if (!user) {
+        localStorage.removeItem('kujang_current_user');
+        sessionStorage.removeItem('kujang_current_user');
+      } else {
+        localStorage.setItem('kujang_current_user', JSON.stringify(user));
+        sessionStorage.setItem('kujang_current_user', JSON.stringify(user));
+      }
+    } catch (e) {}
   };
 
   /**
@@ -311,6 +318,7 @@
   window.kujangLogout = function () {
     window.setKujangCurrentUser(null);
     try {
+      localStorage.removeItem('kujang_current_user');
       sessionStorage.removeItem('kujang_current_user');
       sessionStorage.clear();
     } catch (e) {}
@@ -374,14 +382,17 @@
    * Inisialisasi saat DOM siap
    */
   document.addEventListener('DOMContentLoaded', () => {
-    // Selalu tampilkan halaman login KUJANG ID saat membuka localhost / reload
-    try {
-      sessionStorage.removeItem('kujang_current_user');
-    } catch (e) {}
-
+    // Cek sesi login aktif di browser (tetap di dashboard saat refresh halaman)
+    const existingUser = window.getKujangCurrentUser();
     const overlay = document.getElementById('kujangAuthOverlay');
-    if (overlay) overlay.style.display = 'flex';
-    window.showKujangMethodStep();
+
+    if (existingUser && existingUser.role) {
+      if (overlay) overlay.style.display = 'none';
+      completeLogin(existingUser);
+    } else {
+      if (overlay) overlay.style.display = 'flex';
+      window.showKujangMethodStep();
+    }
 
     // 2. Setup event listener keyboard pada 6 kotak input OTP
     const otpInputs = document.querySelectorAll('.kujang-otp-digit');

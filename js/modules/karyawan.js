@@ -1048,7 +1048,7 @@ function formatTicketScheduleWithDay(t) {
   }
 
   const timePart = returnTimeStr ? `${plannedTimeStr} – ${returnTimeStr}` : `${plannedTimeStr} WIB`;
-  return `<div style="font-weight: 700; color: #0f172a; font-size: 0.785rem; white-space: nowrap;">${dayName}, ${dateFormatted}</div><div style="font-size: 0.74rem; color: #475569; font-family: var(--font-mono); font-weight: 500; margin-top: 2px; white-space: nowrap;">${timePart}</div>`;
+  return `<div class="schedule-day-date" style="font-weight: 600; font-size: 0.72rem; line-height: 1.35; white-space: nowrap;">${dayName}, ${dateFormatted}</div><div class="schedule-time-text" style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono); font-weight: 500; margin-top: 1px; white-space: nowrap;">${timePart}</div>`;
 }
 
 function getCleanEmpStatus(status, ticket) {
@@ -1187,38 +1187,38 @@ function renderEmpCards(list, containerElement) {
             </div>
 
             <!-- Detail Box (Tujuan, Keperluan, Rencana Waktu) -->
-            <div class="figma-card-detail-box">
+            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="color: #64748b; font-weight: 500;">Tujuan keluar</span>
-                <span class="detail-val" style="color: #0f172a; font-weight: 700; text-align: right;">${t.destination}</span>
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Tujuan keluar</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: #0f172a; font-weight: 600; text-align: right; line-height: 1.35;">${t.destination}</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="color: #64748b; font-weight: 500;">Keperluan</span>
-                <span class="detail-val" style="color: #0f172a; font-weight: 600; text-align: right; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</span>
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Keperluan</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: #0f172a; font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;">${t.reason || '-'}</span>
               </div>
-              <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.45rem; border-top: 1px dashed #e2e8f0;">
-                <span class="detail-label" style="color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
+              <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed #e2e8f0;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
                 <div class="detail-schedule-val" style="text-align: right;">${scheduleWithDay}</div>
               </div>
             </div>
 
             <!-- Note Banner (Sesuai status) -->
-            <div class="figma-note-banner note-${noteType}" style="font-size: 0.75rem; color: ${catatanColor}; background: ${catatanBg}; border: 1px solid ${catatanBorder}; border-radius: 6px; padding: 0.45rem 0.65rem; line-height: 1.4; font-weight: 600;">
+            <div class="figma-note-banner note-${noteType}" style="font-size: 0.72rem; color: ${catatanColor}; background: ${catatanBg}; border: 1px solid ${catatanBorder}; border-radius: 6px; padding: 0.38rem 0.55rem; line-height: 1.35; font-weight: 600;">
               ${catatanText}
             </div>
 
             <!-- Action Buttons Footer -->
-            <div class="figma-card-footer" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.65rem; border-top: 1px solid #f1f5f9;">
+            <div class="figma-card-footer" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.55rem; border-top: 1px solid #f1f5f9;">
               <div style="display: flex; gap: 0.65rem; align-items: center;">
                 ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui' || t.status === 'Terlambat') ? `
-                  <button class="btn-figma-primary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'qr')">
+                  <button class="btn-figma-primary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;" onclick="openTicketDetail('${t.id}', 'qr')">
                     Buka QR Izin
                   </button>
                 ` : ''}
-                <a href="#" class="figma-card-link" style="font-size: 0.8rem; font-weight: 700; color: #0284c7;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan →</a>
+                <a href="#" class="figma-card-link" style="font-size: 0.75rem; font-weight: 700; color: #0284c7;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan →</a>
               </div>
-              <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fee2e2; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.55rem; border-radius: 6px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fee2e2; color: #ef4444; font-size: 0.72rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.28rem 0.5rem; border-radius: 6px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 <span>Hapus</span>
               </button>
             </div>

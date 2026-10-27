@@ -672,6 +672,12 @@ function updateThemeUI(isDark) {
     document.documentElement.classList.remove('theme-dark');
   }
 
+  // Sinkronkan seluruh toggle switch checkbox di dashboard
+  const toggleInputs = document.querySelectorAll('.theme-switch-input');
+  toggleInputs.forEach(input => {
+    input.checked = isDark;
+  });
+
   const iconEls = document.querySelectorAll('.theme-icon-wrap, #dashThemeIcon, #dashThemeIconEmp, #dashThemeIconApp, #dashThemeIconSec, #dashThemeIconAdm');
   const labelEls = document.querySelectorAll('.theme-text-wrap, #dashThemeLabel, #dashThemeLabelEmp, #dashThemeLabelApp, #dashThemeLabelSec, #dashThemeLabelAdm');
 

@@ -141,15 +141,30 @@ function handleOpenNewRequest() {
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
   }
-  // Tidak memilih atasan secara default agar form kosong sebelum diisi pengguna
-  if (typeof window.resetApproverSearch === 'function') {
-    window.resetApproverSearch();
+  const isDelegatedActive = (typeof localStorage !== 'undefined' && localStorage.getItem('kujang_delegasi_wewenang') === 'true');
+  if (isDelegatedActive) {
+    if (typeof window.chooseApproverByName === 'function') {
+      window.chooseApproverByName('Dewi Sartika, S.T., M.M.');
+    }
+  } else {
+    // Tidak memilih atasan secara default agar form kosong sebelum diisi pengguna
+    if (typeof window.resetApproverSearch === 'function') {
+      window.resetApproverSearch();
+    }
   }
 
   const primaryApprover = typeof window.getPrimaryApprover === 'function' ? window.getPrimaryApprover() : null;
   const approverDirectNotice = document.getElementById('approverDirectNotice');
   if (approverDirectNotice) {
-    if (primaryApprover && primaryApprover.name) {
+    if (isDelegatedActive) {
+      approverDirectNotice.style.background = '#f0fdf4';
+      approverDirectNotice.style.borderColor = '#bbf7d0';
+      approverDirectNotice.style.color = '#15803d';
+      approverDirectNotice.innerHTML = `
+        <span style="font-size: 0.95rem;">🔄</span>
+        <span>Wewenang dialihkan: Pengajuan langsung otomatis diteruskan kepada <strong>Dewi Sartika, S.T., M.M.</strong> (Atasan 2 / Penerima Wewenang).</span>
+      `;
+    } else if (primaryApprover && primaryApprover.name) {
       approverDirectNotice.style.background = '#eff6ff';
       approverDirectNotice.style.borderColor = '#dbeafe';
       approverDirectNotice.style.color = '#1d4ed8';
@@ -618,14 +633,24 @@ function setupSingleApproverCombobox(cfg) {
       itemEl.dataset.name = approver.name;
 
       const initials = getApproverInitials(approver.name);
-      const highlightedName = highlightApproverMatch(approver.name, cleanQuery);
+      const nameText = approver.displayName || approver.name;
+      const highlightedName = highlightApproverMatch(nameText, cleanQuery);
       const highlightedTitle = highlightApproverMatch(approver.title, cleanQuery);
       const highlightedDept = highlightApproverMatch(approver.department, cleanQuery);
       const avatarBg = approver.avatarBg || 'linear-gradient(135deg, #059669 0%, #0d9488 100%)';
 
-      const directTag = approver.isDirectSupervisor
-        ? `<span class="approver-item-tag" title="Atasan langsung divisi Anda">Atasan Langsung</span>`
-        : '';
+      let directTag = '';
+      if (approver.isUnavailable) {
+        directTag = `<span class="approver-item-tag" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">Sedang Tidak Tersedia</span>`;
+      } else if (approver.isDirectSupervisor) {
+        directTag = `<span class="approver-item-tag" title="Atasan langsung divisi Anda">Atasan Langsung</span>`;
+      }
+
+      if (approver.isUnavailable) {
+        itemEl.classList.add('is-unavailable');
+        itemEl.style.opacity = '0.65';
+        itemEl.style.cursor = 'not-allowed';
+      }
 
       itemEl.innerHTML = `
         <div class="approver-item-avatar" style="background: ${avatarBg};">
@@ -641,13 +666,19 @@ function setupSingleApproverCombobox(cfg) {
           <div class="approver-item-dept">${highlightedDept}</div>
         </div>
         <div class="approver-item-cta">
-          <span>Pilih</span>
+          <span>${approver.isUnavailable ? 'Tidak Tersedia' : 'Pilih'}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </div>
       `;
 
       itemEl.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (approver.isUnavailable) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Atasan 1 (Ir. Hendra Gunawan) sedang tidak tersedia karena wewenang dialihkan ke Atasan 2 (Dewi Sartika).', 'warning');
+          }
+          return;
+        }
         chooseApprover(approver);
       });
 

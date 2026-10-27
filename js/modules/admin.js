@@ -475,6 +475,13 @@ function renderAdminAudit() {
 
     const dt = formatAuditDateTime(log.time);
 
+    // Hitung berapa kali karyawan ini sudah mengajukan izin di sistem
+    const applicantTickets = (window.ticketsList || []).filter(t => 
+      (log.applicantNip && t.applicantNip === log.applicantNip) ||
+      (log.applicantName && t.applicantName === log.applicantName)
+    );
+    const submissionCount = applicantTickets.length || 1;
+
     return `
       <tr>
         <td style="white-space: nowrap;">
@@ -491,8 +498,13 @@ function renderAdminAudit() {
           </a>
         </td>
         <td>
-          <div class="report-emp-name">${log.applicantName}</div>
-          <div class="report-emp-nip">NIP: ${log.applicantNip}</div>
+          <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+            <span class="report-emp-name">${log.applicantName}</span>
+            <span class="audit-freq-chip" title="Karyawan ini telah mengajukan izin sebanyak ${submissionCount} kali">
+              ${submissionCount}x Pengajuan
+            </span>
+          </div>
+          <div class="report-emp-nip" style="margin-top: 2px;">NIP: ${log.applicantNip}</div>
         </td>
         <td>
           <span class="audit-pill ${pillClass}">${log.event}</span>
