@@ -20,7 +20,8 @@
    */
   window.getKujangCurrentUser = function () {
     try {
-      const stored = localStorage.getItem('kujang_current_user') || sessionStorage.getItem('kujang_current_user');
+      // Ambil user login aktif dari sessionStorage tab ini (bertahan saat refresh F5, tapi tab baru menampilkan login)
+      const stored = sessionStorage.getItem('kujang_current_user');
       return stored ? JSON.parse(stored) : null;
     } catch (e) {
       return null;
@@ -28,15 +29,14 @@
   };
 
   /**
-   * Set user login di browser ini
+   * Set user login di browser/tab ini
    */
   window.setKujangCurrentUser = function (user) {
     try {
       if (!user) {
-        localStorage.removeItem('kujang_current_user');
         sessionStorage.removeItem('kujang_current_user');
+        try { localStorage.removeItem('kujang_current_user'); } catch (e) {}
       } else {
-        localStorage.setItem('kujang_current_user', JSON.stringify(user));
         sessionStorage.setItem('kujang_current_user', JSON.stringify(user));
       }
     } catch (e) {}
@@ -382,7 +382,10 @@
    * Inisialisasi saat DOM siap
    */
   document.addEventListener('DOMContentLoaded', () => {
-    // Cek sesi login aktif di browser (tetap di dashboard saat refresh halaman)
+    // Bersihkan sisa kunci lama di localStorage agar tab baru selalu mulai dari halaman login
+    try { localStorage.removeItem('kujang_current_user'); } catch (e) {}
+
+    // Cek sesi login aktif di tab ini (tetap di dashboard saat refresh halaman F5)
     const existingUser = window.getKujangCurrentUser();
     const overlay = document.getElementById('kujangAuthOverlay');
 

@@ -1590,7 +1590,7 @@ const AVAILABLE_ROLES_JABATAN = [
     jabatan: 'Manajer',
     fullTitle: 'Atasan 1 (Manager)',
     isSingleSeat: true,
-    description: 'Persetujuan izin keluar area karyawan, delegasi, dan pemantauan bawahan.'
+    description: 'Persetujuan izin keluar area karyawan dan pemantauan bawahan.'
   },
   {
     roleKey: 'approver2',
@@ -1598,7 +1598,7 @@ const AVAILABLE_ROLES_JABATAN = [
     jabatan: 'Supervisor / Plt',
     fullTitle: 'Atasan 2 (Supervisor / Plt)',
     isSingleSeat: true,
-    description: 'Persetujuan delegasi / supervisi operasional saat Manager berhalangan.'
+    description: 'Persetujuan izin operasional / supervisi bawahan.'
   },
   {
     roleKey: 'karyawan',

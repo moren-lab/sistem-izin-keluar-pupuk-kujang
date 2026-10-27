@@ -479,16 +479,19 @@ function loadUsers() {
   }
 }
 
-// Helper sentral untuk mendapatkan Atasan Utama yang sedang aktif (Atasan 1 atau Atasan 2 bila didelegasikan)
+// Helper sentral untuk mendapatkan Atasan Utama yang sedang aktif
 function getPrimaryApprover() {
-  const isDelegated = (typeof localStorage !== 'undefined' && localStorage.getItem('kujang_delegasi_wewenang') === 'true');
   const users = (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
-  if (isDelegated) {
-    return users.find(u => (u.roleKey === 'approver2' || (u.name && u.name.includes('Dewi Sartika'))) && u.status === 'Aktif') || null;
-  }
   return users.find(u => u.roleKey === 'approver' && u.status === 'Aktif') || null;
 }
 window.getPrimaryApprover = getPrimaryApprover;
+
+// Bersihkan data peninggalan delegasi wewenang bila ada di storage
+try {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('kujang_delegasi_wewenang');
+  }
+} catch (e) {}
 
 // Sinkronisasi seluruh aktor sistem dari data direktori pengguna (MOCK_USERS)
 function syncActorsFromUsers(data) {
@@ -586,8 +589,6 @@ function getActiveApprovers() {
     return isApproverRole && u.status === 'Aktif';
   });
 
-  const isDelegated = (typeof localStorage !== 'undefined' && localStorage.getItem('kujang_delegasi_wewenang') === 'true');
-
   const avatarPalettes = [
     'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
     'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
@@ -601,29 +602,14 @@ function getActiveApprovers() {
     const isApprover1 = u.roleKey === 'approver' || (u.name && u.name.includes('Hendra Gunawan'));
     const isApprover2 = u.roleKey === 'approver2' || (u.name && u.name.includes('Dewi Sartika'));
 
-    let displayName = u.name;
-    let isUnavailable = false;
-    let isDirectSupervisor = u.roleKey === 'approver';
-
-    if (isDelegated) {
-      if (isApprover1) {
-        displayName = `${u.name} (Atasan 1 - Sedang Tidak Tersedia)`;
-        isUnavailable = true;
-        isDirectSupervisor = false;
-      } else if (isApprover2) {
-        displayName = `${u.name} (Atasan 2 / Penerima Wewenang)`;
-        isDirectSupervisor = true;
-      }
-    }
-
     return {
       nip: u.nip || '',
       name: u.name,
-      displayName: displayName,
-      isUnavailable: isUnavailable,
+      displayName: u.name,
+      isUnavailable: false,
       title: u.role || (isApprover1 ? 'Atasan 1 (Manager)' : 'Atasan 2 (Supervisor / Plt)'),
       department: u.department || 'Departemen Rekayasa & Pemeliharaan',
-      isDirectSupervisor: isDirectSupervisor,
+      isDirectSupervisor: isApprover1,
       avatarBg: avatarPalettes[idx % avatarPalettes.length]
     };
   });

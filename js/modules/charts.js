@@ -418,62 +418,47 @@ function getApproverWeeklyData(period) {
       }
     });
   } else {
-    // MINGGU INI (Real-time): Pantau setiap hari (Senin - Jumat) secara dinamis
+    // MINGGU INI (Real-time murni): Hanya pantau pengajuan yang jatuh pada minggu aktif berjalan (26–30 Okt 2026)
     const realCounts = { Sen: 0, Sel: 0, Rab: 0, Kam: 0, Jum: 0 };
-    const mapKeys = ['', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum'];
 
     list.forEach(t => {
-      // Prioritaskan tanggal rencana waktu keluar atau waktu pengajuan
-      const dateStr = t.plannedExit || t.createdAt;
-      if (dateStr) {
-        let dt = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : null;
-        if (!dt || isNaN(dt.getTime())) {
-          dt = new Date(dateStr);
-        }
-        if (dt && !isNaN(dt.getTime())) {
-          const day = dt.getDay(); // 1=Sen, 2=Sel, 3=Rab, 4=Kam, 5=Jum
-          if (day >= 1 && day <= 5) {
-            const key = mapKeys[day];
-            if (key) realCounts[key]++;
-          }
-        } else {
-          // Fallback parsing format '2026-10-27' atau teks
-          const m = String(dateStr).match(/2026-10-(\d{2})/);
-          if (m) {
-            const dom = parseInt(m[1], 10);
-            // 26=Sen(1), 27=Sel(2), 28=Rab(3), 29=Kam(4), 30=Jum(5)
-            const dIdx = dom - 25;
-            if (dIdx >= 1 && dIdx <= 5) {
-              realCounts[mapKeys[dIdx]]++;
-            }
-          }
-        }
+      // Prioritaskan tanggal rencana waktu keluar, waktu pengajuan, atau nomor ID tiket
+      let matchedDay = null;
+      const combined = `${t.id || ''} ${t.plannedExit || ''} ${t.createdAt || ''}`;
+      
+      if (combined.includes('2026-10-26') || combined.includes('26 Okt') || combined.includes('20261026')) {
+        matchedDay = 'Sen';
+      } else if (combined.includes('2026-10-27') || combined.includes('27 Okt') || combined.includes('20261027')) {
+        matchedDay = 'Sel';
+      } else if (combined.includes('2026-10-28') || combined.includes('28 Okt') || combined.includes('20261028')) {
+        matchedDay = 'Rab';
+      } else if (combined.includes('2026-10-29') || combined.includes('29 Okt') || combined.includes('20261029')) {
+        matchedDay = 'Kam';
+      } else if (combined.includes('2026-10-30') || combined.includes('30 Okt') || combined.includes('20261030')) {
+        matchedDay = 'Jum';
+      }
+
+      if (matchedDay && realCounts[matchedDay] !== undefined) {
+        realCounts[matchedDay]++;
       }
     });
 
-    // Senin: Base shift pagi 4 pengajuan + tiket Senin yang masuk
-    daysMap['Sen'].count = 4 + (realCounts['Sen'] || 0);
-
-    // Selasa (Hari ini) sampai Jumat:
-    // Tampilkan jumlah pengajuan aktual untuk hari tersebut. Jika ada pengajuan baru, batang langsung naik!
-    ['Sel', 'Rab', 'Kam', 'Jum'].forEach((key, idx) => {
-      const dayIdx = idx + 2; // 2=Sel, 3=Rab, 4=Kam, 5=Jum
-      const c = realCounts[key] || 0;
-      if (c > 0) {
-        daysMap[key].count = c;
-      } else if (curDay > dayIdx) {
-        daysMap[key].count = 2; // hari lampau di minggu ini
-      } else {
-        daysMap[key].count = 0; // hari ini (belum ada) atau hari mendatang
-      }
-    });
+    // Murni gunakan data pengajuan aktual minggu ini (tanpa data palsu / dummy tambahan)
+    daysMap['Sen'].count = realCounts['Sen'] || 0;
+    daysMap['Sel'].count = realCounts['Sel'] || 0;
+    daysMap['Rab'].count = realCounts['Rab'] || 0;
+    daysMap['Kam'].count = realCounts['Kam'] || 0;
+    daysMap['Jum'].count = realCounts['Jum'] || 0;
   }
 
   const daysData = Object.values(daysMap);
   const totalVal = daysData.reduce((acc, d) => acc + d.count, 0);
   const maxVal = Math.max(...daysData.map(d => d.count), 1);
-  const peakDayObj = daysData.filter(d => d.count > 0).reduce((max, d) => d.count > max.count ? d : max, daysData[0]);
-  const peakDay = peakDayObj ? peakDayObj.full : 'Senin';
+  const validDaysWithCount = daysData.filter(d => d.count > 0);
+  const peakDayObj = validDaysWithCount.length > 0 
+    ? validDaysWithCount.reduce((max, d) => d.count > max.count ? d : max, validDaysWithCount[0])
+    : null;
+  const peakDay = peakDayObj ? peakDayObj.full : 'Belum Ada';
 
   return { daysData, totalVal, maxVal, peakDay, isMonth, curDay };
 }
@@ -489,10 +474,11 @@ function renderApproverBarChart() {
   // Subtitle update
   const subtitle = document.getElementById('approverChartSubtitle');
   if (subtitle) {
+    const peakText = totalVal > 0 ? `Puncak: ${peakDay}, ${maxVal} pengajuan` : 'Belum Ada Pengajuan';
     if (isMonth) {
-      subtitle.textContent = `Oktober 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
+      subtitle.textContent = `Oktober 2026 — Total: ${totalVal} pengajuan — ${peakText}`;
     } else {
-      subtitle.textContent = `26–30 Okt 2026 — Total: ${totalVal} pengajuan — Puncak: ${peakDay}, ${maxVal} pengajuan`;
+      subtitle.textContent = `26–30 Okt 2026 — Total: ${totalVal} pengajuan — ${peakText}`;
     }
   }
 

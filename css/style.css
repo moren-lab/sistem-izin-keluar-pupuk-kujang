@@ -136,36 +136,6 @@
   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.45);
 }
 
-/* Tombol Delegasi Wewenang Atasan */
-.btn-delegation-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.42rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.775rem;
-  font-weight: 700;
-  font-family: var(--font-main);
-  background: rgba(255, 255, 255, 0.15);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-}
-
-.btn-delegation-toggle:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
-}
-
-.btn-delegation-toggle.active {
-  background: #059669;
-  border-color: #34d399;
-  color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 2px 8px rgba(5, 150, 105, 0.4);
-}
 
 /* Badge Frekuensi Pengajuan Karyawan di Audit Trail (Revisi 4) */
 .audit-freq-chip {
@@ -495,13 +465,17 @@ body.theme-dark .figma-contact-phone {
 }
 
 /* ===================================================================
-   4. RIWAYAT PENGAJUAN (FIGMA FILTER TOOLBAR & CONTROLS)
+   4. FILTER TOOLBARS & CONTROLS (KARYAWAN, POS JAGA, ATASAN, ADMIN)
    =================================================================== */
-body.theme-dark .figma-filter-toolbar {
-  background: #131b2a !important;
-  border: 1px solid #24334a !important;
+body.theme-dark .figma-filter-toolbar,
+body.theme-dark .admin-filter-toolbar,
+body.theme-dark .smart-toolbar {
+  background: #111622 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  color: #f8fafc !important;
 }
+
 body.theme-dark .figma-filter-lbl {
   color: #94a3b8 !important;
 }
@@ -549,33 +523,206 @@ body.theme-dark .btn-figma-toggle.active {
   box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35) !important;
 }
 
+/* Admin Filter Toolbars & Search/Select Elements (Gambar Direktori Akun & Audit) */
+body.theme-dark .admin-search-input {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-search-input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+}
+body.theme-dark .admin-search-input::placeholder {
+  color: #64748b !important;
+}
+
+body.theme-dark .admin-select-filter {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-select-filter option {
+  background: #182337 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-select-filter:focus {
+  border-color: #10b981 !important;
+}
+
+body.theme-dark #adminUsersCount,
+body.theme-dark #adminAuditCountBadge,
+body.theme-dark #adminReportTotalCount,
+body.theme-dark .admin-filter-toolbar span {
+  color: #94a3b8 !important;
+}
+
+/* Pos Jaga Multi-Gate Segmented Tabs (Pos 1, Pos 2, Pos 3) */
+body.theme-dark .security-gate-tabs {
+  background: #111622 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+body.theme-dark .btn-gate-tab {
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+body.theme-dark .btn-gate-tab:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .btn-gate-tab.active {
+  background: #182337 !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+body.theme-dark .btn-gate-tab .gate-pill-count {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+}
+body.theme-dark .btn-gate-tab.active .gate-pill-count {
+  background: rgba(56, 189, 248, 0.2) !important;
+  color: #38bdf8 !important;
+}
+
+/* Pos Jaga Smart Toolbar & Search Inputs */
+body.theme-dark .search-input {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .search-input::placeholder {
+  color: #64748b !important;
+}
+body.theme-dark .search-input:focus {
+  border-color: #10b981 !important;
+  background: #1e2c42 !important;
+}
+body.theme-dark .toolbar-search svg {
+  color: #94a3b8 !important;
+}
+
+/* Universal Filter Select in Dark Mode (Pos Jaga, Atasan, Admin) */
+body.theme-dark .filter-select,
+body.theme-dark .chart-filter-select {
+  background: #182337 !important;
+  background-color: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .filter-select:hover,
+body.theme-dark .chart-filter-select:hover {
+  background: #202e47 !important;
+  background-color: #202e47 !important;
+  border-color: #3b82f6 !important;
+}
+body.theme-dark .filter-select:focus,
+body.theme-dark .chart-filter-select:focus {
+  border-color: #10b981 !important;
+  background: #202e47 !important;
+  background-color: #202e47 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+}
+body.theme-dark .filter-select option,
+body.theme-dark .chart-filter-select option {
+  background: #182337 !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark .scan-input-box input:focus {
+  background: #182337 !important;
+  color: #f8fafc !important;
+  border-color: #38bdf8 !important;
+}
+body.theme-dark .post-select-box option {
+  color: #f8fafc !important;
+  background: #182337 !important;
+}
+
 /* ===================================================================
-   5. TICKET CARDS & CARD GRID
+   5. TICKET CARDS & CARD GRID (KARYAWAN, ATASAN, POS JAGA, ADMIN)
    =================================================================== */
-body.theme-dark .figma-grid-item {
+body.theme-dark .figma-grid-item,
+body.theme-dark .card-item,
+body.theme-dark .card-history-item,
+body.theme-dark #containerApproverRequests .card-item,
+body.theme-dark #containerSecurityHistory .card-item,
+body.theme-dark #containerSecurityQueue .card-item {
   background: #111622 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
-}
-body.theme-dark .figma-grid-item:hover {
-  border-color: #10b981 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
-}
-body.theme-dark .figma-ticket-id {
   color: #f8fafc !important;
 }
-body.theme-dark .figma-ticket-date {
+
+body.theme-dark .figma-grid-item:hover,
+body.theme-dark .card-item:hover,
+body.theme-dark .card-history-item:hover {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.theme-dark .figma-ticket-id,
+body.theme-dark .card-id-num {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .figma-ticket-date,
+body.theme-dark .card-created-meta {
   color: #94a3b8 !important;
+}
+
+/* Inner Profile & Personnel Boxes in Cards */
+body.theme-dark .card-item div[style*="background:var(--bg-subtle)"],
+body.theme-dark .card-item div[style*="background: var(--bg-subtle)"],
+body.theme-dark .card-history-item div[style*="background:var(--bg-subtle)"],
+body.theme-dark .card-history-item div[style*="background: var(--bg-subtle)"] {
+  background: #161f2e !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 6px !important;
+}
+
+/* Inner Scan Logs & Realization Summary in Security Cards (Gambar 2) */
+body.theme-dark .card-item div[style*="background: var(--bg-card)"],
+body.theme-dark .card-item div[style*="background:var(--bg-card)"],
+body.theme-dark .card-history-item div[style*="background: var(--bg-card)"],
+body.theme-dark .card-history-item div[style*="background:var(--bg-card)"] {
+  background: #141c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+}
+
+/* Approver Schedule Box & Card Details Box (Gambar 1) */
+body.theme-dark .approver-schedule-box,
+body.theme-dark .card-details-box {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+}
+
+body.theme-dark .approver-schedule-box .schedule-time-text {
+  color: #f8fafc !important;
+}
+
+/* Scan Log Times Contrast */
+body.theme-dark [style*="color: #065f46"],
+body.theme-dark [style*="color:#065f46"] {
+  color: #34d399 !important;
+}
+
+body.theme-dark [style*="color: #0e7490"],
+body.theme-dark [style*="color:#0e7490"] {
+  color: #38bdf8 !important;
 }
 
 /* Tags inside Card */
 body.theme-dark .figma-tag-badge,
-body.theme-dark .badge-type {
+body.theme-dark .badge-type,
+body.theme-dark .tag-badge {
   background: rgba(148, 163, 184, 0.12) !important;
   border: 1px solid rgba(148, 163, 184, 0.25) !important;
   color: #cbd5e1 !important;
 }
 body.theme-dark .figma-tag-badge.badge-dinas,
+body.theme-dark .tag-badge.tag-dinas,
 body.theme-dark .figma-tag-badge[style*="background: #eff6ff"],
 body.theme-dark .figma-tag-badge[style*="background:#eff6ff"] {
   background: rgba(16, 185, 129, 0.18) !important;
@@ -583,11 +730,34 @@ body.theme-dark .figma-tag-badge[style*="background:#eff6ff"] {
   color: #34d399 !important;
 }
 body.theme-dark .figma-tag-badge.badge-pribadi,
+body.theme-dark .tag-badge.tag-pribadi,
 body.theme-dark .figma-tag-badge[style*="background: #fefce8"],
 body.theme-dark .figma-tag-badge[style*="background:#fefce8"] {
   background: rgba(245, 158, 11, 0.18) !important;
   border: 1px solid rgba(245, 158, 11, 0.35) !important;
   color: #fde047 !important;
+}
+
+/* Gate Pos Badges */
+body.theme-dark .gate-badge-pill {
+  background: #182337 !important;
+  color: #38bdf8 !important;
+  border: 1px solid #2e3e57 !important;
+}
+body.theme-dark .gate-badge-pill.pos-1 {
+  background: rgba(14, 165, 233, 0.14) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(14, 165, 233, 0.3) !important;
+}
+body.theme-dark .gate-badge-pill.pos-2 {
+  background: rgba(168, 85, 247, 0.14) !important;
+  color: #c084fc !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+}
+body.theme-dark .gate-badge-pill.pos-3 {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
 }
 
 /* Detail Box inside Card */
@@ -671,21 +841,172 @@ body.theme-dark .figma-clean-status.status-cancelled {
   color: #94a3b8 !important;
 }
 
-/* Card Footer */
-body.theme-dark .figma-card-footer {
-  border-top-color: #24334a !important;
+/* Action Buttons & Footers in Cards (Gambar 1 & Gambar 2) */
+body.theme-dark .figma-card-footer,
+body.theme-dark .card-actions-bar,
+body.theme-dark .tracking-card-footer {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
 }
+
 body.theme-dark .figma-card-link {
   color: #38bdf8 !important;
 }
-body.theme-dark .btn-figma-delete-single {
-  background: rgba(239, 68, 68, 0.08) !important;
-  border: 1px solid rgba(239, 68, 68, 0.25) !important;
-  color: #f87171 !important;
+
+/* Tracking Decision Pill (Sudah Diputuskan / Belum Diputuskan) */
+body.theme-dark .tracking-decision-pill.pill-pending {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
 }
-body.theme-dark .btn-figma-delete-single:hover {
-  background: rgba(239, 68, 68, 0.2) !important;
+body.theme-dark .tracking-decision-pill.pill-decided {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+body.theme-dark .tracking-decision-pill.pill-reassigned {
+  background: rgba(59, 130, 246, 0.16) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+}
+
+/* Primary QR Buttons (Buka QR Izin / Tiket & QR Code) */
+body.theme-dark .btn-tracking-qr,
+body.theme-dark .btn-card-qr,
+body.theme-dark .btn-figma-primary {
+  background: #059669 !important;
   color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35) !important;
+}
+body.theme-dark .btn-tracking-qr:hover,
+body.theme-dark .btn-card-qr:hover,
+body.theme-dark .btn-figma-primary:hover {
+  background: #10b981 !important;
+}
+
+/* Secondary Detail Buttons (Detail Pengajuan) */
+body.theme-dark .btn-tracking-detail,
+body.theme-dark .btn-card-detail {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+body.theme-dark .btn-tracking-detail:hover,
+body.theme-dark .btn-card-detail:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+/* Delete / Destructive Buttons (Hapus) */
+body.theme-dark .btn-tracking-delete,
+body.theme-dark .btn-figma-delete-single {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+body.theme-dark .btn-tracking-delete:hover,
+body.theme-dark .btn-figma-delete-single:hover {
+  background: rgba(239, 68, 68, 0.24) !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+}
+
+/* Topbar Secondary Buttons (Ekspor CSV di Pos Jaga - Gambar 2) */
+body.theme-dark .btn-secondary,
+body.theme-dark #btnSecurityLogExport {
+  background: #162032 !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .btn-secondary:hover,
+body.theme-dark #btnSecurityLogExport:hover {
+  background: #1e2c42 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+/* View Mode Switcher (Kartu / Tabel di Pos Jaga - Gambar 2) */
+body.theme-dark .view-mode-group {
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .btn-view-mode {
+  background: #162032 !important;
+  color: #94a3b8 !important;
+  border: none !important;
+}
+body.theme-dark .btn-view-mode:hover {
+  background: #1e2c42 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .btn-view-mode.active {
+  background: #1e2c42 !important;
+  color: #34d399 !important;
+}
+
+/* Clear Completed History Button (Hapus Riwayat Selesai di Atasan - Gambar 1) */
+body.theme-dark .btn-clear-history,
+body.theme-dark #btnClearApproverHistory {
+  background: rgba(225, 29, 72, 0.16) !important;
+  border: 1px solid rgba(225, 29, 72, 0.35) !important;
+  color: #fda4af !important;
+}
+body.theme-dark .btn-clear-history:hover,
+body.theme-dark #btnClearApproverHistory:hover {
+  background: rgba(225, 29, 72, 0.28) !important;
+  color: #ffffff !important;
+  border-color: #f43f5e !important;
+}
+
+/* Admin Audit Trail & Log Table (Gambar 3) */
+body.theme-dark .report-emp-name {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+body.theme-dark .report-emp-nip {
+  color: #94a3b8 !important;
+}
+body.theme-dark .report-dept-name {
+  color: #cbd5e1 !important;
+}
+body.theme-dark .audit-freq-chip {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+body.theme-dark .report-ticket-id {
+  color: #34d399 !important;
+  font-weight: 700 !important;
+}
+body.theme-dark .btn-admin-detail {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+body.theme-dark .btn-admin-detail:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+body.theme-dark .btn-admin-danger {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.28) !important;
+}
+body.theme-dark .btn-admin-danger:hover {
+  background: rgba(239, 68, 68, 0.24) !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+}
+body.theme-dark .btn-admin-success {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+body.theme-dark .btn-admin-switch {
+  background: #162032 !important;
+  color: #f8fafc !important;
+  border: 1px solid #24334a !important;
 }
 
 /* ===================================================================
@@ -2325,7 +2646,7 @@ body {
 }
 
 .btn-secondary {
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -2452,7 +2773,7 @@ body {
 
 /* SECTION CONTENT WRAPPER */
 .content-section {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
@@ -2513,7 +2834,7 @@ body {
   font-family: var(--font-main);
   font-size: 0.825rem;
   color: var(--text-primary);
-  background: #ffffff;
+  background: var(--bg-card);
   transition: border-color 0.15s ease;
   min-height: 38px;
 }
@@ -2548,7 +2869,7 @@ body {
 
 .filter-select:focus {
   border-color: var(--corp-teal);
-  background: #ffffff;
+  background: var(--bg-card);
 }
 
 .view-mode-group {
@@ -2561,7 +2882,7 @@ body {
 .btn-view-mode {
   padding: 0.45rem 0.7rem;
   border: none;
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--text-muted);
   cursor: pointer;
   display: flex;
@@ -3132,7 +3453,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
-  background: #ffffff;
+  background: var(--bg-card);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -3143,7 +3464,7 @@ body {
 .card-item:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: #cbd5e1;
+  border-color: var(--border-focus);
 }
 
 .card-top {
@@ -4589,7 +4910,7 @@ body.modal-open {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 0.85rem 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
@@ -4610,15 +4931,16 @@ body.modal-open {
   border-radius: var(--radius-md);
   font-size: 0.825rem;
   font-family: var(--font-main);
-  background: #ffffff;
+  background: var(--bg-app);
+  color: var(--text-primary);
   min-width: 240px;
   transition: all 0.15s ease;
 }
 
 .admin-search-input:focus {
   outline: none;
-  border-color: #0f2b48;
-  box-shadow: 0 0 0 3px rgba(15, 43, 72, 0.08);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 .admin-select-filter {
@@ -4627,14 +4949,14 @@ body.modal-open {
   border-radius: var(--radius-md);
   font-size: 0.825rem;
   font-family: var(--font-main);
-  background: #ffffff;
+  background: var(--bg-app);
   cursor: pointer;
   color: var(--text-primary);
 }
 
 .admin-select-filter:focus {
   outline: none;
-  border-color: #0f2b48;
+  border-color: var(--border-focus);
 }
 
 /* BUTTONS */
@@ -5299,14 +5621,15 @@ body.modal-open {
 }
 
 .filter-select {
-  border: 1.5px solid #e2e8f0;
-  background-color: #ffffff;
+  border: 1.5px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   transition: all 0.2s ease;
 }
 
 .filter-select:hover {
-  border-color: #cbd5e1;
-  background-color: #f8fafc;
+  border-color: var(--border-focus);
+  background-color: var(--bg-subtle);
 }
 
 .filter-select:focus {
@@ -5317,8 +5640,9 @@ body.modal-open {
 .chart-filter-select {
   padding: 0.25rem 0.55rem;
   border-radius: 6px;
-  border: 1.5px solid #e2e8f0;
-  background-color: #ffffff;
+  border: 1.5px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   font-family: var(--font-main);
   font-size: 0.725rem;
   font-weight: 600;
@@ -7891,9 +8215,10 @@ body.modal-open {
 .security-gate-tabs {
   display: flex;
   gap: 0.5rem;
-  background: #f1f5f9;
+  background: var(--bg-subtle);
   padding: 0.35rem;
   border-radius: 10px;
+  border: 1px solid var(--border-color);
   margin-top: 1rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -7906,7 +8231,7 @@ body.modal-open {
   padding: 0.45rem 0.85rem;
   border: none;
   background: transparent;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 600;
   border-radius: 7px;
@@ -7916,13 +8241,13 @@ body.modal-open {
 }
 
 .btn-gate-tab:hover {
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .btn-gate-tab.active {
-  background: #ffffff;
-  color: #0284c7;
+  background: var(--bg-card);
+  color: var(--primary-accent);
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }

@@ -141,36 +141,21 @@ function handleOpenNewRequest() {
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
   }
-  const isDelegatedActive = (typeof localStorage !== 'undefined' && localStorage.getItem('kujang_delegasi_wewenang') === 'true');
-  if (isDelegatedActive) {
-    if (typeof window.chooseApproverByName === 'function') {
-      window.chooseApproverByName('Dewi Sartika, S.T., M.M.');
-    }
-  } else {
-    // Tidak memilih atasan secara default agar form kosong sebelum diisi pengguna
-    if (typeof window.resetApproverSearch === 'function') {
-      window.resetApproverSearch();
-    }
+  // Tidak memilih atasan secara default agar form bersih sebelum diisi pengguna
+  if (typeof window.resetApproverSearch === 'function') {
+    window.resetApproverSearch();
   }
 
   const primaryApprover = typeof window.getPrimaryApprover === 'function' ? window.getPrimaryApprover() : null;
   const approverDirectNotice = document.getElementById('approverDirectNotice');
   if (approverDirectNotice) {
-    if (isDelegatedActive) {
-      approverDirectNotice.style.background = '#f0fdf4';
-      approverDirectNotice.style.borderColor = '#bbf7d0';
-      approverDirectNotice.style.color = '#15803d';
-      approverDirectNotice.innerHTML = `
-        <span style="font-size: 0.95rem;">🔄</span>
-        <span>Wewenang dialihkan: Pengajuan langsung otomatis diteruskan kepada <strong>Dewi Sartika, S.T., M.M.</strong> (Atasan 2 / Penerima Wewenang).</span>
-      `;
-    } else if (primaryApprover && primaryApprover.name) {
+    if (primaryApprover && primaryApprover.name) {
       approverDirectNotice.style.background = '#eff6ff';
       approverDirectNotice.style.borderColor = '#dbeafe';
       approverDirectNotice.style.color = '#1d4ed8';
       approverDirectNotice.innerHTML = `
         <span style="font-size: 0.95rem;">ℹ️</span>
-        <span>Pengajuan diteruskan kepada atasan langsung (<strong>${primaryApprover.name}</strong>). QR terbit setelah izin disetujui.</span>
+        <span>Pengajuan diteruskan kepada atasan (<strong>${primaryApprover.name}</strong>) atau pilih atasan peninjau aktif di bawah. QR terbit setelah izin disetujui.</span>
       `;
     } else {
       approverDirectNotice.style.background = '#fff1f2';
@@ -178,7 +163,7 @@ function handleOpenNewRequest() {
       approverDirectNotice.style.color = '#9f1239';
       approverDirectNotice.innerHTML = `
         <span style="font-size: 0.95rem;">⚠️</span>
-        <span><strong>Atasan anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain.</strong> Silakan ketik dan pilih salah satu atasan peninjau aktif di bawah.</span>
+        <span>Silakan ketik dan pilih salah satu atasan peninjau aktif di bawah untuk memproses izin keluar area.</span>
       `;
     }
   }

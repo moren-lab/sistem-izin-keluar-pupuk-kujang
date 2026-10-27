@@ -386,7 +386,7 @@ function switchRole(role) {
     if (sidebarUserSub) sidebarUserSub.textContent = `NIP: ${act2.nip}`;
 
     setApproverNav(currentApproverNav || 'dashboard');
-    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Atasan 2 / Delegasi (Dewi Sartika)', 'info');
+    if (typeof window.showToast === 'function') window.showToast('Beralih ke mode Atasan 2 (Dewi Sartika)', 'info');
   } else if (role === 'security') {
     if (btnSwitchSecurity) btnSwitchSecurity.classList.add('active', 'security');
     if (viewSecurity) viewSecurity.style.display = 'block';
