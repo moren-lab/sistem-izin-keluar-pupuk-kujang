@@ -567,7 +567,7 @@ function renderKaryawanDashboard() {
           </div>
         ` : ''}
 
-        <div style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
+        <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
         </div>
       `;
@@ -812,7 +812,7 @@ function renderPengajuanSayaView() {
           </div>
         ` : ''}
 
-        <div style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
+        <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
         </div>
       </div>

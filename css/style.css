@@ -7760,4 +7760,755 @@ body.modal-open {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ========================================================
+   MULTI-GATE SEGMENTED TABS (POS 1, POS 2, POS 3)
+   ======================================================== */
+.security-gate-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-gate-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-gate-tab:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.btn-gate-tab.active {
+  background: #ffffff;
+  color: #0284c7;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-gate-tab .gate-pill-count {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.btn-gate-tab.active .gate-pill-count {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* Gate Badge Pills for Table & Cards */
+.gate-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gate-badge-pill.pos-1 {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.gate-badge-pill.pos-2 {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+
+.gate-badge-pill.pos-3 {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+/* ===================================================================
+   MOBILE RESPONSIVE SUITE (SMARTPHONES: ANDROID & IPHONE 360px - 430px+)
+   Adapted from Figma Mobile Artboard & SAKTI Integrated Live System
+   =================================================================== */
+
+/* Keyframe for Native Mobile Sheet Slide-Up */
+@keyframes sheetSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 1. DESKTOP BASELINE: Hide Mobile Bottom Nav on Desktop */
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+/* 2. TABLET & SMARTPHONE GLOBAL RESPONSIVE RULES (<= 768px) */
+@media (max-width: 768px) {
+  /* Prevent iOS Safari 16px Auto-Zoom on form focus */
+  input,
+  select,
+  textarea,
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px !important;
+  }
+
+  /* Safe Area & Layout Flow */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .app-layout {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .main-wrapper {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Page container bottom clearance for fixed bottom navigation */
+  .page-container {
+    padding: 1rem 0.85rem calc(76px + env(safe-area-inset-bottom, 16px)) 0.85rem !important;
+    gap: 1rem !important;
+  }
+
+  /* Admin mode has no bottom nav: standard padding */
+  body.role-is-admin .page-container {
+    padding-bottom: 2rem !important;
+  }
+
+  /* Compact Top Navbar (58px height) */
+  .top-navbar {
+    height: 58px !important;
+    padding: 0 0.85rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .navbar-left {
+    gap: 0.5rem !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+
+  .btn-sidebar-toggle {
+    width: 36px !important;
+    height: 36px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Figma Breadcrumb on mobile */
+  .figma-breadcrumb {
+    font-size: 0.775rem !important;
+    gap: 0.35rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Role Switcher Widget: Smooth Horizontal Swipe */
+  .navbar-right {
+    gap: 0.5rem !important;
+    margin-left: auto !important;
+    min-width: 0 !important;
+  }
+
+  .role-switcher-container {
+    padding: 2px 4px !important;
+    gap: 0.2rem !important;
+    max-width: calc(100vw - 120px) !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .role-switch-btn {
+    padding: 0.32rem 0.6rem !important;
+    font-size: 0.7rem !important;
+    min-height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .role-switch-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* Figma Hero Banner */
+  .figma-hero-banner {
+    padding: 1.15rem 1rem !important;
+    border-radius: 12px !important;
+    margin-top: 0 !important;
+  }
+
+  .figma-hero-top h2 {
+    font-size: 1.15rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .figma-hero-top p {
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
+    margin-top: 3px !important;
+  }
+
+  .figma-hero-strip {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    margin-top: 0.85rem !important;
+    padding-top: 0.75rem !important;
+  }
+
+  .hero-strip-left {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+  }
+
+  .btn-hero-action {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    min-height: 42px !important;
+    font-size: 0.825rem !important;
+    padding: 0.6rem 1rem !important;
+  }
+
+  /* Figma Section Bar & Quick Action Buttons */
+  .figma-section-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .figma-section-title {
+    font-size: 1.25rem !important;
+  }
+
+  .figma-section-sub {
+    font-size: 0.8rem !important;
+  }
+
+  .figma-section-bar > div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+  }
+
+  .figma-section-bar > div:last-child button {
+    flex: 1 !important;
+    min-height: 42px !important;
+    justify-content: center !important;
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.5rem !important;
+    text-align: center !important;
+  }
+
+  /* 3-Column Unified Stats Card (Figma Mobile Artboard Match) */
+  .figma-stats-card {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    border-radius: 10px !important;
+    margin-top: 0.85rem !important;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .figma-stat-col {
+    padding: 0.75rem 0.35rem !important;
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+  }
+
+  .figma-stat-col:not(:last-child) {
+    border-right: 1px solid #f1f5f9 !important;
+    border-bottom: none !important;
+  }
+
+  .figma-stat-label {
+    font-size: 0.64rem !important;
+    line-height: 1.25 !important;
+    color: #64748b !important;
+    text-align: center !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    display: block !important;
+  }
+
+  .figma-stat-number {
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin-top: 2px !important;
+    line-height: 1.15 !important;
+  }
+
+  .figma-stat-sub {
+    font-size: 0.58rem !important;
+    line-height: 1.2 !important;
+    color: #94a3b8 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    margin-top: 2px !important;
+  }
+
+  /* 2-Column Grid collapses into vertical single column */
+  .figma-grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .figma-col-left,
+  .figma-col-right {
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  .figma-card {
+    padding: 1.1rem 1rem !important;
+    border-radius: 10px !important;
+  }
+
+  /* Active Permit Card Action Buttons: Full Width Thumb Friendly */
+  .card-action-btns-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.6rem !important;
+    width: 100% !important;
+    margin-top: 1rem !important;
+  }
+
+  .card-action-btns-wrap button,
+  .card-action-btns-wrap a {
+    width: 100% !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    padding: 0.65rem 1rem !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Donut Chart Touch Legends */
+  .donut-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #karyawanDonutChart {
+    max-width: 220px !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  .chip-donut {
+    min-height: 38px !important;
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.8rem !important;
+    border-radius: 99px !important;
+    touch-action: manipulation;
+  }
+
+  /* Camera Scanner Container on Mobile */
+  .camera-scanner-container {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    max-height: 60vh !important;
+  }
+
+  #qr-reader {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  #qr-reader video {
+    width: 100% !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+  }
+
+  .gate-badge-pill {
+    min-height: 36px !important;
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Multi-Gate selector button row */
+  .multi-gate-row {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .multi-gate-btn {
+    flex: 1 1 calc(33.333% - 0.5rem) !important;
+    min-height: 40px !important;
+  }
+
+  /* Smart Toolbar on Mobile */
+  .smart-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.65rem !important;
+  }
+
+  .toolbar-search {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .filters-group {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .filter-select {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    min-height: 40px !important;
+  }
+
+  /* Cards Grid on Mobile */
+  .cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  /* Form Elements on Mobile */
+  .modal-body [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* 3. NATIVE MOBILE BOTTOM-SHEET MODALS (<= 640px) */
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    z-index: 10000 !important;
+  }
+
+  .modal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 88vh !important;
+    margin: 0 !important;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.28) !important;
+    animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* Drag Handle Pill Indicator */
+  .modal-card::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4.5px;
+    background: #cbd5e1;
+    border-radius: 99px;
+    margin: 10px auto 2px auto;
+    flex-shrink: 0;
+  }
+
+  .modal-header {
+    padding: 0.85rem 1.15rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .modal-header h3 {
+    font-size: 1.05rem !important;
+  }
+
+  .modal-body {
+    padding: 1rem 1.15rem !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  .modal-footer {
+    padding: 0.85rem 1.15rem calc(0.85rem + env(safe-area-inset-bottom, 12px)) 1.15rem !important;
+    border-top: 1px solid #f1f5f9 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .modal-footer button {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    min-height: 44px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    justify-content: center !important;
+  }
+}
+
+/* Extra small mobile adjustments (<= 400px e.g. iPhone SE) */
+@media (max-width: 400px) {
+  #breadcrumbRole {
+    display: none !important;
+  }
+
+  .modal-footer button {
+    flex: 1 1 100% !important;
+  }
+
+  .figma-stats-card .figma-stat-number {
+    font-size: 1.25rem !important;
+  }
+
+  .figma-stats-card .figma-stat-label {
+    font-size: 0.6rem !important;
+  }
+}
+
+/* 4. MOBILE BOTTOM NAVIGATION COMPONENT */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  height: calc(62px + env(safe-area-inset-bottom, 0px));
+  padding: 6px 1rem calc(6px + env(safe-area-inset-bottom, 0px)) 1rem;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bottom-nav-group {
+  display: flex;
+  width: 100%;
+  max-width: 500px;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 600;
+  min-width: 58px;
+  min-height: 48px;
+  position: relative;
+  transition: color 0.15s ease, transform 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.94);
+}
+
+.bottom-nav-item .bnav-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  transition: transform 0.15s ease;
+}
+
+.bottom-nav-item .bnav-icon-wrap svg {
+  width: 22px;
+  height: 22px;
+}
+
+.bottom-nav-item .bnav-label {
+  font-size: 0.675rem;
+  line-height: 1.1;
+  color: inherit;
+}
+
+.bottom-nav-item.active {
+  color: #059669;
+  font-weight: 800;
+}
+
+.bottom-nav-item.active .bnav-icon-wrap {
+  color: #059669;
+  transform: scale(1.08);
+}
+
+.bottom-nav-item .bnav-badge {
+  position: absolute;
+  top: -4px;
+  right: -9px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 99px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Pos Jaga Center QR Scan Highlight Button */
+.bottom-nav-item.bnav-special-scan {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  color: #ffffff !important;
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.35);
+  transform: translateY(-4px);
+}
+
+.bottom-nav-item.bnav-special-scan .bnav-label {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.bottom-nav-item.bnav-special-scan:active {
+  transform: translateY(-2px) scale(0.96);
+}
+
+/* 5. DARK MODE ENHANCEMENTS FOR MOBILE SUITE */
+body.theme-dark .mobile-bottom-nav {
+  background: rgba(14, 21, 36, 0.94) !important;
+  border-top: 1px solid #1e2c42 !important;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.theme-dark .bottom-nav-item {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .bottom-nav-item.active {
+  color: #34d399 !important;
+}
+
+body.theme-dark .bottom-nav-item.active .bnav-icon-wrap {
+  color: #34d399 !important;
+}
+
+body.theme-dark .bottom-nav-item .bnav-badge {
+  border-color: #0e1524 !important;
+}
+
+body.theme-dark .modal-card {
+  background: #111827 !important;
+  border-top: 1px solid #1f2937 !important;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7) !important;
+}
+
+body.theme-dark .modal-card::before {
+  background: #374151 !important;
+}
+
+body.theme-dark .modal-header {
+  background: #111827 !important;
+  border-bottom: 1px solid #1f2937 !important;
+}
+
+body.theme-dark .modal-footer {
+  background: #111827 !important;
+  border-top: 1px solid #1f2937 !important;
+}
+
+body.theme-dark .figma-stats-card {
+  background: #131b2a !important;
+  border-color: #24334a !important;
+}
+
+body.theme-dark .figma-stat-col:not(:last-child) {
+  border-right-color: #1e2c42 !important;
+}
+
+body.theme-dark .figma-stat-number {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .figma-stat-label {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .figma-card {
+  background: #131b2a !important;
+  border-color: #24334a !important;
+}
+
+
+
 

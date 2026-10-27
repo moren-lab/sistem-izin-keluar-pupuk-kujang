@@ -236,7 +236,9 @@ function renderKaryawanDonutChart() {
                 stroke-dasharray="${s.len} ${C}" stroke-dashoffset="${s.offset}"
                 style="transition: stroke-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease; cursor: pointer;"
                 onmouseenter="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                onmouseleave="window.unhoverKaryawanDonut()" />
+                onmouseleave="window.unhoverKaryawanDonut()"
+                onclick="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                ontouchstart="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
             `).join('')}
           </g>
           
@@ -246,10 +248,22 @@ function renderKaryawanDonutChart() {
         </svg>
       </div>
 
-      <!-- Single Dynamic Interactive Info Under Diagram (No duplicate text) -->
-      <div id="karyawanDonutInfoBadge" style="margin-top: 1rem; width: 100%; max-width: 320px; min-height: 46px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+      <!-- Interactive Touch Legend Chips for Mobile & Desktop -->
+      <div class="donut-legend-wrap" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 0.85rem; width: 100%;">
+        ${segmentsRenderData.map(s => `
+          <button type="button" class="donut-legend-chip" id="chipDonut_${s.key}"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.65rem; border-radius: 999px; border: 1.5px solid ${s.color}40; background: ${s.color}15; color: ${s.color}; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;"
+            onclick="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${s.color};"></span>
+            <span>${s.label}: <strong>${s.count}</strong> (${s.pct}%)</span>
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- Single Dynamic Interactive Info Under Diagram -->
+      <div id="karyawanDonutInfoBadge" style="margin-top: 0.75rem; width: 100%; max-width: 320px; min-height: 44px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.75rem; color: ${infoBadgeText}; font-weight: 500; background: ${infoBadgeBg}; border: 1.5px dashed ${infoBadgeBorder}; border-radius: 8px; padding: 0.5rem 0.85rem; width: 100%; text-align: center;">
-          💡 Arahkan kursor ke warna chart untuk detail persentase
+          💡 Ketuk atau arahkan ke chart untuk melihat rincian persentase
         </div>
       </div>
     </div>

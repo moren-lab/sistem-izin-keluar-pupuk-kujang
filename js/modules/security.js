@@ -1,26 +1,201 @@
 /**
- * Mendapatkan profil Petugas Pos Jaga aktif dari master MOCK_USERS
+ * Gate officers mapping & multi-gate support for Pos 1, Pos 2, Pos 3
  */
-function getCurrentSecurityActor() {
-  const users = window.MOCK_USERS || [];
-  const activeSec = users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
-  if (activeSec) {
-    if (window.ACTORS && window.ACTORS.security) {
-      window.ACTORS.security.name = activeSec.name;
-      window.ACTORS.security.nip = activeSec.nip;
-      if (activeSec.department) window.ACTORS.security.department = activeSec.department;
-    }
-    return activeSec;
-  }
-  return (window.ACTORS && window.ACTORS.security) || {
+const GATE_OFFICERS = {
+  'Pos 1 Gerbang Utama': {
     nip: 'SEC-2018-042',
     name: 'Sertu Agus',
-    title: 'Petugas Pengamanan Pos 1',
-    department: 'Departemen Pengamanan & K3',
-    gateName: 'Pos 1 Gerbang Utama'
-  };
+    title: 'Petugas Pengamanan (Pos 1)',
+    gateName: 'Pos 1 Gerbang Utama',
+    gateShort: 'Pos 1',
+    gateFull: 'Pos 1 Gerbang Utama (Utara)'
+  },
+  'Pos 2 Gerbang Barat': {
+    nip: 'SEC-2019-088',
+    name: 'Kopral Dani',
+    title: 'Petugas Pengamanan (Pos 2)',
+    gateName: 'Pos 2 Gerbang Barat',
+    gateShort: 'Pos 2',
+    gateFull: 'Pos 2 Gerbang Barat'
+  },
+  'Pos 3 Gerbang Timur': {
+    nip: 'SEC-2020-105',
+    name: 'Praka Ilham',
+    title: 'Petugas Pengamanan (Pos 3)',
+    gateName: 'Pos 3 Gerbang Timur',
+    gateShort: 'Pos 3',
+    gateFull: 'Pos 3 Gerbang Timur'
+  }
+};
+
+function getActiveGateOfficer(gateKey) {
+  const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+  const gateShort = gateKey && gateKey.includes('Pos 2') ? 'Pos 2' : (gateKey && gateKey.includes('Pos 3') ? 'Pos 3' : 'Pos 1');
+  const matchedUser = users.find(u => 
+    (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) &&
+    (u.role && u.role.includes(gateShort)) &&
+    u.status === 'Aktif'
+  );
+  if (matchedUser) {
+    const fullName = gateShort === 'Pos 2' ? 'Pos 2 Gerbang Barat' : (gateShort === 'Pos 3' ? 'Pos 3 Gerbang Timur' : 'Pos 1 Gerbang Utama');
+    return {
+      nip: matchedUser.nip,
+      name: matchedUser.name,
+      title: matchedUser.role || `Petugas Pengamanan (${gateShort})`,
+      gateName: gateKey || fullName,
+      gateShort: gateShort,
+      gateFull: fullName
+    };
+  }
+  const defaultGate = gateKey && GATE_OFFICERS[gateKey] ? GATE_OFFICERS[gateKey] : (GATE_OFFICERS[gateShort === 'Pos 2' ? 'Pos 2 Gerbang Barat' : (gateShort === 'Pos 3' ? 'Pos 3 Gerbang Timur' : 'Pos 1 Gerbang Utama')]);
+  return defaultGate || GATE_OFFICERS['Pos 1 Gerbang Utama'];
+}
+window.getActiveGateOfficer = getActiveGateOfficer;
+
+function getCurrentSecurityActor() {
+  const currentGate = localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama';
+  const officer = getActiveGateOfficer(currentGate);
+  if (window.ACTORS && window.ACTORS.security) {
+    window.ACTORS.security.name = officer.name;
+    window.ACTORS.security.nip = officer.nip;
+    window.ACTORS.security.gateName = officer.gateName;
+    window.ACTORS.security.title = officer.title;
+  }
+  return officer;
 }
 window.getCurrentSecurityActor = getCurrentSecurityActor;
+
+function updateActiveSecurityGate(gateValue, notify = false) {
+  const officer = getActiveGateOfficer(gateValue);
+  localStorage.setItem('KUJANG_ACTIVE_GATE', gateValue);
+
+  if (window.ACTORS && window.ACTORS.security) {
+    window.ACTORS.security.name = officer.name;
+    window.ACTORS.security.nip = officer.nip;
+    window.ACTORS.security.gateName = officer.gateName;
+    window.ACTORS.security.title = officer.title;
+  }
+
+  const selectGateLocation = document.getElementById('selectGateLocation');
+  if (selectGateLocation && selectGateLocation.value !== gateValue) {
+    selectGateLocation.value = gateValue;
+  }
+
+  const securityOfficerBadge = document.getElementById('securityOfficerBadge');
+  if (securityOfficerBadge) {
+    securityOfficerBadge.textContent = `Petugas Jaga: ${officer.name} — ${officer.gateShort}`;
+  }
+
+  const sidebarUserName = document.getElementById('sidebarUserName');
+  const sidebarUserSub = document.getElementById('sidebarUserSub');
+  if (window.currentActor === 'security') {
+    if (sidebarUserName) sidebarUserName.textContent = officer.name;
+    if (sidebarUserSub) sidebarUserSub.textContent = `NIP: ${officer.nip} — ${officer.gateName}`;
+  }
+
+  const secHeroGreeting = document.getElementById('secHeroGreeting');
+  const secHeroSub = document.getElementById('secHeroSub');
+  if (secHeroGreeting) secHeroGreeting.textContent = `Selamat bertugas, ${officer.name}`;
+  if (secHeroSub) {
+    secHeroSub.textContent = `${officer.title} — ${officer.gateName} — Departemen Pengamanan & K3 — PT Pupuk Kujang`;
+  }
+
+  const figmaPelacakanCountMeta = document.getElementById('figmaPelacakanCountMeta');
+  if (figmaPelacakanCountMeta) {
+    figmaPelacakanCountMeta.textContent = `${officer.gateName} — PT Pupuk Kujang`;
+  }
+
+  if (notify && typeof window.showToast === 'function') {
+    window.showToast(`Beralih ke pos jaga: ${officer.gateName} (${officer.name})`, 'info');
+  }
+
+  renderSecurityView();
+}
+window.updateActiveSecurityGate = updateActiveSecurityGate;
+
+function getTicketGate(t) {
+  if (t.scanOutGate) return t.scanOutGate;
+  const str = `${t.scanOutTime || ''} ${t.scanInTime || ''} ${t.securityOfficerOut || ''}`;
+  if (str.includes('Pos 2')) return 'Pos 2 Gerbang Barat';
+  if (str.includes('Pos 3')) return 'Pos 3 Gerbang Timur';
+  if (str.includes('Pos 1')) return 'Pos 1 Gerbang Utama';
+  if (t.timeline && Array.isArray(t.timeline)) {
+    for (const ev of t.timeline) {
+      const evStr = `${ev.by || ''} ${ev.desc || ''} ${ev.gate || ''}`;
+      if (evStr.includes('Pos 2')) return 'Pos 2 Gerbang Barat';
+      if (evStr.includes('Pos 3')) return 'Pos 3 Gerbang Timur';
+      if (evStr.includes('Pos 1')) return 'Pos 1 Gerbang Utama';
+    }
+  }
+  return 'Pos 1 Gerbang Utama';
+}
+window.getTicketGate = getTicketGate;
+
+function getGateBadgeHtml(gateName) {
+  if (!gateName) gateName = 'Pos 1 Gerbang Utama';
+  if (gateName.includes('Pos 2')) {
+    return `<span class="gate-badge-pill pos-2">Pos 2 Gerbang Barat</span>`;
+  } else if (gateName.includes('Pos 3')) {
+    return `<span class="gate-badge-pill pos-3">Pos 3 Gerbang Timur</span>`;
+  }
+  return `<span class="gate-badge-pill pos-1">Pos 1 Gerbang Utama</span>`;
+}
+window.getGateBadgeHtml = getGateBadgeHtml;
+
+function updateGateFilterCounts() {
+  const ticketsList = (window.ticketsList || []).filter(t => !t.deletedBySecurity);
+  const eligible = ticketsList.filter(t => t.scanOutTime || t.scanInTime || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat' || t.status === 'Disetujui');
+
+  let cAll = eligible.length;
+  let cPos1 = 0;
+  let cPos2 = 0;
+  let cPos3 = 0;
+
+  eligible.forEach(t => {
+    const g = getTicketGate(t);
+    if (g.includes('Pos 2')) cPos2++;
+    else if (g.includes('Pos 3')) cPos3++;
+    else cPos1++;
+  });
+
+  const countGateAll = document.getElementById('countGateAll');
+  const countGatePos1 = document.getElementById('countGatePos1');
+  const countGatePos2 = document.getElementById('countGatePos2');
+  const countGatePos3 = document.getElementById('countGatePos3');
+
+  if (countGateAll) countGateAll.textContent = cAll;
+  if (countGatePos1) countGatePos1.textContent = cPos1;
+  if (countGatePos2) countGatePos2.textContent = cPos2;
+  if (countGatePos3) countGatePos3.textContent = cPos3;
+}
+window.updateGateFilterCounts = updateGateFilterCounts;
+
+function setSecurityGateFilter(gate) {
+  window.currentSecurityGateFilter = gate;
+  const filterSecurityLogGate = document.getElementById('filterSecurityLogGate');
+  if (filterSecurityLogGate) filterSecurityLogGate.value = gate;
+
+  document.querySelectorAll('.btn-gate-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.getAttribute('data-gate') === gate);
+  });
+
+  const secTitle = document.getElementById('securityRiwayatSectionTitle');
+  const secMeta = document.getElementById('securityRiwayatSectionMeta');
+  if (secTitle) {
+    if (gate === 'all') {
+      secTitle.textContent = 'Log & Arsip Seluruh Gerbang Pos Jaga';
+    } else {
+      secTitle.textContent = `Log & Arsip Pemindaian Gerbang ${gate}`;
+    }
+  }
+  if (secMeta) {
+    const officer = gate === 'all' ? null : getActiveGateOfficer(gate);
+    secMeta.textContent = officer ? `Petugas Bertugas: ${officer.name} (${officer.gateShort})` : 'Riwayat Scan Out & Kepulangan Personel di Seluruh Pos';
+  }
+
+  renderSecurityView();
+}
+window.setSecurityGateFilter = setSecurityGateFilter;
 
 /**
  * SISTEM PERIZINAN KELUAR AREA KARYAWAN - PT Pupuk Kujang Cikampek
@@ -54,7 +229,8 @@ function updateSecurityMetrics() {
 }
 
 function renderSecurityDashboard() {
-  const secActor = typeof getCurrentSecurityActor === 'function' ? getCurrentSecurityActor() : (window.ACTORS && window.ACTORS.security ? window.ACTORS.security : { name: 'Sertu Agus', role: 'Petugas Pengamanan' });
+  const ticketsList = window.ticketsList || [];
+  const secActor = typeof getCurrentSecurityActor === 'function' ? getCurrentSecurityActor() : (window.ACTORS && window.ACTORS.security ? window.ACTORS.security : { name: 'Sertu Agus', role: 'Petugas Pengamanan', gateName: 'Pos 1 Gerbang Utama' });
   const secHeroGreeting = document.getElementById('secHeroGreeting');
   const secHeroSub = document.getElementById('secHeroSub');
   if (secHeroGreeting) {
@@ -63,7 +239,7 @@ function renderSecurityDashboard() {
   if (secHeroSub) {
     const title = secActor.role || secActor.title || 'Petugas Pengamanan';
     const dept = secActor.department || 'Departemen Pengamanan & K3';
-    secHeroSub.textContent = `${title} — Pos 1 Gerbang Utama — ${dept} — PT Pupuk Kujang`;
+    secHeroSub.textContent = `${title} — ${secActor.gateName || 'Pos 1 Gerbang Utama'} — ${dept} — PT Pupuk Kujang`;
   }
   updateSecurityMetrics();
   const readyExitTickets = ticketsList.filter(t => t.status === 'Disetujui');
@@ -79,7 +255,7 @@ function renderSecurityDashboard() {
   const securityDashboardOutsideList = document.getElementById('securityDashboardOutsideList');
   const securityDashboardRecentFeed = document.getElementById('securityDashboardRecentFeed');
 
-  // Ready to Exit (Disetujui) List for Pos 1 Gate
+  // Ready to Exit (Disetujui) List for Pos Gate
   if (badgeReadyExitCount) {
     badgeReadyExitCount.textContent = `${readyExitTickets.length} Karyawan`;
   }
@@ -109,7 +285,7 @@ function renderSecurityDashboard() {
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
               <span class="status-pill-green" style="font-size: 0.7rem;">Disetujui</span>
-              <button class="btn-quick-scan-out" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="executeScanOut('${t.id}')" title="Proses Scan Out di Pos 1">
+              <button class="btn-quick-scan-out" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="executeScanOut('${t.id}')" title="Proses Scan Out di Pos Jaga">
                 Proses Scan Out
               </button>
             </div>
@@ -134,12 +310,12 @@ function renderSecurityDashboard() {
                 PERINGATAN GERBANG: Ada ${overdueTickets.length} Karyawan Terlambat Kembali ke Pabrik!
               </div>
               <div class="security-overdue-sub" style="font-size: 0.775rem;">
-                Karyawan telah melewati batas estimasi jam kembali. Pastikan segera memindai (Scan In) begitu tiba di Pos 1.
+                Karyawan telah melewati batas estimasi jam kembali. Pastikan segera memindai (Scan In) begitu tiba di Pos Jaga.
               </div>
             </div>
           </div>
           <button class="btn-quick-scan-in" style="background: #b91c1c; font-size: 0.775rem; padding: 0.45rem 0.85rem;" onclick="setSecurityNav('pelacakan')">
-            Lihat Headcount Terlambat →
+            Lihat Headcount Terlambat
           </button>
         </div>
       `;
@@ -236,6 +412,74 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                           : (isOutside ? '#0891b2' 
                           : (isExpired ? '#94a3b8' : ''))));
 
+        const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+        const gateBadgeHtml = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
+
+        // A. SPECIAL AIRY LAYOUT FOR RIWAYAT MODE (isHistoryMode === true)
+        if (isHistoryMode) {
+          return `
+            <div class="card-item card-history-item" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''} display: flex; flex-direction: column;">
+              <div class="card-top" style="margin-bottom: 0.65rem;">
+                <div>
+                  <span class="card-id-num">${t.id}</span>
+                  <div class="card-created-meta">Diajukan: ${t.createdAt}</div>
+                </div>
+                ${window.getStatusPill(t.status, t)}
+              </div>
+
+              <!-- Employee badge -->
+              <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between; margin-bottom: 0.6rem;">
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama'}</div>
+                  <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Departemen Terkait'}</div>
+                </div>
+                <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
+              </div>
+
+              <!-- Destination & Gate Pos Badge -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.6rem;">
+                <div><strong>Tujuan:</strong> ${t.destination}</div>
+                <div>${gateBadgeHtml}</div>
+              </div>
+
+              <!-- Realization Summary Row (Scan Out & Scan In) -->
+              <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem;">
+                ${t.scanOutTime ? `<div style="color: #065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
+                ${t.scanInTime ? `<div style="color: ${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight: ${isLateCompleted ? '700' : 'normal'};"><strong>Scan In:</strong> ${t.scanInTime}</div>` : ''}
+                ${(!t.scanOutTime && !t.scanInTime) ? `<div style="color: var(--text-muted);">Belum ada catatan pemindaian gerbang</div>` : ''}
+              </div>
+
+              ${isLateCompleted ? `
+                <div class="sec-status-callout warning" style="border-radius:6px; padding:0.4rem 0.6rem; font-size:0.725rem; font-weight:700; margin-bottom: 0.6rem;">
+                  Kembali melewati estimasi (+${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`} terlambat).
+                </div>
+              ` : ''}
+
+              <!-- Action Buttons -->
+              <div class="card-actions-bar" style="margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
+                  <button class="btn-card-qr" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'qr')" title="Buka Tiket & QR Code">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Tiket & QR Code</span>
+                  </button>
+                  <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Detail pengajuan</span>
+                  </button>
+                </div>
+
+                <div>
+                  <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.6rem; border-radius: 6px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // B. STANDARD LAYOUT FOR PELACAKAN / HEADCOUNT QUEUE
         return `
           <div class="card-item" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''}">
             <div class="card-top">
@@ -255,8 +499,9 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
             </div>
 
-            <div style="font-size:0.8rem; color:var(--text-secondary);">
-              <strong>Tujuan:</strong> ${t.destination}
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; font-size:0.8rem; color:var(--text-secondary);">
+              <div><strong>Tujuan:</strong> ${t.destination}</div>
+              <div>${gateBadgeHtml}</div>
             </div>
 
             <div class="card-details-box">
@@ -264,7 +509,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 <span style="font-size:0.675rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Rencana Keluar</span>
                 <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.plannedExit.replace('T', ' ')}</div>
               </div>
-              <div style="color:#cbd5e1;">→</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:600; align-self:center;">s/d</div>
               <div style="text-align: right;">
                 <span style="font-size:0.675rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Estimasi Kembali</span>
                 <div style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono); font-size:0.775rem;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</div>
@@ -301,7 +546,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 </button>
                 <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Lihat Rincian</span>
+                  <span>Detail pengajuan</span>
                 </button>
               </div>
 
@@ -412,17 +657,24 @@ function filterSecurityLogTickets() {
   const filterSecurityLogCategory = document.getElementById('filterSecurityLogCategory');
   const filterSecurityLogStatus = document.getElementById('filterSecurityLogStatus');
   const filterSecurityLogPeriod = document.getElementById('filterSecurityLogPeriod');
+  const filterSecurityLogGate = document.getElementById('filterSecurityLogGate');
 
   const query = searchSecurityLogInput ? searchSecurityLogInput.value.trim().toLowerCase() : '';
   const category = filterSecurityLogCategory ? filterSecurityLogCategory.value : 'all';
   const status = filterSecurityLogStatus ? filterSecurityLogStatus.value : 'all';
   const period = filterSecurityLogPeriod ? filterSecurityLogPeriod.value : 'all';
+  const gateFilter = filterSecurityLogGate ? filterSecurityLogGate.value : (window.activeSecurityGateFilter || 'all');
 
   const ACTORS = window.ACTORS || {};
   const currentActor = window.currentActor || 'security';
   const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
 
-  return ticketsList.filter(t => {
+  // Synchronize counts across tabs
+  if (typeof updateGateFilterCounts === 'function') {
+    updateGateFilterCounts();
+  }
+
+  const filtered = ticketsList.filter(t => {
     // Abaikan jika sudah dihapus dari pos jaga
     if (t.deletedBySecurity) return false;
 
@@ -435,6 +687,12 @@ function filterSecurityLogTickets() {
     // Hanya tiket yang relevan dengan transaksi pos gerbang atau selesai
     const hasLog = t.scanOutTime || t.scanInTime || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat' || t.status === 'Disetujui';
     if (!hasLog) return false;
+
+    // Filter Gerbang Pos (Multi-gate Pos 1, 2, 3)
+    if (gateFilter && gateFilter !== 'all') {
+      const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+      if (ticketGate !== gateFilter) return false;
+    }
 
     // Filter Periode Waktu
     if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, period)) {
@@ -463,7 +721,9 @@ function filterSecurityLogTickets() {
       const matchNip = (t.applicantNip || '').toLowerCase().includes(query);
       const matchDest = (t.destination || '').toLowerCase().includes(query);
       const matchReason = (t.reason || '').toLowerCase().includes(query);
-      if (!matchId && !matchName && !matchNip && !matchDest && !matchReason) return false;
+      const tGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || '');
+      const matchGate = (tGate || '').toLowerCase().includes(query);
+      if (!matchId && !matchName && !matchNip && !matchDest && !matchReason && !matchGate) return false;
     }
 
     return true;
@@ -484,13 +744,6 @@ function filterSecurityLogTickets() {
     return sortOrder === 'asc' ? tA - tB : tB - tA;
   });
 
-  if (sortSecurityLog && !sortSecurityLog._bound) {
-    sortSecurityLog._bound = true;
-    sortSecurityLog.addEventListener('change', () => {
-      renderSecurityView();
-    });
-  }
-
   return filtered;
 }
 
@@ -502,25 +755,28 @@ function renderSecurityLogTable(list, containerElement) {
       <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
-            <th style="min-width: 170px;">Nomor tiket / kategori & tipe</th>
-            <th style="min-width: 220px;">Tujuan & Keperluan</th>
-            <th style="white-space: nowrap; min-width: 145px;">Rencana waktu</th>
+            <th style="min-width: 160px;">Nomor Tiket & Kategori</th>
+            <th style="min-width: 140px;">Gerbang Pos</th>
+            <th style="min-width: 200px;">Pemohon & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="min-width: 200px;">Catatan</th>
+            <th style="min-width: 200px;">Catatan Pemindaian</th>
             <th style="text-align: right; white-space: nowrap; min-width: 90px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
           ${list.map(t => {
             const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
+            const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+            const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
             
             let catatanHtml = `<span style="color: #475569;">Tepat waktu — Disetujui ${t.approverName || 'Atasan'}</span>`;
             if (t.scanInTime && t.scanOutTime) {
-              const outSimple = t.scanOutTime.replace(/ \(Pos 1.*\)/, '');
-              const inSimple = t.scanInTime.replace(/ \(Pos 1.*\)/, '');
+              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+              const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
               catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Scan In: ${inSimple}</span>`;
             } else if (t.scanOutTime) {
-              const outSimple = t.scanOutTime.replace(/ \(Pos 1.*\)/, '');
+              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
               catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
             } else if (t.status === 'Terlambat') {
               catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
@@ -554,8 +810,11 @@ function renderSecurityLogTable(list, containerElement) {
                   <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
                 </td>
                 <td style="vertical-align: middle;">
+                  ${gateBadge}
+                </td>
+                <td style="vertical-align: middle;">
                   <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${t.destination})</span></div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
                 </td>
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
@@ -656,38 +915,44 @@ function executeScanOut(ticketId) {
   }
 
   const selectGateLocation = document.getElementById('selectGateLocation');
-  const gate = selectGateLocation ? (selectGateLocation.value || 'Pos 1 Gerbang Utama') : 'Pos 1 Gerbang Utama';
+  let gate = (selectGateLocation && selectGateLocation.value && selectGateLocation.value !== 'all') 
+    ? selectGateLocation.value 
+    : (localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama');
+  if (gate === 'all') gate = 'Pos 1 Gerbang Utama';
+  const officer = typeof getActiveGateOfficer === 'function' ? getActiveGateOfficer(gate) : { name: 'Sertu Agus', nip: 'SEC-2018-042', gateShort: 'Pos 1' };
+  const securityName = officer ? `${officer.name} (${officer.gateShort})` : 'Sertu Agus (Pos 1)';
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
-  const ACTORS = window.ACTORS || {};
-  const securityName = (window.currentActor === 'security' && ACTORS.security) ? ACTORS.security.name : 'Sertu Agus (Pos 1)';
-
+  ticket.scanOutGate = gate;
   ticket.scanOutTime = `${nowFormatted} (${gate})`;
+  ticket.securityOfficerOut = officer ? officer.name : 'Sertu Agus';
+  ticket.securityNipOut = officer ? officer.nip : 'SEC-2018-042';
   if (!ticket.timeline) ticket.timeline = [];
 
   if (ticket.isEmergency) {
-    ticket.securityOfficerOut = `${securityName} (${gate})`;
     if (ticket.type === 'Pulang Mendahului') {
       ticket.status = 'Selesai';
       ticket.timeline.push({
         event: 'Scan Out Gerbang Darurat (Pulang)',
         time: nowFormatted,
         by: `${securityName} (${gate})`,
+        gate: gate,
         desc: `Petugas Pos Jaga memvalidasi fisik karyawan/ambulans dan mencatat justifikasi kedaruratan. Izin pulang mendahului selesai diproses. Otorisasi sebelumnya: ${ticket.emergencyUnlockedBy || 'Resmi'}.`
       });
-      if (typeof window.showToast === 'function') window.showToast(`Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id} (Pulang Mendahului).`, 'success');
+      if (typeof window.showToast === 'function') window.showToast(`Scan Out Darurat berhasil di ${gate}! Petugas (${officer.name}) mencatat keberangkatan darurat #${ticket.id} (Pulang Mendahului).`, 'success');
     } else {
       ticket.status = 'Sedang di Luar';
       ticket.timeline.push({
         event: 'Scan Out Gerbang Darurat',
         time: nowFormatted,
         by: `${securityName} (${gate})`,
+        gate: gate,
         desc: `Petugas Pos Jaga memvalidasi fisik karyawan/ambulans dan mencatat justifikasi kedaruratan di gerbang. Status: Sedang di Luar. Otorisasi sebelumnya: ${ticket.emergencyUnlockedBy || 'Resmi'}.`
       });
-      if (typeof window.showToast === 'function') window.showToast(`Scan Out Darurat berhasil! Petugas (${securityName}) mencatat keberangkatan darurat #${ticket.id}. Gerbang dibuka.`, 'success');
+      if (typeof window.showToast === 'function') window.showToast(`Scan Out Darurat berhasil di ${gate}! Petugas (${officer.name}) mencatat keberangkatan darurat #${ticket.id}. Gerbang dibuka.`, 'success');
     }
   } else if (ticket.type === 'Pulang Mendahului') {
     ticket.status = 'Selesai';
@@ -695,18 +960,20 @@ function executeScanOut(ticketId) {
       event: 'Scan Out Pos Jaga (Pulang)',
       time: nowFormatted,
       by: `${securityName} (${gate})`,
-      desc: `Karyawan meninggalkan pabrik (Pulang Mendahului). Tiket langsung berstatus Selesai.`
+      gate: gate,
+      desc: `Karyawan meninggalkan pabrik melalui ${gate} (Pulang Mendahului). Tiket langsung berstatus Selesai.`
     });
-    if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil! Tiket #${ticket.id} selesai diproses (Pulang Mendahului).`, 'success');
+    if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil di ${gate}! Tiket #${ticket.id} selesai diproses oleh Petugas ${officer.name} (Pulang Mendahului).`, 'success');
   } else {
     ticket.status = 'Sedang di Luar';
     ticket.timeline.push({
       event: 'Scan Out Pos Jaga',
       time: nowFormatted,
       by: `${securityName} (${gate})`,
-      desc: `Karyawan berhasil diverifikasi keluar kawasan. Status: Sedang di Luar.`
+      gate: gate,
+      desc: `Karyawan berhasil diverifikasi keluar kawasan melalui ${gate}. Status: Sedang di Luar.`
     });
-    if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil! Status tiket #${ticket.id} kini: Sedang di Luar.`, 'success');
+    if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil di ${gate}! Petugas (${officer.name}) memverifikasi keberangkatan tiket #${ticket.id}.`, 'success');
   }
 
   window.saveTickets(ticketsList);
@@ -742,14 +1009,16 @@ function executeScanIn(ticketId) {
   }
 
   const selectGateLocation = document.getElementById('selectGateLocation');
-  const gate = selectGateLocation ? (selectGateLocation.value || 'Pos 1 Gerbang Utama') : 'Pos 1 Gerbang Utama';
+  let gate = (selectGateLocation && selectGateLocation.value && selectGateLocation.value !== 'all') 
+    ? selectGateLocation.value 
+    : (localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama');
+  if (gate === 'all') gate = 'Pos 1 Gerbang Utama';
+  const officer = typeof getActiveGateOfficer === 'function' ? getActiveGateOfficer(gate) : { name: 'Sertu Agus', nip: 'SEC-2018-042', gateShort: 'Pos 1' };
+  const securityName = officer ? `${officer.name} (${officer.gateShort})` : 'Sertu Agus (Pos 1)';
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
-
-  const ACTORS = window.ACTORS || {};
-  const securityName = (window.currentActor === 'security' && ACTORS.security) ? ACTORS.security.name : 'Sertu Agus (Pos 1)';
 
   // Periksa apakah ada perpanjangan waktu yang sedang aktif
   const hasPendingExt = ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan';
@@ -771,7 +1040,10 @@ function executeScanIn(ticketId) {
     }
   }
 
+  ticket.scanInGate = gate;
   ticket.scanInTime = `${nowFormatted} (${gate})${wasOverdue ? ' [Terlambat]' : ''}`;
+  ticket.securityOfficerIn = officer ? officer.name : 'Sertu Agus';
+  ticket.securityNipIn = officer ? officer.nip : 'SEC-2018-042';
   ticket.actualReturnTime = `${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
   ticket.status = 'Selesai';
   if (!ticket.timeline) ticket.timeline = [];
@@ -779,11 +1051,12 @@ function executeScanIn(ticketId) {
     event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Masuk)',
     time: nowFormatted,
     by: `${securityName} (${gate})`,
+    gate: gate,
     desc: wasOverdue
-      ? `Karyawan tiba kembali di kawasan pabrik MELEWATI estimasi waktu kembali (Terlambat). QR code dinonaktifkan permanen.`
+      ? `Karyawan tiba kembali di kawasan pabrik melalui ${gate} MELEWATI estimasi waktu kembali (Terlambat). Petugas: ${officer.name}. QR code dinonaktifkan permanen.`
       : (isCoveredByExtension 
-          ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu. Tap In Kartu Akses berhasil, QR code dinonaktifkan.`
-          : `Karyawan kembali tiba di kawasan pabrik. QR code dinonaktifkan permanen.`)
+          ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu di ${gate}. Tap In Kartu Akses berhasil, QR code dinonaktifkan.`
+          : `Karyawan kembali tiba di kawasan pabrik melalui ${gate}. Diverifikasi oleh ${officer.name}. QR code dinonaktifkan permanen.`)
   });
 
   if (ticket.pendingExtension) {
@@ -791,7 +1064,8 @@ function executeScanIn(ticketId) {
       event: 'Perpanjangan Waktu Selesai Otomatis',
       time: nowFormatted,
       by: `${securityName} (${gate})`,
-      desc: 'Karyawan telah kembali ke pabrik dan melakukan Scan In saat permohonan perpanjangan waktu masih berjalan. Tiket resmi selesai.'
+      gate: gate,
+      desc: `Karyawan telah kembali ke pabrik dan melakukan Scan In di ${gate} saat permohonan perpanjangan waktu masih berjalan. Tiket resmi selesai.`
     });
     ticket.pendingExtension = null;
   }
@@ -809,8 +1083,8 @@ function executeScanIn(ticketId) {
   if (typeof window.showToast === 'function') {
     window.showToast(
       wasOverdue 
-        ? `Tap In Kartu Akses berhasil! Tiket #${ticket.id} selesai dicatat (Catatan: Kembali Terlambat).` 
-        : `Tap In Kartu Akses berhasil! Karyawan telah tiba kembali. Tiket #${ticket.id} selesai.`,
+        ? `Tap In Kartu Akses berhasil di ${gate}! Tiket #${ticket.id} selesai dicatat (Catatan: Kembali Terlambat).` 
+        : `Tap In Kartu Akses berhasil di ${gate}! Karyawan telah tiba kembali. Petugas (${officer.name}) mencatat tiket #${ticket.id} selesai.`,
       wasOverdue ? 'warning' : 'success'
     );
   }
@@ -1139,6 +1413,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterSecurityLogCategory = document.getElementById('filterSecurityLogCategory');
   const filterSecurityLogStatus = document.getElementById('filterSecurityLogStatus');
   const filterSecurityLogPeriod = document.getElementById('filterSecurityLogPeriod');
+  const filterSecurityLogGate = document.getElementById('filterSecurityLogGate');
+  const sortSecurityLog = document.getElementById('sortSecurityLog');
   const btnSecurityLogViewCard = document.getElementById('btnSecurityLogViewCard');
   const btnSecurityLogViewTable = document.getElementById('btnSecurityLogViewTable');
   const btnSecurityLogExport = document.getElementById('btnSecurityLogExport');
@@ -1147,6 +1423,36 @@ document.addEventListener('DOMContentLoaded', () => {
   if (filterSecurityLogCategory) filterSecurityLogCategory.addEventListener('change', renderSecurityView);
   if (filterSecurityLogStatus) filterSecurityLogStatus.addEventListener('change', renderSecurityView);
   if (filterSecurityLogPeriod) filterSecurityLogPeriod.addEventListener('change', renderSecurityView);
+  if (sortSecurityLog) sortSecurityLog.addEventListener('change', renderSecurityView);
+
+  if (filterSecurityLogGate) {
+    filterSecurityLogGate.addEventListener('change', (e) => {
+      if (typeof setSecurityGateFilter === 'function') {
+        setSecurityGateFilter(e.target.value);
+      } else {
+        renderSecurityView();
+      }
+    });
+  }
+
+  // Pos Jaga Gate Terminal Selector
+  const selectGateLocation = document.getElementById('selectGateLocation');
+  if (selectGateLocation) {
+    const savedGate = localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama';
+    selectGateLocation.value = savedGate;
+    selectGateLocation.addEventListener('change', (e) => {
+      if (typeof updateActiveSecurityGate === 'function') {
+        updateActiveSecurityGate(e.target.value, true);
+      }
+    });
+    if (typeof updateActiveSecurityGate === 'function') {
+      updateActiveSecurityGate(savedGate, false);
+    }
+  }
+
+  if (typeof updateGateFilterCounts === 'function') {
+    updateGateFilterCounts();
+  }
 
   if (btnSecurityLogViewCard && btnSecurityLogViewTable) {
     btnSecurityLogViewCard.addEventListener('click', () => {

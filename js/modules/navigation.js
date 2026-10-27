@@ -374,15 +374,27 @@ function switchRole(role) {
     if (viewSecurity) viewSecurity.style.display = 'block';
     if (navSecurityGroup) navSecurityGroup.style.display = 'flex';
 
+    const secActor = typeof window.getCurrentSecurityActor === 'function' ? window.getCurrentSecurityActor() : ((ACTORS && ACTORS.security) ? ACTORS.security : { name: 'Sertu Agus', nip: 'SEC-2018-042', gateName: 'Pos 1 Gerbang Utama', gateShort: 'Pos 1' });
+
     if (roleBadge) {
       roleBadge.className = 'role-tag-pill role-security';
       roleBadge.textContent = 'Peran: Petugas Pengamanan';
     }
-    if (sidebarUserName && ACTORS) sidebarUserName.textContent = ACTORS.security.name;
-    if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.security.nip} — ${ACTORS.security.gateName}`;
+    if (sidebarUserName && secActor) sidebarUserName.textContent = secActor.name;
+    if (sidebarUserSub && secActor) sidebarUserSub.textContent = `NIP: ${secActor.nip} — ${secActor.gateName}`;
+
+    // Update scanner badge & dropdown if on page
+    const securityOfficerBadge = document.getElementById('securityOfficerBadge');
+    if (securityOfficerBadge && secActor) {
+      securityOfficerBadge.textContent = `Petugas Jaga: ${secActor.name} — ${secActor.gateShort}`;
+    }
+    const selectGateLocation = document.getElementById('selectGateLocation');
+    if (selectGateLocation && secActor) {
+      selectGateLocation.value = secActor.gateName;
+    }
 
     setSecurityNav(currentSecurityNav || 'dashboard');
-    if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Pos Jaga Pengamanan (${ACTORS.security.name})`, 'info');
+    if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Pos Jaga Pengamanan (${secActor.name})`, 'info');
   } else if (role === 'admin') {
     if (btnSwitchAdmin) btnSwitchAdmin.classList.add('active', 'admin');
     if (viewAdmin) viewAdmin.style.display = 'block';

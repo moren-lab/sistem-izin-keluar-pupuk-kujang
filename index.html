@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sistem Perizinan Keluar Area | PT Pupuk Kujang</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
@@ -1229,7 +1229,7 @@
                       <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0;">Personel di luar kawasan industri — Wajib Tap In / Scan In saat kembali</p>
                     </div>
                     <button class="btn-figma-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="setSecurityNav('pelacakan')">
-                      <span>Semua Headcount →</span>
+                      <span>Semua Headcount</span>
                     </button>
                   </div>
                   <div id="securityDashboardOutsideList" class="feed-list">
@@ -1246,7 +1246,7 @@
                     <h3 class="figma-card-title">
                       <span>Aktivitas Gerbang Terkini</span>
                     </h3>
-                    <a href="javascript:void(0)" class="figma-card-link" onclick="setSecurityNav('riwayat')" style="font-size: 0.75rem; color: #0284c7; font-weight: 700; text-decoration: none;">Log Lengkap →</a>
+                    <a href="javascript:void(0)" class="figma-card-link" onclick="setSecurityNav('riwayat')" style="font-size: 0.75rem; color: #0284c7; font-weight: 700; text-decoration: none;">Log Lengkap</a>
                   </div>
                   <div id="securityDashboardRecentFeed" class="feed-list">
                     <!-- Rendered via JS -->
@@ -1280,7 +1280,7 @@
                   masukkan nomor tiket secara manual</p>
               </div>
               <div>
-                <span class="role-tag-pill role-security" style="font-size: 0.8rem; padding: 4px 10px;">
+                <span id="securityOfficerBadge" class="role-tag-pill role-security" style="font-size: 0.8rem; padding: 4px 10px;">
                   Petugas Jaga: Sertu Agus — Pos 1
                 </span>
               </div>
@@ -1569,9 +1569,29 @@
               </div>
             </div>
 
-            <div class="figma-section-bar" style="margin-top: 1.25rem;">
-              <span class="figma-section-title">Log & Arsip Pemindaian Gerbang Pos 1</span>
-              <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Riwayat Scan Out & Kepulangan Personel</span>
+            <!-- Gate Segmented Tabs for Pos 1, Pos 2, Pos 3 -->
+            <div class="security-gate-tabs" id="securityGateTabs">
+              <button type="button" class="btn-gate-tab active" id="tabGateAll" data-gate="all" onclick="setSecurityGateFilter('all')">
+                <span>Semua Gerbang</span>
+                <span class="gate-pill-count" id="countGateAll">0</span>
+              </button>
+              <button type="button" class="btn-gate-tab" id="tabGatePos1" data-gate="Pos 1 Gerbang Utama" onclick="setSecurityGateFilter('Pos 1 Gerbang Utama')">
+                <span>Pos 1 Gerbang Utama</span>
+                <span class="gate-pill-count" id="countGatePos1">0</span>
+              </button>
+              <button type="button" class="btn-gate-tab" id="tabGatePos2" data-gate="Pos 2 Gerbang Barat" onclick="setSecurityGateFilter('Pos 2 Gerbang Barat')">
+                <span>Pos 2 Gerbang Barat</span>
+                <span class="gate-pill-count" id="countGatePos2">0</span>
+              </button>
+              <button type="button" class="btn-gate-tab" id="tabGatePos3" data-gate="Pos 3 Gerbang Timur" onclick="setSecurityGateFilter('Pos 3 Gerbang Timur')">
+                <span>Pos 3 Gerbang Timur</span>
+                <span class="gate-pill-count" id="countGatePos3">0</span>
+              </button>
+            </div>
+
+            <div class="figma-section-bar" style="margin-top: 0.85rem;">
+              <span class="figma-section-title" id="securityRiwayatSectionTitle">Log & Arsip Pemindaian Gerbang Pos Jaga</span>
+              <span id="securityRiwayatSectionMeta" style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Riwayat Scan Out & Kepulangan Personel di Seluruh Pos</span>
             </div>
 
             <div class="content-section" style="margin-top: 0.75rem;">
@@ -1587,6 +1607,13 @@
                 </div>
 
                 <div class="filters-group">
+                  <select id="filterSecurityLogGate" class="filter-select" title="Pilih Gerbang Pos">
+                    <option value="all">Semua Gerbang Pos</option>
+                    <option value="Pos 1 Gerbang Utama">Pos 1 Gerbang Utama</option>
+                    <option value="Pos 2 Gerbang Barat">Pos 2 Gerbang Barat</option>
+                    <option value="Pos 3 Gerbang Timur">Pos 3 Gerbang Timur</option>
+                  </select>
+
                   <select id="filterSecurityLogPeriod" class="filter-select" title="Filter Periode Waktu">
                     <option value="all">Semua Waktu</option>
                     <option value="today">Hari Ini</option>

@@ -137,13 +137,15 @@ const DEFAULT_TICKETS = [
     createdAt: '14 Okt 2026, 11.30 WIB',
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui.',
-    scanOutTime: '14 Okt 2026, 13.02 WIB (Pos 1)',
-    scanInTime: '14 Okt 2026, 14.25 WIB (Pos 1)',
+    scanOutGate: 'Pos 2 Gerbang Barat',
+    securityOfficerOut: 'Kopral Dani (Pos 2)',
+    scanOutTime: '14 Okt 2026, 13.02 WIB (Pos 2 Gerbang Barat)',
+    scanInTime: '14 Okt 2026, 14.25 WIB (Pos 2 Gerbang Barat)',
     timeline: [
       { event: 'Pengajuan Dibuat', time: '14 Okt 2026, 11.30 WIB', by: 'Budi Pratama', desc: 'Izin urusan pribadi.' },
       { event: 'Disetujui', time: '14 Okt 2026, 11.45 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
-      { event: 'Scan Out', time: '14 Okt 2026, 13.02 WIB', by: 'Pos 1', desc: 'Keluar gerbang.' },
-      { event: 'Scan In', time: '14 Okt 2026, 14.25 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
+      { event: 'Scan Out', time: '14 Okt 2026, 13.02 WIB', by: 'Kopral Dani (Pos 2)', gate: 'Pos 2 Gerbang Barat', desc: 'Keluar gerbang barat.' },
+      { event: 'Scan In', time: '14 Okt 2026, 14.25 WIB', by: 'Kopral Dani (Pos 2)', gate: 'Pos 2 Gerbang Barat', desc: 'Kembali tepat waktu.' }
     ]
   },
   {
@@ -214,13 +216,15 @@ const DEFAULT_TICKETS = [
     createdAt: '07 Okt 2026, 08.20 WIB',
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui. Selesai tepat waktu.',
-    scanOutTime: '07 Okt 2026, 09.00 WIB (Pos 1)',
-    scanInTime: '07 Okt 2026, 11.50 WIB (Pos 1)',
+    scanOutGate: 'Pos 3 Gerbang Timur',
+    securityOfficerOut: 'Praka Ilham (Pos 3)',
+    scanOutTime: '07 Okt 2026, 09.00 WIB (Pos 3 Gerbang Timur)',
+    scanInTime: '07 Okt 2026, 11.50 WIB (Pos 3 Gerbang Timur)',
     timeline: [
       { event: 'Pengajuan Dibuat', time: '07 Okt 2026, 08.20 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
       { event: 'Disetujui', time: '07 Okt 2026, 08.40 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
-      { event: 'Scan Out', time: '07 Okt 2026, 09.00 WIB', by: 'Pos 1', desc: 'Keluar area.' },
-      { event: 'Scan In', time: '07 Okt 2026, 11.50 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
+      { event: 'Scan Out', time: '07 Okt 2026, 09.00 WIB', by: 'Praka Ilham (Pos 3)', gate: 'Pos 3 Gerbang Timur', desc: 'Keluar gerbang timur.' },
+      { event: 'Scan In', time: '07 Okt 2026, 11.50 WIB', by: 'Praka Ilham (Pos 3)', gate: 'Pos 3 Gerbang Timur', desc: 'Kembali tepat waktu.' }
     ]
   },
   {
@@ -299,6 +303,22 @@ function loadTickets() {
         if (t.emergencyLocked || t.qrLocked) {
           t.emergencyLocked = false;
           t.qrLocked = false;
+          changed = true;
+        }
+      }
+      // Pastikan tiket memiliki metadata gerbang pos
+      if (!t.scanOutGate) {
+        if (t.id === 'IZ-20261014-003' || t.id === 'IZ-20261002-001') {
+          t.scanOutGate = 'Pos 2 Gerbang Barat';
+          t.securityOfficerOut = 'Kopral Dani (Pos 2)';
+          changed = true;
+        } else if (t.id === 'IZ-20261007-004') {
+          t.scanOutGate = 'Pos 3 Gerbang Timur';
+          t.securityOfficerOut = 'Praka Ilham (Pos 3)';
+          changed = true;
+        } else if (t.scanOutTime || t.scanInTime) {
+          t.scanOutGate = 'Pos 1 Gerbang Utama';
+          t.securityOfficerOut = 'Sertu Agus (Pos 1)';
           changed = true;
         }
       }
@@ -390,6 +410,17 @@ const DEFAULT_USERS = [
     lastLogin: 'Kemarin, 22:00 WIB'
   },
   {
+    kujangId: 'KJG-774421',
+    nip: 'SEC-2020-105',
+    name: 'Praka Ilham',
+    email: 'pos3.security@pupuk-kujang.co.id',
+    department: 'Departemen Pengamanan & K3',
+    role: 'Petugas Pengamanan (Pos 3)',
+    roleKey: 'security',
+    status: 'Aktif',
+    lastLogin: 'Hari ini, 07:00 WIB'
+  },
+  {
     kujangId: 'KJG-661009',
     nip: 'ADM-2016-019',
     name: 'Bambang Sutrisno, S.T.',
@@ -431,7 +462,18 @@ function loadUsers() {
     return JSON.parse(JSON.stringify(DEFAULT_USERS));
   }
   try {
-    return JSON.parse(saved);
+    let users = JSON.parse(saved);
+    let changed = false;
+    DEFAULT_USERS.forEach(defU => {
+      if (!users.some(u => u.nip === defU.nip)) {
+        users.push(defU);
+        changed = true;
+      }
+    });
+    if (changed) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    }
+    return users;
   } catch (e) {
     return JSON.parse(JSON.stringify(DEFAULT_USERS));
   }
