@@ -336,7 +336,7 @@ function loadTickets() {
 function resetAllTicketsToDefault() {
   try {
     localStorage.clear();
-  } catch (e) {}
+  } catch (e) { }
   window.ticketsList = JSON.parse(JSON.stringify(DEFAULT_TICKETS));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(window.ticketsList));
   if (typeof window.switchRole === 'function') window.switchRole('karyawan');
@@ -491,7 +491,7 @@ try {
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem('kujang_delegasi_wewenang');
   }
-} catch (e) {}
+} catch (e) { }
 
 // Sinkronisasi seluruh aktor sistem dari data direktori pengguna (MOCK_USERS)
 function syncActorsFromUsers(data) {
@@ -584,8 +584,8 @@ syncActorsFromUsers(MOCK_USERS);
 function getActiveApprovers() {
   const users = (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
   const approverUsers = users.filter(u => {
-    const isApproverRole = u.roleKey === 'approver' || u.roleKey === 'approver2' || 
-                           (u.role && (u.role.toLowerCase().includes('atasan') || u.role.toLowerCase().includes('manager') || u.role.toLowerCase().includes('supervisor')));
+    const isApproverRole = u.roleKey === 'approver' || u.roleKey === 'approver2' ||
+      (u.role && (u.role.toLowerCase().includes('atasan') || u.role.toLowerCase().includes('manager') || u.role.toLowerCase().includes('supervisor')));
     return isApproverRole && u.status === 'Aktif';
   });
 
@@ -654,7 +654,7 @@ window.pendingFormData = pendingFormData;
 // Properti getter dinamis agar setiap pembacaan window.MOCK_APPROVERS selalu mengembalikan atasan aktif
 try {
   Object.defineProperty(window, 'MOCK_APPROVERS', {
-    get: function() {
+    get: function () {
       return getActiveApprovers();
     },
     configurable: true

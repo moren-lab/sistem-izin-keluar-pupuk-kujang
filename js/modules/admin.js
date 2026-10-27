@@ -475,12 +475,40 @@ function renderAdminAudit() {
 
     const dt = formatAuditDateTime(log.time);
 
-    // Hitung berapa kali karyawan ini sudah mengajukan izin di sistem
-    const applicantTickets = (window.ticketsList || []).filter(t => 
-      (log.applicantNip && t.applicantNip === log.applicantNip) ||
-      (log.applicantName && t.applicantName === log.applicantName)
+    // Hitung berapa kali karyawan ini mengajukan izin pada hari ini (bukan total riwayat seumur hidup)
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const todayYMD = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`; // "20261027"
+    const todayDash = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`; // "2026-10-27"
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const todayIndo = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`.toLowerCase();
+    const todayIndoPad = `${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`.toLowerCase();
+
+    const isTodayTicket = (t) => {
+      if (!t) return false;
+      if (t.id && t.id.includes(todayYMD)) return true;
+      if (t.createdAt) {
+        const c = String(t.createdAt).toLowerCase();
+        if (c.includes(todayDash) || c.includes(todayIndo) || c.includes(todayIndoPad)) return true;
+      }
+      if (t.plannedExit) {
+        const p = String(t.plannedExit).toLowerCase();
+        if (p.includes(todayDash) || p.includes(todayIndo) || p.includes(todayIndoPad)) return true;
+      }
+      if (dt && dt.date && dt.date !== '-') {
+        const rowDateClean = dt.date.toLowerCase();
+        if (t.createdAt && String(t.createdAt).toLowerCase().includes(rowDateClean)) return true;
+        if (t.plannedExit && String(t.plannedExit).toLowerCase().includes(rowDateClean)) return true;
+      }
+      return false;
+    };
+
+    const applicantTicketsToday = (window.ticketsList || []).filter(t => 
+      ((log.applicantNip && t.applicantNip === log.applicantNip) ||
+       (log.applicantName && t.applicantName === log.applicantName)) &&
+      isTodayTicket(t)
     );
-    const submissionCount = applicantTickets.length || 1;
+    const submissionCount = applicantTicketsToday.length > 0 ? applicantTicketsToday.length : 1;
 
     return `
       <tr>
@@ -500,7 +528,7 @@ function renderAdminAudit() {
         <td>
           <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
             <span class="report-emp-name">${log.applicantName}</span>
-            <span class="audit-freq-chip" title="Karyawan ini telah mengajukan izin sebanyak ${submissionCount} kali">
+            <span class="audit-freq-chip" title="Karyawan ini telah mengajukan izin sebanyak ${submissionCount} kali hari ini">
               ${submissionCount}x Pengajuan
             </span>
           </div>
@@ -1121,7 +1149,7 @@ function renderAdminUsers() {
         </td>
         <td style="font-size: 0.8rem; color: var(--text-secondary);">${u.email || '-'}</td>
         <td style="font-size: 0.825rem; color: var(--text-primary);">${u.department}</td>
-        <td>
+        <td style="white-space: nowrap;">
           <span class="user-role-badge ${roleClass}">${u.role}</span>
         </td>
         <td>

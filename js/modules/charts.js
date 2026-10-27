@@ -1009,12 +1009,6 @@ function renderAdminDeptChart() {
         `;
       }).join('')}
     </div>
-
-    <!-- Admin Dept Summary Badge (Single Source of Info) -->
-    <div id="adminDeptBadge" style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: ${dark ? '#131b2a' : '#f8fafc'}; border: 1.5px solid ${dark ? '#24334a' : 'var(--border-color)'}; border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
-      <span>🏢 Frekuensi per Departemen</span>
-      <span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>
-    </div>
   `;
 
   attachDeptFilterListener();
@@ -1046,23 +1040,6 @@ function hoverDeptRow(e, name, count, pct, color, activeIdx, total) {
     row.style.paddingLeft = '6px';
     row.style.paddingRight = '6px';
   }
-
-  // Update badge di bawah
-  const badge = document.getElementById('adminDeptBadge');
-  if (badge) {
-    badge.style.background = dark ? '#182337' : '#ffffff';
-    badge.style.borderColor = color;
-    badge.style.boxShadow = `0 2px 10px ${color}20`;
-    badge.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-        <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0; max-width: 78%;">
-          <span style="width: 8px; height: 8px; border-radius: 2px; background: ${color}; flex-shrink: 0; box-shadow: 0 0 6px ${color}80;"></span>
-          <span style="font-weight: 700; color: ${dark ? '#f8fafc' : '#0f172a'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}: ${count} Izin</span>
-        </div>
-        <span style="background: ${color}; color: #ffffff; padding: 2px 10px; border-radius: 999px; font-weight: 800; font-family: var(--font-mono); font-size: 0.725rem; flex-shrink: 0;">${pct}%</span>
-      </div>
-    `;
-  }
 }
 
 function unhoverDeptRow(activeIdx) {
@@ -1076,15 +1053,6 @@ function unhoverDeptRow(activeIdx) {
       row.style.paddingLeft = '0';
       row.style.paddingRight = '0';
     }
-  }
-  const badge = document.getElementById('adminDeptBadge');
-  const { total, period } = getAdminDeptData();
-  const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
-  if (badge) {
-    badge.style.background = '#f8fafc';
-    badge.style.borderColor = 'var(--border-color)';
-    badge.style.boxShadow = 'none';
-    badge.innerHTML = `<span>🏢 Frekuensi per Departemen</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>`;
   }
 }
 

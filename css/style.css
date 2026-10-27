@@ -1125,9 +1125,12 @@ body.theme-dark .figma-table tr:hover td {
 
 /* Inputs, Select, Textarea */
 body.theme-dark input[type="text"],
+body.theme-dark input[type="email"],
+body.theme-dark input[type="number"],
 body.theme-dark input[type="datetime-local"],
 body.theme-dark input[type="password"],
 body.theme-dark input[type="search"],
+body.theme-dark .form-input,
 body.theme-dark select,
 body.theme-dark textarea {
   background: #182337 !important;
@@ -5000,10 +5003,14 @@ body.modal-open {
 
 /* User matrix badge */
 .user-role-badge {
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.725rem;
   font-weight: 600;
+  line-height: 1.3;
 }
 
 .user-role-badge.karyawan {
