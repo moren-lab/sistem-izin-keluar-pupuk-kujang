@@ -8960,72 +8960,491 @@ body.theme-dark .figma-card {
 }
 
 /* ===================================================================
-   KARYAWAN SEGMENT SWITCHER (SESUAI PDF HALAMAN 1 & 4)
+   DESKTOP VS MOBILE APP CONTAINER ISOLATION
    =================================================================== */
 @media (min-width: 769px) {
-  .karyawan-segment-toggle {
+  #mobileAppContainer {
     display: none !important;
   }
-  .mobile-hide-seg {
-    display: block !important;
+  #desktopAppContainer {
+    display: flex !important;
   }
-  #karyawanStatsCardWrap.mobile-hide-seg {
-    display: grid !important;
+  .mobile-only-widget {
+    display: none !important;
   }
 }
 
 @media (max-width: 768px) {
-  .karyawan-segment-toggle {
-    display: flex !important;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    margin-bottom: 0.75rem;
-    width: 100%;
-    background: #f1f5f9;
-    padding: 4px;
-    border-radius: 10px;
-    border: 1.5px solid #e2e8f0;
-    box-sizing: border-box;
-  }
-
-  .karyawan-seg-btn {
-    flex: 1;
-    padding: 0.55rem 0.65rem;
-    border-radius: 7px;
-    border: none;
-    background: transparent;
-    color: #475569;
-    font-size: 0.775rem;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.15s ease;
-    white-space: nowrap;
-  }
-
-  .karyawan-seg-btn.active {
-    background: #059669 !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3) !important;
-  }
-
-  .mobile-hide-seg {
+  #desktopAppContainer {
     display: none !important;
   }
-
-  body.theme-dark .karyawan-segment-toggle {
-    background: #162032 !important;
-    border-color: #24334a !important;
+  #mobileAppContainer {
+    display: block !important;
+    width: 100%;
+    min-height: 100vh;
+    background: #f8fafc;
+    box-sizing: border-box;
+    padding-bottom: 84px;
   }
-
-  body.theme-dark .karyawan-seg-btn {
-    color: #94a3b8 !important;
+  .hide-on-mobile {
+    display: none !important;
   }
+}
 
-  body.theme-dark .karyawan-seg-btn.active {
-    background: #059669 !important;
-    color: #ffffff !important;
-  }
+/* ===================================================================
+   MOBILE LAYOUT & COMPONENTS (SESUAI PDF FIGMA HALAMAN 1 & 4)
+   =================================================================== */
+.mobile-app-layout {
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 16px;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+}
+
+/* 1. Mobile Top App Bar (Logo Pupuk Kujang + Avatar BP) */
+.mobile-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0 12px 0;
+  background: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 25;
+}
+
+.mobile-brand-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.mobile-brand-icon-box {
+  width: 32px;
+  height: 32px;
+  background: #059669;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+.mobile-brand-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  display: block;
+}
+
+.mobile-brand-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 600;
+  display: block;
+  margin-top: -1px;
+}
+
+.mobile-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #047857;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.mobile-user-avatar:active {
+  transform: scale(0.95);
+}
+
+/* 2. Mobile Hero Card (Hijau Tua Pekat Pupuk Kujang) */
+.mobile-hero-card {
+  background: #1b3b2b;
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 18px 18px;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(27, 59, 43, 0.2);
+}
+
+.mobile-hero-greeting-sub {
+  font-size: 0.75rem;
+  color: #a7f3d0;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.mobile-hero-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.mobile-hero-role {
+  font-size: 0.775rem;
+  color: #d1fae5;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+.mobile-hero-meta {
+  font-size: 0.72rem;
+  color: #a7f3d0;
+  opacity: 0.9;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.mobile-hero-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 14px 0 12px 0;
+}
+
+.mobile-hero-active-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.775rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.mobile-hero-btn {
+  width: 100%;
+  margin-top: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-hero-btn:active {
+  transform: translateY(1px);
+  background: #f1f5f9;
+}
+
+/* 3. Mobile Segment Switcher */
+.mobile-segment-toggle {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 12px 0;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  box-sizing: border-box;
+}
+
+.mobile-seg-btn {
+  flex: 1;
+  padding: 9px 8px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 0.785rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.mobile-seg-btn.active {
+  background: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3) !important;
+}
+
+/* 4. Mobile 3-Column Stats Card */
+.mobile-stats-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 6px;
+  text-align: center;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.mobile-stat-col {
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.mobile-stat-col:not(:last-child) {
+  border-right: 1px solid #f1f5f9;
+}
+
+.mobile-stat-label {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.mobile-stat-number {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.mobile-stat-sub {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+/* 5. Mobile Cards General */
+.mobile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mobile-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* 6. Buttons Inside Mobile Card */
+.btn-mobile-primary {
+  width: 100%;
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-mobile-primary:active {
+  background: #047857;
+  transform: translateY(1px);
+}
+
+.btn-mobile-secondary {
+  width: 100%;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-mobile-secondary:active {
+  background: #f8fafc;
+  transform: translateY(1px);
+}
+
+.btn-mobile-danger-outline {
+  width: 100%;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.mobile-link-rincian {
+  display: block;
+  text-align: center;
+  color: #059669;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.mobile-rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.775rem;
+  color: #475569;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-contact-card {
+  border-color: #e2e8f0;
+}
+
+.mobile-contact-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.mobile-contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* 7. Floating Role Switcher for Mobile Simulation Testing */
+.mobile-role-floating-pill {
+  position: fixed;
+  bottom: 74px;
+  right: 14px;
+  z-index: 99;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-role-floating-pill:active {
+  transform: scale(0.95);
+}
+
+.mobile-role-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+}
+
+.mobile-role-sheet {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 18px 18px 0 0;
+  padding: 18px;
+  z-index: 999;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.mobile-role-sheet.open,
+.mobile-role-sheet-backdrop.open {
+  display: block !important;
+}
+
+/* 8. Dark Mode for Mobile */
+body.theme-dark #mobileAppContainer {
+  background: #0b1120 !important;
+}
+
+body.theme-dark .mobile-card {
+  background: #131b2a !important;
+  border-color: #24334a !important;
+}
+
+body.theme-dark .mobile-brand-name,
+body.theme-dark .mobile-card-title,
+body.theme-dark .mobile-stat-number,
+body.theme-dark .mobile-contact-title {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .mobile-segment-toggle {
+  background: #162032 !important;
+  border-color: #24334a !important;
+}
+
+body.theme-dark .mobile-seg-btn {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .mobile-stats-card {
+  background: #131b2a !important;
+  border-color: #24334a !important;
+}
+
+body.theme-dark .mobile-btn-secondary {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
 }
 
 

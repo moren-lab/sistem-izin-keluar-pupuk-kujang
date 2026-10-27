@@ -1105,8 +1105,8 @@ function renderAdminUsers() {
 
     const isRevoked = u.status === 'Dicabut' || u.status === 'Nonaktif';
     const statusBadge = isRevoked
-      ? `<span class="admin-user-status-pill revoked">● Dicabut</span>`
-      : `<span class="admin-user-status-pill active">● Aktif</span>`;
+      ? `<span class="admin-user-status-pill revoked">Dicabut</span>`
+      : `<span class="admin-user-status-pill active">Aktif</span>`;
 
     return `
       <tr>

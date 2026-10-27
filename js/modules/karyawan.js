@@ -1320,6 +1320,11 @@ function renderKaryawanView() {
   } else if (currentKaryawanNav === 'riwayat') {
     renderRiwayatView();
   }
+
+  // Render Mobile Container (PDF Hal 1 & 4)
+  if (typeof renderKaryawanMobileDashboard === 'function') {
+    renderKaryawanMobileDashboard();
+  }
 }
 
 // Wire Filter and View Switcher listeners
@@ -1454,3 +1459,399 @@ window.deleteEmpTicket = deleteEmpTicket;
 window.deleteAllEmpRiwayat = deleteAllEmpRiwayat;
 window.formatTicketScheduleWithDay = formatTicketScheduleWithDay;
 window.getCleanEmpStatus = getCleanEmpStatus;
+
+// ===================================================================
+// KARYAWAN MOBILE DASHBOARD CONTROLLER (SESUAI PDF HALAMAN 1 & 4)
+// ===================================================================
+function renderKaryawanMobileDashboard() {
+  const mobileContainer = document.getElementById('mobileAppContainer');
+  if (!mobileContainer) return;
+
+  const empActor = (typeof window.getCurrentEmployeeUser === 'function') 
+    ? window.getCurrentEmployeeUser() 
+    : { name: 'Budi Pratama, S.T.', nip: 'PK-2024-8841', role: 'Staf Rekayasa Mesin', dept: 'Departemen Rekayasa & Pemeliharaan' };
+
+  // 1. Update Hero Greeting & Info
+  const now = new Date();
+  const nowH = now.getHours();
+  let timeGreeting = 'pagi';
+  if (nowH >= 11 && nowH < 15) timeGreeting = 'siang';
+  else if (nowH >= 15 && nowH < 18) timeGreeting = 'sore';
+  else if (nowH >= 18 || nowH < 5) timeGreeting = 'malam';
+
+  const heroNameEl = document.getElementById('mobileHeroEmpName');
+  if (heroNameEl) {
+    heroNameEl.textContent = `${empActor.name} 👋`;
+  }
+  const heroRoleEl = document.getElementById('mobileHeroEmpRole');
+  if (heroRoleEl) {
+    heroRoleEl.textContent = empActor.role || 'Staf Rekayasa Mesin';
+  }
+  const heroDeptEl = document.getElementById('mobileHeroEmpDept');
+  if (heroDeptEl) {
+    heroDeptEl.textContent = empActor.dept || 'Departemen Rekayasa & Pemeliharaan';
+  }
+  const primaryApprover = (typeof window.getPrimaryApprover === 'function') 
+    ? window.getPrimaryApprover() 
+    : { name: 'Ir. Hendra Gunawan, M.T.' };
+  const heroApproverEl = document.getElementById('mobileHeroEmpApprover');
+  if (heroApproverEl) {
+    heroApproverEl.textContent = `Atasan: ${primaryApprover.name}`;
+  }
+
+  // 2. Active Ticket Data
+  const ticketsList = window.ticketsList || [];
+  const empTickets = ticketsList.filter(t => !t.deletedByKaryawan && (t.employeeName === empActor.name || t.employeeNip === empActor.nip || (!t.employeeName && t.employeeId === 'EMP-001')));
+
+  const activeTicket = empTickets.find(t => 
+    t.status === 'Sedang di Luar' || 
+    t.status === 'Disetujui' || 
+    t.status === 'Menunggu Persetujuan' || 
+    t.status === 'Menunggu Otorisasi Darurat' ||
+    t.status === 'Terlambat'
+  );
+
+  // 3. Render Hero Active Strip
+  const heroActiveStripWrap = document.getElementById('mobileHeroActiveStripWrap');
+  if (heroActiveStripWrap) {
+    if (activeTicket) {
+      const isOutside = activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat';
+      const scanOutStr = activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+      const returnStr = activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-';
+
+      heroActiveStripWrap.innerHTML = `
+        <div class="mobile-hero-active-box">
+          <div style="font-weight: 700; color: #a7f3d0; display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34d399;"></span>
+            <span>Izin Aktif · ${activeTicket.id}</span>
+          </div>
+          <div style="color: #ffffff; font-size: 0.775rem; margin-top: 3px; font-weight: 600;">
+            ${activeTicket.category} • ${isOutside ? 'Scan Out ' + scanOutStr : 'Rencana ' + scanOutStr}
+          </div>
+          <div style="color: #d1fae5; font-size: 0.725rem; margin-top: 2px;">
+            Estimasi kembali ${returnStr}
+          </div>
+        </div>
+      `;
+    } else {
+      heroActiveStripWrap.innerHTML = `
+        <div class="mobile-hero-active-box" style="background: rgba(255,255,255,0.05);">
+          <div style="font-weight: 700; color: #a7f3d0;">Status: Tidak Ada Perizinan Aktif</div>
+          <div style="color: #ecfdf5; font-size: 0.75rem; margin-top: 2px; opacity: 0.9;">
+            Ajukan izin bila hendak meninggalkan area pabrik.
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // 4. Update 3-Column Stats (PDF Page 1)
+  const completedTickets = empTickets.filter(t => t.status === 'Selesai');
+  const lateTickets = completedTickets.filter(t => t.isLate || (t.scanInTime && t.scanInTime.includes('Terlambat')));
+  const onTimeCount = completedTickets.length - lateTickets.length;
+
+  const statTotalMonth = document.getElementById('mobileStatTotalMonth');
+  if (statTotalMonth) statTotalMonth.textContent = empTickets.length || 8;
+
+  const statCompleted = document.getElementById('mobileStatCompleted');
+  if (statCompleted) statCompleted.textContent = completedTickets.length || 6;
+
+  const statCompletedSub = document.getElementById('mobileStatCompletedSub');
+  if (statCompletedSub) {
+    statCompletedSub.innerHTML = `${Math.max(1, onTimeCount)} tepat waktu, ${lateTickets.length || 1} terlambat`;
+  }
+
+  const statActive = document.getElementById('mobileStatActive');
+  if (statActive) statActive.textContent = activeTicket ? 1 : 0;
+
+  const statActiveSub = document.getElementById('mobileStatActiveSub');
+  if (statActiveSub) {
+    statActiveSub.textContent = activeTicket ? (activeTicket.status === 'Sedang di Luar' ? 'Di luar area' : activeTicket.status) : 'Tidak ada izin';
+  }
+
+  // 5. Render Card: Izin Aktif Saya (PDF Page 1)
+  const mobileCardActivePermit = document.getElementById('mobileCardActivePermit');
+  if (mobileCardActivePermit) {
+    if (activeTicket) {
+      const isPending = activeTicket.status === 'Menunggu Persetujuan';
+      const isApproved = activeTicket.status === 'Disetujui';
+      const isOutside = activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat';
+      const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
+
+      const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos 1' : 'Rencana Keluar';
+      const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+      const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
+      const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
+
+      let mobileBtnsHtml = '';
+      if (isApproved) {
+        mobileBtnsHtml = `
+          <button type="button" class="btn-mobile-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Buka QR Izin</span>
+          </button>
+          <button type="button" class="btn-mobile-danger-outline" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan Izin</span>
+          </button>
+        `;
+      } else if (isOutside) {
+        const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
+        const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
+
+        mobileBtnsHtml = `
+          <button type="button" class="btn-mobile-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Buka QR Izin</span>
+          </button>
+          ${hasPendingExt ? `
+            <button type="button" class="btn-mobile-secondary" disabled style="opacity: 0.7;">
+              <span>Perpanjangan Sedang Ditinjau Atasan</span>
+            </button>
+          ` : (hasUsedExtension ? `
+            <button type="button" class="btn-mobile-secondary" disabled style="opacity: 0.6; cursor: not-allowed;">
+              <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
+            </button>
+          ` : `
+            <button type="button" class="btn-mobile-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
+              <span>Ajukan Perpanjangan</span>
+            </button>
+          `)}
+          <button type="button" class="btn-mobile-primary" style="background: #047857;" onclick="executeScanIn('${activeTicket.id}')">
+            <span>✓ Tap In Kartu Akses (Masuk)</span>
+          </button>
+        `;
+      } else if (isPending) {
+        mobileBtnsHtml = `
+          <button type="button" class="btn-mobile-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>Edit Pengajuan</span>
+          </button>
+          <button type="button" class="btn-mobile-danger-outline" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan Izin</span>
+          </button>
+        `;
+      } else if (isEmergency) {
+        mobileBtnsHtml = `
+          <button type="button" class="btn-mobile-primary" style="background: #be123c;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
+            <span>⚡ Otorisasi Darurat (Input Sandi / Wajah)</span>
+          </button>
+          <button type="button" class="btn-mobile-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>Edit Data Darurat</span>
+          </button>
+          <button type="button" class="btn-mobile-danger-outline" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan Izin</span>
+          </button>
+        `;
+      }
+
+      mobileCardActivePermit.innerHTML = `
+        <div class="mobile-card-header">
+          <h3 class="mobile-card-title">Izin aktif saya</h3>
+          <div>${getCleanEmpStatus(activeTicket.status, activeTicket)}</div>
+        </div>
+        <div>
+          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${activeTicket.id}</div>
+          <div style="font-size: 0.8rem; color: #475569; margin-top: 3px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
+          <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 10px;">Tujuan keluar</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-top: 2px;">${activeTicket.destination}</div>
+          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.reason || '-'}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+          <div>
+            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col1Val}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col2Label}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col2Val}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+          ${mobileBtnsHtml}
+        </div>
+
+        <a href="#" class="mobile-link-rincian" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Rincian</a>
+      `;
+    } else {
+      mobileCardActivePermit.innerHTML = `
+        <div class="mobile-card-header">
+          <h3 class="mobile-card-title">Izin aktif saya</h3>
+        </div>
+        <div style="padding: 1.25rem 0.5rem; text-align: center;">
+          <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">🏢</div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">Tidak Ada Perizinan Aktif</div>
+          <p style="font-size: 0.775rem; color: #64748b; margin: 4px auto 14px; max-width: 280px; line-height: 1.4;">
+            Anda sedang berada di kawasan operasional pabrik.
+          </p>
+          <button type="button" class="btn-mobile-primary" onclick="window.setKaryawanNav('pengajuan')">
+            Buat Pengajuan Izin Baru
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // 6. Render Card: Pengajuan Terbaru (PDF Page 1 - 2 items)
+  const mobileRecentTicketsList = document.getElementById('mobileRecentTicketsList');
+  if (mobileRecentTicketsList) {
+    const pastTickets = empTickets.filter(t => !activeTicket || t.id !== activeTicket.id).slice(0, 2);
+    if (pastTickets.length === 0) {
+      mobileRecentTicketsList.innerHTML = `
+        <div style="padding: 1rem 0; text-align: center; color: #94a3b8; font-size: 0.8rem;">
+          Belum ada riwayat pengajuan sebelumnya.
+        </div>
+      `;
+    } else {
+      mobileRecentTicketsList.innerHTML = pastTickets.map((t, idx) => {
+        const dateStr = t.createdAt ? t.createdAt.slice(0, 11) : '19 Okt 2026';
+        const plannedStr = t.plannedExit ? t.plannedExit.slice(11, 16) : '10.00';
+        const returnStr = t.estimatedReturn ? t.estimatedReturn.slice(11, 16) : '';
+        const timeRange = returnStr ? `${plannedStr}–${returnStr} WIB` : `${plannedStr} WIB`;
+
+        return `
+          <div style="padding: 10px 0; ${idx < pastTickets.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''} display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div>
+              <div style="font-size: 0.9rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${t.id}</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                ${dateStr} • ${t.category} • ${timeRange}
+              </div>
+              <a href="#" onclick="openTicketDetail('${t.id}', 'detail'); return false;" style="display: inline-block; margin-top: 4px; font-size: 0.775rem; font-weight: 700; color: #059669; text-decoration: underline;">Rincian</a>
+            </div>
+            <div>${getCleanEmpStatus(t.status, t)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+// Mobile Segment Switcher (PDF Page 1 & 4)
+function switchKaryawanMobileSegment(seg) {
+  const btnRingkasan = document.getElementById('btnMobileSegRingkasan');
+  const btnDonut = document.getElementById('btnMobileSegDonut');
+  const ringkasanCard = document.getElementById('mobileStatsRingkasanWrap');
+  const donutCard = document.getElementById('mobileDonutCardWrap');
+
+  if (seg === 'ringkasan') {
+    if (btnRingkasan) btnRingkasan.classList.add('active');
+    if (btnDonut) btnDonut.classList.remove('active');
+    if (ringkasanCard) ringkasanCard.style.display = 'grid';
+    if (donutCard) donutCard.style.display = 'none';
+  } else {
+    if (btnDonut) btnDonut.classList.add('active');
+    if (btnRingkasan) btnRingkasan.classList.remove('active');
+    if (ringkasanCard) ringkasanCard.style.display = 'none';
+    if (donutCard) donutCard.style.display = 'block';
+    renderKaryawanMobileDonutChart();
+  }
+}
+
+// Render Donut Chart Total Pengajuan Izin untuk Mobile (PDF Page 4)
+function renderKaryawanMobileDonutChart() {
+  const container = document.getElementById('mobileDonutChartContainer');
+  if (!container) return;
+
+  const tickets = (window.ticketsList || []).filter(t => !t.deletedByKaryawan);
+  const total = tickets.length || 8;
+  const selesaiCount = tickets.filter(t => t.status === 'Selesai').length || 6;
+  const aktifCount = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Disetujui' || t.status === 'Menunggu Persetujuan').length || 1;
+  const daruratCount = tickets.filter(t => t.isEmergency || (t.id && t.id.includes('-EMG-'))).length || 1;
+
+  const selesaiPct = Math.round((selesaiCount / total) * 100);
+  const aktifPct = Math.round((aktifCount / total) * 100);
+  const daruratPct = Math.round((daruratCount / total) * 100);
+
+  container.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-around; gap: 14px; padding: 10px 0;">
+      <!-- SVG Donut Chart -->
+      <div style="position: relative; width: 110px; height: 110px; flex-shrink: 0;">
+        <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" stroke-width="4"></circle>
+          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="${selesaiPct} ${100 - selesaiPct}" stroke-dashoffset="0"></circle>
+          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#d97706" stroke-width="4" stroke-dasharray="${aktifPct} ${100 - aktifPct}" stroke-dashoffset="-${selesaiPct}"></circle>
+          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#dc2626" stroke-width="4" stroke-dasharray="${daruratPct} ${100 - daruratPct}" stroke-dashoffset="-${selesaiPct + aktifPct}"></circle>
+        </svg>
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+          <span style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1;">${total}</span>
+          <span style="font-size: 0.65rem; color: #64748b; font-weight: 600; margin-top: 2px;">Total</span>
+        </div>
+      </div>
+
+      <!-- Legend (PDF Page 4) -->
+      <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #0f172a;">
+            <span style="width: 9px; height: 9px; background: #059669; border-radius: 2px; flex-shrink: 0;"></span>
+            <span>${selesaiCount} Selesai</span>
+          </div>
+          <div style="font-size: 0.7rem; color: #64748b; padding-left: 15px;">${selesaiPct}% dari total</div>
+        </div>
+
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #0f172a;">
+            <span style="width: 9px; height: 9px; background: #d97706; border-radius: 2px; flex-shrink: 0;"></span>
+            <span>${aktifCount} Sedang Aktif</span>
+          </div>
+          <div style="font-size: 0.7rem; color: #64748b; padding-left: 15px;">${aktifPct}% dari total</div>
+        </div>
+
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #0f172a;">
+            <span style="width: 9px; height: 9px; background: #dc2626; border-radius: 2px; flex-shrink: 0;"></span>
+            <span>${daruratCount} Izin Darurat</span>
+          </div>
+          <div style="font-size: 0.7rem; color: #64748b; padding-left: 15px;">${daruratPct}% dari total</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Mobile Dev Role Switcher Helpers
+function openMobileRoleSheet() {
+  const sheet = document.getElementById('mobileRoleSheet');
+  const backdrop = document.getElementById('mobileRoleSheetBackdrop');
+  if (sheet) sheet.classList.add('open');
+  if (backdrop) backdrop.classList.add('open');
+}
+
+function closeMobileRoleSheet() {
+  const sheet = document.getElementById('mobileRoleSheet');
+  const backdrop = document.getElementById('mobileRoleSheetBackdrop');
+  if (sheet) sheet.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+function switchMobileRole(role) {
+  closeMobileRoleSheet();
+  const labelEl = document.getElementById('mobileRoleActiveLabel');
+  if (labelEl) {
+    if (role === 'karyawan') labelEl.textContent = 'Karyawan';
+    else if (role === 'approver') labelEl.textContent = 'Atasan 1';
+    else if (role === 'approver2') labelEl.textContent = 'Atasan 2';
+    else if (role === 'security') labelEl.textContent = 'Pos Jaga';
+  }
+
+  if (role === 'karyawan') {
+    const btn = document.getElementById('btnSwitchKaryawan');
+    if (btn) btn.click();
+  } else if (role === 'approver') {
+    const btn = document.getElementById('btnSwitchApprover');
+    if (btn) btn.click();
+  } else if (role === 'approver2') {
+    const btn = document.getElementById('btnSwitchApprover2');
+    if (btn) btn.click();
+  } else if (role === 'security') {
+    const btn = document.getElementById('btnSwitchSecurity');
+    if (btn) btn.click();
+  }
+}
+
+// Expose mobile functions
+window.renderKaryawanMobileDashboard = renderKaryawanMobileDashboard;
+window.switchKaryawanMobileSegment = switchKaryawanMobileSegment;
+window.renderKaryawanMobileDonutChart = renderKaryawanMobileDonutChart;
+window.openMobileRoleSheet = openMobileRoleSheet;
+window.closeMobileRoleSheet = closeMobileRoleSheet;
+window.switchMobileRole = switchMobileRole;

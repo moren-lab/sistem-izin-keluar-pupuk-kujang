@@ -272,11 +272,7 @@ function renderApproverDashboard() {
       `;
     } else if (lockedEmergencyTickets.length === 0 && activeEmergencyTickets.length === 0 && pendingExtensions.length === 0) {
       bannerHtml += `
-        <div class="approver-alert-banner all-done" style="border-radius: 10px; padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-          <div style="font-size: 1.2rem;">✅</div>
-          <div style="font-size: 0.825rem; font-weight: 600;">
-            Semua antrean izin bawahan telah diputuskan. Tidak ada pengajuan yang tertunda saat ini.
-          </div>
+       
         </div>
       `;
     }
