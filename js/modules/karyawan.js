@@ -501,19 +501,16 @@ function renderKaryawanDashboard() {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         actionButtonsHtml = `
-          <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-            <span>Detail pengajuan</span>
-          </button>
           ${hasPendingExt ? '' : (hasUsedExtension ? `
             <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
               <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
             </button>
           ` : `
-            <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
+            <button class="btn-figma-secondary" style="background:#ffffff; color:#0f172a; border: 1.5px solid #cbd5e1; font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
               <span>Ajukan Perpanjangan</span>
             </button>
           `)}
-          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
+          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
             <span>✓ Tap In Kartu Akses (Masuk)</span>
           </button>
         `;
@@ -529,29 +526,27 @@ function renderKaryawanDashboard() {
           </h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
-          <div>
-            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
-              <span>${activeTicket.id}</span>
-              ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
-            </div>
-            <div style="font-size: 0.8rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-            <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+        <div>
+          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+            <span>${activeTicket.id}</span>
+            ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
-          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-            ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+          <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
+            <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid #f1f5f9;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col1Val}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col1Val}</div>
           </div>
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col2Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col2Val}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col2Val}</div>
           </div>
         </div>
 
@@ -744,19 +739,16 @@ function renderPengajuanSayaView() {
       const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
       const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
       actionButtonsHtml = `
-        <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-          <span>Detail pengajuan</span>
-        </button>
         ${hasPendingExt ? '' : (hasUsedExtension ? `
           <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
             <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
           </button>
         ` : `
-          <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
+          <button class="btn-figma-secondary" style="background:#ffffff; color:#0f172a; border: 1.5px solid #cbd5e1; font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
             <span>Ajukan Perpanjangan</span>
           </button>
         `)}
-        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
+        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
           <span>✓ Tap In Kartu Akses (Masuk)</span>
         </button>
       `;
@@ -774,39 +766,37 @@ function renderPengajuanSayaView() {
           </h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
-          <div>
-            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
-              <span>${activeTicket.id}</span>
-              ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
-            </div>
-            <div style="font-size: 0.8rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-            <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+        <div>
+          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+            <span>${activeTicket.id}</span>
+            ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
-          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-            ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+          <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
+            <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid #f1f5f9;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col1Val}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col1Val}</div>
           </div>
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col2Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col2Val}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col2Val}</div>
           </div>
         </div>
 
         ${isEmergLocked ? `
-          <div style="margin-top: 0.85rem; font-size: 0.775rem; padding-top: 0.65rem; border-top: 1px solid #f1f5f9;">
+          <div style="margin-top: 0.85rem; font-size: 0.775rem; padding-top: 0.65rem; border-top: 1px solid var(--border-color, #f1f5f9);">
             <div style="font-weight: 800; color: #b91c1c; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
               <span>Izin Darurat Menunggu Otorisasi</span>
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
             </div>
-            <div style="color: #475569; margin-top: 0.25rem; line-height: 1.45;">
+            <div style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.45;">
               Sesuai SOP K3, QR Code terkunci sampai diotorisasi. Hubungi Atasan untuk meminta <strong>Kode Sandi OTP</strong> atau gunakan <strong>Scan Wajah</strong> langsung.
             </div>
           </div>
@@ -823,8 +813,8 @@ function renderPengajuanSayaView() {
         <div class="figma-card-header">
           <h3 class="figma-card-title">Atasan langsung</h3>
         </div>
-        <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">${activeTicket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
-        <div style="font-size: 0.775rem; color: #64748b; margin-top: 2px;">${activeTicket.approverTitle || 'Manajer Rekayasa & Pemeliharaan'}</div>
+        <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">${activeTicket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
+        <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">${activeTicket.approverTitle || 'Manajer Rekayasa & Pemeliharaan'}</div>
         ${activeTicket.reassignedFrom ? `
           <div style="margin-top: 0.45rem; font-size: 0.75rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 0.3rem 0.65rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
             <span>↳ Dialihkan dari ${activeTicket.reassignedFrom}</span>
@@ -1596,10 +1586,6 @@ function renderKaryawanMobileDashboard() {
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
 
         mobileBtnsHtml = `
-          <button type="button" class="btn-mobile-secondary" style="background: #ffffff; color: var(--text-primary); border: 1.5px solid var(--border-color);" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-            <span>Detail Pengajuan</span>
-          </button>
           ${hasPendingExt ? `
             <button type="button" class="btn-mobile-secondary" disabled style="opacity: 0.7;">
               <span>Perpanjangan Sedang Ditinjau Atasan</span>
@@ -1643,24 +1629,28 @@ function renderKaryawanMobileDashboard() {
       mobileCardActivePermit.innerHTML = `
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Izin aktif saya</h3>
-          <div>${getCleanEmpStatus(activeTicket.status, activeTicket)}</div>
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
         </div>
         <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${activeTicket.id}</div>
-          <div style="font-size: 0.8rem; color: #475569; margin-top: 3px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
+          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">${activeTicket.id}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
           <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 10px;">Tujuan keluar</div>
-          <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-top: 2px;">${activeTicket.destination}</div>
-          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.reason || '-'}</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.destination}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${activeTicket.reason || '-'}</div>
+          <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
+            <span style="color: var(--text-muted); font-weight: 600;">status:</span>
+            ${getCleanEmpStatus(activeTicket.status, activeTicket)}
+          </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col1Val}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col1Val}</div>
           </div>
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col2Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${col2Val}</div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col2Val}</div>
           </div>
         </div>
 

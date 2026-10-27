@@ -1123,6 +1123,115 @@ body.theme-dark .figma-table tr:hover td {
   background: #182234 !important;
 }
 
+.theme-dark .report-scan-time,
+body.theme-dark .report-scan-time,
+html.theme-dark .report-scan-time {
+  color: #f8fafc !important;
+}
+.theme-dark .report-scan-gate,
+body.theme-dark .report-scan-gate,
+html.theme-dark .report-scan-gate {
+  color: #94a3b8 !important;
+}
+.theme-dark .report-ticket-id,
+body.theme-dark .report-ticket-id,
+html.theme-dark .report-ticket-id {
+  color: #38bdf8 !important;
+}
+.theme-dark .report-emp-name,
+body.theme-dark .report-emp-name,
+html.theme-dark .report-emp-name {
+  color: #f8fafc !important;
+}
+.theme-dark .report-emp-nip,
+body.theme-dark .report-emp-nip,
+html.theme-dark .report-emp-nip {
+  color: #94a3b8 !important;
+}
+.theme-dark .report-dept-name,
+body.theme-dark .report-dept-name,
+html.theme-dark .report-dept-name {
+  color: #cbd5e1 !important;
+}
+.theme-dark .schedule-day-date,
+body.theme-dark .schedule-day-date,
+html.theme-dark .schedule-day-date {
+  color: #f8fafc !important;
+}
+.theme-dark .schedule-time-text,
+body.theme-dark .schedule-time-text,
+html.theme-dark .schedule-time-text {
+  color: #94a3b8 !important;
+}
+
+/* Extend Duration Modal & Pending Extension Dark Theme Styles */
+.extend-summary-box,
+.pending-ext-summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.extend-notice-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.pending-ext-card-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+#pendingExtReason {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.theme-dark .extend-summary-box,
+body.theme-dark .extend-summary-box,
+html.theme-dark .extend-summary-box,
+.theme-dark .pending-ext-summary-box,
+body.theme-dark .pending-ext-summary-box,
+html.theme-dark .pending-ext-summary-box,
+.theme-dark .extend-notice-box,
+body.theme-dark .extend-notice-box,
+html.theme-dark .extend-notice-box,
+.theme-dark .pending-ext-card-box,
+body.theme-dark .pending-ext-card-box,
+html.theme-dark .pending-ext-card-box {
+  background: #182234 !important;
+  border-color: #24334a !important;
+}
+
+.theme-dark #extendTicketDest,
+body.theme-dark #extendTicketDest,
+html.theme-dark #extendTicketDest,
+.theme-dark #pendingExtReason,
+body.theme-dark #pendingExtReason,
+html.theme-dark #pendingExtReason {
+  color: #f8fafc !important;
+  background: #182234 !important;
+  border-color: #24334a !important;
+}
+
+.theme-dark #extendTicketId,
+body.theme-dark #extendTicketId,
+html.theme-dark #extendTicketId,
+.theme-dark #pendingExtTicketId,
+body.theme-dark #pendingExtTicketId,
+html.theme-dark #pendingExtTicketId {
+  color: #38bdf8 !important;
+}
+
+.theme-dark #extendCurrentReturnDisplay,
+body.theme-dark #extendCurrentReturnDisplay,
+html.theme-dark #extendCurrentReturnDisplay,
+.theme-dark #pendingExtNewReturn,
+body.theme-dark #pendingExtNewReturn,
+html.theme-dark #pendingExtNewReturn {
+  color: #fbbf24 !important;
+}
+
 /* Inputs, Select, Textarea */
 body.theme-dark input[type="text"],
 body.theme-dark input[type="email"],
@@ -4809,7 +4918,7 @@ body.modal-open {
 
 .report-dept-name {
   font-size: 0.825rem;
-  color: #334155;
+  color: var(--text-secondary, #334155);
   line-height: 1.3;
 }
 
@@ -4836,14 +4945,14 @@ body.modal-open {
 
 .report-scan-time {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary, #0f172a);
   font-size: 0.825rem;
   white-space: nowrap;
 }
 
 .report-scan-gate {
   font-size: 0.725rem;
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   margin-top: 1px;
   white-space: nowrap;
 }

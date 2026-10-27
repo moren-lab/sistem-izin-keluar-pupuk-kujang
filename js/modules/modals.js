@@ -1634,9 +1634,29 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const isSecurity = (window.currentActor === 'security');
 
   if (btnDetailScanOut) {
-    // Scan Out hanya diizinkan di Terminal Verifikasi Tiket & Kamera Scan QR
-    btnDetailScanOut.style.display = 'none';
-    btnDetailScanOut.onclick = null;
+    // Scan Out hanya muncul di pos jaga pada menu / halaman "Terminal Verifikasi Tiket & Kamera Scan QR"
+    const secScannerPage = document.getElementById('securityScannerPage');
+    const isScannerPageActive = secScannerPage && (secScannerPage.style.display !== 'none' || window._openedFromScannerTerminal);
+    const canScanOut = isSecurity && isScannerPageActive && (ticket.status === 'Disetujui' || (ticket.isEmergency && !ticket.emergencyLocked)) && !ticket.scanOutTime;
+
+    if (canScanOut) {
+      btnDetailScanOut.style.display = 'inline-flex';
+      btnDetailScanOut.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+        <span>Verifikasi Keluar (Scan Out)</span>
+      `;
+      btnDetailScanOut.onclick = function () {
+        if (typeof window.executeScanOut === 'function') {
+          window.executeScanOut(ticket.id);
+        }
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+      };
+    } else {
+      btnDetailScanOut.style.display = 'none';
+      btnDetailScanOut.onclick = null;
+    }
   }
 
   if (btnDetailScanIn) {
@@ -2507,8 +2527,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseDetailModal = document.getElementById('btnCloseDetailModal');
   const btnCloseDetailBottom = document.getElementById('btnCloseDetailBottom');
   const modalTicketDetail = document.getElementById('modalTicketDetail');
-  if (btnCloseDetailModal) btnCloseDetailModal.addEventListener('click', () => modalTicketDetail.classList.remove('open'));
-  if (btnCloseDetailBottom) btnCloseDetailBottom.addEventListener('click', () => modalTicketDetail.classList.remove('open'));
+  if (btnCloseDetailModal) btnCloseDetailModal.addEventListener('click', () => {
+    modalTicketDetail.classList.remove('open');
+    window._openedFromScannerTerminal = false;
+  });
+  if (btnCloseDetailBottom) btnCloseDetailBottom.addEventListener('click', () => {
+    modalTicketDetail.classList.remove('open');
+    window._openedFromScannerTerminal = false;
+  });
 
   const btnDownloadQRPng = document.getElementById('btnDownloadQRPng');
   const qrCodeContainer = document.getElementById('qrCodeContainer');

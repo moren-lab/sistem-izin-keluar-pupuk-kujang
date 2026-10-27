@@ -876,6 +876,7 @@ function executeVerification(inputQuery) {
 
   // Langsung buka Rincian Tiket tanpa kartu perantara terpisah
   if (typeof window.openTicketDetail === 'function') {
+    window._openedFromScannerTerminal = true;
     window.openTicketDetail(ticket.id, 'detail');
   }
 }

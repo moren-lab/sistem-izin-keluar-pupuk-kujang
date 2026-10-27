@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261027_1828">
+  <link rel="stylesheet" href="css/style.css?v=20261027_1917">
   <link rel="stylesheet" href="css/auth.css?v=20261027_1810">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
@@ -4027,54 +4027,54 @@
       <div class="modal-body"
         style="padding: 0.75rem 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; max-height: 72vh; overflow-y: auto;">
         <!-- Notice Banner -->
-        <div
-          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: #475569;">
+        <div class="extend-notice-box"
+          style="border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem;">
           <span>Permohonan perpanjangan diteruskan kepada atasan langsung. Grace period aktif selama proses
             peninjauan.</span>
         </div>
 
         <!-- Ringkasan Tiket Aktif -->
-        <div
-          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.825rem;">
+        <div class="extend-summary-box"
+          style="border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.825rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-            <span style="font-size: 0.7rem; color: #64748b; font-weight: 600;">No. Tiket</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">No. Tiket</span>
             <strong id="extendTicketId"
-              style="font-family: var(--font-mono); color: #0f172a; font-size: 0.85rem;">-</strong>
+              style="font-family: var(--font-mono); color: var(--text-primary); font-size: 0.85rem;">-</strong>
           </div>
           <div style="margin-bottom: 0.4rem;">
-            <span style="font-size: 0.7rem; color: #64748b; font-weight: 600; display: block;">Tujuan & Keperluan</span>
-            <span id="extendTicketDest" style="font-weight: 600; color: #1e293b;">-</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; display: block;">Tujuan & Keperluan</span>
+            <span id="extendTicketDest" style="font-weight: 600; color: var(--text-primary); line-height: 1.45; display: block; margin-top: 2px;">-</span>
           </div>
           <div>
-            <span style="font-size: 0.7rem; color: #64748b; font-weight: 600; display: block;">Estimasi Kembali
+            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; display: block;">Estimasi Kembali
               Semula</span>
             <span id="extendCurrentReturnDisplay"
-              style="font-family: var(--font-mono); font-weight: 700; color: #b45309;">-</span>
+              style="font-family: var(--font-mono); font-weight: 700; color: #f59e0b;">-</span>
           </div>
         </div>
 
         <!-- Form Input -->
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label" for="inputExtendNewReturn"
-            style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
+            style="font-weight: 600; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.35rem;">
             Perkiraan Waktu Kembali Baru <span style="color: var(--rose-danger);">*</span>
           </label>
           <input type="datetime-local" id="inputExtendNewReturn" class="form-input" required
-            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;">
+            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px;">
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label" for="inputExtendReason"
-            style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
+            style="font-weight: 600; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.35rem;">
             Alasan Perpanjangan Waktu <span style="color: var(--rose-danger);">*</span>
           </label>
           <textarea id="inputExtendReason" class="form-textarea" rows="3"
             placeholder="Jelaskan alasan perpanjangan durasi (misal: penanganan koordinasi teknis dinas lanjutan)..."
             required
-            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;"></textarea>
+            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px;"></textarea>
         </div>
 
-        <div style="font-size: 0.75rem; color: #64748b; margin-top: -0.25rem;">
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: -0.25rem;">
           * Wajib diisi. Waktu kembali baru harus lebih lambat dari jadwal semula. Seluruh waktu dalam WIB.
         </div>
       </div>
@@ -4109,40 +4109,40 @@
 
       <div class="modal-body" style="padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
         <!-- Status Information -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.85rem 1rem;">
-          <div style="font-size: 0.825rem; font-weight: 700; color: #0f172a;">Menunggu Persetujuan Atasan</div>
-          <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px;">Grace period aktif: Penandaan terlambat
+        <div class="pending-ext-card-box" style="border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary);">Menunggu Persetujuan Atasan</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px;">Grace period aktif: Penandaan terlambat
             ditangguhkan sementara.</div>
         </div>
 
         <!-- Detail Fields -->
-        <div
-          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.825rem;">
+        <div class="pending-ext-summary-box"
+          style="border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.825rem;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #64748b; font-weight: 600;">Nomor Tiket:</span>
-            <strong id="pendingExtTicketId" style="font-family: var(--font-mono); color: #0f172a;">-</strong>
+            <span style="color: var(--text-muted); font-weight: 600;">Nomor Tiket:</span>
+            <strong id="pendingExtTicketId" style="font-family: var(--font-mono); color: var(--text-primary);">-</strong>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #64748b; font-weight: 600;">Jadwal Kembali Semula:</span>
+            <span style="color: var(--text-muted); font-weight: 600;">Jadwal Kembali Semula:</span>
             <span id="pendingExtOldReturn"
-              style="font-family: var(--font-mono); font-weight: 700; color: #475569;">-</span>
+              style="font-family: var(--font-mono); font-weight: 700; color: var(--text-secondary);">-</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #64748b; font-weight: 600;">Usulan Jam Kembali Baru:</span>
+            <span style="color: var(--text-muted); font-weight: 600;">Usulan Jam Kembali Baru:</span>
             <span id="pendingExtNewReturn"
-              style="font-family: var(--font-mono); font-weight: 700; color: #0f172a; font-size: 0.85rem;">-</span>
+              style="font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); font-size: 0.85rem;">-</span>
           </div>
           <div>
-            <span style="color: #64748b; font-weight: 600; display: block; margin-bottom: 2px;">Alasan Perpanjangan
+            <span style="color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 2px;">Alasan Perpanjangan
               Waktu:</span>
             <div id="pendingExtReason"
-              style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.6rem 0.75rem; color: #1e293b; line-height: 1.45; font-style: italic;">
+              style="border-radius: 6px; padding: 0.6rem 0.75rem; color: var(--text-primary); line-height: 1.45; font-style: italic;">
               -</div>
           </div>
           <div
-            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;">
+            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color, #e2e8f0); padding-top: 0.5rem;">
             <span>Diajukan pada:</span>
-            <span id="pendingExtRequestedAt" style="font-weight: 600;">-</span>
+            <span id="pendingExtRequestedAt" style="font-weight: 600; color: var(--text-secondary);">-</span>
           </div>
         </div>
       </div>
@@ -4483,13 +4483,13 @@
   <script src="js/modules/ui.js?v=20261027_1745"></script>
   <script src="js/modules/scheduler.js?v=20261027_1745"></script>
   <script src="js/modules/navigation.js?v=20261027_1758"></script>
-  <script src="js/modules/karyawan.js?v=20261027_1842"></script>
+  <script src="js/modules/karyawan.js?v=20261027_1858"></script>
   <script src="js/modules/approver.js?v=20261027_1842"></script>
-  <script src="js/modules/security.js?v=20261027_1842"></script>
-  <script src="js/modules/admin.js?v=20261027_1745"></script>
+  <script src="js/modules/security.js?v=20261027_1909"></script>
+  <script src="js/modules/admin.js?v=20261027_1858"></script>
   <script src="js/modules/charts.js?v=20261027_1825"></script>
   <script src="js/modules/emergency.js?v=20261027_1842"></script>
-  <script src="js/modules/modals.js?v=20261027_1842"></script>
+  <script src="js/modules/modals.js?v=20261027_1909"></script>
   <script src="js/app.js?v=20261027_1745"></script>
   <script src="js/modules/auth.js?v=20261027_1745"></script>
 </body>

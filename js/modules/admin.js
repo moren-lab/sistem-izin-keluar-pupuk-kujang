@@ -51,8 +51,8 @@ function cleanScanDisplay(scanTimeStr, gateFallback) {
   }
 
   return `
-    <div class="report-scan-time">${timeOnly}</div>
-    ${gateName && gateName !== '-' ? `<div class="report-scan-gate">${gateName}</div>` : ''}
+    <div class="report-scan-time" style="color: var(--text-primary); font-weight: 600;">${timeOnly}</div>
+    ${gateName && gateName !== '-' ? `<div class="report-scan-gate" style="color: var(--text-secondary); font-size: 0.725rem; margin-top: 1px;">${gateName}</div>` : ''}
   `;
 }
 
