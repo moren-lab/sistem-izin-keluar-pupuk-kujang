@@ -371,7 +371,7 @@ function renderKaryawanDashboard() {
     if (nowH >= 11 && nowH < 15) timeGreeting = 'siang';
     else if (nowH >= 15 && nowH < 18) timeGreeting = 'sore';
     else if (nowH >= 18 || nowH < 5) timeGreeting = 'malam';
-    empHeroGreeting.textContent = `Selamat ${timeGreeting}, ${empActor.name} 👋`;
+    empHeroGreeting.textContent = `Selamat ${timeGreeting}, ${empActor.name} `;
   }
   const primaryApprover = (typeof window.getPrimaryApprover === 'function') 
     ? window.getPrimaryApprover() 
@@ -426,7 +426,7 @@ function renderKaryawanDashboard() {
     } else {
       figmaHeroStrip.innerHTML = `
         <div class="hero-strip-left">
-          <span style="font-weight: 700; font-size: 0.8rem; color: #059669;">Siap Beroperasi</span>
+          
           <span class="hero-strip-text">Status: Tidak Ada Perizinan Aktif</span>
           <span class="hero-strip-sub">Ajukan izin bila hendak meninggalkan area.</span>
         </div>
@@ -487,30 +487,33 @@ function renderKaryawanDashboard() {
         `;
       } else if (isApproved) {
         actionButtonsHtml = `
-          <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')" style="width: 100%; justify-content: center;">
+          <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
             <span>Buka QR Izin</span>
           </button>
-          <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')" style="width: 100%; justify-content: center; background: transparent; color: #dc2626; border: 1px solid #fecaca;">
-            <span>Batalkan Izin</span>
+          <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+            <span>Detail pengajuan</span>
+          </button>
+          <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan</span>
           </button>
         `;
       } else if (isOutside) {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         actionButtonsHtml = `
-          <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')" style="width: 100%; justify-content: center;">
+          <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
             <span>Buka QR Izin</span>
           </button>
           ${hasPendingExt ? '' : (hasUsedExtension ? `
-            <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc; width: 100%; justify-content: center;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+            <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
               <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
             </button>
           ` : `
-            <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')" style="width: 100%; justify-content: center;">
+            <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
               <span>Ajukan Perpanjangan</span>
             </button>
           `)}
-          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; width: 100%; justify-content: center;" onclick="executeScanIn('${activeTicket.id}')">
+          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
             <span>✓ Tap In Kartu Akses (Masuk)</span>
           </button>
         `;
@@ -519,23 +522,26 @@ function renderKaryawanDashboard() {
       const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
 
       cardActivePermitSummary.innerHTML = `
-        <div class="figma-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem; margin: 0;">
+        <div class="figma-card-header">
+          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
             <span>Izin aktif saya</span>
             ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
           </h3>
-          <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+              <span>${activeTicket.id}</span>
+              ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
+            </div>
+            <div style="font-size: 0.8rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
-        </div>
-
-        <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
-            <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
-          </div>
-          <div style="font-size: 0.825rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid #f1f5f9;">
@@ -561,12 +567,8 @@ function renderKaryawanDashboard() {
           </div>
         ` : ''}
 
-        <div class="card-action-btns-wrap" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.15rem;">
+        <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
-        </div>
-
-        <div style="text-align: center; margin-top: 0.85rem;">
-          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;" style="color: #059669; font-weight: 700; font-size: 0.85rem; text-decoration: underline;">Rincian</a>
         </div>
       `;
     } else {
@@ -728,30 +730,33 @@ function renderPengajuanSayaView() {
       `;
     } else if (isApproved) {
       actionButtonsHtml = `
-        <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')" style="width: 100%; justify-content: center;">
+        <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
           <span>Buka QR Izin</span>
         </button>
-        <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')" style="width: 100%; justify-content: center; background: transparent; color: #dc2626; border: 1px solid #fecaca;">
-          <span>Batalkan Izin</span>
+        <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+          <span>Detail pengajuan</span>
+        </button>
+        <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+          <span>Batalkan</span>
         </button>
       `;
     } else if (isOutside) {
       const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
       const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
       actionButtonsHtml = `
-        <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')" style="width: 100%; justify-content: center;">
+        <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
           <span>Buka QR Izin</span>
         </button>
         ${hasPendingExt ? '' : (hasUsedExtension ? `
-          <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc; width: 100%; justify-content: center;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+          <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
             <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
           </button>
         ` : `
-          <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')" style="width: 100%; justify-content: center;">
+          <button class="btn-figma-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
             <span>Ajukan Perpanjangan</span>
           </button>
         `)}
-        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; width: 100%; justify-content: center;" onclick="executeScanIn('${activeTicket.id}')">
+        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669;" onclick="executeScanIn('${activeTicket.id}')">
           <span>✓ Tap In Kartu Akses (Masuk)</span>
         </button>
       `;
@@ -762,23 +767,26 @@ function renderPengajuanSayaView() {
     colPengajuanLeft.innerHTML = `
       <!-- Card 1: Izin aktif saya -->
       <div class="figma-card">
-        <div class="figma-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem; margin: 0;">
+        <div class="figma-card-header">
+          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
             <span>Izin aktif saya</span>
             ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
           </h3>
-          <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+              <span>${activeTicket.id}</span>
+              ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
+            </div>
+            <div style="font-size: 0.8rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
-        </div>
-
-        <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
-            <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
-          </div>
-          <div style="font-size: 0.825rem; color: #475569; margin-top: 4px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid #f1f5f9;">
@@ -804,13 +812,10 @@ function renderPengajuanSayaView() {
           </div>
         ` : ''}
 
-        <div class="card-action-btns-wrap" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.15rem;">
+        <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
         </div>
-
-        <div style="text-align: center; margin-top: 0.85rem;">
-          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;" style="color: #059669; font-weight: 700; font-size: 0.85rem; text-decoration: underline;">Rincian</a>
-        </div>
+      </div>
       </div>
 
       <!-- Card 2: Atasan langsung -->

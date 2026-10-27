@@ -264,7 +264,7 @@ function renderSecurityDashboard() {
     if (readyExitTickets.length === 0) {
       securityDashboardReadyExitList.innerHTML = `
         <div style="padding: 1.25rem; text-align: center; color: var(--text-secondary); font-size: 0.825rem;">
-          Nihil: Belum ada izin baru yang disetujui untuk keluar saat ini.
+          Belum ada izin baru yang disetujui untuk keluar saat ini.
         </div>
       `;
     } else {
@@ -329,7 +329,7 @@ function renderSecurityDashboard() {
     if (outsideTickets.length === 0) {
       securityDashboardOutsideList.innerHTML = `
         <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
-          Nihil: Tidak ada karyawan yang sedang di luar pabrik (Headcount aman).
+          Tidak ada karyawan yang sedang di luar pabrik.
         </div>
       `;
     } else {

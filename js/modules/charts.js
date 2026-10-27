@@ -286,12 +286,7 @@ function renderKaryawanDonutChart() {
         `).join('')}
       </div>
 
-      <!-- Single Dynamic Interactive Info Under Diagram -->
-      <div id="karyawanDonutInfoBadge" style="margin-top: 0.75rem; width: 100%; max-width: 320px; min-height: 44px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.75rem; color: ${infoBadgeText}; font-weight: 500; background: ${infoBadgeBg}; border: 1.5px dashed ${infoBadgeBorder}; border-radius: 8px; padding: 0.5rem 0.85rem; width: 100%; text-align: center;">
-          💡 Ketuk atau arahkan ke chart untuk melihat rincian persentase
-        </div>
-      </div>
+
     </div>
   `;
 
