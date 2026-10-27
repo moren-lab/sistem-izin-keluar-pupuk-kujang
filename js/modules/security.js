@@ -95,14 +95,14 @@ function renderSecurityDashboard() {
       securityDashboardReadyExitList.innerHTML = readyExitTickets.map(t => {
         const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
         return `
-          <div class="feed-item" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem; padding: 0.75rem 1rem;">
+          <div class="feed-item" style="border-radius: 8px; margin-bottom: 0.5rem; padding: 0.75rem 1rem;">
             <div class="feed-item-left">
               <div class="feed-item-icon" style="background: ${isEmergency ? '#ffe4e6' : '#dbeafe'}; color: ${isEmergency ? '#be123c' : '#1d4ed8'}; font-size: 0.75rem; font-weight: 800;">
                 ${isEmergency ? 'EMG' : 'REG'}
               </div>
               <div>
-                <div class="feed-item-title" style="font-weight: 800; color: #0f172a;">${t.applicantName || 'Budi Pratama'} <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #64748b;">(${t.id})</span></div>
-                <div class="feed-item-sub" style="font-size: 0.75rem; color: #475569; margin-top: 2px;">
+                <div class="feed-item-title" style="font-weight: 800; color: var(--text-primary);">${t.applicantName || 'Budi Pratama'} <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">(${t.id})</span></div>
+                <div class="feed-item-sub" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
                   Tujuan: <strong>${t.destination}</strong> — Rencana Keluar: <span style="font-family: var(--font-mono); font-weight: 700;">${t.plannedExit ? t.plannedExit.replace('T', ' ') : 'Hari Ini'}</span>
                 </div>
               </div>
@@ -124,16 +124,16 @@ function renderSecurityDashboard() {
     if (overdueTickets.length > 0) {
       securityOverdueBanner.style.display = 'block';
       securityOverdueBanner.innerHTML = `
-        <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+        <div class="security-overdue-alert" style="border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fee2e2; color: #dc2626; flex-shrink: 0;">
+            <div class="security-overdue-icon-box" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </div>
             <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: #991b1b;">
+              <div class="security-overdue-title" style="font-weight: 800; font-size: 0.9rem;">
                 PERINGATAN GERBANG: Ada ${overdueTickets.length} Karyawan Terlambat Kembali ke Pabrik!
               </div>
-              <div style="font-size: 0.775rem; color: #7f1d1d;">
+              <div class="security-overdue-sub" style="font-size: 0.775rem;">
                 Karyawan telah melewati batas estimasi jam kembali. Pastikan segera memindai (Scan In) begitu tiba di Pos 1.
               </div>
             </div>
@@ -160,7 +160,7 @@ function renderSecurityDashboard() {
       securityDashboardOutsideList.innerHTML = outsideTickets.map(t => {
         const isOverdue = t.status === 'Terlambat';
         return `
-          <div class="feed-item" style="${isOverdue ? 'border-left: 3px solid var(--rose-danger); background: #fff5f5;' : ''}">
+          <div class="feed-item ${isOverdue ? 'item-overdue' : ''}">
             <div class="feed-item-left">
               <div class="feed-item-icon" style="background: ${isOverdue ? 'var(--rose-light)' : '#e0f2fe'}; color: ${isOverdue ? 'var(--rose-danger)' : '#0284c7'}; font-size: 0.75rem; font-weight: 800;">
                 ${isOverdue ? 'LATE' : 'OUT'}
@@ -272,19 +272,19 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             </div>
 
             ${isOverdue ? `
-              <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b91c1c; font-weight:700;">
+              <div class="sec-status-callout danger" style="border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; font-weight:700;">
                 Karyawan terlambat kembali! Wajib melakukan Tap In Kartu Akses saat tiba di kawasan.
               </div>
             ` : ''}
 
             ${isLateCompleted ? `
-              <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#b45309; font-weight:700;">
+              <div class="sec-status-callout warning" style="border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; font-weight:700;">
                 Karyawan kembali melewati estimasi waktu (+${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`} terlambat).
               </div>
             ` : ''}
 
             ${isExpired ? `
-              <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; color:#475569;">
+              <div class="sec-status-callout neutral" style="border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem;">
                 Tiket telah kedaluwarsa & hangus (+10 menit dari rencana keluar). Dilarang diproses keluar.
               </div>
             ` : ''}
@@ -550,12 +550,12 @@ function renderSecurityLogTable(list, containerElement) {
             return `
               <tr>
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 700; font-family: var(--font-mono); color: #0f172a; font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
-                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${t.category} — ${t.type}</div>
+                  <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 600; color: #0f172a; font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: #475569;">(${t.destination})</span></div>
-                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 3px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
+                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${t.destination})</span></div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
                 </td>
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
@@ -833,12 +833,19 @@ async function startCameraScanner(selectedCameraId = null) {
 
   const cameraDeviceSelect = document.getElementById('cameraDeviceSelect');
   const cameraIdlePlaceholder = document.getElementById('cameraIdlePlaceholder');
+  const cameraLoadingPlaceholder = document.getElementById('cameraLoadingPlaceholder');
   const cameraScanOverlay = document.getElementById('cameraScanOverlay');
   const cameraScanStatus = document.getElementById('cameraScanStatus');
   const btnStartCamera = document.getElementById('btnStartCamera');
   const btnStopCamera = document.getElementById('btnStopCamera');
 
   try {
+    // Tampilkan indikator loading saat kamera sedang diinisialisasi (Revisi 6)
+    if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'none';
+    if (cameraScanOverlay) cameraScanOverlay.style.display = 'none';
+    if (cameraLoadingPlaceholder) cameraLoadingPlaceholder.style.display = 'flex';
+    if (cameraScanStatus) cameraScanStatus.textContent = 'Sedang membuka kamera, mohon tunggu...';
+
     if (!html5QrScannerInstance) {
       html5QrScannerInstance = new Html5Qrcode('cameraReaderView');
     }
@@ -866,10 +873,6 @@ async function startCameraScanner(selectedCameraId = null) {
 
     const targetCamera = selectedCameraId || ((cameraDeviceSelect && cameraDeviceSelect.value) ? cameraDeviceSelect.value : { facingMode: 'environment' });
 
-    if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'none';
-    if (cameraScanOverlay) cameraScanOverlay.style.display = 'flex';
-    if (cameraScanStatus) cameraScanStatus.textContent = 'Kamera aktif: Arahkan ke QR Code tiket...';
-
     await html5QrScannerInstance.start(
       targetCamera,
       config,
@@ -879,16 +882,41 @@ async function startCameraScanner(selectedCameraId = null) {
       () => {}
     );
 
+    // Kamera berhasil aktif
+    if (cameraActiveToolbar) cameraActiveToolbar.style.display = 'flex';
+    if (cameraLoadingPlaceholder) cameraLoadingPlaceholder.style.display = 'none';
+    if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'none';
+    if (cameraScanOverlay) cameraScanOverlay.style.display = 'flex';
+    if (cameraScanStatus) cameraScanStatus.textContent = 'Kamera aktif: Arahkan ke QR Code tiket...';
+
     isCameraScanningActive = true;
     if (btnStartCamera) btnStartCamera.style.display = 'none';
     if (btnStopCamera) btnStopCamera.style.display = 'inline-flex';
     if (typeof window.showToast === 'function') window.showToast('Kamera pemindai QR aktif!', 'success');
   } catch (err) {
     console.error('Camera Scanner Error:', err);
+    if (cameraActiveToolbar) cameraActiveToolbar.style.display = 'none';
+    if (cameraLoadingPlaceholder) cameraLoadingPlaceholder.style.display = 'none';
     if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'flex';
     if (cameraScanOverlay) cameraScanOverlay.style.display = 'none';
-    if (cameraScanStatus) cameraScanStatus.textContent = 'Izin kamera ditolak atau kamera tidak terdeteksi.';
-    if (typeof window.showToast === 'function') window.showToast('Gagal mengaktifkan kamera: ' + (err.message || err), 'danger');
+
+    // Pesan error komunikatif dan bersahabat bagi pengguna (Revisi 6)
+    let userErrorMsg = 'Kamera tidak dapat dibuka. Pastikan kamera terpasang dan izinkan browser mengakses kamera.';
+    const errName = err ? (err.name || String(err)) : '';
+    const errStr = String(err ? (err.message || err) : '').toLowerCase();
+
+    if (errName === 'NotAllowedError' || errStr.includes('permission') || errStr.includes('denied') || errStr.includes('not allowed')) {
+      userErrorMsg = 'Izin kamera ditolak. Silakan klik ikon gembok pada bilah browser Anda lalu izinkan kamera.';
+    } else if (errName === 'NotFoundError' || errStr.includes('notfound') || errStr.includes('no camera') || errStr.includes('device not found')) {
+      userErrorMsg = 'Tidak ditemukan perangkat kamera pada komputer ini. Silakan gunakan pemindai barcode eksternal atau input tiket manual.';
+    } else if (errName === 'NotReadableError' || errStr.includes('already in use') || errStr.includes('busy')) {
+      userErrorMsg = 'Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan coba kembali.';
+    } else if (errStr.includes('secure') || errStr.includes('https')) {
+      userErrorMsg = 'Akses kamera dibatasi peramban ke koneksi aman (HTTPS / localhost).';
+    }
+
+    if (cameraScanStatus) cameraScanStatus.innerHTML = `<span style="color: #ef4444; font-weight: 700;">⚠️ ${userErrorMsg}</span>`;
+    if (typeof window.showToast === 'function') window.showToast(userErrorMsg, 'danger');
   }
 }
 
@@ -904,12 +932,16 @@ async function stopCameraScanner() {
 
   const btnStartCamera = document.getElementById('btnStartCamera');
   const btnStopCamera = document.getElementById('btnStopCamera');
+  const cameraActiveToolbar = document.getElementById('cameraActiveToolbar');
   const cameraIdlePlaceholder = document.getElementById('cameraIdlePlaceholder');
+  const cameraLoadingPlaceholder = document.getElementById('cameraLoadingPlaceholder');
   const cameraScanOverlay = document.getElementById('cameraScanOverlay');
   const cameraScanStatus = document.getElementById('cameraScanStatus');
 
+  if (cameraActiveToolbar) cameraActiveToolbar.style.display = 'none';
   if (btnStartCamera) btnStartCamera.style.display = 'inline-flex';
   if (btnStopCamera) btnStopCamera.style.display = 'none';
+  if (cameraLoadingPlaceholder) cameraLoadingPlaceholder.style.display = 'none';
   if (cameraIdlePlaceholder) cameraIdlePlaceholder.style.display = 'flex';
   if (cameraScanOverlay) cameraScanOverlay.style.display = 'none';
   if (cameraScanStatus) cameraScanStatus.textContent = 'Arahkan kamera ke QR Code Tiket Izin Karyawan.';

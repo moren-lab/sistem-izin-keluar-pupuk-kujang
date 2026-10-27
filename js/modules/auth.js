@@ -310,7 +310,20 @@
    */
   window.kujangLogout = function () {
     window.setKujangCurrentUser(null);
+    try {
+      sessionStorage.removeItem('kujang_current_user');
+      sessionStorage.clear();
+    } catch (e) {}
     pendingAccount = null;
+
+    // Tutup seluruh modal atau scanner yang mungkin sedang aktif
+    try {
+      if (typeof window.stopCameraScanner === 'function') {
+        window.stopCameraScanner();
+      }
+      const openModals = document.querySelectorAll('.modal-overlay.open, .figma-modal-overlay.open, .portal-login-overlay.open');
+      openModals.forEach(m => m.classList.remove('open'));
+    } catch (e) {}
 
     // Reset tombol verify
     const btnVerify = document.getElementById('btnKujangVerifyOtp');
@@ -361,20 +374,14 @@
    * Inisialisasi saat DOM siap
    */
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cek apakah tab ini sudah memiliki sesi login di sessionStorage
-    const currentUser = window.getKujangCurrentUser();
-    const overlay = document.getElementById('kujangAuthOverlay');
+    // Selalu tampilkan halaman login KUJANG ID saat membuka localhost / reload
+    try {
+      sessionStorage.removeItem('kujang_current_user');
+    } catch (e) {}
 
-    if (currentUser) {
-      // Tab ini sudah login -> langsung masuk ke role-nya
-      if (overlay) overlay.style.display = 'none';
-      activateAppRole(currentUser.role);
-      updateAppUserBadge(currentUser);
-    } else {
-      // Tab ini belum login -> tampilkan Kujang ID
-      if (overlay) overlay.style.display = 'flex';
-      window.showKujangMethodStep();
-    }
+    const overlay = document.getElementById('kujangAuthOverlay');
+    if (overlay) overlay.style.display = 'flex';
+    window.showKujangMethodStep();
 
     // 2. Setup event listener keyboard pada 6 kotak input OTP
     const otpInputs = document.querySelectorAll('.kujang-otp-digit');
@@ -416,10 +423,9 @@
       });
     }
 
-    // 4. MULTI-TAB SYNC: Saat tab lain mengubah data tiket di localStorage,
-    // re-render view tab ini secara real-time tanpa refresh!
     window.addEventListener('storage', (e) => {
-      if (e.key === 'ticketsList' || e.key === 'empTickets') {
+      const storageKey = window.STORAGE_KEY || 'KUJANG_GATEPASS_TICKETS_V7';
+      if (e.key === storageKey || e.key === 'ticketsList' || e.key === 'empTickets') {
         const activeUser = window.getKujangCurrentUser();
         if (!activeUser) return;
 

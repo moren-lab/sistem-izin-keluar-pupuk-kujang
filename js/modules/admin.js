@@ -311,39 +311,117 @@ function renderAdminRecentFeed() {
 // ==========================================
 // 3. AUDIT TRAIL & INVESTIGATION (FR-ADM-04, UC-21, BRULE-13)
 // ==========================================
+function formatAuditDateTime(tStr) {
+  if (!tStr) return { date: '-', time: '-' };
+  const raw = tStr.trim();
+
+  // If format is like "19 Okt 2026, 09.20 WIB" or "19 Okt 2026, 10.05 WIB (Pos 1 Gerbang Utama)"
+  if (raw.includes(',')) {
+    const parts = raw.split(',');
+    const datePart = parts[0].trim();
+    let timePart = parts.slice(1).join(',').trim();
+    timePart = timePart.replace(/(\d{1,2})\.(\d{2})/, '$1:$2');
+    return { date: datePart, time: timePart };
+  }
+
+  // If ISO string like "2026-10-19T10:00"
+  if (raw.includes('T')) {
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const datePart = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      const timePart = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} WIB`;
+      return { date: datePart, time: timePart };
+    }
+  }
+
+  const words = raw.split(/\s+/);
+  if (words.length >= 4) {
+    const datePart = words.slice(0, 3).join(' ');
+    const timePart = words.slice(3).join(' ');
+    return { date: datePart, time: timePart };
+  }
+
+  return { date: raw, time: '' };
+}
+
 function renderAdminAudit() {
   const tickets = window.ticketsList || [];
   const tbody = document.getElementById('adminAuditTableBody');
   const countBadge = document.getElementById('adminAuditFilterCount');
   if (!tbody) return;
 
-  const allLogs = [];
-  tickets.forEach(ticket => {
-    const logs = ticket.activityLog || ticket.timeline || [];
-    logs.forEach(log => {
-      allLogs.push({
-        ticketId: ticket.id,
-        applicantName: ticket.applicantName,
-        applicantNip: ticket.applicantNip,
-        department: ticket.department,
-        category: ticket.category,
-        event: log.event,
-        time: log.time,
-        by: log.by,
-        desc: log.desc
-      });
-    });
-  });
-
-  const sortAuditEl = document.getElementById('sortAdminAudit');
-  const sortAuditOrder = sortAuditEl ? sortAuditEl.value : 'desc';
-
   const parseLogTime = (tStr) => {
     if (!tStr) return 0;
-    const clean = tStr.replace(' WIB', '').trim();
+    const clean = tStr.replace(' WIB', '').replace(/\(.*?\)/g, '').trim();
+    const months = {
+      'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'Mei': '05', 'Jun': '06',
+      'Jul': '07', 'Agu': '08', 'Sep': '09', 'Okt': '10', 'Nov': '11', 'Des': '12'
+    };
+    const m = clean.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}),?\s+(\d{1,2})[:.](\d{2})/);
+    if (m) {
+      const day = m[1].padStart(2, '0');
+      const mon = months[m[2]] || '01';
+      const yr = m[3];
+      const hr = m[4].padStart(2, '0');
+      const min = m[5];
+      const iso = `${yr}-${mon}-${day}T${hr}:${min}:00`;
+      const parsed = new Date(iso);
+      if (!isNaN(parsed.getTime())) return parsed.getTime();
+    }
     const d = new Date(clean);
     return isNaN(d.getTime()) ? 0 : d.getTime();
   };
+
+  // Group by employee so each employee occupies only ONE real-time row
+  const employeeMap = new Map();
+
+  tickets.forEach(ticket => {
+    const empKey = (ticket.applicantNip || ticket.applicantName || 'karyawan').trim().toLowerCase();
+    const logs = ticket.activityLog || ticket.timeline || [];
+
+    let latestLog = null;
+    if (logs.length > 0) {
+      latestLog = logs.reduce((latest, current) => {
+        return parseLogTime(current.time) >= parseLogTime(latest.time) ? current : latest;
+      }, logs[0]);
+    } else {
+      latestLog = {
+        event: ticket.status || 'Diajukan',
+        time: ticket.createdAt || ticket.plannedExit || '',
+        by: ticket.applicantName || 'Pemohon',
+        desc: ticket.reason || 'Pengajuan izin keluar'
+      };
+    }
+
+    const candidate = {
+      ticketId: ticket.id,
+      ticket: ticket,
+      applicantName: ticket.applicantName || 'Karyawan',
+      applicantNip: ticket.applicantNip || '-',
+      department: ticket.department || 'Departemen Rekayasa & Pemeliharaan',
+      category: ticket.category || 'Dinas Kantor',
+      event: latestLog.event,
+      time: latestLog.time,
+      by: latestLog.by,
+      desc: latestLog.desc,
+      rawLog: latestLog
+    };
+
+    if (!employeeMap.has(empKey)) {
+      employeeMap.set(empKey, candidate);
+    } else {
+      const existing = employeeMap.get(empKey);
+      if (parseLogTime(candidate.time) >= parseLogTime(existing.time)) {
+        employeeMap.set(empKey, candidate);
+      }
+    }
+  });
+
+  const allLogs = Array.from(employeeMap.values());
+
+  const sortAuditEl = document.getElementById('sortAdminAudit');
+  const sortAuditOrder = sortAuditEl ? sortAuditEl.value : 'desc';
 
   allLogs.sort((a, b) => {
     const tA = parseLogTime(a.time);
@@ -370,7 +448,7 @@ function renderAdminAudit() {
   });
 
   if (countBadge) {
-    countBadge.textContent = `${filtered.length} riwayat peristiwa`;
+    countBadge.textContent = `${filtered.length} riwayat karyawan`;
   }
 
   if (filtered.length === 0) {
@@ -395,11 +473,16 @@ function renderAdminAudit() {
     else if (log.event.includes('Terlambat')) pillClass = 'event-overdue';
     else if (log.event.includes('Kedaluwarsa')) pillClass = 'event-expire';
 
+    const dt = formatAuditDateTime(log.time);
+
     return `
       <tr>
         <td style="white-space: nowrap;">
-          <div style="font-size: 0.775rem; font-family: var(--font-mono); color: var(--text-secondary);">
-            ${log.time}
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">
+            ${dt.date}
+          </div>
+          <div style="font-size: 0.735rem; font-family: var(--font-mono); color: var(--text-secondary); line-height: 1.35; margin-top: 2px;">
+            ${dt.time}
           </div>
         </td>
         <td style="white-space: nowrap;">
@@ -1010,13 +1093,13 @@ function renderAdminUsers() {
 
     const isRevoked = u.status === 'Dicabut' || u.status === 'Nonaktif';
     const statusBadge = isRevoked
-      ? `<span style="font-size: 0.75rem; color: #991b1b; font-weight: 700; background: #fee2e2; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">● Dicabut</span>`
-      : `<span style="font-size: 0.75rem; color: #166534; font-weight: 700; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">● Aktif</span>`;
+      ? `<span class="admin-user-status-pill revoked">● Dicabut</span>`
+      : `<span class="admin-user-status-pill active">● Aktif</span>`;
 
     return `
       <tr>
         <td>
-          <span style="font-family: var(--font-mono); font-weight: 700; color: #1e293b; font-size: 0.825rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px;">
+          <span class="kujang-id-code-badge">
             ${u.kujangId}
           </span>
         </td>
@@ -1025,7 +1108,7 @@ function renderAdminUsers() {
           <div class="report-emp-nip">NIP: ${u.nip}</div>
         </td>
         <td style="font-size: 0.8rem; color: var(--text-secondary);">${u.email || '-'}</td>
-        <td style="font-size: 0.825rem; color: #334155;">${u.department}</td>
+        <td style="font-size: 0.825rem; color: var(--text-primary);">${u.department}</td>
         <td>
           <span class="user-role-badge ${roleClass}">${u.role}</span>
         </td>
@@ -1114,16 +1197,13 @@ function renderAdminStatusTracking() {
 
   pillsContainer.innerHTML = filterKeys.map(f => {
     const isActive = adminTrackingStatusFilter === f.key;
-    const activeStyle = isActive
-      ? `background: #0f172a; color: #ffffff; border-color: #0f172a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1);`
-      : `background: #ffffff; color: var(--text-secondary); border-color: var(--border-color); font-weight: 500;`;
 
     return `
-      <button type="button" class="status-tracking-pill-btn" onclick="window.filterAdminStatusTracking('${f.key}')"
-        style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.775rem; border: 1px solid var(--border-color); cursor: pointer; white-space: nowrap; transition: all 0.15s ease; ${activeStyle}">
+      <button type="button" class="status-tracking-pill-btn ${isActive ? 'active' : ''}" onclick="window.filterAdminStatusTracking('${f.key}')"
+        style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.775rem; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
         <span>${f.icon}</span>
         <span>${f.label}</span>
-        <span style="background: ${isActive ? 'rgba(255,255,255,0.25)' : '#f1f5f9'}; color: ${isActive ? '#ffffff' : 'var(--text-primary)'}; padding: 1px 6px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">
+        <span class="status-tracking-pill-count">
           ${f.count}
         </span>
       </button>
@@ -1630,12 +1710,12 @@ function renderAdminRoleDropdownItems(query = '') {
     let badgeHtml = '';
     if (item.isSingleSeat) {
       if (isOccupiedByOther) {
-        badgeHtml = `<span style="font-size: 0.7rem; font-weight: 700; color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; padding: 2px 7px; border-radius: 999px;">● Sedang Aktif: ${occupant.name}</span>`;
+        badgeHtml = `<span class="role-seat-badge occupied">● Sedang Aktif: ${occupant.name}</span>`;
       } else {
-        badgeHtml = `<span style="font-size: 0.7rem; font-weight: 700; color: #166534; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 999px;">✓ Tersedia</span>`;
+        badgeHtml = `<span class="role-seat-badge available">✓ Tersedia</span>`;
       }
     } else {
-      badgeHtml = `<span style="font-size: 0.7rem; font-weight: 700; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 2px 7px; border-radius: 999px;">Multi-User</span>`;
+      badgeHtml = `<span class="role-seat-badge multi">Multi-User</span>`;
     }
 
     return `
@@ -1644,12 +1724,12 @@ function renderAdminRoleDropdownItems(query = '') {
            style="display: flex; flex-direction: column; gap: 3px; padding: 0.6rem 0.85rem;"
            onclick="window.selectAdminRole('${item.roleKey}', '${item.jabatan.replace(/'/g, "\\'")}')">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <div style="font-weight: 700; font-size: 0.85rem; color: #0f172a;">
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">
             ${item.hakAkses} <span style="color: var(--text-muted); font-weight: 400;">—</span> <span style="color: var(--primary-accent);">${item.jabatan}</span>
           </div>
           ${badgeHtml}
         </div>
-        <div style="font-size: 0.725rem; color: #64748b; line-height: 1.35;">
+        <div style="font-size: 0.725rem; color: var(--text-secondary); line-height: 1.35;">
           ${item.description}
         </div>
       </div>

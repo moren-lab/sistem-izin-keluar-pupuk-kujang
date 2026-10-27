@@ -952,61 +952,38 @@ function validateWorkingHours(dateInput, label = 'Waktu') {
   const d = (typeof dateInput === 'string') ? new Date(dateInput) : dateInput;
   if (!d || isNaN(d.getTime())) return { valid: false, message: `Format ${label} tidak valid!` };
 
+  // Mendukung operasional 24 jam untuk seluruh shift kerja (termasuk lembur, shift malam, dan regu satpam/K3)
+  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const day = d.getDay();
-  if (day === 0 || day === 6) {
-    return {
-      valid: false,
-      message: `${label} tidak dapat dipilih pada hari libur akhir pekan (${day === 6 ? 'Sabtu' : 'Minggu'}). Sistem perizinan hanya berlaku hari kerja Senin s/d Jumat!`
-    };
-  }
-
   const hours = d.getHours();
   const minutes = d.getMinutes();
-  const totalMins = hours * 60 + minutes;
-  const startMins = 7 * 60; // 07:00 WIB
-  const closingInfo = getClosingTimeForDate(d);
+  const pad = (n) => String(n).padStart(2, '0');
 
-  if (totalMins < startMins) {
-    return {
-      valid: false,
-      message: `${label} (${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} WIB) tidak boleh sebelum jam masuk kerja (minimal pukul 07:00 WIB)!`
-    };
-  }
-
-  if (totalMins > closingInfo.totalMinutes) {
-    return {
-      valid: false,
-      message: `${label} (${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} WIB) melebihi batas jam pulang kantor! Untuk hari ${closingInfo.dayName}, batas maksimal pengajuan dan kepulangan adalah pukul ${closingInfo.closingStr}.`
-    };
-  }
-
-  return { valid: true, closingInfo };
+  return {
+    valid: true,
+    closingInfo: {
+      day,
+      dayName: dayNames[day] || 'Hari Kerja',
+      hour: hours,
+      minute: minutes,
+      totalMinutes: hours * 60 + minutes,
+      closingStr: '24 Jam',
+      scheduleText: 'Operasional 24 Jam (Shift Siang / Malam / Lembur)'
+    }
+  };
 }
 
 function setInputMaxByDate(inputEl, baseDate = new Date()) {
   if (!inputEl) return;
-  const d = (typeof baseDate === 'string') ? new Date(baseDate) : baseDate;
-  if (!d || isNaN(d.getTime())) return;
-  const pad = (n) => String(n).padStart(2, '0');
-  const closing = getClosingTimeForDate(d);
-  if (closing && closing.totalMinutes > 0) {
-    inputEl.max = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
-  }
+  // Bebaskan batasan jam agar karyawan shift malam atau lembur dapat mengajukan izin 24 jam
+  inputEl.removeAttribute('max');
 }
 
 function isWithinOperationalHours(date = new Date()) {
-  const result = validateWorkingHours(date, 'Waktu saat ini');
-  if (!result.valid) {
-    return {
-      allowed: false,
-      scheduleText: result.message,
-      message: result.message
-    };
-  }
   return {
     allowed: true,
-    scheduleText: result.closingInfo.scheduleText,
-    closingHour: result.closingInfo.closingStr
+    scheduleText: 'Operasional 24 Jam (Shift Pabrik & Pengamanan)',
+    closingHour: '24 Jam'
   };
 }
 
@@ -1132,6 +1109,31 @@ function openDigitalPassModal(ticketId) {
     }
   }
 
+  const printTicketDateTime = document.getElementById('printTicketDateTime');
+  if (printTicketDateTime) {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    printTicketDateTime.textContent = `Dicetak: ${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()} pukul ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+  }
+
+  const elDept = document.getElementById('digitalPassDepartment');
+  if (elDept) elDept.textContent = ticket.department || 'Departemen Rekayasa & Pemeliharaan';
+
+  const elPurpose = document.getElementById('digitalPassPurpose');
+  if (elPurpose) elPurpose.textContent = `${ticket.category || 'Dinas Kantor'} (${ticket.type || 'Kembali ke Area'})`;
+
+  const elPlannedExit = document.getElementById('digitalPassPlannedExit');
+  if (elPlannedExit) {
+    const rawExit = ticket.plannedExit || '19 Okt 2026, 10.00 WIB';
+    elPlannedExit.textContent = window.formatDisplayDate ? window.formatDisplayDate(rawExit) : rawExit;
+  }
+
+  const elApprover = document.getElementById('digitalPassApprover');
+  if (elApprover) {
+    const appTitle = ticket.approverTitle ? ` — ${ticket.approverTitle}` : '';
+    elApprover.textContent = `${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}${appTitle}`;
+  }
+
   // Button actions
   const btnDownload = document.getElementById('btnDownloadDigitalQRPng');
   if (btnDownload) {
@@ -1154,9 +1156,17 @@ function openDigitalPassModal(ticketId) {
   const btnPrint = document.getElementById('btnPrintDigitalPass');
   if (btnPrint) {
     btnPrint.onclick = () => {
+      document.body.classList.add('printing-digital-pass');
       window.print();
+      setTimeout(() => {
+        document.body.classList.remove('printing-digital-pass');
+      }, 1000);
     };
   }
+
+  window.addEventListener('afterprint', () => {
+    document.body.classList.remove('printing-digital-pass');
+  }, { once: true });
 
   modal.classList.add('open');
 }
@@ -1601,9 +1611,11 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   // Security Action Buttons (Scan Out / Scan In) directly inside detail modal
   const btnDetailScanOut = document.getElementById('btnDetailScanOut');
   const btnDetailScanIn = document.getElementById('btnDetailScanIn');
+  const isSecurity = (window.currentActor === 'security');
 
   if (btnDetailScanOut) {
-    const canScanOut = (ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
+    // Karyawan tidak boleh scan out sendiri di riwayatnya. Hanya Pos Jaga yang berwenang via scanner / manual.
+    const canScanOut = isSecurity && (ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
     if (canScanOut) {
       btnDetailScanOut.style.display = 'inline-flex';
       btnDetailScanOut.onclick = function () {
@@ -2003,23 +2015,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.showToast(check.message, 'danger');
       }
       inputEl.style.borderColor = '#e11d48';
-
-      // Otomatis sesuaikan atau batasi ke batas jam pulang hari itu
-      if (!isNaN(d.getTime())) {
-        const day = d.getDay();
-        if (day === 0 || day === 6) {
-          inputEl.value = '';
-        } else {
-          const closing = getClosingTimeForDate(d);
-          const pad = (n) => String(n).padStart(2, '0');
-          const totalMins = d.getHours() * 60 + d.getMinutes();
-          if (totalMins > closing.totalMinutes) {
-            inputEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
-          } else if (totalMins < 7 * 60) {
-            inputEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T07:00`;
-          }
-        }
-      }
     } else {
       inputEl.style.borderColor = '';
     }
@@ -2030,16 +2025,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (companionReturnEl.value && companionReturnEl.value <= inputEl.value) {
         const exitDt = new Date(inputEl.value);
         const newReturn = new Date(exitDt.getTime() + 60 * 60000);
-        const closing = getClosingTimeForDate(exitDt);
-        if (closing && (newReturn.getHours() * 60 + newReturn.getMinutes()) > closing.totalMinutes) {
-          newReturn.setHours(closing.hour, closing.minute, 0, 0);
-        }
         companionReturnEl.value = getFormattedDateTimeLocal(newReturn);
-        if (!isDinas && catVal === 'Urusan Pribadi') {
-          setInputMaxByDate(companionReturnEl, now);
-        } else {
-          companionReturnEl.removeAttribute('max');
-        }
+        companionReturnEl.removeAttribute('max');
       }
     }
   }
@@ -2091,22 +2078,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.showToast(check.message, 'danger');
       }
       returnEl.style.borderColor = '#e11d48';
-
-      if (!isNaN(d.getTime())) {
-        const day = d.getDay();
-        if (day === 0 || day === 6) {
-          returnEl.value = '';
-        } else {
-          const closing = getClosingTimeForDate(d);
-          const pad = (n) => String(n).padStart(2, '0');
-          const totalMins = d.getHours() * 60 + d.getMinutes();
-          if (totalMins > closing.totalMinutes) {
-            returnEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(closing.hour)}:${pad(closing.minute)}`;
-          } else if (totalMins < 7 * 60) {
-            returnEl.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T07:00`;
-          }
-        }
-      }
     } else {
       returnEl.style.borderColor = '';
     }

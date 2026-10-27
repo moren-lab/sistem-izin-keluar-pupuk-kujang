@@ -555,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnLoginSubmit) btnLoginSubmit.addEventListener('click', handleLoginSubmit);
 
   initRoleSwitcherScroll();
+  initTheme();
 
   setInterval(updateClock, 1000);
   updateClock();
@@ -623,12 +624,11 @@ function executeLogout() {
   }
   closeMobileSidebar();
 
-  const portalLoginOverlay = document.getElementById('portalLoginOverlay');
-  if (portalLoginOverlay) {
-    portalLoginOverlay.classList.add('open');
-  }
-  if (typeof window.showToast === 'function') {
-    window.showToast('Sesi KUJANG ID berhasil diakhiri. Silakan pilih akun untuk masuk kembali.', 'info');
+  if (typeof window.kujangLogout === 'function') {
+    window.kujangLogout();
+  } else {
+    const portalLoginOverlay = document.getElementById('portalLoginOverlay');
+    if (portalLoginOverlay) portalLoginOverlay.classList.add('open');
   }
 }
 
@@ -648,6 +648,54 @@ function handleLoginSubmit() {
   }
 }
 
+// ==========================================
+// TEMA GELAP / TERANG (DARK MODE / LIGHT MODE)
+// ==========================================
+function updateThemeUI(isDark) {
+  if (isDark) {
+    document.body.classList.add('theme-dark');
+    document.documentElement.classList.add('theme-dark');
+  } else {
+    document.body.classList.remove('theme-dark');
+    document.documentElement.classList.remove('theme-dark');
+  }
+
+  const iconEls = document.querySelectorAll('.theme-icon-wrap, #dashThemeIcon, #dashThemeIconEmp, #dashThemeIconApp, #dashThemeIconSec, #dashThemeIconAdm');
+  const labelEls = document.querySelectorAll('.theme-text-wrap, #dashThemeLabel, #dashThemeLabelEmp, #dashThemeLabelApp, #dashThemeLabelSec, #dashThemeLabelAdm');
+
+  iconEls.forEach(el => {
+    el.textContent = isDark ? '☀️' : '🌙';
+  });
+
+  labelEls.forEach(el => {
+    el.textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
+  });
+
+  // Re-render interactive charts with dark mode styling
+  try {
+    if (typeof window.renderAllCharts === 'function') {
+      window.renderAllCharts();
+    }
+  } catch (err) {
+    console.warn('[Theme] renderAllCharts warning:', err);
+  }
+}
+
+function toggleDarkMode() {
+  const current = localStorage.getItem('kujang_theme') === 'dark';
+  const next = !current;
+  localStorage.setItem('kujang_theme', next ? 'dark' : 'light');
+  updateThemeUI(next);
+  if (typeof window.showToast === 'function') {
+    window.showToast(next ? 'Mode Gelap diaktifkan' : 'Mode Terang diaktifkan', 'info');
+  }
+}
+
+function initTheme() {
+  const isDark = localStorage.getItem('kujang_theme') === 'dark';
+  updateThemeUI(isDark);
+}
+
 // Expose globally
 window.updateClock = updateClock;
 window.toggleSidebar = toggleSidebar;
@@ -662,4 +710,7 @@ window.closeLogoutModal = closeLogoutModal;
 window.executeLogout = executeLogout;
 window.handleLoginSubmit = handleLoginSubmit;
 window.initRoleSwitcherScroll = initRoleSwitcherScroll;
+window.updateThemeUI = updateThemeUI;
+window.toggleDarkMode = toggleDarkMode;
+window.initTheme = initTheme;
 

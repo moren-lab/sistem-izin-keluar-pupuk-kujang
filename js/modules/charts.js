@@ -11,6 +11,19 @@
  */
 
 // ===================================================================
+// THEME HELPER FOR CHARTS
+// ===================================================================
+function isThemeDark() {
+  try {
+    return document.documentElement.classList.contains('theme-dark') ||
+           document.body.classList.contains('theme-dark') ||
+           localStorage.getItem('kujang_theme') === 'dark';
+  } catch (e) {
+    return false;
+  }
+}
+
+// ===================================================================
 // FLOATING INTERACTIVE TOOLTIP ENGINE
 // ===================================================================
 function ensureChartTooltip() {
@@ -200,6 +213,14 @@ function renderKaryawanDonutChart() {
     };
   });
 
+  const dark = isThemeDark();
+  const trackStroke = dark ? '#1e293b' : '#f1f5f9';
+  const centerTextCol = dark ? '#f8fafc' : '#0f172a';
+  const centerSubCol = dark ? '#94a3b8' : '#64748b';
+  const infoBadgeBg = dark ? '#131b2a' : '#f8fafc';
+  const infoBadgeBorder = dark ? '#24334a' : '#cbd5e1';
+  const infoBadgeText = dark ? '#cbd5e1' : '#64748b';
+
   container.innerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.5rem 0; width: 100%;">
       <!-- SVG Donut Chart with 2 Categories (Selesai Hijau, Darurat Merah) -->
@@ -207,7 +228,7 @@ function renderKaryawanDonutChart() {
         <svg width="150" height="150" viewBox="0 0 150 150" style="display: block; overflow: visible;">
           <g transform="rotate(-90 ${cx} ${cy})">
             <!-- Background Track -->
-            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="18" />
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${trackStroke}" stroke-width="18" />
             
             ${segmentsRenderData.map(s => `
               <circle id="donutSlice_${s.key}"
@@ -220,14 +241,14 @@ function renderKaryawanDonutChart() {
           </g>
           
           <!-- Center Text -->
-          <text x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="#0f172a" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
-          <text x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
+          <text x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
+          <text x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
         </svg>
       </div>
 
       <!-- Single Dynamic Interactive Info Under Diagram (No duplicate text) -->
       <div id="karyawanDonutInfoBadge" style="margin-top: 1rem; width: 100%; max-width: 320px; min-height: 46px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.75rem; color: #64748b; font-weight: 500; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem 0.85rem; width: 100%; text-align: center;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.75rem; color: ${infoBadgeText}; font-weight: 500; background: ${infoBadgeBg}; border: 1.5px dashed ${infoBadgeBorder}; border-radius: 8px; padding: 0.5rem 0.85rem; width: 100%; text-align: center;">
           💡 Arahkan kursor ke warna chart untuk detail persentase
         </div>
       </div>
@@ -244,11 +265,12 @@ function hoverKaryawanDonut(key, count, total, pct, color) {
 
   const badge = document.getElementById('karyawanDonutInfoBadge');
   if (badge) {
+    const dark = isThemeDark();
     const isDarurat = key === 'darurat';
     const title = isDarurat ? 'Total Izin Darurat' : 'Total Izin Selesai';
-    const bg = isDarurat ? '#fef2f2' : '#ecfdf5';
-    const border = isDarurat ? '#ef4444' : '#10b981';
-    const textCol = isDarurat ? '#991b1b' : '#065f46';
+    const bg = isDarurat ? (dark ? 'rgba(239, 68, 68, 0.15)' : '#fef2f2') : (dark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5');
+    const border = isDarurat ? (dark ? 'rgba(239, 68, 68, 0.4)' : '#ef4444') : (dark ? 'rgba(16, 185, 129, 0.4)' : '#10b981');
+    const textCol = isDarurat ? (dark ? '#fca5a5' : '#991b1b') : (dark ? '#6ee7b7' : '#065f46');
     const dotCol = isDarurat ? '#dc2626' : '#059669';
 
     badge.innerHTML = `
@@ -414,6 +436,8 @@ function renderApproverBarChart() {
     }
   }
 
+  const dark = isThemeDark();
+
   container.innerHTML = `
     <div class="approver-bar-wrap" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 0.85rem; height: 165px; padding-top: 10px;">
       ${daysData.map((d, idx) => {
@@ -421,8 +445,14 @@ function renderApproverBarChart() {
         const isPeak = d.count === maxVal && d.count > 0;
         const isToday = !isMonth && d.dayIdx === curDay;
         const heightPx = d.count > 0 ? (Math.round((d.count / maxVal) * 115) + 16) : 6;
-        const barColor = isPeak ? '#059669' : (d.count > 0 ? '#10b981' : '#e2e8f0');
-        const textColor = isPeak ? '#047857' : (d.count > 0 ? '#0f172a' : '#94a3b8');
+        const emptyBarCol = dark ? '#1e293b' : '#e2e8f0';
+        const barColor = isPeak ? '#059669' : (d.count > 0 ? '#10b981' : emptyBarCol);
+        const textColor = isPeak 
+          ? (dark ? '#34d399' : '#047857') 
+          : (d.count > 0 ? (dark ? '#f8fafc' : '#0f172a') : (dark ? '#64748b' : '#94a3b8'));
+        const labelCol = (isToday || isPeak) 
+          ? (dark ? '#34d399' : '#047857') 
+          : (dark ? '#94a3b8' : '#64748b');
         const pct = totalVal > 0 ? Math.round((d.count / totalVal) * 100) : 0;
         const subtext = isFuture ? 'Hari Mendatang (Belum ada pengajuan)' : (isPeak ? '★ Hari Volume Tertinggi' : 'Aktivitas Normal');
 
@@ -439,7 +469,7 @@ function renderApproverBarChart() {
             <div id="approverBar_${idx}" class="${d.count > 0 ? (isPeak ? 'approver-bar-pillar peak' : 'approver-bar-pillar normal') : 'approver-bar-pillar empty'}" 
                  style="height: ${heightPx}px; width: 100%; max-width: 44px; background: ${barColor}; border-radius: 6px 6px 0 0; transition: height 0.4s ease, background 0.2s ease;"></div>
             <!-- Weekday label -->
-            <span style="font-size: 0.8rem; font-weight: ${isToday || isPeak ? '800' : '600'}; color: ${isToday || isPeak ? '#047857' : '#64748b'}; margin-top: 8px;">
+            <span style="font-size: 0.8rem; font-weight: ${isToday || isPeak ? '800' : '600'}; color: ${labelCol}; margin-top: 8px;">
               ${d.label}
             </span>
           </div>
@@ -650,6 +680,16 @@ function renderAdminTrafficChart() {
   }
 
   const slotWidth = plotW / (data.length - 1);
+  const dark = isThemeDark();
+  const gridLineStroke = dark ? '#1e293b' : '#f1f5f9';
+  const baseLineStroke = dark ? '#263342' : '#e2e8f0';
+  const pointFill = dark ? '#0f172a' : '#ffffff';
+  const timeBeaconBg = dark ? 'rgba(239, 68, 68, 0.18)' : '#fef2f2';
+  const timeBeaconBorder = dark ? 'rgba(239, 68, 68, 0.35)' : '#fecaca';
+  const timeBeaconText = dark ? '#fca5a5' : '#dc2626';
+  const badgeSummaryBg = dark ? '#131b2a' : '#f0f9ff';
+  const badgeSummaryBorder = dark ? '#1e3a5f' : '#bae6fd';
+  const badgeSummaryText = dark ? '#93c5fd' : '#0369a1';
 
   container.innerHTML = `
     <!-- Dual Legend & Realtime Timestamp Header -->
@@ -664,7 +704,7 @@ function renderAdminTrafficChart() {
           <span>Tap In (Masuk)</span>
         </span>
       </div>
-      <div style="display: inline-flex; align-items: center; gap: 5px; color: #dc2626; font-size: 0.72rem; background: #fef2f2; padding: 2px 7px; border-radius: 6px; border: 1px solid #fecaca;">
+      <div style="display: inline-flex; align-items: center; gap: 5px; color: ${timeBeaconText}; font-size: 0.72rem; background: ${timeBeaconBg}; padding: 2px 7px; border-radius: 6px; border: 1px solid ${timeBeaconBorder};">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);"></span>
         <span>Jam Sekarang: <strong>${timeNowFull}</strong></span>
       </div>
@@ -684,9 +724,9 @@ function renderAdminTrafficChart() {
         </defs>
 
         <!-- Grid Lines -->
-        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft + plotW}" y2="${padTop}" stroke="#f1f5f9" stroke-width="1" />
-        <line x1="${padLeft}" y1="${padTop + plotH * 0.5}" x2="${padLeft + plotW}" y2="${padTop + plotH * 0.5}" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3,3" />
-        <line x1="${padLeft}" y1="${padTop + plotH}" x2="${padLeft + plotW}" y2="${padTop + plotH}" stroke="#e2e8f0" stroke-width="1.5" />
+        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft + plotW}" y2="${padTop}" stroke="${gridLineStroke}" stroke-width="1" />
+        <line x1="${padLeft}" y1="${padTop + plotH * 0.5}" x2="${padLeft + plotW}" y2="${padTop + plotH * 0.5}" stroke="${gridLineStroke}" stroke-width="1" stroke-dasharray="3,3" />
+        <line x1="${padLeft}" y1="${padTop + plotH}" x2="${padLeft + plotW}" y2="${padTop + plotH}" stroke="${baseLineStroke}" stroke-width="1.5" />
 
         <!-- Area Fills -->
         <path d="${areaDOut}" fill="url(#trafficGradientOut)" />
@@ -716,6 +756,7 @@ function renderAdminTrafficChart() {
           const ptOut = pointsOut[i];
           const ptIn = pointsIn[i];
           const isCurrentSlot = d.hour === currentSlotStr;
+          const labelFill = isCurrentSlot ? (dark ? '#f8fafc' : '#0f172a') : (dark ? '#94a3b8' : '#64748b');
           return `
             <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
                onmouseenter="window.hoverTrafficPoint('${d.hour}', ${d.out}, ${d.in}, ${ptOut.x}, ${ptOut.y}, ${ptIn.y}, ${i});"
@@ -725,13 +766,13 @@ function renderAdminTrafficChart() {
               <line id="trafficGuideLine_${i}" x1="${ptOut.x}" y1="${padTop}" x2="${ptOut.x}" y2="${padTop + plotH}" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="3,3" style="display: none;" />
               <!-- Out Point (Hanya muncul jika jam sudah berjalan) -->
               ${(7 + i) <= curH ? `
-                <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
+                <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="${pointFill}" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
               ` : ''}
               <!-- In Point (Hanya muncul jika jam sudah berjalan) -->
               ${(7 + i) <= curH ? `
-                <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="#ffffff" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
+                <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="${pointFill}" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
               ` : ''}
-              ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${isCurrentSlot ? '#0f172a' : '#64748b'}" text-anchor="middle">${d.hour}</text>` : ''}
+              ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${labelFill}" text-anchor="middle">${d.hour}</text>` : ''}
             </g>
           `;
         }).join('')}
@@ -739,7 +780,7 @@ function renderAdminTrafficChart() {
     </div>
 
     <!-- Admin Traffic Badge Summary (Realtime & Dual Metrics) -->
-    <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; color: #0369a1; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
+    <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: ${badgeSummaryBg}; border: 1.5px solid ${badgeSummaryBorder}; border-radius: 8px; font-size: 0.75rem; color: ${badgeSummaryText}; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
       <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
       <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
         <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
@@ -928,7 +969,7 @@ function renderAdminDeptChart() {
     </div>
 
     <!-- Admin Dept Summary Badge (Single Source of Info) -->
-    <div id="adminDeptBadge" style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+    <div id="adminDeptBadge" style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: ${dark ? '#131b2a' : '#f8fafc'}; border: 1.5px solid ${dark ? '#24334a' : 'var(--border-color)'}; border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
       <span>🏢 Frekuensi per Departemen</span>
       <span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>
     </div>
@@ -940,6 +981,7 @@ function renderAdminDeptChart() {
 function hoverDeptRow(e, name, count, pct, color, activeIdx, total) {
   const isTop = activeIdx === 0;
   const subtext = isTop ? '★ Departemen Frekuensi Tertinggi' : `Peringkat #${activeIdx + 1} Departemen Teraktif`;
+  const dark = isThemeDark();
 
   // Tampilkan Tooltip Gelap Presisi Tinggi Sesuai Gambar 1
   if (typeof window.showChartTooltip === 'function') {
@@ -957,7 +999,7 @@ function hoverDeptRow(e, name, count, pct, color, activeIdx, total) {
   // Highlight baris
   const row = document.getElementById(`deptRow_${activeIdx}`);
   if (row) {
-    row.style.background = '#f1f5f9';
+    row.style.background = dark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
     row.style.borderRadius = '8px';
     row.style.paddingLeft = '6px';
     row.style.paddingRight = '6px';
@@ -966,14 +1008,14 @@ function hoverDeptRow(e, name, count, pct, color, activeIdx, total) {
   // Update badge di bawah
   const badge = document.getElementById('adminDeptBadge');
   if (badge) {
-    badge.style.background = '#ffffff';
+    badge.style.background = dark ? '#182337' : '#ffffff';
     badge.style.borderColor = color;
     badge.style.boxShadow = `0 2px 10px ${color}20`;
     badge.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
         <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0; max-width: 78%;">
           <span style="width: 8px; height: 8px; border-radius: 2px; background: ${color}; flex-shrink: 0; box-shadow: 0 0 6px ${color}80;"></span>
-          <span style="font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}: ${count} Izin</span>
+          <span style="font-weight: 700; color: ${dark ? '#f8fafc' : '#0f172a'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}: ${count} Izin</span>
         </div>
         <span style="background: ${color}; color: #ffffff; padding: 2px 10px; border-radius: 999px; font-weight: 800; font-family: var(--font-mono); font-size: 0.725rem; flex-shrink: 0;">${pct}%</span>
       </div>

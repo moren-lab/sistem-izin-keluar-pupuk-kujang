@@ -58,6 +58,1441 @@
   --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
 }
 
+/* ===================================================================
+   DASHBOARD THEME TOGGLE BUTTON (IN-DASHBOARD WIDGET)
+   =================================================================== */
+.dashboard-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #1e293b;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  font-family: var(--font-main);
+  user-select: none;
+}
+
+.dashboard-theme-toggle-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(15, 23, 42, 0.12);
+}
+
+.dashboard-theme-toggle-btn.on-banner {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.dashboard-theme-toggle-btn.on-banner:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.theme-icon-wrap {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.theme-text-wrap {
+  font-size: 0.775rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* ===================================================================
+   HIGH-PREMIUM DARK THEME PALETTE (OBSIDIAN & PUPUK KUJANG TEAL)
+   =================================================================== */
+body.theme-dark,
+html.theme-dark {
+  /* Brand Accent Tokens in Dark Mode */
+  --corp-blue: #091a2e;
+  --corp-blue-light: #0f2b48;
+  --corp-teal: #10b981;
+  --corp-teal-hover: #34d399;
+  --corp-teal-light: rgba(16, 185, 129, 0.18);
+  --corp-teal-border: rgba(16, 185, 129, 0.4);
+
+  --primary-accent: #3b82f6;
+  --primary-accent-light: rgba(59, 130, 246, 0.18);
+
+  --amber-warning: #fbbf24;
+  --amber-light: rgba(251, 191, 36, 0.15);
+  --amber-border: rgba(251, 191, 36, 0.35);
+
+  --rose-danger: #fb7185;
+  --rose-light: rgba(251, 113, 133, 0.15);
+  --rose-border: rgba(251, 113, 133, 0.35);
+
+  --purple-accent: #c084fc;
+  --purple-light: rgba(192, 132, 252, 0.15);
+
+  --security-cyan: #22d3ee;
+  --security-cyan-light: rgba(34, 211, 238, 0.15);
+
+  /* Obsidian & Sleek Slate Surfaces */
+  --bg-app: #0b101b;
+  --bg-card: #141c2b;
+  --bg-subtle: #1c2638;
+  --border-color: #24334a;
+  --border-focus: #10b981;
+
+  /* Crisp, High-Contrast Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+body.theme-dark {
+  background-color: #0b101b !important;
+  color: #f8fafc !important;
+  font-family: var(--font-main);
+}
+
+/* ===================================================================
+   1. TOP NAVBAR & HEADER IN DARK MODE
+   =================================================================== */
+body.theme-dark .top-navbar {
+  background: #0e1524 !important;
+  border-bottom: 1px solid #1e2c42 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-dark .btn-sidebar-toggle {
+  background: #162032 !important;
+  border-color: #24334a !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .btn-sidebar-toggle:hover {
+  background: #1e2c44 !important;
+  color: #ffffff !important;
+}
+
+body.theme-dark .figma-breadcrumb {
+  color: #94a3b8 !important;
+}
+body.theme-dark .figma-breadcrumb span {
+  color: #94a3b8 !important;
+}
+body.theme-dark .figma-breadcrumb #breadcrumbSubpage {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+/* Real-Time Clock Pill */
+body.theme-dark .navbar-clock-pill {
+  background: #162032 !important;
+  border: 1px solid #283952 !important;
+  box-shadow: none !important;
+}
+body.theme-dark #liveDigitalClock,
+body.theme-dark .navbar-clock-text {
+  color: #e2e8f0 !important;
+}
+body.theme-dark .pulsing-dot {
+  background-color: #10b981 !important;
+  box-shadow: 0 0 8px #10b981 !important;
+}
+
+/* Role Switcher in Top Navbar */
+body.theme-dark .role-switch-btn {
+  background: #162032 !important;
+  border: 1px solid #283952 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .role-switch-btn:hover {
+  background: #1e2d46 !important;
+  color: #ffffff !important;
+}
+body.theme-dark .role-switch-btn.active {
+  background: #059669 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4) !important;
+}
+body.theme-dark .btn-reset-simulation,
+body.theme-dark #btnResetSimulation {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #f87171 !important;
+}
+body.theme-dark .btn-reset-simulation:hover,
+body.theme-dark #btnResetSimulation:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #ffffff !important;
+}
+
+/* ===================================================================
+   2. SIDEBAR IN DARK MODE
+   =================================================================== */
+body.theme-dark .sidebar {
+  background: #0a1318 !important;
+  border-right: 1px solid #142429 !important;
+}
+body.theme-dark .sidebar-header {
+  background: #0a1318 !important;
+  border-bottom: 1px solid #142429 !important;
+}
+body.theme-dark .brand-app-name {
+  color: #ffffff !important;
+}
+body.theme-dark .brand-corp-name {
+  color: #34d399 !important;
+}
+body.theme-dark .sidebar-brand-subtitle h4 {
+  color: #f1f5f9 !important;
+}
+body.theme-dark .sidebar-brand-subtitle p {
+  color: #6ee7b7 !important;
+}
+body.theme-dark .sidebar-navigation .nav-item {
+  color: #94a3b8 !important;
+}
+body.theme-dark .sidebar-navigation .nav-item:hover {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+}
+body.theme-dark .sidebar-navigation .nav-item.active {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border-left: 3px solid #10b981 !important;
+}
+body.theme-dark .sidebar-footer-card {
+  background: #0f1c21 !important;
+  border: 1px solid #193138 !important;
+  color: #e2e8f0 !important;
+}
+body.theme-dark .btn-sidebar-logout {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #f87171 !important;
+}
+body.theme-dark .btn-sidebar-logout:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* ===================================================================
+   3. HERO BANNERS & DASHBOARD CARDS
+   =================================================================== */
+body.theme-dark .figma-hero-banner {
+  background: linear-gradient(135deg, #05261b 0%, #083726 50%, #031c13 100%) !important;
+  border: 1px solid #0f4b35 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+body.theme-dark .dashboard-hero-banner.approver-theme {
+  background: linear-gradient(135deg, #0d223c 0%, #133357 50%, #08192d 100%) !important;
+  border: 1px solid #1b4577 !important;
+}
+body.theme-dark .figma-hero-banner.security-theme {
+  background: linear-gradient(135deg, #0a2d39 0%, #0f3f50 50%, #061f28 100%) !important;
+  border: 1px solid #14566b !important;
+}
+
+body.theme-dark .dashboard-theme-toggle-btn {
+  background: #182337 !important;
+  border: 1.5px solid #2d3e58 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+body.theme-dark .dashboard-theme-toggle-btn:hover {
+  background: #202e48 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+body.theme-dark .dashboard-theme-toggle-btn.on-banner {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+body.theme-dark .dashboard-widget-card,
+body.theme-dark .content-section,
+body.theme-dark .figma-ticket-card,
+body.theme-dark .approver-card-v2,
+body.theme-dark .metric-card,
+body.theme-dark .admin-card,
+body.theme-dark .report-filter-bar,
+body.theme-dark .search-filter-card,
+body.theme-dark .figma-card,
+body.theme-dark .figma-stats-card,
+body.theme-dark .figma-quick-actions,
+body.theme-dark .figma-recent-card,
+body.theme-dark .stat-box {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+body.theme-dark .figma-stat-col {
+  border-color: #24334a !important;
+}
+
+body.theme-dark .figma-section-title,
+body.theme-dark .figma-card-title,
+body.theme-dark h1,
+body.theme-dark h2,
+body.theme-dark h3,
+body.theme-dark h4 {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .figma-section-sub,
+body.theme-dark .figma-stat-sub,
+body.theme-dark p {
+  color: #cbd5e1 !important;
+}
+
+body.theme-dark .figma-stat-number {
+  color: #f8fafc !important;
+}
+body.theme-dark .figma-stat-label {
+  color: #94a3b8 !important;
+}
+body.theme-dark .figma-bullet-list li {
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-contact-content {
+  background: #182337 !important;
+  border-color: #24334a !important;
+}
+body.theme-dark .figma-contact-phone {
+  color: #34d399 !important;
+}
+
+/* ===================================================================
+   4. RIWAYAT PENGAJUAN (FIGMA FILTER TOOLBAR & CONTROLS)
+   =================================================================== */
+body.theme-dark .figma-filter-toolbar {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+body.theme-dark .figma-filter-lbl {
+  color: #94a3b8 !important;
+}
+body.theme-dark .figma-search-input-box {
+  background: #182337 !important;
+  border: 1px solid #2d3e58 !important;
+}
+body.theme-dark .figma-search-input-box input {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .figma-search-input-box input::placeholder {
+  color: #64748b !important;
+}
+body.theme-dark .figma-search-input-box svg {
+  stroke: #94a3b8 !important;
+}
+
+body.theme-dark .figma-filter-select {
+  background: #182337 !important;
+  border: 1px solid #2d3e58 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .figma-filter-select option {
+  background: #182337 !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark .figma-results-bar {
+  color: #94a3b8 !important;
+}
+body.theme-dark .btn-figma-toggle {
+  background: #182337 !important;
+  border: 1px solid #2d3e58 !important;
+  color: #94a3b8 !important;
+}
+body.theme-dark .btn-figma-toggle:hover {
+  background: #223048 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .btn-figma-toggle.active {
+  background: #059669 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35) !important;
+}
+
+/* ===================================================================
+   5. TICKET CARDS & CARD GRID
+   =================================================================== */
+body.theme-dark .figma-grid-item {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+body.theme-dark .figma-grid-item:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+body.theme-dark .figma-ticket-id {
+  color: #f8fafc !important;
+}
+body.theme-dark .figma-ticket-date {
+  color: #94a3b8 !important;
+}
+
+/* Tags inside Card */
+body.theme-dark .figma-tag-badge,
+body.theme-dark .badge-type {
+  background: rgba(148, 163, 184, 0.12) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-tag-badge.badge-dinas,
+body.theme-dark .figma-tag-badge[style*="background: #eff6ff"],
+body.theme-dark .figma-tag-badge[style*="background:#eff6ff"] {
+  background: rgba(37, 99, 235, 0.18) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: #93c5fd !important;
+}
+body.theme-dark .figma-tag-badge.badge-pribadi,
+body.theme-dark .figma-tag-badge[style*="background: #fefce8"],
+body.theme-dark .figma-tag-badge[style*="background:#fefce8"] {
+  background: rgba(245, 158, 11, 0.18) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fde047 !important;
+}
+
+/* Detail Box inside Card */
+body.theme-dark .figma-card-detail-box,
+body.theme-dark .figma-grid-item [style*="background: #f8fafc"],
+body.theme-dark .figma-grid-item [style*="background:#f8fafc"] {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .figma-card-detail-box .detail-label,
+body.theme-dark .figma-card-detail-box span[style*="color: #64748b"] {
+  color: #94a3b8 !important;
+}
+body.theme-dark .figma-card-detail-box .detail-val,
+body.theme-dark .figma-card-detail-box span[style*="color: #0f172a"] {
+  color: #f8fafc !important;
+}
+body.theme-dark .detail-schedule-row {
+  border-top-color: #24334a !important;
+}
+
+/* Note Banners (Status alert box inside card) */
+body.theme-dark .figma-note-banner,
+body.theme-dark .figma-grid-item [style*="background: #f0fdf4"],
+body.theme-dark .figma-grid-item [style*="background:#f0fdf4"] {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+body.theme-dark .figma-note-banner.note-warning,
+body.theme-dark .figma-grid-item [style*="background: #fffbeb"],
+body.theme-dark .figma-grid-item [style*="background:#fffbeb"] {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
+}
+body.theme-dark .figma-note-banner.note-danger,
+body.theme-dark .figma-grid-item [style*="background: #fef2f2"],
+body.theme-dark .figma-grid-item [style*="background:#fef2f2"] {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #f87171 !important;
+}
+body.theme-dark .figma-note-banner.note-muted,
+body.theme-dark .figma-grid-item [style*="background: #f8fafc"],
+body.theme-dark .figma-grid-item [style*="background:#f8fafc"] {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #94a3b8 !important;
+}
+
+/* Status text coloring */
+body.theme-dark .figma-clean-status.status-selesai,
+body.theme-dark [style*="color: #059669"] {
+  color: #34d399 !important;
+}
+body.theme-dark .figma-clean-status.status-selesai-late {
+  color: #fbbf24 !important;
+}
+body.theme-dark .figma-clean-status.status-outside,
+body.theme-dark [style*="color: #0284c7"] {
+  color: #38bdf8 !important;
+}
+body.theme-dark .figma-clean-status.status-late,
+body.theme-dark .figma-clean-status.status-rejected,
+body.theme-dark [style*="color: #dc2626"],
+body.theme-dark [style*="color: #b91c1c"] {
+  color: #f87171 !important;
+}
+body.theme-dark .figma-clean-status.status-pending,
+body.theme-dark [style*="color: #d97706"],
+body.theme-dark [style*="color: #b45309"] {
+  color: #fbbf24 !important;
+}
+body.theme-dark .figma-clean-status.status-emergency,
+body.theme-dark [style*="color: #be123c"] {
+  color: #fb7185 !important;
+}
+body.theme-dark .figma-clean-status.status-expired,
+body.theme-dark .figma-clean-status.status-cancelled {
+  color: #94a3b8 !important;
+}
+
+/* Card Footer */
+body.theme-dark .figma-card-footer {
+  border-top-color: #24334a !important;
+}
+body.theme-dark .figma-card-link {
+  color: #38bdf8 !important;
+}
+body.theme-dark .btn-figma-delete-single {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  color: #f87171 !important;
+}
+body.theme-dark .btn-figma-delete-single:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* ===================================================================
+   6. RIWAYAT DATA TABLE
+   =================================================================== */
+body.theme-dark .figma-table-card {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .figma-table th {
+  background: #182337 !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #24334a !important;
+}
+body.theme-dark .figma-table td {
+  border-bottom: 1px solid #1c283d !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-table tr:hover td {
+  background: #182337 !important;
+}
+
+/* Pagination */
+body.theme-dark .figma-pagination-bar {
+  color: #94a3b8 !important;
+}
+body.theme-dark .figma-page-btn {
+  background: #182337 !important;
+  border: 1px solid #2d3e58 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-page-btn:hover {
+  background: #223048 !important;
+  color: #ffffff !important;
+}
+body.theme-dark .figma-page-btn.active {
+  background: #059669 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* ===================================================================
+   7. MODALS & POPUPS IN DARK MODE
+   =================================================================== */
+body.theme-dark .modal-overlay {
+  background: rgba(4, 7, 13, 0.78) !important;
+  backdrop-filter: blur(8px) !important;
+}
+body.theme-dark .modal-card,
+body.theme-dark .modal-content,
+body.theme-dark .figma-modal-card {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  color: #f8fafc !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+body.theme-dark .modal-header {
+  background: #131b2a !important;
+  border-bottom: 1px solid #24334a !important;
+}
+body.theme-dark .modal-header h3 {
+  color: #f8fafc !important;
+}
+body.theme-dark .modal-header p {
+  color: #94a3b8 !important;
+}
+body.theme-dark .btn-close-modal {
+  background: #182337 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .btn-close-modal:hover {
+  background: #24334a !important;
+  color: #ffffff !important;
+}
+body.theme-dark .modal-body {
+  scrollbar-color: #2e3e57 #131b2a !important;
+}
+body.theme-dark .modal-footer {
+  background: #131b2a !important;
+  border-top: 1px solid #24334a !important;
+}
+
+/* Tables in Dark Mode */
+body.theme-dark .report-data-table,
+body.theme-dark .karyawan-history-table,
+body.theme-dark .admin-data-table {
+  background: #131b2a;
+  color: #cbd5e1;
+}
+
+body.theme-dark .report-data-table th,
+body.theme-dark .karyawan-history-table th,
+body.theme-dark .admin-data-table th {
+  background: #182337;
+  color: #f8fafc;
+  border-bottom-color: #24334a;
+}
+
+body.theme-dark .report-data-table td,
+body.theme-dark .karyawan-history-table td,
+body.theme-dark .admin-data-table td {
+  border-bottom-color: #24334a;
+  color: #cbd5e1;
+}
+
+body.theme-dark .report-data-table tr:hover,
+body.theme-dark .karyawan-history-table tr:hover,
+body.theme-dark .admin-data-table tr:hover {
+  background: #1c273c;
+}
+
+/* Inputs, Select, Textarea */
+body.theme-dark input[type="text"],
+body.theme-dark input[type="datetime-local"],
+body.theme-dark input[type="password"],
+body.theme-dark input[type="search"],
+body.theme-dark select,
+body.theme-dark textarea {
+  background: #182337 !important;
+  color: #f8fafc !important;
+  border-color: #2e3e57 !important;
+}
+
+body.theme-dark input:focus,
+body.theme-dark select:focus,
+body.theme-dark textarea:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Secondary Buttons */
+body.theme-dark .btn-card-detail,
+body.theme-dark .btn-tracking-detail,
+body.theme-dark .btn-action-sm {
+  background: #182337 !important;
+  color: #cbd5e1 !important;
+  border-color: #2e3e57 !important;
+}
+
+body.theme-dark .btn-card-detail:hover,
+body.theme-dark .btn-tracking-detail:hover,
+body.theme-dark .btn-action-sm:hover {
+  background: #202e47 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+body.theme-dark .empty-box {
+  background: #131b2a;
+  border-color: #24334a;
+}
+
+body.theme-dark .empty-icon-circle {
+  background: #182337 !important;
+}
+
+body.theme-dark .info-strip {
+  background: #182337;
+  border-color: #24334a;
+}
+
+body.theme-dark .scanner-instruction-card {
+  background: #131b2a;
+  border-color: #24334a;
+}
+
+/* Overriding residual inline colors */
+body.theme-dark [style*="color: #0f172a"],
+body.theme-dark [style*="color:#0f172a"] {
+  color: #f8fafc !important;
+}
+body.theme-dark [style*="color: #475569"],
+body.theme-dark [style*="color:#475569"],
+body.theme-dark [style*="color: #334155"],
+body.theme-dark [style*="color:#334155"] {
+  color: #cbd5e1 !important;
+}
+body.theme-dark [style*="color: #64748b"],
+body.theme-dark [style*="color:#64748b"] {
+  color: #94a3b8 !important;
+}
+body.theme-dark [style*="background: #ffffff"],
+body.theme-dark [style*="background:#ffffff"],
+body.theme-dark [style*="background: white"],
+body.theme-dark [style*="background:#fff"] {
+  background: #131b2a !important;
+}
+body.theme-dark [style*="background: #f8fafc"],
+body.theme-dark [style*="background:#f8fafc"],
+body.theme-dark [style*="background: #f1f5f9"],
+body.theme-dark [style*="background:#f1f5f9"] {
+  background: #182337 !important;
+}
+body.theme-dark [style*="border: 1px solid #e2e8f0"],
+body.theme-dark [style*="border:1px solid #e2e8f0"],
+body.theme-dark [style*="border: 1.5px solid #e2e8f0"],
+body.theme-dark [style*="border: 1px solid #cbd5e1"],
+body.theme-dark [style*="border-top: 1px solid #f1f5f9"],
+body.theme-dark [style*="border-top:1px solid #f1f5f9"],
+body.theme-dark [style*="border-bottom: 1px solid #f1f5f9"],
+body.theme-dark [style*="border-bottom:1px solid #f1f5f9"] {
+  border-color: #24334a !important;
+}
+
+/* Alert Banners & Warnings in Dark Mode */
+body.theme-dark [style*="background: #fff1f2"],
+body.theme-dark [style*="background:#fff1f2"],
+body.theme-dark [style*="background: #ffe4e6"],
+body.theme-dark [style*="background:#ffe4e6"] {
+  background: rgba(225, 29, 72, 0.12) !important;
+  border-color: rgba(225, 29, 72, 0.35) !important;
+}
+body.theme-dark [style*="color: #9f1239"],
+body.theme-dark [style*="color:#9f1239"],
+body.theme-dark [style*="color: #881337"],
+body.theme-dark [style*="color:#881337"] {
+  color: #fb7185 !important;
+}
+
+body.theme-dark [style*="background: #fef3c7"],
+body.theme-dark [style*="background:#fef3c7"],
+body.theme-dark [style*="background: #fffbeb"],
+body.theme-dark [style*="background:#fffbeb"] {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+body.theme-dark [style*="color: #92400e"],
+body.theme-dark [style*="color:#92400e"],
+body.theme-dark [style*="color: #78350f"],
+body.theme-dark [style*="color:#78350f"] {
+  color: #fbbf24 !important;
+}
+
+/* SVG Chart Elements in Dark Mode */
+body.theme-dark svg circle[stroke="#f1f5f9"],
+body.theme-dark svg circle[stroke="#e2e8f0"] {
+  stroke: #1c273c !important;
+}
+body.theme-dark svg line[stroke="#f1f5f9"],
+body.theme-dark svg line[stroke="#e2e8f0"] {
+  stroke: #24334a !important;
+}
+body.theme-dark svg text[fill="#0f172a"],
+body.theme-dark svg text[fill="#1e293b"] {
+  fill: #f8fafc !important;
+}
+body.theme-dark svg text[fill="#64748b"],
+body.theme-dark svg text[fill="#475569"] {
+  fill: #94a3b8 !important;
+}
+body.theme-dark #karyawanDonutInfoBadge > div {
+  background: #182337 !important;
+  border-color: #2e3e58 !important;
+  color: #cbd5e1 !important;
+}
+
+/* ===================================================================
+   BASE STYLES FOR ATASAN, POS JAGA, & ADMIN SEMANTIC COMPONENTS
+   =================================================================== */
+.approver-alert-banner {
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+  transition: all 0.2s ease;
+}
+.approver-alert-banner.all-done {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+.approver-alert-banner.reassign-away {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+.approver-alert-banner.reassign-to {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+.approver-alert-banner.extension {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  color: #92400e;
+}
+.approver-alert-banner.emergency {
+  background: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  color: #881337;
+}
+
+.approver-feed-warning {
+  border-left: 3.5px solid #d97706 !important;
+  background: #fffdfa;
+}
+.approver-feed-reassign {
+  border-left: 3.5px solid #3b82f6 !important;
+  background: #f8fafc;
+}
+.approver-detail-callout {
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.775rem;
+  line-height: 1.45;
+}
+.approver-detail-callout.warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+.approver-detail-callout.info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+.approver-feed-footer {
+  border-top: 1px solid #f1f5f9;
+}
+.reassign-tag-text {
+  color: #92400e;
+  font-weight: 800;
+  font-size: 0.725rem;
+}
+
+.approver-schedule-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  margin: 0.35rem 0;
+}
+.schedule-time-text {
+  font-family: var(--font-mono);
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.emergency-passcode-code-text {
+  color: #9f1239;
+}
+.approver-passcode-copy-btn {
+  background: #ffe4e6;
+  color: #9f1239;
+  border: 1px solid #fda4af;
+}
+
+.approver-reassigned-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px dashed #fde68a;
+}
+.approver-reassigned-heading {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+.approver-reassigned-badge {
+  font-size: 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #fde68a;
+}
+.approver-reassigned-sub {
+  font-size: 0.75rem;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.btn-clear-history {
+  font-size: 0.775rem;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.approver-sop-card {
+  background: #f8fafc;
+}
+
+/* Pos Jaga (Security) Base */
+.figma-card-ready-exit {
+  border: 1.5px solid #bfdbfe;
+}
+.ready-exit-title {
+  color: #1e40af;
+}
+.security-overdue-alert {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+}
+.security-overdue-icon-box {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.security-overdue-title {
+  color: #991b1b;
+}
+.security-overdue-sub {
+  color: #7f1d1d;
+}
+.feed-item.item-overdue {
+  border-left: 3px solid var(--rose-danger);
+  background: #fff5f5;
+}
+.sec-status-callout {
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.75rem;
+}
+.sec-status-callout.danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+.sec-status-callout.warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+}
+.sec-status-callout.neutral {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+/* Admin K3 Base */
+.admin-live-beacon {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.beacon-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+}
+.kujang-id-code-badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.825rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.admin-user-status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.admin-user-status-pill.active {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+.admin-user-status-pill.revoked {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+.role-seat-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.role-seat-badge.occupied {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+.role-seat-badge.available {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+.role-seat-badge.multi {
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+}
+
+/* ===================================================================
+   8. ATASAN (APPROVER) IN DARK MODE
+   =================================================================== */
+body.theme-dark .approver-card-v2 {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+body.theme-dark .approver-card-v2:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+body.theme-dark .approver-card-v2 .card-id-num {
+  color: #f8fafc !important;
+}
+body.theme-dark .approver-card-v2 .card-created-meta {
+  color: #94a3b8 !important;
+}
+body.theme-dark .approver-card-v2 [style*="background:var(--bg-subtle)"],
+body.theme-dark .approver-card-v2 [style*="background: var(--bg-subtle)"] {
+  background: #182337 !important;
+  border-color: #24334a !important;
+}
+
+body.theme-dark .approver-alert-banner.all-done {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #6ee7b7 !important;
+}
+body.theme-dark .approver-alert-banner.reassign-away {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+}
+body.theme-dark .approver-alert-banner.reassign-to {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+}
+body.theme-dark .approver-alert-banner.extension {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fde68a !important;
+}
+body.theme-dark .approver-alert-banner.emergency {
+  background: rgba(225, 29, 72, 0.14) !important;
+  border: 1.5px solid rgba(225, 29, 72, 0.38) !important;
+  color: #fecdd3 !important;
+}
+body.theme-dark .approver-feed-warning {
+  background: #141f2d !important;
+  border-left-color: #f59e0b !important;
+  border-top-color: #24334a !important;
+  border-right-color: #24334a !important;
+  border-bottom-color: #24334a !important;
+}
+body.theme-dark .approver-feed-reassign {
+  background: #141f2d !important;
+  border-left-color: #60a5fa !important;
+  border-top-color: #24334a !important;
+  border-right-color: #24334a !important;
+  border-bottom-color: #24334a !important;
+}
+body.theme-dark .approver-detail-callout.warning {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+}
+body.theme-dark .approver-detail-callout.info {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+}
+body.theme-dark .approver-feed-footer {
+  border-top: 1px solid #24334a !important;
+}
+body.theme-dark .reassign-tag-text {
+  color: #93c5fd !important;
+}
+body.theme-dark .approver-schedule-box {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .schedule-time-text {
+  color: #f8fafc !important;
+}
+body.theme-dark .emergency-passcode-code-text {
+  color: #fda4af !important;
+  text-shadow: 0 0 12px rgba(244, 63, 94, 0.4) !important;
+}
+body.theme-dark .approver-passcode-copy-btn {
+  background: rgba(244, 63, 94, 0.18) !important;
+  color: #fda4af !important;
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+body.theme-dark .approver-passcode-copy-btn:hover {
+  background: rgba(244, 63, 94, 0.28) !important;
+  color: #ffffff !important;
+}
+body.theme-dark .approver-reassigned-section {
+  border-top-color: rgba(245, 158, 11, 0.35) !important;
+}
+body.theme-dark .approver-reassigned-heading {
+  color: #fbbf24 !important;
+}
+body.theme-dark .approver-reassigned-badge {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fde68a !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+body.theme-dark .approver-reassigned-sub {
+  color: #f59e0b !important;
+}
+body.theme-dark .btn-clear-history {
+  background: rgba(225, 29, 72, 0.12) !important;
+  border-color: rgba(225, 29, 72, 0.35) !important;
+  color: #fda4af !important;
+}
+body.theme-dark .btn-clear-history:hover {
+  background: rgba(225, 29, 72, 0.22) !important;
+  color: #ffffff !important;
+}
+body.theme-dark .approver-sop-card {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+}
+
+body.theme-dark .emergency-passcode-display {
+  background: #182337 !important;
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+body.theme-dark .emergency-passcode-box {
+  background: #182337 !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+body.theme-dark .filter-select {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .filter-select option {
+  background: #182337 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .tracking-card-footer {
+  border-top-color: #24334a !important;
+}
+body.theme-dark .tracking-decision-pill.pill-pending {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
+}
+body.theme-dark .tracking-decision-pill.pill-decided {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+body.theme-dark .tracking-decision-pill.pill-reassigned {
+  background: rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: #93c5fd !important;
+}
+
+/* ===================================================================
+   9. POS JAGA (SECURITY / SATPAM) IN DARK MODE
+   =================================================================== */
+body.theme-dark .figma-kicker-blue {
+  color: #38bdf8 !important;
+}
+body.theme-dark .figma-card-ready-exit {
+  border: 1.5px solid rgba(59, 130, 246, 0.35) !important;
+  background: #131b2a !important;
+}
+body.theme-dark .ready-exit-title {
+  color: #60a5fa !important;
+}
+body.theme-dark .security-overdue-alert {
+  background: rgba(220, 38, 38, 0.15) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.4) !important;
+}
+body.theme-dark .security-overdue-icon-box {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #f87171 !important;
+}
+body.theme-dark .security-overdue-title {
+  color: #fca5a5 !important;
+}
+body.theme-dark .security-overdue-sub {
+  color: #cbd5e1 !important;
+}
+body.theme-dark .feed-item {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .feed-item:hover {
+  background: #1e2c44 !important;
+  border-color: #3b82f6 !important;
+}
+body.theme-dark .feed-item.item-overdue {
+  border-left: 3px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+body.theme-dark .feed-item-title {
+  color: #f8fafc !important;
+}
+body.theme-dark .feed-item-sub {
+  color: #94a3b8 !important;
+}
+body.theme-dark .sec-status-callout.danger {
+  background: rgba(220, 38, 38, 0.14) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+}
+body.theme-dark .sec-status-callout.warning {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fde68a !important;
+}
+body.theme-dark .sec-status-callout.neutral {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+  color: #94a3b8 !important;
+}
+body.theme-dark .camera-scanner-container {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .camera-status-pill {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .scanner-input-container {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .scan-input-box {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .scan-input-box input {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .scan-input-box input::placeholder {
+  color: #64748b !important;
+}
+body.theme-dark .status-pill-green {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+
+/* ===================================================================
+   10. ADMINISTRATOR (ADMIN PENGAMANAN & K3) IN DARK MODE
+   =================================================================== */
+body.theme-dark .role-badge-neutral {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .subtle-auditor-strip {
+  background: #162032 !important;
+  border: 1px solid #24334a !important;
+  color: #94a3b8 !important;
+}
+body.theme-dark .headcount-card-calm {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .headcount-card-calm.has-outside {
+  background: #172033 !important;
+  border-left: 4px solid #f59e0b !important;
+  border-color: #24334a !important;
+}
+body.theme-dark .headcount-count-box {
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-kpi-box {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+}
+body.theme-dark .admin-kpi-label {
+  color: #94a3b8 !important;
+}
+body.theme-dark .admin-kpi-value {
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-kpi-sub {
+  color: #64748b !important;
+}
+body.theme-dark .admin-search-input {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-search-input::placeholder {
+  color: #64748b !important;
+}
+
+/* Status Tracking Pills for Admin */
+body.theme-dark .status-tracking-pill-btn {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .status-tracking-pill-btn:hover {
+  background: #223048 !important;
+  color: #ffffff !important;
+}
+body.theme-dark .status-tracking-pill-btn.active {
+  background: #059669 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4) !important;
+}
+body.theme-dark .status-tracking-pill-btn .status-tracking-pill-count {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .status-tracking-pill-btn.active .status-tracking-pill-count {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+/* Admin User Management Modal & Dropdowns */
+body.theme-dark .searchable-dropdown-menu {
+  background: #131b2a !important;
+  border: 1px solid #24334a !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+body.theme-dark .searchable-dropdown-item {
+  color: #f8fafc !important;
+}
+body.theme-dark .searchable-dropdown-item:hover,
+body.theme-dark .searchable-dropdown-item.selected {
+  background: #182337 !important;
+}
+body.theme-dark .btn-admin-edit,
+body.theme-dark .btn-admin-switch {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .btn-admin-edit:hover,
+body.theme-dark .btn-admin-switch:hover {
+  background: #223048 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+body.theme-dark .admin-live-beacon {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+body.theme-dark .beacon-pulse-dot {
+  background: #34d399 !important;
+  box-shadow: 0 0 6px #34d399 !important;
+}
+body.theme-dark .kujang-id-code-badge {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f8fafc !important;
+}
+body.theme-dark .admin-user-status-pill.active {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+body.theme-dark .admin-user-status-pill.revoked {
+  background: rgba(220, 38, 38, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #f87171 !important;
+}
+body.theme-dark .role-seat-badge.occupied {
+  background: rgba(220, 38, 38, 0.18) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+}
+body.theme-dark .role-seat-badge.available {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+body.theme-dark .role-seat-badge.multi {
+  background: rgba(2, 132, 199, 0.18) !important;
+  border: 1px solid rgba(2, 132, 199, 0.35) !important;
+  color: #7dd3fc !important;
+}
+
+body.theme-dark .user-role-badge.karyawan {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+body.theme-dark .user-role-badge.approver {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+body.theme-dark .user-role-badge.security {
+  background: rgba(6, 182, 212, 0.15) !important;
+  color: #67e8f9 !important;
+  border-color: rgba(6, 182, 212, 0.3) !important;
+}
+body.theme-dark .user-role-badge.admin {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #d8b4fe !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
 *,
 *::before,
 *::after {
@@ -140,10 +1575,116 @@ body {
   background: #94a3b8;
 }
 
-.sidebar.collapsed {
-  width: 0;
-  overflow: hidden;
-  border-right: none;
+/* Collapsible Mini Rail Sidebar (Desktop >= 901px) */
+@media (min-width: 901px) {
+  .sidebar.collapsed {
+    width: 72px !important;
+    overflow-x: hidden !important;
+  }
+
+  .sidebar.collapsed .sidebar-header {
+    padding: 1rem 0.5rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  .sidebar.collapsed .sidebar-header .brand-wrapper {
+    gap: 0 !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+  }
+
+  .sidebar.collapsed .brand-text-group,
+  .sidebar.collapsed .sidebar-brand-subtitle {
+    display: none !important;
+  }
+
+  .sidebar.collapsed .nav-section-label {
+    display: none !important;
+  }
+
+  .sidebar.collapsed .sidebar-navigation {
+    padding: 1rem 0.35rem !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+  }
+
+  .sidebar.collapsed .sidebar-navigation .nav-item {
+    width: 48px !important;
+    height: 48px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border-radius: var(--radius-md) !important;
+    position: relative !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .sidebar.collapsed .nav-item-content {
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  .sidebar.collapsed .nav-item-content span {
+    display: none !important;
+  }
+
+  .sidebar.collapsed .sidebar-navigation .nav-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 auto !important;
+  }
+
+  .sidebar.collapsed .nav-badge-count {
+    position: absolute !important;
+    top: 4px !important;
+    right: 4px !important;
+    padding: 1px 5px !important;
+    font-size: 0.65rem !important;
+    min-width: 16px !important;
+    height: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .sidebar.collapsed .sidebar-info-card {
+    display: none !important;
+  }
+
+  .sidebar.collapsed .sidebar-footer-card {
+    padding: 0.75rem 0.35rem !important;
+    text-align: center !important;
+  }
+
+  .sidebar.collapsed .sidebar-footer-card > div:first-child,
+  .sidebar.collapsed .sidebar-footer-card > div:nth-child(2),
+  .sidebar.collapsed .sidebar-footer-card #sidebarUserName,
+  .sidebar.collapsed .sidebar-footer-card #sidebarUserSub {
+    display: none !important;
+  }
+
+  .sidebar.collapsed .sidebar-footer-card > div:nth-child(3) {
+    justify-content: center !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .sidebar.collapsed .btn-sidebar-logout {
+    padding: 0.5rem 0 !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .sidebar.collapsed .btn-sidebar-logout span {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar.collapsed {
+    width: 270px !important;
+  }
 }
 
 .sidebar-header {
@@ -437,7 +1978,11 @@ body {
   word-break: keep-all !important;
   overflow: visible !important;
   display: inline-block !important;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums !important;
+  -webkit-font-feature-settings: "tnum" 1 !important;
+  font-feature-settings: "tnum" 1 !important;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace) !important;
 }
 
 @media (max-width: 1260px) {
@@ -1254,6 +2799,15 @@ body {
   }
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .camera-status-pill {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1595,6 +3149,127 @@ body {
 .btn-reject:hover {
   background: #ffe4e6;
 }
+
+/* TRACKING CARD FOOTER (REVISI ATASAN PELACAKAN IZIN) */
+.tracking-card-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tracking-footer-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tracking-decision-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.tracking-decision-pill.pill-decided {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.tracking-decision-pill.pill-pending {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.tracking-decision-pill.pill-reassigned {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.btn-tracking-delete {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btn-tracking-delete:hover {
+  background: #ffe4e6;
+  color: #9f1239;
+  border-color: #fda4af;
+  transform: translateY(-1px);
+}
+
+.tracking-footer-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.btn-tracking-qr {
+  background: var(--corp-teal);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+  font-size: 0.775rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  min-height: 36px;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
+}
+
+.btn-tracking-qr:hover {
+  background: var(--corp-teal-hover);
+  transform: translateY(-1px);
+}
+
+.btn-tracking-detail {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+  font-size: 0.775rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  min-height: 36px;
+}
+
+.btn-tracking-detail:hover {
+  background: var(--bg-subtle);
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
 
 /* ===================================================================
    MODAL DIALOGS - SCROLL & PINNED FOOTER
@@ -2965,6 +4640,67 @@ body.modal-open {
   th {
     background: #f1f5f9 !important;
     color: #000000 !important;
+  }
+
+  /* KHUSUS CETAK TIKET IZIN DIGITAL (GATE PASS CARD) */
+  body.printing-digital-pass {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.printing-digital-pass .app-layout,
+  body.printing-digital-pass .sidebar,
+  body.printing-digital-pass .top-navbar,
+  body.printing-digital-pass .modal-overlay:not(#modalDigitalPassQR),
+  body.printing-digital-pass #modalDigitalPassQR .btn-close-modal,
+  body.printing-digital-pass #modalDigitalPassQR .modal-footer,
+  body.printing-digital-pass .kujang-auth-overlay,
+  body.printing-digital-pass .toast-container,
+  body.printing-digital-pass .kujang-wa-popup {
+    display: none !important;
+  }
+
+  body.printing-digital-pass #modalDigitalPassQR {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.printing-digital-pass #modalDigitalPassQR .modal-card {
+    position: relative !important;
+    max-width: 620px !important;
+    width: 100% !important;
+    margin: 20px auto !important;
+    box-shadow: none !important;
+    border: 2px solid #0f2b48 !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    background: #ffffff !important;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body.printing-digital-pass .ticket-print-header {
+    display: block !important;
+  }
+
+  body.printing-digital-pass #digitalPassQrContainer {
+    box-shadow: none !important;
+    border: 1.5px solid #0f2b48 !important;
+    margin: 0.5rem auto !important;
+  }
+
+  body.printing-digital-pass #digitalPassQrContainer img,
+  body.printing-digital-pass #digitalPassQrContainer canvas {
+    display: block !important;
+    margin: 0 auto !important;
   }
 }
 

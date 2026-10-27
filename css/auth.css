@@ -623,3 +623,115 @@
   border-color: #fca5a5;
   color: #b91c1c;
 }
+
+/* ==========================================================================
+   KUJANG ID DARK THEME OVERRIDES
+   ========================================================================== */
+body.theme-dark .kujang-auth-overlay,
+html.theme-dark .kujang-auth-overlay {
+  background: #0b1120;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.08) 0px, transparent 50%);
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-auth-card,
+html.theme-dark .kujang-auth-card {
+  background: #131d31;
+  border-color: #273549;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-brand-title {
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-brand-sub {
+  color: #94a3b8;
+}
+
+body.theme-dark .kujang-stepper {
+  border-bottom-color: #273549;
+}
+
+body.theme-dark .kujang-step-item {
+  color: #64748b;
+}
+
+body.theme-dark .kujang-step-item.active {
+  color: #10b981;
+}
+
+body.theme-dark .kujang-step-item.completed {
+  color: #059669;
+}
+
+body.theme-dark .kujang-step-num {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+body.theme-dark .kujang-method-card {
+  background: #1e293b;
+  border-color: #273549;
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-method-card:hover {
+  background: #273549;
+  border-color: #10b981;
+}
+
+body.theme-dark .kujang-method-title {
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-method-desc {
+  color: #94a3b8;
+}
+
+body.theme-dark .kujang-login-box {
+  background: #1e293b;
+  border-color: #273549;
+}
+
+body.theme-dark .kujang-input-group label {
+  color: #cbd5e1;
+}
+
+body.theme-dark .kujang-input-group input {
+  background: #131d31;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-otp-digit {
+  background: #131d31;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.theme-dark .kujang-otp-digit:focus {
+  border-color: #10b981;
+  background: #1e293b;
+}
+
+body.theme-dark .kujang-quick-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.theme-dark .kujang-quick-btn:hover {
+  background: #273549;
+  color: #ffffff;
+}
+
+body.theme-dark .kujang-sec-notice {
+  background: #1e293b;
+  border-color: #273549;
+  color: #94a3b8;
+}
+
