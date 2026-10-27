@@ -191,9 +191,9 @@ function unlockEmergencyTicket(ticketId, method, authorizerName, extraNote) {
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
   if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
 
-  // Buka rincian tiket / QR yang sudah aktif
+  // Buka rincian tiket / QR yang sudah aktif (hanya karyawan yang langsung membuka QR)
   if (typeof window.openTicketDetail === 'function') {
-    window.openTicketDetail(ticket.id, 'qr');
+    window.openTicketDetail(ticket.id, window.currentActor === 'karyawan' ? 'qr' : 'detail');
   }
 
   return true;

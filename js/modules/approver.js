@@ -540,94 +540,70 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : ''}
 
-            ${isTrackingView ? `
-              <div class="tracking-card-footer">
-                <div class="tracking-footer-status-row">
-                  <div class="tracking-decision-pill ${
-                    isTicketReassignedFromCurrentApprover(t) ? 'pill-reassigned' :
-                    ((isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? 'pill-pending' : 'pill-decided')
-                  }">
-                    ${isTicketReassignedFromCurrentApprover(t) ? `
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 14 20 9 15 4"></polyline><path d="M4 20v-7a4 4 0 0 1 4-4h12"></path></svg>
-                      <span>Dialihkan ke ${t.approverName}</span>
-                    ` : (
-                      (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        <span>Belum Diputuskan</span>
-                      ` : `
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Sudah Diputuskan</span>
-                      `
-                    )}
-                  </div>
-                  <button type="button" class="btn-tracking-delete" onclick="window.deleteApproverTicket('${t.id}')" title="Hapus catatan dari pelacakan">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    <span>Hapus</span>
-                  </button>
-                </div>
-
-                <div class="tracking-footer-actions-grid">
-                  <button class="btn-tracking-qr" onclick="openTicketDetail('${t.id}', 'qr')" title="Buka Tiket Digital & QR Code">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>Buka QR Izin</span>
-                  </button>
-                  <button class="btn-tracking-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                    <span>Detail pengajuan</span>
-                  </button>
-                </div>
+            ${isTicketReassignedFromCurrentApprover(t) ? `
+              <div class="card-actions-bar" style="display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
+                <button class="btn-card-detail" style="flex: 1; min-width: 0; padding: 0.4rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Detail pengajuan</span>
+                </button>
+                <span style="font-size:0.72rem; color:#92400e; font-weight:700; white-space: nowrap; padding-left: 0.3rem;">
+                  Dialihkan ke ${t.approverName}
+                </span>
               </div>
-            ` : `
-              <div class="card-actions-bar">
-                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
-                  <button class="btn-figma-primary" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'qr')" title="Buka Tiket Digital & QR Code">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>Buka QR Izin</span>
-                  </button>
-                  <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
+            ` : (
+              (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
+                <!-- Tiered Action Grid: Row 1 Decision (50%-50%), Row 2 Inspection (50%-50%) -->
+                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; width: 100%;">
+                    ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+                      <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="openRejectExtensionModal('${t.id}')">
+                        ✕ Tolak Perpanjang
+                      </button>
+                      <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="approveExtensionRequest('${t.id}')">
+                        ✓ Setujui Perpanjang
+                      </button>
+                    ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
+                      <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="openRejectModal('${t.id}')">
+                        ✕ Tolak Darurat
+                      </button>
+                      <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem; background: #059669;" onclick="window.emergencyDirectApprove('${t.id}')">
+                        ✓ Buka Kunci
+                      </button>
+                    ` : `
+                      <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.775rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem;" onclick="openRejectModal('${t.id}')">
+                        ✕ Tolak
+                      </button>
+                      <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.775rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem;" onclick="openApproveModal('${t.id}')">
+                        ✓ Setujui
+                      </button>
+                    `)}
+                  </div>
+                  <button class="btn-card-detail" style="width: 100%; padding: 0.4rem 0.5rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     <span>Detail pengajuan</span>
                   </button>
                 </div>
-
-                ${isTicketReassignedFromCurrentApprover(t) ? `
-                  <span style="font-size:0.75rem; color:#92400e; font-weight:700;">
-                    Dialihkan ke ${t.approverName}
-                  </span>
-                ` : (
-                  t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
-                    <div class="approver-action-grid">
-                      <button class="btn-reject" onclick="openRejectExtensionModal('${t.id}')">
-                        ✕ Tolak Perpanjang
-                      </button>
-                      <button class="btn-approve" onclick="approveExtensionRequest('${t.id}')">
-                        ✓ Setujui Perpanjang
-                      </button>
-                    </div>
-                  ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
-                    <div class="approver-action-grid">
-                      <button class="btn-reject" onclick="openRejectModal('${t.id}')">
-                        ✕ Tolak Darurat
-                      </button>
-                      <button class="btn-approve" style="background:#059669; font-weight:800;" onclick="window.emergencyDirectApprove('${t.id}')">
-                        ✓ Validasi & Buka Kunci
-                      </button>
-                    </div>
-                  ` : (isPending ? `
-                    <div class="approver-action-grid">
-                      <button class="btn-reject" onclick="openRejectModal('${t.id}')">
-                        ✕ Tolak
-                      </button>
-                      <button class="btn-approve" onclick="openApproveModal('${t.id}')">
-                        ✓ Setujui
-                      </button>
-                    </div>
+              ` : `
+                <!-- Single Balanced Row for Decided Tickets -->
+                <div class="card-actions-bar" style="display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
+                  <button class="btn-card-detail" style="flex: 1; min-width: 0; padding: 0.4rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Detail pengajuan</span>
+                  </button>
+                  ${(t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') ? `
+                    <button type="button" class="btn-figma-delete-single" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.35); color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.6rem; border-radius: 6px; min-height: 34px; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.06)'" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      <span>Hapus</span>
+                    </button>
                   ` : `
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Sudah Diputuskan</span>
-                  `))
-                )}
-              </div>
-            `}
+                    <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600; white-space: nowrap; padding-left: 0.3rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      Diputuskan
+                    </span>
+                  `}
+                </div>
+              `
+            )}
           </div>
         `;
   }).join('')}

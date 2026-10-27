@@ -625,113 +625,202 @@
 }
 
 /* ==========================================================================
-   KUJANG ID DARK THEME OVERRIDES
+   HALAMAN LOGIN PENGECUALIAN DARI MODE GELAP (ALWAYS LIGHT CORPORATE THEME)
+   Halaman login Kujang ID & Portal Login tidak ikut mode gelap meskipun
+   akun user atau sistem sedang dalam mode gelap.
    ========================================================================== */
 body.theme-dark .kujang-auth-overlay,
-html.theme-dark .kujang-auth-overlay {
-  background: #0b1120;
+html.theme-dark .kujang-auth-overlay,
+.kujang-auth-overlay {
+  background: #f1f5f9 !important;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.08) 0px, transparent 50%);
-  color: #f8fafc;
+    radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.04) 0px, transparent 50%) !important;
+  color: #0f172a !important;
+}
+
+@media (max-width: 576px) {
+  body.theme-dark .kujang-auth-overlay,
+  html.theme-dark .kujang-auth-overlay,
+  .kujang-auth-overlay {
+    background: #ffffff !important;
+  }
 }
 
 body.theme-dark .kujang-auth-card,
-html.theme-dark .kujang-auth-card {
-  background: #131d31;
-  border-color: #273549;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  color: #f8fafc;
+html.theme-dark .kujang-auth-card,
+.kujang-auth-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.02) !important;
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-brand-title {
-  color: #f8fafc;
+body.theme-dark .kujang-brand-title,
+.kujang-brand-title {
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-brand-sub {
-  color: #94a3b8;
+body.theme-dark .kujang-brand-sub,
+.kujang-brand-sub {
+  color: #64748b !important;
 }
 
-body.theme-dark .kujang-stepper {
-  border-bottom-color: #273549;
+body.theme-dark .kujang-stepper,
+.kujang-stepper {
+  border-bottom: 1px solid #f1f5f9 !important;
 }
 
-body.theme-dark .kujang-step-item {
-  color: #64748b;
+body.theme-dark .kujang-step-item,
+.kujang-step-item {
+  color: #94a3b8 !important;
 }
 
-body.theme-dark .kujang-step-item.active {
-  color: #10b981;
+body.theme-dark .kujang-step-item.active,
+.kujang-step-item.active {
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-step-item.completed {
-  color: #059669;
+body.theme-dark .kujang-step-item.active .kujang-step-num,
+.kujang-step-item.active .kujang-step-num {
+  background: #059669 !important;
+  color: #ffffff !important;
 }
 
-body.theme-dark .kujang-step-num {
-  background: #1e293b;
-  color: #94a3b8;
+body.theme-dark .kujang-step-item.completed,
+.kujang-step-item.completed {
+  color: #059669 !important;
 }
 
-body.theme-dark .kujang-method-card {
-  background: #1e293b;
-  border-color: #273549;
-  color: #f8fafc;
+body.theme-dark .kujang-step-item.completed .kujang-step-num,
+.kujang-step-item.completed .kujang-step-num {
+  background: #dcfce7 !important;
+  color: #059669 !important;
 }
 
-body.theme-dark .kujang-method-card:hover {
-  background: #273549;
-  border-color: #10b981;
+body.theme-dark .kujang-step-num,
+.kujang-step-num {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
 }
 
-body.theme-dark .kujang-method-title {
-  color: #f8fafc;
+body.theme-dark .kujang-method-card,
+.kujang-method-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-method-desc {
-  color: #94a3b8;
+body.theme-dark .kujang-method-card:hover,
+.kujang-method-card:hover {
+  background: #f8fafc !important;
+  border-color: #059669 !important;
 }
 
-body.theme-dark .kujang-login-box {
-  background: #1e293b;
-  border-color: #273549;
+body.theme-dark .kujang-method-title,
+.kujang-method-title {
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-input-group label {
-  color: #cbd5e1;
+body.theme-dark .kujang-method-desc,
+.kujang-method-desc {
+  color: #64748b !important;
 }
 
-body.theme-dark .kujang-input-group input {
-  background: #131d31;
-  border-color: #334155;
-  color: #f8fafc;
+body.theme-dark .kujang-login-box,
+.kujang-login-box {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
-body.theme-dark .kujang-otp-digit {
-  background: #131d31;
-  border-color: #334155;
-  color: #f8fafc;
+body.theme-dark .kujang-input-group label,
+.kujang-input-group label {
+  color: #334155 !important;
 }
 
-body.theme-dark .kujang-otp-digit:focus {
-  border-color: #10b981;
-  background: #1e293b;
+body.theme-dark .kujang-input-group input,
+body.theme-dark .kujang-auth-card input,
+.kujang-input-group input,
+.kujang-auth-card input {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-quick-btn {
-  background: #1e293b;
-  border-color: #334155;
-  color: #cbd5e1;
+body.theme-dark .kujang-otp-digit,
+.kujang-otp-digit {
+  background: #ffffff !important;
+  border: 2px solid #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
-body.theme-dark .kujang-quick-btn:hover {
-  background: #273549;
-  color: #ffffff;
+body.theme-dark .kujang-otp-digit:focus,
+.kujang-otp-digit:focus {
+  border-color: #059669 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
 }
 
-body.theme-dark .kujang-sec-notice {
-  background: #1e293b;
-  border-color: #273549;
-  color: #94a3b8;
+body.theme-dark .kujang-quick-btn,
+.kujang-quick-btn {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+body.theme-dark .kujang-quick-btn:hover,
+.kujang-quick-btn:hover {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body.theme-dark .kujang-sec-notice,
+.kujang-sec-notice {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+body.theme-dark .kujang-account-item,
+.kujang-account-item {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body.theme-dark .kujang-account-item:hover,
+.kujang-account-item:hover {
+  border-color: #059669 !important;
+  background: #f0fdf4 !important;
+}
+
+body.theme-dark .kujang-account-name,
+.kujang-account-name {
+  color: #0f172a !important;
+}
+
+body.theme-dark .kujang-account-role,
+.kujang-account-role {
+  color: #64748b !important;
+}
+
+/* Portal Login Card Lock to Light Theme */
+body.theme-dark .portal-login-card,
+.portal-login-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+body.theme-dark .portal-user-option,
+.portal-user-option {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body.theme-dark .portal-user-option:hover,
+.portal-user-option:hover {
+  background: #f1f5f9 !important;
+  border-color: #059669 !important;
 }
 

@@ -285,8 +285,8 @@ function renderSecurityDashboard() {
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
               <span class="status-pill-green" style="font-size: 0.7rem;">Disetujui</span>
-              <button class="btn-quick-scan-out" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="executeScanOut('${t.id}')" title="Proses Scan Out di Pos Jaga">
-                Proses Scan Out
+              <button type="button" class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.725rem; font-weight: 600; min-height: 30px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
+                <span>Detail</span>
               </button>
             </div>
           </div>
@@ -469,25 +469,16 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 </div>
               ` : ''}
 
-              <!-- Action Buttons -->
-              <div class="card-actions-bar" style="margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
-                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
-                  <button class="btn-card-qr" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'qr')" title="Buka Tiket & QR Code">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>Tiket & QR Code</span>
-                  </button>
-                  <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                    <span>Detail pengajuan</span>
-                  </button>
-                </div>
-
-                <div>
-                  <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.6rem; border-radius: 6px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    <span>Hapus</span>
-                  </button>
-                </div>
+              <!-- Action Buttons (Single Symmetrical Row) -->
+              <div class="card-actions-bar" style="display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
+                <button class="btn-card-detail" style="flex: 1; min-width: 0; padding: 0.4rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Detail pengajuan</span>
+                </button>
+                <button type="button" class="btn-figma-delete-single" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.35); color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.6rem; border-radius: 6px; min-height: 34px; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.06)'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Hapus</span>
+                </button>
               </div>
             </div>
           `;
@@ -555,31 +546,16 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             ${t.scanOutTime ? `<div style="font-size:0.75rem; color:#065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
             ${t.scanInTime ? `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Scan In:</strong> ${t.scanInTime}</div>` : ''}
 
-            <!-- Quick Action Buttons for Satpam -->
-            <div class="card-actions-bar">
-              <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
-                <button class="btn-card-qr" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'qr')" title="Buka Tiket & QR Code">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                  <span>Tiket & QR Code</span>
-                </button>
-                <button class="btn-card-detail" style="padding:0.4rem 0.75rem; font-size:0.75rem; min-height:34px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Detail pengajuan</span>
-                </button>
-              </div>
-
-              <div style="display:flex; gap:0.4rem; align-items: center;">
-                ${(isReadyExit && !isHistoryMode) ? `
-                  <button class="btn-quick-scan-out" onclick="executeScanOut('${t.id}')" title="Proses Scan Out (Meninggalkan Kawasan Pabrik)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    <span>Proses Scan Out</span>
-                  </button>
-                ` : ''}
-                <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fecaca; color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.35rem 0.6rem; border-radius: 6px; transition: background 0.15s; margin-left: 0.25rem;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', '${isHistoryMode ? 'riwayat' : 'pelacakan'}')" title="Hapus Data #${t.id}">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Hapus</span>
-                </button>
-              </div>
+            <!-- Quick Action Buttons for Satpam (Single Symmetrical Row) -->
+            <div class="card-actions-bar" style="display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
+              <button class="btn-card-detail" style="flex: 1; min-width: 0; padding: 0.4rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Detail pengajuan</span>
+              </button>
+              <button type="button" class="btn-figma-delete-single" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.35); color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.6rem; border-radius: 6px; min-height: 34px; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.06)'" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', '${isHistoryMode ? 'riwayat' : 'pelacakan'}')" title="Hapus Data #${t.id}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Hapus</span>
+              </button>
             </div>
           </div>
         `;

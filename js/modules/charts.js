@@ -534,53 +534,110 @@ window.renderApproverBarChart = renderApproverBarChart;
 
 // ===================================================================
 // 3. ADMIN: GATE PASS REALTIME TRAFFIC DUAL CHART (SCAN OUT & SCAN IN)
-// Realtime, Live Ticking & Current Time Indicator (07:00 - 17:00 WIB)
+// Day Shift: 07:00 - 17:00 WIB | Night Shift: 17:00 - 07:00 WIB
+// Realtime Live Ticking, Auto Day/Night Reset, Cutoff at Current Time
 // ===================================================================
 function getAdminTrafficData() {
   const list = window.ticketsList || [];
-  const hours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  const now = new Date();
+  const curH = now.getHours();
+  const curM = now.getMinutes();
+  const curS = now.getSeconds();
+  const curDecHour = curH + (curM / 60) + (curS / 3600);
 
-  // Baseline standard operating load (Kawasan Pabrik Kujang)
-  const baseOut = {
-    '07:00': 2, '08:00': 4, '09:00': 5, '10:00': 7,
-    '11:00': 12, '12:00': 9, '13:00': 5, '14:00': 8,
-    '15:00': 9, '16:00': 14, '17:00': 7
-  };
-  const baseIn = {
-    '07:00': 1, '08:00': 2, '09:00': 3, '10:00': 5,
-    '11:00': 7, '12:00': 11, '13:00': 12, '14:00': 6,
-    '15:00': 8, '16:00': 10, '17:00': 15
-  };
+  // Shift Detection:
+  // Siang: 07:00 s/d 17:00 (07:00:00 - 16:59:59)
+  // Malam: 17:00 s/d 07:00 (17:00:00 - 06:59:59)
+  const isNight = (curH >= 17 || curH < 7);
 
-  const nowTime = new Date();
-  const curHourNum = nowTime.getHours();
+  let hours = [];
+  let elapsedHours = 0;
+  let totalShiftHours = 0;
+  const baseOut = {};
+  const baseIn = {};
 
-  // Zero-out future hours (di atas jam sekarang tidak boleh ada data / nol)
-  hours.forEach(hour => {
-    const hNum = parseInt(hour.split(':')[0], 10);
-    if (hNum > curHourNum) {
-      baseOut[hour] = 0;
-      baseIn[hour] = 0;
+  if (!isNight) {
+    // === SHIFT SIANG: 07:00 s/d 17:00 WIB (10 Jam Operasional) ===
+    hours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+    totalShiftHours = 10;
+    elapsedHours = Math.max(0, Math.min(10, curDecHour - 7));
+
+    // Baseline jam kerja normal pabrik
+    const dayBaseOut = {
+      '07:00': 2, '08:00': 4, '09:00': 5, '10:00': 7,
+      '11:00': 12, '12:00': 9, '13:00': 5, '14:00': 8,
+      '15:00': 9, '16:00': 14, '17:00': 7
+    };
+    const dayBaseIn = {
+      '07:00': 1, '08:00': 2, '09:00': 3, '10:00': 5,
+      '11:00': 7, '12:00': 11, '13:00': 12, '14:00': 6,
+      '15:00': 8, '16:00': 10, '17:00': 15
+    };
+
+    hours.forEach(h => {
+      const hNum = parseInt(h.split(':')[0], 10);
+      if (hNum > curH) {
+        baseOut[h] = 0;
+        baseIn[h] = 0;
+      } else {
+        baseOut[h] = dayBaseOut[h] || 0;
+        baseIn[h] = dayBaseIn[h] || 0;
+      }
+    });
+  } else {
+    // === SHIFT MALAM: 17:00 s/d 07:00 WIB (14 Jam Operasional) ===
+    // Saat lewat pukul 17:00, grafik di-reset dari nol
+    hours = ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00'];
+    totalShiftHours = 14;
+
+    if (curDecHour >= 17) {
+      elapsedHours = curDecHour - 17;
+    } else {
+      elapsedHours = (24 - 17) + curDecHour; // 7 jam s/d tengah malam + jam dini hari
     }
-  });
+    elapsedHours = Math.max(0, Math.min(14, elapsedHours));
 
+    // Shift malam dimulai dari NOL
+    hours.forEach(h => {
+      baseOut[h] = 0;
+      baseIn[h] = 0;
+    });
+  }
+
+  // Hitung aktivitas nyata dari database tiket
   list.forEach(t => {
     // Scan Out (Keluar Gerbang)
     const outTime = t.scanOutTime || t.plannedExit;
     if (outTime) {
       const match = outTime.match(/(\d{1,2}):\d{2}/);
       if (match) {
-        const slot = match[1].padStart(2, '0') + ':00';
-        if (baseOut[slot] !== undefined) { const slotH = parseInt(slot.split(':')[0], 10); if (slotH <= curHourNum) { baseOut[slot]++; } }
+        const slotH = parseInt(match[1], 10);
+        const slot = String(slotH).padStart(2, '0') + ':00';
+        if (baseOut[slot] !== undefined) {
+          const slotElapsed = isNight
+            ? (slotH >= 17 ? slotH - 17 : 7 + slotH)
+            : (slotH - 7);
+          if (slotElapsed <= elapsedHours) {
+            baseOut[slot]++;
+          }
+        }
       }
     }
-    // Scan In (Kembali Masuk Gerbang)
+    // Scan In (Masuk Gerbang)
     const inTime = t.scanInTime || t.estimatedReturn;
     if (inTime) {
       const match = inTime.match(/(\d{1,2}):\d{2}/);
       if (match) {
-        const slot = match[1].padStart(2, '0') + ':00';
-        if (baseIn[slot] !== undefined) { const slotH = parseInt(slot.split(':')[0], 10); if (slotH <= curHourNum) { baseIn[slot]++; } }
+        const slotH = parseInt(match[1], 10);
+        const slot = String(slotH).padStart(2, '0') + ':00';
+        if (baseIn[slot] !== undefined) {
+          const slotElapsed = isNight
+            ? (slotH >= 17 ? slotH - 17 : 7 + slotH)
+            : (slotH - 7);
+          if (slotElapsed <= elapsedHours) {
+            baseIn[slot]++;
+          }
+        }
       }
     }
   });
@@ -594,19 +651,23 @@ function getAdminTrafficData() {
 
   const totalOut = rows.reduce((s, r) => s + r.out, 0);
   const totalIn = rows.reduce((s, r) => s + r.in, 0);
-  const maxVal = Math.max(...rows.map(r => Math.max(r.out, r.in)), 1);
+  const maxVal = Math.max(...rows.map(r => Math.max(r.out, r.in)), isNight ? 5 : 10);
 
   const peakRow = rows.reduce((max, r) => r.total > max.total ? r : max, rows[0]);
   const peakOutRow = rows.reduce((max, r) => r.out > max.out ? r : max, rows[0]);
   const peakInRow = rows.reduce((max, r) => r.in > max.in ? r : max, rows[0]);
 
   return {
+    isNight,
+    hours,
     rows,
     totalOut,
     totalIn,
     totalCombined: totalOut + totalIn,
     maxVal,
-    peakHour: peakRow.hour,
+    elapsedHours,
+    totalShiftHours,
+    peakHour: (peakRow && peakRow.total > 0) ? peakRow.hour : (isNight ? '17:00' : '12:00'),
     peakOutHour: peakOutRow.hour,
     peakInHour: peakInRow.hour
   };
@@ -616,7 +677,33 @@ function renderAdminTrafficChart() {
   const container = document.getElementById('chartAdminTrafficContainer');
   if (!container) return;
 
-  const { rows: data, totalOut, totalIn, totalCombined, maxVal, peakHour, peakOutHour, peakInHour } = getAdminTrafficData();
+  const {
+    isNight,
+    hours,
+    rows: data,
+    totalOut,
+    totalIn,
+    totalCombined,
+    maxVal,
+    elapsedHours,
+    totalShiftHours,
+    peakHour
+  } = getAdminTrafficData();
+
+  window._trafficColCount = data.length;
+
+  // Sinkronisasi teks subtitle & icon di header widget
+  const subTitle = document.getElementById('adminTrafficShiftSubtitle');
+  if (subTitle) {
+    subTitle.innerHTML = isNight
+      ? '🌙 17:00 – 07:00 WIB (Shift Malam)'
+      : '☀️ 07:00 – 17:00 WIB (Shift Siang)';
+  }
+  const iconSpan = document.getElementById('adminTrafficIcon');
+  if (iconSpan) {
+    iconSpan.textContent = isNight ? '🌙' : '🌊';
+  }
+
   const width = 500;
   const height = 160;
   const padLeft = 28;
@@ -632,40 +719,33 @@ function renderAdminTrafficChart() {
   const curH = now.getHours();
   const curM = now.getMinutes();
   const curS = now.getSeconds();
-  const curDecHour = curH + (curM / 60) + (curS / 3600);
   const timeNowStr = `${String(curH).padStart(2, '0')}:${String(curM).padStart(2, '0')}`;
   const timeNowFull = `${timeNowStr}:${String(curS).padStart(2, '0')} WIB`;
 
-  let currentX = null;
-  if (curDecHour >= 7 && curDecHour <= 17) {
-    const fraction = (curDecHour - 7) / (17 - 7);
-    currentX = padLeft + fraction * plotW;
-  } else if (curDecHour < 7) {
-    currentX = padLeft;
-  } else {
-    currentX = padLeft + plotW;
-  }
+  // Posisi X Realtime Beacon
+  const fraction = Math.max(0, Math.min(1, elapsedHours / totalShiftHours));
+  const currentX = padLeft + fraction * plotW;
 
-  // Find data closest to current hour
+  // Data slot saat ini
   const currentSlotStr = `${String(curH).padStart(2, '0')}:00`;
-  const curSlotData = data.find(d => d.hour === currentSlotStr) || data[0];
+  const curSlotData = data.find(d => d.hour === currentSlotStr) || (isNight ? data[0] : data[data.length - 1]);
 
   // Dual Line Points
   const pointsOut = data.map((d, i) => {
     const x = padLeft + (i / (data.length - 1)) * plotW;
     const y = padTop + plotH - (d.out / (maxVal * 1.18)) * plotH;
-    return { x, y, hour: d.hour, val: d.out, hourNum: 7 + i };
+    return { x, y, hour: d.hour, val: d.out, index: i };
   });
 
   const pointsIn = data.map((d, i) => {
     const x = padLeft + (i / (data.length - 1)) * plotW;
     const y = padTop + plotH - (d.in / (maxVal * 1.18)) * plotH;
-    return { x, y, hour: d.hour, val: d.in, hourNum: 7 + i };
+    return { x, y, hour: d.hour, val: d.in, index: i };
   });
 
   // ===================================================================
-  // CUTOFF LOGIKA: Di atas jam sekarang TIDAK ADA GRAFIK (Requirement 7)
-  // Misalnya jam 12.00, maka jam 12.00 ke atas tidak ada garis grafiknya.
+  // CUTOFF LOGIKA: Di atas jam sekarang TIDAK ADA GRAFIK
+  // Garis hanya digambar dari awal shift sampai currentX
   // ===================================================================
   let pathDOut = '';
   let areaDOut = '';
@@ -674,50 +754,40 @@ function renderAdminTrafficChart() {
   let nowYOut = padTop + plotH;
   let nowYIn = padTop + plotH;
 
-  if (curDecHour >= 7) {
-    if (curDecHour >= 17) {
-      // Seluruh jam operasional (07:00 - 17:00) sudah lewat
-      pathDOut = `M ${pointsOut[0].x},${pointsOut[0].y} ` + pointsOut.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
-      areaDOut = `${pathDOut} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+  const maxPassedIndex = Math.min(Math.floor(elapsedHours), data.length - 1);
+  const passedPointsOut = pointsOut.slice(0, maxPassedIndex + 1);
+  const passedPointsIn = pointsIn.slice(0, maxPassedIndex + 1);
 
-      pathDIn = `M ${pointsIn[0].x},${pointsIn[0].y} ` + pointsIn.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
-      areaDIn = `${pathDIn} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
-    } else {
-      // Masih dalam rentang 07:00 s/d 17:00 -> potong tepat di jam & menit sekarang (currentX)
-      const maxPassedIndex = Math.min(Math.floor(curDecHour - 7), data.length - 1);
-      const passedPointsOut = pointsOut.slice(0, maxPassedIndex + 1);
-      const passedPointsIn = pointsIn.slice(0, maxPassedIndex + 1);
+  if (passedPointsOut.length > 0) {
+    const p0Out = pointsOut[maxPassedIndex];
+    const p1Out = pointsOut[Math.min(maxPassedIndex + 1, pointsOut.length - 1)];
+    const p0In = pointsIn[maxPassedIndex];
+    const p1In = pointsIn[Math.min(maxPassedIndex + 1, pointsIn.length - 1)];
 
-      const p0Out = pointsOut[maxPassedIndex];
-      const p1Out = pointsOut[Math.min(maxPassedIndex + 1, pointsOut.length - 1)];
-      const p0In = pointsIn[maxPassedIndex];
-      const p1In = pointsIn[Math.min(maxPassedIndex + 1, pointsIn.length - 1)];
+    const spanX = (p1Out.x - p0Out.x) || 1;
+    const tFrac = Math.max(0, Math.min(1, (currentX - p0Out.x) / spanX));
+    nowYOut = p0Out.y + tFrac * (p1Out.y - p0Out.y);
+    nowYIn = p0In.y + tFrac * (p1In.y - p0In.y);
 
-      const spanX = (p1Out.x - p0Out.x) || 1;
-      const tFrac = Math.max(0, Math.min(1, (currentX - p0Out.x) / spanX));
-      nowYOut = p0Out.y + tFrac * (p1Out.y - p0Out.y);
-      nowYIn = p0In.y + tFrac * (p1In.y - p0In.y);
-
-      // Garis Scan Out hanya sampai currentX
-      pathDOut = `M ${passedPointsOut[0].x},${passedPointsOut[0].y}`;
-      for (let k = 1; k < passedPointsOut.length; k++) {
-        pathDOut += ` L ${passedPointsOut[k].x},${passedPointsOut[k].y}`;
-      }
-      if (currentX > passedPointsOut[passedPointsOut.length - 1].x) {
-        pathDOut += ` L ${currentX},${nowYOut}`;
-      }
-      areaDOut = `${pathDOut} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
-
-      // Garis Scan In hanya sampai currentX
-      pathDIn = `M ${passedPointsIn[0].x},${passedPointsIn[0].y}`;
-      for (let k = 1; k < passedPointsIn.length; k++) {
-        pathDIn += ` L ${passedPointsIn[k].x},${passedPointsIn[k].y}`;
-      }
-      if (currentX > passedPointsIn[passedPointsIn.length - 1].x) {
-        pathDIn += ` L ${currentX},${nowYIn}`;
-      }
-      areaDIn = `${pathDIn} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+    // Garis Scan Out
+    pathDOut = `M ${passedPointsOut[0].x},${passedPointsOut[0].y}`;
+    for (let k = 1; k < passedPointsOut.length; k++) {
+      pathDOut += ` L ${passedPointsOut[k].x},${passedPointsOut[k].y}`;
     }
+    if (currentX > passedPointsOut[passedPointsOut.length - 1].x) {
+      pathDOut += ` L ${currentX},${nowYOut}`;
+    }
+    areaDOut = `${pathDOut} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+
+    // Garis Scan In
+    pathDIn = `M ${passedPointsIn[0].x},${passedPointsIn[0].y}`;
+    for (let k = 1; k < passedPointsIn.length; k++) {
+      pathDIn += ` L ${passedPointsIn[k].x},${passedPointsIn[k].y}`;
+    }
+    if (currentX > passedPointsIn[passedPointsIn.length - 1].x) {
+      pathDIn += ` L ${currentX},${nowYIn}`;
+    }
+    areaDIn = `${pathDIn} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
   }
 
   const slotWidth = plotW / (data.length - 1);
@@ -728,9 +798,6 @@ function renderAdminTrafficChart() {
   const timeBeaconBg = dark ? 'rgba(239, 68, 68, 0.18)' : '#fef2f2';
   const timeBeaconBorder = dark ? 'rgba(239, 68, 68, 0.35)' : '#fecaca';
   const timeBeaconText = dark ? '#fca5a5' : '#dc2626';
-  const badgeSummaryBg = dark ? '#131b2a' : '#f0f9ff';
-  const badgeSummaryBorder = dark ? '#1e3a5f' : '#bae6fd';
-  const badgeSummaryText = dark ? '#93c5fd' : '#0369a1';
 
   container.innerHTML = `
     <!-- Dual Legend & Realtime Timestamp Header -->
@@ -798,6 +865,7 @@ function renderAdminTrafficChart() {
           const ptIn = pointsIn[i];
           const isCurrentSlot = d.hour === currentSlotStr;
           const labelFill = isCurrentSlot ? (dark ? '#f8fafc' : '#0f172a') : (dark ? '#94a3b8' : '#64748b');
+          const isPassed = i <= maxPassedIndex;
           return `
             <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
                onmouseenter="window.hoverTrafficPoint('${d.hour}', ${d.out}, ${d.in}, ${ptOut.x}, ${ptOut.y}, ${ptIn.y}, ${i});"
@@ -806,11 +874,11 @@ function renderAdminTrafficChart() {
               <rect x="${ptOut.x - slotWidth / 2}" y="0" width="${slotWidth}" height="${height}" fill="transparent" />
               <line id="trafficGuideLine_${i}" x1="${ptOut.x}" y1="${padTop}" x2="${ptOut.x}" y2="${padTop + plotH}" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="3,3" style="display: none;" />
               <!-- Out Point (Hanya muncul jika jam sudah berjalan) -->
-              ${(7 + i) <= curH ? `
+              ${isPassed ? `
                 <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="${pointFill}" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
               ` : ''}
               <!-- In Point (Hanya muncul jika jam sudah berjalan) -->
-              ${(7 + i) <= curH ? `
+              ${isPassed ? `
                 <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="${pointFill}" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
               ` : ''}
               ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${labelFill}" text-anchor="middle">${d.hour}</text>` : ''}
@@ -820,9 +888,9 @@ function renderAdminTrafficChart() {
       </svg>
     </div>
 
-    <!-- Admin Traffic Badge Summary (Realtime & Dual Metrics) -->
-    <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: ${badgeSummaryBg}; border: 1.5px solid ${badgeSummaryBorder}; border-radius: 8px; font-size: 0.75rem; color: ${badgeSummaryText}; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
-      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
+    <!-- Admin Traffic Badge Summary (Theme-Safe CSS Class) -->
+    <div id="adminTrafficBadge" class="admin-traffic-badge">
+      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}${isNight ? ' — Shift Malam' : ''}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
       <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
         <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
         <span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span>
@@ -833,15 +901,16 @@ function renderAdminTrafficChart() {
 
 function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
   const badge = document.getElementById('adminTrafficBadge');
-  const nowH = new Date().getHours();
-  const isFuture = (7 + activeIdx) > nowH;
+  const { elapsedHours } = getAdminTrafficData();
+  const isFuture = activeIdx > Math.floor(elapsedHours);
 
   if (badge) {
-    badge.style.background = 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
-    badge.style.color = '#ffffff';
-    badge.style.borderColor = '#0284c7';
+    badge.classList.add('is-hovered');
+    badge.style.background = '';
+    badge.style.color = '';
+    badge.style.borderColor = '';
 
-    if (isFuture || (out === 0 && inVal === 0 && (7 + activeIdx) >= nowH)) {
+    if (isFuture || (out === 0 && inVal === 0 && activeIdx >= Math.floor(elapsedHours))) {
       badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>0 Scan Out</strong> — ↘️ <strong>0 Tap In</strong> <span style="font-size:0.75rem; opacity:0.85;">(Belum ada data aktivitas)</span></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">0 Personel</span>`;
     } else {
       const sum = out + inVal;
@@ -849,7 +918,8 @@ function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
     }
   }
 
-  for (let i = 0; i < 11; i++) {
+  const colCount = window._trafficColCount || 15;
+  for (let i = 0; i < colCount; i++) {
     const line = document.getElementById(`trafficGuideLine_${i}`);
     const ptOut = document.getElementById(`trafficPointOut_${i}`);
     const ptIn = document.getElementById(`trafficPointIn_${i}`);
@@ -878,20 +948,22 @@ function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
 function unhoverTrafficPoint() {
   hideChartTooltip();
   const badge = document.getElementById('adminTrafficBadge');
-  const { rows: data, totalOut, totalIn, peakHour } = getAdminTrafficData();
+  const { isNight, rows: data, totalOut, totalIn, peakHour } = getAdminTrafficData();
   const now = new Date();
   const timeNowStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const currentSlotStr = `${String(now.getHours()).padStart(2, '0')}:00`;
-  const curSlotData = data.find(d => d.hour === currentSlotStr) || data[0];
+  const curSlotData = data.find(d => d.hour === currentSlotStr) || (isNight ? data[0] : data[data.length - 1]);
 
   if (badge) {
-    badge.style.background = '#f0f9ff';
-    badge.style.color = '#0369a1';
-    badge.style.borderColor = '#bae6fd';
-    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span></span>`;
+    badge.classList.remove('is-hovered');
+    badge.style.background = '';
+    badge.style.color = '';
+    badge.style.borderColor = '';
+    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}${isNight ? ' — Shift Malam' : ''}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span></span>`;
   }
 
-  for (let i = 0; i < 11; i++) {
+  const colCount = window._trafficColCount || 15;
+  for (let i = 0; i < colCount; i++) {
     const line = document.getElementById(`trafficGuideLine_${i}`);
     const ptOut = document.getElementById(`trafficPointOut_${i}`);
     const ptIn = document.getElementById(`trafficPointIn_${i}`);

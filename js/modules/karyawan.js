@@ -501,8 +501,8 @@ function renderKaryawanDashboard() {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         actionButtonsHtml = `
-          <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
-            <span>Buka QR Izin</span>
+          <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+            <span>Detail pengajuan</span>
           </button>
           ${hasPendingExt ? '' : (hasUsedExtension ? `
             <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
@@ -744,8 +744,8 @@ function renderPengajuanSayaView() {
       const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
       const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
       actionButtonsHtml = `
-        <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
-          <span>Buka QR Izin</span>
+        <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+          <span>Detail pengajuan</span>
         </button>
         ${hasPendingExt ? '' : (hasUsedExtension ? `
           <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
@@ -1208,7 +1208,7 @@ function renderEmpCards(list, containerElement) {
             <!-- Action Buttons Footer -->
             <div class="figma-card-footer" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.55rem; border-top: 1px solid #f1f5f9;">
               <div style="display: flex; gap: 0.65rem; align-items: center;">
-                ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui' || t.status === 'Terlambat') ? `
+                ${(t.status === 'Disetujui' && !t.scanOutTime) ? `
                   <button class="btn-figma-primary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;" onclick="openTicketDetail('${t.id}', 'qr')">
                     Buka QR Izin
                   </button>
@@ -1596,9 +1596,9 @@ function renderKaryawanMobileDashboard() {
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
 
         mobileBtnsHtml = `
-          <button type="button" class="btn-mobile-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            <span>Buka QR Izin</span>
+          <button type="button" class="btn-mobile-secondary" style="background: #ffffff; color: var(--text-primary); border: 1.5px solid var(--border-color);" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Detail Pengajuan</span>
           </button>
           ${hasPendingExt ? `
             <button type="button" class="btn-mobile-secondary" disabled style="opacity: 0.7;">

@@ -1468,11 +1468,12 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     }
   }
 
-  // Button: Buka Tiket QR (if approved or active)
+  // Button: Buka Tiket QR (Hanya untuk Karyawan dan hanya SEBELUM scan out)
   const btnDetailOpenQR = document.getElementById('btnDetailOpenQR');
   if (btnDetailOpenQR) {
-    const hasQr = ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat';
-    if (hasQr) {
+    const isKaryawan = (window.currentActor === 'karyawan');
+    const canShowQR = isKaryawan && (ticket.status === 'Disetujui') && !ticket.scanOutTime;
+    if (canShowQR) {
       btnDetailOpenQR.style.display = 'inline-flex';
       btnDetailOpenQR.onclick = () => {
         if (modalTicketDetail) modalTicketDetail.classList.remove('open');
@@ -1633,20 +1634,9 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const isSecurity = (window.currentActor === 'security');
 
   if (btnDetailScanOut) {
-    // Karyawan tidak boleh scan out sendiri di riwayatnya. Hanya Pos Jaga yang berwenang via scanner / manual.
-    const canScanOut = isSecurity && (ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
-    if (canScanOut) {
-      btnDetailScanOut.style.display = 'inline-flex';
-      btnDetailScanOut.onclick = function () {
-        if (typeof window.executeScanOut === 'function') {
-          window.executeScanOut(ticket.id);
-        }
-        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
-      };
-    } else {
-      btnDetailScanOut.style.display = 'none';
-      btnDetailScanOut.onclick = null;
-    }
+    // Scan Out hanya diizinkan di Terminal Verifikasi Tiket & Kamera Scan QR
+    btnDetailScanOut.style.display = 'none';
+    btnDetailScanOut.onclick = null;
   }
 
   if (btnDetailScanIn) {
