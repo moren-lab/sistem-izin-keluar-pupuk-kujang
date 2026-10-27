@@ -119,6 +119,7 @@ function setApproverNav(navKey) {
   const bnavAppDashboard = document.getElementById('bnavAppDashboard');
   const bnavAppAntrian = document.getElementById('bnavAppAntrian');
   const bnavAppPelacakan = document.getElementById('bnavAppPelacakan');
+  const bnavAppRiwayat = document.getElementById('bnavAppRiwayat');
 
   const approverDashboardPage = document.getElementById('approverDashboardPage');
   const approverAntrianPage = document.getElementById('approverAntrianPage');
@@ -126,15 +127,30 @@ function setApproverNav(navKey) {
 
   if (menuApproverDashboard) menuApproverDashboard.classList.toggle('active', navKey === 'dashboard');
   if (menuApproverAntrian) menuApproverAntrian.classList.toggle('active', navKey === 'antrian');
-  if (menuApproverPelacakan) menuApproverPelacakan.classList.toggle('active', navKey === 'pelacakan');
+  if (menuApproverPelacakan) menuApproverPelacakan.classList.toggle('active', navKey === 'pelacakan' || navKey === 'tim' || navKey === 'riwayat');
 
   if (bnavAppDashboard) bnavAppDashboard.classList.toggle('active', navKey === 'dashboard');
   if (bnavAppAntrian) bnavAppAntrian.classList.toggle('active', navKey === 'antrian');
-  if (bnavAppPelacakan) bnavAppPelacakan.classList.toggle('active', navKey === 'pelacakan');
+  if (bnavAppPelacakan) bnavAppPelacakan.classList.toggle('active', navKey === 'pelacakan' || navKey === 'tim');
+  if (bnavAppRiwayat) bnavAppRiwayat.classList.toggle('active', navKey === 'riwayat');
 
   if (approverDashboardPage) approverDashboardPage.style.display = navKey === 'dashboard' ? 'block' : 'none';
   if (approverAntrianPage) approverAntrianPage.style.display = navKey === 'antrian' ? 'block' : 'none';
-  if (approverPelacakanPage) approverPelacakanPage.style.display = navKey === 'pelacakan' ? 'block' : 'none';
+  if (approverPelacakanPage) approverPelacakanPage.style.display = (navKey === 'pelacakan' || navKey === 'tim' || navKey === 'riwayat') ? 'block' : 'none';
+
+  if (navKey === 'tim') {
+    const filterAppViewMode = document.getElementById('filterAppViewMode');
+    if (filterAppViewMode) {
+      filterAppViewMode.value = 'outside';
+      if (typeof window.filterApproverRequests === 'function') window.filterApproverRequests();
+    }
+  } else if (navKey === 'riwayat') {
+    const filterAppViewMode = document.getElementById('filterAppViewMode');
+    if (filterAppViewMode) {
+      filterAppViewMode.value = 'all';
+      if (typeof window.filterApproverRequests === 'function') window.filterApproverRequests();
+    }
+  }
 
   if (typeof window.renderApproverView === 'function') {
     window.renderApproverView();
@@ -149,6 +165,8 @@ function setApproverNav(navKey) {
   if (breadcrumbSubpage) {
     if (navKey === 'dashboard') breadcrumbSubpage.textContent = 'Dashboard';
     else if (navKey === 'antrian') breadcrumbSubpage.textContent = 'Antrian Persetujuan';
+    else if (navKey === 'tim') breadcrumbSubpage.textContent = 'Tim Saya';
+    else if (navKey === 'riwayat') breadcrumbSubpage.textContent = 'Riwayat Persetujuan';
     else if (navKey === 'pelacakan') breadcrumbSubpage.textContent = 'Pelacakan Izin Karyawan';
   }
 }
@@ -480,9 +498,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const bnavAppDashboard = document.getElementById('bnavAppDashboard');
   const bnavAppAntrian = document.getElementById('bnavAppAntrian');
   const bnavAppPelacakan = document.getElementById('bnavAppPelacakan');
+  const bnavAppRiwayat = document.getElementById('bnavAppRiwayat');
   if (bnavAppDashboard) bnavAppDashboard.addEventListener('click', () => setApproverNav('dashboard'));
   if (bnavAppAntrian) bnavAppAntrian.addEventListener('click', () => setApproverNav('antrian'));
-  if (bnavAppPelacakan) bnavAppPelacakan.addEventListener('click', () => setApproverNav('pelacakan'));
+  if (bnavAppPelacakan) bnavAppPelacakan.addEventListener('click', () => setApproverNav('tim'));
+  if (bnavAppRiwayat) bnavAppRiwayat.addEventListener('click', () => setApproverNav('riwayat'));
 
   const bnavSecDashboard = document.getElementById('bnavSecDashboard');
   const bnavSecScanner = document.getElementById('bnavSecScanner');

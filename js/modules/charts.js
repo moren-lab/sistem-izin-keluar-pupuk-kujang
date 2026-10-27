@@ -108,6 +108,32 @@ function createDonutArcPath(cx, cy, R, r, a0, a1) {
 }
 
 // ===================================================================
+// KARYAWAN DASHBOARD SEGMENT SWITCHER (SESUAI PDF HALAMAN 1 & 4)
+// ===================================================================
+function switchKaryawanSegment(seg) {
+  const btnRingkasan = document.getElementById('btnSegRingkasan');
+  const btnDonut = document.getElementById('btnSegDonut');
+  const statsCard = document.getElementById('karyawanStatsCardWrap');
+  const donutCard = document.getElementById('cardEmpDonutChart');
+
+  if (seg === 'ringkasan') {
+    if (btnRingkasan) btnRingkasan.classList.add('active');
+    if (btnDonut) btnDonut.classList.remove('active');
+    if (statsCard) statsCard.classList.remove('mobile-hide-seg');
+    if (donutCard) donutCard.classList.add('mobile-hide-seg');
+  } else {
+    if (btnDonut) btnDonut.classList.add('active');
+    if (btnRingkasan) btnRingkasan.classList.remove('active');
+    if (statsCard) statsCard.classList.add('mobile-hide-seg');
+    if (donutCard) donutCard.classList.remove('mobile-hide-seg');
+    if (typeof window.renderKaryawanDonutChart === 'function') {
+      window.renderKaryawanDonutChart();
+    }
+  }
+}
+window.switchKaryawanSegment = switchKaryawanSegment;
+
+// ===================================================================
 // 1. KARYAWAN: PRECISION DONUT CHART (REVISI 4 & 5 - DATA REAL-TIME)
 // ===================================================================
 function renderKaryawanDonutChart() {

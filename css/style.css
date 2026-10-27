@@ -16,8 +16,8 @@
   --corp-teal-light: #ecfdf5;
   --corp-teal-border: #a7f3d0;
 
-  --primary-accent: #2563eb;
-  --primary-accent-light: #eff6ff;
+  --primary-accent: #059669;
+  --primary-accent-light: #ecfdf5;
 
   --amber-warning: #d97706;
   --amber-light: #fffbeb;
@@ -7806,16 +7806,16 @@ body.modal-open {
 }
 
 .approver-bar-pillar.peak {
-  background: linear-gradient(180deg, #1d4ed8 0%, #2563eb 100%);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(180deg, #047857 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
 .approver-bar-pillar.normal {
-  background: linear-gradient(180deg, #93c5fd 0%, #bfdbfe 100%);
+  background: linear-gradient(180deg, #6ee7b7 0%, #a7f3d0 100%);
 }
 
 .approver-bar-pillar.normal:hover {
-  background: linear-gradient(180deg, #60a5fa 0%, #93c5fd 100%);
+  background: linear-gradient(180deg, #34d399 0%, #6ee7b7 100%);
 }
 
 /* Department Ranked Row */
@@ -8633,6 +8633,76 @@ body.theme-dark .figma-card {
   background: #131b2a !important;
   border-color: #24334a !important;
 }
+
+/* ===================================================================
+   KARYAWAN SEGMENT SWITCHER (SESUAI PDF HALAMAN 1 & 4)
+   =================================================================== */
+@media (min-width: 769px) {
+  .karyawan-segment-toggle {
+    display: none !important;
+  }
+  .mobile-hide-seg {
+    display: block !important;
+  }
+  #karyawanStatsCardWrap.mobile-hide-seg {
+    display: grid !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .karyawan-segment-toggle {
+    display: flex !important;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    box-sizing: border-box;
+  }
+
+  .karyawan-seg-btn {
+    flex: 1;
+    padding: 0.55rem 0.65rem;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: #475569;
+    font-size: 0.775rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .karyawan-seg-btn.active {
+    background: #059669 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3) !important;
+  }
+
+  .mobile-hide-seg {
+    display: none !important;
+  }
+
+  body.theme-dark .karyawan-segment-toggle {
+    background: #162032 !important;
+    border-color: #24334a !important;
+  }
+
+  body.theme-dark .karyawan-seg-btn {
+    color: #94a3b8 !important;
+  }
+
+  body.theme-dark .karyawan-seg-btn.active {
+    background: #059669 !important;
+    color: #ffffff !important;
+  }
+}
+
 
 
 

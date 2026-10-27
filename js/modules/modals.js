@@ -1588,8 +1588,11 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   }
 
   // Cancel Action Button directly inside detail modal
+  // Pos Jaga / Approver TIDAK berwenang membatalkan izin karyawan yang telah disetujui / aktif.
+  // Hanya Karyawan (pemilik izin) yang dapat membatalkan pengajuan sebelum keluar area.
+  const isKaryawanActor = (window.currentActor === 'karyawan' || !window.currentActor);
   const btnDetailCancelTicket = document.getElementById('btnDetailCancelTicket');
-  const canCancelInDetail = (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
+  const canCancelInDetail = isKaryawanActor && (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
   if (btnDetailCancelTicket) {
     if (canCancelInDetail) {
       btnDetailCancelTicket.style.display = 'inline-flex';
