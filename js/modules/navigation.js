@@ -445,6 +445,11 @@ function switchRole(role) {
   if (typeof window.renderAllCharts === 'function') {
     window.renderAllCharts();
   }
+
+  // Synchronize Mobile App Orchestrator if active
+  if (typeof window.syncMobileRole === 'function') {
+    window.syncMobileRole(role);
+  }
 }
 
 // UPDATE MOBILE BOTTOM NAV (Karyawan, Approver, Security ONLY - Excludes Admin)

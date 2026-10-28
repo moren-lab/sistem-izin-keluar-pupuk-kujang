@@ -1795,50 +1795,39 @@ function renderKaryawanMobileDonutChart() {
   `;
 }
 
-// Mobile Dev Role Switcher Helpers
+// Mobile Dev Role Switcher Helpers (Delegated to mobile_app.js)
 function openMobileRoleSheet() {
+  if (typeof window.openMobileRoleSheet === 'function' && window.openMobileRoleSheet !== openMobileRoleSheet) {
+    window.openMobileRoleSheet();
+    return;
+  }
   const sheet = document.getElementById('mobileRoleSheet');
-  const backdrop = document.getElementById('mobileRoleSheetBackdrop');
+  const backdrop = document.getElementById('mobileModalBackdrop') || document.getElementById('mobileRoleSheetBackdrop');
   if (sheet) sheet.classList.add('open');
   if (backdrop) backdrop.classList.add('open');
 }
 
 function closeMobileRoleSheet() {
+  if (typeof window.closeMobileRoleSheet === 'function' && window.closeMobileRoleSheet !== closeMobileRoleSheet) {
+    window.closeMobileRoleSheet();
+    return;
+  }
   const sheet = document.getElementById('mobileRoleSheet');
-  const backdrop = document.getElementById('mobileRoleSheetBackdrop');
+  const backdrop = document.getElementById('mobileModalBackdrop') || document.getElementById('mobileRoleSheetBackdrop');
   if (sheet) sheet.classList.remove('open');
   if (backdrop) backdrop.classList.remove('open');
 }
 
 function switchMobileRole(role) {
+  if (typeof window.mobileSwitchRole === 'function') {
+    window.mobileSwitchRole(role);
+    return;
+  }
   closeMobileRoleSheet();
-  const labelEl = document.getElementById('mobileRoleActiveLabel');
-  if (labelEl) {
-    if (role === 'karyawan') labelEl.textContent = 'Karyawan';
-    else if (role === 'approver') labelEl.textContent = 'Atasan 1';
-    else if (role === 'approver2') labelEl.textContent = 'Atasan 2';
-    else if (role === 'security') labelEl.textContent = 'Pos Jaga';
-  }
-
-  if (role === 'karyawan') {
-    const btn = document.getElementById('btnSwitchKaryawan');
-    if (btn) btn.click();
-  } else if (role === 'approver') {
-    const btn = document.getElementById('btnSwitchApprover');
-    if (btn) btn.click();
-  } else if (role === 'approver2') {
-    const btn = document.getElementById('btnSwitchApprover2');
-    if (btn) btn.click();
-  } else if (role === 'security') {
-    const btn = document.getElementById('btnSwitchSecurity');
-    if (btn) btn.click();
-  }
 }
 
 // Expose mobile functions
 window.renderKaryawanMobileDashboard = renderKaryawanMobileDashboard;
 window.switchKaryawanMobileSegment = switchKaryawanMobileSegment;
 window.renderKaryawanMobileDonutChart = renderKaryawanMobileDonutChart;
-window.openMobileRoleSheet = openMobileRoleSheet;
-window.closeMobileRoleSheet = closeMobileRoleSheet;
 window.switchMobileRole = switchMobileRole;

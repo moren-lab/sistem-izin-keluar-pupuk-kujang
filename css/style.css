@@ -9502,29 +9502,9 @@ body.theme-dark .figma-card {
   gap: 12px;
 }
 
-/* 7. Floating Role Switcher for Mobile Simulation Testing */
+/* 7. Floating Role Switcher for Mobile Simulation Testing (Moved to top header) */
 .mobile-role-floating-pill {
-  position: fixed;
-  bottom: 74px;
-  right: 14px;
-  z-index: 99;
-  background: #0f172a;
-  color: #ffffff;
-  border-radius: 999px;
-  padding: 7px 13px;
-  font-size: 0.725rem;
-  font-weight: 700;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.mobile-role-floating-pill:active {
-  transform: scale(0.95);
+  display: none !important;
 }
 
 .mobile-role-sheet-backdrop {
