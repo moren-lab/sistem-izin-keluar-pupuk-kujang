@@ -837,8 +837,8 @@ function renderApproverView() {
     list.sort((a, b) => {
       const parseD = (t) => {
         const raw = t.createdAt || t.plannedExit || 0;
-        const d = new Date(raw);
-        return isNaN(d.getTime()) ? 0 : d.getTime();
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
       };
       const dA = parseD(a);
       const dB = parseD(b);

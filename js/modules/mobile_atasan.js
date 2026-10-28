@@ -14,6 +14,7 @@
   let atasanFilterStatus = 'all';
   let atasanRiwayatSearch = '';
   let atasanRiwayatFilterDecision = 'all';
+  let atasanRiwayatSortOrder = 'desc'; // 'desc' | 'asc'
   let isAntreanFilterOpen = false;
   let isAtasanRiwayatFilterOpen = false;
   let selectedTimTicketId = null;
@@ -502,10 +503,7 @@
     }
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Pusat Keputusan</div>
-        <h1 class="mobile-page-title">Antrean Persetujuan</h1>
-      </div>
+     
 
       <!-- Segment Tabs (Izin Baru | Perpanjangan) -->
       <div class="mobile-segment-toggle">
@@ -659,12 +657,7 @@
       </div>
 
       <!-- Kotak Info Biru (Matching PDF Page 3) -->
-      <div class="mobile-info-box-blue">
-        <div class="mobile-info-box-blue-title">Belum ada aktivitas keluar area</div>
-        <div class="mobile-info-box-blue-desc">
-          Scan Out dan Scan In belum tercatat. Waktu di atas adalah rencana pemohon, bukan waktu aktual.
-        </div>
-      </div>
+      
 
       <!-- Aktivitas Pengajuan (Timeline) -->
       <div class="mobile-card" style="margin-bottom: 12px; padding: 14px;">
@@ -826,10 +819,7 @@
     }).join('');
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">PEMANTAUAN / ${(approver.department || approver.dept || 'DEPARTEMEN REKAYASA & PEMELIHARAAN').toUpperCase()}</div>
-        <h1 class="mobile-page-title">Pelacakan Tim</h1>
-      </div>
+    
 
       <!-- Banner Status Perjalanan Tim -->
       <div class="mobile-card" style="padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 0.75rem; color: #334155;">
@@ -867,6 +857,17 @@
       else if (atasanRiwayatFilterDecision === 'rejected') filtered = filtered.filter(t => t.status === 'Ditolak');
       else if (atasanRiwayatFilterDecision === 'emergency') filtered = filtered.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-'))));
     }
+
+    filtered.sort((a, b) => {
+      const parseTime = (t) => {
+        const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
+      };
+      const tA = parseTime(a);
+      const tB = parseTime(b);
+      return atasanRiwayatSortOrder === 'asc' ? tA - tB : tB - tA;
+    });
 
     const cardsHtml = filtered.map(t => {
       const isDitolak = (t.status === 'Ditolak');
@@ -951,16 +952,19 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
-              <label class="mobile-filter-label">Tanggal keputusan</label>
-              <input type="text" class="mobile-filter-input" placeholder="Hari ini" value="19 Okt 2026" readonly style="color: #64748b;">
-            </div>
-            <div>
               <label class="mobile-filter-label">Keputusan</label>
               <select class="mobile-filter-select" id="mRiwayatDecision" onchange="window.mobileFilterRiwayatDecision(this.value)">
                 <option value="all" ${atasanRiwayatFilterDecision === 'all' ? 'selected' : ''}>Semua keputusan</option>
                 <option value="approved" ${atasanRiwayatFilterDecision === 'approved' ? 'selected' : ''}>Disetujui</option>
                 <option value="rejected" ${atasanRiwayatFilterDecision === 'rejected' ? 'selected' : ''}>Ditolak</option>
                 <option value="emergency" ${atasanRiwayatFilterDecision === 'emergency' ? 'selected' : ''}>Penerbitan darurat</option>
+              </select>
+            </div>
+            <div>
+              <label class="mobile-filter-label">Urutan</label>
+              <select class="mobile-filter-select" id="mRiwayatSortAtasan" onchange="window.mobileFilterRiwayatSort(this.value)">
+                <option value="desc" ${atasanRiwayatSortOrder === 'desc' ? 'selected' : ''}>Terbaru</option>
+                <option value="asc" ${atasanRiwayatSortOrder === 'asc' ? 'selected' : ''}>Terlama</option>
               </select>
             </div>
           </div>
@@ -1230,17 +1234,25 @@
   window.mobileApplyRiwayatFilter = function () {
     const input = document.getElementById('mRiwayatSearch');
     atasanRiwayatSearch = input ? input.value.trim() : '';
+    const sortEl = document.getElementById('mRiwayatSortAtasan');
+    if (sortEl) atasanRiwayatSortOrder = sortEl.value;
     renderMobileAtasan(null, 'riwayat');
   };
 
   window.mobileResetAtasanRiwayatFilter = function () {
     atasanRiwayatSearch = '';
     atasanRiwayatFilterDecision = 'all';
+    atasanRiwayatSortOrder = 'desc';
     renderMobileAtasan(null, 'riwayat');
   };
 
   window.mobileFilterRiwayatDecision = function (val) {
     atasanRiwayatFilterDecision = val;
+    renderMobileAtasan(null, 'riwayat');
+  };
+
+  window.mobileFilterRiwayatSort = function (val) {
+    atasanRiwayatSortOrder = val;
     renderMobileAtasan(null, 'riwayat');
   };
 
@@ -1251,13 +1263,14 @@
   window.mobileAtasanExecuteDecision = function (ticketId, decision, defaultNote) {
     const note = defaultNote || document.getElementById('mAtasanDetailNote')?.value || (decision === 'approve' ? 'Disetujui.' : 'Ditolak: Alasan dinas belum memadai.');
 
-    const tickets = getTeamTickets();
-    const t = tickets.find(x => x.id === ticketId);
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
     if (t) {
       const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
+      const pad = n => String(n).padStart(2, '0');
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
       const approver = getActiveApprover();
 
       if (!t.timeline) t.timeline = [];
@@ -1300,39 +1313,43 @@
       }
 
       if (typeof window.saveTickets === 'function') {
-        window.saveTickets(window.ticketsList || tickets);
+        window.saveTickets(list);
       } else {
-        localStorage.setItem('kujang_tickets', JSON.stringify(window.ticketsList || tickets));
+        localStorage.setItem('kujang_tickets', JSON.stringify(list));
       }
 
       // Sync Desktop Views
       if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+      if (typeof window.renderApproverDashboard === 'function') window.renderApproverDashboard();
       if (typeof window.renderApproverView === 'function') window.renderApproverView();
       if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
       if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
       if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+      if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
     }
 
-    window.mobileCloseSheet();
+    if (typeof window.mobileCloseSheet === 'function') {
+      window.mobileCloseSheet();
+    }
     if (typeof window.showToast === 'function') {
       window.showToast(decision === 'approve' ? `Izin ${ticketId} berhasil disetujui!` : `Izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'danger');
     }
-    currentAtasanTab = 'antrean';
-    renderMobileAtasan(null, 'antrean');
+    renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
   };
 
   window.mobileAtasanExecuteExtension = function (ticketId, decision) {
     const note = document.getElementById('mExtDecisionNote')?.value || (decision === 'approve' ? 'Perpanjangan waktu disetujui.' : 'Perpanjangan ditolak, harap kembali segera.');
 
-    const tickets = getTeamTickets();
-    const t = tickets.find(x => x.id === ticketId);
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
     if (t) {
       t.hasExtensionPending = false;
       const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
+      const pad = n => String(n).padStart(2, '0');
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
       const approver = getActiveApprover();
 
       if (!t.timeline) t.timeline = [];
@@ -1367,19 +1384,22 @@
       }
 
       if (typeof window.saveTickets === 'function') {
-        window.saveTickets(window.ticketsList || tickets);
+        window.saveTickets(list);
       } else {
-        localStorage.setItem('kujang_tickets', JSON.stringify(window.ticketsList || tickets));
+        localStorage.setItem('kujang_tickets', JSON.stringify(list));
       }
 
       // Sync Desktop Views
       if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+      if (typeof window.renderApproverDashboard === 'function') window.renderApproverDashboard();
       if (typeof window.renderApproverView === 'function') window.renderApproverView();
       if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
       if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
     }
 
-    window.mobileCloseSheet();
+    if (typeof window.mobileCloseSheet === 'function') {
+      window.mobileCloseSheet();
+    }
     if (typeof window.showToast === 'function') {
       window.showToast(decision === 'approve' ? `Perpanjangan izin ${ticketId} disetujui!` : `Perpanjangan izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'info');
     }
@@ -1425,22 +1445,6 @@
     }
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
-  };
-
-  window.mobileOpenAtasanDetailModal = function (ticketId) {
-    if (typeof window.mobileOpenTicketDetail === 'function') {
-      window.mobileOpenTicketDetail(ticketId);
-    } else if (typeof window.openTicketDetail === 'function') {
-      window.openTicketDetail(ticketId, 'detail');
-    }
-  };
-
-  window.mobileOpenAtasanDaruratModal = function (ticketId) {
-    if (typeof window.mobileOpenTicketDetail === 'function') {
-      window.mobileOpenTicketDetail(ticketId);
-    } else if (typeof window.openTicketDetail === 'function') {
-      window.openTicketDetail(ticketId, 'detail');
-    }
   };
 
   // Expose module function

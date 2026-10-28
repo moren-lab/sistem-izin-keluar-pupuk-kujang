@@ -68,17 +68,21 @@
 
   function formatDisplayDate(dateStr) {
     if (!dateStr) return '-';
+    const clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    if (clean.includes('Okt') || clean.includes('WIB') || clean.includes('Jan') || clean.includes('Feb') || clean.includes('Mar')) {
+      return clean;
+    }
     if (typeof window.formatDisplayDate === 'function') {
-      return window.formatDisplayDate(dateStr);
+      return window.formatDisplayDate(clean);
     }
     try {
-      const dt = new Date(dateStr);
-      if (isNaN(dt.getTime())) return dateStr;
+      const dt = new Date(clean);
+      if (isNaN(dt.getTime())) return clean;
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       const pad = n => String(n).padStart(2, '0');
       return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}:${pad(dt.getMinutes())} WIB`;
     } catch (e) {
-      return dateStr;
+      return clean;
     }
   }
 
@@ -90,10 +94,11 @@
   function formatTimeOnly(timeStr) {
     if (!timeStr) return '';
     if (timeStr.includes('T')) {
-      return timeStr.split('T')[1].slice(0, 5) + ' WIB';
+      const m = timeStr.split('T')[1].match(/^(\d{1,2})[:.](\d{2})/);
+      if (m) return `${m[1]}.${m[2]} WIB`;
     }
     const match = timeStr.match(/(\d{1,2})[:.](\d{2})/);
-    return match ? `${match[1]}.${match[2]} WIB` : timeStr;
+    return match ? `${match[1].padStart(2, '0')}.${match[2]} WIB` : timeStr;
   }
 
   function getBadgeClass(status) {
@@ -237,15 +242,25 @@
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
       .slice(0, 2);
 
+    const emergencyTickets = tickets.filter(t => t.isEmergency || (t.id && t.id.includes('-EMG-')) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
+    const emergencyActive = emergencyTickets.filter(t => t.status !== 'Selesai' && t.status !== 'Ditolak' && t.status !== 'Dibatalkan').length;
+    const emergencyFinished = emergencyTickets.filter(t => t.status === 'Selesai').length;
+
     let recentHtml = recentTickets.map(t => `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
         <div>
           <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${t.id} <span class="mobile-badge ${getBadgeClass(t.status)}" style="margin-left: 4px;">${t.status}</span></div>
           <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">${t.category} • ${t.destination || 'Area Pabrik'}</div>
         </div>
-        <button type="button" class="mobile-link-rincian" style="border:none; background:none;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian →</button>
+        <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; color: #2563eb; font-weight: 700; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
       </div>
     `).join('');
+
+    // Donut SVG calculations with emergency support
+    const strokeDash = 282; // 2 * PI * 45
+    let selesaiLen = totalCount ? Math.round((selesaiCount / totalCount) * strokeDash) : 0;
+    let activeLen = totalCount ? Math.round((activeCount / totalCount) * strokeDash) : 0;
+    let emgLen = totalCount && emergencyActive ? Math.round((emergencyActive / totalCount) * strokeDash) : 0;
 
     container.innerHTML = `
       <!-- Hero Card Profile -->
@@ -258,7 +273,7 @@
 
         ${activeTicket ? `
           <button type="button" class="mobile-hero-btn" style="margin-top: 14px;" onclick="window.mobileSwitchTab('pengajuan')">
-            <span>Pengajuan Saya →</span>
+            <span>Pengajuan Saya</span>
           </button>
         ` : `
           <button type="button" class="mobile-hero-btn" style="margin-top: 14px;" onclick="window.mobileOpenCreateModal(false)">
@@ -267,18 +282,8 @@
         `}
       </section>
 
-      <!-- Segment Switcher: Ringkasan Perizinan | Total Pengajuan Izin (Grafik) -->
-      <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
-        <button type="button" class="mobile-seg-btn ${currentSegment === 'ringkasan' ? 'active' : ''}" onclick="window.mobileSwitchSegment('ringkasan')">
-          Ringkasan Perizinan
-        </button>
-        <button type="button" class="mobile-seg-btn ${currentSegment === 'donut' ? 'active' : ''}" onclick="window.mobileSwitchSegment('donut')">
-          Total Pengajuan Izin
-        </button>
-      </div>
-
-      <!-- Segment Content: 3-Col Stats Card -->
-      <div id="mobileSecRingkasan" style="display: ${currentSegment === 'ringkasan' ? 'grid' : 'none'};" class="mobile-stats-card">
+      <!-- 3-Col Stats Card: Total pengajuan · Izin selesai · Izin aktif (Disejajarkan & Angka Hitam) -->
+      <div class="mobile-stats-card" style="margin-bottom: 14px;">
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Total pengajuan</div>
           <div class="mobile-stat-number" style="color: #0f172a;">${totalCount}</div>
@@ -293,54 +298,22 @@
         </div>
       </div>
 
-      <!-- Segment Content: Donut Chart -->
-      <div id="mobileSecDonut" style="display: ${currentSegment === 'donut' ? 'block' : 'none'};" class="mobile-card">
-        <div class="mobile-card-header">
-          <h3 class="mobile-card-title">Total Pengajuan Izin</h3>
-          <span style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Bulan Ini</span>
-        </div>
-        <div style="display: flex; align-items: center; justify-content: space-around; padding: 12px 0;">
-          <svg width="110" height="110" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#e2e8f0" stroke-width="16" />
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#059669" stroke-width="16" stroke-dasharray="212 282" stroke-dashoffset="0" transform="rotate(-90 60 60)" />
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#0284c7" stroke-width="16" stroke-dasharray="35 282" stroke-dashoffset="-212" transform="rotate(-90 60 60)" />
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#f59e0b" stroke-width="16" stroke-dasharray="35 282" stroke-dashoffset="-247" transform="rotate(-90 60 60)" />
-            <text x="60" y="56" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${totalCount}</text>
-            <text x="60" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">TOTAL</text>
-          </svg>
-          <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></span>
-              <span><strong>${selesaiCount}</strong> Selesai (${totalCount ? Math.round((selesaiCount/totalCount)*100) : 0}%)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #0284c7;"></span>
-              <span><strong>${activeCount}</strong> Sedang Aktif</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span>
-              <span><strong>${terlambatCount}</strong> Perlu Perhatian</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Card: Izin Aktif Saya (Live Card with Full PC Parity Action Buttons) -->
       ${renderActiveTicketCard(activeTicket)}
 
       <!-- Card: Pengajuan Terbaru -->
-      <section class="mobile-card">
+      <section class="mobile-card" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #fff;">
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Pengajuan Terbaru</h3>
         </div>
         ${recentHtml || '<p style="font-size: 0.75rem; color: #64748b; margin-top: 0;">Belum ada riwayat pengajuan.</p>'}
         <div style="text-align: center; margin-top: 10px;">
-          <a href="#" class="mobile-link-rincian" onclick="window.mobileSwitchTab('riwayat'); return false;">Semua riwayat →</a>
+          <a href="#" class="mobile-link-rincian" style="font-size: 0.75rem; color: #2563eb; font-weight: 700; text-decoration: none;" onclick="window.mobileSwitchTab('riwayat'); return false;">Semua riwayat</a>
         </div>
       </section>
 
       <!-- Card: Ketentuan Izin Keluar -->
-      <section class="mobile-card" style="background: #f8fafc;">
+      <section class="mobile-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h3 class="mobile-card-title" style="margin-bottom: 6px;">Ketentuan Izin Keluar</h3>
         <ul style="margin: 0; padding-left: 18px; font-size: 0.75rem; color: #475569; line-height: 1.45;">
           <li>Izin reguler memerlukan persetujuan Atasan. Maksimal satu tiket aktif.</li>
@@ -350,14 +323,7 @@
       </section>
 
       <!-- Card: Kontak Pos Jaga 1 -->
-      <section class="mobile-card">
-        <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Kontak Pos Jaga 1</div>
-        <div style="font-size: 0.75rem; color: #334155; line-height: 1.35;">
-          <strong>Petugas Pengamanan • 24 jam</strong><br>
-          Ekstensi 110 / 0264 316 110<br>
-          <span style="color: #64748b; font-size: 0.7rem;">Hubungi petugas jika terjadi kendala pemindaian QR di gerbang.</span>
-        </div>
-      </section>
+     
     `;
   }
 
@@ -372,10 +338,7 @@
       : { name: 'Ir. Hendra Gunawan, M.T.' };
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <h1 class="mobile-page-title">Pengajuan Saya</h1>
-      </div>
-
+     
       <!-- Card Izin Aktif -->
       ${renderActiveTicketCard(activeTicket)}
 
@@ -456,18 +419,21 @@
     const cardsHtml = tickets.map(t => {
       const isOutside = (t.status === 'Sedang di Luar');
       const isLate = (t.status === 'Terlambat' || t.isLate);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
       return `
-        <div class="mobile-ticket-item" style="border-left: 3px solid ${t.status === 'Selesai' ? '#047857' : (t.status === 'Ditolak' ? '#dc2626' : (isOutside ? '#7c3aed' : '#f59e0b'))}; margin-bottom: 12px;">
-          <div class="mobile-ticket-item-header">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; background: #fff; padding: 12px 14px;">
+          <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <div>
               <div style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</div>
               <div style="font-size: 0.675rem; color: #64748b;">Diajukan ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'}</div>
             </div>
-            <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 12px; font-size: 0.725rem; font-weight: 700; width: auto;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
           </div>
 
-          <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">${t.category} • ${getTType(t)}</div>
-          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">📍 ${t.destination || 'Area Rekayasa'}</div>
+          <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">
+            ${t.category} • ${getTType(t)} • <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">${t.destination || 'Area Rekayasa'}</div>
           <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">${getTTransport(t)}</div>
 
           <div class="mobile-ticket-grid-meta" style="margin-bottom: 8px;">
@@ -483,40 +449,48 @@
             </div>
           </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
             ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
               <button type="button" class="mobile-btn-primary" style="padding: 5px 12px; font-size: 0.725rem; width: auto;" onclick="window.mobileOpenQrModal('${t.id}')">Buka QR Izin</button>
             ` : ''}
-            <button type="button" class="mobile-btn-secondary" style="padding: 5px 12px; font-size: 0.725rem; width: auto;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
+            ${isFinished ? `
+              <button type="button" class="mobile-btn-danger" style="padding: 5px 12px; font-size: 0.725rem; width: auto; background: #fff1f2; color: #dc2626; border: 1px solid #fecdd3; border-radius: 6px; font-weight: 700; cursor: pointer;" onclick="window.mobileDeleteTicketItem('${t.id}', 'karyawan')">Hapus</button>
+            ` : ''}
           </div>
         </div>
       `;
     }).join('');
 
     // List View HTML (PDF Page 6)
-    const listHtml = tickets.map(t => `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">
-        <div style="flex: 1;">
-          <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #0f172a;">${t.id}</div>
-          <div style="font-size: 0.675rem; color: #64748b;">Diajukan ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'}</div>
-          <div style="font-size: 0.775rem; font-weight: 700; color: #1e293b; margin-top: 2px;">📍 ${t.destination || 'Area Rekayasa'}</div>
-          <div style="font-size: 0.7rem; color: #047857;">${t.category} • ${getTType(t)}</div>
-          <div style="font-size: 0.675rem; color: #64748b;">${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}</div>
+    const listHtml = tickets.map(t => {
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+      return `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">
+          <div style="flex: 1;">
+            <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #0f172a;">${t.id}</div>
+            <div style="font-size: 0.675rem; color: #64748b;">Diajukan ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'}</div>
+            <div style="font-size: 0.775rem; font-weight: 700; color: #1e293b; margin-top: 2px;">${t.destination || 'Area Rekayasa'}</div>
+            <div style="font-size: 0.7rem; color: #047857;">${t.category} • ${getTType(t)} • <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span></div>
+            <div style="font-size: 0.675rem; color: #64748b;">${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}</div>
+          </div>
+          <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+            <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; color: #2563eb; font-weight: 700; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
+            ${isFinished ? `
+              <button type="button" style="border: none; background: none; font-size: 0.7rem; color: #dc2626; font-weight: 700; cursor: pointer;" onclick="window.mobileDeleteTicketItem('${t.id}', 'karyawan')">Hapus</button>
+            ` : ''}
+          </div>
         </div>
-        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-          <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
-          <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.725rem; color: #2563eb;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <h1 class="mobile-page-title">Riwayat Pengajuan</h1>
-      </div>
+      
 
-      <!-- Filter Button Bar -->
-      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
+      <!-- Action Bar: Hapus Riwayat Selesai & Filter Button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button type="button" class="mobile-btn-danger" style="width: auto; padding: 6px 12px; font-size: 0.725rem; font-weight: 700; background: #fff1f2; color: #dc2626; border: 1px solid #fecdd3; border-radius: 8px; cursor: pointer;" onclick="window.mobileClearRiwayat('karyawan')">
+          Hapus Riwayat Selesai
+        </button>
         <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleRiwayatFilter()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
           <span>${isRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
@@ -647,7 +621,7 @@
 
     const col1Label = (isOutside && t.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && t.scanOutTime)
-      ? t.scanOutTime.replace(/ \(Pos 1.*\)/, '').slice(11, 16) + ' WIB'
+      ? formatDisplayDate(t.scanOutTime)
       : (t.plannedExit ? formatDisplayDate(t.plannedExit) : '-');
 
     const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
@@ -693,7 +667,7 @@
             </button>
           </div>
           <div style="text-align: center; margin-top: 8px;">
-            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail pengajuan →</a>
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail pengajuan</a>
           </div>
         `;
       }
@@ -748,7 +722,7 @@
         </div>
 
         <div style="font-size: 0.775rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
-        <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 3px 0 2px 0;">📍 ${t.destination || 'Area Cikampek'}</div>
+        <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 3px 0 2px 0;">${t.destination || 'Area Cikampek'}</div>
         <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-style: italic;">"${t.reason || 'Keperluan dinas kantor'}"</div>
 
         <div class="mobile-ticket-grid-meta">
@@ -823,7 +797,7 @@
           <div class="mobile-timeline-line"></div>
         </div>
         <div class="mobile-timeline-content">
-          <div class="mobile-timeline-time">${t.scanOutTime ? t.scanOutTime.slice(11, 16) + ' WIB' : 'Menunggu Keluar'}</div>
+          <div class="mobile-timeline-time">${t.scanOutTime ? formatTimeOnly(t.scanOutTime) : 'Menunggu Keluar'}</div>
           <div class="mobile-timeline-title">${isScanOut ? 'Scan Out Tercatat' : 'Verifikasi Gerbang Keluar'}</div>
           <div class="mobile-timeline-desc">${isScanOut ? (t.scanOutGate || 'Pos 1') + ' • Karyawan meninggalkan area' : 'Tunjukkan QR di pos jaga'}</div>
         </div>
@@ -834,7 +808,7 @@
           <div class="mobile-timeline-dot ${isScanIn ? 'done' : ''}"></div>
         </div>
         <div class="mobile-timeline-content">
-          <div class="mobile-timeline-time">${t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : 'Menunggu Kembali'}</div>
+          <div class="mobile-timeline-time">${t.scanInTime ? formatTimeOnly(t.scanInTime) : 'Menunggu Kembali'}</div>
           <div class="mobile-timeline-title">${isScanIn ? 'Scan In Tercatat' : 'Verifikasi Gerbang Kembali'}</div>
           <div class="mobile-timeline-desc">${isScanIn ? (t.scanInGate || 'Pos 1') + ' • Karyawan telah kembali. Tiket Selesai.' : 'Belum kembali ke area pabrik'}</div>
         </div>
@@ -925,8 +899,10 @@
     if (prefillData?.approverName || prefillData?.approver) {
       const apprName = prefillData.approverName || prefillData.approver;
       selectedApproverData = approvers.find(a => a.name === apprName) || { name: apprName, title: 'Atasan Peninjau', initials: 'AP' };
-    } else {
+    } else if (isEditing) {
       selectedApproverData = approvers[0];
+    } else {
+      selectedApproverData = null; // Kosongkan saat membuat pengajuan baru
     }
 
     const initialCat = prefillData?.category || '';
@@ -992,7 +968,7 @@
 
               <div class="mobile-approver-input-box" id="mApproverInputBox" style="display: ${selectedApproverData ? 'none' : 'flex'};">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="mSearchApproverInput" class="mobile-approver-search-input" placeholder="Ketik nama atasan (Enter untuk pilih langsung)..." autocomplete="off" oninput="window.mobileFilterApprovers(this.value)" onclick="window.mobileShowApproverDropdown()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.mobileSelectFirstApprover();}">
+                <input type="text" id="mSearchApproverInput" class="mobile-approver-search-input" placeholder="Masukkan nama atau NIP atasan..." autocomplete="off" oninput="window.mobileFilterApprovers(this.value)" onclick="window.mobileShowApproverDropdown()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.mobileSelectFirstApprover();}">
                 <button type="button" id="mBtnClearApprover" style="display:none; background:none; border:none; color:#64748b; font-size:12px; cursor:pointer;" onclick="window.mobileClearApproverSearch()">✕</button>
                 <button type="button" style="background:none; border:none; color:#64748b; font-size:11px; cursor:pointer;" onclick="window.mobileToggleApproverDropdown()">▼</button>
               </div>
@@ -1026,13 +1002,13 @@
           <!-- 3. Lokasi / Tujuan Keluar -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
             <label class="mobile-form-label">Lokasi / Tujuan Keluar <span class="req">*</span></label>
-            <input type="text" class="mobile-input" id="mFormDestination" placeholder="${isEmergency ? 'RS Pupuk Kujang / Klinik Medis' : 'PT Rekayasa Industri, Cikampek'}" value="${initialDest}" required>
+            <input type="text" class="mobile-input" id="mFormDestination" placeholder="Masukkan lokasi / tujuan keluar..." value="${initialDest}" required>
           </div>
 
           <!-- 4. Alasan Keperluan Izin -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
             <label class="mobile-form-label">${isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin'} <span class="req">*</span></label>
-            <textarea class="mobile-textarea" id="mFormReason" placeholder="${isEmergency ? 'Pertolongan medis darurat segera untuk keluarga / kecelakaan kerja.' : 'Koordinasi teknis dan pemeriksaan komponen pompa P-204 bersama vendor.'}" required style="min-height: 65px;">${initialReason}</textarea>
+            <textarea class="mobile-textarea" id="mFormReason" placeholder="${isEmergency ? 'Masukkan alasan kondisi kedaruratan...' : 'Masukkan alasan keperluan izin...'}" required style="min-height: 65px;">${initialReason}</textarea>
           </div>
 
           <!-- 5. Rencana Waktu Keluar & Perkiraan Waktu Kembali (Anti Waktu Lampau) -->
@@ -1147,7 +1123,7 @@
 
         <div class="mobile-form-group">
           <label class="mobile-form-label">Alasan Pembatalan <span class="req">*</span></label>
-          <textarea class="mobile-textarea" id="mCancelReason" placeholder="Masukkan alasan pembatalan tiket ini (misal: agenda dibatalkan oleh pihak klien)..." style="min-height: 75px;"></textarea>
+          <textarea class="mobile-textarea" id="mCancelReason" placeholder="Masukkan alasan pembatalan izin..." style="min-height: 75px;"></textarea>
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 18px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
@@ -1269,7 +1245,7 @@
           <div class="mobile-approver-item-name">${a.name}</div>
           <div class="mobile-approver-item-role">${a.title || 'Manajer'} • ${a.department || 'Rekayasa'}</div>
         </div>
-        <span style="color: #059669; font-size: 0.75rem; font-weight: 700;">Pilih →</span>
+        <span style="color: #059669; font-size: 0.75rem; font-weight: 700;">Pilih</span>
       </div>
     `).join('');
   };
@@ -2048,7 +2024,7 @@
           <div>
             <div class="mobile-meta-sub">${isPulang ? 'Tipe' : 'Batas Jam Kembali'}</div>
             <div class="mobile-meta-val" style="${isOutside && !isPulang ? 'color:#b91c1c;' : ''}">
-              ${isPulang ? 'Pulang Mendahului' : (getTReturnTime(t) ? getTReturnTime(t).slice(11, 16) + ' WIB' : '13.00 WIB')}
+              ${isPulang ? 'Pulang Mendahului' : (getTReturnTime(t) ? formatTimeOnly(getTReturnTime(t)) : '13.00 WIB')}
             </div>
           </div>
         </div>
@@ -2150,21 +2126,17 @@
             <div class="mobile-ticket-grid-meta" style="margin: 4px 0 0 0;">
               <div>
                 <div class="mobile-meta-sub">Waktu Keluar</div>
-                <div class="mobile-meta-val">${t.scanOutTime ? t.scanOutTime.slice(11, 16) + ' WIB (Aktual)' : (getTExitTime(t) ? getTExitTime(t).slice(11, 16) + ' WIB (Rencana)' : '10.00 WIB')}</div>
+                <div class="mobile-meta-val">${t.scanOutTime ? formatDisplayDate(t.scanOutTime) + ' (Aktual)' : (getTExitTime(t) ? formatDisplayDate(getTExitTime(t)) + ' (Rencana)' : '10.00 WIB')}</div>
               </div>
               <div>
                 <div class="mobile-meta-sub">Batas Kembali</div>
-                <div class="mobile-meta-val">${getTReturnTime(t) ? getTReturnTime(t).slice(11, 16) + ' WIB' : '13.00 WIB'}</div>
+                <div class="mobile-meta-val">${getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '13.00 WIB'}</div>
               </div>
             </div>
           </div>
 
           ${t.approverNote ? `
-            <div class="mobile-card" style="margin-bottom: 8px; background: #ecfdf5; border-color: #a7f3d0;">
-              <div style="font-size: 0.7rem; color: #047857; font-weight: 700; margin-bottom: 2px;">CATATAN ATASAN</div>
-              <div style="font-size: 0.75rem; color: #064e3b; font-style: italic;">"${t.approverNote}"</div>
-              <div style="font-size: 0.65rem; color: #047857; margin-top: 4px;">Oleh ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
-            </div>
+           
           ` : ''}
         </div>
 
@@ -2277,13 +2249,13 @@
 
           <div class="mobile-form-group">
             <label class="mobile-form-label">Alasan Kendala di Lapangan <span class="req">*</span></label>
-            <textarea class="mobile-textarea" id="mPerpanjangReason" placeholder="Pekerjaan koordinasi teknis bersama vendor belum selesai, memerlukan tambahan waktu..." required style="min-height: 75px;"></textarea>
+            <textarea class="mobile-textarea" id="mPerpanjangReason" placeholder="Masukkan alasan kendala / perpanjangan waktu..." required style="min-height: 75px;"></textarea>
           </div>
 
           <div style="display: flex; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
             <button type="button" class="mobile-btn-secondary" style="flex: 1;" onclick="window.mobileCloseSheet()">Batal</button>
             <button type="submit" class="mobile-btn-primary" style="flex: 2; background: #059669; border-color: #059669; font-weight: 700;">
-              <span>Kirim Permohonan →</span>
+              <span>Kirim Permohonan</span>
             </button>
           </div>
         </form>

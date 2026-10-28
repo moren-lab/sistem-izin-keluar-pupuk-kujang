@@ -737,8 +737,8 @@ function filterSecurityLogTickets() {
   filtered.sort((a, b) => {
     const parseTime = (item) => {
       const raw = item.scanOutTime || item.createdAt || item.plannedExit || 0;
-      const d = new Date(raw);
-      return isNaN(d.getTime()) ? 0 : d.getTime();
+      const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+      return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
     };
     const tA = parseTime(a);
     const tB = parseTime(b);

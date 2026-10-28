@@ -58,13 +58,13 @@ function parseTicketDateTime(val) {
     'des': 11, 'desember': 11, 'dec': 11
   };
 
-  const idMatch = raw.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}).*?(\d{1,2})[:.](\d{2})/);
+  const idMatch = raw.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:.*?(\d{1,2})[:.](\d{2}))?/);
   if (idMatch) {
     const day = parseInt(idMatch[1], 10);
     const monthKey = idMatch[2].toLowerCase().slice(0, 3);
     const year = parseInt(idMatch[3], 10);
-    const hour = parseInt(idMatch[4], 10);
-    const minute = parseInt(idMatch[5], 10);
+    const hour = idMatch[4] !== undefined ? parseInt(idMatch[4], 10) : 0;
+    const minute = idMatch[5] !== undefined ? parseInt(idMatch[5], 10) : 0;
     if (indonesianMonths[monthKey] !== undefined) {
       return new Date(year, indonesianMonths[monthKey], day, hour, minute, 0);
     }

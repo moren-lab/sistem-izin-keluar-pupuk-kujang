@@ -129,6 +129,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
           <span>Pelacakan</span>
         </div>
+        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Riwayat</span>
+        </div>
       `;
     } else if (currentMobileRole === 'security') {
       navEl.innerHTML = `
@@ -410,6 +414,142 @@
     if (sheet) sheet.classList.remove('open');
     if (roleSheet) roleSheet.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
+  };
+
+  // -------------------------------------------------------------------
+  // 6. GLOBAL MOBILE HISTORY DELETION (ALL ACTORS)
+  // -------------------------------------------------------------------
+  window.mobileClearRiwayat = function (actor) {
+    const role = actor || currentMobileRole;
+    let tickets = window.ticketsList || [];
+    let finishedTickets = [];
+    let roleLabel = 'Karyawan';
+    let flag = 'deletedByKaryawan';
+
+    if (role === 'karyawan') {
+      const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+      finishedTickets = tickets.filter(t => !t.deletedByKaryawan && 
+        (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) &&
+        (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+      );
+      roleLabel = 'riwayat Karyawan';
+      flag = 'deletedByKaryawan';
+    } else if (role === 'approver' || role === 'approver2') {
+      finishedTickets = tickets.filter(t => !t.deletedByApprover &&
+        (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+      );
+      roleLabel = 'pelacakan Atasan';
+      flag = 'deletedByApprover';
+    } else if (role === 'security') {
+      finishedTickets = tickets.filter(t => !t.deletedBySecurity &&
+        (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+      );
+      roleLabel = 'pelacakan Pos Jaga';
+      flag = 'deletedBySecurity';
+    }
+
+    if (finishedTickets.length === 0) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Tidak ada riwayat izin selesai atau ditolak untuk dibersihkan.', 'warning');
+      } else {
+        alert('Tidak ada riwayat izin selesai atau ditolak untuk dibersihkan.');
+      }
+      return;
+    }
+
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) return;
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus Riwayat Selesai</h3>
+        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 16px 18px;">
+        <p style="font-size: 0.825rem; color: #334155; line-height: 1.5; margin: 0 0 18px 0;">
+          Hapus <strong>${finishedTickets.length}</strong> riwayat izin yang sudah selesai/diputuskan dari ${roleLabel}? Permohonan yang sedang aktif/berjalan tidak akan dihapus.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 9px 18px; font-weight: 700;" onclick="window.mobileCloseSheet()">Cancel</button>
+          <button type="button" class="mobile-btn-primary" style="width: auto; padding: 9px 22px; font-weight: 800; background: #0284c7; border-color: #0284c7;" onclick="window.mobileConfirmBatchDelete('${flag}', ${finishedTickets.length})">OK</button>
+        </div>
+      </div>
+    `;
+
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
+  window.mobileConfirmBatchDelete = function (flag, count) {
+    let tickets = window.ticketsList || [];
+    tickets.forEach(t => {
+      if (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') {
+        t[flag] = true;
+      }
+    });
+
+    if (typeof window.saveTickets === 'function') {
+      window.saveTickets(tickets);
+    }
+    window.mobileCloseSheet();
+    if (typeof window.showToast === 'function') {
+      window.showToast(`${count} riwayat permohonan telah dihapus.`, 'info');
+    }
+    renderActiveView();
+  };
+
+  window.mobileDeleteTicketItem = function (ticketId, actor) {
+    const role = actor || currentMobileRole;
+    let flag = 'deletedByKaryawan';
+    if (role === 'approver' || role === 'approver2') flag = 'deletedByApprover';
+    else if (role === 'security') flag = 'deletedBySecurity';
+
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) {
+      if (confirm(`Hapus tiket ${ticketId} dari riwayat?`)) {
+        applySingleDelete(ticketId, flag);
+      }
+      return;
+    }
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus dari Riwayat</h3>
+        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 16px 18px;">
+        <p style="font-size: 0.825rem; color: #334155; line-height: 1.5; margin: 0 0 18px 0;">
+          Apakah Anda yakin ingin menghapus tiket <strong>${ticketId}</strong> dari riwayat Anda? Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 9px 18px; font-weight: 700;" onclick="window.mobileCloseSheet()">Cancel</button>
+          <button type="button" class="mobile-btn-danger" style="width: auto; padding: 9px 22px; font-weight: 800; background: #dc2626; color: #fff; border-color: #dc2626;" onclick="window.mobileConfirmSingleDelete('${ticketId}', '${flag}')">Hapus</button>
+        </div>
+      </div>
+    `;
+
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
+  window.mobileConfirmSingleDelete = function (ticketId, flag) {
+    let tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (t) {
+      t[flag] = true;
+      if (typeof window.saveTickets === 'function') {
+        window.saveTickets(tickets);
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Tiket ${ticketId} dihapus dari riwayat.`, 'info');
+      }
+    }
+    window.mobileCloseSheet();
+    renderActiveView();
   };
 
   // Backward compatibility alias

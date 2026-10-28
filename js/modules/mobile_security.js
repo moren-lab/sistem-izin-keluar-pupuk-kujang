@@ -62,25 +62,30 @@
   function formatTimeOnly(timeStr) {
     if (!timeStr) return '';
     if (timeStr.includes('T')) {
-      return timeStr.split('T')[1].slice(0, 5) + ' WIB';
+      const m = timeStr.split('T')[1].match(/^(\d{1,2})[:.](\d{2})/);
+      if (m) return `${m[1]}.${m[2]} WIB`;
     }
     const match = timeStr.match(/(\d{1,2})[:.](\d{2})/);
-    return match ? `${match[1]}.${match[2]} WIB` : timeStr;
+    return match ? `${match[1].padStart(2, '0')}.${match[2]} WIB` : timeStr;
   }
 
   function formatDisplayDate(dateStr) {
     if (!dateStr) return '-';
+    const clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    if (clean.includes('Okt') || clean.includes('WIB') || clean.includes('Jan') || clean.includes('Feb') || clean.includes('Mar')) {
+      return clean;
+    }
     if (typeof window.formatDisplayDate === 'function') {
-      return window.formatDisplayDate(dateStr);
+      return window.formatDisplayDate(clean);
     }
     try {
-      const dt = new Date(dateStr);
-      if (isNaN(dt.getTime())) return dateStr;
+      const dt = new Date(clean);
+      if (isNaN(dt.getTime())) return clean;
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       const pad = n => String(n).padStart(2, '0');
       return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}:${pad(dt.getMinutes())} WIB`;
     } catch (e) {
-      return dateStr;
+      return clean;
     }
   }
 
@@ -349,10 +354,7 @@
     const scannableTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat').slice(0, 6);
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Terminal Verifikasi Tiket</div>
-        <h1 class="mobile-page-title">Pemindai QR</h1>
-      </div>
+      
 
       <!-- Terminal Verifikasi Tiket Card (PDF Hal 2 & 3) -->
       <section class="mobile-card" style="margin-bottom: 12px;">
@@ -567,10 +569,7 @@
     }).join('');
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Terminal Pos Jaga</div>
-        <h1 class="mobile-page-title">Pelacakan karyawan</h1>
-      </div>
+     
 
       <!-- 2 Summary Cards (PDF Hal 4 & 5) -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
@@ -759,10 +758,7 @@
     `).join('');
 
     container.innerHTML = `
-      <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Log Transaksi Gerbang</div>
-        <h1 class="mobile-page-title">Riwayat pemindaian</h1>
-      </div>
+      
 
       <!-- Results Summary Bar, View Switcher & Filter Button -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -912,8 +908,38 @@
           </div>
         </div>
 
-        <!-- Action Buttons (Strict Rule 5: NO APPROVAL/REJECTION BY POS JAGA) -->
+                <!-- Action Buttons: Scan Out / Tap In for Gate Pass -->
         <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${t.status === 'Disetujui' && (!t.isEmergency || !t.emergencyLocked) ? `
+            <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 700; padding: 12px; font-size: 0.85rem;" onclick="window.mobileSecurityDirectScanOut('${t.id}')">
+              <span>🚗 Verifikasi Keluar (Scan Out)</span>
+            </button>
+          ` : ''}
+
+          ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') ? `
+            <button type="button" class="mobile-btn-primary" style="background: #2563eb; border-color: #2563eb; font-weight: 700; padding: 12px; font-size: 0.85rem;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
+              <span>🏢 Verifikasi Kembali (Tap In Masuk)</span>
+            </button>
+          ` : ''}
+
+          ${(t.isEmergency && t.emergencyLocked) ? `
+            <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #991b1b; text-align: center; font-weight: 700;">
+              🚨 Tiket Darurat TERKUNCI: Menunggu otorisasi Atasan sebelum gerbang dapat dibuka.
+            </div>
+          ` : ''}
+
+          ${(t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') ? `
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #92400e; text-align: center; font-weight: 700;">
+              ⚠️ Akses Belum Diizinkan: Tiket belum disetujui oleh Atasan.
+            </div>
+          ` : ''}
+
+          ${(t.status === 'Ditolak' || t.status === 'Dibatalkan') ? `
+            <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #991b1b; text-align: center; font-weight: 700;">
+              ❌ Akses Ditolak: Tiket berstatus ${t.status}.
+            </div>
+          ` : ''}
+
           ${isCompleted ? `
             <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #047857; text-align: center; font-weight: 700;">
               Tiket ini telah selesai diproses. QR Code sudah tidak aktif.
@@ -960,8 +986,9 @@
     const officer = getActiveOfficer();
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
     t.scanOutGate = activeGate;
     t.scanOutTime = `${nowFormatted} (${activeGate})`;
@@ -1024,8 +1051,9 @@
     const officer = getActiveOfficer();
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
     t.status = 'Selesai';
     t.scanInGate = activeGate;
@@ -1101,7 +1129,7 @@
         (decodedText) => {
           window.mobileHandleCameraDecode(decodedText);
         },
-        () => {}
+        () => { }
       );
 
       isMobileCameraActive = true;
