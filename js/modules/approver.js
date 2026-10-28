@@ -58,7 +58,7 @@ function updateApproverMetrics() {
   const pending = pendingInitial + pendingExtensions;
   const approved = ticketsList.filter(t => t.status === 'Disetujui' && isTicketAssignedToCurrentApprover(t)).length;
   const rejected = ticketsList.filter(t => t.status === 'Ditolak' && isTicketAssignedToCurrentApprover(t)).length;
-  const total = ticketsList.filter(t => isTicketAssignedToCurrentApprover(t) || isTicketReassignedFromCurrentApprover(t)).length;
+  const total = ticketsList.filter(t => isTicketAssignedToCurrentApprover(t)).length;
 
   const statAppPending = document.getElementById('statAppPending');
   const statAppApproved = document.getElementById('statAppApproved');
@@ -102,7 +102,7 @@ function renderApproverDashboard() {
   const ticketsList = window.ticketsList || [];
   const pendingTickets = ticketsList.filter(t => t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
   const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
-  const outsideTickets = ticketsList.filter(t => (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && (isTicketAssignedToCurrentApprover(t) || isTicketReassignedFromCurrentApprover(t)));
+  const outsideTickets = ticketsList.filter(t => (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketAssignedToCurrentApprover(t));
 
   const approverUrgentBanner = document.getElementById('approverUrgentBanner');
   const approverDashboardPendingList = document.getElementById('approverDashboardPendingList');
@@ -551,7 +551,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 </span>
               </div>
             ` : (
-              (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
+              (!isTrackingView && (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) ? `
                 <!-- Tiered Action Grid: Row 1 Decision (50%-50%), Row 2 Inspection (50%-50%) -->
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; width: 100%;">
@@ -771,7 +771,12 @@ function renderApproverView() {
 
   // 3. PELACAKAN IZIN KARYAWAN
   if (currentApproverNav === 'pelacakan') {
-    let list = ticketsList.filter(t => !t.deletedByApprover);
+    let list = ticketsList.filter(t => 
+      !t.deletedByApprover && 
+      isTicketAssignedToCurrentApprover(t) &&
+      t.status !== 'Menunggu Persetujuan' &&
+      t.status !== 'Menunggu Otorisasi Darurat'
+    );
 
     // Filter Pencarian (Cari tiket, alasan, tujuan, pemohon, NIP, departemen)
     const searchAppInput = document.getElementById('searchApproverInput');
@@ -820,8 +825,6 @@ function renderApproverView() {
       list = list.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
     } else if (statusVal === 'outside') {
       list = list.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
-    } else if (statusVal === 'pending') {
-      list = list.filter(t => t.status === 'Menunggu Persetujuan');
     } else if (statusVal !== 'all') {
       list = list.filter(t => t.status === statusVal);
     }

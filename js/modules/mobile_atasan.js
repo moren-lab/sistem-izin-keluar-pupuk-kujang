@@ -45,8 +45,21 @@
     return app;
   }
 
+  function isTicketAssignedToMobileApprover(ticket) {
+    if (!ticket) return false;
+    const app = getActiveApprover();
+    const aName = (app.name || '').toLowerCase();
+    const tApprover = (ticket.approverName || '').toLowerCase();
+    if (aName.includes('dewi')) {
+      return tApprover.includes('dewi');
+    } else {
+      return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+    }
+  }
+
   function getTeamTickets() {
-    return window.ticketsList || [];
+    const list = window.ticketsList || [];
+    return list.filter(t => !t.deletedByApprover && isTicketAssignedToMobileApprover(t));
   }
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Bawahan'; }
@@ -1287,9 +1300,9 @@
       }
 
       if (typeof window.saveTickets === 'function') {
-        window.saveTickets(tickets);
+        window.saveTickets(window.ticketsList || tickets);
       } else {
-        localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+        localStorage.setItem('kujang_tickets', JSON.stringify(window.ticketsList || tickets));
       }
 
       // Sync Desktop Views
@@ -1354,9 +1367,9 @@
       }
 
       if (typeof window.saveTickets === 'function') {
-        window.saveTickets(tickets);
+        window.saveTickets(window.ticketsList || tickets);
       } else {
-        localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+        localStorage.setItem('kujang_tickets', JSON.stringify(window.ticketsList || tickets));
       }
 
       // Sync Desktop Views
@@ -1381,7 +1394,7 @@
       if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
       return;
     }
-    const tickets = getTickets();
+    const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
     const approver = getActiveApprover();
@@ -1404,8 +1417,8 @@
       desc: 'Izin darurat disetujui 1-Klik oleh Atasan melalui Aplikasi Mobile. QR Code aktif.'
     });
 
-    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
-    else localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+    if (typeof window.saveTickets === 'function') window.saveTickets(window.ticketsList || tickets);
+    else localStorage.setItem('kujang_tickets', JSON.stringify(window.ticketsList || tickets));
 
     if (typeof window.showToast === 'function') {
       window.showToast(`Izin Darurat #${t.id} disetujui! QR Code ${getTName(t)} kini telah aktif.`, 'success');
