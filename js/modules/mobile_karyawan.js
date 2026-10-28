@@ -287,10 +287,15 @@
     `).join('');
 
     // Donut SVG calculations with emergency support
-    const strokeDash = 282; // 2 * PI * 45
+    const strokeDash = 239; // 2 * PI * 38
+    const selesaiPct = totalCount ? Math.round((selesaiCount / totalCount) * 1000) / 10 : 0;
+    const activePct = totalCount ? Math.round((activeCount / totalCount) * 1000) / 10 : 0;
+    const emergencyCount = emergencyTickets.length;
+    const emgPct = totalCount ? Math.round((emergencyCount / totalCount) * 1000) / 10 : 0;
+
     let selesaiLen = totalCount ? Math.round((selesaiCount / totalCount) * strokeDash) : 0;
     let activeLen = totalCount ? Math.round((activeCount / totalCount) * strokeDash) : 0;
-    let emgLen = totalCount && emergencyActive ? Math.round((emergencyActive / totalCount) * strokeDash) : 0;
+    let emgLen = totalCount ? Math.round((emergencyCount / totalCount) * strokeDash) : 0;
 
     container.innerHTML = `
       <!-- Hero Card Profile -->
@@ -306,14 +311,24 @@
             <span>Pengajuan Saya</span>
           </button>
         ` : `
-          <button type="button" class="mobile-hero-btn" style="margin-top: 14px;" onclick="window.mobileOpenCreateModal(false)">
+          <button type="button" class="mobile-hero-btn" style="margin-top: 14px;" onclick="window.mobileSwitchTab('pengajuan')">
             <span>+ Buat Pengajuan</span>
           </button>
         `}
       </section>
 
-      <!-- 3-Col Stats Card: Total pengajuan · Izin selesai · Izin aktif (Disejajarkan & Angka Hitam) -->
-      <div class="mobile-stats-card" style="margin-bottom: 14px;">
+      <!-- Switcher Segment: Ringkasan Perizinan | Total Pengajuan Izin -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+        <button type="button" id="mBtnSegRingkasan" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${currentSegment === 'ringkasan' ? '#2563eb' : '#cbd5e1'}; background: ${currentSegment === 'ringkasan' ? '#2563eb' : '#ffffff'}; color: ${currentSegment === 'ringkasan' ? '#ffffff' : '#2563eb'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('ringkasan')">
+          Ringkasan Perizinan
+        </button>
+        <button type="button" id="mBtnSegDonut" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${currentSegment === 'donut' ? '#2563eb' : '#cbd5e1'}; background: ${currentSegment === 'donut' ? '#2563eb' : '#ffffff'}; color: ${currentSegment === 'donut' ? '#ffffff' : '#2563eb'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('donut')">
+          Total Pengajuan Izin
+        </button>
+      </div>
+
+      <!-- Segment 1: 3-Col Stats Card (Ringkasan Perizinan) -->
+      <div id="mobileSecRingkasan" class="mobile-stats-card" style="display: ${currentSegment === 'ringkasan' ? 'grid' : 'none'}; margin-bottom: 14px;">
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Total pengajuan</div>
           <div class="mobile-stat-number" style="color: #0f172a;">${totalCount}</div>
@@ -328,7 +343,65 @@
         </div>
       </div>
 
-      <!-- Card: Izin Aktif Saya (Live Card with Full PC Parity Action Buttons) -->
+      <!-- Segment 2: Chart Donat (Total Pengajuan Izin) -->
+      <div id="mobileSecDonut" class="mobile-card" style="display: ${currentSegment === 'donut' ? 'block' : 'none'}; margin-bottom: 14px; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #ffffff;">
+        <h3 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">Total Pengajuan Izin</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="font-size: 0.75rem; color: #64748b;">Periode laporan</span>
+          <div style="display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; color: #334155; font-weight: 600;">
+            <span>Bulan Ini</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-around; gap: 12px;">
+          <!-- SVG Donut Chart -->
+          <div style="position: relative; width: 110px; height: 110px; flex-shrink: 0;">
+            <svg width="110" height="110" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+              <!-- Base Circle -->
+              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" stroke-width="14" />
+              <!-- Selesai (Hijau) -->
+              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#059669" stroke-width="14" stroke-dasharray="${selesaiLen} ${strokeDash}" stroke-dashoffset="0" />
+              <!-- Sedang Aktif (Kuning) -->
+              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#eab308" stroke-width="14" stroke-dasharray="${activeLen} ${strokeDash}" stroke-dashoffset="${-selesaiLen}" />
+              <!-- Izin Darurat (Merah) -->
+              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#dc2626" stroke-width="14" stroke-dasharray="${emgLen} ${strokeDash}" stroke-dashoffset="${-(selesaiLen + activeLen)}" />
+            </svg>
+            <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+              <span style="font-size: 1.35rem; font-weight: 900; color: #0f172a; line-height: 1;">${totalCount}</span>
+              <span style="font-size: 0.65rem; color: #64748b; font-weight: 700; margin-top: 2px;">Total</span>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 8px; height: 8px; border-radius: 2px; background: #059669; flex-shrink: 0;"></span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${selesaiCount} Selesai</span>
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-left: 14px;">${selesaiPct}% dari total</div>
+            </div>
+
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 8px; height: 8px; border-radius: 2px; background: #eab308; flex-shrink: 0;"></span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${activeCount} Sedang Aktif</span>
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-left: 14px;">${activePct}% dari total</div>
+            </div>
+
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 8px; height: 8px; border-radius: 2px; background: #dc2626; flex-shrink: 0;"></span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${emergencyCount} Izin Darurat</span>
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-left: 14px;">${emgPct}% dari total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+<!-- Card: Izin Aktif Saya (Live Card with Full PC Parity Action Buttons) -->
       ${renderActiveTicketCard(activeTicket)}
 
       <!-- Card: Pengajuan Terbaru -->
@@ -368,11 +441,7 @@
       : { name: 'Ir. Hendra Gunawan, M.T.' };
 
     container.innerHTML = `
-     
-      <!-- Card Izin Aktif -->
-      ${renderActiveTicketCard(activeTicket)}
-
-      <!-- Card Informasi Pengajuan (Matching PDF Page 2) -->
+      <!-- Card Informasi Pengajuan (Tetap di Paling Atas Sesuai Permintaan) -->
       <section class="mobile-card">
         <h3 class="mobile-card-title" style="margin-bottom: 8px;">Informasi pengajuan</h3>
         <div style="font-size: 0.75rem; line-height: 1.45; color: #334155;">
@@ -399,6 +468,21 @@
           ` : ''}
         </div>
       </section>
+
+      <!-- Action Buttons: Buat Pengajuan & Izin Darurat (Tepat di Bawah Informasi Pengajuan) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
+        <button type="button" class="mobile-btn-primary" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #059669; border: 1.5px solid #059669; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); cursor: pointer;" onclick="window.mobileOpenCreateModal(false)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="12" y2="12"></line></svg>
+          <span>Buat Pengajuan</span>
+        </button>
+        <button type="button" class="mobile-btn-danger" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #fee2e2; color: #b91c1c; border: 1.5px solid #fca5a5; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(185, 28, 28, 0.08); cursor: pointer;" onclick="window.mobileOpenCreateModal(true)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Izin Darurat</span>
+        </button>
+      </div>
+
+      <!-- Card Izin Aktif -->
+      ${renderActiveTicketCard(activeTicket)}
 
       <!-- Card Kronologi Tercatat (Timeline matching PDF Page 2) -->
       <section class="mobile-card">
@@ -592,28 +676,28 @@
         <button type="button" id="mBtnClearRiwayatSearch" aria-label="Hapus teks pencarian" style="display: ${riwayatSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearRiwayatSearch()">✕</button>
       </div>
 
-      <!-- 2. Toolbar: Segment Toggle (Card/List), Filter, and Solid Red Hapus Riwayat (Pekerjaan A: Samakan Tinggi 36px & Jaga Hit Area 44px) -->
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <!-- Segment Toggle: Card | List -->
-          <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 104px; height: 36px; box-sizing: border-box;">
-            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="height: 100%; font-size: 0.8125rem; font-weight: 700; padding: 0;" onclick="window.mobileSwitchRiwayatView('card')">Card</button>
-            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="height: 100%; font-size: 0.8125rem; font-weight: 700; padding: 0;" onclick="window.mobileSwitchRiwayatView('list')">List</button>
-          </div>
+      <!-- 2. Toolbar: Segment Toggle (Card/List di kiri) & Filter + Tombol Sampah (di samping kanan sejajar) -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
+        <!-- Kiri: Segment Toggle (Card | List) -->
+        <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 104px; height: 36px; padding: 3px; border-radius: 10px; background: #e2e8f0; box-sizing: border-box; display: flex; align-items: center;">
+          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="height: 100%; font-size: 0.775rem; font-weight: 700; padding: 0 10px; border-radius: 7px; border: none; cursor: pointer;" onclick="window.mobileSwitchRiwayatView('card')">Card</button>
+          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="height: 100%; font-size: 0.775rem; font-weight: 700; padding: 0 10px; border-radius: 7px; border: none; cursor: pointer;" onclick="window.mobileSwitchRiwayatView('list')">List</button>
+        </div>
 
-          <!-- Filter Button (Pekerjaan A: 36px visual, radius 10px, hit-area 44px) -->
-          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isRiwayatFilterOpen ? 'active' : ''}" style="height: 36px; min-height: 36px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 700; font-size: 0.8125rem; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box;" onclick="window.mobileToggleRiwayatFilter()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <!-- Kanan: Filter di samping tombol Sampah (Sejajar & Ukuran Sama) -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Filter Button -->
+          <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" style="height: 36px; min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; font-size: 0.775rem; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box;" onclick="window.mobileToggleRiwayatFilter()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
             <span>Filter</span>
             ${(riwayatStatusFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #2563eb; display: inline-block;"></span>' : ''}
           </button>
-        </div>
 
-        <!-- Red Solid Button Hapus Riwayat (Pekerjaan A: 36px visual, radius 10px, hit-area 44px) -->
-        <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} aria-label="Hapus Riwayat Selesai" style="height: 36px; min-height: 36px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; border-radius: 10px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 5px;" onclick="window.mobileClearRiwayat('karyawan')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-          <span>Hapus Riwayat</span>
-        </button>
+          <!-- Tombol Merah Sampah -->
+          <button type="button" class="mobile-btn-clear-history" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="height: 36px; min-height: 36px; width: 36px; min-width: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('karyawan')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
       </div>
 
       <!-- 3. Collapsible Filter Panel -->
@@ -635,12 +719,9 @@
               <option value="Dibatalkan" ${riwayatStatusFilter === 'Dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
             </select>
           </div>
-          <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileResetRiwayatFilterKaryawan()">
+          <div style="margin-top: 4px;">
+            <button type="button" class="mobile-btn-secondary" style="width: 100%; padding: 8px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileResetRiwayatFilterKaryawan()">
               Reset Filter
-            </button>
-            <button type="button" class="mobile-btn-primary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileToggleRiwayatFilter()">
-              Tutup
             </button>
           </div>
         </div>
@@ -712,21 +793,7 @@
   function renderActiveTicketCard(t) {
     if (!t) {
       return `
-        <section class="mobile-card" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); text-align: center; padding: 22px 16px;">
-          <div style="margin-bottom: 6px; color: #94a3b8;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-          <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-primary, #0f172a);">Tidak Ada Izin Aktif</div>
-          <div style="font-size: 0.775rem; color: var(--text-secondary, #64748b); margin-top: 4px; line-height: 1.4;">
-            Anda belum mengajukan izin keluar area atau izin sebelumnya telah selesai.
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
-            <button type="button" class="mobile-btn-primary" style="font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileOpenCreateModal(false)">
-              <span>+ Ajukan Izin</span>
-            </button>
-            <button type="button" class="mobile-btn-danger" style="background: #dc2626; color: #ffffff; border-color: #dc2626; font-weight: 700;" onclick="window.mobileOpenCreateModal(true)">
-              <span>Izin Darurat</span>
-            </button>
-          </div>
-        </section>
+  
       `;
     }
 
@@ -1000,10 +1067,7 @@
               Batalkan Izin Ini
             </button>
           ` : ''}
-          <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet()">
-            Tutup
-          </button>
-        </div>
+          </div>
       </div>
     `;
 
@@ -1020,6 +1084,15 @@
     const activeTicket = getActiveTicket();
     if (!isEmergency && activeTicket && !prefillData && !window.editingTicketId) {
       window.mobileOpenActiveBlockedSheet(activeTicket);
+      return;
+    }
+    // Guard: Izin Darurat pun tidak bisa dibuat jika masih ada izin aktif
+    if (isEmergency && activeTicket && !prefillData && !window.editingTicketId) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Anda masih memiliki izin aktif. Selesaikan atau batalkan terlebih dahulu.', 'warning');
+      } else {
+        alert('Anda masih memiliki izin aktif. Selesaikan atau batalkan terlebih dahulu.');
+      }
       return;
     }
 
@@ -1258,11 +1331,8 @@
           <textarea class="mobile-textarea" id="mCancelReason" placeholder="Masukkan alasan pembatalan izin..." style="min-height: 75px;"></textarea>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 18px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
-          <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 11px; font-weight: 600;" onclick="window.mobileCloseSheet()">
-            Tutup
-          </button>
-          <button type="button" class="mobile-btn-danger" style="flex: 2; padding: 11px; font-weight: 700; background: #dc2626; border-color: #dc2626; color: #ffffff;" onclick="window.mobileConfirmCancelTicket('${t.id}')">
+        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+          <button type="button" class="mobile-btn-danger" style="width: 100%; padding: 11px; font-weight: 700; background: #dc2626; border-color: #dc2626; color: #ffffff;" onclick="window.mobileConfirmCancelTicket('${t.id}')">
             <span>Ya, Batalkan Izin</span>
           </button>
         </div>
@@ -2204,13 +2274,10 @@
           </div>
         </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 10px;">
-          <button type="button" class="mobile-btn-primary" style="flex: 2; font-weight: 700; background: #0284c7; border-color: #0284c7; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileDownloadQr('${t.id}')">
+        <div style="margin-top: 10px;">
+          <button type="button" class="mobile-btn-primary" style="width: 100%; font-weight: 700; background: #0284c7; border-color: #0284c7; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px;" onclick="window.mobileDownloadQr('${t.id}')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>Unduh Tiket QR</span>
-          </button>
-          <button type="button" class="mobile-btn-secondary" style="flex: 1; font-weight: 700;" onclick="window.mobileCloseSheet()">
-            <span>Tutup</span>
           </button>
         </div>
       </div>
@@ -2557,9 +2624,25 @@
       secR.style.display = seg === 'ringkasan' ? 'grid' : 'none';
       secD.style.display = seg === 'donut' ? 'block' : 'none';
     }
-    document.querySelectorAll('.mobile-seg-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.textContent.toLowerCase().includes(seg === 'ringkasan' ? 'ringkasan' : 'total'));
-    });
+    const btnR = document.getElementById('mBtnSegRingkasan');
+    const btnD = document.getElementById('mBtnSegDonut');
+    if (btnR && btnD) {
+      if (seg === 'ringkasan') {
+        btnR.style.background = '#2563eb';
+        btnR.style.color = '#ffffff';
+        btnR.style.borderColor = '#2563eb';
+        btnD.style.background = '#ffffff';
+        btnD.style.color = '#2563eb';
+        btnD.style.borderColor = '#cbd5e1';
+      } else {
+        btnD.style.background = '#2563eb';
+        btnD.style.color = '#ffffff';
+        btnD.style.borderColor = '#2563eb';
+        btnR.style.background = '#ffffff';
+        btnR.style.color = '#2563eb';
+        btnR.style.borderColor = '#cbd5e1';
+      }
+    }
   };
 
   window.mobileSearchRiwayat = function (q) {

@@ -132,10 +132,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
           <span>Pelacakan</span>
         </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <span>Riwayat</span>
-        </div>
       `;
     } else if (currentMobileRole === 'security') {
       navEl.innerHTML = `
@@ -348,6 +344,9 @@
   // 4. GLOBAL SWITCHERS & ROUTING
   // -------------------------------------------------------------------
   window.mobileSwitchTab = function (tab, subParam) {
+    if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'riwayat') {
+      tab = 'dashboard';
+    }
     currentMobileTab = tab;
     renderActiveView();
 
@@ -526,10 +525,6 @@
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
             <span style="color: #dc2626;">Keluar ke Portal SAKTI</span>
-          </button>
-
-          <button type="button" class="mobile-btn-secondary" style="height: 42px; border-radius: 10px; font-weight: 600; font-size: 0.825rem;" onclick="window.mobileCloseSheet()">
-            Tutup
           </button>
         </div>
       </div>

@@ -121,7 +121,7 @@
   // -------------------------------------------------------------------
   function renderMobileAtasan(container, targetTab) {
     if (targetTab) {
-      currentAtasanTab = (targetTab === 'pelacakan') ? 'tim' : targetTab;
+      currentAtasanTab = (targetTab === 'pelacakan') ? 'tim' : (targetTab === 'riwayat' ? 'dashboard' : targetTab);
     }
     if (!container) container = document.getElementById('mobileMainContent');
     if (!container) return;
@@ -133,7 +133,7 @@
     } else if (currentAtasanTab === 'tim' || currentAtasanTab === 'pelacakan') {
       renderAtasanTim(container);
     } else if (currentAtasanTab === 'riwayat') {
-      renderAtasanRiwayat(container);
+      renderAtasanDashboard(container);
     } else if (currentAtasanTab === 'detail') {
       renderAtasanDetailFullPage(container, viewingTicketId);
     }
