@@ -250,7 +250,6 @@
     container.innerHTML = `
       <!-- Hero Card Profile -->
       <section class="mobile-hero-card">
-        <div class="mobile-hero-date-pill">PT PUPUK KUJANG CIKAMPEK</div>
         <div class="mobile-hero-greeting-sub">Selamat ${timeGreeting},</div>
         <h2 class="mobile-hero-name">${emp.name} 👋</h2>
         <div class="mobile-hero-role">${emp.role || 'Staf Rekayasa Mesin'}</div>
@@ -258,9 +257,7 @@
         <div class="mobile-hero-meta">Atasan: ${approver.name || 'Ir. Hendra Gunawan, M.T.'}</div>
 
         ${activeTicket ? `
-          <div class="mobile-hero-divider"></div>
-          ${activeStripHtml}
-          <button type="button" class="mobile-hero-btn" onclick="window.mobileSwitchTab('pengajuan')">
+          <button type="button" class="mobile-hero-btn" style="margin-top: 14px;" onclick="window.mobileSwitchTab('pengajuan')">
             <span>Pengajuan Saya →</span>
           </button>
         ` : `
@@ -270,22 +267,61 @@
         `}
       </section>
 
-      <!-- 3-Col Stats Card (Always visible, numbers in black) -->
-      <div class="mobile-stats-card">
+      <!-- Segment Switcher: Ringkasan Perizinan | Total Pengajuan Izin (Grafik) -->
+      <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
+        <button type="button" class="mobile-seg-btn ${currentSegment === 'ringkasan' ? 'active' : ''}" onclick="window.mobileSwitchSegment('ringkasan')">
+          Ringkasan Perizinan
+        </button>
+        <button type="button" class="mobile-seg-btn ${currentSegment === 'donut' ? 'active' : ''}" onclick="window.mobileSwitchSegment('donut')">
+          Total Pengajuan Izin
+        </button>
+      </div>
+
+      <!-- Segment Content: 3-Col Stats Card -->
+      <div id="mobileSecRingkasan" style="display: ${currentSegment === 'ringkasan' ? 'grid' : 'none'};" class="mobile-stats-card">
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Total pengajuan</div>
           <div class="mobile-stat-number" style="color: #0f172a;">${totalCount}</div>
-          <div class="mobile-stat-caption">Bulan ini</div>
         </div>
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Izin selesai</div>
           <div class="mobile-stat-number" style="color: #0f172a;">${selesaiCount}</div>
-          <div class="mobile-stat-caption">${tepatWaktuCount} tepat waktu, ${lateCompleted} terlambat</div>
         </div>
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Izin aktif</div>
           <div class="mobile-stat-number" style="color: #0f172a;">${activeCount}</div>
-          <div class="mobile-stat-caption">${activeCount > 0 ? (activeTicket.status === 'Sedang di Luar' ? 'Di luar area' : activeTicket.status) : 'Tidak ada'}</div>
+        </div>
+      </div>
+
+      <!-- Segment Content: Donut Chart -->
+      <div id="mobileSecDonut" style="display: ${currentSegment === 'donut' ? 'block' : 'none'};" class="mobile-card">
+        <div class="mobile-card-header">
+          <h3 class="mobile-card-title">Total Pengajuan Izin</h3>
+          <span style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Bulan Ini</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-around; padding: 12px 0;">
+          <svg width="110" height="110" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#e2e8f0" stroke-width="16" />
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#059669" stroke-width="16" stroke-dasharray="212 282" stroke-dashoffset="0" transform="rotate(-90 60 60)" />
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#0284c7" stroke-width="16" stroke-dasharray="35 282" stroke-dashoffset="-212" transform="rotate(-90 60 60)" />
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#f59e0b" stroke-width="16" stroke-dasharray="35 282" stroke-dashoffset="-247" transform="rotate(-90 60 60)" />
+            <text x="60" y="56" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${totalCount}</text>
+            <text x="60" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">TOTAL</text>
+          </svg>
+          <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></span>
+              <span><strong>${selesaiCount}</strong> Selesai (${totalCount ? Math.round((selesaiCount/totalCount)*100) : 0}%)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #0284c7;"></span>
+              <span><strong>${activeCount}</strong> Sedang Aktif</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span>
+              <span><strong>${terlambatCount}</strong> Perlu Perhatian</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -471,16 +507,11 @@
 
     container.innerHTML = `
       <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Arsip Pribadi</div>
         <h1 class="mobile-page-title">Riwayat Pengajuan</h1>
-        <p class="mobile-page-subtitle">Seluruh pengajuan izin milik ${emp.name} • ${emp.nip}</p>
       </div>
 
-      <!-- Result Count and Filter Button Bar -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
-          ${tickets.length} hasil • Semua waktu
-        </span>
+      <!-- Filter Button Bar -->
+      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
         <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleRiwayatFilter()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
           <span>${isRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
@@ -593,6 +624,9 @@
           </div>
           <button type="button" class="mobile-btn-primary" style="margin-top: 14px; width: 100%; font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileOpenCreateModal(false)">
             <span>+ Ajukan Izin Keluar</span>
+          </button>
+          <button type="button" class="mobile-btn-secondary" style="margin-top: 8px; width: 100%; font-weight: 700;" onclick="window.mobileSwitchSegment('donut')">
+            <span>📊 Lihat Grafik Pengajuan Izin</span>
           </button>
         </section>
       `;
@@ -970,11 +1004,11 @@
           <div class="mobile-form-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px;">
             <div class="mobile-form-group" style="margin: 0;">
               <label class="mobile-form-label">Rencana Waktu Keluar <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" value="${defaultExit}" required onchange="window.mobileHandleExitChange(this.value)">
+              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultExit}" required onchange="window.mobileHandleExitChange(this.value)">
             </div>
             <div class="mobile-form-group" id="mFormWrapReturn" style="margin: 0; display: ${initialType === 'Pulang Mendahului' ? 'none' : 'block'};">
               <label class="mobile-form-label">Perkiraan Waktu Kembali <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'}>
+              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'}>
             </div>
           </div>
 
@@ -1099,7 +1133,7 @@
     window.mobileCloseSheet();
 
     if (typeof window.showToast === 'function') {
-      window.showToast(`✓ Tiket #${ticketId} berhasil dibatalkan. Anda kini dapat mengajukan izin baru.`, 'success');
+      window.showToast(`Tiket #${ticketId} berhasil dibatalkan. Anda kini dapat mengajukan izin baru.`, 'success');
     }
 
     renderMobileKaryawan(null, currentKaryawanTab);
@@ -1431,10 +1465,6 @@
           `}
         </div>
 
-        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 0.725rem; color: #065f46; line-height: 1.4;">
-          ℹ️ Dengan menekan tombol <strong>${isEditing ? 'Simpan Perubahan' : 'Kirim Pengajuan Izin'}</strong>, permohonan izin Anda akan langsung diteruskan ke akun Atasan (<strong>${data.approverName}</strong>) untuk proses persetujuan resmi.
-        </div>
-
         <!-- Buttons -->
         <div style="display: flex; gap: 10px; margin-top: 18px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
           <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileBackToCreateModal()">
@@ -1443,7 +1473,7 @@
           </button>
           <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 11px; font-weight: 700; background: #059669; border-color: #059669; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileExecuteSubmitPermit()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>${isEditing ? 'Simpan Perubahan ✓' : (data.isEmergency ? '🚨 Terbitkan QR Darurat' : 'Kirim Pengajuan Izin')}</span>
+            <span>${isEditing ? 'Simpan Perubahan' : (data.isEmergency ? '🚨 Terbitkan QR Darurat' : 'Kirim Pengajuan Izin')}</span>
           </button>
         </div>
       </div>
@@ -1521,7 +1551,7 @@
         window.mobileCloseSheet();
 
         if (typeof window.showToast === 'function') {
-          window.showToast(`✓ Pengajuan #${ticketId} berhasil diperbarui!`, 'success');
+          window.showToast(`Pengajuan #${ticketId} berhasil diperbarui!`, 'success');
         }
 
         renderMobileKaryawan(null, currentKaryawanTab);
@@ -1616,7 +1646,7 @@
       <div class="mobile-sheet-header">
         <div>
           <h3 class="mobile-sheet-title">Tiket Izin Digital</h3>
-          <p style="font-size: 0.725rem; color: #64748b; margin: 1px 0 0 0;">Tunjukkan kepada Petugas Pos Jaga 1</p>
+          
         </div>
         <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
       </div>
@@ -1631,11 +1661,7 @@
           <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; margin-top: 8px;">PT PUPUK KUJANG CIKAMPEK</div>
         </div>
 
-        <p style="font-size: 0.775rem; color: #475569; margin: 0 0 12px 0;">
-          ${isOutside
-            ? 'Pindai QR ini di Pos Jaga 1 saat kembali ke kawasan pabrik (Scan In).'
-            : 'Pindai QR ini di Pos Jaga 1 saat keluar meninggalkan kawasan pabrik (Scan Out).'}
-        </p>
+       
 
         <div class="mobile-ticket-grid-meta" style="text-align: left; margin-bottom: 14px;">
           <div>
@@ -1650,9 +1676,15 @@
           </div>
         </div>
 
-        <button type="button" class="mobile-btn-primary" style="width: 100%; font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileCloseSheet()">
-          <span>Tutup Tiket</span>
-        </button>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button type="button" class="mobile-btn-primary" style="flex: 2; font-weight: 700; background: #0284c7; border-color: #0284c7; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileDownloadQr('${t.id}')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Unduh Tiket QR</span>
+          </button>
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; font-weight: 700;" onclick="window.mobileCloseSheet()">
+            <span>Tutup</span>
+          </button>
+        </div>
       </div>
     `;
 
@@ -1933,7 +1965,7 @@
     window.mobileCloseSheet();
 
     if (typeof window.showToast === 'function') {
-      window.showToast(`✓ Permohonan perpanjangan tiket #${ticketId} berhasil dikirim ke Atasan!`, 'success');
+      window.showToast(`Permohonan perpanjangan tiket #${ticketId} berhasil dikirim ke Atasan!`, 'success');
     }
 
     renderMobileKaryawan(null, currentKaryawanTab);
@@ -1965,11 +1997,31 @@
     }
   };
 
-  window.mobileFilterRiwayatStatus = function (status) {
-    riwayatStatusFilter = status;
-    const container = document.getElementById('mobileMainContent');
-    if (container && currentKaryawanTab === 'riwayat') {
-      renderRiwayat(container);
+  window.mobileDownloadQr = function (ticketId) {
+    const container = document.getElementById('mobileQrCanvasContainer');
+    if (!container) return;
+    const canvas = container.querySelector('canvas');
+    const img = container.querySelector('img');
+    let dataUrl = '';
+    if (canvas) {
+      dataUrl = canvas.toDataURL('image/png');
+    } else if (img && img.src) {
+      dataUrl = img.src;
+    }
+    if (dataUrl) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `Tiket-QR-${ticketId || 'Permit'}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (typeof window.showToast === 'function') {
+        window.showToast('QR Code berhasil diunduh ke perangkat!', 'success');
+      }
+    } else {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Menyiapkan gambar QR Code...', 'info');
+      }
     }
   };
 

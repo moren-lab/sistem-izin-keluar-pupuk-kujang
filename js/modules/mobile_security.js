@@ -253,12 +253,9 @@
     container.innerHTML = `
       <!-- Hero Pos Jaga Profile (Green Hero with White Button) -->
       <section class="mobile-hero-card">
-        <div class="mobile-hero-date-pill">PT PUPUK KUJANG CIKAMPEK</div>
         <div class="mobile-hero-greeting-sub">Selamat pagi, petugas Pos Jaga</div>
         <h2 class="mobile-hero-name">${officer.name} 🛡️</h2>
         <div class="mobile-hero-role">NIP ${officer.nip} • ${officer.dept}</div>
-        <div class="mobile-hero-meta">${activeGate}</div>
-        <div class="mobile-hero-meta">Terminal Pos Utama • Shift pagi</div>
 
         <div class="mobile-hero-divider"></div>
 
@@ -267,46 +264,29 @@
         </button>
       </section>
 
-      <!-- Date Banner (WIB) -->
-      <div style="font-size: 0.725rem; font-weight: 800; color: #475569; letter-spacing: 0.5px; margin-bottom: 10px; text-transform: uppercase;">
-        ${getFormattedTodayWIB()}
-      </div>
-
       <!-- Late Warning Banner -->
       ${alertBannerHtml}
 
-      <!-- 4 Stat Metric Cards (PDF Hal 1 - Clean <br> line break, no '\\n') -->
+      <!-- 4 Stat Metric Cards -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchPelacakanTabAndFilter('outside')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Sedang di luar</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #7c3aed; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
-          <div style="font-size: 0.675rem; color: #64748b; line-height: 1.35;">
-            ${onTimeOutside} sesuai jadwal<br>${lateTickets.length} terlambat
-          </div>
         </div>
 
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchPelacakanTabAndFilter('ready')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Siap keluar</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0;">${readyExitTickets.length}</div>
-          <div style="font-size: 0.675rem; color: #64748b; line-height: 1.35;">
-            Belum Scan Out<br>Bukan headcount
-          </div>
         </div>
 
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('riwayat')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Scan Out hari ini</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${scanOutTodayTickets.length}</div>
-          <div style="font-size: 0.675rem; color: #64748b; line-height: 1.35;">
-            ${scanOutKembali} kembali ke area<br>${scanOutPulang} pulang
-          </div>
         </div>
 
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('riwayat')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Scan In hari ini</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0;">${scanInToday}</div>
-          <div style="font-size: 0.675rem; color: #64748b; line-height: 1.35;">
-            Telah kembali<br>&nbsp;
-          </div>
         </div>
       </div>
 
@@ -316,21 +296,18 @@
         <div class="mobile-quick-card" onclick="window.mobileSwitchTab('scanner')">
           <div>
             <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">Pemindai QR & Manual</div>
-            <div style="font-size: 0.7rem; color: #64748b;">Verifikasi tiket dan catat pergerakan.</div>
           </div>
           <span style="color: #2563eb; font-weight: 800;">→</span>
         </div>
         <div class="mobile-quick-card" onclick="window.mobileSwitchTab('pelacakan')">
           <div>
             <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">Pelacakan di Luar</div>
-            <div style="font-size: 0.7rem; color: #64748b;">Pantau ${outsideTickets.length} karyawan dan waktu kembali.</div>
           </div>
           <span style="color: #2563eb; font-weight: 800;">→</span>
         </div>
         <div class="mobile-quick-card" onclick="window.mobileSwitchTab('riwayat')">
           <div>
             <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">Log Riwayat Gerbang</div>
-            <div style="font-size: 0.7rem; color: #64748b;">Telusuri seluruh transaksi pemindaian.</div>
           </div>
           <span style="color: #2563eb; font-weight: 800;">→</span>
         </div>
@@ -343,9 +320,6 @@
           <span style="font-size: 0.7rem; color: #7c3aed; font-weight: 700;">${outsideTickets.length} Orang</span>
         </div>
         ${outsideListHtml || '<p style="font-size: 0.75rem; color: #64748b; margin: 0;">Tidak ada karyawan di luar area pabrik saat ini.</p>'}
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-size: 0.675rem; color: #64748b; line-height: 1.4;">
-          Headcount hanya izin Kembali ke Area yang sudah Scan Out dan belum Scan In. Izin siap keluar tidak dihitung.
-        </div>
         <div style="text-align: center; margin-top: 10px;">
           <a href="#" class="mobile-link-rincian" onclick="window.mobileSwitchTab('pelacakan'); return false;">Lihat pelacakan →</a>
         </div>
@@ -377,7 +351,6 @@
       <div class="mobile-page-header">
         <div class="mobile-page-category-tag">Terminal Verifikasi Tiket</div>
         <h1 class="mobile-page-title">Pemindai QR</h1>
-        <p class="mobile-page-subtitle">Verifikasi identitas dan catat pergerakan keluar / kembali.</p>
       </div>
 
       <!-- Terminal Verifikasi Tiket Card (PDF Hal 2 & 3) -->
@@ -600,7 +573,6 @@
       <div class="mobile-page-header">
         <div class="mobile-page-category-tag">Terminal Pos Jaga</div>
         <h1 class="mobile-page-title">Pelacakan karyawan</h1>
-        <p class="mobile-page-subtitle">Pantau karyawan yang sudah Scan Out dan belum kembali ke area pabrik.</p>
       </div>
 
       <!-- 2 Summary Cards (PDF Hal 4 & 5) -->
@@ -747,7 +719,7 @@
 
           ${t.status === 'Selesai' ? `
             <div style="font-size: 0.675rem; color: #047857; font-weight: 700; margin-bottom: 8px;">
-              ✓ Selesai ${isLate ? 'terlambat' : 'tepat waktu'} • QR tidak lagi aktif.
+              Selesai ${isLate ? 'terlambat' : 'tepat waktu'} • QR tidak lagi aktif.
             </div>
           ` : (isLate ? `
             <div style="font-size: 0.675rem; color: #b91c1c; font-weight: 700; margin-bottom: 8px;">
@@ -788,7 +760,6 @@
       <div class="mobile-page-header">
         <div class="mobile-page-category-tag">Log Transaksi Gerbang</div>
         <h1 class="mobile-page-title">Riwayat pemindaian</h1>
-        <p class="mobile-page-subtitle">Telusuri tiket, identitas karyawan, dan catatan Scan Out / Scan In lintas status.</p>
       </div>
 
       <!-- Results Summary Bar, View Switcher & Filter Button -->
@@ -854,11 +825,6 @@
             </button>
           </div>
         </div>
-      </div>
-
-      <!-- Date Group Subheader (WIB) -->
-      <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 10px;">
-        Tanggal tiket & pemindaian: ${new Date().getDate()} Okt 2026 • Semua waktu dalam WIB
       </div>
 
       <!-- Items List -->
@@ -948,19 +914,19 @@
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${isReadyOut ? `
             <button type="button" class="mobile-btn-primary" style="font-weight: 700; padding: 11px;" onclick="window.mobileSecurityDirectScanOut('${t.id}')">
-              <span>✓ Catat Scan Out (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
+              <span>Catat Scan Out (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
             </button>
           ` : ''}
 
           ${isReadyIn ? `
             <button type="button" class="mobile-btn-primary" style="font-weight: 700; padding: 11px; background: #047857; border-color: #047857;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-              <span>✓ Catat Scan In (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
+              <span>Catat Scan In (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
             </button>
           ` : ''}
 
           ${isCompleted ? `
             <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #047857; text-align: center; font-weight: 700;">
-              ✓ Tiket ini telah selesai diproses. QR Code sudah tidak aktif.
+              Tiket ini telah selesai diproses. QR Code sudah tidak aktif.
             </div>
           ` : ''}
 
@@ -1023,7 +989,7 @@
         desc: `Karyawan meninggalkan kawasan pabrik melalui ${activeGate} (Pulang Mendahului). Tiket langsung Selesai.`
       });
       if (typeof window.showToast === 'function') {
-        window.showToast(`✓ Scan Out berhasil di ${activeGate}! Tiket #${t.id} selesai diproses (Pulang Mendahului).`, 'success');
+        window.showToast(`Scan Out berhasil di ${activeGate}! Tiket #${t.id} selesai diproses (Pulang Mendahului).`, 'success');
       }
     } else {
       t.status = 'Sedang di Luar';
@@ -1035,7 +1001,7 @@
         desc: `Karyawan diverifikasi keluar gerbang pabrik melalui ${activeGate}. Status: Sedang di Luar.`
       });
       if (typeof window.showToast === 'function') {
-        window.showToast(`✓ Scan Out berhasil! ${getTName(t)} meninggalkan area pada ${nowFormatted} (${activeGate}).`, 'success');
+        window.showToast(`Scan Out berhasil! ${getTName(t)} meninggalkan area pada ${nowFormatted} (${activeGate}).`, 'success');
       }
     }
 
@@ -1095,7 +1061,7 @@
 
     closeMobileSheet();
     if (typeof window.showToast === 'function') {
-      window.showToast(`✓ Scan In berhasil! ${getTName(t)} telah kembali ke area pabrik pada ${nowFormatted}. Tiket Selesai.`, wasOverdue ? 'warning' : 'success');
+      window.showToast(`Scan In berhasil! ${getTName(t)} telah kembali ke area pabrik pada ${nowFormatted}. Tiket Selesai.`, wasOverdue ? 'warning' : 'success');
     }
     renderMobileSecurity(null, currentSecurityTab);
     if (typeof window.renderActiveView === 'function') window.renderActiveView();

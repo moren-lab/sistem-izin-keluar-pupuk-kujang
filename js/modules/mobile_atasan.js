@@ -220,32 +220,15 @@
     }
 
     container.innerHTML = `
-      <!-- Hero Header Card Atasan (Dark Green with White Buttons) -->
+      <!-- Hero Header Card Atasan (Dark Green) -->
       <section class="mobile-hero-card" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);">
-        <div class="mobile-hero-date-pill" style="color: #a7f3d0; background: rgba(255, 255, 255, 0.12);">
-          ${dateFormatted} • ${hourFormatted} WIB
-        </div>
         <div class="mobile-hero-greeting-sub" style="color: #a7f3d0;">Pusat Persetujuan & Monitoring Bawahan</div>
-        <h2 class="mobile-hero-name" style="margin-top: 4px;">Selamat ${timeGreeting}, Pak ${approver.name.split(',')[0].replace('Ir. ', '')}</h2>
-        <div style="font-size: 1rem; font-weight: 800; color: #ffffff;">${approver.name}</div>
-        <div class="mobile-hero-role" style="color: #e2e8f0; font-size: 0.775rem;">${approver.title}</div>
-        <div style="font-size: 0.725rem; color: #cbd5e1; margin-top: 6px;">Ringkasan izin keluar area bawahan langsung</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-top: 4px;">${approver.name}</div>
+        <div style="font-size: 0.775rem; color: #e2e8f0; margin-top: 2px;">${approver.title || 'Atasan'}</div>
 
         <div class="mobile-hero-divider" style="background: rgba(255,255,255,0.15); margin: 12px 0;"></div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <div style="font-size: 0.725rem; color: #fef08a; font-weight: 700;">
-            🛡️ Prinsip: No Approval, No Exit
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-hero-btn-white" onclick="window.mobileSwitchTab('antrean')">
-              Lihat antrean
-            </button>
-            <button type="button" class="mobile-hero-btn-white" onclick="window.mobileSwitchTab('tim')">
-              Lihat Tim
-            </button>
-          </div>
-        </div>
+       
       </section>
 
       <!-- 4-Grid Metrics Overview (2x2 Grid) -->
@@ -254,30 +237,24 @@
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('antrean', 'baru')">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Izin baru menunggu</div>
           <div style="font-size: 1.6rem; font-weight: 900; color: #b45309; line-height: 1.2; margin: 3px 0 2px 0;">${pendingNew.length}</div>
-          <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.3;">Memerlukan keputusan Anda</div>
         </div>
 
         <!-- Card 2: Perpanjangan menunggu -->
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('antrean', 'perpanjangan')">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Perpanjangan menunggu</div>
           <div style="font-size: 1.6rem; font-weight: 900; color: #7c3aed; line-height: 1.2; margin: 3px 0 2px 0;">${pendingExt.length}</div>
-          <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.3;">Diajukan sebelum batas kembali</div>
         </div>
 
         <!-- Card 3: Pengajuan diproses -->
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('riwayat')">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Pengajuan diproses</div>
           <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${processedTickets.length}</div>
-          <div style="font-size: 0.65rem; color: #94a3b8; line-height: 1.3;">${approverDecidedCount} keputusan + ${emergencyCount} darurat</div>
         </div>
 
         <!-- Card 4: Tim di luar area -->
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('tim')">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Tim di luar area</div>
           <div style="font-size: 1.6rem; font-weight: 900; color: #7c3aed; line-height: 1.2; margin: 3px 0 2px 0;">${outsideTickets.length}</div>
-          <div style="font-size: 0.65rem; color: ${lateTickets.length > 0 ? '#b91c1c' : '#047857'}; font-weight: 700; line-height: 1.3;">
-            ${lateTickets.length > 0 ? `Termasuk ${lateTickets.length} karyawan terlambat` : 'Semua tepat waktu'}
-          </div>
         </div>
       </div>
 
@@ -294,7 +271,7 @@
         ${pendingExtHtml}
         ${(pendingNew.length === 0 && pendingExt.length === 0) ? `
           <div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.775rem; padding: 20px;">
-            ✓ Tidak ada pengajuan yang menunggu keputusan Anda saat ini.
+            Tidak ada pengajuan yang menunggu keputusan Anda saat ini.
           </div>
         ` : ''}
       </section>
@@ -304,9 +281,6 @@
         <div class="mobile-card-header">
           <div>
             <h3 class="mobile-card-title">Volume pengajuan tim</h3>
-            <div style="font-size: 0.675rem; color: #64748b; margin-top: 2px;">
-              Minggu lalu • 12 – 16 Okt 2026 • Puncak: Kamis, 8 pengajuan
-            </div>
           </div>
         </div>
         <div class="mobile-bar-chart-wrap">
@@ -343,7 +317,6 @@
         <div class="mobile-card-header">
           <div>
             <h3 class="mobile-card-title">Aktivitas terbaru</h3>
-            <div style="font-size: 0.675rem; color: #64748b; margin-top: 1px;">Hari ini • ${dateFormatted}</div>
           </div>
         </div>
 
@@ -488,7 +461,6 @@
       <div class="mobile-page-header">
         <div class="mobile-page-category-tag">Pusat Keputusan</div>
         <h1 class="mobile-page-title">Antrean Persetujuan</h1>
-        <p class="mobile-page-subtitle">Tinjau pengajuan izin dan perpanjangan dari tim ${approver.dept}.</p>
       </div>
 
       <!-- Segment Tabs (Izin Baru | Perpanjangan) -->
@@ -851,13 +823,6 @@
           </div>
         </div>
 
-        <!-- Kotak Peringatan Kuning Perpanjangan (Matching PDF Page 4) -->
-        <div class="mobile-info-box-yellow">
-          <div class="mobile-info-box-yellow-title">⚠️ Perpanjangan masih menunggu</div>
-          <div class="mobile-info-box-yellow-desc">
-            Selama permohonan menunggu keputusan, penandaan terlambat ditangguhkan hingga batas usulan. Scan In lebih awal menutup permohonan otomatis.
-          </div>
-        </div>
       `;
     }
 
@@ -865,7 +830,6 @@
       <div class="mobile-page-header">
         <div class="mobile-page-category-tag">PEMANTAUAN / ${(approver.department || approver.dept || 'DEPARTEMEN REKAYASA & PEMELIHARAAN').toUpperCase()}</div>
         <h1 class="mobile-page-title">Pelacakan Tim</h1>
-        <p class="mobile-page-subtitle">Pelacakan status, bukan lokasi • Hanya bawahan langsung Anda.</p>
       </div>
 
       <!-- Banner Status Perjalanan Tim -->
@@ -967,14 +931,10 @@
       <div class="mobile-page-header">
         <div class="mobile-page-category-tag">Arsip Keputusan</div>
         <h1 class="mobile-page-title">Riwayat Persetujuan</h1>
-        <p class="mobile-page-subtitle">${tickets.length} pengajuan diproses: ${approverDecidedCount} keputusan Atasan + ${emergencyCount} penerbitan darurat oleh sistem.</p>
       </div>
 
       <!-- Result Bar & Filter Button -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
-          ${filtered.length} catatan • 19 Okt 2026
-        </span>
+      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
         <button type="button" class="mobile-filter-toggle-btn ${isAtasanRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleAtasanRiwayatFilter()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
           <span>${isAtasanRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
@@ -1359,7 +1319,7 @@
 
     window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
-      window.showToast(decision === 'approve' ? `✓ Izin ${ticketId} berhasil disetujui!` : `✕ Izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'danger');
+      window.showToast(decision === 'approve' ? `Izin ${ticketId} berhasil disetujui!` : `Izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'danger');
     }
     currentAtasanTab = 'antrean';
     renderMobileAtasan(null, 'antrean');
@@ -1425,7 +1385,7 @@
 
     window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
-      window.showToast(decision === 'approve' ? `✓ Perpanjangan izin ${ticketId} disetujui!` : `✕ Perpanjangan izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'info');
+      window.showToast(decision === 'approve' ? `Perpanjangan izin ${ticketId} disetujui!` : `Perpanjangan izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'info');
     }
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
