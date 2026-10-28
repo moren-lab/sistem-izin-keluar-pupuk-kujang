@@ -958,6 +958,20 @@ function executeScanOut(ticketId) {
     }
   } else if (ticket.type === 'Pulang Mendahului') {
     ticket.status = 'Selesai';
+    if (typeof window.createNotification === 'function') {
+      window.createNotification({
+        recipientRole: 'karyawan',
+        recipientNip: ticket.applicantNip || 'PK-2024-8841',
+        recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+        actorSource: 'security',
+        type: 'selesai',
+        title: 'Izin Selesai Diproses',
+        message: `Perjalanan izin keluar Anda (#${ticket.id}) telah selesai dicatat oleh Pos Jaga (Pulang Lebih Awal).`,
+        ticketId: ticket.id,
+        priority: 'normal',
+        eventId: `completed_${ticket.id}`
+      });
+    }
     ticket.timeline.push({
       event: 'Scan Out Pos Jaga (Pulang)',
       time: nowFormatted,
@@ -978,6 +992,20 @@ function executeScanOut(ticketId) {
     if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil di ${gate}! Petugas (${officer.name}) memverifikasi keberangkatan tiket #${ticket.id}.`, 'success');
   }
 
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: ticket.applicantNip || 'PK-2024-8841',
+      recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'security',
+      type: 'selesai',
+      title: 'Izin Selesai Diproses',
+      message: `Kepulangan Anda (#${ticket.id}) telah diverifikasi di ${gate}. Tiket selesai.`,
+      ticketId: ticket.id,
+      priority: 'normal',
+      eventId: `completed_${ticket.id}`
+    });
+  }
   window.saveTickets(ticketsList);
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   if (inputScanTicketCode) inputScanTicketCode.value = '';

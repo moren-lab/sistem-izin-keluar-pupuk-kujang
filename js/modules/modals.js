@@ -1742,6 +1742,32 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     }
   }
 
+  // Individual ticket history delete button in detail modal footer
+  const btnDetailDeleteTicket = document.getElementById('btnDetailDeleteTicket');
+  if (btnDetailDeleteTicket) {
+    const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+    const isFinished = FINISHED_STATUSES.includes(ticket.status);
+    const isEmpOrSec = (window.currentActor === 'karyawan' || window.currentActor === 'security');
+    if (isFinished && isEmpOrSec) {
+      btnDetailDeleteTicket.style.display = 'inline-flex';
+      btnDetailDeleteTicket.onclick = function () {
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+        if (window.currentActor === 'karyawan') {
+          if (typeof window.deleteEmpRiwayatItem === 'function') {
+            window.deleteEmpRiwayatItem(ticket.id);
+          }
+        } else if (window.currentActor === 'security') {
+          if (typeof window.deleteSecurityTicket === 'function') {
+            window.deleteSecurityTicket(ticket.id, 'riwayat');
+          }
+        }
+      };
+    } else {
+      btnDetailDeleteTicket.style.display = 'none';
+      btnDetailDeleteTicket.onclick = null;
+    }
+  }
+
   switchDetailTab(defaultTab);
   if (modalTicketDetail) modalTicketDetail.classList.add('open');
 }
@@ -2500,6 +2526,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const ticketsList = window.ticketsList || [];
       ticketsList.unshift(newTicket);
+      if (typeof window.createNotification === 'function') {
+        window.createNotification({
+          recipientRole: 'approver',
+          recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
+          actorSource: 'karyawan',
+          type: 'pengajuan_baru',
+          title: 'Pengajuan Izin Baru',
+          message: `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category}. Menunggu persetujuan Anda.`,
+          ticketId: newTicket.id,
+          priority: 'normal',
+          eventId: `new_sub_${newTicket.id}`
+        });
+      }
       window.saveTickets(ticketsList);
 
       modalConfirmSummary.classList.remove('open');
@@ -3027,6 +3066,22 @@ document.addEventListener('DOMContentLoaded', () => {
         desc: `Mengajukan perpanjangan waktu kembali hingga ${window.formatDisplayDate ? window.formatDisplayDate(newReturnVal) : newReturnVal}. Alasan: "${reasonVal}". Grace Period aktif.`
       });
 
+      if (typeof window.createNotification === 'function') {
+        const ticketForExt = ticketsList.find(t => t.id === currentTicketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
+        if (ticketForExt) {
+          window.createNotification({
+            recipientRole: 'approver',
+            recipientName: ticketForExt.approverName || 'Ir. Hendra Gunawan, M.T.',
+            actorSource: 'karyawan',
+            type: 'permohonan_perpanjangan',
+            title: 'Permohonan Perpanjangan Waktu',
+            message: `${ticketForExt.applicantName} (${ticketForExt.applicantNip}) mengajukan perpanjangan waktu untuk tiket #${ticketForExt.id}. Menunggu persetujuan Anda.`,
+            ticketId: ticketForExt.id,
+            priority: 'normal',
+            eventId: `ext_req_${ticketForExt.id}_${ticketForExt.pendingExtension ? ticketForExt.pendingExtension.newEstimatedReturn : Date.now()}`
+          });
+        }
+      }
       window.saveTickets(ticketsList);
       if (modalExtendDuration) modalExtendDuration.classList.remove('open');
 

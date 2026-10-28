@@ -507,7 +507,11 @@ function renderKaryawanDashboard() {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         actionButtonsHtml = `
-          ${hasPendingExt ? '' : (hasUsedExtension ? `
+          ${hasPendingExt ? `
+            <button class="btn-figma-secondary" disabled style="opacity: 0.9; cursor: not-allowed; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+              <span>Menunggu Persetujuan Perpanjangan</span>
+            </button>
+          ` : (hasUsedExtension ? `
             <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
               <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
             </button>
@@ -1370,28 +1374,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// DELETE FEATURE FOR RIWAYAT PENGAJUAN
+// DELETE FEATURE FOR RIWAYAT PENGAJUAN (STRICT SERVER-LEVEL RULES)
+const FINISHED_EMP_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+
 function deleteEmpTicket(ticketId) {
+  let ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+
+  if (!t) return;
+  if (!FINISHED_EMP_STATUSES.includes(t.status)) {
+    if (typeof window.showToast === 'function') window.showToast('Tiket yang masih berjalan tidak dapat dihapus.', 'error');
+    return;
+  }
+  if (t.applicantNip && t.applicantNip !== myNip) {
+    if (typeof window.showToast === 'function') window.showToast('Anda tidak berhak menghapus tiket karyawan lain.', 'error');
+    return;
+  }
+
   const handler = () => {
-    let ticketsList = window.ticketsList || [];
-    const t = ticketsList.find(x => x.id === ticketId);
-    if (t) {
-      t.deletedByKaryawan = true;
-      window.saveTickets(ticketsList);
-    }
+    t.deletedByKaryawan = true;
+    window.saveTickets(ticketsList);
 
     renderRiwayatView();
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
 
     if (typeof window.showToast === 'function') {
-      window.showToast(`Pengajuan #${ticketId} berhasil dihapus dari riwayat.`, 'info');
+      window.showToast('1 riwayat dihapus', 'info');
     }
   };
 
   if (typeof window.openDeleteConfirmModal === 'function') {
     window.openDeleteConfirmModal({
       title: 'Hapus Riwayat Pengajuan',
-      message: 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.',
+      message: 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tiket yang masih berjalan tidak dapat dihapus.',
       onConfirm: handler
     });
   } else if (confirm('Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.')) {
@@ -1400,10 +1416,13 @@ function deleteEmpTicket(ticketId) {
 }
 
 function deleteAllEmpRiwayat() {
-  const filtered = typeof filterEmpTickets === 'function' ? filterEmpTickets() : [];
+  const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+  const allFiltered = typeof filterEmpTickets === 'function' ? filterEmpTickets() : [];
+  const filtered = allFiltered.filter(t => FINISHED_EMP_STATUSES.includes(t.status) && (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')));
+
   if (filtered.length === 0) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Tidak ada pengajuan di riwayat yang dapat dihapus.', 'warning');
+      window.showToast('Tidak ada riwayat selesai untuk dihapus.', 'warning');
     }
     return;
   }
@@ -1412,9 +1431,11 @@ function deleteAllEmpRiwayat() {
   const handler = () => {
     const idsToDelete = new Set(filtered.map(t => t.id));
     let ticketsList = window.ticketsList || [];
+    let deletedCount = 0;
     ticketsList.forEach(t => {
-      if (idsToDelete.has(t.id)) {
+      if (idsToDelete.has(t.id) && FINISHED_EMP_STATUSES.includes(t.status) && (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'))) {
         t.deletedByKaryawan = true;
+        deletedCount++;
       }
     });
     window.saveTickets(ticketsList);
@@ -1423,17 +1444,17 @@ function deleteAllEmpRiwayat() {
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
 
     if (typeof window.showToast === 'function') {
-      window.showToast(`${count} pengajuan berhasil dihapus dari riwayat.`, 'success');
+      window.showToast(`${deletedCount} riwayat dihapus`, 'success');
     }
   };
 
   if (typeof window.openDeleteConfirmModal === 'function') {
     window.openDeleteConfirmModal({
-      title: 'Hapus Semua Riwayat',
-      message: `Apakah Anda yakin ingin menghapus <strong>${count}</strong> pengajuan dari riwayat? Tindakan ini tidak dapat dibatalkan.`,
+      title: 'Hapus Riwayat Selesai',
+      message: `Hapus <strong>${count}</strong> riwayat yang sudah selesai? Tiket yang masih berjalan tidak akan ikut terhapus.`,
       onConfirm: handler
     });
-  } else if (confirm(`Apakah Anda yakin ingin menghapus ${count} pengajuan dari riwayat? Tindakan ini tidak dapat dibatalkan.`)) {
+  } else if (confirm(`Hapus ${count} riwayat yang sudah selesai? Tiket yang masih berjalan tidak akan ikut terhapus.`)) {
     handler();
   }
 }

@@ -328,6 +328,8 @@ function switchRole(role) {
   if (viewApprover) viewApprover.style.display = 'none';
   if (viewSecurity) viewSecurity.style.display = 'none';
   if (viewAdmin) viewAdmin.style.display = 'none';
+  const viewNotifEl = document.getElementById('viewNotifikasi');
+  if (viewNotifEl) viewNotifEl.style.display = 'none';
 
   if (navKaryawanGroup) navKaryawanGroup.style.display = 'none';
   if (navApproverGroup) navApproverGroup.style.display = 'none';
@@ -444,6 +446,9 @@ function switchRole(role) {
 
   if (typeof window.renderAllCharts === 'function') {
     window.renderAllCharts();
+  }
+  if (typeof window.updateNotificationBadges === 'function') {
+    window.updateNotificationBadges();
   }
 
   // Synchronize Mobile App Orchestrator if active

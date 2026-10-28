@@ -9588,4 +9588,80 @@ body.theme-dark .mobile-btn-secondary {
 
 
 
-
+
+
+/* DESKTOP TOP-RIGHT TOAST POSITIONING */
+@media (min-width: 769px) {
+  .toast-container {
+    top: 1.5rem !important;
+    right: 1.5rem !important;
+    bottom: auto !important;
+  }
+}
+
+/* DESKTOP TOP BAR NOTIFICATION BELL & DROPDOWN */
+.dropdown-notif-container {
+  position: relative;
+  display: inline-block;
+  margin-right: 6px;
+}
+.btn-top-notif {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+.btn-top-notif:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.desktop-notif-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+.desktop-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 400px;
+  max-height: 70vh;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: dropdown-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes dropdown-fade-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

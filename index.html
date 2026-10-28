@@ -9,9 +9,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261028_1830">
-  <link rel="stylesheet" href="css/auth.css?v=20261028_1830">
-  <link rel="stylesheet" href="css/mobile.css?v=20261028_1830">
+  <link rel="stylesheet" href="css/style.css?v=20261028_2300">
+  <link rel="stylesheet" href="css/auth.css?v=20261028_2300">
+  <link rel="stylesheet" href="css/mobile.css?v=20261028_2300">
   <link rel="icon" type="image/png" href="Pupuk Kujang Icon - Colored - zonalogo.com.png">
   <script>
     (function () {
@@ -548,6 +548,28 @@
             <span class="pulsing-dot"></span>
             <span id="liveDigitalClock" class="navbar-clock-text">19 Okt 2026 — 11.00 WIB</span>
           </div>
+          <!-- Desktop Notification Bell & Dropdown Panel -->
+          <div class="dropdown-notif-container" id="desktopNotifContainer">
+            <button type="button" class="btn-top-notif" id="btnDesktopNotif" aria-label="Notifikasi" onclick="window.toggleDesktopNotifDropdown()" title="Notifikasi">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              <span class="desktop-notif-badge" id="desktopNotifBadge" style="display: none;">0</span>
+            </button>
+            <div class="desktop-notif-dropdown" id="desktopNotifDropdown" style="display: none;">
+              <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">Notifikasi</span>
+                  <span id="desktopNotifUnreadText" style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #f0fdf4; padding: 2px 6px; border-radius: 999px;">0 baru</span>
+                </div>
+                <button type="button" style="border: none; background: none; color: #2563eb; font-size: 0.725rem; font-weight: 700; cursor: pointer;" onclick="window.markAllNotificationsAsRead()">Tandai semua dibaca</button>
+              </div>
+              <div id="desktopNotifDropdownList" style="max-height: 380px; overflow-y: auto;">
+              </div>
+              <div style="padding: 10px 16px; border-top: 1px solid #f1f5f9; text-align: center; background: #f8fafc;">
+                <a href="#" style="font-size: 0.775rem; font-weight: 700; color: #059669; text-decoration: none;" onclick="window.closeDesktopNotifDropdown(); if (typeof window.showDesktopFullNotifikasi === 'function') window.showDesktopFullNotifikasi(); return false;">Lihat semua notifikasi →</a>
+              </div>
+            </div>
+          </div>
+
           <!-- Multi-Actor Role Switcher (Karyawan | Atasan | Satpam) -->
           <div class="role-switcher-container" title="Beralih peran untuk menguji alur terintegrasi">
             <button class="role-switch-btn active" id="btnSwitchKaryawan">
@@ -602,6 +624,9 @@
 
       <!-- PAGE CONTENT -->
       <main class="page-container">
+
+        <!-- E. HALAMAN FULL NOTIFIKASI WEB/PC -->
+        <div id="viewNotifikasi" style="display: none;"></div>
 
         <!-- ================= A. KARYAWAN VIEW ================= -->
         <div id="viewKaryawan">
@@ -2363,7 +2388,12 @@
           <span id="mobileRoleHeaderLabel">Karyawan</span>
           <span style="font-size: 0.65rem; opacity: 0.7;">▼</span>
         </button>
-        <div class="mobile-user-avatar" id="mobileUserAvatar" onclick="window.openMobileRoleSheet()" title="Beralih Peran (Simulasi Pengujian)">
+        <!-- Mobile Notification Bell Button (Min 44x44px, disamping Icon User) -->
+        <button type="button" class="mobile-top-notif-btn" id="mBtnTopNotif" aria-label="Notifikasi" onclick="window.openMobileNotificationSheet()" title="Notifikasi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="mobile-notif-badge" id="mNotifBadge" style="display: none;">0</span>
+        </button>
+        <div class="mobile-user-avatar mobile-touch-hit-44" id="mobileUserAvatar" onclick="window.openMobileAvatarMenu()" aria-label="Menu Akun & Keluar SAKTI" role="button" tabindex="0" title="Akun Pengguna & Keluar SAKTI">
           BP
         </div>
       </div>
@@ -3055,6 +3085,10 @@
           <button type="button" class="btn-primary-action" id="btnDetailExtend"
             style="display: none; background: #d97706; border-color: #d97706; font-size: 0.8rem; padding: 0.45rem 0.85rem;">
             Ajukan Perpanjangan
+          </button>
+          <button type="button" class="btn-figma-primary" id="btnDetailDeleteTicket"
+            style="display: none; background: #dc2626; border-color: #dc2626; color: #ffffff; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700;">
+            Hapus Riwayat
           </button>
         </div>
       </div>
@@ -4235,24 +4269,25 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261028_1830"></script>
-  <script src="js/data/authData.js?v=20261028_1830"></script>
-  <script src="js/modules/ui.js?v=20261028_1830"></script>
-  <script src="js/modules/scheduler.js?v=20261028_1830"></script>
-  <script src="js/modules/navigation.js?v=20261028_1830"></script>
-  <script src="js/modules/karyawan.js?v=20261028_1830"></script>
-  <script src="js/modules/approver.js?v=20261028_1830"></script>
-  <script src="js/modules/security.js?v=20261028_1830"></script>
-  <script src="js/modules/admin.js?v=20261028_1830"></script>
-  <script src="js/modules/charts.js?v=20261028_1830"></script>
-  <script src="js/modules/emergency.js?v=20261028_1830"></script>
-  <script src="js/modules/modals.js?v=20261028_1830"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261028_1830"></script>
-  <script src="js/modules/mobile_atasan.js?v=20261028_1830"></script>
-  <script src="js/modules/mobile_security.js?v=20261028_1830"></script>
-  <script src="js/modules/mobile_app.js?v=20261028_1830"></script>
-  <script src="js/app.js?v=20261028_1830"></script>
-  <script src="js/modules/auth.js?v=20261028_1830"></script>
+  <script src="js/data/mockData.js?v=20261028_2300"></script>
+  <script src="js/data/authData.js?v=20261028_2300"></script>
+  <script src="js/modules/notifications.js?v=20261028_2300"></script>
+  <script src="js/modules/ui.js?v=20261028_2300"></script>
+  <script src="js/modules/scheduler.js?v=20261028_2300"></script>
+  <script src="js/modules/navigation.js?v=20261028_2300"></script>
+  <script src="js/modules/karyawan.js?v=20261028_2300"></script>
+  <script src="js/modules/approver.js?v=20261028_2300"></script>
+  <script src="js/modules/security.js?v=20261028_2300"></script>
+  <script src="js/modules/admin.js?v=20261028_2300"></script>
+  <script src="js/modules/charts.js?v=20261028_2300"></script>
+  <script src="js/modules/emergency.js?v=20261028_2300"></script>
+  <script src="js/modules/modals.js?v=20261028_2300"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261028_2300"></script>
+  <script src="js/modules/mobile_atasan.js?v=20261028_2300"></script>
+  <script src="js/modules/mobile_security.js?v=20261028_2300"></script>
+  <script src="js/modules/mobile_app.js?v=20261028_2300"></script>
+  <script src="js/app.js?v=20261028_2300"></script>
+  <script src="js/modules/auth.js?v=20261028_2300"></script>
 </body>
 
 </html>

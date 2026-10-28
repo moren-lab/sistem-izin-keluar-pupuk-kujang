@@ -950,6 +950,31 @@ function confirmApproveDecision() {
   );
 
   window.saveTickets(ticketsList);
+
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: ticket.applicantNip || 'PK-2024-8841',
+      recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'approver',
+      type: 'disetujui',
+      title: 'Pengajuan Disetujui',
+      message: `Pengajuan izin Anda (#${ticket.id}) telah disetujui oleh ${approverName}. QR Code resmi siap digunakan.`,
+      ticketId: ticket.id,
+      priority: 'normal',
+      eventId: `approved_${ticket.id}`
+    });
+    window.createNotification({
+      recipientRole: 'security',
+      actorSource: 'approver',
+      type: 'security_siap_keluar',
+      title: 'Tiket Disetujui - Siap Keluar',
+      message: `Tiket #${ticket.id} (${ticket.applicantName} - ${ticket.category}) telah disetujui dan siap dipindai keluar di gerbang.`,
+      ticketId: ticket.id,
+      priority: 'normal',
+      eventId: `ready_sec_${ticket.id}`
+    });
+  }
   
   const modalApproveDecision = document.getElementById('modalApproveDecision');
   if (modalApproveDecision) modalApproveDecision.classList.remove('open');
@@ -1004,6 +1029,21 @@ function confirmRejectDecision() {
   });
 
   window.saveTickets(ticketsList);
+
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: ticket.applicantNip || 'PK-2024-8841',
+      recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'approver',
+      type: 'ditolak',
+      title: 'Pengajuan Ditolak',
+      message: `Pengajuan izin Anda (#${ticket.id}) ditolak oleh ${approverName}. Alasan: "${reason}".`,
+      ticketId: ticket.id,
+      priority: 'normal',
+      eventId: `rejected_${ticket.id}`
+    });
+  }
 
   const modalRejectDecision = document.getElementById('modalRejectDecision');
   if (modalRejectDecision) modalRejectDecision.classList.remove('open');
@@ -1121,7 +1161,13 @@ function approveExtensionRequest(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket || !ticket.pendingExtension) return;
 
-  const newReturn = ticket.pendingExtension.newEstimatedReturn;
+  let newReturn = ticket.pendingExtension.newEstimatedReturn;
+  if (typeof window.normalizeReturnDateTime === 'function') {
+    newReturn = window.normalizeReturnDateTime(newReturn);
+  } else if (newReturn && (newReturn.match(/\d{4}-\d{2}-\d{2}/g) || []).length > 1) {
+    const lastIdx = newReturn.lastIndexOf('20');
+    if (lastIdx > 0) newReturn = newReturn.slice(lastIdx);
+  }
   const ACTORS = window.ACTORS || {};
   const approverName = ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
   const now = new Date();
@@ -1130,11 +1176,28 @@ function approveExtensionRequest(ticketId) {
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
   ticket.estimatedReturn = newReturn;
+  ticket.plannedReturn = newReturn;
+  ticket.hasExtensionPending = false;
   if (ticket.status === 'Terlambat') {
     ticket.status = 'Sedang di Luar';
   }
 
   if (!ticket.timeline) ticket.timeline = [];
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: ticket.applicantNip || 'PK-2024-8841',
+      recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'approver',
+      type: 'perpanjangan_disetujui',
+      title: 'Perpanjangan Waktu Disetujui',
+      message: `Permohonan perpanjangan waktu untuk tiket #${ticket.id} telah disetujui.`,
+      ticketId: ticket.id,
+      priority: 'normal',
+      eventId: `ext_appr_${ticket.id}_${ticket.pendingExtension ? ticket.pendingExtension.newEstimatedReturn : ''}`
+    });
+  }
+
   ticket.timeline.push({
     event: 'Perpanjangan Waktu Disetujui',
     time: nowFormatted,
@@ -1188,6 +1251,21 @@ function rejectExtensionRequest(ticketId, reason) {
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
 
   if (!ticket.timeline) ticket.timeline = [];
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: ticket.applicantNip || 'PK-2024-8841',
+      recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'approver',
+      type: 'perpanjangan_ditolak',
+      title: 'Perpanjangan Waktu Ditolak',
+      message: `Permohonan perpanjangan waktu untuk tiket #${ticket.id} ditolak. Alasan: "${reason}".`,
+      ticketId: ticket.id,
+      priority: 'normal',
+      eventId: `ext_rej_${ticket.id}`
+    });
+  }
+
   ticket.timeline.push({
     event: 'Perpanjangan Waktu Ditolak',
     time: nowFormatted,

@@ -54,6 +54,9 @@
     updateTopBar();
     renderBottomNav();
     updateFloatingRolePill();
+    if (typeof window.updateNotificationBadges === 'function') {
+      window.updateNotificationBadges();
+    }
   }
 
   function updateTopBar() {
@@ -407,18 +410,278 @@
     if (backdrop) backdrop.classList.remove('open');
   };
 
-  window.mobileCloseSheet = function () {
+    window.mobileCloseSheet = function () {
     const sheet = document.getElementById('mobileActionSheet');
     const roleSheet = document.getElementById('mobileRoleSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (sheet) sheet.classList.remove('open');
     if (roleSheet) roleSheet.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
+    try {
+      if (history.state && history.state.mobileDetailOpen) {
+        history.back();
+      }
+    } catch (e) {}
   };
+
+
+  // -------------------------------------------------------------------
+  // 5. AVATAR MENU & LOG OUT TO SAKTI (PEKERJAAN B)
+  // -------------------------------------------------------------------
+  window.openMobileAvatarMenu = function () {
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) return;
+
+    const user = (typeof window.getKujangCurrentUser === 'function' ? window.getKujangCurrentUser() : null) || {};
+
+    const actorProfiles = {
+      karyawan: {
+        name: 'Budi Pratama, S.T.',
+        nip: 'PK-2024-8841',
+        roleLabel: 'Karyawan Pemohon',
+        dept: 'Departemen Rekayasa & Pemeliharaan',
+        initials: 'BP',
+        avatarBg: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'
+      },
+      approver: {
+        name: 'Ir. Hendra Gunawan, M.T.',
+        nip: 'PK-2016-3392',
+        roleLabel: 'Atasan 1 (Manager Rekayasa & Pemeliharaan)',
+        dept: 'Departemen Rekayasa & Pemeliharaan',
+        initials: 'HG',
+        avatarBg: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
+      },
+      approver2: {
+        name: 'Dewi Sartika, S.T., M.M.',
+        nip: 'PK-2012-0845',
+        roleLabel: 'Atasan 2 (Supervisor Operasional Lapangan)',
+        dept: 'Departemen Rekayasa & Pemeliharaan',
+        initials: 'DS',
+        avatarBg: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
+      },
+      security: {
+        name: 'Sertu Agus',
+        nip: 'SEC-2018-042',
+        roleLabel: 'Petugas Pengamanan (Pos 1 Gerbang Utama)',
+        dept: 'Departemen TI & Pengamanan Pabrik',
+        initials: 'SA',
+        avatarBg: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
+      }
+    };
+
+    const isSameRole = (user && user.role === currentMobileRole);
+    const defaultProfile = actorProfiles[currentMobileRole] || actorProfiles.karyawan;
+    const profile = {
+      name: (isSameRole && user.name) ? user.name : defaultProfile.name,
+      nip: (isSameRole && user.nip) ? user.nip : defaultProfile.nip,
+      roleLabel: defaultProfile.roleLabel,
+      dept: (isSameRole && user.department) ? user.department : defaultProfile.dept,
+      initials: defaultProfile.initials,
+      avatarBg: defaultProfile.avatarBg
+    };
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header">
+        <div>
+          <h3 class="mobile-sheet-title" style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Menu Akun Pengguna</h3>
+          <p style="font-size: 0.725rem; color: #64748b; margin: 1px 0 0 0;">Portal SAKTI • PT Pupuk Kujang</p>
+        </div>
+        <button type="button" class="mobile-sheet-close" aria-label="Tutup Menu Akun" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+
+      <div class="mobile-sheet-body" style="padding-top: 10px;">
+        <!-- User Info Card -->
+        <div class="mobile-avatar-sheet-card">
+          <div class="mobile-avatar-sheet-circle" style="background: ${profile.avatarBg};">
+            ${profile.initials}
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 0.925rem; font-weight: 800; color: #0f172a; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${profile.name}
+            </div>
+            <div style="font-size: 0.75rem; color: #059669; font-weight: 700; margin-top: 2px;">
+              ${profile.roleLabel}
+            </div>
+            <div style="font-size: 0.7rem; color: #64748b; font-family: monospace; margin-top: 2px;">
+              NIP: ${profile.nip}
+            </div>
+            <div style="font-size: 0.675rem; color: #94a3b8; margin-top: 2px;">
+              ${profile.dept}
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.725rem; color: #64748b; margin-bottom: 14px; line-height: 1.4; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+          Sesi aktif Anda terotentikasi melalui <strong>Portal SAKTI Kujang ID</strong>. Untuk mengakhiri sesi kerja dan kembali ke layar login, gunakan tombol keluar di bawah.
+        </div>
+
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Logout Button (Pekerjaan B) -->
+          <button type="button" class="mobile-btn-logout-item" onclick="window.openMobileLogoutConfirm('${profile.name.replace(/'/g, "\\'")}')" aria-label="Keluar dari akun SAKTI">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span style="color: #dc2626;">Keluar ke Portal SAKTI</span>
+          </button>
+
+          <button type="button" class="mobile-btn-secondary" style="height: 42px; border-radius: 10px; font-weight: 600; font-size: 0.825rem;" onclick="window.mobileCloseSheet()">
+            Tutup
+          </button>
+        </div>
+      </div>
+    `;
+
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
+  window.openMobileLogoutConfirm = function (userName) {
+    const sheet = document.getElementById('mobileActionSheet');
+    if (sheet) sheet.classList.remove('open');
+
+    // Check if employee has unsent form draft
+    let hasUnsentDraft = false;
+    if (currentMobileRole === 'karyawan') {
+      const dest = document.getElementById('mFormDestination')?.value;
+      const reason = document.getElementById('mFormReason')?.value;
+      if ((dest && dest.trim()) || (reason && reason.trim())) {
+        hasUnsentDraft = true;
+      }
+    }
+
+    const modalHtml = `
+      <div id="mobileLogoutConfirmModal" class="mobile-modal-overlay open" style="display: flex; align-items: center; justify-content: center; z-index: 10001; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 20px;">
+        <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 340px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: mobileModalFadeIn 0.2s ease-out; text-align: center;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </div>
+
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">Keluar dari aplikasi?</h3>
+          <p style="font-size: 0.775rem; color: #64748b; margin: 0 0 12px 0; line-height: 1.45;">
+            Anda akan keluar dari akun <strong>${userName || 'pengguna'}</strong>. Anda perlu masuk lagi melalui Portal SAKTI untuk memakai aplikasi.
+          </p>
+
+          ${hasUnsentDraft ? `
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 10px; font-size: 0.725rem; color: #b91c1c; font-weight: 700; margin-bottom: 14px; text-align: left; display: flex; align-items: center; gap: 6px;">
+              <span>⚠️ Perhatian: Data formulir yang belum dikirim akan hilang.</span>
+            </div>
+          ` : ''}
+
+          <div style="display: flex; gap: 8px; margin-top: 14px;">
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; height: 42px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem;" onclick="window.closeMobileLogoutConfirm()">
+              Batal
+            </button>
+            <button type="button" id="btnConfirmMobileLogout" class="mobile-btn-danger" style="flex: 1; height: 42px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #dc2626; color: #ffffff; border: 1px solid #dc2626;" onclick="window.executeMobileLogout()">
+              Keluar
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const existing = document.getElementById('mobileLogoutConfirmModal');
+    if (existing) existing.remove();
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  };
+
+  window.closeMobileLogoutConfirm = function () {
+    const modal = document.getElementById('mobileLogoutConfirmModal');
+    if (modal) modal.remove();
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (backdrop) backdrop.classList.remove('open');
+  };
+
+  window.executeMobileLogout = function () {
+    const btn = document.getElementById('btnConfirmMobileLogout');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>Mohon tunggu...</span>';
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'not-allowed';
+    }
+
+    // 1. Matikan kamera pemindai mobile Pos Jaga jika aktif
+    try {
+      if (typeof window.mobileStopCameraScanner === 'function') {
+        window.mobileStopCameraScanner();
+      }
+      if (typeof window.stopCameraScanner === 'function') {
+        window.stopCameraScanner();
+      }
+    } catch (e) {}
+
+    // 2. Hentikan polling notifikasi
+    try {
+      if (typeof window.stopNotifPolling === 'function') {
+        window.stopNotifPolling();
+      }
+    } catch (e) {}
+
+    // 3. Broadcast logout event ke tab lain melalui storage
+    try {
+      localStorage.setItem('kujang_logout_event', String(Date.now()));
+    } catch (e) {}
+
+    // 4. Tutup dialog dan sheet
+    window.closeMobileLogoutConfirm();
+    if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+
+    // 5. Eksekusi logout sentral Kujang ID
+    setTimeout(() => {
+      if (typeof window.kujangLogout === 'function') {
+        window.kujangLogout();
+      } else {
+        sessionStorage.clear();
+        localStorage.removeItem('kujang_current_user');
+        const overlay = document.getElementById('kujangAuthOverlay');
+        if (overlay) overlay.style.display = 'flex';
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast('Anda berhasil keluar dari akun SAKTI.', 'success');
+      }
+    }, 350);
+  };
+
+  // Keyboard shortcut Esc to close logout confirm modal
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        window.closeMobileLogoutConfirm();
+      }
+    });
+  }
+
+    // Support mobile hardware & browser back button to close sheet safely
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('popstate', function () {
+      const sheet = document.getElementById('mobileActionSheet');
+      const roleSheet = document.getElementById('mobileRoleSheet');
+      const backdrop = document.getElementById('mobileModalBackdrop');
+      if (sheet && sheet.classList.contains('open')) {
+        sheet.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+      }
+      if (roleSheet && roleSheet.classList.contains('open')) {
+        roleSheet.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+      }
+    });
+  }
 
   // -------------------------------------------------------------------
   // 6. GLOBAL MOBILE HISTORY DELETION (ALL ACTORS)
   // -------------------------------------------------------------------
+  const FINISHED_STATUSES_RULE = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+
   window.mobileClearRiwayat = function (actor) {
     const role = actor || currentMobileRole;
     let tickets = window.ticketsList || [];
@@ -430,19 +693,19 @@
       const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
       finishedTickets = tickets.filter(t => !t.deletedByKaryawan && 
         (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) &&
-        (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+        FINISHED_STATUSES_RULE.includes(t.status)
       );
       roleLabel = 'riwayat Karyawan';
       flag = 'deletedByKaryawan';
     } else if (role === 'approver' || role === 'approver2') {
       finishedTickets = tickets.filter(t => !t.deletedByApprover &&
-        (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+        FINISHED_STATUSES_RULE.includes(t.status)
       );
       roleLabel = 'pelacakan Atasan';
       flag = 'deletedByApprover';
     } else if (role === 'security') {
       finishedTickets = tickets.filter(t => !t.deletedBySecurity &&
-        (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+        FINISHED_STATUSES_RULE.includes(t.status)
       );
       roleLabel = 'pelacakan Pos Jaga';
       flag = 'deletedBySecurity';
@@ -450,9 +713,9 @@
 
     if (finishedTickets.length === 0) {
       if (typeof window.showToast === 'function') {
-        window.showToast('Tidak ada riwayat izin selesai atau ditolak untuk dibersihkan.', 'warning');
+        window.showToast('Tidak ada riwayat selesai untuk dihapus.', 'warning');
       } else {
-        alert('Tidak ada riwayat izin selesai atau ditolak untuk dibersihkan.');
+        alert('Tidak ada riwayat selesai untuk dihapus.');
       }
       return;
     }
@@ -465,15 +728,15 @@
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus Riwayat Selesai</h3>
-        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+        <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
-      <div class="mobile-sheet-body" style="padding: 16px 18px;">
-        <p style="font-size: 0.825rem; color: #334155; line-height: 1.5; margin: 0 0 18px 0;">
-          Hapus <strong>${finishedTickets.length}</strong> riwayat izin yang sudah selesai/diputuskan dari ${roleLabel}? Permohonan yang sedang aktif/berjalan tidak akan dihapus.
+      <div class="mobile-sheet-body" style="padding: 16px 18px 24px 18px;">
+        <p style="font-size: 0.85rem; color: #334155; line-height: 1.5; margin: 0 0 20px 0;">
+          Hapus <strong>${finishedTickets.length}</strong> riwayat yang sudah selesai? Tiket yang masih berjalan tidak akan ikut terhapus.
         </p>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 9px 18px; font-weight: 700;" onclick="window.mobileCloseSheet()">Cancel</button>
-          <button type="button" class="mobile-btn-primary" style="width: auto; padding: 9px 22px; font-weight: 800; background: #0284c7; border-color: #0284c7;" onclick="window.mobileConfirmBatchDelete('${flag}', ${finishedTickets.length})">OK</button>
+          <button type="button" class="mobile-btn-secondary" style="width: auto; min-height: 44px; padding: 10px 20px; font-weight: 700; border-radius: 10px;" onclick="window.mobileCloseSheet()">Batal</button>
+          <button type="button" style="width: auto; min-height: 44px; padding: 10px 24px; font-weight: 800; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 10px; cursor: pointer;" onclick="window.mobileConfirmBatchDelete('${flag}', ${finishedTickets.length})">Hapus</button>
         </div>
       </div>
     `;
@@ -484,49 +747,62 @@
 
   window.mobileConfirmBatchDelete = function (flag, count) {
     let tickets = window.ticketsList || [];
-    tickets.forEach(t => {
-      if (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') {
-        t[flag] = true;
-      }
-    });
+    let deletedCount = 0;
+
+    if (flag === 'deletedByKaryawan') {
+      const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+      tickets.forEach(t => {
+        const isMyTicket = (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
+        if (isMyTicket && FINISHED_STATUSES_RULE.includes(t.status) && !t.deletedByKaryawan) {
+          t.deletedByKaryawan = true;
+          deletedCount++;
+        }
+      });
+    } else if (flag === 'deletedByApprover') {
+      tickets.forEach(t => {
+        if (FINISHED_STATUSES_RULE.includes(t.status) && !t.deletedByApprover) {
+          t.deletedByApprover = true;
+          deletedCount++;
+        }
+      });
+    } else if (flag === 'deletedBySecurity') {
+      tickets.forEach(t => {
+        if (FINISHED_STATUSES_RULE.includes(t.status) && !t.deletedBySecurity) {
+          t.deletedBySecurity = true;
+          deletedCount++;
+        }
+      });
+    }
 
     if (typeof window.saveTickets === 'function') {
       window.saveTickets(tickets);
     }
     window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
-      window.showToast(`${count} riwayat permohonan telah dihapus.`, 'info');
+      window.showToast(`${deletedCount} riwayat dihapus`, 'info');
     }
     renderActiveView();
   };
 
+  // SINGLE TICKET DELETION (Hapus 1 Riwayat dari Rincian Tiket)
   window.mobileDeleteTicketItem = function (ticketId, actor) {
-    const role = actor || currentMobileRole;
-    let flag = 'deletedByKaryawan';
-    if (role === 'approver' || role === 'approver2') flag = 'deletedByApprover';
-    else if (role === 'security') flag = 'deletedBySecurity';
-
+    const flag = actor === 'security' ? 'deletedBySecurity' : 'deletedByKaryawan';
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (!sheet || !backdrop) {
-      if (confirm(`Hapus tiket ${ticketId} dari riwayat?`)) {
-        applySingleDelete(ticketId, flag);
-      }
-      return;
-    }
+    if (!sheet || !backdrop) return;
 
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus dari Riwayat</h3>
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus Riwayat</h3>
         <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body" style="padding: 16px 18px;">
         <p style="font-size: 0.825rem; color: #334155; line-height: 1.5; margin: 0 0 18px 0;">
-          Apakah Anda yakin ingin menghapus tiket <strong>${ticketId}</strong> dari riwayat Anda? Tindakan ini tidak dapat dibatalkan.
+          Apakah Anda yakin ingin menghapus tiket <strong>${ticketId}</strong> dari riwayat ini?
         </p>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 9px 18px; font-weight: 700;" onclick="window.mobileCloseSheet()">Cancel</button>
+          <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 9px 18px; font-weight: 700;" onclick="window.mobileCloseSheet()">Batal</button>
           <button type="button" class="mobile-btn-danger" style="width: auto; padding: 9px 22px; font-weight: 800; background: #dc2626; color: #fff; border-color: #dc2626;" onclick="window.mobileConfirmSingleDelete('${ticketId}', '${flag}')">Hapus</button>
         </div>
       </div>
@@ -539,20 +815,27 @@
   window.mobileConfirmSingleDelete = function (ticketId, flag) {
     let tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
+    const FINISHED_STATUSES_RULE = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
     if (t) {
+      if (!FINISHED_STATUSES_RULE.includes(t.status)) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Tiket yang masih aktif tidak dapat dihapus.', 'error');
+        }
+        window.mobileCloseSheet();
+        return;
+      }
       t[flag] = true;
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(tickets);
       }
       if (typeof window.showToast === 'function') {
-        window.showToast(`Tiket ${ticketId} dihapus dari riwayat.`, 'info');
+        window.showToast(`1 riwayat (${ticketId}) dihapus`, 'info');
       }
     }
     window.mobileCloseSheet();
     renderActiveView();
   };
 
-  // Backward compatibility alias
   window.switchMobileRole = window.mobileSwitchRole;
 
   // Expose global render active view

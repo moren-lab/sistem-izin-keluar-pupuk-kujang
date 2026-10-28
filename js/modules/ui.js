@@ -70,14 +70,40 @@ function getStatusPill(status, ticket) {
   return `<span style="font-weight: 700; font-size: 0.8125rem; color: ${color}; letter-spacing: -0.01em;">${status}</span>`;
 }
 
+function normalizeReturnDateTime(val) {
+  if (!val) return '';
+  let s = String(val).trim();
+  const dateMatches = s.match(/\d{4}-\d{2}-\d{2}/g);
+  if (dateMatches && dateMatches.length > 1) {
+    const lastDate = dateMatches[dateMatches.length - 1];
+    const lastIdx = s.lastIndexOf(lastDate);
+    if (lastIdx >= 0) s = s.slice(lastIdx);
+  }
+  s = s.replace(/\s*WIB(?::\d{2})?/gi, '');
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?/);
+  if (m) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${m[1]}T${pad(m[2])}:${pad(m[3])}:00`;
+  }
+  const tm = s.match(/^(\d{1,2})[:.](\d{2})/);
+  if (tm) {
+    const today = new Date().toISOString().split('T')[0];
+    const pad = n => String(n).padStart(2, '0');
+    return `${today}T${pad(tm[1])}:${pad(tm[2])}:00`;
+  }
+  return s;
+}
+window.normalizeReturnDateTime = normalizeReturnDateTime;
+
 function formatDisplayDate(dateStr) {
   if (!dateStr) return '-';
-  const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : new Date(dateStr);
+  let cleanStr = normalizeReturnDateTime(dateStr);
+  const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(cleanStr) : new Date(cleanStr);
   if (!d || isNaN(d.getTime())) return dateStr;
   const pad = (n) => String(n).padStart(2, '0');
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())} WIB`;
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())} WIB`;
 }
 
 function formatDayAndDate(dateStr) {

@@ -345,21 +345,28 @@ body.theme-dark .mobile-top-role-pill {
   padding: 3px;
   gap: 3px;
   margin-bottom: 1rem;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .mobile-seg-btn {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 8px 10px;
-  font-size: 0.775rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 700;
   color: #64748b;
-  border-radius: 8px;
+  border-radius: 7px;
   cursor: pointer;
   text-align: center;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .mobile-seg-btn.active {
@@ -683,6 +690,49 @@ body.theme-dark .mobile-top-role-pill {
 
 .mobile-btn-danger:active {
   background: #fee2e2;
+}
+
+/* Specific Solid Action Buttons (Mobile Parity) */
+.mobile-btn-edit-solid {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: 1.5px solid #2563eb !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
+}
+.mobile-btn-edit-solid:hover, .mobile-btn-edit-solid:active {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+.mobile-btn-cancel-solid {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #dc2626 !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25) !important;
+}
+.mobile-btn-cancel-solid:hover, .mobile-btn-cancel-solid:active {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+.mobile-btn-extend-solid {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #d97706 !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.25) !important;
+}
+.mobile-btn-extend-solid:hover, .mobile-btn-extend-solid:active {
+  background: #b45309 !important;
+  border-color: #b45309 !important;
+  color: #ffffff !important;
 }
 
 /* Info Box Components */
@@ -1662,19 +1712,23 @@ body.theme-dark .mobile-summary-value {
 #mobileAppContainer .mobile-filter-toggle-btn {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  justify-content: center !important;
+  gap: 5px !important;
   background: #ffffff !important;
   color: #1e293b !important;
   border: 1px solid #cbd5e1 !important;
-  border-radius: 8px !important;
-  padding: 6px 12px !important;
-  font-size: 0.725rem !important;
+  border-radius: 10px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  font-size: 0.8125rem !important; /* 13px */
   font-weight: 700 !important;
   cursor: pointer !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
   transition: all 0.15s ease !important;
   user-select: none !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
 }
 
 #mobileAppContainer .mobile-filter-toggle-btn:active {
@@ -1822,7 +1876,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   transform: scale(0.99);
 }
 
-/* Riwayat Ticket Card (Point 1, 2, 10) */
+/* Riwayat Ticket Card (Non-clickable container to prevent accidental scroll opening) */
 .mobile-ticket-card {
   border: 1.5px solid #cbd5e1;
   border-radius: 14px;
@@ -1830,16 +1884,9 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   background: #ffffff;
   padding: 14px 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-.mobile-ticket-card:active {
-  background: #f8fafc;
-  border-color: #94a3b8;
 }
 
-/* Riwayat Ticket List Row (Point 1, 2, 10) */
+/* Riwayat Ticket List Row (Non-clickable container to prevent accidental scroll opening) */
 .mobile-ticket-list-row {
   border: 1.5px solid #e2e8f0;
   border-radius: 12px;
@@ -1847,13 +1894,32 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   background: #ffffff;
   padding: 12px 14px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
 }
-.mobile-ticket-list-row:active {
-  background: #f8fafc;
-  border-color: #94a3b8;
+
+/* Dedicated "Lihat Detail" Button (Min 44x44px touch target, bold text, NO icons) */
+.mobile-btn-detail {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 14px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #047857;
+  background: #f0fdf4;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+.mobile-btn-detail:active {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: scale(0.98);
 }
 
 /* Accessible 44x44 Trash Button (Point 3) */
@@ -1879,7 +1945,178 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   border-color: #fca5a5;
 }
 
+/* Solid Red Hapus Riwayat Button (Perubahan 4) */
+.mobile-btn-clear-history {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 10px;
+  background: #dc2626;
+  color: #ffffff;
+  border: 1px solid #dc2626;
+  border-radius: 10px;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.mobile-btn-clear-history:active:not(:disabled) {
+  background: #b91c1c;
+  transform: scale(0.98);
+}
+.mobile-btn-clear-history:disabled {
+  background: #fca5a5 !important;
+  border-color: #fca5a5 !important;
+  color: #ffffff !important;
+  opacity: 0.75 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 /* High contrast secondary text (Point 9) */
 .mobile-text-secondary {
   color: #334155 !important;
+}
+
+/* -------------------------------------------------------------------
+   19. MOBILE NOTIFICATION BELL BUTTON & BADGE
+   ------------------------------------------------------------------- */
+.mobile-top-notif-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.mobile-top-notif-btn:active {
+  background: #f1f5f9;
+  transform: scale(0.96);
+}
+.mobile-notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.4);
+}
+
+/* -------------------------------------------------------------------
+   20. PEKERJAAN A & B: TOUCH HIT AREA, 360PX HEADER & AVATAR LOGOUT
+   ------------------------------------------------------------------- */
+.mobile-touch-hit-44 {
+  position: relative;
+}
+.mobile-touch-hit-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+@media (max-width: 380px) {
+  .mobile-top-bar {
+    padding: 10px 12px !important;
+  }
+  .mobile-brand-left {
+    gap: 8px !important;
+  }
+  .mobile-brand-name {
+    font-size: 0.85rem !important;
+  }
+  .mobile-brand-sub {
+    max-width: 90px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .mobile-top-actions {
+    gap: 6px !important;
+  }
+  .mobile-top-role-pill {
+    padding: 4px 8px !important;
+    font-size: 0.725rem !important;
+  }
+}
+
+.mobile-avatar-sheet-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.mobile-avatar-sheet-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+}
+.mobile-btn-logout-item {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  background: #ffffff;
+  color: #dc2626;
+  border: 1.5px solid #fecaca;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+.mobile-btn-logout-item:active {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  transform: scale(0.98);
 }

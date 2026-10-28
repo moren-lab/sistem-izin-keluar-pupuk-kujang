@@ -22,7 +22,12 @@ function parseTicketDateTime(val) {
   }
   if (typeof val !== 'string') return null;
 
-  const raw = val.trim();
+  let raw = val.trim();
+  if (typeof normalizeReturnDateTime === 'function') {
+    raw = normalizeReturnDateTime(raw);
+  } else if (typeof window !== 'undefined' && typeof window.normalizeReturnDateTime === 'function') {
+    raw = window.normalizeReturnDateTime(raw);
+  }
 
   // 1. Format hanya jam: "12:30", "12.30", "12:30 WIB", "12:30:00"
   const timeOnlyMatch = raw.match(/^(\d{1,2})[:.](\d{2})(?:[:.]\d{2})?(?:\s*WIB)?$/i);
@@ -127,6 +132,23 @@ function checkOverdueAndExpiredTickets(silent = true) {
       const toleranceMs = 10 * 60 * 1000; // toleransi 10 menit
       if (exitTime && !isNaN(exitTime.getTime()) && (now.getTime() > exitTime.getTime() + toleranceMs)) {
         ticket.status = 'Kedaluwarsa';
+        if (!ticket.notifiedExpired) {
+          ticket.notifiedExpired = true;
+          if (typeof window.createNotification === 'function') {
+            window.createNotification({
+              recipientRole: 'karyawan',
+              recipientNip: ticket.applicantNip || 'PK-2024-8841',
+              recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+              actorSource: 'system',
+              type: 'kedaluwarsa',
+              title: 'Tiket Kedaluwarsa',
+              message: `Izin keluar area (#${ticket.id}) otomatis kedaluwarsa karena tidak dipindai keluar melewati batas toleransi rencana keluar.`,
+              ticketId: ticket.id,
+              priority: 'normal',
+              eventId: `expired_${ticket.id}`
+            });
+          }
+        }
         if (!ticket.timeline) ticket.timeline = [];
         ticket.timeline.push({
           event: 'Tiket Kedaluwarsa',
@@ -167,6 +189,51 @@ function checkOverdueAndExpiredTickets(silent = true) {
             ticket.status = 'Terlambat';
             ticket.isLate = true;
             ticket.lateMinutes = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
+            
+            if (!ticket.notifiedLate) {
+              ticket.notifiedLate = true;
+              if (typeof window.createNotification === 'function') {
+                // 1. Notifikasi ke Karyawan
+                window.createNotification({
+                  recipientRole: 'karyawan',
+                  recipientNip: ticket.applicantNip || 'PK-2024-8841',
+                  recipientName: ticket.applicantName,
+                  actorSource: 'system',
+                  type: 'terlambat',
+                  title: 'Peringatan Waktu Kembali',
+                  message: `Batas waktu kembali untuk izin #${ticket.id} telah terlewati. Harap segera kembali ke area pabrik atau ajukan perpanjangan waktu.`,
+                  ticketId: ticket.id,
+                  priority: 'high',
+                  eventId: `late_emp_${ticket.id}`
+                });
+
+                // 2. Notifikasi ke Atasan
+                window.createNotification({
+                  recipientRole: 'approver',
+                  recipientName: ticket.approverName || 'Ir. Hendra Gunawan, M.T.',
+                  actorSource: 'system',
+                  type: 'bawahan_terlambat',
+                  title: '⚠️ Bawahan Terlambat Kembali',
+                  message: `Bawahan Anda, ${ticket.applicantName} (${ticket.applicantNip}), belum kembali ke area pabrik melewati batas waktu untuk tiket #${ticket.id}.`,
+                  ticketId: ticket.id,
+                  priority: 'high',
+                  eventId: `late_appr_${ticket.id}`
+                });
+
+                // 3. Notifikasi ke Pos Jaga
+                window.createNotification({
+                  recipientRole: 'security',
+                  actorSource: 'system',
+                  type: 'security_terlambat',
+                  title: '⚠️ Karyawan Terlambat Kembali',
+                  message: `${ticket.applicantName} (${ticket.applicantNip} • ${ticket.department || 'Pabrik'}) belum kembali melewati batas waktu untuk tiket #${ticket.id}.`,
+                  ticketId: ticket.id,
+                  priority: 'high',
+                  eventId: `late_sec_${ticket.id}`
+                });
+              }
+            }
+
             if (!ticket.timeline) ticket.timeline = [];
             ticket.timeline.push({
               event: 'Status Terlambat',

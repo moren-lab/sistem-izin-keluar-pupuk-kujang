@@ -326,11 +326,20 @@
 
     // Tutup seluruh modal atau scanner yang mungkin sedang aktif
     try {
+      if (typeof window.mobileStopCameraScanner === 'function') {
+        window.mobileStopCameraScanner();
+      }
       if (typeof window.stopCameraScanner === 'function') {
         window.stopCameraScanner();
       }
-      const openModals = document.querySelectorAll('.modal-overlay.open, .figma-modal-overlay.open, .portal-login-overlay.open');
+      if (typeof window.stopNotifPolling === 'function') {
+        window.stopNotifPolling();
+      }
+      const openModals = document.querySelectorAll('.modal-overlay.open, .figma-modal-overlay.open, .portal-login-overlay.open, .mobile-modal-overlay.open');
       openModals.forEach(m => m.classList.remove('open'));
+      if (typeof window.mobileCloseSheet === 'function') {
+        window.mobileCloseSheet();
+      }
     } catch (e) {}
 
     // Reset tombol verify
@@ -438,6 +447,16 @@
     }
 
     window.addEventListener('storage', (e) => {
+      if (e.key === 'kujang_logout_event') {
+        window.setKujangCurrentUser(null);
+        try { sessionStorage.clear(); } catch (err) {}
+        const overlay = document.getElementById('kujangAuthOverlay');
+        if (overlay) overlay.style.display = 'flex';
+        if (typeof window.showKujangMethodStep === 'function') {
+          window.showKujangMethodStep();
+        }
+        return;
+      }
       const storageKey = window.STORAGE_KEY || 'KUJANG_GATEPASS_TICKETS_V7';
       if (e.key === storageKey || e.key === 'ticketsList' || e.key === 'empTickets') {
         const activeUser = window.getKujangCurrentUser();

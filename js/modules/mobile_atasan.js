@@ -212,7 +212,7 @@
             <strong>Peninjauan susulan:</strong> Perjalanan kedaruratan telah selesai. Alur darurat memerlukan peninjauan susulan oleh atasan langsung.
           </p>
           <button type="button" class="mobile-btn-secondary" style="border-color: #fca5a5; color: #991b1b; padding: 7px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileOpenAtasanDaruratModal('${finishedEmergTicket.id}')">
-            Rincian darurat →
+            Lihat Detail
           </button>
         </div>
       `;
@@ -228,7 +228,7 @@
               <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${t.id} • ${t.category}</div>
             </div>
-            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenAtasanDetailModal('${t.id}'); return false;">Rincian</a>
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenAtasanDetailModal('${t.id}'); return false;">Lihat Detail</a>
           </div>
 
           <div style="margin: 4px 0 6px 0;">
@@ -264,7 +264,7 @@
                 <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
                 <div style="font-size: 0.7rem; color: #64748b;">${t.id} • Perpanjangan</div>
               </div>
-              <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenAtasanPerpanjanganModal('${t.id}'); return false;">Rincian</a>
+              <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenAtasanPerpanjanganModal('${t.id}'); return false;">Lihat Detail</a>
             </div>
 
             <div style="margin: 4px 0 6px 0;">
@@ -619,7 +619,7 @@
 
       <div class="mobile-page-header" style="margin-bottom: 12px;">
         <h1 class="mobile-page-title">Detail Pengajuan</h1>
-        <p class="mobile-page-subtitle">Periksa kebutuhan izin dan rencana waktu sebelum memberikan keputusan.</p>
+       
       </div>
 
       <!-- Kartu Pemohon -->
@@ -716,16 +716,14 @@
       ${isPending ? `
         <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; border: 1.5px solid #cbd5e1;">
           <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a;">Keputusan Atasan</div>
-          <div style="font-size: 0.675rem; color: #64748b; margin-bottom: 8px;">Hanya untuk pengajuan bawahan langsung Anda.</div>
+          
 
           <div class="mobile-form-group" style="margin-bottom: 8px;">
             <label class="mobile-form-label">Catatan persetujuan (opsional)</label>
             <textarea class="mobile-textarea" id="mAtasanDetailNote" placeholder="Tambahkan catatan jika diperlukan" style="font-size: 0.75rem; min-height: 60px;"></textarea>
           </div>
 
-          <div style="font-size: 0.675rem; color: #64748b; margin-bottom: 10px; line-height: 1.35;">
-            Persetujuan akan memicu penerbitan QR oleh sistem. Penolakan membutuhkan alasan dan bersifat permanen.
-          </div>
+          
 
           <div style="display: flex; gap: 8px;">
             <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
@@ -945,9 +943,9 @@
             <div style="font-size: 0.7rem; color: #64748b;">
               Status saat ini: <span class="mobile-badge ${currentStatusBadgeClass}">${t.status}</span>
             </div>
-            <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.725rem; font-weight: 700; color: #2563eb;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
-              Rincian →
-            </button>
+            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+            Lihat Detail
+          </button>
           </div>
         </div>
       `;
@@ -955,7 +953,7 @@
 
     container.innerHTML = `
       <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Arsip Keputusan</div>
+      
         <h1 class="mobile-page-title">Riwayat Persetujuan</h1>
       </div>
 
@@ -1037,24 +1035,17 @@
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header">
         <div>
-          <span style="font-size: 0.7rem; color: #7c3aed; font-weight: 700;">PERPANJANGAN WAKTU</span>
+         
           <h3 class="mobile-sheet-title">Tinjau Perpanjangan</h3>
         </div>
         <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
       </div>
 
       <div class="mobile-sheet-body">
-        <div style="font-size: 0.725rem; color: #64748b; margin-bottom: 8px;">
-          Permohonan pertama dan satu-satunya untuk tiket ini.
-        </div>
+       
 
         <!-- Blue Alert Box -->
-        <div class="mobile-info-box-blue">
-          <div class="mobile-info-box-blue-title">Scan In lebih awal akan menutup permohonan otomatis</div>
-          <div class="mobile-info-box-blue-desc">
-            Jika karyawan sudah kembali sebelum keputusan disimpan, tiket menjadi Selesai dan permohonan tidak lagi dapat diputuskan. Atasan tidak melakukan Scan In.
-          </div>
-        </div>
+       
 
         <!-- Karyawan Card -->
         <div class="mobile-card" style="margin-bottom: 12px; padding: 12px 14px;">
@@ -1097,12 +1088,7 @@
           </div>
         </div>
 
-        <div class="mobile-info-box-yellow" style="margin-bottom: 12px;">
-          <div class="mobile-info-box-yellow-title">Penangguhan Keterlambatan</div>
-          <div class="mobile-info-box-yellow-desc">
-            Penandaan terlambat ditangguhkan sampai ${usulan} selama permohonan menunggu keputusan.
-          </div>
-        </div>
+       
 
         <!-- Keputusan Perpanjangan -->
         <div class="mobile-card" style="margin-bottom: 12px; padding: 12px 14px;">
@@ -1116,9 +1102,7 @@
             <textarea class="mobile-textarea" id="mExtDecisionNote" placeholder="Tambahkan catatan jika diperlukan" style="font-size: 0.75rem; min-height: 50px;"></textarea>
           </div>
 
-          <div style="font-size: 0.675rem; color: #475569; margin-bottom: 10px; line-height: 1.35;">
-            Setujui untuk memakai estimasi ${usulan}. Tolak untuk mempertahankan estimasi semula ${semula}.
-          </div>
+          
 
           <div style="display: flex; gap: 8px;">
             <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteExtension('${t.id}', 'reject')">
@@ -1341,6 +1325,46 @@
         });
       }
 
+      if (typeof window.createNotification === 'function') {
+        if (decision === 'approve') {
+          window.createNotification({
+            recipientRole: 'karyawan',
+            recipientNip: t.applicantNip || 'PK-2024-8841',
+            recipientName: t.applicantName || 'Budi Pratama, S.T.',
+            actorSource: 'approver',
+            type: 'disetujui',
+            title: 'Pengajuan Disetujui',
+            message: `Pengajuan izin Anda (#${t.id}) telah disetujui oleh ${approver.name}. QR Code resmi siap digunakan.`,
+            ticketId: t.id,
+            priority: 'normal',
+            eventId: `approved_${t.id}`
+          });
+          window.createNotification({
+            recipientRole: 'security',
+            actorSource: 'approver',
+            type: 'security_siap_keluar',
+            title: 'Tiket Disetujui - Siap Keluar',
+            message: `Tiket #${t.id} (${t.applicantName} - ${t.category}) telah disetujui dan siap dipindai keluar di gerbang.`,
+            ticketId: t.id,
+            priority: 'normal',
+            eventId: `ready_sec_${t.id}`
+          });
+        } else {
+          window.createNotification({
+            recipientRole: 'karyawan',
+            recipientNip: t.applicantNip || 'PK-2024-8841',
+            recipientName: t.applicantName || 'Budi Pratama, S.T.',
+            actorSource: 'approver',
+            type: 'ditolak',
+            title: 'Pengajuan Ditolak',
+            message: `Pengajuan izin Anda (#${t.id}) ditolak oleh ${approver.name}. Alasan: "${note}".`,
+            ticketId: t.id,
+            priority: 'normal',
+            eventId: `rejected_${t.id}`
+          });
+        }
+      }
+
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(list);
       } else {
@@ -1384,32 +1408,76 @@
       if (!t.timeline) t.timeline = [];
 
       if (decision === 'approve') {
-        const today = new Date().toISOString().split('T')[0];
-        const newTime = t.extensionRequestedTime || (t.pendingExtension && t.pendingExtension.newEstimatedReturn ? t.pendingExtension.newEstimatedReturn.slice(11, 16).replace(':', '.') : '12.00');
-        t.plannedReturn = `${today}T${newTime}:00`;
-        t.estimatedReturn = `${today}T${newTime}:00`;
+        let newReturn = (t.pendingExtension && t.pendingExtension.newEstimatedReturn) || t.extensionRequestedTime || '';
+        if (typeof window.normalizeReturnDateTime === 'function') {
+          newReturn = window.normalizeReturnDateTime(newReturn);
+        } else if (typeof normalizeReturnDateTime === 'function') {
+          newReturn = normalizeReturnDateTime(newReturn);
+        } else if (!newReturn.includes('T') && !/\d{4}-\d{2}-\d{2}/.test(newReturn)) {
+          const today = new Date().toISOString().split('T')[0];
+          newReturn = `${today}T${newReturn.replace('.', ':')}:00`;
+        }
+        t.plannedReturn = newReturn;
+        t.estimatedReturn = newReturn;
         t.extensionApproved = true;
         t.extensionCount = (t.extensionCount || 0) + 1;
-        t.approverNote = (t.approverNote || '') + ` | Perpanjangan disetujui hingga ${newTime} WIB.`;
+        if (t.status === 'Terlambat') {
+          t.status = 'Sedang di Luar';
+        }
+        t.approverNote = (t.approverNote || '') + ` | Perpanjangan disetujui hingga ${formatDisplayDate(newReturn)}.`;
         if (t.pendingExtension) {
           t.pendingExtension.status = 'Disetujui';
         }
+        t.pendingExtension = null;
+        t.hasExtensionPending = false;
         t.timeline.push({
           event: 'Perpanjangan Waktu Disetujui',
           time: nowFormatted,
           by: `${approver.name} (${approver.title || 'Atasan'})`,
-          desc: `Tambahan waktu keluar disetujui hingga ${newTime.replace(':', '.')} WIB. Catatan: "${note}"`
+          desc: `Tambahan waktu keluar disetujui hingga ${formatDisplayDate(newReturn)}. Catatan: "${note}"`
         });
+
+        if (typeof window.createNotification === 'function') {
+          window.createNotification({
+            recipientRole: 'karyawan',
+            recipientNip: t.applicantNip || 'PK-2024-8841',
+            recipientName: t.applicantName || 'Budi Pratama, S.T.',
+            actorSource: 'approver',
+            type: 'perpanjangan_disetujui',
+            title: 'Perpanjangan Waktu Disetujui',
+            message: `Permohonan perpanjangan waktu untuk tiket #${t.id} telah disetujui hingga ${formatDisplayDate(newReturn)}.`,
+            ticketId: t.id,
+            priority: 'normal',
+            eventId: `ext_appr_${t.id}_${newReturn}`
+          });
+        }
       } else {
         if (t.pendingExtension) {
           t.pendingExtension.status = 'Ditolak';
         }
+        t.pendingExtension = null;
+        t.hasExtensionPending = false;
         t.timeline.push({
           event: 'Perpanjangan Waktu Ditolak',
           time: nowFormatted,
           by: `${approver.name} (${approver.title || 'Atasan'})`,
           desc: `Permohonan perpanjangan ditolak. Catatan: "${note}"`
         });
+
+        if (typeof window.createNotification === 'function') {
+          window.createNotification({
+            recipientRole: 'karyawan',
+            recipientNip: t.applicantNip || 'PK-2024-8841',
+            recipientName: t.applicantName || 'Budi Pratama, S.T.',
+            actorSource: 'approver',
+            type: 'perpanjangan_ditolak',
+            title: 'Perpanjangan Waktu Ditolak',
+            message: `Permohonan perpanjangan waktu untuk tiket #${t.id} ditolak. Harap segera kembali ke area pabrik.`,
+            ticketId: t.id,
+            priority: 'normal',
+            eventId: `ext_rej_${t.id}`
+          });
+        }
       }
 
       if (typeof window.saveTickets === 'function') {

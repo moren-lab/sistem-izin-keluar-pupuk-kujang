@@ -53,7 +53,16 @@
     return s;
   }
 
-  function getTReturnTime(t) { return t.estimatedReturn || t.plannedReturn || ''; }
+  function getTReturnTime(t) {
+    let ret = t.estimatedReturn || t.plannedReturn || '';
+    if (typeof window.normalizeReturnDateTime === 'function') {
+      ret = window.normalizeReturnDateTime(ret);
+    } else if (ret && ret.includes('20') && (ret.match(/\d{4}-\d{2}-\d{2}/g) || []).length > 1) {
+      const lastIdx = ret.lastIndexOf('20');
+      if (lastIdx > 0) ret = ret.slice(lastIdx);
+    }
+    return ret;
+  }
   function getTExitTime(t) { return t.plannedExit || ''; }
 
   function getEmpTickets() {
@@ -82,22 +91,29 @@
 
   function formatDisplayDate(dateStr) {
     if (!dateStr) return '-';
-    const clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
-    if (clean.includes('Okt') || clean.includes('WIB') || clean.includes('Jan') || clean.includes('Feb') || clean.includes('Mar')) {
-      return clean;
+    let raw = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    if (typeof window.normalizeReturnDateTime === 'function') {
+      raw = window.normalizeReturnDateTime(raw);
+    } else if (raw.includes('20') && (raw.match(/\d{4}-\d{2}-\d{2}/g) || []).length > 1) {
+      const lastIdx = raw.lastIndexOf('20');
+      if (lastIdx > 0) raw = raw.slice(lastIdx);
+    }
+    if ((raw.includes('Okt') || raw.includes('WIB') || raw.includes('Jan') || raw.includes('Feb') || raw.includes('Mar')) && !raw.includes(':00')) {
+      return raw.replace(/(\d{1,2}):(\d{2})(\s*WIB)?/gi, '$1.$2 WIB');
     }
     if (typeof window.formatDisplayDate === 'function') {
-      return window.formatDisplayDate(clean);
+      return window.formatDisplayDate(raw).replace(/(\d{1,2}):(\d{2})(\s*WIB)?/gi, '$1.$2 WIB');
     }
     try {
-      const dt = new Date(clean);
-      if (isNaN(dt.getTime())) return clean;
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const pad = n => String(n).padStart(2, '0');
-      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
-    } catch (e) {
-      return clean;
-    }
+      let parseStr = raw.replace(/(\d{4}-\d{2}-\d{2})[T ](\d{1,2})[.:](\d{2})(?:[.:](\d{2}))?/, '$1T$2:$3:00');
+      const dt = new Date(parseStr);
+      if (!isNaN(dt.getTime())) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const pad = n => String(n).padStart(2, '0');
+        return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
+      }
+    } catch (e) {}
+    return raw.replace(/(\d{1,2}):(\d{2})/g, '$1.$2 WIB');
   }
 
   function formatDateTimeLocal(d) {
@@ -266,7 +282,7 @@
           <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${t.id} <span class="mobile-badge ${getBadgeClass(t.status)}" style="margin-left: 4px;">${t.status}</span></div>
           <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">${t.category} • ${t.destination || 'Area Pabrik'}</div>
         </div>
-        <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; color: #2563eb; font-weight: 700; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
+        <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenTicketDetail('${t.id}')">Lihat Detail</button>
       </div>
     `).join('');
 
@@ -401,6 +417,13 @@
     const emp = getActiveEmp();
     let allEmpTickets = getEmpTickets();
 
+    const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
+    const hasDeletableTickets = (window.ticketsList || []).some(t =>
+      !t.deletedByKaryawan &&
+      (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841')) &&
+      (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+    );
+
     // 1. Filter by Status
     let filtered = allEmpTickets;
     if (riwayatStatusFilter !== 'all') {
@@ -443,7 +466,7 @@
       const dateStr = formatDisplayDate(t.createdAt).split(',')[0];
 
       return `
-        <div class="mobile-ticket-card" onclick="window.mobileOpenTicketDetail('${t.id}')">
+        <div class="mobile-ticket-card">
           <!-- Baris 1: ID Tiket & Tanggal (Kiri) + Status Badge (Kanan) -->
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div>
@@ -463,22 +486,17 @@
             ${t.category || 'Dinas Kantor'} • ${typeDisplay}
           </div>
 
-          <!-- Baris 4: Waktu Keluar / Kembali + Chevron Navigasi (Poin 6: Pulang Lebih Awal hanya jam keluar) -->
-          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px;">
+          <!-- Baris 4: Waktu Keluar / Kembali + Tombol Lihat Detail -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.75rem; color: #334155; font-weight: 600;">
               ${isPulang
                 ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
                 : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
               }
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
-                <button type="button" class="mobile-btn-primary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; min-height: 36px; border-radius: 8px; margin: 0;" onclick="event.stopPropagation(); window.mobileOpenQrModal('${t.id}')">QR Izin</button>
-              ` : ''}
-              <span style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #64748b; margin-right: -10px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </span>
-            </div>
+            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              Lihat Detail
+            </button>
           </div>
         </div>
       `;
@@ -492,7 +510,7 @@
       const dateStr = formatDisplayDate(t.createdAt).split(',')[0];
 
       return `
-        <div class="mobile-ticket-list-row" onclick="window.mobileOpenTicketDetail('${t.id}')">
+        <div class="mobile-ticket-list-row">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div>
               <div style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</div>
@@ -509,16 +527,16 @@
             ${t.category || 'Dinas Kantor'} • ${typeDisplay}
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f8fafc;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.725rem; color: #334155; font-weight: 600;">
               ${isPulang
                 ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
                 : `${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
               }
             </div>
-            <span style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #64748b; margin: -10px -10px -10px 0;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </span>
+            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              Lihat Detail
+            </button>
           </div>
         </div>
       `;
@@ -555,11 +573,13 @@
         `;
       }
       paginationHtml = `
-        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin: 18px 0 8px 0;">
-          ${pageBtns}
-        </div>
-        <div style="text-align: center; font-size: 0.7rem; color: #64748b; font-weight: 600;">
-          Menampilkan ${startIndex + 1}–${Math.min(startIndex + riwayatPageSize, totalItems)} dari ${totalItems} tiket
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 18px 0 8px 0; gap: 8px;">
+          <div style="font-size: 0.725rem; color: #64748b; font-weight: 600;">
+            Menampilkan ${startIndex + 1}–${Math.min(startIndex + riwayatPageSize, totalItems)} dari ${totalItems} tiket
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+            ${pageBtns}
+          </div>
         </div>
       `;
     }
@@ -572,27 +592,28 @@
         <button type="button" id="mBtnClearRiwayatSearch" aria-label="Hapus teks pencarian" style="display: ${riwayatSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearRiwayatSearch()">✕</button>
       </div>
 
-      <!-- 2. Toolbar: Segment Toggle (Card/List) on Left, Filter & Trash on Right (Point 3) -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
-        <!-- Segment Toggle: Card | List -->
-        <div class="mobile-segment-toggle" style="margin-bottom: 0; flex: 1; max-width: 160px;">
-          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" onclick="window.mobileSwitchRiwayatView('card')">Card</button>
-          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" onclick="window.mobileSwitchRiwayatView('list')">List</button>
-        </div>
+      <!-- 2. Toolbar: Segment Toggle (Card/List), Filter, and Solid Red Hapus Riwayat (Pekerjaan A: Samakan Tinggi 36px & Jaga Hit Area 44px) -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <!-- Segment Toggle: Card | List -->
+          <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 104px; height: 36px; box-sizing: border-box;">
+            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="height: 100%; font-size: 0.8125rem; font-weight: 700; padding: 0;" onclick="window.mobileSwitchRiwayatView('card')">Card</button>
+            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="height: 100%; font-size: 0.8125rem; font-weight: 700; padding: 0;" onclick="window.mobileSwitchRiwayatView('list')">List</button>
+          </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <!-- Filter Button (min 44px) -->
-          <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" style="height: 44px; min-width: 44px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.775rem; border-radius: 10px; border: 1.5px solid #cbd5e1; background: ${isRiwayatFilterOpen ? '#059669' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#ffffff' : '#334155'}; cursor: pointer;" onclick="window.mobileToggleRiwayatFilter()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          <!-- Filter Button (Pekerjaan A: 36px visual, radius 10px, hit-area 44px) -->
+          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isRiwayatFilterOpen ? 'active' : ''}" style="height: 36px; min-height: 36px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 700; font-size: 0.8125rem; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box;" onclick="window.mobileToggleRiwayatFilter()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
             <span>Filter</span>
             ${(riwayatStatusFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #2563eb; display: inline-block;"></span>' : ''}
           </button>
-
-          <!-- Trash Icon Button (Point 3: neutral color, 44x44px, tooltip, accessible) -->
-          <button type="button" class="mobile-btn-trash" aria-label="Hapus riwayat selesai" title="Hapus riwayat selesai" onclick="window.mobileClearRiwayat('karyawan')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-          </button>
         </div>
+
+        <!-- Red Solid Button Hapus Riwayat (Pekerjaan A: 36px visual, radius 10px, hit-area 44px) -->
+        <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} aria-label="Hapus Riwayat Selesai" style="height: 36px; min-height: 36px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; border-radius: 10px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 5px;" onclick="window.mobileClearRiwayat('karyawan')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          <span>Hapus Riwayat</span>
+        </button>
       </div>
 
       <!-- 3. Collapsible Filter Panel -->
@@ -744,11 +765,11 @@
               <span>Buka Kunci QR Darurat</span>
             </button>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              <button type="button" class="mobile-btn-secondary" style="font-weight: 700; padding: 9px;" onclick="window.mobileOpenEditSheet('${t.id}')">
-                <span>Edit</span>
+              <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; padding: 10px; font-size: 0.8rem; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenEditSheet('${t.id}')">
+                <span>Edit Pengajuan</span>
               </button>
-              <button type="button" class="mobile-btn-danger" style="background:#ffffff; color:#dc2626; border-color:#fca5a5; font-weight: 700; padding: 9px;" onclick="window.mobileOpenCancelSheet('${t.id}')">
-                <span>Batalkan</span>
+              <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; padding: 10px; font-size: 0.8rem; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenCancelSheet('${t.id}')">
+                <span>Batalkan Izin</span>
               </button>
             </div>
           </div>
@@ -756,15 +777,15 @@
       } else {
         actionButtonsHtml = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-            <button type="button" class="mobile-btn-secondary" style="font-weight: 700; padding: 10px; font-size: 0.8rem;" onclick="window.mobileOpenEditSheet('${t.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; padding: 10px; font-size: 0.8rem; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenEditSheet('${t.id}')">
               <span>Edit Pengajuan</span>
             </button>
-            <button type="button" class="mobile-btn-danger" style="background:#ffffff; color:#dc2626; border-color:#fca5a5; font-weight: 700; padding: 10px; font-size: 0.8rem;" onclick="window.mobileOpenCancelSheet('${t.id}')">
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; padding: 10px; font-size: 0.8rem; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenCancelSheet('${t.id}')">
               <span>Batalkan Izin</span>
             </button>
           </div>
           <div style="text-align: center; margin-top: 8px;">
-            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail pengajuan</a>
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail</a>
           </div>
         `;
       }
@@ -775,33 +796,49 @@
             <span>Buka QR Izin</span>
           </button>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenTicketDetail('${t.id}')">
-              <span>Detail pengajuan</span>
+            <button type="button" class="mobile-btn-secondary" style="font-weight: 600; min-height: 44px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              <span>Lihat Detail</span>
             </button>
-            <button type="button" class="mobile-btn-danger" style="background:#ffffff; color:#dc2626; border-color:#fca5a5; font-weight: 600;" onclick="window.mobileOpenCancelSheet('${t.id}')">
-              <span>Batalkan</span>
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenCancelSheet('${t.id}')">
+              <span>Batalkan Izin</span>
             </button>
           </div>
         </div>
       `;
     } else if (isOutside) {
-      const hasUsedExt = t.extensionApproved || (t.extensionCount && t.extensionCount >= 1);
+      const hasPendingExt = Boolean(t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
+      const hasUsedExt = Boolean(t.extensionApproved || (t.extensionCount && t.extensionCount >= 1));
+
+      let extButtonHtml = '';
+      if (hasPendingExt) {
+        extButtonHtml = `
+          <button type="button" class="mobile-btn-secondary" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 44px; font-weight: 700; opacity: 0.95; cursor: not-allowed; font-size: 0.725rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 4px 6px; line-height: 1.25;">
+            <span>Menunggu Persetujuan</span>
+          </button>
+        `;
+      } else if (hasUsedExt) {
+        extButtonHtml = `
+          <button type="button" class="mobile-btn-secondary" disabled style="background: #f8fafc; color: #94a3b8; border: 1.5px solid #e2e8f0; min-height: 44px; font-weight: 700; opacity: 0.85; cursor: not-allowed; font-size: 0.725rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 4px 6px; line-height: 1.25;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+            <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
+          </button>
+        `;
+      } else {
+        extButtonHtml = `
+          <button type="button" class="mobile-btn-secondary mobile-btn-extend-solid" style="background: #d97706; color: #ffffff; border: 1.5px solid #d97706; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-align: center;" onclick="window.mobileOpenPerpanjanganModal('${t.id}')">
+            <span>Ajukan Perpanjangan</span>
+          </button>
+        `;
+      }
+
       actionButtonsHtml = `
-        <div class="mobile-btn-group-stacked" style="margin-top: 12px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            ${hasUsedExt || isPulang ? `
-              <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenQrModal('${t.id}')">
-                <span>Buka QR Izin</span>
-              </button>
-            ` : `
-              <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenPerpanjanganModal('${t.id}')">
-                <span>Perpanjangan</span>
-              </button>
-            `}
-            <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenTicketDetail('${t.id}')">
-              <span>Detail</span>
-            </button>
-          </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+          ${extButtonHtml}
+          <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
+            <span>✓ Tap In Kartu Akses</span>
+          </button>
+        </div>
+        <div style="text-align: center; margin-top: 8px;">
+          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail</a>
         </div>
       `;
     }
@@ -956,10 +993,10 @@
             </button>
           ` : ''}
           ${activeTicket.status === 'Menunggu Persetujuan' ? `
-            <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${activeTicket.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${activeTicket.id}')">
               Edit Pengajuan Ini
             </button>
-            <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${activeTicket.id}')">
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${activeTicket.id}')">
               Batalkan Izin Ini
             </button>
           ` : ''}
@@ -1027,9 +1064,7 @@
             <div class="mobile-emergency-banner-title" style="color: #b91c1c; font-weight: 800; font-size: 0.825rem; display: flex; align-items: center; gap: 6px;">
               <span>PERHATIAN: JALUR IZIN DARURAT (EMERGENCY PASS)</span>
             </div>
-            <div class="mobile-emergency-banner-desc" style="color: #7f1d1d; font-size: 0.725rem; line-height: 1.4; margin-top: 4px;">
-              Gunakan hanya untuk kondisi darurat/K3/medis mendesak. QR Code diterbitkan dalam status <strong>TERKUNCI</strong> dan baru aktif setelah diotorisasi Atasan melalui salah satu dari 3 cara.
-            </div>
+            
           </div>
         ` : ''}
 
@@ -1797,6 +1832,44 @@
 
     tickets.unshift(newTicket);
 
+    if (typeof window.createNotification === 'function') {
+      if (data.isEmergency) {
+        window.createNotification({
+          recipientRole: 'approver',
+          recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
+          actorSource: 'karyawan',
+          type: 'darurat_baru',
+          title: '🚨 IZIN DARURAT BARU',
+          message: `PERINGATAN: ${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin kedaruratan #${newTicket.id}. Memerlukan otorisasi segera.`,
+          ticketId: newTicket.id,
+          priority: 'high',
+          eventId: `emg_alert_${newTicket.id}`
+        });
+        window.createNotification({
+          recipientRole: 'security',
+          actorSource: 'system',
+          type: 'security_darurat',
+          title: '🚨 Tiket Darurat Melewati Gerbang',
+          message: `Izin darurat baru #${newTicket.id} (${newTicket.applicantName}) akan segera melewati pos pemeriksaan gerbang.`,
+          ticketId: newTicket.id,
+          priority: 'high',
+          eventId: `emg_sec_${newTicket.id}`
+        });
+      } else {
+        window.createNotification({
+          recipientRole: 'approver',
+          recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
+          actorSource: 'karyawan',
+          type: 'pengajuan_baru',
+          title: 'Pengajuan Izin Baru',
+          message: `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category}. Menunggu persetujuan Anda.`,
+          ticketId: newTicket.id,
+          priority: 'normal',
+          eventId: `new_sub_${newTicket.id}`
+        });
+      }
+    }
+
     if (typeof window.saveTickets === 'function') {
       window.saveTickets(tickets);
     } else {
@@ -2093,12 +2166,17 @@
 
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
-      <div class="mobile-sheet-header">
-        <div>
-          <h3 class="mobile-sheet-title">Tiket Izin Digital</h3>
-          
+      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" aria-label="Kembali" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; color: #334155; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <div>
+            <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">RINCIAN TIKET</span>
+            <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
+          </div>
         </div>
-        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+        <button type="button" aria-label="Tutup Rincian" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body" style="text-align: center;">
         <div style="font-size: 0.8rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
@@ -2174,14 +2252,24 @@
 
     const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
     const isApproved = (t.status === 'Disetujui');
-    const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal');    sheet.innerHTML = `
+    const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal');    // Push state for Android / hardware back gesture
+    try {
+      window.history.pushState({ modalOpen: true, modalType: 'karyawanDetail', ticketId: t.id }, '');
+    } catch (e) {}
+
+    sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
-      <div class="mobile-sheet-header">
-        <div>
-          <span style="font-size: 0.7rem; color: #059669; font-weight: 700;">RINCIAN TIKET</span>
-          <h3 class="mobile-sheet-title" style="font-family: monospace;">${t.id}</h3>
+      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" aria-label="Kembali ke Riwayat" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; color: #334155; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <div>
+            <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">RINCIAN TIKET</span>
+            <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
+          </div>
         </div>
-        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+        <button type="button" aria-label="Tutup Rincian" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -2241,37 +2329,53 @@
           </div>
         </div>
 
-        <!-- Action buttons according to ticket status -->
+        <!-- Action buttons according to ticket status (Perubahan 1: Tombol Tutup dihapus) -->
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
           ${isPending ? `
-            <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${t.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${t.id}')">
               Edit Pengajuan Ini
             </button>
-            <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border-color:#fecdd3;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
               Batalkan Izin Ini
             </button>
           ` : ''}
           ${isApproved || isOutside ? `
-            <button type="button" class="mobile-btn-primary" style="background:#059669; border-color:#059669;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
+            <button type="button" class="mobile-btn-primary" style="background:#059669; border-color:#059669; min-height: 44px; font-weight: 700;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
               Tampilkan QR Code Resmi
             </button>
           ` : ''}
           ${isApproved ? `
-            <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border-color:#fecdd3;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
               Batalkan Izin
             </button>
           ` : ''}
           ${isOutside ? `
-            <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet(); window.mobileOpenPerpanjanganModal('${t.id}')">
-              Ajukan Perpanjangan Waktu
+            ${(t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) ? `
+              <button type="button" class="mobile-btn-secondary" disabled style="background: #f8fafc; color: #94a3b8; border: 1.5px solid #e2e8f0; min-height: 44px; font-weight: 700; opacity: 0.85; cursor: not-allowed; border-radius: 8px; text-align: center;">
+                Perpanjangan Telah Digunakan (Maks. 1x)
+              </button>
+            ` : (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
+              <button type="button" class="mobile-btn-secondary" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 44px; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center;">
+                Menunggu Persetujuan Perpanjangan
+              </button>
+            ` : `
+              <button type="button" class="mobile-btn-secondary mobile-btn-extend-solid" style="background: #d97706; color: #ffffff; border: 1.5px solid #d97706; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenPerpanjanganModal('${t.id}')">
+                Ajukan Perpanjangan Waktu
+              </button>
+            `}
+            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}')">
+              ✓ Tap In Kartu Akses (Masuk)
             </button>
           ` : ''}
           ${isFinished ? `
-            <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border:1.5px solid #fecdd3; font-weight:700; min-height:44px; border-radius:10px; cursor:pointer;" onclick="window.mobileCloseSheet(); window.mobileDeleteTicketItem('${t.id}', 'karyawan')">
-              🗑️ Hapus dari Riwayat
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.75rem; color: #64748b; text-align: center; font-weight: 600;">
+              Tiket selesai • QR Code tidak aktif
+            </div>
+            <button type="button" class="mobile-btn-danger" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; min-height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.825rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25); width: 100%; margin-top: 4px;" onclick="window.mobileDeleteTicketItem('${t.id}', 'karyawan')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              <span>Hapus Riwayat</span>
             </button>
           ` : ''}
-          <button type="button" class="mobile-btn-secondary" style="min-height: 44px; font-weight: 700; cursor:pointer;" onclick="window.mobileCloseSheet()">Tutup</button>
         </div>
       </div>
     `;
@@ -2313,6 +2417,13 @@
     if (t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) {
       if (typeof window.showToast === 'function') {
         window.showToast('Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui sebelumnya!', 'warning');
+      }
+      return;
+    }
+    const hasPendingExt = Boolean(t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
+    if (hasPendingExt) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Permohonan perpanjangan Anda sedang menunggu persetujuan Atasan!', 'warning');
       }
       return;
     }
@@ -2412,6 +2523,19 @@
     }
 
     window.mobileCloseSheet();
+
+    if (typeof window.createNotification === 'function') {
+      window.createNotification({
+        recipientRole: 'approver',
+        actorSource: 'karyawan',
+        type: 'perpanjangan_diajukan',
+        title: 'Permohonan Perpanjangan Waktu',
+        message: `${emp.name} mengajukan perpanjangan waktu kembali untuk tiket #${ticketId} hingga ${formatDisplayDate(newTime)}.`,
+        ticketId: ticketId,
+        priority: 'normal',
+        eventId: `ext_req_${ticketId}_${newTime}`
+      });
+    }
 
     if (typeof window.showToast === 'function') {
       window.showToast(`Permohonan perpanjangan tiket #${ticketId} berhasil dikirim ke Atasan!`, 'success');

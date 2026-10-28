@@ -330,6 +330,41 @@ function loadTickets() {
           changed = true;
         }
       }
+      // Pulihkan tanggal jika ada korupsi format ganda atau residu format (misal 2026-10-28T2026-10-29T00.53 WIB:00)
+      ['estimatedReturn', 'plannedReturn', 'plannedExit'].forEach(field => {
+        if (t[field] && typeof t[field] === 'string') {
+          const normFn = (typeof normalizeReturnDateTime === 'function') ? normalizeReturnDateTime : ((typeof window !== 'undefined' && typeof window.normalizeReturnDateTime === 'function') ? window.normalizeReturnDateTime : null);
+          if (normFn) {
+            const norm = normFn(t[field]);
+            if (norm && norm !== t[field]) {
+              t[field] = norm;
+              changed = true;
+            }
+          } else if ((t[field].match(/\d{4}-\d{2}-\d{2}/g) || []).length > 1) {
+            const lastIdx = t[field].lastIndexOf('20');
+            if (lastIdx > 0) {
+              t[field] = t[field].slice(lastIdx).replace(/\s*WIB(?::\d{2})?/gi, '');
+              changed = true;
+            }
+          }
+        }
+      });
+      if (t.pendingExtension && t.pendingExtension.newEstimatedReturn && typeof t.pendingExtension.newEstimatedReturn === 'string') {
+        const normFn = (typeof normalizeReturnDateTime === 'function') ? normalizeReturnDateTime : ((typeof window !== 'undefined' && typeof window.normalizeReturnDateTime === 'function') ? window.normalizeReturnDateTime : null);
+        if (normFn) {
+          const norm = normFn(t.pendingExtension.newEstimatedReturn);
+          if (norm && norm !== t.pendingExtension.newEstimatedReturn) {
+            t.pendingExtension.newEstimatedReturn = norm;
+            changed = true;
+          }
+        } else if ((t.pendingExtension.newEstimatedReturn.match(/\d{4}-\d{2}-\d{2}/g) || []).length > 1) {
+          const lastIdx = t.pendingExtension.newEstimatedReturn.lastIndexOf('20');
+          if (lastIdx > 0) {
+            t.pendingExtension.newEstimatedReturn = t.pendingExtension.newEstimatedReturn.slice(lastIdx).replace(/\s*WIB(?::\d{2})?/gi, '');
+            changed = true;
+          }
+        }
+      }
       // Pastikan tiket memiliki metadata gerbang pos
       if (!t.scanOutGate) {
         if (t.id === 'IZ-20261014-003' || t.id === 'IZ-20261002-001') {
