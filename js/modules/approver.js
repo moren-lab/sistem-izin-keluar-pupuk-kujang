@@ -777,14 +777,19 @@ function renderApproverView() {
     const searchAppInput = document.getElementById('searchApproverInput');
     const searchVal = searchAppInput ? searchAppInput.value.trim().toLowerCase() : '';
     if (searchVal) {
-      list = list.filter(t => 
-        (t.id && t.id.toLowerCase().includes(searchVal)) ||
-        (t.applicantName && t.applicantName.toLowerCase().includes(searchVal)) ||
-        (t.applicantNip && t.applicantNip.toLowerCase().includes(searchVal)) ||
-        (t.destination && t.destination.toLowerCase().includes(searchVal)) ||
-        (t.reason && t.reason.toLowerCase().includes(searchVal)) ||
-        (t.department && t.department.toLowerCase().includes(searchVal))
-      );
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        list = list.filter(t => matcher(searchVal, t.id, t.applicantName, t.applicantNip, t.destination, t.reason, t.department, t.approverName, t.category, t.type));
+      } else {
+        list = list.filter(t => 
+          (t.id && t.id.toLowerCase().includes(searchVal)) ||
+          (t.applicantName && t.applicantName.toLowerCase().includes(searchVal)) ||
+          (t.applicantNip && t.applicantNip.toLowerCase().includes(searchVal)) ||
+          (t.destination && t.destination.toLowerCase().includes(searchVal)) ||
+          (t.reason && t.reason.toLowerCase().includes(searchVal)) ||
+          (t.department && t.department.toLowerCase().includes(searchVal))
+        );
+      }
     }
 
     // Filter Periode Tanggal

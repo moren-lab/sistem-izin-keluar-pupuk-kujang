@@ -576,6 +576,10 @@ function setupSingleApproverCombobox(cfg) {
 
     if (beforeSearchBanner) beforeSearchBanner.style.display = 'none';
     const filtered = approvers.filter(a => {
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        return matcher(cleanQuery, a.name, a.title, a.department, a.nip, a.role);
+      }
       return (
         a.name.toLowerCase().includes(cleanQuery) ||
         a.title.toLowerCase().includes(cleanQuery) ||

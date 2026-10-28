@@ -708,16 +708,23 @@ function filterSecurityLogTickets() {
       }
     }
 
-    // Search query
+    // Search query (multi-token partial search matching)
     if (query) {
-      const matchId = (t.id || '').toLowerCase().includes(query);
-      const matchName = (t.applicantName || '').toLowerCase().includes(query);
-      const matchNip = (t.applicantNip || '').toLowerCase().includes(query);
-      const matchDest = (t.destination || '').toLowerCase().includes(query);
-      const matchReason = (t.reason || '').toLowerCase().includes(query);
       const tGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || '');
-      const matchGate = (tGate || '').toLowerCase().includes(query);
-      if (!matchId && !matchName && !matchNip && !matchDest && !matchReason && !matchGate) return false;
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        if (!matcher(query, t.id, t.applicantName, t.applicantNip, t.destination, t.reason, tGate, t.approverName, t.department, t.category, t.type)) {
+          return false;
+        }
+      } else {
+        const matchId = (t.id || '').toLowerCase().includes(query);
+        const matchName = (t.applicantName || '').toLowerCase().includes(query);
+        const matchNip = (t.applicantNip || '').toLowerCase().includes(query);
+        const matchDest = (t.destination || '').toLowerCase().includes(query);
+        const matchReason = (t.reason || '').toLowerCase().includes(query);
+        const matchGate = (tGate || '').toLowerCase().includes(query);
+        if (!matchId && !matchName && !matchNip && !matchDest && !matchReason && !matchGate) return false;
+      }
     }
 
     return true;

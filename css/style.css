@@ -6895,18 +6895,30 @@ body.modal-open {
 .figma-contact-badge {
   font-size: 0.825rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary, #0f172a);
 }
 
 .figma-contact-phone {
   font-size: 0.8rem;
-  color: #475569;
+  color: var(--text-secondary, #475569);
 }
 
 .figma-contact-sub {
   font-size: 0.725rem;
-  color: #94a3b8;
+  color: var(--text-muted, #94a3b8);
   margin-top: 2px;
+}
+
+body.theme-dark .figma-contact-badge {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .figma-contact-phone {
+  color: #34d399 !important;
+}
+
+body.theme-dark .figma-contact-sub {
+  color: #94a3b8 !important;
 }
 
 /* Figma Info Banner (Light Blue) */

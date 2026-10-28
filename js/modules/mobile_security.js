@@ -481,14 +481,19 @@
     let activeList = (currentPelacakanFilter === 'outside') ? outsideTickets : readyExitTickets;
 
     if (pelacakanSearchQuery) {
-      const q = pelacakanSearchQuery.toLowerCase();
-      activeList = activeList.filter(t =>
-        (t.id && t.id.toLowerCase().includes(q)) ||
-        (getTName(t).toLowerCase().includes(q)) ||
-        (getTNip(t).toLowerCase().includes(q)) ||
-        (t.destination && t.destination.toLowerCase().includes(q)) ||
-        (t.department && t.department.toLowerCase().includes(q))
-      );
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        activeList = activeList.filter(t => matcher(pelacakanSearchQuery, t.id, getTName(t), getTNip(t), t.destination, t.department, t.reason, t.approverName));
+      } else {
+        const q = pelacakanSearchQuery.toLowerCase();
+        activeList = activeList.filter(t =>
+          (t.id && t.id.toLowerCase().includes(q)) ||
+          (getTName(t).toLowerCase().includes(q)) ||
+          (getTNip(t).toLowerCase().includes(q)) ||
+          (t.destination && t.destination.toLowerCase().includes(q)) ||
+          (t.department && t.department.toLowerCase().includes(q))
+        );
+      }
     }
 
     const listHtml = activeList.map(t => {
@@ -556,15 +561,6 @@
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 12px; font-size: 0.725rem; width: auto;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
               Rincian
             </button>
-            ${isReady ? `
-              <button type="button" class="mobile-btn-primary" style="padding: 5px 12px; font-size: 0.725rem; width: auto;" onclick="window.mobileSecurityDirectScanOut('${t.id}')">
-                Catat Scan Out
-              </button>
-            ` : `
-              <button type="button" class="mobile-btn-primary" style="padding: 5px 12px; font-size: 0.725rem; width: auto; background: #047857; border-color: #047857;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-                Catat Tap In
-              </button>
-            `}
           </div>
         </div>
       `;
@@ -668,14 +664,19 @@
       filtered = filtered.filter(t => t.category === riwayatCategoryFilter);
     }
     if (riwayatSearchQuery) {
-      const q = riwayatSearchQuery.toLowerCase();
-      filtered = filtered.filter(t =>
-        (t.id && t.id.toLowerCase().includes(q)) ||
-        (getTName(t).toLowerCase().includes(q)) ||
-        (getTNip(t).toLowerCase().includes(q)) ||
-        (t.destination && t.destination.toLowerCase().includes(q)) ||
-        (t.department && t.department.toLowerCase().includes(q))
-      );
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        filtered = filtered.filter(t => matcher(riwayatSearchQuery, t.id, getTName(t), getTNip(t), t.destination, t.department, t.reason, t.approverName));
+      } else {
+        const q = riwayatSearchQuery.toLowerCase();
+        filtered = filtered.filter(t =>
+          (t.id && t.id.toLowerCase().includes(q)) ||
+          (getTName(t).toLowerCase().includes(q)) ||
+          (getTNip(t).toLowerCase().includes(q)) ||
+          (t.destination && t.destination.toLowerCase().includes(q)) ||
+          (t.department && t.department.toLowerCase().includes(q))
+        );
+      }
     }
 
     const cardsHtml = filtered.map(t => {
@@ -913,18 +914,6 @@
 
         <!-- Action Buttons (Strict Rule 5: NO APPROVAL/REJECTION BY POS JAGA) -->
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${isReadyOut ? `
-            <button type="button" class="mobile-btn-primary" style="font-weight: 700; padding: 11px;" onclick="window.mobileSecurityDirectScanOut('${t.id}')">
-              <span>Catat Scan Out (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
-            </button>
-          ` : ''}
-
-          ${isReadyIn ? `
-            <button type="button" class="mobile-btn-primary" style="font-weight: 700; padding: 11px; background: #047857; border-color: #047857;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-              <span>Catat Tap In Kartu Akses (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
-            </button>
-          ` : ''}
-
           ${isCompleted ? `
             <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #047857; text-align: center; font-weight: 700;">
               Tiket ini telah selesai diproses. QR Code sudah tidak aktif.

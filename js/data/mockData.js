@@ -5,6 +5,30 @@
 
 const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V7';
 
+/**
+ * Universal Partial & Multi-token Search Matching Helper
+ * Allows searching parts of names/titles (e.g. 'Ir' or 'Hendra' matches 'Ir. Hendra Gunawan, M.T.')
+ */
+function matchSearchTokens(query, ...fields) {
+  if (!query) return true;
+  const clean = String(query).trim().toLowerCase();
+  if (!clean) return true;
+  
+  // Split query into individual token words (splitting by whitespace and commas)
+  const tokens = clean.split(/[\s,]+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  const combined = fields.map(f => String(f || '').toLowerCase()).join(' ');
+  const combinedClean = combined.replace(/[.,\-_/]/g, ' ');
+
+  return tokens.every(tok => {
+    if (combined.includes(tok)) return true;
+    const tokClean = tok.replace(/[.,\-_/]/g, '');
+    return tokClean ? combinedClean.includes(tokClean) : false;
+  });
+}
+window.matchSearchTokens = matchSearchTokens;
+
 const ACTORS = {
   karyawan: {
     nip: 'PK-2024-8841',

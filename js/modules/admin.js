@@ -431,13 +431,14 @@ function renderAdminAudit() {
 
   // Filter
   const filtered = allLogs.filter(item => {
-    const term = adminAuditSearchTerm.toLowerCase();
-    const matchesSearch = !term ||
-      item.ticketId.toLowerCase().includes(term) ||
-      item.applicantName.toLowerCase().includes(term) ||
-      item.applicantNip.toLowerCase().includes(term) ||
-      item.by.toLowerCase().includes(term) ||
-      item.desc.toLowerCase().includes(term);
+    const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+    const matchesSearch = !adminAuditSearchTerm || (matcher 
+      ? matcher(adminAuditSearchTerm, item.ticketId, item.applicantName, item.applicantNip, item.by, item.desc, item.event)
+      : (item.ticketId.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+         item.applicantName.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+         item.applicantNip.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+         item.by.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+         item.desc.toLowerCase().includes(adminAuditSearchTerm.toLowerCase())));
 
     let matchesEvent = true;
     if (adminAuditEventFilter !== 'all') {
@@ -1091,13 +1092,15 @@ function renderAdminUsers() {
     if (adminUserRoleFilter !== 'all' && user.roleKey !== adminUserRoleFilter) {
       return false;
     }
-    const term = adminUserSearchTerm.toLowerCase();
-    if (term) {
-      const match = (user.kujangId || '').toLowerCase().includes(term) ||
-        (user.nip || '').toLowerCase().includes(term) ||
-        (user.name || '').toLowerCase().includes(term) ||
-        (user.department || '').toLowerCase().includes(term) ||
-        (user.role || '').toLowerCase().includes(term);
+    if (adminUserSearchTerm) {
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      const match = matcher
+        ? matcher(adminUserSearchTerm, user.kujangId, user.nip, user.name, user.department, user.role, user.email)
+        : ((user.kujangId || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+           (user.nip || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+           (user.name || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+           (user.department || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+           (user.role || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()));
       if (!match) return false;
     }
     return true;
@@ -1256,14 +1259,16 @@ function renderAdminStatusTracking() {
     if (adminTrackingStatusFilter !== 'all' && cStatus !== adminTrackingStatusFilter) {
       return false;
     }
-    const term = adminTrackingSearchTerm.toLowerCase();
-    if (term) {
-      const match = (t.id || '').toLowerCase().includes(term) ||
-        (t.applicantName || '').toLowerCase().includes(term) ||
-        (t.applicantNip || '').toLowerCase().includes(term) ||
-        (t.department || '').toLowerCase().includes(term) ||
-        (t.destination || '').toLowerCase().includes(term) ||
-        (t.reason || '').toLowerCase().includes(term);
+    if (adminTrackingSearchTerm) {
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      const match = matcher
+        ? matcher(adminTrackingSearchTerm, t.id, t.applicantName, t.applicantNip, t.department, t.destination, t.reason, t.approverName, t.category, t.type)
+        : ((t.id || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+           (t.applicantName || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+           (t.applicantNip || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+           (t.department || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+           (t.destination || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+           (t.reason || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()));
       if (!match) return false;
     }
     return true;

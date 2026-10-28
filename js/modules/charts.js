@@ -261,31 +261,19 @@ function renderKaryawanDonutChart() {
                 cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="18"
                 stroke-dasharray="${s.len} ${C}" stroke-dashoffset="${s.offset}"
                 style="transition: stroke-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease; cursor: pointer;"
-                onmouseenter="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                onmouseleave="window.unhoverKaryawanDonut()"
-                onclick="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                ontouchstart="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
+                onmouseenter="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                onmousemove="window.moveChartTooltip(event)"
+                onmouseleave="window.unhoverKaryawanDonut(${total})"
+                onclick="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                ontouchstart="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
             `).join('')}
           </g>
           
           <!-- Center Text -->
-          <text x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
-          <text x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
+          <text id="karyawanDonutCenterVal" x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
+          <text id="karyawanDonutCenterLbl" x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
         </svg>
       </div>
-
-      <!-- Interactive Touch Legend Chips for Mobile & Desktop -->
-      <div class="donut-legend-wrap" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 0.85rem; width: 100%;">
-        ${segmentsRenderData.map(s => `
-          <button type="button" class="donut-legend-chip" id="chipDonut_${s.key}"
-            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.65rem; border-radius: 999px; border: 1.5px solid ${s.color}40; background: ${s.color}15; color: ${s.color}; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;"
-            onclick="window.hoverKaryawanDonut('${s.key}', ${s.count}, ${total}, '${s.pct}', '${s.color}')">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${s.color};"></span>
-            <span>${s.label}: <strong>${s.count}</strong> (${s.pct}%)</span>
-          </button>
-        `).join('')}
-      </div>
-
 
     </div>
   `;
@@ -293,51 +281,63 @@ function renderKaryawanDonutChart() {
   attachDonutFilterListener();
 }
 
-function hoverKaryawanDonut(key, count, total, pct, color) {
-  if (typeof window.hideChartTooltip === 'function') {
-    window.hideChartTooltip(); // Prevent duplicate floating black tooltip
+function hoverKaryawanDonut(e, key, label, count, total, pct, color) {
+  // If called without event (legacy signature fallback)
+  if (typeof e === 'string') {
+    color = pct;
+    pct = total;
+    total = count;
+    count = label;
+    label = e === 'darurat' ? 'Total Izin Darurat' : 'Total Izin Selesai';
+    key = e;
+    e = window.event;
   }
 
-  const badge = document.getElementById('karyawanDonutInfoBadge');
-  if (badge) {
-    const dark = isThemeDark();
-    const isDarurat = key === 'darurat';
-    const title = isDarurat ? 'Total Izin Darurat' : 'Total Izin Selesai';
-    const bg = isDarurat ? (dark ? 'rgba(239, 68, 68, 0.15)' : '#fef2f2') : (dark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5');
-    const border = isDarurat ? (dark ? 'rgba(239, 68, 68, 0.4)' : '#ef4444') : (dark ? 'rgba(16, 185, 129, 0.4)' : '#10b981');
-    const textCol = isDarurat ? (dark ? '#fca5a5' : '#991b1b') : (dark ? '#6ee7b7' : '#065f46');
-    const dotCol = isDarurat ? '#dc2626' : '#059669';
+  if (e && typeof window.showChartTooltip === 'function') {
+    window.showChartTooltip(e, {
+      title: label || (key === 'darurat' ? 'Total Izin Darurat' : 'Total Izin Selesai'),
+      count: count,
+      total: total,
+      percent: pct,
+      color: color,
+      unit: 'pengajuan',
+      subtext: `${count} dari ${total} total pengajuan izin (${pct}%)`
+    });
+  }
 
-    badge.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.5rem 0.85rem; background: ${bg}; border: 1.5px solid ${border}; border-radius: 8px; color: ${textCol}; font-size: 0.8rem; box-shadow: 0 2px 8px ${dotCol}25; animation: fadeIn 0.15s ease;">
-        <div style="display: flex; align-items: center; gap: 0.55rem;">
-          <span style="width: 10px; height: 10px; border-radius: 50%; background: ${dotCol}; box-shadow: 0 0 6px ${dotCol}80; flex-shrink: 0; display: inline-block;"></span>
-          <span style="font-weight: 600;"><strong>${title}:</strong> ${count} Pengajuan</span>
-        </div>
-        <span style="background: ${dotCol}; color: #ffffff; padding: 2px 9px; border-radius: 999px; font-weight: 800; font-family: var(--font-mono); font-size: 0.75rem; flex-shrink: 0;">${pct}%</span>
-      </div>
-    `;
+  const centerVal = document.getElementById('karyawanDonutCenterVal');
+  const centerLbl = document.getElementById('karyawanDonutCenterLbl');
+  if (centerVal && centerLbl) {
+    centerVal.textContent = `${pct}%`;
+    centerVal.setAttribute('fill', color);
+    centerLbl.textContent = `${count} Pengajuan`;
   }
 
   const slice = document.getElementById(`donutSlice_${key}`);
   if (slice) {
     slice.setAttribute('stroke-width', '24');
-    slice.style.filter = `drop-shadow(0 0 6px ${color})`;
+    slice.style.filter = `drop-shadow(0 0 8px ${color})`;
   }
 }
 
-function unhoverKaryawanDonut() {
+function unhoverKaryawanDonut(defaultTotal) {
   if (typeof window.hideChartTooltip === 'function') {
     window.hideChartTooltip();
   }
 
-  const badge = document.getElementById('karyawanDonutInfoBadge');
-  if (badge) {
-    badge.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.75rem; color: #64748b; font-weight: 500; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem 0.85rem; width: 100%; text-align: center;">
+  const dark = isThemeDark();
+  const centerTextCol = dark ? '#f8fafc' : '#0f172a';
+  const centerSubCol = dark ? '#94a3b8' : '#64748b';
 
-      </div>
-    `;
+  const centerVal = document.getElementById('karyawanDonutCenterVal');
+  const centerLbl = document.getElementById('karyawanDonutCenterLbl');
+  if (centerVal && centerLbl) {
+    if (defaultTotal !== undefined) {
+      centerVal.textContent = defaultTotal;
+    }
+    centerVal.setAttribute('fill', centerTextCol);
+    centerLbl.textContent = 'Total Izin';
+    centerLbl.setAttribute('fill', centerSubCol);
   }
 
   ['selesai', 'darurat'].forEach(k => {

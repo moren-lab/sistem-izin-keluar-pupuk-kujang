@@ -437,14 +437,19 @@
     }
 
     if (riwayatSearchQuery) {
-      const q = riwayatSearchQuery.toLowerCase();
-      tickets = tickets.filter(t =>
-        (t.id && t.id.toLowerCase().includes(q)) ||
-        (t.destination && t.destination.toLowerCase().includes(q)) ||
-        (t.reason && t.reason.toLowerCase().includes(q)) ||
-        (t.category && t.category.toLowerCase().includes(q)) ||
-        (t.approverName && t.approverName.toLowerCase().includes(q))
-      );
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        tickets = tickets.filter(t => matcher(riwayatSearchQuery, t.id, t.destination, t.reason, t.category, t.approverName, t.type));
+      } else {
+        const q = riwayatSearchQuery.toLowerCase();
+        tickets = tickets.filter(t =>
+          (t.id && t.id.toLowerCase().includes(q)) ||
+          (t.destination && t.destination.toLowerCase().includes(q)) ||
+          (t.reason && t.reason.toLowerCase().includes(q)) ||
+          (t.category && t.category.toLowerCase().includes(q)) ||
+          (t.approverName && t.approverName.toLowerCase().includes(q))
+        );
+      }
     }
 
     // Card View HTML (PDF Page 3 & 5)
@@ -616,10 +621,10 @@
   function renderActiveTicketCard(t) {
     if (!t) {
       return `
-        <section class="mobile-card" style="text-align: center; padding: 22px 16px;">
+        <section class="mobile-card" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); text-align: center; padding: 22px 16px;">
           <div style="margin-bottom: 6px; color: #94a3b8;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">Tidak Ada Izin Aktif</div>
-          <div style="font-size: 0.775rem; color: #64748b; margin-top: 4px; line-height: 1.4;">
+          <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-primary, #0f172a);">Tidak Ada Izin Aktif</div>
+          <div style="font-size: 0.775rem; color: var(--text-secondary, #64748b); margin-top: 4px; line-height: 1.4;">
             Anda belum mengajukan izin keluar area atau izin sebelumnya telah selesai.
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
@@ -630,9 +635,6 @@
               <span>Izin Darurat</span>
             </button>
           </div>
-          <button type="button" class="mobile-btn-secondary" style="margin-top: 8px; width: 100%; font-weight: 700;" onclick="window.mobileSwitchSegment('donut')">
-            <span>Lihat Grafik Pengajuan Izin</span>
-          </button>
         </section>
       `;
     }
@@ -715,11 +717,6 @@
       const hasUsedExt = t.extensionApproved || (t.extensionCount && t.extensionCount >= 1);
       actionButtonsHtml = `
         <div class="mobile-btn-group-stacked" style="margin-top: 12px;">
-          ${!isPulang ? `
-            <button type="button" class="mobile-btn-primary" style="background: #047857; border-color: #047857; font-weight: 800; padding: 11px;" onclick="window.mobileExecuteTapIn('${t.id}')">
-              <span>Tap In Kartu Akses (Kembali Masuk)</span>
-            </button>
-          ` : ''}
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             ${hasUsedExt || isPulang ? `
               <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenQrModal('${t.id}')">
@@ -739,7 +736,7 @@
     }
 
     return `
-      <section class="mobile-card" style="border-left: 4px solid ${isPending ? '#f59e0b' : (isApproved ? '#059669' : (t.status === 'Terlambat' ? '#dc2626' : '#0284c7'))};">
+      <section class="mobile-card" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div class="mobile-card-header">
           <div>
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
@@ -1011,15 +1008,8 @@
               <label class="mobile-form-label">Kategori Keperluan <span class="req">*</span></label>
               <select class="mobile-select" id="mFormCategory" required onchange="window.mobileHandleCategoryChange(this.value)">
                 <option value="">-- Pilih Kategori --</option>
-                ${isEmergency ? `
-                  <option value="Keperluan Medis / K3 Mendadak" ${initialCat === 'Keperluan Medis / K3 Mendadak' || !initialCat ? 'selected' : ''}>Keperluan Medis / K3</option>
-                  <option value="Evakuasi Kedaruratan" ${initialCat === 'Evakuasi Kedaruratan' ? 'selected' : ''}>Evakuasi Kedaruratan</option>
-                  <option value="Bencana / Musibah Keluarga" ${initialCat === 'Bencana / Musibah Keluarga' ? 'selected' : ''}>Bencana / Musibah</option>
-                  <option value="Dinas Darurat Lapangan" ${initialCat === 'Dinas Darurat Lapangan' ? 'selected' : ''}>Dinas Darurat Lapangan</option>
-                ` : `
-                  <option value="Dinas Kantor" ${initialCat === 'Dinas Kantor' || !initialCat ? 'selected' : ''}>Dinas Kantor</option>
-                  <option value="Urusan Pribadi" ${initialCat === 'Urusan Pribadi' ? 'selected' : ''}>Urusan Pribadi</option>
-                `}
+                <option value="Dinas Kantor" ${initialCat === 'Dinas Kantor' || !initialCat ? 'selected' : ''}>Dinas Kantor</option>
+                <option value="Urusan Pribadi" ${initialCat === 'Urusan Pribadi' ? 'selected' : ''}>Urusan Pribadi</option>
               </select>
             </div>
 
@@ -1253,14 +1243,17 @@
     if (!dd) return;
     if (btnClear) btnClear.style.display = query ? 'block' : 'none';
 
-    const q = (query || '').toLowerCase().trim();
     const approvers = getMobileApprovers();
-    const filtered = approvers.filter(a =>
-      a.name.toLowerCase().includes(q) ||
-      (a.title && a.title.toLowerCase().includes(q)) ||
-      (a.department && a.department.toLowerCase().includes(q)) ||
-      (a.nip && a.nip.toLowerCase().includes(q))
-    );
+    const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+    const filtered = matcher 
+      ? approvers.filter(a => matcher(query, a.name, a.title, a.department, a.nip, a.role))
+      : approvers.filter(a => {
+          const q = (query || '').toLowerCase().trim();
+          return a.name.toLowerCase().includes(q) ||
+            (a.title && a.title.toLowerCase().includes(q)) ||
+            (a.department && a.department.toLowerCase().includes(q)) ||
+            (a.nip && a.nip.toLowerCase().includes(q));
+        });
 
     if (filtered.length === 0) {
       dd.innerHTML = `<div style="padding: 14px; text-align: center; color: #64748b; font-size: 0.775rem;">Atasan "${query}" tidak ditemukan</div>`;

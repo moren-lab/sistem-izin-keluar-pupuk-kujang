@@ -151,12 +151,18 @@ function filterEmpTickets() {
       return false;
     }
 
-    // 3. Search input
+    // 3. Search input (multi-token matching for ID, destination, reason, approver name, category, type)
     if (query) {
-      const matchId = (t.id || '').toLowerCase().includes(query);
-      const matchReason = (t.reason || '').toLowerCase().includes(query);
-      const matchDest = (t.destination || '').toLowerCase().includes(query);
-      if (!matchId && !matchReason && !matchDest) return false;
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        if (!matcher(query, t.id, t.reason, t.destination, t.approverName, t.category, t.type, t.applicantName)) return false;
+      } else {
+        const matchId = (t.id || '').toLowerCase().includes(query);
+        const matchReason = (t.reason || '').toLowerCase().includes(query);
+        const matchDest = (t.destination || '').toLowerCase().includes(query);
+        const matchApp = (t.approverName || '').toLowerCase().includes(query);
+        if (!matchId && !matchReason && !matchDest && !matchApp) return false;
+      }
     }
 
 

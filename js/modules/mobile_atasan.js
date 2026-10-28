@@ -272,7 +272,7 @@
         </div>
 
         <!-- Card 3: Pengajuan diproses -->
-        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('riwayat')">
+        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('tim')">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Pengajuan diproses</div>
           <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${processedTickets.length}</div>
         </div>
@@ -389,12 +389,17 @@
 
     // Apply Filter
     if (atasanSearchQuery) {
-      const q = atasanSearchQuery.toLowerCase();
-      activeList = activeList.filter(t => 
-        (getTName(t).toLowerCase().includes(q)) ||
-        (getTNip(t).toLowerCase().includes(q)) ||
-        (t.id && t.id.toLowerCase().includes(q))
-      );
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      if (matcher) {
+        activeList = activeList.filter(t => matcher(atasanSearchQuery, t.id, getTName(t), getTNip(t), t.destination, t.reason, t.category, t.type));
+      } else {
+        const q = atasanSearchQuery.toLowerCase();
+        activeList = activeList.filter(t => 
+          (getTName(t).toLowerCase().includes(q)) ||
+          (getTNip(t).toLowerCase().includes(q)) ||
+          (t.id && t.id.toLowerCase().includes(q))
+        );
+      }
     }
 
     let itemsHtml = '';
@@ -798,59 +803,14 @@
           ` : ''}
 
           <div style="display: flex; justify-content: flex-end;">
-            <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.725rem; font-weight: 700; color: #2563eb;" onclick="window.mobileSelectTimTicket('${t.id}')">
-              ${isSelected ? '● Sedang Dilihat' : 'Lihat Linimasa →'}
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail pengajuan</span>
             </button>
           </div>
         </div>
       `;
     }).join('');
-
-    // Linimasa Terpilih Box (Matching PDF Page 4)
-    let linimasaHtml = '';
-    if (selectedTicket) {
-      linimasaHtml = `
-        <div class="mobile-card" style="margin-top: 14px; padding: 14px;">
-          <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Linimasa terpilih</div>
-          <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 10px;">
-            ${selectedTicket.id} • ${getTName(selectedTicket)} • Baca saja
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: #047857; min-width: 60px;">
-                ${selectedTicket.scanOutTime ? formatTimeOnly(selectedTicket.scanOutTime) : '09.50 WIB'}
-              </div>
-              <div style="flex: 1; font-size: 0.75rem;">
-                <div style="font-weight: 800; color: #0f172a;">Scan Out tercatat</div>
-                <div style="font-size: 0.675rem; color: #64748b;">Pos Jaga • Sedang di Luar</div>
-              </div>
-            </div>
-
-            ${selectedTicket.hasExtensionPending ? `
-              <div style="display: flex; gap: 10px; align-items: flex-start;">
-                <div style="font-size: 0.7rem; font-weight: 800; color: #7c3aed; min-width: 60px;">10.50 WIB</div>
-                <div style="flex: 1; font-size: 0.75rem;">
-                  <div style="font-weight: 800; color: #0f172a;">Perpanjangan diajukan</div>
-                  <div style="font-size: 0.675rem; color: #7c3aed; font-weight: 700;">${getTName(selectedTicket)} • ${formatTimeOnly(getTReturnTime(selectedTicket))} → ${selectedTicket.extensionRequestedTime || '12.00'} WIB</div>
-                </div>
-              </div>
-            ` : ''}
-
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: ${selectedTicket.scanInTime ? '#047857' : '#94a3b8'}; min-width: 60px;">
-                ${selectedTicket.scanInTime ? formatTimeOnly(selectedTicket.scanInTime) : 'Belum tercatat'}
-              </div>
-              <div style="flex: 1; font-size: 0.75rem;">
-                <div style="font-weight: 800; color: #0f172a;">${selectedTicket.scanInTime ? 'Scan In tercatat' : 'Scan In'}</div>
-                <div style="font-size: 0.675rem; color: #64748b;">Sumber pencatatan: Pos Jaga</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      `;
-    }
 
     container.innerHTML = `
       <div class="mobile-page-header">
@@ -865,9 +825,6 @@
 
       <!-- List of Team Members Cards -->
       ${listHtml || '<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada pergerakan bawahan saat ini.</div>'}
-
-      <!-- Selected Timeline Box -->
-      ${linimasaHtml}
     `;
   }
 
@@ -1455,6 +1412,22 @@
     }
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
+  };
+
+  window.mobileOpenAtasanDetailModal = function (ticketId) {
+    if (typeof window.mobileOpenTicketDetail === 'function') {
+      window.mobileOpenTicketDetail(ticketId);
+    } else if (typeof window.openTicketDetail === 'function') {
+      window.openTicketDetail(ticketId, 'detail');
+    }
+  };
+
+  window.mobileOpenAtasanDaruratModal = function (ticketId) {
+    if (typeof window.mobileOpenTicketDetail === 'function') {
+      window.mobileOpenTicketDetail(ticketId);
+    } else if (typeof window.openTicketDetail === 'function') {
+      window.openTicketDetail(ticketId, 'detail');
+    }
   };
 
   // Expose module function
