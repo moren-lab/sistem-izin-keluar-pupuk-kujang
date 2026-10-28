@@ -29,6 +29,7 @@
     color: #0f172a;
     -webkit-tap-highlight-color: transparent;
     box-sizing: border-box;
+    overflow-x: hidden;
   }
 }
 
@@ -157,7 +158,7 @@ body.theme-dark .mobile-top-role-pill {
    3. MOBILE CONTENT WRAPPER & HEADERS
    ------------------------------------------------------------------- */
 .mobile-main-content {
-  padding: 14px 16px 20px 16px;
+  padding: 14px 16px 88px 16px;
   box-sizing: border-box;
 }
 
@@ -518,43 +519,57 @@ body.theme-dark .mobile-top-role-pill {
   margin-top: 1px;
 }
 
-/* Status Badges - Clean Text, No colored background box (User requested: hilangkan Box berwarna pada semua status) */
+/* Status Badges - Prominent Pill / Badge as requested in Point 4 */
 .mobile-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-  font-size: 0.725rem;
-  font-weight: 700;
+  justify-content: center;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
   white-space: nowrap;
-}
-
-.mobile-badge.sedang-di-luar {
-  color: #7c3aed !important;
-  background: transparent !important;
-  border: none !important;
+  letter-spacing: 0.01em;
 }
 
 .mobile-badge.disetujui,
 .mobile-badge.selesai {
   color: #047857 !important;
-  background: transparent !important;
-  border: none !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+.mobile-badge.sedang-di-luar {
+  color: #6b21a8 !important;
+  background: #f3e8ff !important;
+  border: 1px solid #d8b4fe !important;
 }
 
 .mobile-badge.menunggu {
   color: #b45309 !important;
-  background: transparent !important;
-  border: none !important;
+  background: #fef3c7 !important;
+  border: 1px solid #fde68a !important;
+}
+
+.mobile-badge.kedaluwarsa {
+  color: #c2410c !important;
+  background: #fff7ed !important;
+  border: 1px solid #fed7aa !important;
 }
 
 .mobile-badge.terlambat,
 .mobile-badge.darurat,
 .mobile-badge.ditolak {
   color: #b91c1c !important;
-  background: transparent !important;
-  border: none !important;
+  background: #fef2f2 !important;
+  border: 1px solid #fecdd3 !important;
+}
+
+.mobile-badge.dibatalkan {
+  color: #475569 !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
 }
 
 /* -------------------------------------------------------------------
@@ -1786,3 +1801,85 @@ body.theme-dark #mobileAppContainer select.mobile-select {
 }
 
 
+
+
+/* Recent tickets individual boxes on Dashboard (Point 11.a) */
+.mobile-recent-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  min-height: 48px;
+  transition: all 0.15s ease;
+}
+.mobile-recent-card:active {
+  background: #f8fafc;
+  transform: scale(0.99);
+}
+
+/* Riwayat Ticket Card (Point 1, 2, 10) */
+.mobile-ticket-card {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.mobile-ticket-card:active {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Riwayat Ticket List Row (Point 1, 2, 10) */
+.mobile-ticket-list-row {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: #ffffff;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.mobile-ticket-list-row:active {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Accessible 44x44 Trash Button (Point 3) */
+.mobile-btn-trash {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+.mobile-btn-trash:active {
+  background: #f1f5f9;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+/* High contrast secondary text (Point 9) */
+.mobile-text-secondary {
+  color: #334155 !important;
+}

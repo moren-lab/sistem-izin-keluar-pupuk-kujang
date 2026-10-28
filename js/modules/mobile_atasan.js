@@ -66,7 +66,17 @@
   function getTName(t) { return t.applicantName || t.employeeName || 'Bawahan'; }
   function getTNip(t) { return t.applicantNip || t.employeeNip || 'PK-2024'; }
   function getTDept(t) { return t.department || 'Departemen Rekayasa & Pemeliharaan'; }
-  function getTType(t) { return t.type || t.returnType || 'Kembali ke Area'; }
+  
+  function formatTipeKepulanganDisplay(type) {
+    if (!type) return 'Kembali ke Area';
+    const s = String(type).trim();
+    if (s === 'Pulang Mendahului' || s.includes('Pulang Mendahului') || s.includes('Pulang Lebih Awal') || s.includes('Tidak Kembali')) {
+      return 'Pulang Lebih Awal (Tidak Kembali)';
+    }
+    return s;
+  }
+
+  function getTType(t) { return formatTipeKepulanganDisplay(t.type || t.returnType || 'Kembali ke Area'); }
   function getTTransport(t) { return t.transportMode || t.transportation || 'Kendaraan dinas'; }
   function getTReturnTime(t) { return t.estimatedReturn || t.plannedReturn || ''; }
   function getTExitTime(t) { return t.plannedExit || ''; }
@@ -74,10 +84,29 @@
   function formatTimeOnly(timeStr) {
     if (!timeStr) return '';
     if (timeStr.includes('T')) {
-      return timeStr.split('T')[1].slice(0, 5) + ' WIB';
+      const m = timeStr.split('T')[1].match(/^(\d{1,2})[:.](\d{2})/);
+      if (m) return `${m[1]}.${m[2]} WIB`;
     }
     const match = timeStr.match(/(\d{1,2})[:.](\d{2})/);
-    return match ? `${match[1]}.${match[2]} WIB` : timeStr;
+    return match ? `${match[1].padStart(2, '0')}.${match[2]} WIB` : timeStr.replace(':', '.');
+  }
+
+  function formatDisplayDate(dateStr) {
+    if (!dateStr) return '-';
+    let clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    clean = clean.replace(/(\d{1,2}):(\d{2})/g, '$1.$2');
+    if (clean.includes('Okt') || clean.includes('WIB') || clean.includes('Jan') || clean.includes('Feb') || clean.includes('Mar')) {
+      return clean;
+    }
+    try {
+      const dt = new Date(clean);
+      if (isNaN(dt.getTime())) return clean;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const pad = n => String(n).padStart(2, '0');
+      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
+    } catch (e) {
+      return clean;
+    }
   }
 
   function formatDateIndo(dateObj) {
@@ -1151,7 +1180,7 @@
             </div>
             <div>
               <div class="mobile-meta-sub">Jenis izin</div>
-              <div class="mobile-meta-val">${getTType(t) || 'Pulang Mendahului'}</div>
+              <div class="mobile-meta-val">${getTType(t) || 'Pulang Lebih Awal (Tidak Kembali)'}</div>
             </div>
           </div>
 
@@ -1270,7 +1299,7 @@
       const pad = n => String(n).padStart(2, '0');
       const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
       const approver = getActiveApprover();
 
       if (!t.timeline) t.timeline = [];
@@ -1349,14 +1378,14 @@
       const pad = n => String(n).padStart(2, '0');
       const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
       const approver = getActiveApprover();
 
       if (!t.timeline) t.timeline = [];
 
       if (decision === 'approve') {
         const today = new Date().toISOString().split('T')[0];
-        const newTime = t.extensionRequestedTime || (t.pendingExtension && t.pendingExtension.newEstimatedReturn ? t.pendingExtension.newEstimatedReturn.slice(11, 16) : '12:00');
+        const newTime = t.extensionRequestedTime || (t.pendingExtension && t.pendingExtension.newEstimatedReturn ? t.pendingExtension.newEstimatedReturn.slice(11, 16).replace(':', '.') : '12.00');
         t.plannedReturn = `${today}T${newTime}:00`;
         t.estimatedReturn = `${today}T${newTime}:00`;
         t.extensionApproved = true;
@@ -1369,7 +1398,7 @@
           event: 'Perpanjangan Waktu Disetujui',
           time: nowFormatted,
           by: `${approver.name} (${approver.title || 'Atasan'})`,
-          desc: `Tambahan waktu keluar disetujui hingga ${newTime} WIB. Catatan: "${note}"`
+          desc: `Tambahan waktu keluar disetujui hingga ${newTime.replace(':', '.')} WIB. Catatan: "${note}"`
         });
       } else {
         if (t.pendingExtension) {
@@ -1427,7 +1456,7 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     if (!t.timeline) t.timeline = [];
     t.timeline.push({

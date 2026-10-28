@@ -11,6 +11,11 @@
   let currentSegment = 'ringkasan'; // 'ringkasan' | 'donut'
   let riwayatSearchQuery = '';
   let riwayatStatusFilter = 'all';
+  let currentRiwayatView = 'card';
+  let isRiwayatFilterOpen = false;
+  let currentRiwayatPage = 1;
+  const riwayatPageSize = 6;
+  let riwayatSearchDebounceTimer = null;
   let selectedApproverData = null;
   let pendingMobileFormData = null;
 
@@ -37,8 +42,17 @@
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Budi Pratama, S.T.'; }
   function getTNip(t) { return t.applicantNip || t.employeeNip || 'PK-2024-8841'; }
-  function getTType(t) { return t.type || t.returnType || 'Kembali ke Area'; }
+  function getTType(t) { return formatTipeKepulanganDisplay(t.type || t.returnType || 'Kembali ke Area'); }
   function getTTransport(t) { return t.transportMode || t.transportation || 'Kendaraan dinas'; }
+  function formatTipeKepulanganDisplay(type) {
+    if (!type) return 'Kembali ke Area';
+    const s = String(type).trim();
+    if (s === 'Pulang Mendahului' || s.includes('Pulang Mendahului') || s.includes('Pulang Lebih Awal') || s.includes('Tidak Kembali')) {
+      return 'Pulang Lebih Awal (Tidak Kembali)';
+    }
+    return s;
+  }
+
   function getTReturnTime(t) { return t.estimatedReturn || t.plannedReturn || ''; }
   function getTExitTime(t) { return t.plannedExit || ''; }
 
@@ -80,7 +94,7 @@
       if (isNaN(dt.getTime())) return clean;
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       const pad = n => String(n).padStart(2, '0');
-      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}:${pad(dt.getMinutes())} WIB`;
+      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
     } catch (e) {
       return clean;
     }
@@ -198,7 +212,7 @@
               <span class="mobile-active-strip-badge" style="background: #10b981; color: #064e3b;">Disetujui</span>
             </div>
             <div class="mobile-active-strip-desc" style="color: #d1fae5;">
-              ${activeTicket.category || 'Dinas Kantor'} — QR Siap Digunakan di Pos 1 — Jadwal Keluar ${activeTicket.plannedExit ? activeTicket.plannedExit.slice(11, 16) + ' WIB' : ''}
+              ${activeTicket.category || 'Dinas Kantor'} — QR Siap Digunakan di Pos 1 — Jadwal Keluar ${activeTicket.plannedExit ? formatTimeOnly(activeTicket.plannedExit) : ''}
             </div>
           </div>
         `;
@@ -213,7 +227,7 @@
               <span class="mobile-active-strip-badge" style="background: #0284c7; color: #ffffff;">Sedang di Luar</span>
             </div>
             <div class="mobile-active-strip-desc" style="color: #e0f2fe;">
-              ${activeTicket.category || 'Dinas Kantor'} — Scan Out ${activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '').slice(11, 16) + ' WIB' : '10:05 WIB'} — Batas kembali ${activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (getTReturnTime(activeTicket) ? getTReturnTime(activeTicket).slice(11, 16) + ' WIB' : '13.00 WIB')}
+              ${activeTicket.category || 'Dinas Kantor'} — Scan Out ${activeTicket.scanOutTime ? formatTimeOnly(activeTicket.scanOutTime) : '10.05 WIB'} — ${activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal (Tidak Kembali)' : 'Batas kembali ' + (getTReturnTime(activeTicket) ? formatTimeOnly(getTReturnTime(activeTicket)) : '13.00 WIB')}
             </div>
           </div>
         `;
@@ -381,17 +395,16 @@
   }
 
   // -------------------------------------------------------------------
-  // 4. RIWAYAT PENGAJUAN (Hal 3, 5, 6 - Card & List View Toggle)
+  // 4. RIWAYAT PENGAJUAN (Hal 3, 5, 6 - Card & List View Toggle, Live Search, Dynamic Pagination)
   // -------------------------------------------------------------------
-  let currentRiwayatView = 'card'; // 'card' | 'list'
-  let isRiwayatFilterOpen = false;
-
   function renderRiwayat(container) {
     const emp = getActiveEmp();
-    let tickets = getEmpTickets();
+    let allEmpTickets = getEmpTickets();
 
+    // 1. Filter by Status
+    let filtered = allEmpTickets;
     if (riwayatStatusFilter !== 'all') {
-      tickets = tickets.filter(t => {
+      filtered = filtered.filter(t => {
         if (riwayatStatusFilter === 'Terlambat') {
           return t.status === 'Terlambat' || t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
         }
@@ -399,172 +412,230 @@
       });
     }
 
-    if (riwayatSearchQuery) {
-      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
-      if (matcher) {
-        tickets = tickets.filter(t => matcher(riwayatSearchQuery, t.id, t.destination, t.reason, t.category, t.approverName, t.type));
-      } else {
-        const q = riwayatSearchQuery.toLowerCase();
-        tickets = tickets.filter(t =>
-          (t.id && t.id.toLowerCase().includes(q)) ||
-          (t.destination && t.destination.toLowerCase().includes(q)) ||
-          (t.reason && t.reason.toLowerCase().includes(q)) ||
-          (t.category && t.category.toLowerCase().includes(q)) ||
-          (t.approverName && t.approverName.toLowerCase().includes(q))
-        );
-      }
+    // 2. Filter by Search Query (ID, destination, reason, category, approver, type)
+    if (riwayatSearchQuery && riwayatSearchQuery.trim()) {
+      const q = riwayatSearchQuery.trim().toLowerCase();
+      filtered = filtered.filter(t => {
+        const idStr = (t.id || '').toLowerCase();
+        const destStr = (t.destination || '').toLowerCase();
+        const reasonStr = (t.reason || '').toLowerCase();
+        const catStr = (t.category || '').toLowerCase();
+        const appStr = (t.approverName || '').toLowerCase();
+        const typeStr = (t.type || t.returnType || '').toLowerCase();
+        return idStr.includes(q) || destStr.includes(q) || reasonStr.includes(q) || catStr.includes(q) || appStr.includes(q) || typeStr.includes(q);
+      });
     }
 
-    // Card View HTML (PDF Page 3 & 5)
-    const cardsHtml = tickets.map(t => {
-      const isOutside = (t.status === 'Sedang di Luar');
-      const isLate = (t.status === 'Terlambat' || t.isLate);
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+    // 3. Pagination calculations
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / riwayatPageSize) || 1;
+    if (currentRiwayatPage > totalPages) currentRiwayatPage = 1;
+    if (currentRiwayatPage < 1) currentRiwayatPage = 1;
+
+    const startIndex = (currentRiwayatPage - 1) * riwayatPageSize;
+    const pageTickets = filtered.slice(startIndex, startIndex + riwayatPageSize);
+
+    // 4. Card View HTML (Points 1, 2, 4, 5, 6, 7, 8, 9, 10)
+    const cardsHtml = pageTickets.map(t => {
+      const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
+      const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
+      const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
+      const dateStr = formatDisplayDate(t.createdAt).split(',')[0];
+
       return `
-        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; background: #fff; padding: 12px 14px;">
-          <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <div class="mobile-ticket-card" onclick="window.mobileOpenTicketDetail('${t.id}')">
+          <!-- Baris 1: ID Tiket & Tanggal (Kiri) + Status Badge (Kanan) -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+              <div style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</div>
+              <div style="font-size: 0.725rem; font-weight: 600; color: #334155; margin-top: 1px;">Diajukan ${dateStr}</div>
+            </div>
+            <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
+          </div>
+
+          <!-- Baris 2: Lokasi / Tujuan Keluar (Judul Utama) -->
+          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; line-height: 1.35;">
+            ${destText}
+          </div>
+
+          <!-- Baris 3: Kategori & Tipe Kepulangan -->
+          <div style="font-size: 0.75rem; font-weight: 600; color: #047857; margin-bottom: 8px;">
+            ${t.category || 'Dinas Kantor'} • ${typeDisplay}
+          </div>
+
+          <!-- Baris 4: Waktu Keluar / Kembali + Chevron Navigasi (Poin 6: Pulang Lebih Awal hanya jam keluar) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px;">
+            <div style="font-size: 0.75rem; color: #334155; font-weight: 600;">
+              ${isPulang
+                ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
+                : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
+              }
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
+                <button type="button" class="mobile-btn-primary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; min-height: 36px; border-radius: 8px; margin: 0;" onclick="event.stopPropagation(); window.mobileOpenQrModal('${t.id}')">QR Izin</button>
+              ` : ''}
+              <span style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #64748b; margin-right: -10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // 5. List View HTML (Points 1, 2, 4, 5, 6, 7, 8, 9, 10)
+    const listHtml = pageTickets.map(t => {
+      const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
+      const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
+      const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
+      const dateStr = formatDisplayDate(t.createdAt).split(',')[0];
+
+      return `
+        <div class="mobile-ticket-list-row" onclick="window.mobileOpenTicketDetail('${t.id}')">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div>
               <div style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</div>
-              <div style="font-size: 0.675rem; color: #64748b;">Diajukan ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'}</div>
+              <div style="font-size: 0.725rem; font-weight: 600; color: #334155; margin-top: 1px;">Diajukan ${dateStr}</div>
             </div>
-            <button type="button" class="mobile-btn-secondary" style="padding: 5px 12px; font-size: 0.725rem; font-weight: 700; width: auto;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
+            <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
           </div>
 
-          <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">
-            ${t.category} • ${getTType(t)} • <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
-          </div>
-          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">${t.destination || 'Area Rekayasa'}</div>
-          <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">${getTTransport(t)}</div>
-
-          <div class="mobile-ticket-grid-meta" style="margin-bottom: 8px;">
-            <div>
-              <div class="mobile-meta-sub">Rencana waktu</div>
-              <div class="mobile-meta-val">${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}</div>
-            </div>
-            <div>
-              <div class="mobile-meta-sub">Status info</div>
-              <div class="mobile-meta-val" style="font-size: 0.7rem; color: ${isLate ? '#b91c1c' : '#047857'};">
-                ${t.status === 'Selesai' ? 'Tepat waktu' : (isOutside ? 'QR tersedia' : t.status)}
-              </div>
-            </div>
+          <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 3px;">
+            ${destText}
           </div>
 
-          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-            ${(t.status === 'Sedang di Luar' || t.status === 'Disetujui') ? `
-              <button type="button" class="mobile-btn-primary" style="padding: 5px 12px; font-size: 0.725rem; width: auto;" onclick="window.mobileOpenQrModal('${t.id}')">Buka QR Izin</button>
-            ` : ''}
-            ${isFinished ? `
-              <button type="button" class="mobile-btn-danger" style="padding: 5px 12px; font-size: 0.725rem; width: auto; background: #fff1f2; color: #dc2626; border: 1px solid #fecdd3; border-radius: 6px; font-weight: 700; cursor: pointer;" onclick="window.mobileDeleteTicketItem('${t.id}', 'karyawan')">Hapus</button>
-            ` : ''}
+          <div style="font-size: 0.725rem; font-weight: 600; color: #047857; margin-bottom: 6px;">
+            ${t.category || 'Dinas Kantor'} • ${typeDisplay}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid #f8fafc;">
+            <div style="font-size: 0.725rem; color: #334155; font-weight: 600;">
+              ${isPulang
+                ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
+                : `${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
+              }
+            </div>
+            <span style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #64748b; margin: -10px -10px -10px 0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </span>
           </div>
         </div>
       `;
     }).join('');
 
-    // List View HTML (PDF Page 6)
-    const listHtml = tickets.map(t => {
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
-      return `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 10px; border-bottom: 1px solid #f1f5f9;">
-          <div style="flex: 1;">
-            <div style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #0f172a;">${t.id}</div>
-            <div style="font-size: 0.675rem; color: #64748b;">Diajukan ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'}</div>
-            <div style="font-size: 0.775rem; font-weight: 700; color: #1e293b; margin-top: 2px;">${t.destination || 'Area Rekayasa'}</div>
-            <div style="font-size: 0.7rem; color: #047857;">${t.category} • ${getTType(t)} • <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span></div>
-            <div style="font-size: 0.675rem; color: #64748b;">${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}</div>
-          </div>
-          <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-            <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; color: #2563eb; font-weight: 700; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">Rincian</button>
-            ${isFinished ? `
-              <button type="button" style="border: none; background: none; font-size: 0.7rem; color: #dc2626; font-weight: 700; cursor: pointer;" onclick="window.mobileDeleteTicketItem('${t.id}', 'karyawan')">Hapus</button>
-            ` : ''}
-          </div>
+    // Empty state (Point 11.c)
+    const emptyHtml = `
+      <div class="mobile-card" style="text-align: center; padding: 28px 16px; border: 1.5px dashed #cbd5e1; border-radius: 14px; background: #ffffff;">
+        <div style="color: #94a3b8; margin-bottom: 8px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        </div>
+        <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Tidak Ada Pengajuan Ditemukan</div>
+        <div style="font-size: 0.775rem; color: #475569; max-width: 260px; margin: 0 auto; line-height: 1.4;">
+          ${riwayatSearchQuery ? `Tidak ada tiket yang cocok dengan kata kunci "<strong>${riwayatSearchQuery}</strong>".` : 'Tidak ada permohonan izin yang sesuai dengan kriteria filter ini.'}
+        </div>
+        ${(riwayatSearchQuery || riwayatStatusFilter !== 'all') ? `
+          <button type="button" class="mobile-btn-secondary" style="margin-top: 14px; padding: 8px 16px; font-size: 0.75rem; width: auto; font-weight: 700; min-height: 40px; display: inline-flex; align-items: center; gap: 6px;" onclick="window.mobileResetRiwayatFilterKaryawan()">
+            <span>Reset Pencarian & Filter</span>
+          </button>
+        ` : ''}
+      </div>
+    `;
+
+    // Dynamic Pagination Buttons
+    let paginationHtml = '';
+    if (totalPages > 1) {
+      let pageBtns = '';
+      for (let p = 1; p <= totalPages; p++) {
+        const isActive = (p === currentRiwayatPage);
+        pageBtns += `
+          <button type="button" style="min-width: 36px; height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid ${isActive ? '#2563eb' : '#cbd5e1'}; background: ${isActive ? '#2563eb' : '#ffffff'}; color: ${isActive ? '#ffffff' : '#334155'}; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileSetRiwayatPage(${p})">
+            ${p}
+          </button>
+        `;
+      }
+      paginationHtml = `
+        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin: 18px 0 8px 0;">
+          ${pageBtns}
+        </div>
+        <div style="text-align: center; font-size: 0.7rem; color: #64748b; font-weight: 600;">
+          Menampilkan ${startIndex + 1}–${Math.min(startIndex + riwayatPageSize, totalItems)} dari ${totalItems} tiket
         </div>
       `;
-    }).join('');
+    }
 
     container.innerHTML = `
-      
-
-      <!-- Action Bar: Hapus Riwayat Selesai & Filter Button -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <button type="button" class="mobile-btn-danger" style="width: auto; padding: 6px 12px; font-size: 0.725rem; font-weight: 700; background: #fff1f2; color: #dc2626; border: 1px solid #fecdd3; border-radius: 8px; cursor: pointer;" onclick="window.mobileClearRiwayat('karyawan')">
-          Hapus Riwayat Selesai
-        </button>
-        <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleRiwayatFilter()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-          <span>${isRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
-          ${(riwayatSearchQuery || riwayatStatusFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
-        </button>
+      <!-- 1. Search Bar (Point 11.c) -->
+      <div style="display: flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" style="flex-shrink: 0; margin-right: 8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="mRiwayatLiveSearch" placeholder="Cari nomor tiket, tujuan, alasan, kategori..." value="${riwayatSearchQuery}" style="flex: 1; border: none; background: transparent; font-size: 0.825rem; color: #0f172a; padding: 11px 0; outline: none; min-width: 0;" oninput="window.mobileDebounceRiwayatSearch(this.value)">
+        <button type="button" id="mBtnClearRiwayatSearch" aria-label="Hapus teks pencarian" style="display: ${riwayatSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearRiwayatSearch()">✕</button>
       </div>
 
-      <!-- Segment Toggle: Card | List (Matching PDF Page 3 & 6) -->
-      <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
-        <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" onclick="window.mobileSwitchRiwayatView('card')">
-          Card
-        </button>
-        <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" onclick="window.mobileSwitchRiwayatView('list')">
-          List
-        </button>
+      <!-- 2. Toolbar: Segment Toggle (Card/List) on Left, Filter & Trash on Right (Point 3) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
+        <!-- Segment Toggle: Card | List -->
+        <div class="mobile-segment-toggle" style="margin-bottom: 0; flex: 1; max-width: 160px;">
+          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" onclick="window.mobileSwitchRiwayatView('card')">Card</button>
+          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" onclick="window.mobileSwitchRiwayatView('list')">List</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Filter Button (min 44px) -->
+          <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" style="height: 44px; min-width: 44px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.775rem; border-radius: 10px; border: 1.5px solid #cbd5e1; background: ${isRiwayatFilterOpen ? '#059669' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#ffffff' : '#334155'}; cursor: pointer;" onclick="window.mobileToggleRiwayatFilter()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>Filter</span>
+            ${(riwayatStatusFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #2563eb; display: inline-block;"></span>' : ''}
+          </button>
+
+          <!-- Trash Icon Button (Point 3: neutral color, 44x44px, tooltip, accessible) -->
+          <button type="button" class="mobile-btn-trash" aria-label="Hapus riwayat selesai" title="Hapus riwayat selesai" onclick="window.mobileClearRiwayat('karyawan')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
       </div>
 
-      <!-- Collapsible Filter Card -->
-      <div id="mRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isRiwayatFilterOpen ? 'block' : 'none'};">
+      <!-- 3. Collapsible Filter Panel -->
+      <div id="mRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isRiwayatFilterOpen ? 'block' : 'none'}; margin-bottom: 12px;">
         <div class="mobile-filter-panel-title">
-          <span>Cari & filter pengajuan</span>
+          <span>Filter Status Pengajuan</span>
           <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleRiwayatFilter()">✕</button>
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <div>
-            <label class="mobile-filter-label">Cari pengajuan</label>
-            <input type="text" class="mobile-filter-input" id="mRiwayatSearchInput" placeholder="Cari tiket, alasan, atau tujuan..." value="${riwayatSearchQuery}">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <div>
-              <label class="mobile-filter-label">Status</label>
-              <select class="mobile-filter-select" id="mRiwayatSelectStatus">
-                <option value="all" ${riwayatStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
-                <option value="Sedang di Luar" ${riwayatStatusFilter === 'Sedang di Luar' ? 'selected' : ''}>Sedang di Luar</option>
-                <option value="Disetujui" ${riwayatStatusFilter === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
-                <option value="Selesai" ${riwayatStatusFilter === 'Selesai' ? 'selected' : ''}>Selesai</option>
-                <option value="Terlambat" ${riwayatStatusFilter === 'Terlambat' ? 'selected' : ''}>Terlambat</option>
-                <option value="Ditolak" ${riwayatStatusFilter === 'Ditolak' ? 'selected' : ''}>Ditolak</option>
-              </select>
-            </div>
-            <div>
-              <label class="mobile-filter-label">Tanggal pengajuan</label>
-              <input type="text" class="mobile-filter-input" placeholder="Semua Waktu" readonly style="color: #64748b;">
-            </div>
+            <label class="mobile-filter-label">Status Tiket</label>
+            <select class="mobile-filter-select" id="mRiwayatSelectStatus" onchange="window.mobileHandleRiwayatStatusChange(this.value)">
+              <option value="all" ${riwayatStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
+              <option value="Sedang di Luar" ${riwayatStatusFilter === 'Sedang di Luar' ? 'selected' : ''}>Sedang di Luar</option>
+              <option value="Disetujui" ${riwayatStatusFilter === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
+              <option value="Selesai" ${riwayatStatusFilter === 'Selesai' ? 'selected' : ''}>Selesai</option>
+              <option value="Terlambat" ${riwayatStatusFilter === 'Terlambat' ? 'selected' : ''}>Terlambat</option>
+              <option value="Ditolak" ${riwayatStatusFilter === 'Ditolak' ? 'selected' : ''}>Ditolak</option>
+              <option value="Dibatalkan" ${riwayatStatusFilter === 'Dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
+            </select>
           </div>
           <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileApplyRiwayatFilterKaryawan()">
-              Terapkan Filter
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileResetRiwayatFilterKaryawan()">
+              Reset Filter
             </button>
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetRiwayatFilterKaryawan()">
-              Reset
+            <button type="button" class="mobile-btn-primary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileToggleRiwayatFilter()">
+              Tutup
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Items Container (Card View or List View) -->
-      ${currentRiwayatView === 'card' ? `
-        <div>${cardsHtml || '<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada pengajuan yang sesuai dengan filter.</div>'}</div>
-      ` : `
-        <div class="mobile-card" style="padding: 4px 10px;">
-          ${listHtml || '<div style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 20px;">Tidak ada pengajuan.</div>'}
-        </div>
-      `}
-
-      <!-- Pagination (Matching PDF Page 3 & 6) -->
-      <div style="display: flex; justify-content: center; gap: 6px; margin: 16px 0;">
-        <span style="display: inline-flex; width: 32px; height: 32px; border-radius: 8px; background: #2563eb; color: #fff; font-size: 0.75rem; font-weight: 800; align-items: center; justify-content: center;">1</span>
-        <span style="display: inline-flex; width: 32px; height: 32px; border-radius: 8px; background: #f1f5f9; color: #64748b; font-size: 0.75rem; font-weight: 700; align-items: center; justify-content: center; cursor: pointer;">2</span>
+      <!-- 4. Items Container (Card View or List View) -->
+      <div id="mRiwayatItemsContainer">
+        ${totalItems === 0 ? emptyHtml : (currentRiwayatView === 'card' ? cardsHtml : listHtml)}
       </div>
+
+      <!-- 5. Dynamic Pagination (Point 11.c) -->
+      ${paginationHtml}
     `;
   }
 
-  // Riwayat View & Filter Helpers
+  // Riwayat View, Search & Filter Handlers
   window.mobileSwitchRiwayatView = function (v) {
     currentRiwayatView = v;
     renderMobileKaryawan(null, 'riwayat');
@@ -575,20 +646,45 @@
     renderMobileKaryawan(null, 'riwayat');
   };
 
-  window.mobileApplyRiwayatFilterKaryawan = function () {
-    const searchEl = document.getElementById('mRiwayatSearchInput');
-    const statusEl = document.getElementById('mRiwayatSelectStatus');
-    if (searchEl) riwayatSearchQuery = searchEl.value.trim();
-    if (statusEl) riwayatStatusFilter = statusEl.value;
+  window.mobileHandleRiwayatStatusChange = function (val) {
+    riwayatStatusFilter = val;
+    currentRiwayatPage = 1;
     renderMobileKaryawan(null, 'riwayat');
+  };
+
+  window.mobileDebounceRiwayatSearch = function (val) {
+    clearTimeout(riwayatSearchDebounceTimer);
+    riwayatSearchDebounceTimer = setTimeout(() => {
+      riwayatSearchQuery = val ? val.trim() : '';
+      currentRiwayatPage = 1;
+      renderMobileKaryawan(null, 'riwayat');
+      const input = document.getElementById('mRiwayatLiveSearch');
+      if (input) {
+        input.focus();
+        if (typeof input.setSelectionRange === 'function') input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }, 200);
+  };
+
+  window.mobileClearRiwayatSearch = function () {
+    riwayatSearchQuery = '';
+    currentRiwayatPage = 1;
+    renderMobileKaryawan(null, 'riwayat');
+  };
+
+  window.mobileSetRiwayatPage = function (p) {
+    currentRiwayatPage = p;
+    renderMobileKaryawan(null, 'riwayat');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   window.mobileResetRiwayatFilterKaryawan = function () {
     riwayatSearchQuery = '';
     riwayatStatusFilter = 'all';
+    currentRiwayatPage = 1;
+    isRiwayatFilterOpen = false;
     renderMobileKaryawan(null, 'riwayat');
   };
-
   // -------------------------------------------------------------------
   // 5. HELPER RENDERING: ACTIVE TICKET CARD (EXACT PC PARITY)
   // -------------------------------------------------------------------
@@ -616,6 +712,7 @@
     const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
     const isApproved = (t.status === 'Disetujui');
     const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
     const isEmergency = Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')) || t.status === 'Menunggu Otorisasi Darurat');
     const isEmergencyLocked = Boolean(isEmergency && (t.emergencyLocked || t.qrLocked || t.status === 'Menunggu Otorisasi Darurat'));
 
@@ -627,7 +724,7 @@
     const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
     const col2Label = isPulang ? 'Tipe Kepulangan' : 'Batas Jam Kembali';
     const col2Val = isPulang
-      ? 'Pulang Mendahului'
+      ? 'Pulang Lebih Awal (Tidak Kembali)'
       : (getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '-');
 
     let actionButtonsHtml = '';
@@ -773,7 +870,7 @@
           <div class="mobile-timeline-line"></div>
         </div>
         <div class="mobile-timeline-content">
-          <div class="mobile-timeline-time">${t.createdAt ? t.createdAt.slice(11, 16) + ' WIB' : '09.20 WIB'}</div>
+          <div class="mobile-timeline-time">${t.createdAt ? formatTimeOnly(t.createdAt) : '09.20 WIB'}</div>
           <div class="mobile-timeline-title">Pengajuan Dibuat</div>
           <div class="mobile-timeline-desc">${t.category} • ${t.returnType || 'Kembali ke Area'}</div>
         </div>
@@ -994,7 +1091,7 @@
               <select class="mobile-select" id="mFormReturnType" required onchange="window.mobileToggleReturnType(this.value)">
                 <option value="">-- Pilih Tipe Kepulangan --</option>
                 <option value="Kembali ke Area" ${initialType === 'Kembali ke Area' || !initialType ? 'selected' : ''}>Kembali ke Area</option>
-                <option value="Pulang Mendahului" ${initialType === 'Pulang Mendahului' ? 'selected' : ''}>Pulang Mendahului (Tidak Kembali)</option>
+                <option value="Pulang Mendahului" ${initialType === 'Pulang Mendahului' ? 'selected' : ''}>Pulang Lebih Awal (Tidak Kembali)</option>
               </select>
             </div>
           </div>
@@ -1151,7 +1248,7 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     t.status = 'Dibatalkan';
     t.emergencyLocked = false;
@@ -1554,7 +1651,7 @@
           ` : `
             <div class="mobile-summary-row">
               <span class="mobile-summary-label">Perkiraan Kembali</span>
-              <span class="mobile-summary-value" style="color: #64748b;">Pulang Mendahului (Tidak Kembali)</span>
+              <span class="mobile-summary-value" style="color: #64748b;">Pulang Lebih Awal (Tidak Kembali)</span>
             </div>
           `}
         </div>
@@ -1607,7 +1704,7 @@
     const pad = n => String(n).padStart(2, '0');
     const dateCode = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     // CASE 1: UPDATE EXISTING TICKET (EDIT MODE)
     if (data.isEditing && data.editingTicketId) {
@@ -1748,7 +1845,7 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
     const wasOverdue = (t.status === 'Terlambat');
 
     t.status = 'Selesai';
@@ -1902,7 +1999,7 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     if (!t.timeline) t.timeline = [];
     t.timeline.push({
@@ -2024,7 +2121,7 @@
           <div>
             <div class="mobile-meta-sub">${isPulang ? 'Tipe' : 'Batas Jam Kembali'}</div>
             <div class="mobile-meta-val" style="${isOutside && !isPulang ? 'color:#b91c1c;' : ''}">
-              ${isPulang ? 'Pulang Mendahului' : (getTReturnTime(t) ? formatTimeOnly(getTReturnTime(t)) : '13.00 WIB')}
+              ${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (getTReturnTime(t) ? formatTimeOnly(getTReturnTime(t)) : '13.00 WIB')}
             </div>
           </div>
         </div>
@@ -2077,9 +2174,7 @@
 
     const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
     const isApproved = (t.status === 'Disetujui');
-    const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');
-
-    sheet.innerHTML = `
+    const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal');    sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header">
         <div>
@@ -2122,15 +2217,15 @@
           </div>
 
           <div class="mobile-card" style="margin-bottom: 8px;">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">WAKTU KELUAR & KEMBALI</div>
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">${isPulang ? 'WAKTU KELUAR' : 'WAKTU KELUAR & KEMBALI'}</div>
             <div class="mobile-ticket-grid-meta" style="margin: 4px 0 0 0;">
               <div>
                 <div class="mobile-meta-sub">Waktu Keluar</div>
                 <div class="mobile-meta-val">${t.scanOutTime ? formatDisplayDate(t.scanOutTime) + ' (Aktual)' : (getTExitTime(t) ? formatDisplayDate(getTExitTime(t)) + ' (Rencana)' : '10.00 WIB')}</div>
               </div>
               <div>
-                <div class="mobile-meta-sub">Batas Kembali</div>
-                <div class="mobile-meta-val">${getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '13.00 WIB'}</div>
+                <div class="mobile-meta-sub">${isPulang ? 'Tipe Kepulangan' : 'Batas Kembali'}</div>
+                <div class="mobile-meta-val">${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '13.00 WIB')}</div>
               </div>
             </div>
           </div>
@@ -2171,7 +2266,12 @@
               Ajukan Perpanjangan Waktu
             </button>
           ` : ''}
-          <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet()">Tutup</button>
+          ${isFinished ? `
+            <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border:1.5px solid #fecdd3; font-weight:700; min-height:44px; border-radius:10px; cursor:pointer;" onclick="window.mobileCloseSheet(); window.mobileDeleteTicketItem('${t.id}', 'karyawan')">
+              🗑️ Hapus dari Riwayat
+            </button>
+          ` : ''}
+          <button type="button" class="mobile-btn-secondary" style="min-height: 44px; font-weight: 700; cursor:pointer;" onclick="window.mobileCloseSheet()">Tutup</button>
         </div>
       </div>
     `;
@@ -2284,7 +2384,7 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     t.hasExtensionPending = true;
     t.extensionRequestedTime = newTime;

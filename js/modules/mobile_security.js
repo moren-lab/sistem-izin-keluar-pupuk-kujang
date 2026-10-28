@@ -54,7 +54,17 @@
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Budi Pratama, S.T.'; }
   function getTNip(t) { return t.applicantNip || t.employeeNip || 'PK-2024-8841'; }
-  function getTType(t) { return t.type || t.returnType || 'Kembali ke Area'; }
+  
+  function formatTipeKepulanganDisplay(type) {
+    if (!type) return 'Kembali ke Area';
+    const s = String(type).trim();
+    if (s === 'Pulang Mendahului' || s.includes('Pulang Mendahului') || s.includes('Pulang Lebih Awal') || s.includes('Tidak Kembali')) {
+      return 'Pulang Lebih Awal (Tidak Kembali)';
+    }
+    return s;
+  }
+
+  function getTType(t) { return formatTipeKepulanganDisplay(t.type || t.returnType || 'Kembali ke Area'); }
   function getTTransport(t) { return t.transportMode || t.transportation || 'Kendaraan dinas'; }
   function getTReturnTime(t) { return t.estimatedReturn || t.plannedReturn || ''; }
   function getTExitTime(t) { return t.plannedExit || ''; }
@@ -66,24 +76,22 @@
       if (m) return `${m[1]}.${m[2]} WIB`;
     }
     const match = timeStr.match(/(\d{1,2})[:.](\d{2})/);
-    return match ? `${match[1].padStart(2, '0')}.${match[2]} WIB` : timeStr;
+    return match ? `${match[1].padStart(2, '0')}.${match[2]} WIB` : timeStr.replace(':', '.');
   }
 
   function formatDisplayDate(dateStr) {
     if (!dateStr) return '-';
-    const clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    let clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    clean = clean.replace(/(\d{1,2}):(\d{2})/g, '$1.$2');
     if (clean.includes('Okt') || clean.includes('WIB') || clean.includes('Jan') || clean.includes('Feb') || clean.includes('Mar')) {
       return clean;
-    }
-    if (typeof window.formatDisplayDate === 'function') {
-      return window.formatDisplayDate(clean);
     }
     try {
       const dt = new Date(clean);
       if (isNaN(dt.getTime())) return clean;
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       const pad = n => String(n).padStart(2, '0');
-      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}:${pad(dt.getMinutes())} WIB`;
+      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
     } catch (e) {
       return clean;
     }
@@ -541,7 +549,7 @@
           </div>
 
           <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">${t.category} • ${getTType(t)}</div>
-          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">📍 ${t.destination || 'Area Rekayasa'}</div>
+          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">📍 ${(t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan'}</div>
           <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">Rencana : ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'} • ${exitPlanT} – ${returnT}</div>
 
           <div class="mobile-ticket-grid-meta" style="margin-bottom: 8px;">
@@ -696,7 +704,7 @@
           </div>
 
           <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">${t.category} • ${getTType(t)}</div>
-          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">📍 ${t.destination || 'Area Rekayasa'}</div>
+          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px;">📍 ${(t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan'}</div>
           <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">
             Rencana: ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'} • ${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}
           </div>
@@ -713,7 +721,7 @@
                 ${isPulang ? 'Tidak diperlukan' : (scanInT || 'Belum Tap In')}
               </div>
               <div style="font-size: 0.625rem; color: #64748b;">
-                ${isPulang ? 'Pulang Mendahului' : (scanInT ? (t.scanInGate || activeGate) : 'Belum ada catatan pos')}
+                ${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (scanInT ? (t.scanInGate || activeGate) : 'Belum ada catatan pos')}
               </div>
             </div>
           </div>
@@ -886,7 +894,7 @@
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">DETAIL DOKUMEN IZIN</div>
           <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.5;">
             <strong>Keperluan:</strong> ${t.category} (${getTType(t)})<br>
-            <strong>Tujuan:</strong> ${t.destination || 'Area Cikampek'}<br>
+            <strong>Tujuan:</strong> ${(t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan'}<br>
             <strong>Alasan:</strong> "${t.reason || '-'}"<br>
             <strong>Atasan:</strong> ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}<br>
             <strong>Transportasi:</strong> ${getTTransport(t)}
@@ -902,7 +910,7 @@
           <div>
             <div class="mobile-meta-sub">${isPulang ? 'Tipe' : 'Batas Kembali'}</div>
             <div class="mobile-meta-val" style="color: ${isTicketLate(t) ? '#dc2626' : '#0f172a'};">
-              ${isPulang ? 'Pulang Mendahului' : (formatTimeOnly(getTReturnTime(t)) || '13.00 WIB')}
+              ${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (formatTimeOnly(getTReturnTime(t)) || '13.00 WIB')}
             </div>
             <div style="font-size: 0.65rem; color: #64748b;">${isPulang ? 'Tidak kembali' : (t.scanInTime ? formatTimeOnly(t.scanInTime) + ' (Kembali)' : 'Belum kembali')}</div>
           </div>
@@ -988,7 +996,7 @@
     const pad = n => String(n).padStart(2, '0');
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     t.scanOutGate = activeGate;
     t.scanOutTime = `${nowFormatted} (${activeGate})`;
@@ -1003,10 +1011,10 @@
         time: nowFormatted,
         by: `${officer.name} (${activeGate})`,
         gate: activeGate,
-        desc: `Karyawan meninggalkan kawasan pabrik melalui ${activeGate} (Pulang Mendahului). Tiket langsung Selesai.`
+        desc: `Karyawan meninggalkan kawasan pabrik melalui ${activeGate} (Pulang Lebih Awal). Tiket langsung Selesai.`
       });
       if (typeof window.showToast === 'function') {
-        window.showToast(`Scan Out berhasil di ${activeGate}! Tiket #${t.id} selesai diproses (Pulang Mendahului).`, 'success');
+        window.showToast(`Scan Out berhasil di ${activeGate}! Tiket #${t.id} selesai diproses (Pulang Lebih Awal).`, 'success');
       }
     } else {
       t.status = 'Sedang di Luar';
@@ -1053,7 +1061,7 @@
     const pad = n => String(n).padStart(2, '0');
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     t.status = 'Selesai';
     t.scanInGate = activeGate;

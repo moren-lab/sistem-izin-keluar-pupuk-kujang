@@ -84,7 +84,7 @@ function handleOpenNewRequest() {
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
           const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-          const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+          const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
           activeTicket.timeline.unshift({
             event: 'Izin Dibatalkan (Buat Baru)',
             time: nowFormatted,
@@ -1289,7 +1289,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoTablePlanExit = document.getElementById('infoTablePlanExit');
   if (infoTablePlanExit) {
-    infoTablePlanExit.textContent = ticket.plannedExit ? `${ticket.plannedExit.slice(11, 16)} WIB` : '09.00 WIB';
+    infoTablePlanExit.textContent = ticket.plannedExit ? `${ticket.plannedExit.slice(11, 16).replace(':', '.')} WIB` : '09.00 WIB';
   }
 
   const infoTableActualExit = document.getElementById('infoTableActualExit');
@@ -1300,7 +1300,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoTablePlanReturn = document.getElementById('infoTablePlanReturn');
   if (infoTablePlanReturn) {
-    infoTablePlanReturn.textContent = ticket.estimatedReturn ? `${ticket.estimatedReturn.slice(11, 16)} WIB` : '-';
+    infoTablePlanReturn.textContent = ticket.estimatedReturn ? `${ticket.estimatedReturn.slice(11, 16).replace(':', '.')} WIB` : '-';
   }
 
   const infoTableActualReturn = document.getElementById('infoTableActualReturn');
@@ -1351,7 +1351,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     } else if (ticket.status === 'Terlambat') {
       infoNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ PERINGATAN: Karyawan telah melewati batas waktu estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Tap In Kartu Akses.</span>`;
     } else if (ticket.status === 'Sedang di Luar') {
-      infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Tap In Kartu Akses sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) : '13.00'} WIB.`;
+      infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Tap In Kartu Akses sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16).replace(':', '.') : '13.00'} WIB.`;
     } else if (ticket.status === 'Disetujui') {
       infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos 1 untuk Scan Out.`;
     } else if (ticket.status === 'Menunggu Persetujuan') {
@@ -1792,7 +1792,7 @@ function confirmCancelTicket() {
     const ACTORS = window.ACTORS || {};
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
-    const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
     ticket.status = 'Dibatalkan';
     ticket.scanOutTime = null;
@@ -2407,7 +2407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
-          const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+          const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
           if (!ticket.timeline) ticket.timeline = [];
 
@@ -2469,7 +2469,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const dateCode = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
       const randomSuffix = Math.floor(100 + Math.random() * 900);
       const ticketId = `TK-${dateCode}-${randomSuffix}`;
-      const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
       const newTicket = {
         id: ticketId,
@@ -2776,7 +2776,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
-          const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+          const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
           if (!ticket.timeline) ticket.timeline = [];
 
@@ -2839,7 +2839,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const dateCode = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
       const randomSuffix = Math.floor(100 + Math.random() * 900);
       const ticketId = `TK-EMG-${dateCode}-${randomSuffix}`;
-      const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
       const emergencyPasscode = (typeof window.generateEmergencyPasscode === 'function') 
         ? window.generateEmergencyPasscode() 
@@ -3008,7 +3008,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const pad = (n) => String(n).padStart(2, '0');
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
       ticket.pendingExtension = {
         requestedAt: nowFormatted,
@@ -3254,7 +3254,7 @@ function executeCancelPendingExtension() {
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
   if (!ticket.timeline) ticket.timeline = [];
   ticket.timeline.push({
