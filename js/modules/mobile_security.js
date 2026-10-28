@@ -172,7 +172,8 @@
     const scanOutTodayTickets = tickets.filter(t => t.scanOutTime || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat');
     const scanOutKembali = scanOutTodayTickets.filter(t => t.type !== 'Pulang Mendahului' && t.returnType !== 'Pulang Mendahului').length;
     const scanOutPulang = scanOutTodayTickets.filter(t => t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului').length;
-    const scanInToday = tickets.filter(t => t.status === 'Selesai' && t.scanInTime).length;
+    const tapInToday = tickets.filter(t => t.status === 'Selesai' && t.scanInTime).length;
+    const scanInToday = tapInToday;
 
     // Overdue banner if any late tickets exist (PDF Hal 1)
     let alertBannerHtml = '';
@@ -183,10 +184,10 @@
       alertBannerHtml = `
         <div class="mobile-emergency-banner" style="margin-bottom: 12px; background: #fef2f2; border: 1px solid #fecaca;">
           <div class="mobile-emergency-banner-title" style="color: #b91c1c; font-weight: 800; font-size: 0.8rem;">
-            ⚠️ ${lateTickets.length} karyawan terlambat kembali
+            ${lateTickets.length} Karyawan Terlambat Kembali
           </div>
           <div class="mobile-emergency-banner-desc" style="color: #991b1b; font-size: 0.725rem; line-height: 1.4; margin-top: 4px;">
-            <strong>${getTName(overdueTicket)}</strong> terlambat ${lateMnt} menit. Batas kembali ${batasJam}; belum Scan In. Segera konfirmasi keberadaan atau tindak lanjuti di ${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]}.
+            <strong>${getTName(overdueTicket)}</strong> terlambat ${lateMnt} menit. Batas kembali ${batasJam}; belum Tap In. Segera konfirmasi keberadaan atau tindak lanjuti di ${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]}.
           </div>
           <button type="button" class="mobile-btn-danger" style="margin-top: 8px; padding: 6px 12px; font-size: 0.725rem; width: auto; background: #dc2626; color: #fff; border: none; font-weight: 700; border-radius: 6px;" onclick="window.mobileSwitchPelacakanTabAndFilter('outside', 'late')">
             Lihat Headcount Terlambat →
@@ -233,7 +234,7 @@
 
     const recentActivityHtml = recentActivityTickets.map(t => {
       const hasIn = Boolean(t.scanInTime && t.status === 'Selesai');
-      const eventLabel = hasIn ? 'Scan In' : (t.isEmergency ? 'Scan Out • Darurat' : 'Scan Out');
+      const eventLabel = hasIn ? 'Tap In' : (t.isEmergency ? 'Scan Out • Darurat' : 'Scan Out');
       const timeStr = hasIn ? formatTimeOnly(t.scanInTime) : formatTimeOnly(t.scanOutTime);
       const gateStr = hasIn ? (t.scanInGate || activeGate) : (t.scanOutGate || activeGate);
       return `
@@ -254,13 +255,13 @@
       <!-- Hero Pos Jaga Profile (Green Hero with White Button) -->
       <section class="mobile-hero-card">
         <div class="mobile-hero-greeting-sub">Selamat pagi, petugas Pos Jaga</div>
-        <h2 class="mobile-hero-name">${officer.name} 🛡️</h2>
+        <h2 class="mobile-hero-name">${officer.name}</h2>
         <div class="mobile-hero-role">NIP ${officer.nip} • ${officer.dept}</div>
 
         <div class="mobile-hero-divider"></div>
 
         <button type="button" class="mobile-hero-btn mobile-hero-btn-white" onclick="window.mobileSwitchTab('scanner')">
-          <span>📷 Buka Kamera Scan</span>
+          <span>Buka Kamera Scan</span>
         </button>
       </section>
 
@@ -284,9 +285,9 @@
           <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${scanOutTodayTickets.length}</div>
         </div>
 
-        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('riwayat')">
-          <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Scan In hari ini</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0;">${scanInToday}</div>
+        <div class="mobile-card" style="margin: 0; padding: 12px;" onclick="window.mobileSwitchTab('riwayat')">
+          <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Tap In hari ini</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0;">${tapInToday}</div>
         </div>
       </div>
 
@@ -385,7 +386,7 @@
         </div>
 
         <div id="mCameraIdlePlaceholder" class="mobile-scanner-idle" style="display: ${isMobileCameraActive ? 'none' : 'block'};">
-          <div style="font-size: 2.2rem; margin-bottom: 8px;">📷</div>
+          <div style="margin-bottom: 8px; color: #64748b;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
           <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0;">Kamera belum aktif</h4>
           <p style="font-size: 0.75rem; color: #64748b; margin: 0 0 16px 0; line-height: 1.4;">
             Aktifkan kamera, lalu arahkan QR tiket ke dalam bingkai.
@@ -403,7 +404,7 @@
 
         <div id="mCameraActiveBar" style="display: ${isMobileCameraActive ? 'flex' : 'none'}; gap: 8px; margin-bottom: 12px;">
           <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px; background: #dc2626; color: #fff; border: none; font-weight: 700; border-radius: 8px;" onclick="window.mobileStopCameraScanner()">
-            <span>✕ Hentikan Kamera</span>
+            <span>Hentikan Kamera</span>
           </button>
         </div>
 
@@ -543,8 +544,8 @@
               <div style="font-size: 0.625rem; color: #64748b;">${isReady ? 'Belum Scan Out' : (t.scanOutGate || activeGate)}</div>
             </div>
             <div>
-              <div class="mobile-meta-sub">Scan In</div>
-              <div class="mobile-meta-val" style="color: ${scanInT ? '#047857' : '#64748b'};">${scanInT || 'Belum Scan In'}</div>
+              <div class="mobile-meta-sub">Tap In Kartu</div>
+              <div class="mobile-meta-val" style="color: ${scanInT ? '#047857' : '#64748b'};">${scanInT || 'Belum Tap In'}</div>
               <div style="font-size: 0.625rem; color: #64748b;">${scanInT ? (t.scanInGate || activeGate) : 'Belum ada catatan pos'}</div>
             </div>
           </div>
@@ -561,7 +562,7 @@
               </button>
             ` : `
               <button type="button" class="mobile-btn-primary" style="padding: 5px 12px; font-size: 0.725rem; width: auto; background: #047857; border-color: #047857;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-                Catat Scan In
+                Catat Tap In
               </button>
             `}
           </div>
@@ -707,9 +708,9 @@
               <div style="font-size: 0.625rem; color: #64748b;">${scanOutT ? (t.scanOutGate || activeGate) : 'Belum ada catatan pos'}</div>
             </div>
             <div>
-              <div class="mobile-meta-sub">Scan In</div>
+              <div class="mobile-meta-sub">Tap In Kartu</div>
               <div class="mobile-meta-val" style="color: ${scanInT ? '#047857' : (isPulang ? '#64748b' : '#dc2626')};">
-                ${isPulang ? 'Tidak diperlukan' : (scanInT || 'Belum Scan In')}
+                ${isPulang ? 'Tidak diperlukan' : (scanInT || 'Belum Tap In')}
               </div>
               <div style="font-size: 0.625rem; color: #64748b;">
                 ${isPulang ? 'Pulang Mendahului' : (scanInT ? (t.scanInGate || activeGate) : 'Belum ada catatan pos')}
@@ -723,7 +724,7 @@
             </div>
           ` : (isLate ? `
             <div style="font-size: 0.675rem; color: #b91c1c; font-weight: 700; margin-bottom: 8px;">
-              ⚠️ Terlambat ${t.lateMinutes || 30} menit • Batas kembali ${formatTimeOnly(getTReturnTime(t))}.
+              Terlambat ${t.lateMinutes || 30} menit • Batas kembali ${formatTimeOnly(getTReturnTime(t))}.
             </div>
           ` : `
             <div style="font-size: 0.675rem; color: #64748b; margin-bottom: 8px;">
@@ -747,7 +748,7 @@
           <div style="font-size: 0.825rem; font-weight: 800; color: #1e293b; margin-top: 1px;">${getTName(t)}</div>
           <div style="font-size: 0.675rem; color: #64748b;">${getTNip(t)} • ${t.department || 'Rekayasa & Pemeliharaan'}</div>
           <div style="font-size: 0.725rem; color: #047857; margin-top: 2px;">${t.category} • ${getTType(t)}</div>
-          <div style="font-size: 0.675rem; color: #64748b;">Scan Out: ${formatTimeOnly(t.scanOutTime) || '—'} • Scan In: ${formatTimeOnly(t.scanInTime) || '—'}</div>
+          <div style="font-size: 0.675rem; color: #64748b;">Scan Out: ${formatTimeOnly(t.scanOutTime) || '—'} • Tap In: ${formatTimeOnly(t.scanInTime) || '—'}</div>
         </div>
         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
           <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
@@ -920,7 +921,7 @@
 
           ${isReadyIn ? `
             <button type="button" class="mobile-btn-primary" style="font-weight: 700; padding: 11px; background: #047857; border-color: #047857;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-              <span>Catat Scan In (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
+              <span>Catat Tap In Kartu Akses (${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]})</span>
             </button>
           ` : ''}
 
@@ -1061,11 +1062,14 @@
 
     closeMobileSheet();
     if (typeof window.showToast === 'function') {
-      window.showToast(`Scan In berhasil! ${getTName(t)} telah kembali ke area pabrik pada ${nowFormatted}. Tiket Selesai.`, wasOverdue ? 'warning' : 'success');
+      window.showToast(`Tap In Kartu Akses berhasil! ${getTName(t)} telah kembali ke area pabrik pada ${nowFormatted}. Tiket Selesai.`, wasOverdue ? 'warning' : 'success');
     }
     renderMobileSecurity(null, currentSecurityTab);
     if (typeof window.renderActiveView === 'function') window.renderActiveView();
   };
+
+  // Alias for Tap In
+  window.mobileSecurityDirectTapIn = window.mobileSecurityDirectScanIn;
 
   // -------------------------------------------------------------------
   // 7. REAL CAMERA SCANNER & FILE UPLOAD INTEGRATION
@@ -1137,7 +1141,7 @@
 
       if (statusMsg) {
         statusMsg.style.display = 'block';
-        statusMsg.innerHTML = `<span style="color: #dc2626; font-weight: 700;">⚠️ ${userMsg}</span>`;
+        statusMsg.innerHTML = `<span style="color: #dc2626; font-weight: 700;">${userMsg}</span>`;
       }
       if (typeof window.showToast === 'function') window.showToast(userMsg, 'danger');
     }

@@ -217,7 +217,7 @@
           <div class="mobile-active-strip" style="background: rgba(239, 68, 68, 0.22); border: 1px solid rgba(239, 68, 68, 0.5);">
             <div class="mobile-active-strip-head">
               <span class="mobile-active-strip-title" style="color: #fca5a5;">
-                ⚠️ Status: Terlambat Kembali — ${activeTicket.id}
+                Status: Terlambat Kembali — ${activeTicket.id}
               </span>
               <span class="mobile-active-strip-badge" style="background: #dc2626; color: #ffffff;">Terlambat</span>
             </div>
@@ -251,7 +251,7 @@
       <!-- Hero Card Profile -->
       <section class="mobile-hero-card">
         <div class="mobile-hero-greeting-sub">Selamat ${timeGreeting},</div>
-        <h2 class="mobile-hero-name">${emp.name} 👋</h2>
+        <h2 class="mobile-hero-name">${emp.name}</h2>
         <div class="mobile-hero-role">${emp.role || 'Staf Rekayasa Mesin'}</div>
         <div class="mobile-hero-meta">${emp.dept || 'Departemen Rekayasa & Pemeliharaan'}</div>
         <div class="mobile-hero-meta">Atasan: ${approver.name || 'Ir. Hendra Gunawan, M.T.'}</div>
@@ -617,16 +617,21 @@
     if (!t) {
       return `
         <section class="mobile-card" style="text-align: center; padding: 22px 16px;">
-          <div style="font-size: 1.6rem; margin-bottom: 6px;">📋</div>
+          <div style="margin-bottom: 6px; color: #94a3b8;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
           <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">Tidak Ada Izin Aktif</div>
           <div style="font-size: 0.775rem; color: #64748b; margin-top: 4px; line-height: 1.4;">
             Anda belum mengajukan izin keluar area atau izin sebelumnya telah selesai.
           </div>
-          <button type="button" class="mobile-btn-primary" style="margin-top: 14px; width: 100%; font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileOpenCreateModal(false)">
-            <span>+ Ajukan Izin Keluar</span>
-          </button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
+            <button type="button" class="mobile-btn-primary" style="font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileOpenCreateModal(false)">
+              <span>+ Ajukan Izin</span>
+            </button>
+            <button type="button" class="mobile-btn-danger" style="background: #dc2626; color: #ffffff; border-color: #dc2626; font-weight: 700;" onclick="window.mobileOpenCreateModal(true)">
+              <span>Izin Darurat</span>
+            </button>
+          </div>
           <button type="button" class="mobile-btn-secondary" style="margin-top: 8px; width: 100%; font-weight: 700;" onclick="window.mobileSwitchSegment('donut')">
-            <span>📊 Lihat Grafik Pengajuan Izin</span>
+            <span>Lihat Grafik Pengajuan Izin</span>
           </button>
         </section>
       `;
@@ -636,6 +641,7 @@
     const isApproved = (t.status === 'Disetujui');
     const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const isEmergency = Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')) || t.status === 'Menunggu Otorisasi Darurat');
+    const isEmergencyLocked = Boolean(isEmergency && (t.emergencyLocked || t.qrLocked || t.status === 'Menunggu Otorisasi Darurat'));
 
     const col1Label = (isOutside && t.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && t.scanOutTime)
@@ -650,24 +656,50 @@
 
     let actionButtonsHtml = '';
     if (isPending) {
-      actionButtonsHtml = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-          <button type="button" class="mobile-btn-secondary" style="font-weight: 700; padding: 10px; font-size: 0.8rem;" onclick="window.mobileOpenEditSheet('${t.id}')">
-            <span>✏️ Edit Pengajuan</span>
-          </button>
-          <button type="button" class="mobile-btn-danger" style="background:#ffffff; color:#dc2626; border-color:#fca5a5; font-weight: 700; padding: 10px; font-size: 0.8rem;" onclick="window.mobileOpenCancelSheet('${t.id}')">
-            <span>✕ Batalkan Izin</span>
-          </button>
-        </div>
-        <div style="text-align: center; margin-top: 8px;">
-          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail pengajuan →</a>
-        </div>
-      `;
+      if (isEmergencyLocked) {
+        actionButtonsHtml = `
+          <div style="background: #fef2f2; border: 1px dashed #fca5a5; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: left;">
+            <div style="font-size: 0.75rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 4px;">
+              <span>QR Code Terkunci (SOP Darurat)</span>
+            </div>
+            <div style="font-size: 0.725rem; color: #7f1d1d; margin-top: 3px; line-height: 1.35;">
+              QR Code terkunci sampai diotorisasi Atasan melalui salah satu dari 3 metode otorisasi.
+            </div>
+          </div>
+          <div class="mobile-btn-group-stacked" style="margin-top: 10px;">
+            <button type="button" class="mobile-btn-primary" style="background: #dc2626; border-color: #dc2626; font-weight: 800;" onclick="window.mobileOpenEmergencyUnlockSheet('${t.id}')">
+              <span>Buka Kunci QR Darurat</span>
+            </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button type="button" class="mobile-btn-secondary" style="font-weight: 700; padding: 9px;" onclick="window.mobileOpenEditSheet('${t.id}')">
+                <span>Edit</span>
+              </button>
+              <button type="button" class="mobile-btn-danger" style="background:#ffffff; color:#dc2626; border-color:#fca5a5; font-weight: 700; padding: 9px;" onclick="window.mobileOpenCancelSheet('${t.id}')">
+                <span>Batalkan</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        actionButtonsHtml = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+            <button type="button" class="mobile-btn-secondary" style="font-weight: 700; padding: 10px; font-size: 0.8rem;" onclick="window.mobileOpenEditSheet('${t.id}')">
+              <span>Edit Pengajuan</span>
+            </button>
+            <button type="button" class="mobile-btn-danger" style="background:#ffffff; color:#dc2626; border-color:#fca5a5; font-weight: 700; padding: 10px; font-size: 0.8rem;" onclick="window.mobileOpenCancelSheet('${t.id}')">
+              <span>Batalkan Izin</span>
+            </button>
+          </div>
+          <div style="text-align: center; margin-top: 8px;">
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail pengajuan →</a>
+          </div>
+        `;
+      }
     } else if (isApproved) {
       actionButtonsHtml = `
         <div class="mobile-btn-group-stacked" style="margin-top: 12px;">
           <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 700;" onclick="window.mobileOpenQrModal('${t.id}')">
-            <span>📱 Buka QR Izin</span>
+            <span>Buka QR Izin</span>
           </button>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenTicketDetail('${t.id}')">
@@ -683,17 +715,19 @@
       const hasUsedExt = t.extensionApproved || (t.extensionCount && t.extensionCount >= 1);
       actionButtonsHtml = `
         <div class="mobile-btn-group-stacked" style="margin-top: 12px;">
-          <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 700;" onclick="window.mobileOpenQrModal('${t.id}')">
-            <span>📱 Buka QR Izin (${t.status === 'Terlambat' ? 'Terlambat' : 'Masuk'})</span>
-          </button>
+          ${!isPulang ? `
+            <button type="button" class="mobile-btn-primary" style="background: #047857; border-color: #047857; font-weight: 800; padding: 11px;" onclick="window.mobileExecuteTapIn('${t.id}')">
+              <span>Tap In Kartu Akses (Kembali Masuk)</span>
+            </button>
+          ` : ''}
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            ${hasUsedExt ? `
-              <button type="button" class="mobile-btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed; font-size: 0.7rem;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali">
-                <span>Perpanjangan Digunakan</span>
+            ${hasUsedExt || isPulang ? `
+              <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenQrModal('${t.id}')">
+                <span>Buka QR Izin</span>
               </button>
             ` : `
               <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenPerpanjanganModal('${t.id}')">
-                <span>⏱️ Perpanjangan</span>
+                <span>Perpanjangan</span>
               </button>
             `}
             <button type="button" class="mobile-btn-secondary" style="font-weight: 600;" onclick="window.mobileOpenTicketDetail('${t.id}')">
@@ -855,10 +889,10 @@
           ` : ''}
           ${activeTicket.status === 'Menunggu Persetujuan' ? `
             <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${activeTicket.id}')">
-              ✏️ Edit Pengajuan Ini
+              Edit Pengajuan Ini
             </button>
             <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${activeTicket.id}')">
-              ✕ Batalkan Izin Ini
+              Batalkan Izin Ini
             </button>
           ` : ''}
           <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet()">
@@ -908,7 +942,7 @@
       <div class="mobile-sheet-header" style="padding: 14px 18px 10px 18px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.25;">
-            ${isEditing ? `Edit Pengajuan Izin — ${window.editingTicketId}` : (isEmergency ? 'Formulir Izin Darurat / Bypass' : 'Formulir Pengajuan Izin Keluar')}
+            ${isEditing ? `Edit Pengajuan Izin — ${window.editingTicketId}` : (isEmergency ? 'Formulir Izin Darurat (Emergency Pass)' : 'Formulir Pengajuan Izin Keluar')}
           </h3>
           <p style="font-size: 0.775rem; color: #64748b; margin: 3px 0 0 0;">
             ${isEditing ? 'Perbarui data formulir izin keluar Anda sebelum disetujui Atasan' : (isEmergency ? 'Penerbitan izin darurat untuk evakuasi/keadaan mendesak' : 'Lengkapi detail perizinan Anda di bawah ini')}
@@ -919,9 +953,13 @@
 
       <div class="mobile-sheet-body">
         ${isEmergency ? `
-          <div class="mobile-emergency-banner" style="margin-bottom: 14px;">
-            <div class="mobile-emergency-banner-title">🚨 PERHATIAN: IZIN DARURAT / BYPASS</div>
-            <div class="mobile-emergency-banner-desc">Gunakan hanya untuk evakuasi atau keadaan darurat medis/teknis. Data wajib diisi lengkap.</div>
+          <div class="mobile-emergency-banner" style="margin-bottom: 14px; background: #fff5f5; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px;">
+            <div class="mobile-emergency-banner-title" style="color: #b91c1c; font-weight: 800; font-size: 0.825rem; display: flex; align-items: center; gap: 6px;">
+              <span>PERHATIAN: JALUR IZIN DARURAT (EMERGENCY PASS)</span>
+            </div>
+            <div class="mobile-emergency-banner-desc" style="color: #7f1d1d; font-size: 0.725rem; line-height: 1.4; margin-top: 4px;">
+              Gunakan hanya untuk kondisi darurat/K3/medis mendesak. QR Code diterbitkan dalam status <strong>TERKUNCI</strong> dan baru aktif setelah diotorisasi Atasan melalui salah satu dari 3 cara.
+            </div>
           </div>
         ` : ''}
 
@@ -929,9 +967,9 @@
           <!-- 1. Pilih Atasan Langsung (Searchable Combobox) -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label class="mobile-form-label" style="margin: 0;">Pilih Atasan Langsung <span class="req">*</span></label>
+              <label class="mobile-form-label" style="margin: 0;">Pilih Atasan Peninjau <span class="req">*</span></label>
               <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.675rem; font-weight: 700; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 2px 8px;">
-                🔍 Ketik / cari nama atasan anda
+                Ketik nama langsung terpilih
               </span>
             </div>
 
@@ -951,13 +989,13 @@
                   </div>
                 </div>
                 <button type="button" class="mobile-btn-change-approver" onclick="window.mobileChangeApprover()">
-                  Ganti
+                  Ubah Atasan
                 </button>
               </div>
 
               <div class="mobile-approver-input-box" id="mApproverInputBox" style="display: ${selectedApproverData ? 'none' : 'flex'};">
-                <span style="color: #64748b; font-size: 0.85rem;">🔍</span>
-                <input type="text" id="mSearchApproverInput" class="mobile-approver-search-input" placeholder="Ketik/cari nama atasan anda..." autocomplete="off" oninput="window.mobileFilterApprovers(this.value)" onclick="window.mobileShowApproverDropdown()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="mSearchApproverInput" class="mobile-approver-search-input" placeholder="Ketik nama atasan (Enter untuk pilih langsung)..." autocomplete="off" oninput="window.mobileFilterApprovers(this.value)" onclick="window.mobileShowApproverDropdown()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.mobileSelectFirstApprover();}">
                 <button type="button" id="mBtnClearApprover" style="display:none; background:none; border:none; color:#64748b; font-size:12px; cursor:pointer;" onclick="window.mobileClearApproverSearch()">✕</button>
                 <button type="button" style="background:none; border:none; color:#64748b; font-size:11px; cursor:pointer;" onclick="window.mobileToggleApproverDropdown()">▼</button>
               </div>
@@ -973,8 +1011,15 @@
               <label class="mobile-form-label">Kategori Keperluan <span class="req">*</span></label>
               <select class="mobile-select" id="mFormCategory" required onchange="window.mobileHandleCategoryChange(this.value)">
                 <option value="">-- Pilih Kategori --</option>
-                <option value="Dinas Kantor" ${initialCat === 'Dinas Kantor' ? 'selected' : ''}>Dinas Kantor</option>
-                <option value="Urusan Pribadi" ${initialCat === 'Urusan Pribadi' ? 'selected' : ''}>Urusan Pribadi</option>
+                ${isEmergency ? `
+                  <option value="Keperluan Medis / K3 Mendadak" ${initialCat === 'Keperluan Medis / K3 Mendadak' || !initialCat ? 'selected' : ''}>Keperluan Medis / K3</option>
+                  <option value="Evakuasi Kedaruratan" ${initialCat === 'Evakuasi Kedaruratan' ? 'selected' : ''}>Evakuasi Kedaruratan</option>
+                  <option value="Bencana / Musibah Keluarga" ${initialCat === 'Bencana / Musibah Keluarga' ? 'selected' : ''}>Bencana / Musibah</option>
+                  <option value="Dinas Darurat Lapangan" ${initialCat === 'Dinas Darurat Lapangan' ? 'selected' : ''}>Dinas Darurat Lapangan</option>
+                ` : `
+                  <option value="Dinas Kantor" ${initialCat === 'Dinas Kantor' || !initialCat ? 'selected' : ''}>Dinas Kantor</option>
+                  <option value="Urusan Pribadi" ${initialCat === 'Urusan Pribadi' ? 'selected' : ''}>Urusan Pribadi</option>
+                `}
               </select>
             </div>
 
@@ -982,7 +1027,7 @@
               <label class="mobile-form-label">Tipe Kepulangan <span class="req">*</span></label>
               <select class="mobile-select" id="mFormReturnType" required onchange="window.mobileToggleReturnType(this.value)">
                 <option value="">-- Pilih Tipe Kepulangan --</option>
-                <option value="Kembali ke Area" ${initialType === 'Kembali ke Area' ? 'selected' : ''}>Kembali ke Area</option>
+                <option value="Kembali ke Area" ${initialType === 'Kembali ke Area' || !initialType ? 'selected' : ''}>Kembali ke Area</option>
                 <option value="Pulang Mendahului" ${initialType === 'Pulang Mendahului' ? 'selected' : ''}>Pulang Mendahului (Tidak Kembali)</option>
               </select>
             </div>
@@ -991,38 +1036,68 @@
           <!-- 3. Lokasi / Tujuan Keluar -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
             <label class="mobile-form-label">Lokasi / Tujuan Keluar <span class="req">*</span></label>
-            <input type="text" class="mobile-input" id="mFormDestination" placeholder="PT Rekayasa Industri, Cikampek" value="${initialDest}" required>
+            <input type="text" class="mobile-input" id="mFormDestination" placeholder="${isEmergency ? 'RS Pupuk Kujang / Klinik Medis' : 'PT Rekayasa Industri, Cikampek'}" value="${initialDest}" required>
           </div>
 
           <!-- 4. Alasan Keperluan Izin -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
-            <label class="mobile-form-label">Alasan Keperluan Izin <span class="req">*</span></label>
-            <textarea class="mobile-textarea" id="mFormReason" placeholder="Koordinasi teknis dan pemeriksaan komponen pompa P-204 bersama vendor pemeliharaan." required style="min-height: 65px;">${initialReason}</textarea>
+            <label class="mobile-form-label">${isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin'} <span class="req">*</span></label>
+            <textarea class="mobile-textarea" id="mFormReason" placeholder="${isEmergency ? 'Pertolongan medis darurat segera untuk keluarga / kecelakaan kerja.' : 'Koordinasi teknis dan pemeriksaan komponen pompa P-204 bersama vendor.'}" required style="min-height: 65px;">${initialReason}</textarea>
           </div>
 
-          <!-- 5. Rencana Waktu Keluar & Perkiraan Waktu Kembali -->
+          <!-- 5. Rencana Waktu Keluar & Perkiraan Waktu Kembali (Anti Waktu Lampau) -->
           <div class="mobile-form-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px;">
             <div class="mobile-form-group" style="margin: 0;">
               <label class="mobile-form-label">Rencana Waktu Keluar <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultExit}" required onchange="window.mobileHandleExitChange(this.value)">
+              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultExit}" required oninput="window.mobileHandleExitChange(this.value)" onchange="window.mobileHandleExitChange(this.value)">
             </div>
             <div class="mobile-form-group" id="mFormWrapReturn" style="margin: 0; display: ${initialType === 'Pulang Mendahului' ? 'none' : 'block'};">
               <label class="mobile-form-label">Perkiraan Waktu Kembali <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'}>
+              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'} oninput="window.mobileHandleReturnChange(this.value)" onchange="window.mobileHandleReturnChange(this.value)">
             </div>
           </div>
 
-          <div style="font-size: 0.725rem; color: #64748b; margin-bottom: 18px; line-height: 1.4;">
-            * Wajib diisi. Waktu kembali wajib jika memilih Kembali ke Area. Seluruh waktu dalam WIB.
+          <div style="font-size: 0.725rem; color: #64748b; margin-bottom: 12px; line-height: 1.4;">
+            * Wajib diisi. Dilarang memilih waktu yang sudah dilalui. Seluruh waktu dalam WIB.
           </div>
+
+          ${isEmergency ? `
+            <!-- 6. Metode Otorisasi Darurat (Pilihan 3 Opsi) -->
+            <div class="mobile-form-group" style="margin-bottom: 14px; background: #fafafa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;">
+              <label class="mobile-form-label" style="color: #991b1b; font-weight: 800; margin-bottom: 6px;">Pilih Cara Otorisasi Buka Kunci QR <span class="req">*</span></label>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.775rem; color: #1e293b; cursor: pointer;">
+                  <input type="radio" name="mEmgMethod" value="app" checked>
+                  <div>
+                    <strong>Persetujuan Langsung Atasan di App (1-Click)</strong>
+                    <div style="color: #64748b; font-size: 0.675rem;">Notifikasi prioritas dikirim ke perangkat Atasan</div>
+                  </div>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.775rem; color: #1e293b; cursor: pointer;">
+                  <input type="radio" name="mEmgMethod" value="passcode">
+                  <div>
+                    <strong>Input Kode Sandi / OTP (6 Digit)</strong>
+                    <div style="color: #64748b; font-size: 0.675rem;">Minta kode sandi otorisasi dari Atasan</div>
+                  </div>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.775rem; color: #1e293b; cursor: pointer;">
+                  <input type="radio" name="mEmgMethod" value="facescan">
+                  <div>
+                    <strong>Scan Wajah Atasan (Face Scan Biometrik)</strong>
+                    <div style="color: #64748b; font-size: 0.675rem;">Pindai wajah Atasan langsung di tempat</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          ` : ''}
 
           <!-- Footer Actions (Batal & Lanjutkan Konfirmasi) -->
           <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 14px; margin-top: 14px; border-top: 1px solid #f1f5f9;">
             <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 10px 20px; font-weight: 600;" onclick="window.mobileCloseSheet()">
               Batal
             </button>
-            <button type="submit" class="mobile-btn-primary" style="width: auto; padding: 10px 24px; font-weight: 700; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px;">
-              <span>${isEditing ? 'Lanjutkan & Simpan Perubahan' : 'Lanjutkan Konfirmasi'}</span>
+            <button type="submit" class="mobile-btn-primary" style="width: auto; padding: 10px 24px; font-weight: 700; background: ${isEmergency ? '#dc2626' : '#059669'}; border-color: ${isEmergency ? '#dc2626' : '#059669'}; display: inline-flex; align-items: center; gap: 6px;">
+              <span>${isEditing ? 'Lanjutkan & Simpan' : (isEmergency ? 'Lanjutkan Konfirmasi Darurat' : 'Lanjutkan Konfirmasi')}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
           </div>
@@ -1206,6 +1281,20 @@
     `).join('');
   };
 
+  window.mobileSelectFirstApprover = function () {
+    const input = document.getElementById('mSearchApproverInput');
+    const q = (input?.value || '').toLowerCase().trim();
+    const approvers = getMobileApprovers();
+    const match = approvers.find(a =>
+      a.name.toLowerCase().includes(q) ||
+      (a.title && a.title.toLowerCase().includes(q)) ||
+      (a.nip && a.nip.toLowerCase().includes(q))
+    ) || approvers[0];
+    if (match) {
+      window.mobileSelectApprover(match.name, match.title || 'Manajer', match.initials || 'HG');
+    }
+  };
+
   window.mobileSelectApprover = function (name, title, initials) {
     selectedApproverData = { name, title, initials };
     const hiddenInput = document.getElementById('mFormApproverValue');
@@ -1224,6 +1313,10 @@
     if (dd) dd.style.display = 'none';
     if (inputBox) inputBox.style.display = 'none';
     if (card) card.style.display = 'flex';
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Atasan terpilih: ${name}`, 'info');
+    }
   };
 
   window.mobileChangeApprover = function () {
@@ -1279,13 +1372,43 @@
   };
 
   window.mobileHandleExitChange = function (val) {
+    const exitInput = document.getElementById('mFormPlannedExit');
     const retInput = document.getElementById('mFormEstimatedReturn');
+    if (!val) return;
+
+    const now = new Date();
+    // VALIDASI KETAT ANTI MASA LALU (Toleransi 30 detik)
+    if (new Date(val).getTime() < now.getTime() - 30000) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Rencana waktu keluar tidak boleh memilih waktu atau jam yang sudah berlalu! Disesuaikan otomatis.', 'warning');
+      }
+      const adjusted = new Date(now.getTime() + 5 * 60000);
+      if (exitInput) {
+        exitInput.value = formatDateTimeLocal(adjusted);
+        val = exitInput.value;
+      }
+    }
+
     if (retInput && val) {
       retInput.min = val;
-      if (retInput.value && retInput.value <= val) {
+      if (retInput.value && new Date(retInput.value) <= new Date(val)) {
         const exitDt = new Date(val);
-        retInput.value = formatDateTimeLocal(new Date(exitDt.getTime() + 60 * 60000));
+        retInput.value = formatDateTimeLocal(new Date(exitDt.getTime() + 2 * 60 * 60000));
       }
+    }
+  };
+
+  window.mobileHandleReturnChange = function (val) {
+    const exitInput = document.getElementById('mFormPlannedExit');
+    const retInput = document.getElementById('mFormEstimatedReturn');
+    if (!val || !exitInput) return;
+    const exitVal = exitInput.value;
+    if (exitVal && new Date(val) <= new Date(exitVal)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Perkiraan waktu kembali harus lebih besar dari rencana waktu keluar!', 'warning');
+      }
+      const exitDt = new Date(exitVal);
+      if (retInput) retInput.value = formatDateTimeLocal(new Date(exitDt.getTime() + 2 * 60 * 60000));
     }
   };
 
@@ -1299,6 +1422,7 @@
     const reason = (document.getElementById('mFormReason')?.value || '').trim();
     const plannedExit = document.getElementById('mFormPlannedExit')?.value || '';
     const estimatedReturn = returnType === 'Pulang Mendahului' ? null : (document.getElementById('mFormEstimatedReturn')?.value || '');
+    const emergencyMethod = document.querySelector('input[name="mEmgMethod"]:checked')?.value || 'app';
 
     // 1. Approver check
     if (!approverName) {
@@ -1337,9 +1461,9 @@
     }
 
     const now = new Date();
-    const oneMinAgo = new Date(now.getTime() - 60000);
-    if (new Date(plannedExit) < oneMinAgo) {
-      if (typeof window.showToast === 'function') window.showToast('Hari atau tanggal sebelumnya tidak dapat dipilih sebagai rencana waktu keluar!', 'danger');
+    const thirtySecAgo = new Date(now.getTime() - 30000);
+    if (new Date(plannedExit) < thirtySecAgo) {
+      if (typeof window.showToast === 'function') window.showToast('Rencana waktu keluar tidak boleh memilih waktu atau jam yang sudah berlalu!', 'danger');
       document.getElementById('mFormPlannedExit')?.focus();
       return;
     }
@@ -1386,6 +1510,7 @@
       reason,
       plannedExit,
       estimatedReturn,
+      emergencyMethod,
       isEmergency: !!isEmergency,
       isEditing: Boolean(window.editingTicketId),
       editingTicketId: window.editingTicketId
@@ -1589,6 +1714,8 @@
       isEmergency: !!data.isEmergency,
       emergencyLocked: !!data.isEmergency,
       qrLocked: !!data.isEmergency,
+      emergencyPasscode: data.isEmergency ? String(Math.floor(100000 + Math.random() * 900000)) : undefined,
+      emergencyMethod: data.emergencyMethod || 'app',
       createdAt: nowFormatted,
       timeline: [
         {
@@ -1616,14 +1743,271 @@
 
     window.mobileCloseSheet();
 
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Tiket #${newId} berhasil diajukan! Sistem kini mengunci pengajuan baru hingga tiket ini diproses.`, 'success');
+    if (data.isEmergency) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Izin Darurat #${newId} dibuat! QR Code terkunci sampai diotorisasi Atasan.`, 'warning');
+      }
+      setTimeout(() => {
+        window.mobileOpenEmergencyUnlockSheet(newId);
+      }, 250);
+    } else {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Tiket #${newId} berhasil diajukan! Sistem kini mengunci pengajuan baru hingga tiket ini diproses.`, 'success');
+      }
     }
 
     renderMobileKaryawan(null, currentKaryawanTab);
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  };
+
+  // -------------------------------------------------------------------
+  // TAP IN KARTU AKSES (ALUR KEMBALI KE PABRIK)
+  // -------------------------------------------------------------------
+  window.mobileExecuteTapIn = function (ticketId) {
+    if (typeof window.executeScanIn === 'function') {
+      window.executeScanIn(ticketId);
+      renderMobileKaryawan(null, currentKaryawanTab);
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+      if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+      return;
+    }
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+    const wasOverdue = (t.status === 'Terlambat');
+
+    t.status = 'Selesai';
+    t.scanInTime = `${nowFormatted} (Pos 1 Gerbang Utama)`;
+    t.scanInGate = 'Pos 1 Gerbang Utama';
+    if (!t.timeline) t.timeline = [];
+    t.timeline.push({
+      event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Tepat Waktu)',
+      time: nowFormatted,
+      by: `${t.applicantName || 'Budi Pratama'} (Karyawan)`,
+      desc: `Tap In Kartu Akses berhasil di Pos 1 Gerbang Utama. Karyawan kembali ke area pabrik. Tiket #${t.id} resmi selesai.`
+    });
+
+    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    else localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Tap In Kartu Akses berhasil! Anda telah kembali ke area pabrik. Tiket #${t.id} selesai.`, wasOverdue ? 'warning' : 'success');
+    }
+
+    renderMobileKaryawan(null, currentKaryawanTab);
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+    if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+  };
+
+  // -------------------------------------------------------------------
+  // OTORISASI IZIN DARURAT (3 METODE BUKA KUNCI QR DARURAT)
+  // -------------------------------------------------------------------
+  window.mobileOpenEmergencyUnlockSheet = function (ticketId) {
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) return;
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId) || getActiveTicket();
+    if (!t) return;
+
+    window.currentMobileEmergencyTicketId = t.id;
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="border-bottom: 1.5px solid #fee2e2; background: #fff5f5; padding: 14px 18px 10px 18px;">
+        <div>
+          <div style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px;">SOP DARURAT • NO APPROVAL NO EXIT</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 2px 0 0 0;">Otorisasi Buka Kunci QR</h3>
+          <p style="font-size: 0.725rem; color: #64748b; margin: 2px 0 0 0;">Tiket ${t.id} • Atasan: ${t.approverName}</p>
+        </div>
+        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+
+      <div class="mobile-sheet-body">
+        <!-- 3 Tabs Navigation -->
+        <div style="display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 14px;">
+          <button type="button" id="mTabBtnEmgApp" class="mobile-seg-btn active" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('app')">
+            App Atasan
+          </button>
+          <button type="button" id="mTabBtnEmgPass" class="mobile-seg-btn" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('passcode')">
+            Kode OTP
+          </button>
+          <button type="button" id="mTabBtnEmgFace" class="mobile-seg-btn" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('facescan')">
+            Scan Wajah
+          </button>
+        </div>
+
+        <!-- Tab 1: Persetujuan App -->
+        <div id="mPaneEmgApp" style="display: block; text-align: center; padding: 6px 0;">
+          <div style="margin-bottom: 6px; color: #64748b;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></div>
+          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">Persetujuan 1-Click di Aplikasi Atasan</div>
+          <p style="font-size: 0.75rem; color: #64748b; line-height: 1.45; margin: 6px 0 14px 0;">
+            Notifikasi prioritas darurat telah diteruskan ke perangkat <strong>${t.approverName}</strong>. Atasan dapat menyetujui langsung dari HP atau sistem web.
+          </p>
+          <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 800; padding: 11px;" onclick="window.mobileSimulateApproverUnlock('${t.id}')">
+            <span>Simulasikan Persetujuan Atasan</span>
+          </button>
+        </div>
+
+        <!-- Tab 2: Passcode OTP -->
+        <div id="mPaneEmgPass" style="display: none; text-align: center; padding: 6px 0;">
+          <div style="margin-bottom: 6px; color: #64748b;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">Masukkan 6-Digit Sandi Otorisasi</div>
+          <p style="font-size: 0.75rem; color: #64748b; margin: 4px 0 10px 0;">
+            Minta 6-digit kode OTP darurat dari Atasan Anda:
+          </p>
+      
+          <div style="margin-bottom: 14px;">
+            <input type="text" id="mInputEmgPasscode" class="mobile-input" maxlength="6" placeholder="______" style="text-align: center; font-size: 1.4rem; letter-spacing: 8px; font-weight: 900; font-family: monospace; width: 190px; margin: 0 auto;">
+          </div>
+          <button type="button" class="mobile-btn-primary" style="font-weight: 800; padding: 11px;" onclick="window.mobileVerifyPasscodeUnlock('${t.id}')">
+            <span>Verifikasi Sandi & Buka QR</span>
+          </button>
+        </div>
+
+        <!-- Tab 3: Face Scan -->
+        <div id="mPaneEmgFace" style="display: none; text-align: center; padding: 6px 0;">
+          <div style="position: relative; width: 140px; height: 160px; margin: 0 auto 12px auto; border-radius: 50%; border: 3px dashed #059669; display: flex; align-items: center; justify-content: center; background: #0f172a; overflow: hidden;" id="mFaceScanRing">
+            <div style="color: #64748b;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <div id="mFaceScanOverlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(5,150,105,0.25); display:none;"></div>
+          </div>
+          <div id="mFaceStatusText" style="font-size: 0.775rem; color: #475569; margin-bottom: 12px;">
+            Posisikan wajah Atasan di depan kamera lalu tekan tombol scan biometrik.
+          </div>
+          <div style="background: #e2e8f0; height: 6px; border-radius: 999px; overflow: hidden; margin-bottom: 14px; width: 80%; margin-left: auto; margin-right: auto;">
+            <div id="mFaceProgressBar" style="width: 0%; height: 100%; background: #059669; transition: width 0.3s;"></div>
+          </div>
+          <button type="button" id="mBtnTriggerFace" class="mobile-btn-primary" style="font-weight: 800; padding: 11px;" onclick="window.mobileTriggerFaceScan('${t.id}')">
+            <span>Pindai Wajah Atasan Sekarang</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
+  window.mobileSwitchEmgTab = function (tab) {
+    const btnApp = document.getElementById('mTabBtnEmgApp');
+    const btnPass = document.getElementById('mTabBtnEmgPass');
+    const btnFace = document.getElementById('mTabBtnEmgFace');
+    const paneApp = document.getElementById('mPaneEmgApp');
+    const panePass = document.getElementById('mPaneEmgPass');
+    const paneFace = document.getElementById('mPaneEmgFace');
+
+    if (btnApp) btnApp.classList.toggle('active', tab === 'app');
+    if (btnPass) btnPass.classList.toggle('active', tab === 'passcode');
+    if (btnFace) btnFace.classList.toggle('active', tab === 'facescan');
+
+    if (paneApp) paneApp.style.display = tab === 'app' ? 'block' : 'none';
+    if (panePass) panePass.style.display = tab === 'passcode' ? 'block' : 'none';
+    if (paneFace) paneFace.style.display = tab === 'facescan' ? 'block' : 'none';
+  };
+
+  window.mobileAutoFillPasscode = function (code) {
+    const input = document.getElementById('mInputEmgPasscode');
+    if (input) {
+      input.value = code;
+      input.focus();
+    }
+  };
+
+  function completeEmergencyUnlock(ticketId, method) {
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+
+    t.status = 'Disetujui';
+    t.emergencyLocked = false;
+    t.qrLocked = false;
+    t.emergencyUnlockMethod = method;
+
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+    if (!t.timeline) t.timeline = [];
+    t.timeline.push({
+      event: 'Otorisasi Darurat Berhasil',
+      time: nowFormatted,
+      by: `${t.approverName || 'Atasan Langsung'}`,
+      desc: `QR Code darurat berhasil dibuka kuncinya melalui metode: ${method}. QR kini aktif untuk Scan Out di Pos Jaga.`
+    });
+
+    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    else localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+
+    window.mobileCloseSheet();
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`BERHASIL! QR Code Darurat #${t.id} telah TERBUKA & AKTIF!`, 'success');
+    }
+
+    renderMobileKaryawan(null, currentKaryawanTab);
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+
+    setTimeout(() => {
+      window.mobileOpenQrModal(t.id);
+    }, 350);
+  }
+
+  window.mobileSimulateApproverUnlock = function (ticketId) {
+    completeEmergencyUnlock(ticketId, 'Persetujuan Langsung Atasan di App');
+  };
+
+  window.mobileVerifyPasscodeUnlock = function (ticketId) {
+    const input = document.getElementById('mInputEmgPasscode');
+    const val = (input?.value || '').trim();
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const targetCode = t.emergencyPasscode || '849201';
+
+    if (!val || val !== targetCode) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Kode sandi tidak valid! Pastikan 6 digit kode dari Atasan sesuai.', 'danger');
+      }
+      if (input) input.focus();
+      return;
+    }
+
+    completeEmergencyUnlock(ticketId, 'Input Kode Sandi / OTP');
+  };
+
+  window.mobileTriggerFaceScan = function (ticketId) {
+    const btn = document.getElementById('mBtnTriggerFace');
+    const statusText = document.getElementById('mFaceStatusText');
+    const progress = document.getElementById('mFaceProgressBar');
+    const overlay = document.getElementById('mFaceScanOverlay');
+
+    if (btn) btn.disabled = true;
+    if (overlay) overlay.style.display = 'block';
+    if (statusText) statusText.innerHTML = '<span style="color:#059669; font-weight:700;">Memindai biometrik wajah Atasan... 30%</span>';
+    if (progress) progress.style.width = '35%';
+
+    setTimeout(() => {
+      if (statusText) statusText.innerHTML = '<span style="color:#059669; font-weight:700;">Mencocokkan data wajah Atasan... 80%</span>';
+      if (progress) progress.style.width = '80%';
+
+      setTimeout(() => {
+        if (statusText) statusText.innerHTML = '<span style="color:#059669; font-weight:800;">✓ Wajah Cocok (99.2%)! Otorisasi Berhasil.</span>';
+        if (progress) progress.style.width = '100%';
+
+        setTimeout(() => {
+          completeEmergencyUnlock(ticketId, 'Scan Wajah Atasan (Biometrik)');
+        }, 400);
+      }, 500);
+    }, 500);
   };
 
   // -------------------------------------------------------------------
@@ -1801,25 +2185,25 @@
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
           ${isPending ? `
             <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${t.id}')">
-              ✏️ Edit Pengajuan Ini
+              Edit Pengajuan Ini
             </button>
             <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border-color:#fecdd3;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
-              ✕ Batalkan Izin Ini
+              Batalkan Izin Ini
             </button>
           ` : ''}
           ${isApproved || isOutside ? `
             <button type="button" class="mobile-btn-primary" style="background:#059669; border-color:#059669;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
-              📱 Tampilkan QR Code Resmi
+              Tampilkan QR Code Resmi
             </button>
           ` : ''}
           ${isApproved ? `
             <button type="button" class="mobile-btn-danger" style="background:#fff1f2; color:#be123c; border-color:#fecdd3;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
-              ✕ Batalkan Izin
+              Batalkan Izin
             </button>
           ` : ''}
           ${isOutside ? `
             <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet(); window.mobileOpenPerpanjanganModal('${t.id}')">
-              ⏱️ Ajukan Perpanjangan Waktu
+              Ajukan Perpanjangan Waktu
             </button>
           ` : ''}
           <button type="button" class="mobile-btn-secondary" onclick="window.mobileCloseSheet()">Tutup</button>

@@ -126,23 +126,49 @@
 
     // Priority Cards: Emergency Ticket if exists
     let priorityHtml = '';
-    const emergencyTicket = tickets.find(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-'))));
-    if (emergencyTicket) {
+    const pendingEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan' || t.emergencyLocked));
+    const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
+
+    if (pendingEmergTicket) {
+      priorityHtml = `
+        <div class="mobile-card" style="border-left: 4px solid #dc2626; background: #fef2f2; margin-bottom: 12px; padding: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px;">PRIORITAS TINGGI • IZIN DARURAT</span>
+            <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">Menunggu Otorisasi</span>
+          </div>
+          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+          <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+          <div style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0;">
+            <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
+          </div>
+          <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px;">
+            <em>"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</em>
+          </div>
+          <div style="background: #ffffff; border: 1px dashed #fca5a5; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.725rem; color: #991b1b; display: flex; justify-content: space-between; align-items: center;">
+            <span>Kode Sandi Otorisasi:</span>
+            <strong style="font-size: 0.85rem; letter-spacing: 2px;">${pendingEmergTicket.emergencyPasscode || '849201'}</strong>
+          </div>
+          <button type="button" class="mobile-btn-primary" style="background: #dc2626; border-color: #dc2626; font-weight: 800; padding: 10px;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
+            <span>Setujui Izin Darurat (1-Click)</span>
+          </button>
+        </div>
+      `;
+    } else if (finishedEmergTicket) {
       priorityHtml = `
         <div class="mobile-card" style="border-left: 4px solid #b91c1c; background: #fff5f5; margin-bottom: 12px; padding: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <span style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px;">PRIORITAS • IZIN DARURAT</span>
             <span class="mobile-badge darurat">Selesai Darurat</span>
           </div>
-          <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(emergencyTicket)}</div>
-          <div style="font-size: 0.725rem; color: #64748b;">${emergencyTicket.id} • ${emergencyTicket.category || 'Darurat'} • ${emergencyTicket.status}</div>
+          <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(finishedEmergTicket)}</div>
+          <div style="font-size: 0.725rem; color: #64748b;">${finishedEmergTicket.id} • ${finishedEmergTicket.category || 'Darurat'} • ${finishedEmergTicket.status}</div>
           <div style="font-size: 0.7rem; color: #7f1d1d; margin: 4px 0 2px 0; font-weight: 700;">
-            Terbit ${emergencyTicket.createdAt ? formatTimeOnly(emergencyTicket.createdAt) : '09.15 WIB'} • Scan Out ${emergencyTicket.scanOutTime ? formatTimeOnly(emergencyTicket.scanOutTime) : '09.20 WIB'}
+            Terbit ${finishedEmergTicket.createdAt ? formatTimeOnly(finishedEmergTicket.createdAt) : '09.15 WIB'} • Scan Out ${finishedEmergTicket.scanOutTime ? formatTimeOnly(finishedEmergTicket.scanOutTime) : '09.20 WIB'}
           </div>
           <p style="font-size: 0.725rem; color: #475569; margin: 4px 0 10px 0; line-height: 1.35;">
             <strong>Peninjauan susulan:</strong> Perjalanan kedaruratan telah selesai. Alur darurat memerlukan peninjauan susulan oleh atasan langsung.
           </p>
-          <button type="button" class="mobile-btn-secondary" style="border-color: #fca5a5; color: #991b1b; padding: 7px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileOpenAtasanDaruratModal('${emergencyTicket.id}')">
+          <button type="button" class="mobile-btn-secondary" style="border-color: #fca5a5; color: #991b1b; padding: 7px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileOpenAtasanDaruratModal('${finishedEmergTicket.id}')">
             Rincian darurat →
           </button>
         </div>
@@ -616,7 +642,7 @@
 
       <!-- Kotak Info Biru (Matching PDF Page 3) -->
       <div class="mobile-info-box-blue">
-        <div class="mobile-info-box-blue-title">ℹ️ Belum ada aktivitas keluar area</div>
+        <div class="mobile-info-box-blue-title">Belum ada aktivitas keluar area</div>
         <div class="mobile-info-box-blue-desc">
           Scan Out dan Scan In belum tercatat. Waktu di atas adalah rencana pemohon, bukan waktu aktual.
         </div>
@@ -663,10 +689,10 @@
 
           <div style="display: flex; gap: 8px;">
             <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
-              ✕ Tolak
+              Tolak
             </button>
             <button type="button" class="mobile-btn-approve" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
-              ✓ Setujui
+              Setujui
             </button>
           </div>
         </div>
@@ -1021,7 +1047,7 @@
 
         <!-- Blue Alert Box -->
         <div class="mobile-info-box-blue">
-          <div class="mobile-info-box-blue-title">ℹ️ Scan In lebih awal akan menutup permohonan otomatis</div>
+          <div class="mobile-info-box-blue-title">Scan In lebih awal akan menutup permohonan otomatis</div>
           <div class="mobile-info-box-blue-desc">
             Jika karyawan sudah kembali sebelum keputusan disimpan, tiket menjadi Selesai dan permohonan tidak lagi dapat diputuskan. Atasan tidak melakukan Scan In.
           </div>
@@ -1069,7 +1095,7 @@
         </div>
 
         <div class="mobile-info-box-yellow" style="margin-bottom: 12px;">
-          <div class="mobile-info-box-yellow-title">⏳ Penangguhan Keterlambatan</div>
+          <div class="mobile-info-box-yellow-title">Penangguhan Keterlambatan</div>
           <div class="mobile-info-box-yellow-desc">
             Penandaan terlambat ditangguhkan sampai ${usulan} selama permohonan menunggu keputusan.
           </div>
@@ -1093,10 +1119,10 @@
 
           <div style="display: flex; gap: 8px;">
             <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteExtension('${t.id}', 'reject')">
-              ✕ Tolak
+              Tolak
             </button>
             <button type="button" class="mobile-btn-approve" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteExtension('${t.id}', 'approve')">
-              ✓ Setujui
+              Setujui
             </button>
           </div>
         </div>
@@ -1386,6 +1412,46 @@
     window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
       window.showToast(decision === 'approve' ? `Perpanjangan izin ${ticketId} disetujui!` : `Perpanjangan izin ${ticketId} ditolak.`, decision === 'approve' ? 'success' : 'info');
+    }
+    renderMobileAtasan(null, currentAtasanTab);
+    if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
+  };
+
+  window.mobileAtasanApproveEmergency = function (ticketId) {
+    if (typeof window.emergencyDirectApprove === 'function') {
+      window.emergencyDirectApprove(ticketId);
+      renderMobileAtasan(null, currentAtasanTab);
+      if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
+      return;
+    }
+    const tickets = getTickets();
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const approver = getActiveApprover();
+    t.status = 'Disetujui';
+    t.emergencyLocked = false;
+    t.qrLocked = false;
+    t.emergencyUnlockMethod = 'Persetujuan Langsung Atasan di App';
+    t.emergencyUnlockedBy = approver.name;
+
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} WIB`;
+
+    if (!t.timeline) t.timeline = [];
+    t.timeline.push({
+      event: 'Otorisasi Darurat Berhasil (1-Click Atasan)',
+      time: nowFormatted,
+      by: `${approver.name} (${approver.title || 'Manajer'})`,
+      desc: 'Izin darurat disetujui 1-Klik oleh Atasan melalui Aplikasi Mobile. QR Code aktif.'
+    });
+
+    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    else localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Izin Darurat #${t.id} disetujui! QR Code ${getTName(t)} kini telah aktif.`, 'success');
     }
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();

@@ -7,16 +7,18 @@
 (function () {
   'use strict';
 
-  let currentMobileRole = 'karyawan'; // 'karyawan' | 'approver' | 'approver2' | 'security' | 'admin'
+  let currentMobileRole = 'karyawan'; // 'karyawan' | 'approver' | 'approver2' | 'security'
   let currentMobileTab = 'dashboard';
 
   // -------------------------------------------------------------------
   // 1. INITIALIZATION & SYNC
   // -------------------------------------------------------------------
   function initMobileApp() {
-    // Detect if desktop switched role
-    if (window.currentActor && ['karyawan', 'approver', 'approver2', 'security', 'admin'].includes(window.currentActor)) {
+    // Detect if desktop switched role (Mobile only supports Karyawan, Atasan 1, Atasan 2, Pos Jaga)
+    if (window.currentActor && ['karyawan', 'approver', 'approver2', 'security'].includes(window.currentActor)) {
       currentMobileRole = window.currentActor;
+    } else {
+      currentMobileRole = 'karyawan';
     }
 
     renderMobileShell();
@@ -87,13 +89,6 @@
       avatarEl.style.color = '#0369a1';
       avatarEl.style.borderColor = '#bae6fd';
       avatarEl.title = 'Sertu Agus (Pos Jaga) — Klik untuk ganti peran';
-    } else if (currentMobileRole === 'admin') {
-      subEl.textContent = 'Perizinan Keluar Area • Admin K3';
-      avatarEl.textContent = 'BS';
-      avatarEl.style.background = '#f5f3ff';
-      avatarEl.style.color = '#7c3aed';
-      avatarEl.style.borderColor = '#ddd6fe';
-      avatarEl.title = 'Bambang Sutrisno (Admin) — Klik untuk ganti peran';
     }
   }
 
@@ -156,21 +151,6 @@
         <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           <span>Riwayat</span>
-        </div>
-      `;
-    } else if (currentMobileRole === 'admin') {
-      navEl.innerHTML = `
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" onclick="window.mobileSwitchTab('dashboard')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Dashboard</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'users' ? 'active' : ''}" onclick="window.mobileSwitchTab('users')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span>Hak Akses</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <span>Audit Log</span>
         </div>
       `;
     }
@@ -315,7 +295,7 @@
         </div>
         <div style="display: flex; gap: 8px; margin-top: 14px;">
           <div style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; color: #ede9fe; font-weight: 700;">
-            🛡️ Kebijakan: No Approval, No Exit
+            Kebijakan: No Approval, No Exit
           </div>
         </div>
       </div>
@@ -351,10 +331,10 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <button type="button" class="mobile-btn-primary" style="background:#7c3aed; border-color:#7c3aed;" onclick="window.mobileSwitchTab('users')">
-            👥 Lihat & Kelola Hak Akses Pengguna
+            Lihat & Kelola Hak Akses Pengguna
           </button>
           <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('riwayat')">
-            📜 Buka Log Audit & Rekam Jejak
+            Buka Log Audit & Rekam Jejak
           </button>
         </div>
       </div>
@@ -394,8 +374,7 @@
       karyawan: 'Karyawan (Budi Pratama, S.T.)',
       approver: 'Atasan 1 (Ir. Hendra Gunawan, M.T.)',
       approver2: 'Atasan 2 (Dewi Sartika, S.T., M.M.)',
-      security: 'Pos Jaga (Sertu Agus - Pos 1)',
-      admin: 'Admin (Bambang Sutrisno - Pengamanan & K3)'
+      security: 'Pos Jaga (Sertu Agus - Pos 1)'
     };
     if (typeof window.showToast === 'function') {
       window.showToast(`Beralih ke tampilan simulasi: ${roleNames[role] || role}`, 'info');
@@ -404,12 +383,14 @@
 
   // Synchronize Mobile when Desktop or Auth changes role
   window.syncMobileRole = function (role) {
-    if (['karyawan', 'approver', 'approver2', 'security', 'admin'].includes(role)) {
+    if (['karyawan', 'approver', 'approver2', 'security'].includes(role)) {
       currentMobileRole = role;
-      currentMobileTab = 'dashboard';
-      renderMobileShell();
-      renderActiveView();
+    } else {
+      currentMobileRole = 'karyawan';
     }
+    currentMobileTab = 'dashboard';
+    renderMobileShell();
+    renderActiveView();
   };
 
   window.openMobileRoleSheet = function () {
