@@ -14,6 +14,8 @@
   let atasanFilterStatus = 'all';
   let atasanRiwayatSearch = '';
   let atasanRiwayatFilterDecision = 'all';
+  let isAntreanFilterOpen = false;
+  let isAtasanRiwayatFilterOpen = false;
   let selectedTimTicketId = null;
   let viewingTicketId = null;
 
@@ -499,41 +501,50 @@
         </button>
       </div>
 
-      <!-- Filter Card (Matching PDF Page 2) -->
-      <div class="mobile-card" style="padding: 12px 14px; margin-bottom: 12px;">
-        <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Filter pengajuan</div>
+      <!-- Result Bar & Filter Button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
+          ${activeList.length} ${currentAntreanSegment === 'baru' ? 'izin baru' : 'perpanjangan'} menunggu persetujuan
+        </span>
+        <button type="button" class="mobile-filter-toggle-btn ${isAntreanFilterOpen ? 'active' : ''}" onclick="window.mobileToggleAntreanFilter()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          <span>${isAntreanFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+          ${(atasanSearchQuery || atasanFilterDate) ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
+        </button>
+      </div>
+
+      <!-- Collapsible Filter Card -->
+      <div id="mAtasanAntreanFilterCard" class="mobile-filter-panel" style="display: ${isAntreanFilterOpen ? 'block' : 'none'};">
+        <div class="mobile-filter-panel-title">
+          <span>Cari & filter pengajuan</span>
+          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleAntreanFilter()">✕</button>
+        </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <div>
-            <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Cari pengajuan</label>
-            <input type="text" class="mobile-input" id="mAtasanInputSearch" placeholder="Nama / NIP / nomor tiket" value="${atasanSearchQuery}" style="font-size: 0.75rem; padding: 7px 10px;">
+            <label class="mobile-filter-label">Cari pengajuan</label>
+            <input type="text" class="mobile-filter-input" id="mAtasanInputSearch" placeholder="Nama / NIP / nomor tiket" value="${atasanSearchQuery}">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
-              <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Tanggal pengajuan</label>
-              <input type="date" class="mobile-input" id="mAtasanInputDate" value="${atasanFilterDate}" style="font-size: 0.75rem; padding: 7px 10px;">
+              <label class="mobile-filter-label">Tanggal pengajuan</label>
+              <input type="date" class="mobile-filter-input" id="mAtasanInputDate" value="${atasanFilterDate}">
             </div>
             <div>
-              <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Status</label>
-              <select class="mobile-select" id="mAtasanSelectStatus" style="font-size: 0.75rem; padding: 7px 10px;">
+              <label class="mobile-filter-label">Status</label>
+              <select class="mobile-filter-select" id="mAtasanSelectStatus">
                 <option value="all">Menunggu Persetujuan</option>
               </select>
             </div>
           </div>
           <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileApplyAtasanFilter()">
-              Terapkan
+            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileApplyAtasanFilter()">
+              Terapkan Filter
             </button>
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileResetAtasanFilter()">
-              Atur ulang filter
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetAtasanFilter()">
+              Reset
             </button>
           </div>
         </div>
-      </div>
-
-      <!-- Ringkasan Hasil Box -->
-      <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 0.7rem; color: #475569;">
-        <span><strong>Hasil:</strong> ${activeList.length} ${currentAntreanSegment === 'baru' ? 'izin baru' : 'perpanjangan'}</span>
-        <span><strong>Status:</strong> Menunggu Persetujuan</span>
       </div>
 
       <!-- Ticket Items List -->
@@ -959,39 +970,53 @@
         <p class="mobile-page-subtitle">${tickets.length} pengajuan diproses: ${approverDecidedCount} keputusan Atasan + ${emergencyCount} penerbitan darurat oleh sistem.</p>
       </div>
 
-      <!-- Filter Riwayat Card (Matching PDF Page 5) -->
-      <div class="mobile-card" style="padding: 12px 14px; margin-bottom: 12px;">
-        <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Filter riwayat</div>
+      <!-- Result Bar & Filter Button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
+          ${filtered.length} catatan • 19 Okt 2026
+        </span>
+        <button type="button" class="mobile-filter-toggle-btn ${isAtasanRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleAtasanRiwayatFilter()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          <span>${isAtasanRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+          ${(atasanRiwayatSearch || atasanRiwayatFilterDecision !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
+        </button>
+      </div>
+
+      <!-- Collapsible Filter Card -->
+      <div id="mAtasanRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isAtasanRiwayatFilterOpen ? 'block' : 'none'};">
+        <div class="mobile-filter-panel-title">
+          <span>Cari & filter riwayat</span>
+          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleAtasanRiwayatFilter()">✕</button>
+        </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <div>
-            <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Cari nama / NIP / tiket</label>
-            <input type="text" class="mobile-input" id="mRiwayatSearch" placeholder="Semua bawahan langsung" value="${atasanRiwayatSearch}" style="font-size: 0.75rem; padding: 7px 10px;">
+            <label class="mobile-filter-label">Cari nama / NIP / tiket</label>
+            <input type="text" class="mobile-filter-input" id="mRiwayatSearch" placeholder="Semua bawahan langsung" value="${atasanRiwayatSearch}">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
-              <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Tanggal keputusan</label>
-              <input type="text" class="mobile-input" placeholder="Hari ini" value="19 Okt 2026" style="font-size: 0.75rem; padding: 7px 10px;" readonly>
+              <label class="mobile-filter-label">Tanggal keputusan</label>
+              <input type="text" class="mobile-filter-input" placeholder="Hari ini" value="19 Okt 2026" readonly style="color: #64748b;">
             </div>
             <div>
-              <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Keputusan</label>
-              <select class="mobile-select" id="mRiwayatDecision" style="font-size: 0.75rem; padding: 7px 10px;" onchange="window.mobileFilterRiwayatDecision(this.value)">
-                <option value="all">Semua keputusan</option>
-                <option value="approved">Disetujui</option>
-                <option value="rejected">Ditolak</option>
-                <option value="emergency">Penerbitan darurat</option>
+              <label class="mobile-filter-label">Keputusan</label>
+              <select class="mobile-filter-select" id="mRiwayatDecision" onchange="window.mobileFilterRiwayatDecision(this.value)">
+                <option value="all" ${atasanRiwayatFilterDecision === 'all' ? 'selected' : ''}>Semua keputusan</option>
+                <option value="approved" ${atasanRiwayatFilterDecision === 'approved' ? 'selected' : ''}>Disetujui</option>
+                <option value="rejected" ${atasanRiwayatFilterDecision === 'rejected' ? 'selected' : ''}>Ditolak</option>
+                <option value="emergency" ${atasanRiwayatFilterDecision === 'emergency' ? 'selected' : ''}>Penerbitan darurat</option>
               </select>
             </div>
           </div>
-          <button type="button" class="mobile-btn-primary" style="padding: 8px 12px; font-size: 0.75rem; margin-top: 4px;" onclick="window.mobileApplyRiwayatFilter()">
-            Terapkan
-          </button>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileApplyRiwayatFilter()">
+              Terapkan Filter
+            </button>
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetAtasanRiwayatFilter()">
+              Reset
+            </button>
+          </div>
         </div>
-      </div>
-
-      <!-- Result Count Banner -->
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 0.7rem; color: #475569; display: flex; justify-content: space-between;">
-        <span><strong>${filtered.length} catatan</strong> • 19 Okt 2026</span>
-        <span>Baca saja</span>
       </div>
 
       <!-- History Cards List -->
@@ -1222,6 +1247,16 @@
     renderMobileAtasan(null, 'antrean');
   };
 
+  window.mobileToggleAntreanFilter = function () {
+    isAntreanFilterOpen = !isAntreanFilterOpen;
+    renderMobileAtasan(null, 'antrean');
+  };
+
+  window.mobileToggleAtasanRiwayatFilter = function () {
+    isAtasanRiwayatFilterOpen = !isAtasanRiwayatFilterOpen;
+    renderMobileAtasan(null, 'riwayat');
+  };
+
   window.mobileApplyAtasanFilter = function () {
     const inputSearch = document.getElementById('mAtasanInputSearch');
     const inputDate = document.getElementById('mAtasanInputDate');
@@ -1239,6 +1274,12 @@
   window.mobileApplyRiwayatFilter = function () {
     const input = document.getElementById('mRiwayatSearch');
     atasanRiwayatSearch = input ? input.value.trim() : '';
+    renderMobileAtasan(null, 'riwayat');
+  };
+
+  window.mobileResetAtasanRiwayatFilter = function () {
+    atasanRiwayatSearch = '';
+    atasanRiwayatFilterDecision = 'all';
     renderMobileAtasan(null, 'riwayat');
   };
 

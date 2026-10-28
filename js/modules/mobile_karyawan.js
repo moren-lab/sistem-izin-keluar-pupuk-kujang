@@ -228,14 +228,7 @@
         `;
       }
     } else {
-      activeStripHtml = `
-        <div class="mobile-active-strip" style="background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.12);">
-          <div class="mobile-active-strip-head">
-            <span class="mobile-active-strip-title" style="color:#a7f3d0;">✓ Status: Tidak Ada Perizinan Aktif</span>
-          </div>
-          <div class="mobile-active-strip-desc" style="color:#cbd5e1;">Ajukan izin bila hendak meninggalkan area pabrik.</div>
-        </div>
-      `;
+      activeStripHtml = '';
     }
 
     // Recent 2 tickets
@@ -264,78 +257,35 @@
         <div class="mobile-hero-meta">${emp.dept || 'Departemen Rekayasa & Pemeliharaan'}</div>
         <div class="mobile-hero-meta">Atasan: ${approver.name || 'Ir. Hendra Gunawan, M.T.'}</div>
 
-        <div class="mobile-hero-divider"></div>
-        ${activeStripHtml}
-
         ${activeTicket ? `
+          <div class="mobile-hero-divider"></div>
+          ${activeStripHtml}
           <button type="button" class="mobile-hero-btn" onclick="window.mobileSwitchTab('pengajuan')">
             <span>Pengajuan Saya →</span>
           </button>
         ` : `
-          <button type="button" class="mobile-hero-btn" onclick="window.mobileOpenCreateModal(false)">
+          <button type="button" class="mobile-hero-btn" style="margin-top: 14px;" onclick="window.mobileOpenCreateModal(false)">
             <span>+ Buat Pengajuan</span>
           </button>
         `}
       </section>
 
-      <!-- Segment Switcher (Ringkasan Perizinan | Total Pengajuan Izin) -->
-      <div class="mobile-segment-toggle">
-        <button type="button" class="mobile-seg-btn ${currentSegment === 'ringkasan' ? 'active' : ''}" onclick="window.mobileSwitchSegment('ringkasan')">
-          Ringkasan Perizinan
-        </button>
-        <button type="button" class="mobile-seg-btn ${currentSegment === 'donut' ? 'active' : ''}" onclick="window.mobileSwitchSegment('donut')">
-          Total Pengajuan Izin
-        </button>
-      </div>
-
-      <!-- Segment Content: 3-Col Stats Card (Identical count with PC updateKaryawanMetrics) -->
-      <div id="mobileSecRingkasan" style="display: ${currentSegment === 'ringkasan' ? 'grid' : 'none'};" class="mobile-stats-card">
+      <!-- 3-Col Stats Card (Always visible, numbers in black) -->
+      <div class="mobile-stats-card">
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Total pengajuan</div>
-          <div class="mobile-stat-number">${totalCount}</div>
+          <div class="mobile-stat-number" style="color: #0f172a;">${totalCount}</div>
           <div class="mobile-stat-caption">Bulan ini</div>
         </div>
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Izin selesai</div>
-          <div class="mobile-stat-number" style="color: #059669;">${selesaiCount}</div>
+          <div class="mobile-stat-number" style="color: #0f172a;">${selesaiCount}</div>
           <div class="mobile-stat-caption">${tepatWaktuCount} tepat waktu, ${lateCompleted} terlambat</div>
         </div>
         <div class="mobile-stat-col">
           <div class="mobile-stat-label">Izin aktif</div>
-          <div class="mobile-stat-number" style="color: #0284c7;">${activeCount}</div>
+          <div class="mobile-stat-number" style="color: #0f172a;">${activeCount}</div>
           <div class="mobile-stat-caption">${activeCount > 0 ? (activeTicket.status === 'Sedang di Luar' ? 'Di luar area' : activeTicket.status) : 'Tidak ada'}</div>
-        </div>
-      </div>
-
-      <!-- Segment Content: Donut Chart -->
-      <div id="mobileSecDonut" style="display: ${currentSegment === 'donut' ? 'block' : 'none'};" class="mobile-card">
-        <div class="mobile-card-header">
-          <h3 class="mobile-card-title">Total Pengajuan Izin</h3>
-          <span style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Bulan Ini</span>
-        </div>
-        <div style="display: flex; align-items: center; justify-content: space-around; padding: 12px 0;">
-          <svg width="120" height="120" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#e2e8f0" stroke-width="16" />
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#059669" stroke-width="16" stroke-dasharray="212 282" stroke-dashoffset="0" transform="rotate(-90 60 60)" />
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#0284c7" stroke-width="16" stroke-dasharray="35 282" stroke-dashoffset="-212" transform="rotate(-90 60 60)" />
-            <circle cx="60" cy="60" r="45" fill="none" stroke="#f59e0b" stroke-width="16" stroke-dasharray="35 282" stroke-dashoffset="-247" transform="rotate(-90 60 60)" />
-            <text x="60" y="56" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${totalCount}</text>
-            <text x="60" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">TOTAL</text>
-          </svg>
-          <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></span>
-              <span><strong>${selesaiCount}</strong> Selesai (${totalCount ? Math.round((selesaiCount/totalCount)*100) : 0}%)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #0284c7;"></span>
-              <span><strong>${activeCount}</strong> Sedang Aktif</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span>
-              <span><strong>${terlambatCount}</strong> Perlu Perhatian</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -347,7 +297,7 @@
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Pengajuan Terbaru</h3>
         </div>
-        ${recentHtml || '<p style="font-size: 0.75rem; color: #64748b; margin: 0;">Belum ada riwayat pengajuan.</p>'}
+        ${recentHtml || '<p style="font-size: 0.75rem; color: #64748b; margin-top: 0;">Belum ada riwayat pengajuan.</p>'}
         <div style="text-align: center; margin-top: 10px;">
           <a href="#" class="mobile-link-rincian" onclick="window.mobileSwitchTab('riwayat'); return false;">Semua riwayat →</a>
         </div>
@@ -387,25 +337,7 @@
 
     container.innerHTML = `
       <div class="mobile-page-header">
-        <div class="mobile-page-category-tag">Layanan Karyawan</div>
         <h1 class="mobile-page-title">Pengajuan Saya</h1>
-        <p class="mobile-page-subtitle">Pantau izin berjalan, akses QR digital, dan kelola waktu kembali.</p>
-      </div>
-
-      <!-- Top Action Buttons (Rule: Disabled Buat Izin if activeTicket exists, Red Izin Darurat) -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
-        ${activeTicket ? `
-          <button type="button" class="mobile-btn-secondary" disabled style="opacity: 0.55; cursor: not-allowed; background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; font-weight: 700; padding: 10px;" title="Selesaikan tiket aktif Anda terlebih dahulu sebelum membuat pengajuan baru.">
-            <span>Buat Pengajuan Izin</span>
-          </button>
-        ` : `
-          <button type="button" class="mobile-btn-primary" style="font-weight: 700; padding: 10px;" onclick="window.mobileOpenCreateModal(false)">
-            <span>+ Buat Pengajuan Izin</span>
-          </button>
-        `}
-        <button type="button" class="mobile-btn-danger" style="background: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 700; padding: 10px;" onclick="window.mobileOpenCreateModal(true)">
-          <span>🚨 Izin Darurat</span>
-        </button>
       </div>
 
       <!-- Card Izin Aktif -->
@@ -547,10 +479,12 @@
       <!-- Result Count and Filter Button Bar -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
-          ${tickets.length} hasil • Semua waktu • Terbaru lebih dulu
+          ${tickets.length} hasil • Semua waktu
         </span>
-        <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 5px 12px; font-size: 0.725rem;" onclick="window.mobileToggleRiwayatFilter()">
-          Filter ⚙️
+        <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleRiwayatFilter()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          <span>${isRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+          ${(riwayatSearchQuery || riwayatStatusFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
         </button>
       </div>
 
@@ -564,18 +498,21 @@
         </button>
       </div>
 
-      <!-- Collapsible Filter Card (Matching PDF Page 5) -->
-      <div id="mRiwayatFilterCard" class="mobile-card" style="display: ${isRiwayatFilterOpen ? 'block' : 'none'}; padding: 12px 14px; margin-bottom: 12px;">
-        <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Cari & filter pengajuan</div>
+      <!-- Collapsible Filter Card -->
+      <div id="mRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isRiwayatFilterOpen ? 'block' : 'none'};">
+        <div class="mobile-filter-panel-title">
+          <span>Cari & filter pengajuan</span>
+          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleRiwayatFilter()">✕</button>
+        </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <div>
-            <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Cari pengajuan</label>
-            <input type="text" class="mobile-input" id="mRiwayatSearchInput" placeholder="Cari tiket, alasan, atau tujuan..." value="${riwayatSearchQuery}" style="font-size: 0.75rem; padding: 7px 10px;">
+            <label class="mobile-filter-label">Cari pengajuan</label>
+            <input type="text" class="mobile-filter-input" id="mRiwayatSearchInput" placeholder="Cari tiket, alasan, atau tujuan..." value="${riwayatSearchQuery}">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
-              <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Status</label>
-              <select class="mobile-select" id="mRiwayatSelectStatus" style="font-size: 0.75rem; padding: 7px 10px;">
+              <label class="mobile-filter-label">Status</label>
+              <select class="mobile-filter-select" id="mRiwayatSelectStatus">
                 <option value="all" ${riwayatStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
                 <option value="Sedang di Luar" ${riwayatStatusFilter === 'Sedang di Luar' ? 'selected' : ''}>Sedang di Luar</option>
                 <option value="Disetujui" ${riwayatStatusFilter === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
@@ -585,15 +522,15 @@
               </select>
             </div>
             <div>
-              <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Tanggal pengajuan</label>
-              <input type="text" class="mobile-input" placeholder="Semua Waktu" style="font-size: 0.75rem; padding: 7px 10px;" readonly>
+              <label class="mobile-filter-label">Tanggal pengajuan</label>
+              <input type="text" class="mobile-filter-input" placeholder="Semua Waktu" readonly style="color: #64748b;">
             </div>
           </div>
           <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileApplyRiwayatFilterKaryawan()">
+            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileApplyRiwayatFilterKaryawan()">
               Terapkan Filter
             </button>
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileResetRiwayatFilterKaryawan()">
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetRiwayatFilterKaryawan()">
               Reset
             </button>
           </div>

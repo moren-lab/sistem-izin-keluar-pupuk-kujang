@@ -15,6 +15,8 @@
   let riwayatStatusFilter = 'all';
   let riwayatCategoryFilter = 'all';
   let currentRiwayatView = 'card'; // 'card' | 'list'
+  let isPelacakanFilterOpen = false;
+  let isSecurityRiwayatFilterOpen = false;
   let activeGate = 'Pos 1 Gerbang Utama (Utara)';
 
   // Camera scanner instance
@@ -622,29 +624,6 @@
         </div>
       </div>
 
-      <!-- Card Daftar Pelacakan Pos Jaga (PDF Hal 4 & 5) -->
-      <section class="mobile-card" style="padding: 12px 14px; margin-bottom: 12px;">
-        <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Daftar pelacakan Pos Jaga</div>
-        
-        <div style="margin-bottom: 8px;">
-          <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Pencarian</label>
-          <input type="text" id="mPelacakanSearchInput" class="mobile-input" placeholder="Cari tiket, nama, NIP, atau tujuan…" value="${pelacakanSearchQuery}" style="font-size: 0.75rem; padding: 7px 10px;">
-        </div>
-
-        <div style="display: flex; gap: 8px; align-items: flex-end;">
-          <div style="flex: 2;">
-            <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Status pelacakan</label>
-            <select class="mobile-select" id="mPelacakanFilterSelect" style="font-size: 0.75rem; padding: 7px 10px;" onchange="window.mobileHandlePelacakanDropdown(this.value)">
-              <option value="outside" ${currentPelacakanFilter === 'outside' ? 'selected' : ''}>Sedang di Luar (Headcount)</option>
-              <option value="ready" ${currentPelacakanFilter === 'ready' ? 'selected' : ''}>Izin Siap Keluar (Disetujui Atasan)</option>
-            </select>
-          </div>
-          <button type="button" class="mobile-btn-primary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileApplyPelacakanSearch()">
-            Cari
-          </button>
-        </div>
-      </section>
-
       <!-- Segment Tabs (Sedang di Luar · 2 | Izin Siap Keluar · 1) -->
       <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
         <button type="button" class="mobile-seg-btn ${currentPelacakanFilter === 'outside' ? 'active' : ''}" onclick="window.mobileSwitchPelacakanFilter('outside')">
@@ -653,6 +632,47 @@
         <button type="button" class="mobile-seg-btn ${currentPelacakanFilter === 'ready' ? 'active' : ''}" onclick="window.mobileSwitchPelacakanFilter('ready')">
           Izin Siap Keluar · ${readyExitTickets.length}
         </button>
+      </div>
+
+      <!-- Result Bar & Filter Button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
+          ${activeList.length} karyawan (${currentPelacakanFilter === 'outside' ? 'Di Luar Area' : 'Siap Keluar'})
+        </span>
+        <button type="button" class="mobile-filter-toggle-btn ${isPelacakanFilterOpen ? 'active' : ''}" onclick="window.mobileTogglePelacakanFilter()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          <span>${isPelacakanFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+          ${pelacakanSearchQuery ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
+        </button>
+      </div>
+
+      <!-- Collapsible Filter Card -->
+      <div id="mPelacakanFilterCard" class="mobile-filter-panel" style="display: ${isPelacakanFilterOpen ? 'block' : 'none'};">
+        <div class="mobile-filter-panel-title">
+          <span>Cari & filter pelacakan</span>
+          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileTogglePelacakanFilter()">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <label class="mobile-filter-label">Pencarian</label>
+            <input type="text" id="mPelacakanSearchInput" class="mobile-filter-input" placeholder="Cari tiket, nama, NIP, atau tujuan…" value="${pelacakanSearchQuery}">
+          </div>
+          <div>
+            <label class="mobile-filter-label">Status pelacakan</label>
+            <select class="mobile-filter-select" id="mPelacakanFilterSelect" onchange="window.mobileHandlePelacakanDropdown(this.value)">
+              <option value="outside" ${currentPelacakanFilter === 'outside' ? 'selected' : ''}>Sedang di Luar (Headcount)</option>
+              <option value="ready" ${currentPelacakanFilter === 'ready' ? 'selected' : ''}>Izin Siap Keluar (Disetujui Atasan)</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileApplyPelacakanSearch()">
+              Terapkan Filter
+            </button>
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetPelacakanSearch()">
+              Reset
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Tickets List -->
@@ -771,57 +791,68 @@
         <p class="mobile-page-subtitle">Telusuri tiket, identitas karyawan, dan catatan Scan Out / Scan In lintas status.</p>
       </div>
 
-      <!-- Filter Card (PDF Hal 6 & 7) -->
-      <section class="mobile-card" style="padding: 12px 14px; margin-bottom: 12px;">
-        <div style="margin-bottom: 8px;">
-          <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Pencarian</label>
-          <input type="text" id="mRiwayatSecSearch" class="mobile-input" placeholder="Cari tiket, nama, NIP, atau tujuan…" value="${riwayatSearchQuery}" style="font-size: 0.75rem; padding: 7px 10px;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-          <div>
-            <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Kategori</label>
-            <select class="mobile-select" id="mRiwayatSecCat" style="font-size: 0.75rem; padding: 7px 10px;" onchange="window.mobileFilterRiwayatSec()">
-              <option value="all" ${riwayatCategoryFilter === 'all' ? 'selected' : ''}>Semua Kategori</option>
-              <option value="Dinas Kantor" ${riwayatCategoryFilter === 'Dinas Kantor' ? 'selected' : ''}>Dinas Kantor</option>
-              <option value="Urusan Pribadi" ${riwayatCategoryFilter === 'Urusan Pribadi' ? 'selected' : ''}>Urusan Pribadi</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Status</label>
-            <select class="mobile-select" id="mRiwayatSecStatus" style="font-size: 0.75rem; padding: 7px 10px;" onchange="window.mobileFilterRiwayatSec()">
-              <option value="all" ${riwayatStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
-              <option value="Sedang di Luar" ${riwayatStatusFilter === 'Sedang di Luar' ? 'selected' : ''}>Sedang di Luar</option>
-              <option value="Disetujui" ${riwayatStatusFilter === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
-              <option value="Selesai" ${riwayatStatusFilter === 'Selesai' ? 'selected' : ''}>Selesai</option>
-              <option value="Terlambat" ${riwayatStatusFilter === 'Terlambat' ? 'selected' : ''}>Terlambat</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileFilterRiwayatSec()">
-            Terapkan Filter
-          </button>
-          <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 0.75rem;" onclick="window.mobileResetRiwayatSec()">
-            Reset
-          </button>
-        </div>
-      </section>
-
-      <!-- Results Summary Bar & View Switcher (PDF Hal 6 & 7) -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <!-- Results Summary Bar, View Switcher & Filter Button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
-          ${filtered.length} tiket • Semua waktu
+          ${filtered.length} log pemindaian
         </span>
-        <!-- Segment Toggle: Card | List -->
-        <div class="mobile-segment-toggle" style="margin-bottom: 0; padding: 2px;">
-          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="padding: 4px 10px; font-size: 0.7rem;" onclick="window.mobileSwitchRiwayatViewSec('card')">
-            Card
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Segment Toggle: Card | List -->
+          <div class="mobile-segment-toggle" style="margin-bottom: 0; padding: 2px;">
+            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="padding: 4px 10px; font-size: 0.7rem;" onclick="window.mobileSwitchRiwayatViewSec('card')">
+              Card
+            </button>
+            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="padding: 4px 10px; font-size: 0.7rem;" onclick="window.mobileSwitchRiwayatViewSec('list')">
+              List
+            </button>
+          </div>
+          <button type="button" class="mobile-filter-toggle-btn ${isSecurityRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleSecurityRiwayatFilter()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>${isSecurityRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+            ${(riwayatSearchQuery || riwayatStatusFilter !== 'all' || riwayatCategoryFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
           </button>
-          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="padding: 4px 10px; font-size: 0.7rem;" onclick="window.mobileSwitchRiwayatViewSec('list')">
-            List
-          </button>
+        </div>
+      </div>
+
+      <!-- Collapsible Filter Card -->
+      <div id="mSecurityRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isSecurityRiwayatFilterOpen ? 'block' : 'none'};">
+        <div class="mobile-filter-panel-title">
+          <span>Cari & filter riwayat pemindaian</span>
+          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleSecurityRiwayatFilter()">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <label class="mobile-filter-label">Pencarian</label>
+            <input type="text" id="mRiwayatSecSearch" class="mobile-filter-input" placeholder="Cari tiket, nama, NIP, atau tujuan…" value="${riwayatSearchQuery}">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <label class="mobile-filter-label">Kategori</label>
+              <select class="mobile-filter-select" id="mRiwayatSecCat">
+                <option value="all" ${riwayatCategoryFilter === 'all' ? 'selected' : ''}>Semua Kategori</option>
+                <option value="Dinas Kantor" ${riwayatCategoryFilter === 'Dinas Kantor' ? 'selected' : ''}>Dinas Kantor</option>
+                <option value="Urusan Pribadi" ${riwayatCategoryFilter === 'Urusan Pribadi' ? 'selected' : ''}>Urusan Pribadi</option>
+              </select>
+            </div>
+            <div>
+              <label class="mobile-filter-label">Status</label>
+              <select class="mobile-filter-select" id="mRiwayatSecStatus">
+                <option value="all" ${riwayatStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
+                <option value="Sedang di Luar" ${riwayatStatusFilter === 'Sedang di Luar' ? 'selected' : ''}>Sedang di Luar</option>
+                <option value="Disetujui" ${riwayatStatusFilter === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
+                <option value="Selesai" ${riwayatStatusFilter === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                <option value="Terlambat" ${riwayatStatusFilter === 'Terlambat' ? 'selected' : ''}>Terlambat</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileFilterRiwayatSec()">
+              Terapkan Filter
+            </button>
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetRiwayatSec()">
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1277,6 +1308,21 @@
     if (container) {
       renderSecurityPelacakan(container);
     }
+  };
+
+  window.mobileTogglePelacakanFilter = function () {
+    isPelacakanFilterOpen = !isPelacakanFilterOpen;
+    renderMobileSecurity(null, 'pelacakan');
+  };
+
+  window.mobileResetPelacakanSearch = function () {
+    pelacakanSearchQuery = '';
+    renderMobileSecurity(null, 'pelacakan');
+  };
+
+  window.mobileToggleSecurityRiwayatFilter = function () {
+    isSecurityRiwayatFilterOpen = !isSecurityRiwayatFilterOpen;
+    renderMobileSecurity(null, 'riwayat');
   };
 
   window.mobileSwitchPelacakanTabAndFilter = function (tabFilter, specialQuery) {
