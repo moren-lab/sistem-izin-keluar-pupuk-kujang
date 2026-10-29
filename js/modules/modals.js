@@ -1641,11 +1641,17 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const isSecurity = (window.currentActor === 'security');
 
   if (btnDetailScanOut) {
-    // Scan Out hanya muncul di pos jaga pada menu / halaman "Terminal Verifikasi Tiket & Kamera Scan QR"
+    // Scan Out untuk Pos Jaga: Muncul saat di Terminal Verifikasi (kamera scan, unggah QR, input manual tiket)
     const secScannerPage = document.getElementById('securityScannerPage');
-    const isScannerPageActive = secScannerPage && (secScannerPage.style.display !== 'none' || window._openedFromScannerTerminal);
-    // Sesuai revisi: Scan Out hanya dilakukan oleh karyawan, pos jaga tidak memiliki tombol Scan Out di detail
-    const canScanOut = false;
+    const isScannerPageActive = Boolean(window._openedFromScannerTerminal) || 
+      (secScannerPage && secScannerPage.style.display !== 'none') || 
+      (window.currentActor === 'security');
+
+    // Syarat Scan Out: Tiket Disetujui, belum Scan Out, dan bukan darurat terkunci
+    const canScanOut = isScannerPageActive && 
+      (ticket.status === 'Disetujui') && 
+      !ticket.scanOutTime && 
+      !(ticket.isEmergency && ticket.emergencyLocked);
 
     if (canScanOut) {
       btnDetailScanOut.style.display = 'inline-flex';
@@ -1659,7 +1665,12 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
         if (typeof window.executeScanOut === 'function') {
           window.executeScanOut(ticket.id);
         }
-        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+        if (typeof window.closeTicketDetailModal === 'function') {
+          window.closeTicketDetailModal();
+        } else if (modalTicketDetail) {
+          modalTicketDetail.classList.remove('open');
+          modalTicketDetail.style.display = 'none';
+        }
       };
     } else {
       btnDetailScanOut.style.display = 'none';
