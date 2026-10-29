@@ -699,11 +699,17 @@
         <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
           ${activeList.length} karyawan (${currentPelacakanFilter === 'outside' ? 'Di Luar Area' : 'Siap Keluar'})
         </span>
-        <button type="button" class="mobile-filter-toggle-btn ${isPelacakanFilterOpen ? 'active' : ''}" onclick="window.mobileTogglePelacakanFilter()">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="mobile-filter-toggle-btn" style="background: #fff; color: #dc2626; border-color: #fca5a5; padding: 4px 8px; font-size: 0.725rem; display: inline-flex; align-items: center; gap: 4px;" onclick="window.mobileSecurityClearAllFinished()" title="Hapus Riwayat Selesai">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Hapus Selesai</span>
+          </button>
+          <button type="button" class="mobile-filter-toggle-btn ${isPelacakanFilterOpen ? 'active' : ''}" onclick="window.mobileTogglePelacakanFilter()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
           <span>${isPelacakanFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
           ${pelacakanSearchQuery ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
         </button>
+        </div>
       </div>
 
       <!-- Collapsible Filter Card -->
@@ -1223,17 +1229,7 @@
 
         <!-- Action Buttons (Read-only for Pos Jaga, only operational Scan Out / Scan In when applicable) -->
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
-          ${t.status === 'Disetujui' && (!t.isEmergency || !t.emergencyLocked) ? `
-            <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 700; padding: 12px; font-size: 0.85rem; min-height: 44px;" onclick="window.mobileSecurityDirectScanOut('${t.id}')">
-              <span>🚗 Verifikasi Keluar (Scan Out)</span>
-            </button>
-          ` : ''}
-
-          ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') ? `
-            <button type="button" class="mobile-btn-primary" style="background: #2563eb; border-color: #2563eb; font-weight: 700; padding: 12px; font-size: 0.85rem; min-height: 44px;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-              <span>🏢 Verifikasi Kembali (Tap In Masuk)</span>
-            </button>
-          ` : ''}
+          <!-- Pos Jaga: Detail bersifat inspeksi. Scan Out dan Tap In hanya dilakukan oleh Karyawan -->
 
           ${(t.isEmergency && t.emergencyLocked) ? `
             <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #991b1b; text-align: center; font-weight: 700;">

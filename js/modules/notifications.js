@@ -243,10 +243,20 @@
     window._openedFromNotification = true;
     window._openedFromNotificationTab = fromTab;
 
-    // Tutup panel/modal notifikasi
+    // Tutup dropdown notifikasi desktop jika terbuka
     closeDesktopNotifDropdown();
     if (typeof window.mobileCloseSheet === 'function') {
       window.mobileCloseSheet();
+    }
+
+    // Tutup halaman penuh notifikasi desktop jika sedang aktif
+    const notifView = document.getElementById('viewNotifikasi');
+    if (notifView && notifView.style.display === 'block') {
+      if (typeof window.closeDesktopFullNotifikasi === 'function') {
+        window.closeDesktopFullNotifikasi();
+      } else {
+        notifView.style.display = 'none';
+      }
     }
 
     if (!ticketId) return;
@@ -262,32 +272,24 @@
       } else if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
         if (typeof window.mobileOpenAtasanDetailModal === 'function') {
           window.mobileOpenAtasanDetailModal(ticketId);
+        } else if (typeof window.openTicketDetail === 'function') {
+          window.openTicketDetail(ticketId);
         }
       } else if (user.roleKey === 'security') {
         if (typeof window.mobileSecurityInspectTicket === 'function') {
           window.mobileSecurityInspectTicket(ticketId);
+        } else if (typeof window.openTicketDetail === 'function') {
+          window.openTicketDetail(ticketId);
+        }
+      } else {
+        if (typeof window.openTicketDetail === 'function') {
+          window.openTicketDetail(ticketId);
         }
       }
     } else {
-      // Desktop
-      if (user.roleKey === 'karyawan') {
-        if (typeof window.openTicketDetail === 'function') {
-          window.openTicketDetail(ticketId);
-        } else if (typeof window.switchKaryawanTab === 'function') {
-          window.switchKaryawanTab('riwayat');
-        }
-      } else if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
-        if (typeof window.openDecisionModal === 'function') {
-          window.openDecisionModal(ticketId);
-        } else if (typeof window.switchApproverTab === 'function') {
-          window.switchApproverTab('riwayat');
-        }
-      } else if (user.roleKey === 'security') {
-        if (typeof window.openSecurityDetailModal === 'function') {
-          window.openSecurityDetailModal(ticketId);
-        } else if (typeof window.switchSecurityTab === 'function') {
-          window.switchSecurityTab('riwayat');
-        }
+      // Desktop: semua peran langsung membuka modal detail pengajuan
+      if (typeof window.openTicketDetail === 'function') {
+        window.openTicketDetail(ticketId);
       }
     }
   }
@@ -478,7 +480,7 @@
   }
 
   // 10. TAMPILAN WEB/PC: HALAMAN PENUH NOTIFIKASI
-  window.renderDesktopFullNotifikasiPage = function (filterTab = 'all') {
+  function renderDesktopFullNotifikasiPage(filterTab = 'all') {
     const container = document.getElementById('viewNotifikasi');
     if (!container) return;
 

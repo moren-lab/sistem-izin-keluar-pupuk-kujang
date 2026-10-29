@@ -168,7 +168,7 @@ function renderApproverDashboard() {
                   <div style="font-size: 0.85rem; color: #881337; margin-top: 3px;">
                     <strong>${emg.applicantName}</strong> (${emg.id}) — Tujuan: <strong>${emg.destination}</strong>
                   </div>
-                  <div style="font-size: 0.775rem; color: #9f1239; margin-top: 2px; font-style: italic;">
+                  <div style="font-size: 0.775rem; color: #9f1239; margin-top: 2px; font-style: normal;">
                     "Alasan Kedaruratan: ${emg.reason}"
                   </div>
                 </div>
@@ -646,7 +646,7 @@ function renderApproverTable(list, containerElement) {
 
             let catatanHtml = `<span style="color: var(--text-muted); font-size: 0.75rem;">-</span>`;
             if (t.approverNote) {
-              catatanHtml = `<span style="color: var(--text-primary); font-size: 0.75rem; font-style: italic;" title="${(t.approverNote || '').replace(/"/g, '&quot;')}">"${t.approverNote}"</span>`;
+              catatanHtml = `<span style="color: var(--text-primary); font-size: 0.75rem; font-style: normal;" title="${(t.approverNote || '').replace(/"/g, '&quot;')}">"${t.approverNote}"</span>`;
             } else if (t.rejectionReason) {
               catatanHtml = `<span style="color: #ef4444; font-size: 0.75rem;" title="${(t.rejectionReason || '').replace(/"/g, '&quot;')}">${t.rejectionReason}</span>`;
             } else if (t.reassignedTo) {

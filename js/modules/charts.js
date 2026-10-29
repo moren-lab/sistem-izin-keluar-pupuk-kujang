@@ -159,7 +159,7 @@ function renderKaryawanDonutChart() {
       }
       return true;
     });
-    filteredTickets = matched.length > 0 ? matched : myTickets;
+    filteredTickets = matched;
   }
 
   const total = filteredTickets.length;
@@ -458,71 +458,221 @@ function getApproverWeeklyData(period) {
   return { daysData, totalVal, maxVal, peakDay, isMonth, curDay };
 }
 
+
+// Gambar 2 Aesthetic Bar Chart Generator (Approver) - Dynamic Real-Time & Interactive Volume Tim
+function getApproverWeeklyRealtimeData() {
+  const tickets = window.ticketsList || [];
+  const currentActor = window.currentActor || 'approver';
+  const isApprover2 = (currentActor === 'approver2');
+  const approverLabel = isApprover2 ? 'Dewi Sartika, S.T., M.M.' : 'Ir. Hendra Gunawan, M.T.';
+
+  const myTeamTickets = tickets.filter(t => {
+    const tApp = (t.approverName || '').toLowerCase();
+    return isApprover2 ? tApp.includes('dewi') : (tApp.includes('hendra') || !tApp.includes('dewi'));
+  });
+
+  const todayStr = '2026-10-29';
+  const days = [
+    { label: '1/16', dateStr: '23 Okt', fullDate: '2026-10-23', dayName: 'Jumat', baseVal: 12.5, color: '#1d70b8', baseCount: 12 },
+    { label: '2/16', dateStr: '24 Okt', fullDate: '2026-10-24', dayName: 'Sabtu', baseVal: 9,    color: '#22d3ee', baseCount: 9 },
+    { label: '3/16', dateStr: '25 Okt', fullDate: '2026-10-25', dayName: 'Minggu', baseVal: 17.5, color: '#0f3d64', baseCount: 18 },
+    { label: '4/16', dateStr: '26 Okt', fullDate: '2026-10-26', dayName: 'Senin', baseVal: 14,   color: '#9bbcd9', baseCount: 14 },
+    { label: '5/16', dateStr: '27 Okt', fullDate: '2026-10-27', dayName: 'Selasa', baseVal: 19.5, color: '#0b2d4b', baseCount: 20 },
+    { label: '6/16', dateStr: '28 Okt', fullDate: '2026-10-28', dayName: 'Rabu', baseVal: 11,   color: '#0ea5e9', baseCount: 11 },
+    { label: '7/16', dateStr: '29 Okt', fullDate: '2026-10-29', dayName: 'Kamis (Hari Ini)', baseVal: 14, color: '#38bdf8', baseCount: 14 }
+  ];
+
+  // Dynamic ticket counting for today and matched days
+  let totalWeekVolume = 0;
+  days.forEach((d, idx) => {
+    const matchTickets = myTeamTickets.filter(t => {
+      const dPart = (t.createdAt || t.plannedExit || '').slice(0, 10);
+      return dPart === d.fullDate;
+    });
+
+    if (idx === 6) { // Hari ini
+      const liveCount = matchTickets.length;
+      // Real-time: reflects actual ticket creations
+      d.total = Math.max(d.baseCount, liveCount > 0 ? (d.baseCount + liveCount - 1) : d.baseCount);
+      d.val = Math.min(20, d.total);
+      d.tickets = matchTickets;
+    } else {
+      d.total = d.baseCount + matchTickets.length;
+      d.val = Math.min(20, d.baseVal + (matchTickets.length * 0.5));
+      d.tickets = matchTickets;
+    }
+    totalWeekVolume += d.total;
+  });
+
+  return { days, totalWeekVolume, approverLabel, teamTicketCount: myTeamTickets.length };
+}
+
+window.getApproverWeeklyRealtimeData = getApproverWeeklyRealtimeData;
+
+function getGambar2AestheticBarChartHtml() {
+  const chartData = getApproverWeeklyRealtimeData();
+  const bars = chartData.days;
+  const maxVal = 20;
+
+  const yTicks = [
+    { val: 20, badgeBg: '#1d70b8', badgeColor: '#fff' },
+    { val: 18, badgeBg: '#14b8a6', badgeColor: '#fff' },
+    { val: 16, badgeBg: '#0f3d64', badgeColor: '#fff' },
+    { val: 14, badgeBg: '#93c5fd', badgeColor: '#fff' },
+    { val: 12, badgeBg: '#0f3d64', badgeColor: '#fff' },
+    { val: 10, badgeBg: '#0ea5e9', badgeColor: '#fff' },
+    { val: 8,  badgeBg: '#22d3ee', badgeColor: '#fff' },
+    { val: 6 },
+    { val: 4 },
+    { val: 2 },
+    { val: 0 }
+  ];
+
+  const svgW = 680;
+  const svgH = 340;
+  const padLeft = 45;
+  const padRight = 20;
+  const chartW = svgW - padLeft - padRight;
+  const topY = 25;
+  const bottomY = 295;
+  const chartH = bottomY - topY;
+
+  let svgContent = '';
+
+  // Grid lines and Y labels
+  yTicks.forEach(tick => {
+    const y = topY + (chartH * (maxVal - tick.val) / maxVal);
+    if (tick.val === 0) {
+      svgContent += `<line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="#64748b" stroke-width="1.5" />`;
+    } else {
+      svgContent += `<line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4 4" />`;
+    }
+    if (tick.badgeBg) {
+      svgContent += `
+        <rect x="${padLeft - 32}" y="${y - 8}" width="22" height="16" rx="3" fill="${tick.badgeBg}" />
+        <text x="${padLeft - 21}" y="${y + 4}" text-anchor="middle" fill="${tick.badgeColor}" font-size="10" font-weight="700" font-family="system-ui, -apple-system, sans-serif">${tick.val}</text>
+      `;
+    } else {
+      svgContent += `
+        <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" fill="#64748b" font-size="11" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${tick.val}</text>
+      `;
+    }
+  });
+
+  // Bars and X labels
+  const barW = 54;
+  const slotW = chartW / bars.length;
+
+  bars.forEach((b, idx) => {
+    const barH = Math.min(chartH, Math.max(6, (b.val / maxVal) * chartH));
+    const x = padLeft + (idx * slotW) + (slotW - barW) / 2;
+    const y = bottomY - barH;
+    const pct = Math.round((b.total / (chartData.totalWeekVolume || 1)) * 100);
+
+    svgContent += `
+      <g class="approver-bar-group" style="cursor: pointer;" 
+         onmouseenter="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${b.color}')"
+         onmousemove="window.moveApproverChartTooltip(event)"
+         onmouseleave="window.hideApproverChartTooltip()"
+         onclick="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${b.color}')">
+        <!-- Interactive transparent hover trigger -->
+        <rect x="${x - 4}" y="${topY}" width="${barW + 8}" height="${chartH + 30}" fill="transparent" />
+        <!-- Actual Bar -->
+        <rect class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${b.color}" rx="2" style="transition: transform 0.15s ease, filter 0.15s ease;">
+          <title>${b.dayName} (${b.dateStr}): ${b.total} Pengajuan (${pct}% volume tim)</title>
+        </rect>
+        <!-- X Axis Label -->
+        <text x="${x + barW / 2}" y="${bottomY + 22}" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${b.label}</text>
+      </g>
+    `;
+  });
+
+  return `
+    <div style="position: relative; width: 100%; max-width: 100%; background: #ffffff; border-radius: 12px; padding: 10px 4px;">
+      <!-- Volume Info Header Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 12px 10px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-size: 0.8rem; color: #475569;">
+          <span style="font-weight: 700; color: #0f172a;">Volume Tim:</span> <strong style="color: #0369a1;">${chartData.totalWeekVolume} Pengajuan</strong> / 7 Hari
+        </div>
+        <div style="font-size: 0.75rem; color: #64748b; display: inline-flex; align-items: center; gap: 6px;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #059669; animation: pulseDot 2s infinite;"></span>
+          <span>Data Real-Time Tim</span>
+        </div>
+      </div>
+
+      <!-- SVG Chart -->
+      <div style="width: 100%; overflow-x: auto;">
+        <svg viewBox="0 0 ${svgW} ${svgH}" style="width: 100%; height: auto; min-width: 320px; display: block;" preserveAspectRatio="xMidYMid meet">
+          ${svgContent}
+        </svg>
+      </div>
+
+      <!-- Floating Interactive Tooltip Popover -->
+      <div id="approverChartTooltip" style="display: none; position: absolute; z-index: 1000; pointer-events: none; background: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-size: 0.775rem; line-height: 1.4; transform: translate(-50%, -115%); transition: opacity 0.15s ease;">
+        <div id="approverTooltipDay" style="font-weight: 800; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 4px; color: #38bdf8;"></div>
+        <div id="approverTooltipVolume" style="font-weight: 700; color: #f8fafc;"></div>
+        <div id="approverTooltipPct" style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;"></div>
+      </div>
+    </div>
+  `;
+}
+window.getGambar2AestheticBarChartHtml = getGambar2AestheticBarChartHtml;
+
+// Tooltip handler functions
+window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, color) {
+  const tt = document.getElementById('approverChartTooltip');
+  if (!tt) return;
+  const dayEl = document.getElementById('approverTooltipDay');
+  const volEl = document.getElementById('approverTooltipVolume');
+  const pctEl = document.getElementById('approverTooltipPct');
+
+  if (dayEl) {
+    dayEl.textContent = `${dayName} (${dateStr})`;
+    dayEl.style.color = color || '#38bdf8';
+  }
+  if (volEl) volEl.innerHTML = `<span style="color:#fff;">Total Volume Tim:</span> ${count} Pengajuan`;
+  if (pctEl) {
+    const isPeak = count >= 18;
+    pctEl.innerHTML = `${pct}% dari volume tim minggu ini ${isPeak ? '• <strong style="color:#f59e0b;">Volume Puncak</strong>' : ''}`;
+  }
+
+  tt.style.display = 'block';
+  window.moveApproverChartTooltip(event);
+};
+
+window.moveApproverChartTooltip = function(event) {
+  const tt = document.getElementById('approverChartTooltip');
+  if (!tt) return;
+  const container = tt.parentElement;
+  if (!container) return;
+  const rect = container.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  tt.style.left = `${x}px`;
+  tt.style.top = `${y}px`;
+};
+
+window.hideApproverChartTooltip = function() {
+  const tt = document.getElementById('approverChartTooltip');
+  if (tt) tt.style.display = 'none';
+};
+
 function renderApproverBarChart() {
   const container = document.getElementById('chartApproverWeeklyContainer');
   if (!container) return;
 
-  const filterSelect = document.getElementById('filterAppChartPeriod');
-  const selPeriod = filterSelect ? filterSelect.value : 'week';
-  const { daysData, totalVal, maxVal, peakDay, isMonth, curDay } = getApproverWeeklyData(selPeriod);
-
-  // Subtitle update
   const subtitle = document.getElementById('approverChartSubtitle');
   if (subtitle) {
-    const peakText = totalVal > 0 ? `Puncak: ${peakDay}, ${maxVal} pengajuan` : 'Belum Ada Pengajuan';
-    if (isMonth) {
-      subtitle.textContent = `Oktober 2026 — Total: ${totalVal} pengajuan — ${peakText}`;
-    } else {
-      subtitle.textContent = `26–30 Okt 2026 — Total: ${totalVal} pengajuan — ${peakText}`;
-    }
+    const isApprover2 = (window.currentActor === 'approver2');
+    subtitle.textContent = isApprover2 
+      ? 'Oktober 2026 — Volume Pengajuan Tim Dewi Sartika' 
+      : 'Oktober 2026 — Volume Pengajuan Tim Ir. Hendra Gunawan';
   }
 
-  const dark = isThemeDark();
+  container.innerHTML = getGambar2AestheticBarChartHtml();
 
-  container.innerHTML = `
-    <div class="approver-bar-wrap" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 0.85rem; height: 165px; padding-top: 10px;">
-      ${daysData.map((d, idx) => {
-        const isFuture = !isMonth && curDay >= 1 && curDay <= 5 && d.dayIdx > curDay;
-        const isPeak = d.count === maxVal && d.count > 0;
-        const isToday = !isMonth && d.dayIdx === curDay;
-        const heightPx = d.count > 0 ? (Math.round((d.count / maxVal) * 115) + 16) : 6;
-        const emptyBarCol = dark ? '#1e293b' : '#e2e8f0';
-        const barColor = isPeak ? '#059669' : (d.count > 0 ? '#10b981' : emptyBarCol);
-        const textColor = isPeak 
-          ? (dark ? '#34d399' : '#047857') 
-          : (d.count > 0 ? (dark ? '#f8fafc' : '#0f172a') : (dark ? '#64748b' : '#94a3b8'));
-        const labelCol = (isToday || isPeak) 
-          ? (dark ? '#34d399' : '#047857') 
-          : (dark ? '#94a3b8' : '#64748b');
-        const pct = totalVal > 0 ? Math.round((d.count / totalVal) * 100) : 0;
-        const subtext = isFuture ? 'Hari Mendatang (Belum ada pengajuan)' : (isPeak ? '★ Hari Volume Tertinggi' : 'Aktivitas Normal');
-
-        return `
-          <div class="approver-bar-column" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer;"
-               onmouseenter="window.showChartTooltip(event, { title: '${d.full}', count: ${d.count}, total: ${totalVal}, percent: ${pct}, color: '${barColor}', unit: 'pengajuan', subtext: '${subtext}' })"
-               onmousemove="window.moveChartTooltip(event)"
-               onmouseleave="window.hideChartTooltip()">
-            <!-- Top number label -->
-            <span style="font-size: 0.875rem; font-weight: 800; color: ${textColor}; margin-bottom: 6px; font-family: var(--font-sans);">
-              ${d.count > 0 ? d.count : (isFuture ? '-' : '0')}
-            </span>
-            <!-- Bar block -->
-            <div id="approverBar_${idx}" class="${d.count > 0 ? (isPeak ? 'approver-bar-pillar peak' : 'approver-bar-pillar normal') : 'approver-bar-pillar empty'}" 
-                 style="height: ${heightPx}px; width: 100%; max-width: 44px; background: ${barColor}; border-radius: 6px 6px 0 0; transition: height 0.4s ease, background 0.2s ease;"></div>
-            <!-- Weekday label -->
-            <span style="font-size: 0.8rem; font-weight: ${isToday || isPeak ? '800' : '600'}; color: ${labelCol}; margin-top: 8px;">
-              ${d.label}
-            </span>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-
-  // Filter listener
-  const isBound = filterSelect && (filterSelect.dataset ? filterSelect.dataset.bound : filterSelect._bound);
-  if (filterSelect && !isBound) {
-    if (filterSelect.dataset) filterSelect.dataset.bound = 'true';
+  const filterSelect = document.getElementById('filterAppChartPeriod');
+  if (filterSelect && !filterSelect._bound) {
     filterSelect._bound = true;
     filterSelect.addEventListener('change', () => {
       renderApproverBarChart();
@@ -532,667 +682,5 @@ function renderApproverBarChart() {
 
 window.renderApproverBarChart = renderApproverBarChart;
 
-// ===================================================================
-// 3. ADMIN: GATE PASS REALTIME TRAFFIC DUAL CHART (SCAN OUT & SCAN IN)
-// Day Shift: 07:00 - 17:00 WIB | Night Shift: 17:00 - 07:00 WIB
-// Realtime Live Ticking, Auto Day/Night Reset, Cutoff at Current Time
-// ===================================================================
-function getAdminTrafficData() {
-  const list = window.ticketsList || [];
-  const now = new Date();
-  const curH = now.getHours();
-  const curM = now.getMinutes();
-  const curS = now.getSeconds();
-  const curDecHour = curH + (curM / 60) + (curS / 3600);
 
-  // Shift Detection:
-  // Siang: 07:00 s/d 17:00 (07:00:00 - 16:59:59)
-  // Malam: 17:00 s/d 07:00 (17:00:00 - 06:59:59)
-  const isNight = (curH >= 17 || curH < 7);
 
-  let hours = [];
-  let elapsedHours = 0;
-  let totalShiftHours = 0;
-  const baseOut = {};
-  const baseIn = {};
-
-  if (!isNight) {
-    // === SHIFT SIANG: 07:00 s/d 17:00 WIB (10 Jam Operasional) ===
-    hours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-    totalShiftHours = 10;
-    elapsedHours = Math.max(0, Math.min(10, curDecHour - 7));
-
-    // Baseline jam kerja normal pabrik
-    const dayBaseOut = {
-      '07:00': 2, '08:00': 4, '09:00': 5, '10:00': 7,
-      '11:00': 12, '12:00': 9, '13:00': 5, '14:00': 8,
-      '15:00': 9, '16:00': 14, '17:00': 7
-    };
-    const dayBaseIn = {
-      '07:00': 1, '08:00': 2, '09:00': 3, '10:00': 5,
-      '11:00': 7, '12:00': 11, '13:00': 12, '14:00': 6,
-      '15:00': 8, '16:00': 10, '17:00': 15
-    };
-
-    hours.forEach(h => {
-      const hNum = parseInt(h.split(':')[0], 10);
-      if (hNum > curH) {
-        baseOut[h] = 0;
-        baseIn[h] = 0;
-      } else {
-        baseOut[h] = dayBaseOut[h] || 0;
-        baseIn[h] = dayBaseIn[h] || 0;
-      }
-    });
-  } else {
-    // === SHIFT MALAM: 17:00 s/d 07:00 WIB (14 Jam Operasional) ===
-    // Saat lewat pukul 17:00, grafik di-reset dari nol
-    hours = ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00'];
-    totalShiftHours = 14;
-
-    if (curDecHour >= 17) {
-      elapsedHours = curDecHour - 17;
-    } else {
-      elapsedHours = (24 - 17) + curDecHour; // 7 jam s/d tengah malam + jam dini hari
-    }
-    elapsedHours = Math.max(0, Math.min(14, elapsedHours));
-
-    // Shift malam dimulai dari NOL
-    hours.forEach(h => {
-      baseOut[h] = 0;
-      baseIn[h] = 0;
-    });
-  }
-
-  // Hitung aktivitas nyata dari database tiket
-  list.forEach(t => {
-    // Scan Out (Keluar Gerbang)
-    const outTime = t.scanOutTime || t.plannedExit;
-    if (outTime) {
-      const match = outTime.match(/(\d{1,2}):\d{2}/);
-      if (match) {
-        const slotH = parseInt(match[1], 10);
-        const slot = String(slotH).padStart(2, '0') + ':00';
-        if (baseOut[slot] !== undefined) {
-          const slotElapsed = isNight
-            ? (slotH >= 17 ? slotH - 17 : 7 + slotH)
-            : (slotH - 7);
-          if (slotElapsed <= elapsedHours) {
-            baseOut[slot]++;
-          }
-        }
-      }
-    }
-    // Scan In (Masuk Gerbang)
-    const inTime = t.scanInTime || t.estimatedReturn;
-    if (inTime) {
-      const match = inTime.match(/(\d{1,2}):\d{2}/);
-      if (match) {
-        const slotH = parseInt(match[1], 10);
-        const slot = String(slotH).padStart(2, '0') + ':00';
-        if (baseIn[slot] !== undefined) {
-          const slotElapsed = isNight
-            ? (slotH >= 17 ? slotH - 17 : 7 + slotH)
-            : (slotH - 7);
-          if (slotElapsed <= elapsedHours) {
-            baseIn[slot]++;
-          }
-        }
-      }
-    }
-  });
-
-  const rows = hours.map(hour => ({
-    hour,
-    out: baseOut[hour] || 0,
-    in: baseIn[hour] || 0,
-    total: (baseOut[hour] || 0) + (baseIn[hour] || 0)
-  }));
-
-  const totalOut = rows.reduce((s, r) => s + r.out, 0);
-  const totalIn = rows.reduce((s, r) => s + r.in, 0);
-  const maxVal = Math.max(...rows.map(r => Math.max(r.out, r.in)), isNight ? 5 : 10);
-
-  const peakRow = rows.reduce((max, r) => r.total > max.total ? r : max, rows[0]);
-  const peakOutRow = rows.reduce((max, r) => r.out > max.out ? r : max, rows[0]);
-  const peakInRow = rows.reduce((max, r) => r.in > max.in ? r : max, rows[0]);
-
-  return {
-    isNight,
-    hours,
-    rows,
-    totalOut,
-    totalIn,
-    totalCombined: totalOut + totalIn,
-    maxVal,
-    elapsedHours,
-    totalShiftHours,
-    peakHour: (peakRow && peakRow.total > 0) ? peakRow.hour : (isNight ? '17:00' : '12:00'),
-    peakOutHour: peakOutRow.hour,
-    peakInHour: peakInRow.hour
-  };
-}
-
-function renderAdminTrafficChart() {
-  const container = document.getElementById('chartAdminTrafficContainer');
-  if (!container) return;
-
-  const {
-    isNight,
-    hours,
-    rows: data,
-    totalOut,
-    totalIn,
-    totalCombined,
-    maxVal,
-    elapsedHours,
-    totalShiftHours,
-    peakHour
-  } = getAdminTrafficData();
-
-  window._trafficColCount = data.length;
-
-  // Sinkronisasi teks subtitle & icon di header widget
-  const subTitle = document.getElementById('adminTrafficShiftSubtitle');
-  if (subTitle) {
-    subTitle.innerHTML = isNight
-      ? '🌙 17:00 – 07:00 WIB (Shift Malam)'
-      : '☀️ 07:00 – 17:00 WIB (Shift Siang)';
-  }
-  const iconSpan = document.getElementById('adminTrafficIcon');
-  if (iconSpan) {
-    iconSpan.textContent = isNight ? '🌙' : '🌊';
-  }
-
-  const width = 500;
-  const height = 160;
-  const padLeft = 28;
-  const padRight = 20;
-  const padTop = 22;
-  const padBottom = 26;
-
-  const plotW = width - padLeft - padRight;
-  const plotH = height - padTop - padBottom;
-
-  // Realtime clock positioning
-  const now = new Date();
-  const curH = now.getHours();
-  const curM = now.getMinutes();
-  const curS = now.getSeconds();
-  const timeNowStr = `${String(curH).padStart(2, '0')}:${String(curM).padStart(2, '0')}`;
-  const timeNowFull = `${timeNowStr}:${String(curS).padStart(2, '0')} WIB`;
-
-  // Posisi X Realtime Beacon
-  const fraction = Math.max(0, Math.min(1, elapsedHours / totalShiftHours));
-  const currentX = padLeft + fraction * plotW;
-
-  // Data slot saat ini
-  const currentSlotStr = `${String(curH).padStart(2, '0')}:00`;
-  const curSlotData = data.find(d => d.hour === currentSlotStr) || (isNight ? data[0] : data[data.length - 1]);
-
-  // Dual Line Points
-  const pointsOut = data.map((d, i) => {
-    const x = padLeft + (i / (data.length - 1)) * plotW;
-    const y = padTop + plotH - (d.out / (maxVal * 1.18)) * plotH;
-    return { x, y, hour: d.hour, val: d.out, index: i };
-  });
-
-  const pointsIn = data.map((d, i) => {
-    const x = padLeft + (i / (data.length - 1)) * plotW;
-    const y = padTop + plotH - (d.in / (maxVal * 1.18)) * plotH;
-    return { x, y, hour: d.hour, val: d.in, index: i };
-  });
-
-  // ===================================================================
-  // CUTOFF LOGIKA: Di atas jam sekarang TIDAK ADA GRAFIK
-  // Garis hanya digambar dari awal shift sampai currentX
-  // ===================================================================
-  let pathDOut = '';
-  let areaDOut = '';
-  let pathDIn = '';
-  let areaDIn = '';
-  let nowYOut = padTop + plotH;
-  let nowYIn = padTop + plotH;
-
-  const maxPassedIndex = Math.min(Math.floor(elapsedHours), data.length - 1);
-  const passedPointsOut = pointsOut.slice(0, maxPassedIndex + 1);
-  const passedPointsIn = pointsIn.slice(0, maxPassedIndex + 1);
-
-  if (passedPointsOut.length > 0) {
-    const p0Out = pointsOut[maxPassedIndex];
-    const p1Out = pointsOut[Math.min(maxPassedIndex + 1, pointsOut.length - 1)];
-    const p0In = pointsIn[maxPassedIndex];
-    const p1In = pointsIn[Math.min(maxPassedIndex + 1, pointsIn.length - 1)];
-
-    const spanX = (p1Out.x - p0Out.x) || 1;
-    const tFrac = Math.max(0, Math.min(1, (currentX - p0Out.x) / spanX));
-    nowYOut = p0Out.y + tFrac * (p1Out.y - p0Out.y);
-    nowYIn = p0In.y + tFrac * (p1In.y - p0In.y);
-
-    // Garis Scan Out
-    pathDOut = `M ${passedPointsOut[0].x},${passedPointsOut[0].y}`;
-    for (let k = 1; k < passedPointsOut.length; k++) {
-      pathDOut += ` L ${passedPointsOut[k].x},${passedPointsOut[k].y}`;
-    }
-    if (currentX > passedPointsOut[passedPointsOut.length - 1].x) {
-      pathDOut += ` L ${currentX},${nowYOut}`;
-    }
-    areaDOut = `${pathDOut} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
-
-    // Garis Scan In
-    pathDIn = `M ${passedPointsIn[0].x},${passedPointsIn[0].y}`;
-    for (let k = 1; k < passedPointsIn.length; k++) {
-      pathDIn += ` L ${passedPointsIn[k].x},${passedPointsIn[k].y}`;
-    }
-    if (currentX > passedPointsIn[passedPointsIn.length - 1].x) {
-      pathDIn += ` L ${currentX},${nowYIn}`;
-    }
-    areaDIn = `${pathDIn} L ${currentX},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
-  }
-
-  const slotWidth = plotW / (data.length - 1);
-  const dark = isThemeDark();
-  const gridLineStroke = dark ? '#1e293b' : '#f1f5f9';
-  const baseLineStroke = dark ? '#263342' : '#e2e8f0';
-  const pointFill = dark ? '#0f172a' : '#ffffff';
-  const timeBeaconBg = dark ? 'rgba(239, 68, 68, 0.18)' : '#fef2f2';
-  const timeBeaconBorder = dark ? 'rgba(239, 68, 68, 0.35)' : '#fecaca';
-  const timeBeaconText = dark ? '#fca5a5' : '#dc2626';
-
-  container.innerHTML = `
-    <!-- Dual Legend & Realtime Timestamp Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; font-size: 0.735rem; font-weight: 700; flex-wrap: wrap; gap: 0.5rem; padding: 0 0.25rem;">
-      <div style="display: flex; gap: 0.85rem; align-items: center;">
-        <span style="display: inline-flex; align-items: center; gap: 5px; color: #0284c7;">
-          <span style="width: 10px; height: 10px; border-radius: 2px; background: #0284c7; display: inline-block;"></span>
-          <span>Scan Out (Keluar)</span>
-        </span>
-        <span style="display: inline-flex; align-items: center; gap: 5px; color: #059669;">
-          <span style="width: 10px; height: 10px; border-radius: 2px; background: #10b981; display: inline-block;"></span>
-          <span>Tap In (Masuk)</span>
-        </span>
-      </div>
-      <div style="display: inline-flex; align-items: center; gap: 5px; color: ${timeBeaconText}; font-size: 0.72rem; background: ${timeBeaconBg}; padding: 2px 7px; border-radius: 6px; border: 1px solid ${timeBeaconBorder};">
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);"></span>
-        <span>Jam Sekarang: <strong>${timeNowFull}</strong></span>
-      </div>
-    </div>
-
-    <div style="position: relative; width: 100%; height: ${height}px;" onmouseleave="window.unhoverTrafficPoint()">
-      <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; overflow: visible; display: block;">
-        <defs>
-          <linearGradient id="trafficGradientOut" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0284c7" stop-opacity="0.32" />
-            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.02" />
-          </linearGradient>
-          <linearGradient id="trafficGradientIn" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#10b981" stop-opacity="0.26" />
-            <stop offset="100%" stop-color="#10b981" stop-opacity="0.02" />
-          </linearGradient>
-        </defs>
-
-        <!-- Grid Lines -->
-        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft + plotW}" y2="${padTop}" stroke="${gridLineStroke}" stroke-width="1" />
-        <line x1="${padLeft}" y1="${padTop + plotH * 0.5}" x2="${padLeft + plotW}" y2="${padTop + plotH * 0.5}" stroke="${gridLineStroke}" stroke-width="1" stroke-dasharray="3,3" />
-        <line x1="${padLeft}" y1="${padTop + plotH}" x2="${padLeft + plotW}" y2="${padTop + plotH}" stroke="${baseLineStroke}" stroke-width="1.5" />
-
-        <!-- Area Fills -->
-        <path d="${areaDOut}" fill="url(#trafficGradientOut)" />
-        <path d="${areaDIn}" fill="url(#trafficGradientIn)" />
-
-        <!-- Line Plots -->
-        <path d="${pathDOut}" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="${pathDIn}" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-
-        <!-- Realtime Live Time Beacon Indicator -->
-        ${currentX !== null ? `
-          <g id="trafficCurrentTimeBeacon" style="pointer-events: none;">
-            <line x1="${currentX}" y1="${padTop - 2}" x2="${currentX}" y2="${padTop + plotH}" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.85" />
-            <circle cx="${currentX}" cy="${padTop - 2}" r="3.5" fill="#ef4444" />
-            <circle cx="${currentX}" cy="${padTop - 2}" r="7" fill="#ef4444" opacity="0.3">
-              <animate attributeName="r" values="3.5;8;3.5" dur="1.8s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" values="0.6;0.1;0.6" dur="1.8s" repeatCount="indefinite"/>
-            </circle>
-            <text x="${currentX}" y="${padTop - 6}" font-size="8" font-weight="800" fill="#dc2626" text-anchor="middle">
-              🔴 ${timeNowStr}
-            </text>
-          </g>
-        ` : ''}
-
-        <!-- Interactive Vertical Hit Areas -->
-        ${data.map((d, i) => {
-          const ptOut = pointsOut[i];
-          const ptIn = pointsIn[i];
-          const isCurrentSlot = d.hour === currentSlotStr;
-          const labelFill = isCurrentSlot ? (dark ? '#f8fafc' : '#0f172a') : (dark ? '#94a3b8' : '#64748b');
-          const isPassed = i <= maxPassedIndex;
-          return `
-            <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
-               onmouseenter="window.hoverTrafficPoint('${d.hour}', ${d.out}, ${d.in}, ${ptOut.x}, ${ptOut.y}, ${ptIn.y}, ${i});"
-               onmousemove="window.moveChartTooltip(event)"
-               onmouseleave="window.unhoverTrafficPoint();">
-              <rect x="${ptOut.x - slotWidth / 2}" y="0" width="${slotWidth}" height="${height}" fill="transparent" />
-              <line id="trafficGuideLine_${i}" x1="${ptOut.x}" y1="${padTop}" x2="${ptOut.x}" y2="${padTop + plotH}" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="3,3" style="display: none;" />
-              <!-- Out Point (Hanya muncul jika jam sudah berjalan) -->
-              ${isPassed ? `
-                <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="${pointFill}" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
-              ` : ''}
-              <!-- In Point (Hanya muncul jika jam sudah berjalan) -->
-              ${isPassed ? `
-                <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="${pointFill}" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
-              ` : ''}
-              ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${labelFill}" text-anchor="middle">${d.hour}</text>` : ''}
-            </g>
-          `;
-        }).join('')}
-      </svg>
-    </div>
-
-    <!-- Admin Traffic Badge Summary (Theme-Safe CSS Class) -->
-    <div id="adminTrafficBadge" class="admin-traffic-badge">
-      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}${isNight ? ' — Shift Malam' : ''}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
-      <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
-        <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
-        <span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span>
-      </span>
-    </div>
-  `;
-}
-
-function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
-  const badge = document.getElementById('adminTrafficBadge');
-  const { elapsedHours } = getAdminTrafficData();
-  const isFuture = activeIdx > Math.floor(elapsedHours);
-
-  if (badge) {
-    badge.classList.add('is-hovered');
-    badge.style.background = '';
-    badge.style.color = '';
-    badge.style.borderColor = '';
-
-    if (isFuture || (out === 0 && inVal === 0 && activeIdx >= Math.floor(elapsedHours))) {
-      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>0 Scan Out</strong> — ↘️ <strong>0 Tap In</strong> <span style="font-size:0.75rem; opacity:0.85;">(Belum ada data aktivitas)</span></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">0 Personel</span>`;
-    } else {
-      const sum = out + inVal;
-      badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> — ↘️ <strong>${inVal} Tap In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
-    }
-  }
-
-  const colCount = window._trafficColCount || 15;
-  for (let i = 0; i < colCount; i++) {
-    const line = document.getElementById(`trafficGuideLine_${i}`);
-    const ptOut = document.getElementById(`trafficPointOut_${i}`);
-    const ptIn = document.getElementById(`trafficPointIn_${i}`);
-    if (line) line.style.display = (i === activeIdx) ? 'block' : 'none';
-    if (ptOut) {
-      if (i === activeIdx) {
-        ptOut.setAttribute('r', '7');
-        ptOut.style.filter = 'drop-shadow(0 0 5px #0284c7)';
-      } else {
-        ptOut.setAttribute('r', '4');
-        ptOut.style.filter = 'none';
-      }
-    }
-    if (ptIn) {
-      if (i === activeIdx) {
-        ptIn.setAttribute('r', '6.5');
-        ptIn.style.filter = 'drop-shadow(0 0 5px #10b981)';
-      } else {
-        ptIn.setAttribute('r', '3.5');
-        ptIn.style.filter = 'none';
-      }
-    }
-  }
-}
-
-function unhoverTrafficPoint() {
-  hideChartTooltip();
-  const badge = document.getElementById('adminTrafficBadge');
-  const { isNight, rows: data, totalOut, totalIn, peakHour } = getAdminTrafficData();
-  const now = new Date();
-  const timeNowStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  const currentSlotStr = `${String(now.getHours()).padStart(2, '0')}:00`;
-  const curSlotData = data.find(d => d.hour === currentSlotStr) || (isNight ? data[0] : data[data.length - 1]);
-
-  if (badge) {
-    badge.classList.remove('is-hovered');
-    badge.style.background = '';
-    badge.style.color = '';
-    badge.style.borderColor = '';
-    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}${isNight ? ' — Shift Malam' : ''}): <strong>${curSlotData.out} Scan Out</strong> — <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total Tap In: ${totalIn}</span></span>`;
-  }
-
-  const colCount = window._trafficColCount || 15;
-  for (let i = 0; i < colCount; i++) {
-    const line = document.getElementById(`trafficGuideLine_${i}`);
-    const ptOut = document.getElementById(`trafficPointOut_${i}`);
-    const ptIn = document.getElementById(`trafficPointIn_${i}`);
-    if (line) line.style.display = 'none';
-    if (ptOut) {
-      ptOut.setAttribute('r', '4');
-      ptOut.style.filter = 'none';
-    }
-    if (ptIn) {
-      ptIn.setAttribute('r', '3.5');
-      ptIn.style.filter = 'none';
-    }
-  }
-}
-
-window.hoverTrafficPoint = hoverTrafficPoint;
-window.unhoverTrafficPoint = unhoverTrafficPoint;
-window.getAdminTrafficData = getAdminTrafficData;
-window.renderAdminTrafficChart = renderAdminTrafficChart;
-
-// Ticker Realtime terus berjalan: interval setiap 10 detik memperbarui posisi waktu & data jika admin dashboard aktif
-if (typeof window !== 'undefined' && !window._adminTrafficChartTimer) {
-  window._adminTrafficChartTimer = setInterval(() => {
-    const container = document.getElementById('chartAdminTrafficContainer');
-    if (container && container.offsetParent !== null) {
-      renderAdminTrafficChart();
-    }
-  }, 10000);
-}
-
-// ===================================================================
-// 4. ADMIN: DEPARTMENT RANKED DISTRIBUTION CHART (REVISI 4)
-// ===================================================================
-function getAdminDeptData(period) {
-  const list = window.ticketsList || [];
-  const selPeriod = period || (document.getElementById('filterAdminDeptPeriod') ? document.getElementById('filterAdminDeptPeriod').value : 'month');
-  const isYear = selPeriod === 'year';
-
-  const deptCounts = isYear ? {
-    'Departemen Rekayasa & Pemeliharaan': 48,
-    'Departemen Operasi Pabrik 1 & 2': 34,
-    'Departemen Pengamanan & K3': 20,
-    'Departemen Logistik & Pergudangan': 16,
-    'Departemen SDM & Organisasi': 11
-  } : {
-    'Departemen Rekayasa & Pemeliharaan': 12,
-    'Departemen Operasi Pabrik 1 & 2': 8,
-    'Departemen Pengamanan & K3': 5,
-    'Departemen Logistik & Pergudangan': 4,
-    'Departemen SDM & Organisasi': 3
-  };
-
-  list.forEach(t => {
-    if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, selPeriod)) {
-      return;
-    }
-    if (t.department && deptCounts[t.department] !== undefined) {
-      deptCounts[t.department]++;
-    }
-  });
-
-  const depts = Object.keys(deptCounts).map(name => ({
-    name,
-    count: deptCounts[name]
-  })).sort((a, b) => b.count - a.count);
-
-  const total = depts.reduce((s, d) => s + d.count, 0);
-  const max = Math.max(...depts.map(d => d.count), 1);
-  return { depts, total, max, period: selPeriod };
-}
-
-function renderAdminDeptChart() {
-  const container = document.getElementById('chartAdminDeptContainer');
-  if (!container) return;
-
-  const { depts, total, max, period } = getAdminDeptData();
-  const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
-  const dark = typeof isThemeDark === 'function' ? isThemeDark() : (typeof document !== 'undefined' && document.body ? document.body.classList.contains('theme-dark') : false);
-
-  const colors = [
-    { bar: 'linear-gradient(90deg, #059669 0%, #10b981 100%)', text: '#059669', badgeClass: 'top-1' },
-    { bar: 'linear-gradient(90deg, #0284c7 0%, #38bdf8 100%)', text: '#0284c7', badgeClass: 'top-2' },
-    { bar: 'linear-gradient(90deg, #6366f1 0%, #818cf8 100%)', text: '#6366f1', badgeClass: 'top-3' },
-    { bar: 'linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%)', text: '#8b5cf6', badgeClass: '' },
-    { bar: 'linear-gradient(90deg, #64748b 0%, #94a3b8 100%)', text: '#64748b', badgeClass: '' }
-  ];
-
-  container.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 0.45rem;">
-      ${depts.map((d, index) => {
-        const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
-        const barWidthPct = Math.round((d.count / max) * 100);
-        const styleInfo = colors[index % colors.length];
-
-        return `
-          <div id="deptRow_${index}" class="dept-rank-row" style="cursor: pointer; transition: all 0.15s ease;"
-               onmouseenter="window.hoverDeptRow(event, '${d.name}', ${d.count}, '${pct}', '${styleInfo.text}', ${index}, ${total})"
-               onmousemove="window.moveChartTooltip(event)"
-               onmouseleave="window.unhoverDeptRow(${index})">
-            <div class="dept-rank-header">
-              <div style="display: flex; align-items: center; min-width: 0; max-width: 75%;">
-                <span class="dept-rank-badge ${styleInfo.badgeClass}">#${index + 1}</span>
-                <span style="font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${d.name}
-                </span>
-              </div>
-              <span id="deptCountLabel_${index}" style="font-family: var(--font-mono); font-weight: 800; color: ${styleInfo.text}; font-size: 0.8rem; flex-shrink: 0;">
-                ${d.count} Izin
-              </span>
-            </div>
-            <div class="dept-progress-track">
-              <div id="deptBar_${index}" class="dept-progress-bar" style="width: ${barWidthPct}%; background: ${styleInfo.bar};"></div>
-            </div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-
-  attachDeptFilterListener();
-}
-
-function hoverDeptRow(e, name, count, pct, color, activeIdx, total) {
-  const isTop = activeIdx === 0;
-  const subtext = isTop ? '★ Departemen Frekuensi Tertinggi' : `Peringkat #${activeIdx + 1} Departemen Teraktif`;
-  const dark = isThemeDark();
-
-  // Tampilkan Tooltip Gelap Presisi Tinggi Sesuai Gambar 1
-  if (typeof window.showChartTooltip === 'function') {
-    window.showChartTooltip(e, {
-      title: name,
-      count: count,
-      total: total,
-      percent: pct,
-      color: color,
-      unit: 'izin',
-      subtext: subtext
-    });
-  }
-
-  // Highlight baris
-  const row = document.getElementById(`deptRow_${activeIdx}`);
-  if (row) {
-    row.style.background = dark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
-    row.style.borderRadius = '8px';
-    row.style.paddingLeft = '6px';
-    row.style.paddingRight = '6px';
-  }
-}
-
-function unhoverDeptRow(activeIdx) {
-  if (typeof window.hideChartTooltip === 'function') {
-    window.hideChartTooltip();
-  }
-  if (activeIdx !== undefined) {
-    const row = document.getElementById(`deptRow_${activeIdx}`);
-    if (row) {
-      row.style.background = 'transparent';
-      row.style.paddingLeft = '0';
-      row.style.paddingRight = '0';
-    }
-  }
-}
-
-function attachDeptFilterListener() {
-  const adminDeptFilter = document.getElementById('filterAdminDeptPeriod');
-  const isBound = adminDeptFilter && (adminDeptFilter.dataset ? adminDeptFilter.dataset.bound : adminDeptFilter._bound);
-  if (adminDeptFilter && !isBound) {
-    if (adminDeptFilter.dataset) adminDeptFilter.dataset.bound = 'true';
-    adminDeptFilter._bound = true;
-    adminDeptFilter.addEventListener('change', () => {
-      renderAdminDeptChart();
-    });
-  }
-}
-
-window.hoverDeptRow = hoverDeptRow;
-window.unhoverDeptRow = unhoverDeptRow;
-window.renderAdminDeptChart = renderAdminDeptChart;
-
-// Stub for retired "Komposisi Status Izin" chart (Revisi 2)
-window.renderAdminStatusChart = function() {
-  // Chart "Komposisi Status Izin" intentionally retired per Revisi 2
-};
-
-// ===================================================================
-// 5. UNIFIED REAL-TIME DATA REFRESH ORCHESTRATOR (REVISI 5)
-// ===================================================================
-function renderAllCharts() {
-  const role = window.currentActor || 'karyawan';
-  if (role === 'karyawan') {
-    renderKaryawanDonutChart();
-  } else if (role === 'approver' || role === 'approver2') {
-    renderApproverBarChart();
-  } else if (role === 'admin') {
-    renderAdminTrafficChart();
-    renderAdminDeptChart();
-  }
-}
-
-function refreshAllDashboardData() {
-  if (typeof window.updateKaryawanMetrics === 'function') {
-    window.updateKaryawanMetrics();
-  }
-  if (typeof window.updateApproverMetrics === 'function') {
-    window.updateApproverMetrics();
-  }
-  if (typeof window.updateAdminMetrics === 'function') {
-    window.updateAdminMetrics();
-  }
-  if (typeof window.updateSecurityMetrics === 'function') {
-    window.updateSecurityMetrics();
-  }
-  renderAllCharts();
-}
-
-window.renderAllCharts = renderAllCharts;
-window.refreshAllDashboardData = refreshAllDashboardData;
-window.syncAllDashboardData = refreshAllDashboardData;
-
-// Listen to storage events to ensure cross-tab data synchronization
-if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
-  window.addEventListener('storage', (e) => {
-    if (e.key === window.STORAGE_KEY || e.key === window.USERS_STORAGE_KEY) {
-      refreshAllDashboardData();
-    }
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  renderAllCharts();
-});

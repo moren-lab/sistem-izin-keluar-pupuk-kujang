@@ -9,9 +9,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261029_0550">
-  <link rel="stylesheet" href="css/auth.css?v=20261029_0550">
-  <link rel="stylesheet" href="css/mobile.css?v=20261029_0830">
+  <link rel="stylesheet" href="css/style.css?v=20261029_1330">
+  <link rel="stylesheet" href="css/auth.css?v=20261029_1330">
+  <link rel="stylesheet" href="css/mobile.css?v=20261029_1330">
   <link rel="icon" type="image/png" href="Pupuk Kujang Icon - Colored - zonalogo.com.png">
   <script>
     (function () {
@@ -774,6 +774,9 @@
 
               </div>
               <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-secondary" id="btnCloseDetailBottom" onclick="window.closeTicketDetailModal ? window.closeTicketDetailModal() : document.getElementById('modalTicketDetail').classList.remove('open')" style="padding: 0.45rem 0.85rem; font-size: 0.8rem;">
+            Tutup
+          </button>
                 <button class="btn-figma-danger" id="btnOpenEmergencyModal" onclick="handleOpenEmergency()"
                   title="Pengajuan Izin Darurat">
                   <span>Izin Darurat</span>
@@ -2466,7 +2469,7 @@
           <!-- Pilih Atasan Langsung (Searchable Autocomplete Combobox) -->
           <div class="form-group approver-search-group" id="groupSelectApprover" style="margin-bottom: 0;">
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
-              <label class="form-label" for="searchApproverInput"
+              <label class="form-label" for="searchReqApproverInput"
                 style="font-weight: 600; color: #334155; font-size: 0.8rem; margin: 0;">
                 Pilih Atasan Langsung <span style="color: var(--rose-danger);">*</span>
               </label>
@@ -2506,7 +2509,7 @@
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                 </span>
-                <input type="text" id="searchApproverInput" class="form-input approver-search-input"
+                <input type="text" id="searchReqApproverInput" class="form-input approver-search-input"
                   placeholder="Masukkan nama atau NIP atasan..." autocomplete="off" spellcheck="false">
                 <button type="button" class="btn-clear-approver-search" id="btnClearApproverSearch"
                   title="Hapus / Reset" style="display: none;">
@@ -2814,7 +2817,7 @@
   </div>
 
   <!-- ================= MODAL 5: DETAIL TIKET & AUDIT TRAIL (FIGMA SCREEN 2 & 3) ================= -->
-  <div class="modal-overlay" id="modalTicketDetail">
+  <div class="modal-overlay" id="modalTicketDetail" onclick="if(event.target === this) { window.closeTicketDetailModal ? window.closeTicketDetailModal() : this.classList.remove('open'); }">
     <div class="modal-card" style="max-width: 820px; width: 95%;">
       <div class="modal-header" style="padding: 1.25rem 1.5rem 1rem;">
         <div>
@@ -2823,7 +2826,7 @@
           <p id="modalDetailSubtitle" style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Budi Pratama, S.T. —
             Dinas Kantor — 16 Oktober 2026</p>
         </div>
-        <button class="btn-close-modal" id="btnCloseDetailModal" title="Tutup">✕</button>
+        <button class="btn-close-modal" id="btnCloseDetailModal" onclick="window.closeTicketDetailModal ? window.closeTicketDetailModal() : document.getElementById('modalTicketDetail').classList.remove('open')" title="Tutup">✕</button>
       </div>
 
       <!-- TAB SWITCHER (INFORMASI TIKET | RIWAYAT AKTIVITAS) + STATUS BADGE -->
@@ -4065,8 +4068,7 @@
           <div>
             <span style="color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 2px;">Alasan Perpanjangan
               Waktu:</span>
-            <div id="pendingExtReason"
-              style="border-radius: 6px; padding: 0.6rem 0.75rem; color: var(--text-primary); line-height: 1.45; font-style: italic;">
+            <div id="pendingExtReason" style="border-radius: 6px; padding: 0.6rem 0.75rem; color: var(--text-primary); line-height: 1.45; font-style: normal;">
               -</div>
           </div>
           <div
@@ -4269,25 +4271,25 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261029_0550"></script>
-  <script src="js/data/authData.js?v=20261029_0550"></script>
-  <script src="js/modules/notifications.js?v=20261029_0830"></script>
-  <script src="js/modules/ui.js?v=20261029_0550"></script>
-  <script src="js/modules/scheduler.js?v=20261029_0550"></script>
-  <script src="js/modules/navigation.js?v=20261029_0550"></script>
-  <script src="js/modules/karyawan.js?v=20261029_0550"></script>
-  <script src="js/modules/approver.js?v=20261029_0830"></script>
-  <script src="js/modules/security.js?v=20261029_0550"></script>
-  <script src="js/modules/admin.js?v=20261029_0550"></script>
-  <script src="js/modules/charts.js?v=20261029_0550"></script>
-  <script src="js/modules/emergency.js?v=20261029_0550"></script>
-  <script src="js/modules/modals.js?v=20261029_0830"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261029_0830"></script>
-  <script src="js/modules/mobile_atasan.js?v=20261029_0830"></script>
-  <script src="js/modules/mobile_security.js?v=20261029_0830"></script>
-  <script src="js/modules/mobile_app.js?v=20261029_0550"></script>
-  <script src="js/app.js?v=20261029_0550"></script>
-  <script src="js/modules/auth.js?v=20261029_0550"></script>
+  <script src="js/data/mockData.js?v=20261029_1330"></script>
+  <script src="js/data/authData.js?v=20261029_1330"></script>
+  <script src="js/modules/notifications.js?v=20261029_1330"></script>
+  <script src="js/modules/ui.js?v=20261029_1330"></script>
+  <script src="js/modules/scheduler.js?v=20261029_1330"></script>
+  <script src="js/modules/navigation.js?v=20261029_1330"></script>
+  <script src="js/modules/karyawan.js?v=20261029_1330"></script>
+  <script src="js/modules/approver.js?v=20261029_1330"></script>
+  <script src="js/modules/security.js?v=20261029_1330"></script>
+  <script src="js/modules/admin.js?v=20261029_1330"></script>
+  <script src="js/modules/charts.js?v=20261029_1330"></script>
+  <script src="js/modules/emergency.js?v=20261029_1330"></script>
+  <script src="js/modules/modals.js?v=20261029_1330"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261029_1330"></script>
+  <script src="js/modules/mobile_atasan.js?v=20261029_1330"></script>
+  <script src="js/modules/mobile_security.js?v=20261029_1330"></script>
+  <script src="js/modules/mobile_app.js?v=20261029_1330"></script>
+  <script src="js/app.js?v=20261029_1330"></script>
+  <script src="js/modules/auth.js?v=20261029_1330"></script>
 </body>
 
 </html>

@@ -137,7 +137,7 @@ function playScannerBeep() {
   }
 }
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', duration = 2000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toast = document.createElement('div');
@@ -146,11 +146,13 @@ function showToast(message, type = 'success') {
   toast.innerHTML = `<span>${message}</span>`;
   container.appendChild(toast);
 
+  const finalDuration = (message && message.includes('Beralih ke mode')) ? 2000 : (duration || 2000);
+
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(10px)';
     setTimeout(() => toast.remove(), 250);
-  }, 4000);
+  }, finalDuration);
 }
 
 // Expose globally
@@ -175,8 +177,13 @@ function matchesPeriodFilter(ticket, period) {
       }
     }
   }
+  if (!d && ticket.id) {
+    const idMatch = ticket.id.match(/TK-(?:EMG-)?(\d{4})(\d{2})(\d{2})/);
+    if (idMatch) {
+      d = new Date(parseInt(idMatch[1], 10), parseInt(idMatch[2], 10) - 1, parseInt(idMatch[3], 10));
+    }
+  }
   if (!d) return true;
-
   const now = new Date();
   if (period === 'today') {
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();

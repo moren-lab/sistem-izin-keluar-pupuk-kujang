@@ -855,7 +855,7 @@ let emgApproverComboboxInstance = null;
 
 function setupApproverSearch() {
   regApproverComboboxInstance = setupSingleApproverCombobox({
-    searchInputId: 'searchApproverInput',
+    searchInputId: 'searchReqApproverInput',
     selectApproverId: 'selectApprover',
     btnClearId: 'btnClearApproverSearch',
     btnToggleId: 'btnToggleApproverList',
@@ -1644,7 +1644,8 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     // Scan Out hanya muncul di pos jaga pada menu / halaman "Terminal Verifikasi Tiket & Kamera Scan QR"
     const secScannerPage = document.getElementById('securityScannerPage');
     const isScannerPageActive = secScannerPage && (secScannerPage.style.display !== 'none' || window._openedFromScannerTerminal);
-    const canScanOut = isSecurity && isScannerPageActive && (ticket.status === 'Disetujui' || (ticket.isEmergency && !ticket.emergencyLocked)) && !ticket.scanOutTime;
+    // Sesuai revisi: Scan Out hanya dilakukan oleh karyawan, pos jaga tidak memiliki tombol Scan Out di detail
+    const canScanOut = false;
 
     if (canScanOut) {
       btnDetailScanOut.style.display = 'inline-flex';
@@ -1771,9 +1772,24 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
     }
   }
 
-  switchDetailTab(defaultTab);
-  if (modalTicketDetail) modalTicketDetail.classList.add('open');
+  const activeTabName = (defaultTab === 'timeline' || defaultTab === 'riwayat') ? 'timeline' : 'info';
+  switchDetailTab(activeTabName);
+  if (modalTicketDetail) {
+    modalTicketDetail.style.display = 'flex';
+    modalTicketDetail.classList.add('open');
+  }
 }
+
+function closeTicketDetailModal() {
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) {
+    modalTicketDetail.classList.remove('open');
+    modalTicketDetail.style.display = 'none';
+  }
+  window._openedFromScannerTerminal = false;
+  document.body.classList.remove('modal-open');
+}
+window.closeTicketDetailModal = closeTicketDetailModal;
 
 // CANCELLATION FLOW
 function openCancelModal(ticketId, callback) {
@@ -2573,9 +2589,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseDetailModal = document.getElementById('btnCloseDetailModal');
   const btnCloseDetailBottom = document.getElementById('btnCloseDetailBottom');
   const modalTicketDetail = document.getElementById('modalTicketDetail');
-  if (btnCloseDetailModal) btnCloseDetailModal.addEventListener('click', () => {
-    modalTicketDetail.classList.remove('open');
-    window._openedFromScannerTerminal = false;
+  if (btnCloseDetailModal) btnCloseDetailModal.addEventListener('click', closeTicketDetailModal);
+  if (btnCloseDetailBottom) btnCloseDetailBottom.addEventListener('click', closeTicketDetailModal);
+  if (modalTicketDetail) {
+    modalTicketDetail.addEventListener('click', (e) => {
+      if (e.target === modalTicketDetail) {
+        closeTicketDetailModal();
+      }
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const m = document.getElementById('modalTicketDetail');
+      if (m && m.classList.contains('open')) {
+        closeTicketDetailModal();
+      }
+    }
   });
   if (btnCloseDetailBottom) btnCloseDetailBottom.addEventListener('click', () => {
     modalTicketDetail.classList.remove('open');
@@ -3183,6 +3212,19 @@ function openExtendDurationModal(ticketId) {
   const dayOfWeek = now.getDay();
   const closingHourStr = (dayOfWeek === 5) ? '16:30' : '16:00';
   const minVal = `${todayStr}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  if (inputExtendNewReturn) {
+    inputExtendNewReturn.min = minVal;
+    inputExtendNewReturn.addEventListener('change', () => {
+      const curNow = new Date();
+      const selVal = new Date(inputExtendNewReturn.value);
+      if (!isNaN(selVal.getTime()) && selVal.getTime() <= curNow.getTime()) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Waktu perpanjangan tidak boleh di masa lampau!', 'danger');
+        }
+        inputExtendNewReturn.value = minVal;
+      }
+    });
+  }
   const maxVal = `${todayStr}T${closingHourStr}`;
 
   const isDinas = isDinasCategory(ticket.category);

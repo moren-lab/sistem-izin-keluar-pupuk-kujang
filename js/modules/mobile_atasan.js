@@ -189,7 +189,7 @@
             <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
           </div>
           <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px;">
-            <em>"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</em>
+            <span style="font-style: normal;">"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</span>
           </div>
           <div style="background: #ffffff; border: 1px dashed #fca5a5; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.725rem; color: #991b1b; display: flex; justify-content: space-between; align-items: center;">
             <span>Kode Sandi Otorisasi:</span>
@@ -346,32 +346,10 @@
             <h3 class="mobile-card-title">Volume pengajuan tim</h3>
           </div>
         </div>
-        <div class="mobile-bar-chart-wrap">
-          <div class="mobile-bar-col">
-            <span class="mobile-bar-value">3</span>
-            <div class="mobile-bar-pillar" style="height: 38%;"></div>
-            <span class="mobile-bar-label">Sen</span>
-          </div>
-          <div class="mobile-bar-col">
-            <span class="mobile-bar-value">5</span>
-            <div class="mobile-bar-pillar" style="height: 62%;"></div>
-            <span class="mobile-bar-label">Sel</span>
-          </div>
-          <div class="mobile-bar-col">
-            <span class="mobile-bar-value">4</span>
-            <div class="mobile-bar-pillar" style="height: 50%;"></div>
-            <span class="mobile-bar-label">Rab</span>
-          </div>
-          <div class="mobile-bar-col">
-            <span class="mobile-bar-value" style="color: #2563eb;">8</span>
-            <div class="mobile-bar-pillar peak" style="height: 100%;"></div>
-            <span class="mobile-bar-label" style="color: #2563eb; font-weight: 800;">Kam</span>
-          </div>
-          <div class="mobile-bar-col">
-            <span class="mobile-bar-value">6</span>
-            <div class="mobile-bar-pillar" style="height: 75%;"></div>
-            <span class="mobile-bar-label">Jum</span>
-          </div>
+        <div style="margin-top: 6px;">
+          ${(typeof window.getGambar2AestheticBarChartHtml === 'function') 
+            ? window.getGambar2AestheticBarChartHtml() 
+            : '<div style="text-align:center; padding: 12px; color: #64748b;">Memuat grafik...</div>'}
         </div>
       </section>
 
@@ -1628,3 +1606,30 @@
   };
 
 })();
+
+  // Fitur Hapus Semua Selesai di Pelacakan Tim Atasan
+  window.mobileAtasanClearAllFinished = function () {
+    const approver = getActiveApprover();
+    const tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
+    const finishedTickets = tickets.filter(t =>
+      (t.approverName === approver.name || (!t.approverName && approver.name.includes('Hendra'))) &&
+      (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan') &&
+      !t.deletedByApprover
+    );
+    if (finishedTickets.length === 0) {
+      if (typeof window.showToast === 'function') window.showToast('Tidak ada data izin selesai yang dapat dihapus.', 'info');
+      return;
+    }
+    if (!confirm(`Hapus ${finishedTickets.length} riwayat izin selesai dari pelacakan? Izin yang sedang aktif tidak akan dihapus.`)) {
+      return;
+    }
+    finishedTickets.forEach(t => {
+      t.deletedByApprover = true;
+    });
+    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    if (typeof window.showToast === 'function') {
+      window.showToast(`${finishedTickets.length} riwayat selesai berhasil dibersihkan dari pelacakan Atasan.`, 'success');
+    }
+    renderMobileAtasan(null, currentAtasanTab);
+    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  };

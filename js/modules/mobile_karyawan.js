@@ -8,7 +8,8 @@
   'use strict';
 
   let currentKaryawanTab = 'dashboard'; // 'dashboard' | 'pengajuan' | 'riwayat'
-  let currentSegment = 'ringkasan'; // 'ringkasan' | 'donut'
+  let currentSegment = 'ringkasan';
+  let mobileDonutPeriod = 'month'; // 'month' | 'today' | 'all' // 'ringkasan' | 'donut'
   let riwayatSearchQuery = '';
   let riwayatStatusFilter = 'all';
   let currentRiwayatView = 'card';
@@ -289,16 +290,28 @@
       </div>
     `).join('');
 
-    // Donut SVG calculations with emergency support
-    const strokeDash = 239; // 2 * PI * 38
-    const selesaiPct = totalCount ? Math.round((selesaiCount / totalCount) * 1000) / 10 : 0;
-    const activePct = totalCount ? Math.round((activeCount / totalCount) * 1000) / 10 : 0;
-    const emergencyCount = emergencyTickets.length;
-    const emgPct = totalCount ? Math.round((emergencyCount / totalCount) * 1000) / 10 : 0;
+    // Donut SVG calculations with dynamic period filtering (Bulan Ini, Hari Ini, Semua)
+    const isEmg = (item) => Boolean(item.isEmergency || (item.id && (item.id.includes('-EMG-') || item.id.startsWith('TK-EMG'))) || (item.category && item.category.toLowerCase().includes('darurat')));
+    const donutFilteredTickets = tickets.filter(item => {
+      if (typeof window.matchesPeriodFilter === 'function') {
+        return window.matchesPeriodFilter(item, mobileDonutPeriod);
+      }
+      return true;
+    });
 
-    let selesaiLen = totalCount ? Math.round((selesaiCount / totalCount) * strokeDash) : 0;
-    let activeLen = totalCount ? Math.round((activeCount / totalCount) * strokeDash) : 0;
-    let emgLen = totalCount ? Math.round((emergencyCount / totalCount) * strokeDash) : 0;
+    const donutTotal = donutFilteredTickets.length;
+    const donutSelesai = donutFilteredTickets.filter(item => item.status === 'Selesai' && !isEmg(item)).length;
+    const donutActive = donutFilteredTickets.filter(item => (item.status === 'Sedang di Luar' || item.status === 'Disetujui' || item.status === 'Menunggu Persetujuan' || item.status === 'Terlambat') && !isEmg(item)).length;
+    const donutEmg = donutFilteredTickets.filter(isEmg).length;
+
+    const strokeDash = 239; // 2 * PI * 38
+    const selesaiPct = donutTotal ? Math.round((donutSelesai / donutTotal) * 1000) / 10 : 0;
+    const activePct = donutTotal ? Math.round((donutActive / donutTotal) * 1000) / 10 : 0;
+    const emgPct = donutTotal ? Math.round((donutEmg / donutTotal) * 1000) / 10 : 0;
+
+    let selesaiLen = donutTotal ? Math.round((donutSelesai / donutTotal) * strokeDash) : 0;
+    let activeLen = donutTotal ? Math.round((donutActive / donutTotal) * strokeDash) : 0;
+    let emgLen = donutTotal ? Math.round((donutEmg / donutTotal) * strokeDash) : 0;
 
     container.innerHTML = `
       <!-- Hero Card Profile -->
@@ -350,11 +363,12 @@
       <div id="mobileSecDonut" class="mobile-card" style="display: ${currentSegment === 'donut' ? 'block' : 'none'}; margin-bottom: 14px; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #ffffff;">
         <h3 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">Total Pengajuan Izin</h3>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-size: 0.75rem; color: #64748b;">Periode laporan</span>
-          <div style="display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; color: #334155; font-weight: 600;">
-            <span>Bulan Ini</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </div>
+          <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Periode laporan</span>
+          <select id="mSelectDonutPeriod" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #1e293b; cursor: pointer; outline: none;" onchange="window.mobileSwitchDonutPeriod(this.value)">
+            <option value="month" ${mobileDonutPeriod === 'month' ? 'selected' : ''}>Bulan Ini</option>
+            <option value="today" ${mobileDonutPeriod === 'today' ? 'selected' : ''}>Hari Ini</option>
+            <option value="all" ${mobileDonutPeriod === 'all' ? 'selected' : ''}>Semua Periode</option>
+          </select>
         </div>
 
         <div style="display: flex; align-items: center; justify-content: space-around; gap: 12px;">
@@ -371,7 +385,7 @@
               <circle cx="50" cy="50" r="38" fill="transparent" stroke="#dc2626" stroke-width="14" stroke-dasharray="${emgLen} ${strokeDash}" stroke-dashoffset="${-(selesaiLen + activeLen)}" />
             </svg>
             <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
-              <span style="font-size: 1.35rem; font-weight: 900; color: #0f172a; line-height: 1;">${totalCount}</span>
+              <span style="font-size: 1.35rem; font-weight: 900; color: #0f172a; line-height: 1;">${donutTotal}</span>
               <span style="font-size: 0.65rem; color: #64748b; font-weight: 700; margin-top: 2px;">Total</span>
             </div>
           </div>
@@ -381,7 +395,7 @@
             <div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="width: 8px; height: 8px; border-radius: 2px; background: #059669; flex-shrink: 0;"></span>
-                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${selesaiCount} Selesai</span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${donutSelesai} Selesai</span>
               </div>
               <div style="font-size: 0.7rem; color: #64748b; margin-left: 14px;">${selesaiPct}% dari total</div>
             </div>
@@ -389,7 +403,7 @@
             <div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="width: 8px; height: 8px; border-radius: 2px; background: #eab308; flex-shrink: 0;"></span>
-                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${activeCount} Sedang Aktif</span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${donutActive} Sedang Aktif</span>
               </div>
               <div style="font-size: 0.7rem; color: #64748b; margin-left: 14px;">${activePct}% dari total</div>
             </div>
@@ -397,7 +411,7 @@
             <div>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="width: 8px; height: 8px; border-radius: 2px; background: #dc2626; flex-shrink: 0;"></span>
-                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${emergencyCount} Izin Darurat</span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${donutEmg} Izin Darurat</span>
               </div>
               <div style="font-size: 0.7rem; color: #64748b; margin-left: 14px;">${emgPct}% dari total</div>
             </div>
@@ -934,7 +948,7 @@
 
         <div style="font-size: 0.775rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
         <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 3px 0 2px 0;">${t.destination || 'Area Cikampek'}</div>
-        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-style: italic;">"${t.reason || 'Keperluan dinas kantor'}"</div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-style: normal;">"${t.reason || 'Keperluan dinas kantor'}"</div>
 
         <div class="mobile-ticket-grid-meta">
           <div>
@@ -1439,6 +1453,7 @@
     const dd = document.getElementById('mApproverDropdown');
     const btnClear = document.getElementById('mBtnClearApprover');
     if (!dd) return;
+    dd.style.display = 'flex';
     if (btnClear) btnClear.style.display = query ? 'block' : 'none';
 
     const approvers = getMobileApprovers();
@@ -1762,7 +1777,7 @@
           </div>
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Alasan Keperluan</span>
-            <span class="mobile-summary-value" style="font-style: italic; color: #334155;">"${data.reason}"</span>
+            <span class="mobile-summary-value" style="font-style: normal; color: #334155;">"${data.reason}"</span>
           </div>
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Rencana Keluar</span>
@@ -2553,7 +2568,7 @@
         <form onsubmit="window.mobileSubmitPerpanjangan(event, '${t.id}')">
           <div class="mobile-form-group">
             <label class="mobile-form-label">Usulan Jam Kembali Baru <span class="req">*</span></label>
-            <input type="datetime-local" class="mobile-input" id="mPerpanjangNewTime" value="${defaultNewTime}" required>
+            <input type="datetime-local" class="mobile-input" id="mPerpanjangNewTime" value="${defaultNewTime}" min="${formatDateTimeLocal(new Date(Math.max(Date.now(), currentReturn ? new Date(currentReturn).getTime() : Date.now()) + 5 * 60000))}" required onchange="const minVal = this.getAttribute('min'); if (this.value && minVal && this.value < minVal) { this.value = minVal; if (typeof window.showToast === 'function') window.showToast('Waktu perpanjangan tidak boleh di masa lampau!', 'warning'); }">
             <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px;">Pilih waktu kepulangan baru (disarankan +30 s.d +60 menit).</div>
           </div>
 
@@ -2583,6 +2598,17 @@
 
     if (!newTime || !reason) {
       if (typeof window.showToast === 'function') window.showToast('Harap lengkapi waktu dan alasan perpanjangan!', 'warning');
+      return;
+    }
+
+    const selDate = new Date(newTime);
+    const nowTime = new Date();
+    if (isNaN(selDate.getTime()) || selDate.getTime() <= nowTime.getTime()) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Waktu perpanjangan tidak boleh di masa lampau!', 'warning');
+      } else {
+        alert('Waktu perpanjangan tidak boleh di masa lampau!');
+      }
       return;
     }
 
@@ -2724,3 +2750,8 @@
   window.renderMobileKaryawan = renderMobileKaryawan;
 
 })();
+
+  window.mobileSwitchDonutPeriod = function (period) {
+    mobileDonutPeriod = period;
+    renderMobileKaryawan(null, 'dashboard');
+  };
