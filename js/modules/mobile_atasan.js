@@ -1747,9 +1747,54 @@
       if (typeof window.showToast === 'function') window.showToast('Tidak ada data izin selesai yang dapat dihapus.', 'info');
       return;
     }
-    if (!confirm(`Hapus ${finishedTickets.length} riwayat izin selesai dari pelacakan? Izin yang sedang aktif tidak akan dihapus.`)) {
-      return;
-    }
+
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) return;
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </div>
+          <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0;">Bersihkan Pelacakan Selesai</h3>
+        </div>
+        <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 16px 18px 24px 18px;">
+        <p style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; margin: 0 0 10px 0;">
+          Hapus <strong>${finishedTickets.length} riwayat izin selesai</strong> dari tampilan pelacakan Atasan?
+        </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+          <div style="display: flex; gap: 6px; align-items: flex-start;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Riwayat selesai hanya disembunyikan dari pelacakan Atasan. Data audit trail server dan bukti gerbang tetap utuh. Permohonan yang sedang aktif tidak dihapus.</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 0.85rem;" onclick="window.mobileCloseSheet()">Batal</button>
+          <button type="button" id="mBtnConfirmAtasanClear" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 800; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 10px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);" onclick="window.mobileExecuteAtasanClearAllFinished()">Hapus Riwayat</button>
+        </div>
+      </div>
+    `;
+
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
+  window.mobileExecuteAtasanClearAllFinished = function () {
+    const approver = getActiveApprover();
+    const tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
+    const isDewi = approver.name.toLowerCase().includes('dewi');
+    const finishedTickets = tickets.filter(t => {
+      const isMyTicket = isTicketAssignedToMobileApprover(t);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan');
+      const isDel = isDewi ? t.deletedByApprover2 : t.deletedByApprover1;
+      return isMyTicket && isFinished && !isDel;
+    });
+
     finishedTickets.forEach(t => {
       if (isDewi) {
         t.deletedByApprover2 = true;
@@ -1758,8 +1803,9 @@
       }
     });
     if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
-      window.showToast(`${finishedTickets.length} riwayat selesai berhasil dibersihkan dari pelacakan Atasan.`, 'success');
+      window.showToast(`${finishedTickets.length} riwayat selesai dibersihkan dari pelacakan Atasan.`, 'success');
     }
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderApproverView === 'function') window.renderApproverView();

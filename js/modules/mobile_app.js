@@ -722,16 +722,27 @@
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus Riwayat Selesai</h3>
-        <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet()">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </div>
+          <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0;">Konfirmasi Hapus Riwayat</h3>
+        </div>
+        <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body" style="padding: 16px 18px 24px 18px;">
-        <p style="font-size: 0.85rem; color: #334155; line-height: 1.5; margin: 0 0 20px 0;">
-          Hapus <strong>${finishedTickets.length}</strong> riwayat yang sudah selesai? Tiket yang masih berjalan tidak akan ikut terhapus.
+        <p style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; margin: 0 0 10px 0;">
+          Hapus <strong>${finishedTickets.length} tiket</strong> riwayat selesai dari daftar tampilan Anda?
         </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+          <div style="display: flex; gap: 6px; align-items: flex-start;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Riwayat akan disembunyikan dari perangkat ini. Log keamanan pos gerbang dan audit trail resmi di server tetap tersimpan aman. Tiket yang sedang berjalan tidak akan terhapus.</span>
+          </div>
+        </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="button" class="mobile-btn-secondary" style="width: auto; min-height: 44px; padding: 10px 20px; font-weight: 700; border-radius: 10px;" onclick="window.mobileCloseSheet()">Batal</button>
-          <button type="button" style="width: auto; min-height: 44px; padding: 10px 24px; font-weight: 800; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 10px; cursor: pointer;" onclick="window.mobileConfirmBatchDelete('${flag}', ${finishedTickets.length})">Hapus</button>
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 0.85rem;" onclick="window.mobileCloseSheet()">Batal</button>
+          <button type="button" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 800; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 10px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);" onclick="window.mobileConfirmBatchDelete('${flag}', ${finishedTickets.length})">Hapus Riwayat</button>
         </div>
       </div>
     `;
@@ -789,16 +800,27 @@
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 14px 18px 10px 18px; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">Hapus Riwayat</h3>
-        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </div>
+          <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0;">Konfirmasi Hapus Riwayat</h3>
+        </div>
+        <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
-      <div class="mobile-sheet-body" style="padding: 16px 18px;">
-        <p style="font-size: 0.825rem; color: #334155; line-height: 1.5; margin: 0 0 18px 0;">
-          Apakah Anda yakin ingin menghapus tiket <strong>${ticketId}</strong> dari riwayat ini?
+      <div class="mobile-sheet-body" style="padding: 16px 18px 24px 18px;">
+        <p style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; margin: 0 0 10px 0;">
+          Apakah Anda yakin ingin menghapus tiket <strong>${ticketId}</strong> dari daftar riwayat perangkat ini?
         </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+          <div style="display: flex; gap: 6px; align-items: flex-start;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Data disembunyikan dari tampilan riwayat Anda. Catatan resmi pos gerbang dan audit trail server tetap tersimpan demi integritas keamanan.</span>
+          </div>
+        </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="button" class="mobile-btn-secondary" style="width: auto; padding: 9px 18px; font-weight: 700;" onclick="window.mobileCloseSheet()">Batal</button>
-          <button type="button" class="mobile-btn-danger" style="width: auto; padding: 9px 22px; font-weight: 800; background: #dc2626; color: #fff; border-color: #dc2626;" onclick="window.mobileConfirmSingleDelete('${ticketId}', '${flag}')">Hapus</button>
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 0.85rem;" onclick="window.mobileCloseSheet()">Batal</button>
+          <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 800; background: #dc2626; color: #fff; border: 1.5px solid #dc2626; border-radius: 10px; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);" onclick="window.mobileConfirmSingleDelete('${ticketId}', '${flag}')">Hapus</button>
         </div>
       </div>
     `;
