@@ -17,6 +17,7 @@
   let atasanRiwayatSortOrder = 'desc'; // 'desc' | 'asc'
   let isAntreanFilterOpen = false;
   let isAtasanRiwayatFilterOpen = false;
+  let atasanTimFilter = 'all'; // 'all' | 'outside' | 'late' | 'ready'
   let selectedTimTicketId = null;
   let viewingTicketId = null;
 
@@ -62,11 +63,13 @@
     }
 
     const isUnderSupervision = empSupervisor && empSupervisor.toLowerCase().includes(aName.includes('dewi') ? 'dewi' : 'hendra');
+    const deptMatch = Boolean(ticket.department && (app.department || app.dept) && 
+      ticket.department.toLowerCase() === (app.department || app.dept).toLowerCase());
 
     if (aName.includes('dewi')) {
       return tApprover.includes('dewi') || isUnderSupervision;
     } else {
-      return tApprover.includes('hendra') || (!tApprover.includes('dewi')) || isUnderSupervision;
+      return tApprover.includes('hendra') || (!tApprover.includes('dewi')) || isUnderSupervision || deptMatch;
     }
   }
 
@@ -790,14 +793,47 @@
 
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
+    const readyTickets = tickets.filter(t => t.status === 'Disetujui');
 
-    // Representative team tickets to display (Active + Recent completed)
-    const teamCardsList = tickets.filter(t => 
+    const parseTime = (t) => {
+      const raw = t.scanOutTime || t.approvedAt || t.createdAt || t.plannedExit || 0;
+      const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+      return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
+    };
+
+    // Urutkan prioritas: Terlambat > Sedang di Luar > Disetujui > Selesai
+    const sortedEligible = [...tickets].filter(t => 
       t.status === 'Sedang di Luar' || 
       t.status === 'Terlambat' || 
       t.status === 'Disetujui' || 
       t.status === 'Selesai'
-    ).slice(0, 5);
+    ).sort((a, b) => {
+      const getPriority = (x) => {
+        if (x.status === 'Terlambat' || (x.isLate && x.status !== 'Selesai')) return 1;
+        if (x.status === 'Sedang di Luar') return 2;
+        if (x.status === 'Disetujui') return 3;
+        if (x.status === 'Selesai') return 4;
+        return 5;
+      };
+      const pA = getPriority(a);
+      const pB = getPriority(b);
+      if (pA !== pB) return pA - pB;
+      return parseTime(b) - parseTime(a);
+    });
+
+    let teamCardsList = [];
+    if (atasanTimFilter === 'outside') {
+      teamCardsList = sortedEligible.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+    } else if (atasanTimFilter === 'late') {
+      teamCardsList = sortedEligible.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
+    } else if (atasanTimFilter === 'ready') {
+      teamCardsList = sortedEligible.filter(t => t.status === 'Disetujui');
+    } else {
+      // 'all': Seluruh tiket aktif (Sedang di Luar, Terlambat, Disetujui) WAJIB tampil semua + 5 tiket selesai terbaru
+      const activeTickets = sortedEligible.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Disetujui');
+      const recentDone = sortedEligible.filter(t => t.status === 'Selesai').slice(0, 5);
+      teamCardsList = [...activeTickets, ...recentDone];
+    }
 
     // Selected ticket for timeline view (default to first active or first in list)
     if (!selectedTimTicketId && teamCardsList.length > 0) {
@@ -816,17 +852,17 @@
       let statusSubtitle = 'Belum keluar • Izin masih berlaku';
       if (isLate) {
         statusBadgeClass = 'terlambat';
-        statusSubtitle = 'Terlambat 30 menit • Sistem mencatat Terlambat';
+        statusSubtitle = 'Terlambat • Melebihi batas jam kembali';
       } else if (isOutside) {
         statusBadgeClass = 'sedang-di-luar';
-        statusSubtitle = t.hasExtensionPending ? 'Menunggu keputusan perpanjangan' : 'Di luar area pabrik';
+        statusSubtitle = t.hasExtensionPending ? 'Menunggu keputusan perpanjangan' : 'Sedang berada di luar area pabrik';
       } else if (isSelesai) {
         statusBadgeClass = 'selesai';
-        statusSubtitle = 'Tepat Waktu';
+        statusSubtitle = 'Tepat Waktu • Selesai';
       }
 
       return `
-        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; margin-bottom: 10px;">
           <div class="mobile-ticket-item-header">
             <div>
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
@@ -870,7 +906,7 @@
           ` : ''}
 
           <div style="display: flex; justify-content: flex-end;">
-            <button type="button" class="mobile-btn-secondary" style="padding: 5px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Detail pengajuan</span>
             </button>
@@ -880,15 +916,29 @@
     }).join('');
 
     container.innerHTML = `
-    
-
       <!-- Banner Status Perjalanan Tim -->
-      <div class="mobile-card" style="padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 0.75rem; color: #334155;">
-        <strong>Status perjalanan tim:</strong> ${outsideTickets.length} di luar area, termasuk ${lateTickets.length} terlambat.
+      <div class="mobile-card" style="padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 0.75rem; color: #334155;">
+        <strong>Status perjalanan tim:</strong> <span style="color: #7c3aed; font-weight: 700;">${outsideTickets.length} di luar area</span>, termasuk <span style="color: #dc2626; font-weight: 700;">${lateTickets.length} terlambat</span>.
+      </div>
+
+      <!-- Segment Tabs Filter Pelacakan (Touch Target >= 44px) -->
+      <div class="mobile-segment-toggle" style="margin-bottom: 12px; height: 42px; display: flex; gap: 3px;">
+        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'all' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('all')">
+          Semua (${sortedEligible.length})
+        </button>
+        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'outside' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('outside')">
+          Di Luar (${outsideTickets.length})
+        </button>
+        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'late' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('late')">
+          Terlambat (${lateTickets.length})
+        </button>
+        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'ready' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('ready')">
+          Siap Keluar (${readyTickets.length})
+        </button>
       </div>
 
       <!-- List of Team Members Cards -->
-      ${listHtml || '<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada pergerakan bawahan saat ini.</div>'}
+      ${listHtml || '<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada pergerakan bawahan pada filter ini.</div>'}
     `;
   }
 
@@ -1246,6 +1296,11 @@
 
   window.mobileSelectTimTicket = function (ticketId) {
     selectedTimTicketId = ticketId;
+    renderMobileAtasan(null, 'tim');
+  };
+
+  window.mobileFilterTim = function (filter) {
+    atasanTimFilter = filter;
     renderMobileAtasan(null, 'tim');
   };
 
