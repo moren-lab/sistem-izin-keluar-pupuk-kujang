@@ -66,6 +66,11 @@ function setKaryawanNav(navKey) {
   window.currentKaryawanNav = navKey;
   closeMobileSidebar();
 
+  const viewNotifEl = document.getElementById('viewNotifikasi');
+  if (viewNotifEl) viewNotifEl.style.display = 'none';
+  const viewKaryawan = document.getElementById('viewKaryawan');
+  if (viewKaryawan) viewKaryawan.style.display = 'block';
+
   const menuKaryawanDashboard = document.getElementById('menuKaryawanDashboard');
   const menuKaryawanPengajuanSaya = document.getElementById('menuKaryawanPengajuanSaya');
   const menuKaryawanRiwayat = document.getElementById('menuKaryawanRiwayat');
@@ -111,6 +116,11 @@ function setApproverNav(navKey) {
   currentApproverNav = navKey;
   window.currentApproverNav = navKey;
   closeMobileSidebar();
+
+  const viewNotifEl = document.getElementById('viewNotifikasi');
+  if (viewNotifEl) viewNotifEl.style.display = 'none';
+  const viewApprover = document.getElementById('viewApprover');
+  if (viewApprover) viewApprover.style.display = 'block';
 
   const menuApproverDashboard = document.getElementById('menuApproverDashboard');
   const menuApproverAntrian = document.getElementById('menuApproverAntrian');
@@ -174,6 +184,11 @@ function setSecurityNav(navKey) {
   window.currentSecurityNav = navKey;
   closeMobileSidebar();
 
+  const viewNotifEl = document.getElementById('viewNotifikasi');
+  if (viewNotifEl) viewNotifEl.style.display = 'none';
+  const viewSecurity = document.getElementById('viewSecurity');
+  if (viewSecurity) viewSecurity.style.display = 'block';
+
   const menuSecurityDashboard = document.getElementById('menuSecurityDashboard');
   const menuSecurityScanner = document.getElementById('menuSecurityScanner');
   const menuSecurityPelacakan = document.getElementById('menuSecurityPelacakan');
@@ -228,6 +243,11 @@ function setAdminNav(navKey) {
   window.currentAdminNav = navKey;
   closeMobileSidebar();
 
+  const viewNotifEl = document.getElementById('viewNotifikasi');
+  if (viewNotifEl) viewNotifEl.style.display = 'none';
+  const viewAdmin = document.getElementById('viewAdmin');
+  if (viewAdmin) viewAdmin.style.display = 'block';
+
   const menuAdminDashboard = document.getElementById('menuAdminDashboard');
   const menuAdminAudit = document.getElementById('menuAdminAudit');
   const menuAdminReport = document.getElementById('menuAdminReport');
@@ -271,6 +291,29 @@ function setAdminNav(navKey) {
 function switchRole(role) {
   if (role !== 'security' && typeof window.stopCameraScanner === 'function') {
     window.stopCameraScanner();
+  }
+  if (typeof window.mobileCloseSheet === 'function') {
+    window.mobileCloseSheet();
+  }
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail) {
+    modalTicketDetail.classList.remove('open');
+    modalTicketDetail.style.display = 'none';
+  }
+  const modalRejectReason = document.getElementById('modalRejectReason');
+  if (modalRejectReason) {
+    modalRejectReason.classList.remove('open');
+    modalRejectReason.style.display = 'none';
+  }
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  if (modalBackdrop) {
+    modalBackdrop.classList.remove('open');
+    modalBackdrop.style.display = 'none';
+  }
+  const mobileModalBackdrop = document.getElementById('mobileModalBackdrop');
+  if (mobileModalBackdrop) {
+    mobileModalBackdrop.classList.remove('open');
+    mobileModalBackdrop.style.display = 'none';
   }
 
   window.currentActor = role;

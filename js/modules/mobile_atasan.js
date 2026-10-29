@@ -146,7 +146,11 @@
     const approver = getActiveApprover();
     const tickets = getTeamTickets();
 
-    const pendingNew = tickets.filter(t => t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
+    const pendingNew = tickets.filter(t => 
+      !t.isEmergency && 
+      !t.id.includes('-EMG-') && 
+      t.status === 'Menunggu Persetujuan'
+    );
     const pendingExt = tickets.filter(t => t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
@@ -193,14 +197,14 @@
           </div>
           <!-- B2: Atasan Bisa Lihat Detail Dulu, Baru Setujui / Tolak -->
           <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Detail Pengajuan</span>
             </button>
-            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
+            <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
               Tolak
             </button>
-            <button type="button" class="mobile-btn-primary" style="flex: 1.2; padding: 8px; font-size: 0.75rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
+            <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
               Setujui
             </button>
           </div>
@@ -230,10 +234,10 @@
           </div>
 
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 7px 10px; font-size: 0.775rem;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+            <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
               Tolak
             </button>
-            <button type="button" class="mobile-btn-approve" style="flex: 1; padding: 7px 10px; font-size: 0.775rem;" onclick="window.mobileQuickApproveTicket('${t.id}')">
+            <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
               Setujui
             </button>
           </div>
@@ -415,7 +419,11 @@
     const approver = getActiveApprover();
     const tickets = getTeamTickets();
 
-    const pendingNew = tickets.filter(t => t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
+    const pendingNew = tickets.filter(t => 
+      !t.isEmergency && 
+      !t.id.includes('-EMG-') && 
+      t.status === 'Menunggu Persetujuan'
+    );
     const pendingExt = tickets.filter(t => t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
 
     let activeList = currentAntreanSegment === 'baru' ? pendingNew : pendingExt;
@@ -1301,8 +1309,8 @@
         );
       } else {
         t.status = 'Ditolak';
-        t.emergencyLocked = false;
-        t.qrLocked = false;
+        t.emergencyLocked = true;
+        t.qrLocked = true;
         t.rejectionReason = note;
         t.approverNote = `Ditolak: ${note}`;
         t.approverName = approver.name;
@@ -1536,9 +1544,7 @@
 
   // Expose module function
   window.renderMobileAtasan = renderMobileAtasan;
-
-})();
-
+  window.getTName = getTName;
 
   // -------------------------------------------------------------------
   // B1: FORM PENOLAKAN DENGAN ALASAN WAJIB (BRULE-04)
@@ -1620,3 +1626,5 @@
     }
     window.mobileAtasanExecuteDecision(ticketId, 'reject', reason);
   };
+
+})();

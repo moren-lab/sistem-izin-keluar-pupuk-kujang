@@ -100,7 +100,7 @@ function renderApproverDashboard() {
   }
 
   const ticketsList = window.ticketsList || [];
-  const pendingTickets = ticketsList.filter(t => t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
+  const pendingTickets = ticketsList.filter(t => !t.isEmergency && !(t.id && t.id.startsWith('TK-EMG-')) && t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
   const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
   const outsideTickets = ticketsList.filter(t => (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketAssignedToCurrentApprover(t));
 
@@ -176,6 +176,9 @@ function renderApproverDashboard() {
               <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                 <button type="button" class="btn-approve" style="padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 800; background: #059669; box-shadow: 0 2px 8px rgba(5,150,105,0.3);" onclick="window.emergencyDirectApprove('${emg.id}')">
                   ⚡ 1. Setujui Langsung di App
+                </button>
+                <button type="button" class="btn-reject" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; font-weight: 700; background: #dc2626; color: #fff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="openRejectModal('${emg.id}')">
+                  ✕ Tolak Darurat
                 </button>
                 <button type="button" class="btn-card-detail" style="padding: 0.5rem 0.85rem; font-size: 0.8rem;" onclick="openTicketDetail('${emg.id}', 'detail')">
                   Lihat Tiket
@@ -1023,8 +1026,8 @@ function confirmRejectDecision() {
   const approverTitle = approverActor.title || 'Atasan Peninjau';
 
   ticket.status = 'Ditolak';
-  ticket.emergencyLocked = false;
-  ticket.qrLocked = false;
+  ticket.emergencyLocked = true;
+  ticket.qrLocked = true;
   ticket.rejectionReason = reason;
   ticket.rejectReason = reason;
   ticket.approverNote = `Ditolak: ${reason}`;

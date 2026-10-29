@@ -1133,19 +1133,11 @@
     const isLate = isTicketLate(t);    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');    sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Kembali" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; color: #334155; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          </button>
-          <div>
-           
-            <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
-              <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
-              ${isEmergencyTicket ? '<span class="mobile-badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px;">🚨 DARURAT</span>' : ''}
-            </div>
-          </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
+          <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
+          ${isEmergencyTicket ? '<span class="mobile-badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px;">🚨 DARURAT</span>' : ''}
         </div>
-        <button type="button" aria-label="Tutup Rincian" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
 
       <div class="mobile-sheet-body">

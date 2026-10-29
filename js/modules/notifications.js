@@ -322,17 +322,18 @@
       notifs = notifs.filter(n => !n.isRead);
     }
 
+    const allNotifsCount = getNotificationsForActiveActor().length;
     const unreadTotal = getUnreadCountForActiveActor();
 
     const itemsHtml = notifs.length > 0 ? notifs.map(n => {
       const isHigh = n.priority === 'high';
       const isUnread = !n.isRead;
       return `
-        <div class="mobile-notif-item ${isUnread ? 'unread' : ''} ${isHigh ? 'priority-high' : ''}" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; margin-bottom: 8px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+        <div class="mobile-notif-item ${isUnread ? 'unread' : ''} ${isHigh ? 'priority-high' : ''}" style="position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; margin-bottom: 8px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
           <div style="width: 36px; height: 36px; border-radius: 10px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
             ${getNotifIconSvg(n.type, n.priority)}
           </div>
-          <div style="flex: 1; min-width: 0;">
+          <div style="flex: 1; min-width: 0; padding-right: 36px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 2px;">
               <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; line-height: 1.3;">
                 ${n.title}
@@ -348,6 +349,9 @@
               <span style="color: #059669; font-weight: 700;">Lihat →</span>
             </div>
           </div>
+          <button type="button" aria-label="Hapus Notifikasi" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 0; border-radius: 8px;" onclick="event.stopPropagation(); window.deleteMobileNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </div>
       `;
     }).join('') : `
@@ -365,16 +369,16 @@
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Kembali" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; color: #334155; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          </button>
-          <div>
-            <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">KOTAK MASUK • ${user.roleKey.toUpperCase()}</span>
-            <h3 class="mobile-sheet-title" style="font-size: 1.05rem; margin: 0; color: #0f172a;">Notifikasi</h3>
-          </div>
+        <div>
+          <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">KOTAK MASUK • ${user.roleKey.toUpperCase()}</span>
+          <h3 class="mobile-sheet-title" style="font-size: 1.05rem; margin: 0; color: #0f172a;">Notifikasi</h3>
         </div>
-        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" aria-label="Hapus Semua Notifikasi" class="btn-clear-all-notifs" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #dc2626; color: #ffffff; border: none; border-radius: 8px; cursor: ${allNotifsCount > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsCount > 0 ? '1' : '0.4'}; padding: 0;" ${allNotifsCount > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+          <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+        </div>
       </div>
 
       <div class="mobile-sheet-body" style="padding: 14px 16px; max-height: calc(85vh - 70px); overflow-y: auto;">
@@ -478,7 +482,8 @@
     const container = document.getElementById('viewNotifikasi');
     if (!container) return;
 
-    let notifs = getNotificationsForActiveActor();
+    const allNotifsList = getNotificationsForActiveActor();
+    let notifs = allNotifsList;
     if (filterTab === 'unread') {
       notifs = notifs.filter(n => !n.isRead);
     }
@@ -492,9 +497,9 @@
             <div style="font-size: 0.75rem; color: #059669; font-weight: 800; text-transform: uppercase;">Pusat Pemberitahuan</div>
             <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
             <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 200px;">
-              <button type="button" class="mobile-seg-btn ${filterTab === 'all' ? 'active' : ''}" onclick="window.renderDesktopFullNotifikasiPage('all')">Semua (${getNotificationsForActiveActor().length})</button>
+              <button type="button" class="mobile-seg-btn ${filterTab === 'all' ? 'active' : ''}" onclick="window.renderDesktopFullNotifikasiPage('all')">Semua (${allNotifsList.length})</button>
               <button type="button" class="mobile-seg-btn ${filterTab === 'unread' ? 'active' : ''}" onclick="window.renderDesktopFullNotifikasiPage('unread')">Belum (${unreadCount})</button>
             </div>
             ${unreadCount > 0 ? `
@@ -502,6 +507,13 @@
                 ✓ Tandai semua dibaca
               </button>
             ` : ''}
+            <button type="button" class="btn-clear-all-notifs" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: ${allNotifsList.length > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsList.length > 0 ? '1' : '0.4'}; display: inline-flex; align-items: center; gap: 6px;" ${allNotifsList.length > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              <span>Hapus Semua</span>
+            </button>
+            <button type="button" class="btn-card-detail" style="background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="window.closeDesktopFullNotifikasi()" title="Tutup Pusat Notifikasi (Esc)">
+              <span>✕ Tutup</span>
+            </button>
           </div>
         </div>
 
@@ -511,11 +523,11 @@
             const isHigh = n.priority === 'high';
             const isUnread = !n.isRead;
             return `
-              <div class="card" style="padding: 16px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+              <div class="card" style="position: relative; padding: 16px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
                 <div style="width: 42px; height: 42px; border-radius: 10px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
                   ${getNotifIconSvg(n.type, n.priority)}
                 </div>
-                <div style="flex: 1;">
+                <div style="flex: 1; padding-right: 40px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                     <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">
                       ${n.title}
@@ -534,6 +546,9 @@
                     <span style="color: #059669; font-weight: 700;">Klik untuk membuka detail izin →</span>
                   </div>
                 </div>
+                <button type="button" aria-label="Hapus Notifikasi" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; color: #dc2626; cursor: pointer; padding: 0;" onclick="event.stopPropagation(); window.deleteDesktopNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
               </div>
             `;
           }).join('') : `
@@ -593,8 +608,42 @@
     if (breadcrumbSub) breadcrumbSub.textContent = 'Semua Notifikasi';
   }
 
+  function closeDesktopFullNotifikasi() {
+    const notifView = document.getElementById('viewNotifikasi');
+    if (notifView) notifView.style.display = 'none';
+
+    const role = window.currentActor || 'karyawan';
+    if (role === 'karyawan') {
+      const v = document.getElementById('viewKaryawan');
+      if (v) v.style.display = 'block';
+    } else if (role === 'approver' || role === 'approver2') {
+      const v = document.getElementById('viewApprover');
+      if (v) v.style.display = 'block';
+    } else if (role === 'security') {
+      const v = document.getElementById('viewSecurity');
+      if (v) v.style.display = 'block';
+    } else if (role === 'admin') {
+      const v = document.getElementById('viewAdmin');
+      if (v) v.style.display = 'block';
+    }
+
+    const breadcrumbSub = document.getElementById('breadcrumbSubpage');
+    if (breadcrumbSub) breadcrumbSub.textContent = 'Dashboard';
+  }
+
+  // Handle ESC key to close full desktop notif page
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      const notifView = document.getElementById('viewNotifikasi');
+      if (notifView && notifView.style.display === 'block') {
+        closeDesktopFullNotifikasi();
+      }
+    }
+  });
+
   // Expose global APIs
   window.showDesktopFullNotifikasi = showDesktopFullNotifikasi;
+  window.closeDesktopFullNotifikasi = closeDesktopFullNotifikasi;
   window.renderDesktopFullNotifikasiPage = renderDesktopFullNotifikasiPage;
   window.createNotification = createNotification;
   window.getNotificationsForActiveActor = getNotificationsForActiveActor;
@@ -618,21 +667,55 @@
 
 })();
 
-
-
   window.deleteMobileNotification = function(notifId, currentTab = 'all') {
-    deleteNotification(notifId);
+    if (typeof window.deleteNotification === 'function') {
+      window.deleteNotification(notifId);
+    }
     if (typeof window.showToast === 'function') {
       window.showToast('Notifikasi berhasil dihapus.', 'info');
     }
-    window.openMobileNotificationSheet(currentTab);
+    if (typeof window.openMobileNotificationSheet === 'function') {
+      window.openMobileNotificationSheet(currentTab);
+    }
   };
 
-  window.clearAllMobileNotifications = function(currentTab = 'all') {
-    if (!confirm('Apakah Anda yakin ingin menghapus seluruh riwayat notifikasi?')) return;
-    clearAllNotificationsForActiveActor();
+  window.deleteDesktopNotification = function(notifId, currentTab = 'all') {
+    if (typeof window.deleteNotification === 'function') {
+      window.deleteNotification(notifId);
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast('Notifikasi berhasil dihapus.', 'info');
+    }
+    if (typeof window.renderDesktopFullNotifikasiPage === 'function') {
+      window.renderDesktopFullNotifikasiPage(currentTab);
+    }
+  };
+
+  window.confirmClearAllNotifications = function(currentTab = 'all') {
+    const total = typeof window.getNotificationsForActiveActor === 'function' ? window.getNotificationsForActiveActor().length : 0;
+    const unread = typeof window.getUnreadCountForActiveActor === 'function' ? window.getUnreadCountForActiveActor() : 0;
+    if (total === 0) return;
+
+    const msg = `Konfirmasi Hapus Semua Notifikasi\n\nTotal notifikasi: ${total}\nBelum dibaca: ${unread}\n\nApakah Anda yakin ingin menghapus semua riwayat notifikasi ini? Tindakan ini tidak dapat dibatalkan.`;
+    if (!confirm(msg)) return;
+
+    if (typeof window.clearAllNotificationsForActiveActor === 'function') {
+      window.clearAllNotificationsForActiveActor();
+    }
     if (typeof window.showToast === 'function') {
       window.showToast('Seluruh riwayat notifikasi berhasil dibersihkan.', 'success');
     }
-    window.openMobileNotificationSheet(currentTab);
+
+    const notifView = document.getElementById('viewNotifikasi');
+    if (notifView && notifView.style.display === 'block') {
+      if (typeof window.renderDesktopFullNotifikasiPage === 'function') {
+        window.renderDesktopFullNotifikasiPage(currentTab);
+      }
+    } else {
+      if (typeof window.openMobileNotificationSheet === 'function') {
+        window.openMobileNotificationSheet(currentTab);
+      }
+    }
   };
+
+  window.clearAllMobileNotifications = window.confirmClearAllNotifications;

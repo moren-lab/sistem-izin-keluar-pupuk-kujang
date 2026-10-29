@@ -443,61 +443,67 @@
       ? window.getPrimaryApprover()
       : { name: 'Ir. Hendra Gunawan, M.T.' };
 
-    container.innerHTML = `
-      <!-- Card Informasi Pengajuan (Tetap di Paling Atas Sesuai Permintaan) -->
-      <section class="mobile-card">
-        <h3 class="mobile-card-title" style="margin-bottom: 8px;">Informasi pengajuan</h3>
-        <div style="font-size: 0.75rem; line-height: 1.45; color: #334155;">
-          <div style="margin-bottom: 8px;">
-            <div class="mobile-meta-sub">Atasan langsung</div>
-            <div style="font-weight: 800; color: #0f172a;">${approver.name || 'Ir. Hendra Gunawan, M.T.'}</div>
-            <div style="color: #64748b; font-size: 0.7rem;">${approver.title || 'Manajer Rekayasa & Pemeliharaan'}</div>
+    if (activeTicket) {
+      container.innerHTML = `
+        <!-- Card Izin Aktif (Langsung tampil di paling atas tanpa gap/margin berlebih) -->
+        ${renderActiveTicketCard(activeTicket)}
+
+        <!-- Card Kronologi Tercatat (Timeline matching PDF Page 2) -->
+        <section class="mobile-card" style="margin-top: 12px;">
+          <h3 class="mobile-card-title" style="margin-bottom: 12px;">Kronologi tercatat</h3>
+          <div class="mobile-timeline">
+            ${renderTimelineHtml(activeTicket)}
           </div>
-          <div style="margin-bottom: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <div>
-              <div class="mobile-meta-sub">Nama karyawan</div>
-              <div style="font-weight: 800; color: #0f172a;">${emp.name}</div>
+        </section>
+      `;
+    } else {
+      container.innerHTML = `
+        <!-- Card Informasi Pengajuan (Tampil saat tidak ada tiket aktif) -->
+        <section class="mobile-card">
+          <h3 class="mobile-card-title" style="margin-bottom: 8px;">Informasi pengajuan</h3>
+          <div style="font-size: 0.75rem; line-height: 1.45; color: #334155;">
+            <div style="margin-bottom: 8px;">
+              <div class="mobile-meta-sub">Atasan langsung</div>
+              <div style="font-weight: 800; color: #0f172a;">${approver.name || 'Ir. Hendra Gunawan, M.T.'}</div>
+              <div style="color: #64748b; font-size: 0.7rem;">${approver.title || 'Manajer Rekayasa & Pemeliharaan'}</div>
             </div>
-            <div>
-              <div class="mobile-meta-sub">NIP</div>
-              <div style="font-weight: 800; color: #0f172a;">${emp.nip}</div>
+            <div style="margin-bottom: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div>
+                <div class="mobile-meta-sub">Nama karyawan</div>
+                <div style="font-weight: 800; color: #0f172a;">${emp.name}</div>
+              </div>
+              <div>
+                <div class="mobile-meta-sub">NIP</div>
+                <div style="font-weight: 800; color: #0f172a;">${emp.nip}</div>
+              </div>
             </div>
           </div>
-          ${activeTicket && activeTicket.approverNote ? `
-            <div style="background: #f1f5f9; padding: 8px 10px; border-radius: 8px; margin-top: 4px;">
-              <span style="color: #475569; font-size: 0.7rem; font-weight: 700;">Catatan atasan:</span><br>
-              <em style="color: #1e293b;">"${activeTicket.approverNote}"</em>
-            </div>
-          ` : ''}
+        </section>
+
+        <!-- Action Buttons (Izin Darurat di Kiri, Buat Pengajuan di Kanan) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
+          <!-- Kolom 1 (Kiri): Izin Darurat (Merah Solid #dc2626, Teks Putih) -->
+          <button type="button" class="mobile-btn-danger" style="margin: 0; min-height: 44px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25); cursor: pointer;" onclick="window.mobileOpenCreateModal(true)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Izin Darurat</span>
+          </button>
+
+          <!-- Kolom 2 (Kanan): Buat Pengajuan (Hijau Utama #059669, Teks Putih) -->
+          <button type="button" class="mobile-btn-primary" style="margin: 0; min-height: 44px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); cursor: pointer;" onclick="window.mobileOpenCreateModal(false)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="12" y2="12"></line></svg>
+            <span>Buat Pengajuan</span>
+          </button>
         </div>
-      </section>
 
-      <!-- Action Buttons (Perubahan 4: Izin Darurat di Kiri, Buat Pengajuan di Kanan, Merah Solid A3) -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
-        <!-- Kolom 1 (Kiri): Izin Darurat (Merah Solid #dc2626, Teks Putih) -->
-        <button type="button" class="mobile-btn-danger" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25); cursor: pointer; ${activeTicket ? 'opacity: 0.65;' : ''}" onclick="${activeTicket ? `window.mobileOpenActiveBlockedSheet(window.ticketsList.find(x => x.id === '${activeTicket.id}'))` : 'window.mobileOpenCreateModal(true)'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          <span>Izin Darurat</span>
-        </button>
-
-        <!-- Kolom 2 (Kanan): Buat Pengajuan (Hijau Utama #059669, Teks Putih) -->
-        <button type="button" class="mobile-btn-primary" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); cursor: pointer; ${activeTicket ? 'opacity: 0.65;' : ''}" onclick="${activeTicket ? `window.mobileOpenActiveBlockedSheet(window.ticketsList.find(x => x.id === '${activeTicket.id}'))` : 'window.mobileOpenCreateModal(false)'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="12" y2="12"></line></svg>
-          <span>Buat Pengajuan</span>
-        </button>
-      </div>
-
-      <!-- Card Izin Aktif -->
-      ${renderActiveTicketCard(activeTicket)}
-
-      <!-- Card Kronologi Tercatat (Timeline matching PDF Page 2) -->
-      <section class="mobile-card">
-        <h3 class="mobile-card-title" style="margin-bottom: 12px;">Kronologi tercatat</h3>
-        <div class="mobile-timeline">
-          ${renderTimelineHtml(activeTicket)}
-        </div>
-      </section>
-    `;
+        <!-- Card Kronologi Tercatat (Kosong saat tidak ada izin aktif) -->
+        <section class="mobile-card">
+          <h3 class="mobile-card-title" style="margin-bottom: 12px;">Kronologi tercatat</h3>
+          <div class="mobile-timeline">
+            ${renderTimelineHtml(null)}
+          </div>
+        </section>
+      `;
+    }
   }
 
   // -------------------------------------------------------------------
@@ -909,7 +915,7 @@
           </button>
         </div>
         <div style="text-align: center; margin-top: 8px;">
-          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail</a>
+          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
         </div>
       `;
     }
@@ -1873,6 +1879,17 @@
     }
 
     // CASE 2: CREATE NEW TICKET (PARITY DENGAN PC MODAL 1 & 2)
+    // BRULE-22 Enforcement: Maksimal 1 tiket aktif
+    const existingActive = getActiveTicket();
+    if (existingActive) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Anda masih memiliki tiket aktif! Sesuai aturan BRULE-22, Anda hanya dapat memiliki maksimal 1 izin aktif.', 'danger');
+      }
+      window.mobileCloseSheet();
+      renderMobileKaryawan(null, 'pengajuan');
+      return;
+    }
+
     const randomSuffix = Math.floor(100 + Math.random() * 900);
     const newId = (data.isEmergency ? 'TK-EMG-' : 'TK-') + dateCode + '-' + randomSuffix;
 
@@ -2251,16 +2268,11 @@
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Kembali" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; color: #334155; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          </button>
-          <div>
-            <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">RINCIAN TIKET</span>
-            <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
-          </div>
+        <div>
+          <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">RINCIAN TIKET</span>
+          <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
         </div>
-        <button type="button" aria-label="Tutup Rincian" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body" style="text-align: center;">
         <div style="font-size: 0.8rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
@@ -2330,10 +2342,19 @@
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId) || getActiveTicket();
     if (!t) return;
-
     const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
     const isApproved = (t.status === 'Disetujui');
-    const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal');    // Push state for Android / hardware back gesture
+    const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal');
+
+    // BRULE-08 & BRULE-12: Hanya Karyawan pemilik tiket yang melihat tombol aksi pemilik
+    const emp = getActiveEmp();
+    const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
+    const isOwner = (window.currentActor === 'karyawan' || !window.currentActor) && 
+      (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841'));
+
+    // Push state for Android / hardware back gesture
     try {
       window.history.pushState({ modalOpen: true, modalType: 'karyawanDetail', ticketId: t.id }, '');
     } catch (e) {}
@@ -2341,16 +2362,11 @@
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Kembali ke Riwayat" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; color: #334155; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          </button>
-          <div>
-            <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">RINCIAN TIKET</span>
-            <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
-          </div>
+        <div>
+          <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">RINCIAN TIKET</span>
+          <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
         </div>
-        <button type="button" aria-label="Tutup Rincian" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -2410,7 +2426,8 @@
           </div>
         </div>
 
-        <!-- Action buttons according to ticket status (Perubahan 1: Tombol Tutup dihapus) -->
+        <!-- Action buttons according to ticket status & role (Perubahan 5: Hanya Pemilik Karyawan yang melihat tombol aksi) -->
+        ${isOwner ? `
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
           ${isPending ? `
             <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${t.id}')">
@@ -2458,6 +2475,7 @@
             </button>
           ` : ''}
         </div>
+        ` : ''}
       </div>
     `;
 

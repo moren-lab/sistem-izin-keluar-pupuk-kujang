@@ -464,7 +464,7 @@ function renderKaryawanDashboard() {
       const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
       const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
-      const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
+      const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let actionButtonsHtml = '';
       if (isEmergLocked) {
@@ -674,6 +674,11 @@ function renderPengajuanSayaView() {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
   const colPengajuanLeft = document.getElementById('colPengajuanLeft');
   const emptyEmpActiveBox = document.getElementById('emptyEmpActiveBox');
+  const btnOpenEmergencyModal = document.getElementById('btnOpenEmergencyModal');
+  const btnOpenNewRequestModal = document.getElementById('btnOpenNewRequestModal');
+
+  if (btnOpenEmergencyModal) btnOpenEmergencyModal.style.display = activeTicket ? 'none' : 'inline-flex';
+  if (btnOpenNewRequestModal) btnOpenNewRequestModal.style.display = activeTicket ? 'none' : 'inline-flex';
 
   if (!activeTicket) {
     if (colPengajuanLeft) colPengajuanLeft.style.display = 'none';
@@ -706,7 +711,7 @@ function renderPengajuanSayaView() {
     const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
     const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
-    const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
+    const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
     let actionButtonsHtml = '';
     if (isEmergLocked) {
@@ -830,26 +835,6 @@ function renderPengajuanSayaView() {
             <span>↳ Dialihkan dari ${activeTicket.reassignedFrom}</span>
           </div>
         ` : ''}
-      </div>
-
-      <!-- Card 3: Informasi pengajuan -->
-      <div class="figma-card">
-        <div class="figma-card-header">
-          <h3 class="figma-card-title">Informasi pengajuan</h3>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-          <div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">Nama karyawan</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${activeTicket.applicantName || 'Budi Pratama, S.T.'}</div>
-          </div>
-          <div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">NIP</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-top: 2px;">${activeTicket.applicantNip || 'PK-2024-8841'}</div>
-          </div>
-        </div>
-        <div style="font-size: 0.775rem; color: #64748b; margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
-          Catatan atasan: ${activeTicket.approverNote || '(Menunggu catatan atasan)'}
-        </div>
       </div>
     `;
   }
@@ -1595,7 +1580,7 @@ function renderKaryawanMobileDashboard() {
       const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos 1' : 'Rencana Keluar';
       const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
-      const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Mendahului' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
+      const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let mobileBtnsHtml = '';
       if (isApproved) {
