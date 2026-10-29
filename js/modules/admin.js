@@ -784,7 +784,122 @@ function printAdminReport() {
   window.print();
 }
 
+// ==========================================
+
 // ==========================================
+// 4C. SEARCHABLE DROPDOWN UNTUK ATASAN LANGSUNG KARYAWAN
+// ==========================================
+const AVAILABLE_SUPERVISORS = [
+  { name: 'Ir. Hendra Gunawan, M.T.', nip: 'PK-2015-1002', title: 'Manager Rekayasa & Pemeliharaan', roleLabel: 'Atasan 1' },
+  { name: 'Dewi Sartika, S.T., M.M.', nip: 'PK-2012-0845', title: 'Supervisor Operasional Lapangan (Plt. Manager)', roleLabel: 'Atasan 2' },
+  { name: 'Bambang Sutrisno, S.T.', nip: 'PK-2010-0012', title: 'Manager K3 & Keselamatan Kerja', roleLabel: 'Manajer K3' }
+];
+
+function initAdminSupervisorSearchableDropdown() {
+  const searchInput = document.getElementById('adminInputSupervisorSearch');
+  const clearBtn = document.getElementById('btnAdminSupervisorClear');
+  const dd = document.getElementById('adminSupervisorSearchableDropdown');
+  if (!searchInput || !dd) return;
+
+  if (searchInput.dataset.initialized) return;
+  searchInput.dataset.initialized = 'true';
+
+  searchInput.addEventListener('focus', () => {
+    openAdminSupervisorDropdown();
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+    openAdminSupervisorDropdown();
+    renderAdminSupervisorDropdownItems(val);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      searchInput.focus();
+      renderAdminSupervisorDropdownItems('');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!dd.contains(e.target)) {
+      closeAdminSupervisorDropdown();
+    }
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAdminSupervisorDropdown();
+    }
+  });
+}
+
+function openAdminSupervisorDropdown() {
+  const menu = document.getElementById('adminSupervisorDropdownMenu');
+  const searchInput = document.getElementById('adminInputSupervisorSearch');
+  if (menu) {
+    menu.classList.add('open');
+    renderAdminSupervisorDropdownItems(searchInput ? searchInput.value : '');
+  }
+}
+
+function closeAdminSupervisorDropdown() {
+  const menu = document.getElementById('adminSupervisorDropdownMenu');
+  if (menu) menu.classList.remove('open');
+}
+
+function renderAdminSupervisorDropdownItems(filterText = '') {
+  const menu = document.getElementById('adminSupervisorDropdownMenu');
+  const hiddenInput = document.getElementById('adminInputSupervisor');
+  if (!menu) return;
+
+  const q = (filterText || '').toLowerCase().trim();
+  const currentVal = hiddenInput ? hiddenInput.value : '';
+
+  const filtered = AVAILABLE_SUPERVISORS.filter(s => {
+    if (!q) return true;
+    return s.name.toLowerCase().includes(q) || s.nip.toLowerCase().includes(q) || s.title.toLowerCase().includes(q);
+  });
+
+  if (filtered.length === 0) {
+    menu.innerHTML = `<div class="searchable-dropdown-empty">Tidak ada nama atasan yang cocok dengan "${filterText}"</div>`;
+    return;
+  }
+
+  menu.innerHTML = filtered.map(s => {
+    const isSelected = currentVal === s.name;
+    return `
+      <div class="searchable-dropdown-item ${isSelected ? 'selected' : ''}" onclick="window.setAdminSelectedSupervisor('${s.name.replace(/'/g, "\\'")}')">
+        <div style="font-weight: 700; color: #0f172a; font-size: 0.825rem;">${s.name}</div>
+        <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">${s.nip} • ${s.title} (${s.roleLabel})</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setAdminSelectedSupervisor(name) {
+  const hiddenInput = document.getElementById('adminInputSupervisor');
+  const searchInput = document.getElementById('adminInputSupervisorSearch');
+  const clearBtn = document.getElementById('btnAdminSupervisorClear');
+
+  const sup = AVAILABLE_SUPERVISORS.find(s => s.name === name) || AVAILABLE_SUPERVISORS[0];
+  const finalName = sup ? sup.name : name;
+
+  if (hiddenInput) hiddenInput.value = finalName;
+  if (searchInput) searchInput.value = finalName;
+  if (clearBtn) clearBtn.style.display = finalName ? 'flex' : 'none';
+
+  closeAdminSupervisorDropdown();
+}
+
+window.initAdminSupervisorSearchableDropdown = initAdminSupervisorSearchableDropdown;
+window.setAdminSelectedSupervisor = setAdminSelectedSupervisor;
+
+
 // 5. USER ACCESS MANAGEMENT / KUJANG ID (FR-ADM-06, UC-24, REQUIREMENT 1)
 // ==========================================
 function openAdminUserModal(mode, kujangId) {
@@ -799,6 +914,10 @@ function openAdminUserModal(mode, kujangId) {
 
   // Kosongkan kolom pencarian dropdown saat modal dibuka (Sesuai Permintaan Revisi 4)
   const searchDeptEl = document.getElementById('adminInputDeptSearch');
+  const searchSupEl = document.getElementById('adminInputSupervisorSearch');
+  const clearSupEl = document.getElementById('btnAdminSupervisorClear');
+  if (searchSupEl) searchSupEl.value = '';
+  if (clearSupEl) clearSupEl.style.display = 'none';
   const searchRoleEl = document.getElementById('adminInputRoleSearch');
   const clearDeptEl = document.getElementById('btnAdminDeptClear');
   const clearRoleEl = document.getElementById('btnAdminRoleClear');
@@ -875,6 +994,7 @@ function openAdminUserModal(mode, kujangId) {
   }
   if (typeof initAdminRoleSearchableDropdown === 'function') {
     initAdminRoleSearchableDropdown();
+  initAdminSupervisorSearchableDropdown();
   }
 
   // Pastikan kolom input pencarian kosong hanya saat penambahan akun baru agar placeholder terlihat
@@ -903,6 +1023,7 @@ function saveAdminUserAccess(event) {
   const roleKey = document.getElementById('adminInputRoleKey').value;
   const roleTitleInput = document.getElementById('adminInputRoleTitle')?.value || '';
   const status = document.getElementById('adminInputStatus').value;
+  const directSupervisor = document.getElementById('adminInputSupervisor')?.value || 'Ir. Hendra Gunawan, M.T.';
 
   if (!kujangId || !nip || !name) {
     alert('Mohon lengkapi KUJANG ID, NIP, dan Nama Pengguna.');
@@ -1154,6 +1275,7 @@ function renderAdminUsers() {
         <td style="font-size: 0.825rem; color: var(--text-primary);">${u.department}</td>
         <td style="white-space: nowrap;">
           <span class="user-role-badge ${roleClass}">${u.role}</span>
+          ${u.roleKey === 'karyawan' ? `<div style="font-size: 0.685rem; color: #0369a1; font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong>${u.directSupervisor || 'Ir. Hendra Gunawan, M.T.'}</strong></div>` : ''}
         </td>
         <td>
           ${statusBadge}

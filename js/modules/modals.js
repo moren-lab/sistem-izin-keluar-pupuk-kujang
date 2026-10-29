@@ -2527,9 +2527,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const ticketId = `TK-${dateCode}-${randomSuffix}`;
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
+      const empAccount = (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841'));
+      const directSup = (empAccount && empAccount.directSupervisor) || (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.');
+
       const newTicket = {
         id: ticketId,
         applicantName: ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.',
+        directSupervisor: directSup,
         applicantNip: ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841',
         department: ACTORS.karyawan ? ACTORS.karyawan.department : 'Departemen Rekayasa & Pemeliharaan',
         category: window.pendingFormData.category,
@@ -2948,6 +2952,7 @@ document.addEventListener('DOMContentLoaded', () => {
         emergencyUnlockedBy: null,
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
         approverName: approverVal,
+        directSupervisor: ((window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841')) || {}).directSupervisor || (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.'),
         approverNote: `[Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${approverVal}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`,
         scanOutTime: null,
         scanInTime: null,

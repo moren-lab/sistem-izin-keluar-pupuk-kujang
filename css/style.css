@@ -9595,9 +9595,9 @@ body.theme-dark .mobile-btn-secondary {
 /* DESKTOP TOP-RIGHT TOAST POSITIONING */
 @media (min-width: 769px) {
   .toast-container {
-    top: 1.5rem !important;
+    bottom: 1.5rem !important;
     right: 1.5rem !important;
-    bottom: auto !important;
+    top: auto !important;
   }
 }
 

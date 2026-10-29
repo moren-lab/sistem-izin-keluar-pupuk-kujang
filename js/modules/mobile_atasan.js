@@ -51,16 +51,38 @@
     const app = getActiveApprover();
     const aName = (app.name || '').toLowerCase();
     const tApprover = (ticket.approverName || '').toLowerCase();
-    if (aName.includes('dewi')) {
-      return tApprover.includes('dewi');
-    } else {
-      return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+    
+    let empSupervisor = ticket.directSupervisor || '';
+    if (!empSupervisor && window.KUJANG_ACCOUNTS && ticket.applicantNip) {
+      const acc = window.KUJANG_ACCOUNTS.find(a => a.nip === ticket.applicantNip);
+      if (acc && acc.directSupervisor) empSupervisor = acc.directSupervisor;
     }
+    if (!empSupervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.applicantName || '').toLowerCase().includes('budi'))) {
+      empSupervisor = 'Ir. Hendra Gunawan, M.T.';
+    }
+
+    const isUnderSupervision = empSupervisor && empSupervisor.toLowerCase().includes(aName.includes('dewi') ? 'dewi' : 'hendra');
+
+    if (aName.includes('dewi')) {
+      return tApprover.includes('dewi') || isUnderSupervision;
+    } else {
+      return tApprover.includes('hendra') || (!tApprover.includes('dewi')) || isUnderSupervision;
+    }
+  }
+
+  function isDeletedByCurrentMobileApprover(t) {
+    if (!t) return false;
+    const app = getActiveApprover();
+    const aName = (app.name || '').toLowerCase();
+    if (aName.includes('dewi')) {
+      return !!t.deletedByApprover2;
+    }
+    return !!t.deletedByApprover1;
   }
 
   function getTeamTickets() {
     const list = window.ticketsList || [];
-    return list.filter(t => !t.deletedByApprover && isTicketAssignedToMobileApprover(t));
+    return list.filter(t => !isDeletedByCurrentMobileApprover(t) && isTicketAssignedToMobileApprover(t));
   }
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Bawahan'; }
@@ -1611,11 +1633,13 @@
   window.mobileAtasanClearAllFinished = function () {
     const approver = getActiveApprover();
     const tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
-    const finishedTickets = tickets.filter(t =>
-      (t.approverName === approver.name || (!t.approverName && approver.name.includes('Hendra'))) &&
-      (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan') &&
-      !t.deletedByApprover
-    );
+    const isDewi = approver.name.toLowerCase().includes('dewi');
+    const finishedTickets = tickets.filter(t => {
+      const isMyTicket = isTicketAssignedToMobileApprover(t);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan');
+      const isDel = isDewi ? t.deletedByApprover2 : t.deletedByApprover1;
+      return isMyTicket && isFinished && !isDel;
+    });
     if (finishedTickets.length === 0) {
       if (typeof window.showToast === 'function') window.showToast('Tidak ada data izin selesai yang dapat dihapus.', 'info');
       return;
@@ -1624,7 +1648,11 @@
       return;
     }
     finishedTickets.forEach(t => {
-      t.deletedByApprover = true;
+      if (isDewi) {
+        t.deletedByApprover2 = true;
+      } else {
+        t.deletedByApprover1 = true;
+      }
     });
     if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
     if (typeof window.showToast === 'function') {
