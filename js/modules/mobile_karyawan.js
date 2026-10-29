@@ -525,7 +525,11 @@
   // -------------------------------------------------------------------
   function renderRiwayat(container) {
     const emp = getActiveEmp();
-    let allEmpTickets = getEmpTickets();
+    let allEmpTickets = getEmpTickets().filter(t => {
+      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
+      if (isEmergency) return true; // Izin darurat masuk riwayat segera setelah pengajuan dibuat
+      return t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
+    });
 
     const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
     const hasDeletableTickets = (window.ticketsList || []).some(t =>
@@ -559,6 +563,16 @@
       });
     }
 
+    // Urutkan riwayat: Tiket terbaru selalu di paling atas
+    filtered.sort((a, b) => {
+      const parseTime = (t) => {
+        const raw = t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
+      };
+      return parseTime(b) - parseTime(a);
+    });
+
     // 3. Pagination calculations
     const totalItems = filtered.length;
     const totalPages = Math.ceil(totalItems / riwayatPageSize) || 1;
@@ -580,7 +594,10 @@
           <!-- Baris 1: ID Tiket & Tanggal (Kiri) + Status Badge (Kanan) -->
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
             <div>
-              <div style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</div>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</span>
+                ${isEmergency ? '<span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; border: 1.2px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Izin Darurat</span>' : ''}
+              </div>
               <div style="font-size: 0.725rem; font-weight: 600; color: #334155; margin-top: 1px;">Diajukan ${dateStr}</div>
             </div>
             <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
@@ -625,7 +642,10 @@
         <div class="mobile-ticket-list-row">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div>
-              <div style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</div>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</span>
+                ${isEmergency ? '<span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; border: 1.2px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Izin Darurat</span>' : ''}
+              </div>
               <div style="font-size: 0.725rem; font-weight: 600; color: #334155; margin-top: 1px;">Diajukan ${dateStr}</div>
             </div>
             <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>

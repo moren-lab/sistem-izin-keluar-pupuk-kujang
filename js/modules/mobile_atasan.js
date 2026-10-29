@@ -947,9 +947,11 @@
   // -------------------------------------------------------------------
   function renderAtasanRiwayat(container) {
     const approver = getActiveApprover();
-    const tickets = getTeamTickets().filter(t => 
-      t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Sedang di Luar' || t.status === 'Terlambat'
-    );
+    const tickets = getTeamTickets().filter(t => {
+      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
+      if (isEmergency) return true; // Izin darurat masuk riwayat segera setelah pengajuan dibuat
+      return t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
+    });
 
     const emergencyCount = tickets.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')))).length;
     const approverDecidedCount = Math.max(0, tickets.length - emergencyCount);
@@ -1004,8 +1006,9 @@
             <span class="mobile-badge ${badgeDecisionClass}">${badgeDecisionLabel}</span>
           </div>
 
-          <div style="font-family: monospace; font-size: 0.775rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
-            ${t.id}
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;">
+            <span style="font-family: monospace; font-size: 0.775rem; font-weight: 700; color: #475569;">${t.id}</span>
+            ${isEmergency ? '<span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; border: 1.2px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Izin Darurat</span>' : ''}
           </div>
 
           <div class="mobile-ticket-grid-meta" style="margin: 6px 0;">

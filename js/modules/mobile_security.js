@@ -756,10 +756,12 @@
     );
 
     // 1. Filter log transaksi gerbang & tiket aktif
-    let eligible = tickets.filter(t =>
-      !t.deletedBySecurity &&
-      (t.scanOutTime || t.scanInTime || t.status === 'Selesai' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Disetujui')
-    );
+    let eligible = tickets.filter(t => {
+      if (t.deletedBySecurity) return false;
+      const isEmergencyTicket = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
+      if (isEmergencyTicket) return true; // Izin darurat masuk riwayat segera setelah pengajuan dibuat
+      return Boolean(t.scanOutTime || t.scanInTime || t.status === 'Selesai' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Disetujui');
+    });
 
     // 2. Filter Periode (Hari Ini, Minggu Ini, Bulan Ini, Tahun Ini, Semua Waktu)
     if (riwayatPeriodFilter !== 'all' && typeof window.matchesPeriodFilter === 'function') {
@@ -848,7 +850,7 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
               <span style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</span>
-              ${isEmergencyTicket ? '<span class="mobile-badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 1px 5px; border-radius: 4px;">🚨 DARURAT</span>' : ''}
+              ${isEmergencyTicket ? '<span class="mobile-badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 1px 5px; border-radius: 4px;">Izin Darurat</span>' : ''}
             </div>
             <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
           </div>
@@ -937,7 +939,7 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
             <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
               <span style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</span>
-              ${isEmergencyTicket ? '<span class="mobile-badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.6rem; font-weight: 800; padding: 1px 4px; border-radius: 4px;">🚨 DARURAT</span>' : ''}
+              ${isEmergencyTicket ? '<span class="mobile-badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.6rem; font-weight: 800; padding: 1px 4px; border-radius: 4px;">Izin Darurat</span>' : ''}
             </div>
             <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
           </div>
@@ -1135,7 +1137,7 @@
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;">
         <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
           <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
-          ${isEmergencyTicket ? '<span class="mobile-badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px;">🚨 DARURAT</span>' : ''}
+          ${isEmergencyTicket ? '<span class="mobile-badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px;">Izin Darurat</span>' : ''}
         </div>
         <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
