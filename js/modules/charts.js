@@ -244,37 +244,82 @@ function renderKaryawanDonutChart() {
   const centerTextCol = dark ? '#f8fafc' : '#0f172a';
   const centerSubCol = dark ? '#94a3b8' : '#64748b';
   const infoBadgeBg = dark ? '#131b2a' : '#f8fafc';
-  const infoBadgeBorder = dark ? '#24334a' : '#cbd5e1';
+  const infoBadgeBorder = dark ? '#24334a' : '#e2e8f0';
   const infoBadgeText = dark ? '#cbd5e1' : '#64748b';
 
   container.innerHTML = `
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.5rem 0; width: 100%;">
-      <!-- SVG Donut Chart with 2 Categories (Selesai Hijau, Darurat Merah) -->
-      <div style="position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-        <svg width="150" height="150" viewBox="0 0 150 150" style="display: block; overflow: visible;">
-          <g transform="rotate(-90 ${cx} ${cy})">
-            <!-- Background Track -->
-            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${trackStroke}" stroke-width="18" />
+    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap;">
+        <!-- Left: Precision SVG Donut -->
+        <div style="position: relative; width: 136px; height: 136px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+          <svg width="136" height="136" viewBox="0 0 150 150" style="display: block; overflow: visible;">
+            <g transform="rotate(-90 ${cx} ${cy})">
+              <!-- Background Track -->
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${trackStroke}" stroke-width="16" />
+              
+              ${segmentsRenderData.map(s => `
+                <circle id="donutSlice_${s.key}"
+                  cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16"
+                  stroke-dasharray="${s.len} ${C}" stroke-dashoffset="${s.offset}"
+                  style="transition: stroke-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s ease; cursor: pointer;"
+                  onmouseenter="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                  onmousemove="window.moveChartTooltip(event)"
+                  onmouseleave="window.unhoverKaryawanDonut(${total})"
+                  onclick="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                  ontouchstart="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
+              `).join('')}
+            </g>
             
-            ${segmentsRenderData.map(s => `
-              <circle id="donutSlice_${s.key}"
-                cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="18"
-                stroke-dasharray="${s.len} ${C}" stroke-dashoffset="${s.offset}"
-                style="transition: stroke-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease; cursor: pointer;"
-                onmouseenter="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                onmousemove="window.moveChartTooltip(event)"
-                onmouseleave="window.unhoverKaryawanDonut(${total})"
-                onclick="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                ontouchstart="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
-            `).join('')}
-          </g>
-          
-          <!-- Center Text -->
-          <text id="karyawanDonutCenterVal" x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
-          <text id="karyawanDonutCenterLbl" x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
-        </svg>
+            <!-- Center Text Metric -->
+            <text id="karyawanDonutCenterVal" x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
+            <text id="karyawanDonutCenterLbl" x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
+          </svg>
+        </div>
+
+        <!-- Right: Modern Bento Breakdown Cards -->
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; min-width: 175px;">
+          <!-- Selesai Breakdown Card -->
+          <div id="donutCard_selesai" style="padding: 0.65rem 0.85rem; border-radius: 10px; background: ${dark ? '#1e293b' : '#f8fafc'}; border: 1px solid ${dark ? '#334155' : '#e2e8f0'}; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
+               onmouseenter="window.hoverKaryawanDonut(event, 'selesai', 'Total Izin Selesai', ${countSelesai}, ${total}, '${pctSelesai}', '#059669')"
+               onmouseleave="window.unhoverKaryawanDonut(${total})">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #059669; display: inline-block; box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);"></span>
+                <span style="font-size: 0.775rem; font-weight: 700; color: ${dark ? '#f1f5f9' : '#0f172a'};">Izin Selesai</span>
+              </div>
+              <span style="font-size: 0.775rem; font-weight: 800; color: #059669; font-family: var(--font-mono); font-feature-settings: 'tnum';">${countSelesai} (${pctSelesai}%)</span>
+            </div>
+            <div style="width: 100%; height: 5px; border-radius: 999px; background: ${dark ? '#334155' : '#e2e8f0'}; overflow: hidden;">
+              <div style="width: ${pctSelesai}%; height: 100%; background: #059669; border-radius: 999px;"></div>
+            </div>
+          </div>
+
+          <!-- Darurat Breakdown Card -->
+          <div id="donutCard_darurat" style="padding: 0.65rem 0.85rem; border-radius: 10px; background: ${dark ? '#1e293b' : '#f8fafc'}; border: 1px solid ${dark ? '#334155' : '#e2e8f0'}; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
+               onmouseenter="window.hoverKaryawanDonut(event, 'darurat', 'Total Izin Darurat', ${countDarurat}, ${total}, '${pctDarurat}', '#dc2626')"
+               onmouseleave="window.unhoverKaryawanDonut(${total})">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626; display: inline-block; box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);"></span>
+                <span style="font-size: 0.775rem; font-weight: 700; color: ${dark ? '#f1f5f9' : '#0f172a'};">Izin Darurat</span>
+              </div>
+              <span style="font-size: 0.775rem; font-weight: 800; color: #dc2626; font-family: var(--font-mono); font-feature-settings: 'tnum';">${countDarurat} (${pctDarurat}%)</span>
+            </div>
+            <div style="width: 100%; height: 5px; border-radius: 999px; background: ${dark ? '#334155' : '#e2e8f0'}; overflow: hidden;">
+              <div style="width: ${pctDarurat}%; height: 100%; background: #dc2626; border-radius: 999px;"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Single Source of Truth Status Pill -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.85rem; border-radius: 8px; background: ${infoBadgeBg}; border: 1px solid ${infoBadgeBorder}; font-size: 0.725rem; color: ${infoBadgeText};">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>
+          <span>Data Sinkronisasi Real-Time</span>
+        </span>
+        <span style="font-weight: 700; color: ${dark ? '#94a3b8' : '#334155'};">${total} Pengajuan Terpantau</span>
+      </div>
     </div>
   `;
 
@@ -315,8 +360,15 @@ function hoverKaryawanDonut(e, key, label, count, total, pct, color) {
 
   const slice = document.getElementById(`donutSlice_${key}`);
   if (slice) {
-    slice.setAttribute('stroke-width', '24');
-    slice.style.filter = `drop-shadow(0 0 8px ${color})`;
+    slice.setAttribute('stroke-width', '22');
+    slice.style.filter = `drop-shadow(0 0 8px ${color}80)`;
+  }
+
+  const card = document.getElementById(`donutCard_${key}`);
+  if (card) {
+    card.style.borderColor = color;
+    card.style.background = isThemeDark() ? '#1e293b' : (key === 'darurat' ? '#fef2f2' : '#f0fdf4');
+    card.style.boxShadow = `0 4px 12px ${color}20`;
   }
 }
 
@@ -343,8 +395,14 @@ function unhoverKaryawanDonut(defaultTotal) {
   ['selesai', 'darurat'].forEach(k => {
     const slice = document.getElementById(`donutSlice_${k}`);
     if (slice) {
-      slice.setAttribute('stroke-width', '18');
+      slice.setAttribute('stroke-width', '16');
       slice.style.filter = 'none';
+    }
+    const card = document.getElementById(`donutCard_${k}`);
+    if (card) {
+      card.style.borderColor = dark ? '#334155' : '#e2e8f0';
+      card.style.background = dark ? '#1e293b' : '#f8fafc';
+      card.style.boxShadow = 'none';
     }
   });
 }
@@ -459,7 +517,7 @@ function getApproverWeeklyData(period) {
 }
 
 
-// Gambar 2 Aesthetic Bar Chart Generator (Approver) - Dynamic Real-Time & Interactive Volume Tim
+// Modernized Aesthetic Bar Chart Generator (Approver) - Dynamic Real-Time & Volume Tim
 function getApproverWeeklyRealtimeData() {
   const tickets = window.ticketsList || [];
   const currentActor = window.currentActor || 'approver';
@@ -471,18 +529,16 @@ function getApproverWeeklyRealtimeData() {
     return isApprover2 ? tApp.includes('dewi') : (tApp.includes('hendra') || !tApp.includes('dewi'));
   });
 
-  const todayStr = '2026-10-29';
   const days = [
-    { label: '1/16', dateStr: '23 Okt', fullDate: '2026-10-23', dayName: 'Jumat', baseVal: 12.5, color: '#1d70b8', baseCount: 12 },
-    { label: '2/16', dateStr: '24 Okt', fullDate: '2026-10-24', dayName: 'Sabtu', baseVal: 9,    color: '#22d3ee', baseCount: 9 },
-    { label: '3/16', dateStr: '25 Okt', fullDate: '2026-10-25', dayName: 'Minggu', baseVal: 17.5, color: '#0f3d64', baseCount: 18 },
-    { label: '4/16', dateStr: '26 Okt', fullDate: '2026-10-26', dayName: 'Senin', baseVal: 14,   color: '#9bbcd9', baseCount: 14 },
-    { label: '5/16', dateStr: '27 Okt', fullDate: '2026-10-27', dayName: 'Selasa', baseVal: 19.5, color: '#0b2d4b', baseCount: 20 },
-    { label: '6/16', dateStr: '28 Okt', fullDate: '2026-10-28', dayName: 'Rabu', baseVal: 11,   color: '#0ea5e9', baseCount: 11 },
-    { label: '7/16', dateStr: '29 Okt', fullDate: '2026-10-29', dayName: 'Kamis (Hari Ini)', baseVal: 14, color: '#38bdf8', baseCount: 14 }
+    { label: 'Jum', dateStr: '23 Okt', fullDate: '2026-10-23', dayName: 'Jumat', baseCount: 12 },
+    { label: 'Sab', dateStr: '24 Okt', fullDate: '2026-10-24', dayName: 'Sabtu', baseCount: 9 },
+    { label: 'Min', dateStr: '25 Okt', fullDate: '2026-10-25', dayName: 'Minggu', baseCount: 18 },
+    { label: 'Sen', dateStr: '26 Okt', fullDate: '2026-10-26', dayName: 'Senin', baseCount: 14 },
+    { label: 'Sel', dateStr: '27 Okt', fullDate: '2026-10-27', dayName: 'Selasa', baseCount: 20 },
+    { label: 'Rab', dateStr: '28 Okt', fullDate: '2026-10-28', dayName: 'Rabu', baseCount: 11 },
+    { label: 'Kam', dateStr: '29 Okt', fullDate: '2026-10-29', dayName: 'Kamis (Hari Ini)', baseCount: 14, isToday: true }
   ];
 
-  // Dynamic ticket counting for today and matched days
   let totalWeekVolume = 0;
   days.forEach((d, idx) => {
     const matchTickets = myTeamTickets.filter(t => {
@@ -492,13 +548,12 @@ function getApproverWeeklyRealtimeData() {
 
     if (idx === 6) { // Hari ini
       const liveCount = matchTickets.length;
-      // Real-time: reflects actual ticket creations
       d.total = Math.max(d.baseCount, liveCount > 0 ? (d.baseCount + liveCount - 1) : d.baseCount);
-      d.val = Math.min(20, d.total);
+      d.val = d.total;
       d.tickets = matchTickets;
     } else {
       d.total = d.baseCount + matchTickets.length;
-      d.val = Math.min(20, d.baseVal + (matchTickets.length * 0.5));
+      d.val = d.total;
       d.tickets = matchTickets;
     }
     totalWeekVolume += d.total;
@@ -512,90 +567,126 @@ window.getApproverWeeklyRealtimeData = getApproverWeeklyRealtimeData;
 function getGambar2AestheticBarChartHtml() {
   const chartData = getApproverWeeklyRealtimeData();
   const bars = chartData.days;
-  const maxVal = 20;
 
-  const yTicks = [
-    { val: 20, badgeBg: '#1d70b8', badgeColor: '#fff' },
-    { val: 18, badgeBg: '#14b8a6', badgeColor: '#fff' },
-    { val: 16, badgeBg: '#0f3d64', badgeColor: '#fff' },
-    { val: 14, badgeBg: '#93c5fd', badgeColor: '#fff' },
-    { val: 12, badgeBg: '#0f3d64', badgeColor: '#fff' },
-    { val: 10, badgeBg: '#0ea5e9', badgeColor: '#fff' },
-    { val: 8,  badgeBg: '#22d3ee', badgeColor: '#fff' },
-    { val: 6 },
-    { val: 4 },
-    { val: 2 },
-    { val: 0 }
-  ];
-
-  const svgW = 680;
-  const svgH = 340;
-  const padLeft = 45;
-  const padRight = 20;
-  const chartW = svgW - padLeft - padRight;
-  const topY = 25;
-  const bottomY = 295;
-  const chartH = bottomY - topY;
-
-  let svgContent = '';
-
-  // Grid lines and Y labels
-  yTicks.forEach(tick => {
-    const y = topY + (chartH * (maxVal - tick.val) / maxVal);
-    if (tick.val === 0) {
-      svgContent += `<line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="#64748b" stroke-width="1.5" />`;
-    } else {
-      svgContent += `<line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4 4" />`;
-    }
-    if (tick.badgeBg) {
-      svgContent += `
-        <rect x="${padLeft - 32}" y="${y - 8}" width="22" height="16" rx="3" fill="${tick.badgeBg}" />
-        <text x="${padLeft - 21}" y="${y + 4}" text-anchor="middle" fill="${tick.badgeColor}" font-size="10" font-weight="700" font-family="system-ui, -apple-system, sans-serif">${tick.val}</text>
-      `;
-    } else {
-      svgContent += `
-        <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" fill="#64748b" font-size="11" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${tick.val}</text>
-      `;
+  // Determine peak day
+  let maxCount = -1;
+  let peakIdx = -1;
+  bars.forEach((b, i) => {
+    if (b.total > maxCount) {
+      maxCount = b.total;
+      peakIdx = i;
     }
   });
 
-  // Bars and X labels
-  const barW = 54;
+  const svgW = 680;
+  const svgH = 300;
+  const padLeft = 40;
+  const padRight = 24;
+  const chartW = svgW - padLeft - padRight;
+  const topY = 46;
+  const bottomY = 240;
+  const chartH = bottomY - topY;
+
+  const yTicks = [0, 5, 10, 15, 20];
+  let svgContent = '';
+
+  // Background subtle grid lines and Y numeric labels
+  yTicks.forEach(val => {
+    const y = bottomY - (chartH * val / 20);
+    svgContent += `
+      <line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" 
+            stroke="${val === 0 ? '#94a3b8' : '#f1f5f9'}" 
+            stroke-width="${val === 0 ? '1.5' : '1'}" 
+            ${val > 0 ? 'stroke-dasharray="3,3"' : ''} />
+      <text x="${padLeft - 10}" y="${y + 4}" text-anchor="end" 
+            fill="#64748b" font-size="11" font-weight="600" 
+            font-family="'Plus Jakarta Sans', sans-serif">${val}</text>
+    `;
+  });
+
+  // Bars rendering with cohesive executive palette & rounded tops
   const slotW = chartW / bars.length;
+  const barW = Math.min(50, slotW * 0.62);
 
   bars.forEach((b, idx) => {
-    const barH = Math.min(chartH, Math.max(6, (b.val / maxVal) * chartH));
+    const isPeak = (idx === peakIdx);
+    const isToday = !!b.isToday;
+    const barH = Math.max(12, (b.val / 20) * chartH);
     const x = padLeft + (idx * slotW) + (slotW - barW) / 2;
     const y = bottomY - barH;
     const pct = Math.round((b.total / (chartData.totalWeekVolume || 1)) * 100);
 
+    const barFill = isPeak ? 'url(#barGradPeak)' : (isToday ? 'url(#barGradToday)' : 'url(#barGradStandard)');
+    const barColorHex = isPeak ? '#059669' : (isToday ? '#0284c7' : '#0369a1');
+
     svgContent += `
-      <g class="approver-bar-group" style="cursor: pointer;" 
-         onmouseenter="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${b.color}')"
+      <g class="approver-bar-group" style="cursor: pointer;"
+         onmouseenter="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')"
          onmousemove="window.moveApproverChartTooltip(event)"
          onmouseleave="window.hideApproverChartTooltip()"
-         onclick="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${b.color}')">
-        <!-- Interactive transparent hover trigger -->
-        <rect x="${x - 4}" y="${topY}" width="${barW + 8}" height="${chartH + 30}" fill="transparent" />
-        <!-- Actual Bar -->
-        <rect class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${b.color}" rx="2" style="transition: transform 0.15s ease, filter 0.15s ease;">
+         onclick="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')">
+        
+        <!-- Transparent hover hit area -->
+        <rect x="${x - 6}" y="${topY - 24}" width="${barW + 12}" height="${chartH + 74}" fill="transparent" />
+
+        ${isPeak ? `
+          <!-- Peak Tag Badge -->
+          <g>
+            <rect x="${x + barW / 2 - 24}" y="${y - 28}" width="48" height="17" rx="4" fill="#059669" />
+            <polygon points="${x + barW / 2 - 4},${y - 11} ${x + barW / 2 + 4},${y - 11} ${x + barW / 2},${y - 6}" fill="#059669" />
+            <text x="${x + barW / 2}" y="${y - 16}" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif">PUNCAK</text>
+          </g>
+        ` : ''}
+
+        <!-- Number on top of bar -->
+        <text x="${x + barW / 2}" y="${isPeak ? y - 32 : y - 8}" text-anchor="middle" fill="${isPeak ? '#059669' : (isToday ? '#0284c7' : '#334155')}" font-size="12" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif">${b.total}</text>
+
+        <!-- Rounded Bar -->
+        <rect class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" ry="6"
+              fill="${barFill}" style="transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;">
           <title>${b.dayName} (${b.dateStr}): ${b.total} Pengajuan (${pct}% volume tim)</title>
         </rect>
-        <!-- X Axis Label -->
-        <text x="${x + barW / 2}" y="${bottomY + 22}" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${b.label}</text>
+
+        <!-- X-Axis Labels: Clean Day Name & Date -->
+        <text x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#0f172a'}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif">${b.label}</text>
+        <text x="${x + barW / 2}" y="${bottomY + 34}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#64748b'}" font-size="10" font-weight="${isToday ? '700' : '500'}" font-family="'Plus Jakarta Sans', sans-serif">${b.dateStr}</text>
+        ${isToday ? `<circle cx="${x + barW / 2}" cy="${bottomY + 44}" r="2.5" fill="#0284c7" />` : ''}
       </g>
     `;
   });
 
+  const peakDayObj = bars[peakIdx] || { dayName: 'Selasa', total: 20 };
+  const avgDaily = Math.round((chartData.totalWeekVolume || 98) / 7);
+
   return `
-    <div style="position: relative; width: 100%; max-width: 100%; background: #ffffff; border-radius: 12px; padding: 10px 4px;">
-      <!-- Volume Info Header Bar -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 12px 10px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-        <div style="font-size: 0.8rem; color: #475569;">
-          <span style="font-weight: 700; color: #0f172a;">Volume Tim:</span> <strong style="color: #0369a1;">${chartData.totalWeekVolume} Pengajuan</strong> / 7 Hari
+    <div style="position: relative; width: 100%; max-width: 100%; background: #ffffff; border-radius: 12px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+      <!-- Bento Summary Header Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <div>
+            <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Volume 7 Hari</span>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; line-height: 1.2;">
+              <strong style="color: #0369a1;">${chartData.totalWeekVolume}</strong> <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">Pengajuan</span>
+            </div>
+          </div>
+          <div style="width: 1px; height: 26px; background: #e2e8f0;"></div>
+          <div>
+            <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Hari Puncak</span>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #059669; line-height: 1.2;">
+              ${peakDayObj.dayName} (${peakDayObj.total})
+            </div>
+          </div>
+          <div style="width: 1px; height: 26px; background: #e2e8f0;"></div>
+          <div>
+            <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Rata-rata Harian</span>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #0f172a; line-height: 1.2;">
+              ~${avgDaily} / hari
+            </div>
+          </div>
         </div>
-        <div style="font-size: 0.75rem; color: #64748b; display: inline-flex; align-items: center; gap: 6px;">
-          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #059669; animation: pulseDot 2s infinite;"></span>
+
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #ecfdf5; border: 1px solid #a7f3d0; font-size: 0.725rem; font-weight: 700; color: #065f46;">
+          <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #059669; animation: pulseDot 2s infinite;"></span>
           <span>Data Real-Time Tim</span>
         </div>
       </div>
@@ -603,6 +694,20 @@ function getGambar2AestheticBarChartHtml() {
       <!-- SVG Chart -->
       <div style="width: 100%; overflow-x: auto;">
         <svg viewBox="0 0 ${svgW} ${svgH}" style="width: 100%; height: auto; min-width: 320px; display: block;" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="barGradPeak" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" />
+              <stop offset="100%" stop-color="#059669" />
+            </linearGradient>
+            <linearGradient id="barGradToday" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#0284c7" />
+            </linearGradient>
+            <linearGradient id="barGradStandard" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0284c7" />
+              <stop offset="100%" stop-color="#0369a1" />
+            </linearGradient>
+          </defs>
           ${svgContent}
         </svg>
       </div>
@@ -682,5 +787,511 @@ function renderApproverBarChart() {
 
 window.renderApproverBarChart = renderApproverBarChart;
 
+// ===================================================================
+function getAdminTrafficData() {
+  const list = window.ticketsList || [];
+  const hours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
+  // Baseline standard operating load (Kawasan Pabrik Kujang)
+  const baseOut = {
+    '07:00': 2, '08:00': 4, '09:00': 5, '10:00': 7,
+    '11:00': 12, '12:00': 9, '13:00': 5, '14:00': 8,
+    '15:00': 9, '16:00': 14, '17:00': 7
+  };
+  const baseIn = {
+    '07:00': 1, '08:00': 2, '09:00': 3, '10:00': 5,
+    '11:00': 7, '12:00': 11, '13:00': 12, '14:00': 6,
+    '15:00': 8, '16:00': 10, '17:00': 15
+  };
 
+  list.forEach(t => {
+    // Scan Out (Keluar Gerbang)
+    const outTime = t.scanOutTime || t.plannedExit;
+    if (outTime) {
+      const match = outTime.match(/(\d{1,2}):\d{2}/);
+      if (match) {
+        const slot = match[1].padStart(2, '0') + ':00';
+        if (baseOut[slot] !== undefined) {
+          baseOut[slot]++;
+        }
+      }
+    }
+    // Scan In (Kembali Masuk Gerbang)
+    const inTime = t.scanInTime || t.estimatedReturn;
+    if (inTime) {
+      const match = inTime.match(/(\d{1,2}):\d{2}/);
+      if (match) {
+        const slot = match[1].padStart(2, '0') + ':00';
+        if (baseIn[slot] !== undefined) {
+          baseIn[slot]++;
+        }
+      }
+    }
+  });
+
+  const rows = hours.map(hour => ({
+    hour,
+    out: baseOut[hour] || 0,
+    in: baseIn[hour] || 0,
+    total: (baseOut[hour] || 0) + (baseIn[hour] || 0)
+  }));
+
+  const totalOut = rows.reduce((s, r) => s + r.out, 0);
+  const totalIn = rows.reduce((s, r) => s + r.in, 0);
+  const maxVal = Math.max(...rows.map(r => Math.max(r.out, r.in)), 1);
+
+  const peakRow = rows.reduce((max, r) => r.total > max.total ? r : max, rows[0]);
+  const peakOutRow = rows.reduce((max, r) => r.out > max.out ? r : max, rows[0]);
+  const peakInRow = rows.reduce((max, r) => r.in > max.in ? r : max, rows[0]);
+
+  return {
+    rows,
+    totalOut,
+    totalIn,
+    totalCombined: totalOut + totalIn,
+    maxVal,
+    peakHour: peakRow.hour,
+    peakOutHour: peakOutRow.hour,
+    peakInHour: peakInRow.hour
+  };
+}
+
+function renderAdminTrafficChart() {
+  const container = document.getElementById('chartAdminTrafficContainer');
+  if (!container) return;
+
+  const { rows: data, totalOut, totalIn, totalCombined, maxVal, peakHour, peakOutHour, peakInHour } = getAdminTrafficData();
+  const width = 500;
+  const height = 160;
+  const padLeft = 28;
+  const padRight = 20;
+  const padTop = 22;
+  const padBottom = 26;
+
+  const plotW = width - padLeft - padRight;
+  const plotH = height - padTop - padBottom;
+
+  // Realtime clock positioning
+  const now = new Date();
+  const curH = now.getHours();
+  const curM = now.getMinutes();
+  const curS = now.getSeconds();
+  const curDecHour = curH + (curM / 60) + (curS / 3600);
+  const timeNowStr = `${String(curH).padStart(2, '0')}:${String(curM).padStart(2, '0')}`;
+  const timeNowFull = `${timeNowStr}:${String(curS).padStart(2, '0')} WIB`;
+
+  let currentX = null;
+  if (curDecHour >= 7 && curDecHour <= 17) {
+    const fraction = (curDecHour - 7) / (17 - 7);
+    currentX = padLeft + fraction * plotW;
+  } else if (curDecHour < 7) {
+    currentX = padLeft;
+  } else {
+    currentX = padLeft + plotW;
+  }
+
+  // Find data closest to current hour
+  const currentSlotStr = `${String(curH).padStart(2, '0')}:00`;
+  const curSlotData = data.find(d => d.hour === currentSlotStr) || data[0];
+
+  // Dual Line Points
+  const pointsOut = data.map((d, i) => {
+    const x = padLeft + (i / (data.length - 1)) * plotW;
+    const y = padTop + plotH - (d.out / (maxVal * 1.18)) * plotH;
+    return { x, y, hour: d.hour, val: d.out };
+  });
+
+  const pointsIn = data.map((d, i) => {
+    const x = padLeft + (i / (data.length - 1)) * plotW;
+    const y = padTop + plotH - (d.in / (maxVal * 1.18)) * plotH;
+    return { x, y, hour: d.hour, val: d.in };
+  });
+
+  const pathDOut = `M ${pointsOut[0].x},${pointsOut[0].y} ` + pointsOut.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
+  const areaDOut = `${pathDOut} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+
+  const pathDIn = `M ${pointsIn[0].x},${pointsIn[0].y} ` + pointsIn.slice(1).map(p => `L ${p.x},${p.y}`).join(' ');
+  const areaDIn = `${pathDIn} L ${padLeft + plotW},${padTop + plotH} L ${padLeft},${padTop + plotH} Z`;
+
+  const slotWidth = plotW / (data.length - 1);
+
+  container.innerHTML = `
+    <!-- Dual Legend & Realtime Timestamp Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; font-size: 0.735rem; font-weight: 700; flex-wrap: wrap; gap: 0.5rem; padding: 0 0.25rem;">
+      <div style="display: flex; gap: 0.85rem; align-items: center;">
+        <span style="display: inline-flex; align-items: center; gap: 5px; color: #0284c7;">
+          <span style="width: 10px; height: 10px; border-radius: 2px; background: #0284c7; display: inline-block;"></span>
+          <span>Scan Out (Keluar)</span>
+        </span>
+        <span style="display: inline-flex; align-items: center; gap: 5px; color: #059669;">
+          <span style="width: 10px; height: 10px; border-radius: 2px; background: #10b981; display: inline-block;"></span>
+          <span>Scan In (Masuk)</span>
+        </span>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: 5px; color: #dc2626; font-size: 0.72rem; background: #fef2f2; padding: 2px 7px; border-radius: 6px; border: 1px solid #fecaca;">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);"></span>
+        <span>Jam Sekarang: <strong>${timeNowFull}</strong></span>
+      </div>
+    </div>
+
+    <div style="position: relative; width: 100%; height: ${height}px;" onmouseleave="window.unhoverTrafficPoint()">
+      <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; overflow: visible; display: block;">
+        <defs>
+          <linearGradient id="trafficGradientOut" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0284c7" stop-opacity="0.32" />
+            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.02" />
+          </linearGradient>
+          <linearGradient id="trafficGradientIn" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#10b981" stop-opacity="0.26" />
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0.02" />
+          </linearGradient>
+        </defs>
+
+        <!-- Grid Lines -->
+        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft + plotW}" y2="${padTop}" stroke="#f1f5f9" stroke-width="1" />
+        <line x1="${padLeft}" y1="${padTop + plotH * 0.5}" x2="${padLeft + plotW}" y2="${padTop + plotH * 0.5}" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3,3" />
+        <line x1="${padLeft}" y1="${padTop + plotH}" x2="${padLeft + plotW}" y2="${padTop + plotH}" stroke="#e2e8f0" stroke-width="1.5" />
+
+        <!-- Area Fills -->
+        <path d="${areaDOut}" fill="url(#trafficGradientOut)" />
+        <path d="${areaDIn}" fill="url(#trafficGradientIn)" />
+
+        <!-- Line Plots -->
+        <path d="${pathDOut}" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="${pathDIn}" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+
+        <!-- Realtime Live Time Beacon Indicator -->
+        ${currentX !== null ? `
+          <g id="trafficCurrentTimeBeacon" style="pointer-events: none;">
+            <line x1="${currentX}" y1="${padTop - 2}" x2="${currentX}" y2="${padTop + plotH}" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.85" />
+            <circle cx="${currentX}" cy="${padTop - 2}" r="3.5" fill="#ef4444" />
+            <circle cx="${currentX}" cy="${padTop - 2}" r="7" fill="#ef4444" opacity="0.3">
+              <animate attributeName="r" values="3.5;8;3.5" dur="1.8s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.6;0.1;0.6" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <text x="${currentX}" y="${padTop - 6}" font-size="8" font-weight="800" fill="#dc2626" text-anchor="middle">
+              🔴 ${timeNowStr}
+            </text>
+          </g>
+        ` : ''}
+
+        <!-- Interactive Vertical Hit Areas -->
+        ${data.map((d, i) => {
+          const ptOut = pointsOut[i];
+          const ptIn = pointsIn[i];
+          const isCurrentSlot = d.hour === currentSlotStr;
+          return `
+            <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
+               onmouseenter="window.hoverTrafficPoint('${d.hour}', ${d.out}, ${d.in}, ${ptOut.x}, ${ptOut.y}, ${ptIn.y}, ${i});"
+               onmousemove="window.moveChartTooltip(event)"
+               onmouseleave="window.unhoverTrafficPoint();">
+              <rect x="${ptOut.x - slotWidth / 2}" y="0" width="${slotWidth}" height="${height}" fill="transparent" />
+              <line id="trafficGuideLine_${i}" x1="${ptOut.x}" y1="${padTop}" x2="${ptOut.x}" y2="${padTop + plotH}" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="3,3" style="display: none;" />
+              <!-- Out Point -->
+              <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
+              <!-- In Point -->
+              <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="#ffffff" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
+              ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${isCurrentSlot ? '#0f172a' : '#64748b'}" text-anchor="middle">${d.hour}</text>` : ''}
+            </g>
+          `;
+        }).join('')}
+      </svg>
+    </div>
+
+    <!-- Admin Traffic Badge Summary (Realtime & Dual Metrics) -->
+    <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; color: #0369a1; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
+      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Scan In</strong> (Puncak: ${peakHour} WIB)</span>
+      <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
+        <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
+        <span style="color: #059669;">↘️ Total In: ${totalIn}</span>
+      </span>
+    </div>
+  `;
+}
+
+function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
+  const badge = document.getElementById('adminTrafficBadge');
+  const sum = out + inVal;
+  if (badge) {
+    badge.style.background = 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
+    badge.style.color = '#ffffff';
+    badge.style.borderColor = '#0284c7';
+    badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Scan In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
+  }
+
+  for (let i = 0; i < 11; i++) {
+    const line = document.getElementById(`trafficGuideLine_${i}`);
+    const ptOut = document.getElementById(`trafficPointOut_${i}`);
+    const ptIn = document.getElementById(`trafficPointIn_${i}`);
+    if (line) line.style.display = (i === activeIdx) ? 'block' : 'none';
+    if (ptOut) {
+      if (i === activeIdx) {
+        ptOut.setAttribute('r', '7');
+        ptOut.style.filter = 'drop-shadow(0 0 5px #0284c7)';
+      } else {
+        ptOut.setAttribute('r', '4');
+        ptOut.style.filter = 'none';
+      }
+    }
+    if (ptIn) {
+      if (i === activeIdx) {
+        ptIn.setAttribute('r', '6.5');
+        ptIn.style.filter = 'drop-shadow(0 0 5px #10b981)';
+      } else {
+        ptIn.setAttribute('r', '3.5');
+        ptIn.style.filter = 'none';
+      }
+    }
+  }
+}
+
+function unhoverTrafficPoint() {
+  hideChartTooltip();
+  const badge = document.getElementById('adminTrafficBadge');
+  const { rows: data, totalOut, totalIn, peakHour } = getAdminTrafficData();
+  const now = new Date();
+  const timeNowStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const currentSlotStr = `${String(now.getHours()).padStart(2, '0')}:00`;
+  const curSlotData = data.find(d => d.hour === currentSlotStr) || data[0];
+
+  if (badge) {
+    badge.style.background = '#f0f9ff';
+    badge.style.color = '#0369a1';
+    badge.style.borderColor = '#bae6fd';
+    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Scan In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total In: ${totalIn}</span></span>`;
+  }
+
+  for (let i = 0; i < 11; i++) {
+    const line = document.getElementById(`trafficGuideLine_${i}`);
+    const ptOut = document.getElementById(`trafficPointOut_${i}`);
+    const ptIn = document.getElementById(`trafficPointIn_${i}`);
+    if (line) line.style.display = 'none';
+    if (ptOut) {
+      ptOut.setAttribute('r', '4');
+      ptOut.style.filter = 'none';
+    }
+    if (ptIn) {
+      ptIn.setAttribute('r', '3.5');
+      ptIn.style.filter = 'none';
+    }
+  }
+}
+
+window.hoverTrafficPoint = hoverTrafficPoint;
+window.unhoverTrafficPoint = unhoverTrafficPoint;
+window.getAdminTrafficData = getAdminTrafficData;
+window.renderAdminTrafficChart = renderAdminTrafficChart;
+
+// Ticker Realtime terus berjalan: interval setiap 10 detik memperbarui posisi waktu & data jika admin dashboard aktif
+if (typeof window !== 'undefined' && !window._adminTrafficChartTimer) {
+  window._adminTrafficChartTimer = setInterval(() => {
+    const container = document.getElementById('chartAdminTrafficContainer');
+    if (container && container.offsetParent !== null) {
+      renderAdminTrafficChart();
+    }
+  }, 10000);
+}
+
+// ===================================================================
+// 4. ADMIN: DEPARTMENT RANKED DISTRIBUTION CHART (REVISI 4)
+// ===================================================================
+function getAdminDeptData(period) {
+  const list = window.ticketsList || [];
+  const selPeriod = period || (document.getElementById('filterAdminDeptPeriod') ? document.getElementById('filterAdminDeptPeriod').value : 'month');
+  const isYear = selPeriod === 'year';
+
+  const deptCounts = isYear ? {
+    'Departemen Rekayasa & Pemeliharaan': 48,
+    'Departemen Operasi Pabrik 1 & 2': 34,
+    'Departemen Pengamanan & K3': 20,
+    'Departemen Logistik & Pergudangan': 16,
+    'Departemen SDM & Organisasi': 11
+  } : {
+    'Departemen Rekayasa & Pemeliharaan': 12,
+    'Departemen Operasi Pabrik 1 & 2': 8,
+    'Departemen Pengamanan & K3': 5,
+    'Departemen Logistik & Pergudangan': 4,
+    'Departemen SDM & Organisasi': 3
+  };
+
+  list.forEach(t => {
+    if (typeof window.matchesPeriodFilter === 'function' && !window.matchesPeriodFilter(t, selPeriod)) {
+      return;
+    }
+    if (t.department && deptCounts[t.department] !== undefined) {
+      deptCounts[t.department]++;
+    }
+  });
+
+  const depts = Object.keys(deptCounts).map(name => ({
+    name,
+    count: deptCounts[name]
+  })).sort((a, b) => b.count - a.count);
+
+  const total = depts.reduce((s, d) => s + d.count, 0);
+  const max = Math.max(...depts.map(d => d.count), 1);
+  return { depts, total, max, period: selPeriod };
+}
+
+function renderAdminDeptChart() {
+  const container = document.getElementById('chartAdminDeptContainer');
+  if (!container) return;
+
+  const { depts, total, max, period } = getAdminDeptData();
+  const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
+
+  const colors = [
+    { bar: 'linear-gradient(90deg, #059669 0%, #10b981 100%)', text: '#059669', badgeClass: 'top-1' },
+    { bar: 'linear-gradient(90deg, #0284c7 0%, #38bdf8 100%)', text: '#0284c7', badgeClass: 'top-2' },
+    { bar: 'linear-gradient(90deg, #6366f1 0%, #818cf8 100%)', text: '#6366f1', badgeClass: 'top-3' },
+    { bar: 'linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%)', text: '#8b5cf6', badgeClass: '' },
+    { bar: 'linear-gradient(90deg, #64748b 0%, #94a3b8 100%)', text: '#64748b', badgeClass: '' }
+  ];
+
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 0.45rem;" onmouseleave="window.unhoverDeptRow()">
+      ${depts.map((d, index) => {
+        const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
+        const barWidthPct = Math.round((d.count / max) * 100);
+        const styleInfo = colors[index % colors.length];
+
+        return `
+          <div id="deptRow_${index}" class="dept-rank-row"
+               onmouseenter="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${styleInfo.text}', ${index})"
+               onmouseleave="window.unhoverDeptRow()">
+            <div class="dept-rank-header">
+              <div style="display: flex; align-items: center; min-width: 0; max-width: 75%;">
+                <span class="dept-rank-badge ${styleInfo.badgeClass}">#${index + 1}</span>
+                <span style="font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${d.name}
+                </span>
+              </div>
+              <span id="deptCountLabel_${index}" style="font-family: var(--font-mono); font-weight: 800; color: ${styleInfo.text}; font-size: 0.8rem; flex-shrink: 0;">
+                ${d.count} Izin
+              </span>
+            </div>
+            <div class="dept-progress-track">
+              <div id="deptBar_${index}" class="dept-progress-bar" style="width: ${barWidthPct}%; background: ${styleInfo.bar};"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- Admin Dept Summary Badge (Single Source of Info) -->
+    <div id="adminDeptBadge" style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+      <span>🏢 Frekuensi per Departemen</span>
+      <span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>
+    </div>
+  `;
+
+  attachDeptFilterListener();
+}
+
+function hoverDeptRow(name, count, pct, color, activeIdx) {
+  // Prevent duplicate floating black tooltip per user requirement
+  if (typeof window.hideChartTooltip === 'function') {
+    window.hideChartTooltip();
+  }
+
+  // Only display hovered info in the single dedicated badge below the diagram
+  const badge = document.getElementById('adminDeptBadge');
+  if (badge) {
+    badge.style.background = '#f8fafc';
+    badge.style.borderColor = color;
+    badge.style.boxShadow = `0 2px 10px ${color}20`;
+    badge.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0; max-width: 78%;">
+          <span style="width: 8px; height: 8px; border-radius: 2px; background: ${color}; flex-shrink: 0; box-shadow: 0 0 6px ${color}80;"></span>
+          <span style="font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}: ${count} Izin</span>
+        </div>
+        <span style="background: ${color}; color: #ffffff; padding: 2px 10px; border-radius: 999px; font-weight: 800; font-family: var(--font-mono); font-size: 0.725rem; flex-shrink: 0;">${pct}%</span>
+      </div>
+    `;
+  }
+}
+
+function unhoverDeptRow() {
+  if (typeof window.hideChartTooltip === 'function') {
+    window.hideChartTooltip();
+  }
+  const badge = document.getElementById('adminDeptBadge');
+  const { total, period } = getAdminDeptData();
+  const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
+  if (badge) {
+    badge.style.background = '#f8fafc';
+    badge.style.borderColor = 'var(--border-color)';
+    badge.style.boxShadow = 'none';
+    badge.innerHTML = `<span>🏢 Frekuensi per Departemen</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>`;
+  }
+}
+
+function attachDeptFilterListener() {
+  const adminDeptFilter = document.getElementById('filterAdminDeptPeriod');
+  const isBound = adminDeptFilter && (adminDeptFilter.dataset ? adminDeptFilter.dataset.bound : adminDeptFilter._bound);
+  if (adminDeptFilter && !isBound) {
+    if (adminDeptFilter.dataset) adminDeptFilter.dataset.bound = 'true';
+    adminDeptFilter._bound = true;
+    adminDeptFilter.addEventListener('change', () => {
+      renderAdminDeptChart();
+    });
+  }
+}
+
+window.hoverDeptRow = hoverDeptRow;
+window.unhoverDeptRow = unhoverDeptRow;
+window.renderAdminDeptChart = renderAdminDeptChart;
+
+// Stub for retired "Komposisi Status Izin" chart (Revisi 2)
+window.renderAdminStatusChart = function() {
+  // Chart "Komposisi Status Izin" intentionally retired per Revisi 2
+};
+
+// ===================================================================
+// 5. UNIFIED REAL-TIME DATA REFRESH ORCHESTRATOR (REVISI 5)
+// ===================================================================
+function renderAllCharts() {
+  const role = window.currentActor || 'karyawan';
+  if (role === 'karyawan') {
+    renderKaryawanDonutChart();
+  } else if (role === 'approver' || role === 'approver2') {
+    renderApproverBarChart();
+  } else if (role === 'admin') {
+    renderAdminTrafficChart();
+    renderAdminDeptChart();
+  }
+}
+
+function refreshAllDashboardData() {
+  if (typeof window.updateKaryawanMetrics === 'function') {
+    window.updateKaryawanMetrics();
+  }
+  if (typeof window.updateApproverMetrics === 'function') {
+    window.updateApproverMetrics();
+  }
+  if (typeof window.updateAdminMetrics === 'function') {
+    window.updateAdminMetrics();
+  }
+  if (typeof window.updateSecurityMetrics === 'function') {
+    window.updateSecurityMetrics();
+  }
+  renderAllCharts();
+}
+
+window.renderAllCharts = renderAllCharts;
+window.refreshAllDashboardData = refreshAllDashboardData;
+window.syncAllDashboardData = refreshAllDashboardData;
+
+// Listen to storage events to ensure cross-tab data synchronization
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === window.STORAGE_KEY || e.key === window.USERS_STORAGE_KEY) {
+      refreshAllDashboardData();
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderAllCharts();
+});

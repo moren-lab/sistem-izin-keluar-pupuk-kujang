@@ -9667,3 +9667,63 @@ body.theme-dark .mobile-btn-secondary {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================================================
+   WEB ONLY: Modal Footer Optimization & Backdrop Interactions (Part 2)
+   ========================================================================== */
+.modal-overlay {
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s ease;
+}
+
+.modal-overlay .modal-card {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+}
+
+.modal-overlay.open .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.modal-overlay:not(.open) .modal-card {
+  transform: translateY(8px) scale(0.98);
+}
+
+.modal-overlay .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.modal-overlay .modal-footer:empty {
+  display: none !important;
+}
+
+/* Ensure btn-close-modal has smooth hover and focus micro-interactions */
+.btn-close-modal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #64748b;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-close-modal:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  transform: rotate(90deg);
+}
+
+body.theme-dark .btn-close-modal:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.15);
+}

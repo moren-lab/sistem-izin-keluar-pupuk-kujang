@@ -3413,3 +3413,34 @@ window.openPendingExtensionDetailModal = openPendingExtensionDetailModal;
 window.closePendingExtensionDetailModal = closePendingExtensionDetailModal;
 window.executeCancelPendingExtension = executeCancelPendingExtension;
 window.openEditTicketModal = openEditTicketModal;
+
+// Universal Backdrop Click Handler (Dismiss modal smoothly on overlay background click)
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+      // Do not close if inside active face scan or specific locked flow
+      if (e.target.id === 'modalEmergencyUnlock' && window._activeFaceScanning) {
+        return;
+      }
+      if (e.target.id === 'modalTicketDetail' && typeof window.closeTicketDetailModal === 'function') {
+        window.closeTicketDetailModal();
+        return;
+      }
+      if (e.target.id === 'modalAdminUserAccess' && typeof window.closeAdminUserModal === 'function') {
+        window.closeAdminUserModal();
+        return;
+      }
+      if (e.target.id === 'modalDeleteConfirm' && typeof window.closeDeleteConfirmModal === 'function') {
+        window.closeDeleteConfirmModal();
+        return;
+      }
+      if (e.target.id === 'modalEmergencyUnlock' && typeof window.closeEmergencyUnlockModal === 'function') {
+        window.closeEmergencyUnlockModal();
+        return;
+      }
+      e.target.classList.remove('open');
+      e.target.style.display = 'none';
+      document.body.classList.remove('modal-open');
+    }
+  });
+}
