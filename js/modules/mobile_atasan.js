@@ -17,7 +17,12 @@
   let atasanRiwayatSortOrder = 'desc'; // 'desc' | 'asc'
   let isAntreanFilterOpen = false;
   let isAtasanRiwayatFilterOpen = false;
+  let isAtasanTimFilterOpen = false;
   let atasanTimFilter = 'all'; // 'all' | 'outside' | 'late' | 'ready'
+  let atasanTimSearchQuery = '';
+  let currentAtasanTimPage = 1;
+  const atasanTimPageSize = 6;
+  let atasanTimDebounceTimer = null;
   let selectedTimTicketId = null;
   let viewingTicketId = null;
 
@@ -914,13 +919,34 @@
       teamCardsList = [...activeTickets, ...recentDone];
     }
 
+    // Filter live search jika ada input pencarian
+    if (atasanTimSearchQuery && atasanTimSearchQuery.trim()) {
+      const q = atasanTimSearchQuery.trim().toLowerCase();
+      teamCardsList = teamCardsList.filter(t => {
+        const name = (getTName(t) || '').toLowerCase();
+        const nip = (getTNip(t) || '').toLowerCase();
+        const dept = (getTDept(t) || '').toLowerCase();
+        const id = (t.id || '').toLowerCase();
+        const dest = (t.destination || '').toLowerCase();
+        return name.includes(q) || nip.includes(q) || dept.includes(q) || id.includes(q) || dest.includes(q);
+      });
+    }
+
+    const totalTimItems = teamCardsList.length;
+    const totalTimPages = Math.ceil(totalTimItems / atasanTimPageSize) || 1;
+    if (currentAtasanTimPage > totalTimPages) currentAtasanTimPage = totalTimPages;
+    if (currentAtasanTimPage < 1) currentAtasanTimPage = 1;
+
+    const startIdx = (currentAtasanTimPage - 1) * atasanTimPageSize;
+    const pageTeamCards = teamCardsList.slice(startIdx, startIdx + atasanTimPageSize);
+
     // Selected ticket for timeline view (default to first active or first in list)
     if (!selectedTimTicketId && teamCardsList.length > 0) {
       selectedTimTicketId = (outsideTickets[0] && outsideTickets[0].id) || teamCardsList[0].id;
     }
     const selectedTicket = tickets.find(x => x.id === selectedTimTicketId) || teamCardsList[0];
 
-    const listHtml = teamCardsList.map(t => {
+    const listHtml = pageTeamCards.map(t => {
       const isLate = (t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
       const isOutside = (t.status === 'Sedang di Luar');
       const isApproved = (t.status === 'Disetujui');
@@ -994,30 +1020,121 @@
       `;
     }).join('');
 
+    // Empty state
+    const emptyHtml = `
+      <div class="mobile-card" style="text-align: center; padding: 28px 16px; border: 1.5px dashed #cbd5e1; border-radius: 14px; background: #ffffff;">
+        <div style="color: #94a3b8; margin-bottom: 8px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        </div>
+        <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Tidak Ada Tiket Tim Ditemukan</div>
+        <div style="font-size: 0.775rem; color: #475569; max-width: 260px; margin: 0 auto; line-height: 1.4;">
+          ${atasanTimSearchQuery ? `Tidak ada tiket tim yang cocok dengan kata kunci "<strong>${atasanTimSearchQuery}</strong>".` : 'Tidak ada pergerakan bawahan pada kriteria filter ini.'}
+        </div>
+        ${(atasanTimSearchQuery || atasanTimFilter !== 'all') ? `
+          <button type="button" class="mobile-btn-secondary" style="margin-top: 14px; padding: 8px 16px; font-size: 0.75rem; width: auto; font-weight: 700; min-height: 40px; display: inline-flex; align-items: center; gap: 6px;" onclick="window.mobileResetTimFilter()">
+            <span>Reset Pencarian & Filter</span>
+          </button>
+        ` : ''}
+      </div>
+    `;
+
+    // Dynamic Pagination Buttons
+    let paginationHtml = '';
+    if (totalTimPages > 1) {
+      let pageBtns = '';
+      for (let p = 1; p <= totalTimPages; p++) {
+        const isActive = (p === currentAtasanTimPage);
+        pageBtns += `
+          <button type="button" style="min-width: 36px; height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid ${isActive ? '#2563eb' : '#cbd5e1'}; background: ${isActive ? '#2563eb' : '#ffffff'}; color: ${isActive ? '#ffffff' : '#334155'}; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileSetAtasanTimPage(${p})">
+            ${p}
+          </button>
+        `;
+      }
+      paginationHtml = `
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 18px 0 8px 0; gap: 8px;">
+          <div style="font-size: 0.725rem; color: #64748b; font-weight: 600;">
+            Menampilkan ${startIdx + 1}–${Math.min(startIdx + atasanTimPageSize, totalTimItems)} dari ${totalTimItems} tiket
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+            ${pageBtns}
+          </div>
+        </div>
+      `;
+    }
+
+    // Active filter label
+    let filterLabel = 'Semua';
+    if (atasanTimFilter === 'outside') filterLabel = 'Di Luar';
+    else if (atasanTimFilter === 'late') filterLabel = 'Terlambat';
+    else if (atasanTimFilter === 'ready') filterLabel = 'Siap Keluar';
+
+    const activeFilterSummaryHtml = (atasanTimFilter !== 'all') ? `
+      <div style="font-size: 0.725rem; color: #047857; background: #ecfdf5; border: 1.2px solid #a7f3d0; border-radius: 8px; padding: 6px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+        <span>Filter: <strong>${filterLabel}</strong> • ${totalTimItems} tiket</span>
+        <button type="button" onclick="window.mobileResetTimFilter()" style="background: none; border: none; color: #059669; font-size: 0.725rem; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 2px 4px;">Atur Ulang</button>
+      </div>
+    ` : '';
+
     container.innerHTML = `
       <!-- Banner Status Perjalanan Tim -->
       <div class="mobile-card" style="padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 0.75rem; color: #334155;">
         <strong>Status perjalanan tim:</strong> <span style="color: #7c3aed; font-weight: 700;">${outsideTickets.length} di luar area</span>, termasuk <span style="color: #dc2626; font-weight: 700;">${lateTickets.length} terlambat</span>.
       </div>
 
-      <!-- Segment Tabs Filter Pelacakan (Touch Target >= 44px) -->
-      <div class="mobile-segment-toggle" style="margin-bottom: 12px; height: 42px; display: flex; gap: 3px;">
-        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'all' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('all')">
-          Semua (${sortedEligible.length})
-        </button>
-        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'outside' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('outside')">
-          Di Luar (${outsideTickets.length})
-        </button>
-        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'late' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('late')">
-          Terlambat (${lateTickets.length})
-        </button>
-        <button type="button" class="mobile-seg-btn ${atasanTimFilter === 'ready' ? 'active' : ''}" style="font-size: 0.725rem; min-height: 36px; padding: 4px 8px;" onclick="window.mobileFilterTim('ready')">
-          Siap Keluar (${readyTickets.length})
+      <!-- Live Search Bar -->
+      <div style="display: flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" style="flex-shrink: 0; margin-right: 8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="mAtasanTimLiveSearch" placeholder="Cari nama bawahan, NIP, nomor tiket..." value="${atasanTimSearchQuery}" style="flex: 1; border: none; background: transparent; font-size: 0.825rem; color: #0f172a; padding: 11px 0; outline: none; min-width: 0;" oninput="window.mobileDebounceTimSearch(this.value)">
+        <button type="button" id="mBtnClearTimSearch" aria-label="Hapus teks pencarian" style="display: ${atasanTimSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearTimSearch()">✕</button>
+      </div>
+
+      <!-- Toolbar: Ringkasan di Kiri, Tombol Filter di Kanan (Sejajar) -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+        <div style="font-size: 0.775rem; font-weight: 700; color: #475569;">
+          ${totalTimItems} tiket pelacakan
+        </div>
+        <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px, latar putih, border tipis, icon abu-abu, dot hijau aktif) -->
+        <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isAtasanTimFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isAtasanTimFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isAtasanTimFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isAtasanTimFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleAtasanTimFilter()" title="Filter Status Pelacakan" aria-label="Filter Status Pelacakan">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          ${(atasanTimFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
         </button>
       </div>
 
-      <!-- List of Team Members Cards -->
-      ${listHtml || '<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada pergerakan bawahan pada filter ini.</div>'}
+      <!-- One-line Active Filter Summary -->
+      ${activeFilterSummaryHtml}
+
+      <!-- Collapsible Filter Panel -->
+      <div id="mAtasanTimFilterCard" class="mobile-filter-panel" style="display: ${isAtasanTimFilterOpen ? 'block' : 'none'}; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div class="mobile-filter-panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-weight: 800; font-size: 0.8125rem; color: #0f172a;">Filter Status Pelacakan</span>
+          <button type="button" style="border: none; background: none; font-size: 0.85rem; color: #64748b; cursor: pointer; padding: 4px;" onclick="window.mobileToggleAtasanTimFilter()">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <label class="mobile-filter-label" style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Status Bawahan</label>
+            <select class="mobile-filter-select" id="mAtasanSelectTimFilter" style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; color: #0f172a; background: #ffffff;">
+              <option value="all" ${atasanTimFilter === 'all' ? 'selected' : ''}>Semua (${sortedEligible.length})</option>
+              <option value="outside" ${atasanTimFilter === 'outside' ? 'selected' : ''}>Sedang di Luar (${outsideTickets.length})</option>
+              <option value="late" ${atasanTimFilter === 'late' ? 'selected' : ''}>Terlambat (${lateTickets.length})</option>
+              <option value="ready" ${atasanTimFilter === 'ready' ? 'selected' : ''}>Siap Keluar (${readyTickets.length})</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" class="mobile-btn-primary" style="flex: 1; min-height: 40px; padding: 0 12px; font-size: 0.775rem; font-weight: 700; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; cursor: pointer;" onclick="window.mobileApplyTimFilter()">
+              Terapkan
+            </button>
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 40px; padding: 0 12px; font-size: 0.775rem; font-weight: 700; background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; border-radius: 8px; cursor: pointer;" onclick="window.mobileResetTimFilter()">
+              Atur Ulang
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- List of Team Members Cards or Empty State -->
+      ${teamCardsList.length > 0 ? listHtml : emptyHtml}
+
+      <!-- Dynamic Pagination -->
+      ${paginationHtml}
     `;
   }
 
@@ -1383,6 +1500,55 @@
 
   window.mobileFilterTim = function (filter) {
     atasanTimFilter = filter;
+    currentAtasanTimPage = 1;
+    renderMobileAtasan(null, 'tim');
+  };
+
+  window.mobileToggleAtasanTimFilter = function () {
+    isAtasanTimFilterOpen = !isAtasanTimFilterOpen;
+    renderMobileAtasan(null, 'tim');
+  };
+
+  window.mobileApplyTimFilter = function () {
+    const sel = document.getElementById('mAtasanSelectTimFilter');
+    if (sel) {
+      atasanTimFilter = sel.value;
+    }
+    isAtasanTimFilterOpen = false;
+    currentAtasanTimPage = 1;
+    renderMobileAtasan(null, 'tim');
+  };
+
+  window.mobileResetTimFilter = function () {
+    atasanTimFilter = 'all';
+    atasanTimSearchQuery = '';
+    isAtasanTimFilterOpen = false;
+    currentAtasanTimPage = 1;
+    renderMobileAtasan(null, 'tim');
+  };
+
+  window.mobileDebounceTimSearch = function (val) {
+    atasanTimSearchQuery = val;
+    if (atasanTimDebounceTimer) clearTimeout(atasanTimDebounceTimer);
+    atasanTimDebounceTimer = setTimeout(() => {
+      currentAtasanTimPage = 1;
+      renderMobileAtasan(null, 'tim');
+      const input = document.getElementById('mAtasanTimLiveSearch');
+      if (input) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }, 300);
+  };
+
+  window.mobileClearTimSearch = function () {
+    atasanTimSearchQuery = '';
+    currentAtasanTimPage = 1;
+    renderMobileAtasan(null, 'tim');
+  };
+
+  window.mobileSetAtasanTimPage = function (p) {
+    currentAtasanTimPage = p;
     renderMobileAtasan(null, 'tim');
   };
 
