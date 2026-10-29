@@ -615,12 +615,7 @@
           </div>
         `;
       } else {
-        statusInfoHtml = `
-          <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 6px 10px; font-size: 0.7rem; color: #047857; margin-bottom: 8px; line-height: 1.4;">
-            Disetujui ${t.approverName || 'Ir. Hendra Gunawan, M.T.'} • Batas kembali ${returnT}.<br>
-            Masih dalam waktu izin • Sesuai jadwal. Verifikasi identitas sebelum mencatat kembali.
-          </div>
-        `;
+        
       }
 
       return `
@@ -1102,11 +1097,7 @@
       </div>
 
       <!-- 4. Ringkasan Hasil -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.725rem; color: #475569; font-weight: 700;">
-          ${totalItems} log pemindaian • ${periodText} • Terbaru lebih dulu
-        </span>
-      </div>
+     
 
       <!-- 5. Items Container -->
       <div id="mSecurityRiwayatItemsContainer">
@@ -1232,7 +1223,13 @@
 
         <!-- Action Buttons (Pos Jaga: Operasional Scan Out & Verifikasi Gerbang) -->
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
-          ${(t.isEmergency && t.emergencyLocked) ? `
+          ${(t.status === 'Ditolak') ? `
+            <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.75rem; color: #991b1b; text-align: center; font-weight: 700;">
+              🚫 Akses Keluar Ditolak: Pengajuan ini telah DITOLAK oleh Atasan. Akses gerbang dilarang.
+            </div>
+          ` : ''}
+
+          ${(t.isEmergency && t.emergencyLocked && t.status !== 'Ditolak') ? `
             <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #991b1b; text-align: center; font-weight: 700;">
               🚨 Tiket Darurat TERKUNCI: Menunggu otorisasi Atasan sebelum gerbang dapat dibuka.
             </div>

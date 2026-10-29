@@ -51,16 +51,38 @@
     const app = getActiveApprover();
     const aName = (app.name || '').toLowerCase();
     const tApprover = (ticket.approverName || '').toLowerCase();
-    if (aName.includes('dewi')) {
-      return tApprover.includes('dewi');
-    } else {
-      return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+    
+    let empSupervisor = ticket.directSupervisor || '';
+    if (!empSupervisor && window.KUJANG_ACCOUNTS && ticket.applicantNip) {
+      const acc = window.KUJANG_ACCOUNTS.find(a => a.nip === ticket.applicantNip);
+      if (acc && acc.directSupervisor) empSupervisor = acc.directSupervisor;
     }
+    if (!empSupervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.applicantName || '').toLowerCase().includes('budi'))) {
+      empSupervisor = 'Ir. Hendra Gunawan, M.T.';
+    }
+
+    const isUnderSupervision = empSupervisor && empSupervisor.toLowerCase().includes(aName.includes('dewi') ? 'dewi' : 'hendra');
+
+    if (aName.includes('dewi')) {
+      return tApprover.includes('dewi') || isUnderSupervision;
+    } else {
+      return tApprover.includes('hendra') || (!tApprover.includes('dewi')) || isUnderSupervision;
+    }
+  }
+
+  function isDeletedByCurrentMobileApprover(t) {
+    if (!t) return false;
+    const app = getActiveApprover();
+    const aName = (app.name || '').toLowerCase();
+    if (aName.includes('dewi')) {
+      return !!t.deletedByApprover2;
+    }
+    return !!t.deletedByApprover1;
   }
 
   function getTeamTickets() {
     const list = window.ticketsList || [];
-    return list.filter(t => !t.deletedByApprover && isTicketAssignedToMobileApprover(t));
+    return list.filter(t => !isDeletedByCurrentMobileApprover(t) && isTicketAssignedToMobileApprover(t));
   }
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Bawahan'; }
@@ -173,7 +195,13 @@
 
     // Priority Cards: Emergency Ticket if exists
     let priorityHtml = '';
-    const pendingEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan' || t.emergencyLocked));
+    const pendingEmergTicket = tickets.find(t => 
+      (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && 
+      (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
+      t.status !== 'Ditolak' && 
+      t.status !== 'Selesai' && 
+      t.status !== 'Dibatalkan'
+    );
     const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
 
     if (pendingEmergTicket) {
@@ -606,7 +634,7 @@
             <div style="font-size: 0.725rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
             <div style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #334155; margin-top: 2px;">${t.id}</div>
           </div>
-          <span class="mobile-badge ${isPending ? 'menunggu' : (t.status === 'Disetujui' ? 'disetujui' : (t.status === 'Sedang di Luar' ? 'sedang-di-luar' : 'selesai'))}">
+          <span class="mobile-badge ${isPending ? 'menunggu' : (t.status === 'Ditolak' ? 'ditolak' : (t.status === 'Disetujui' ? 'disetujui' : (t.status === 'Sedang di Luar' ? 'sedang-di-luar' : 'selesai')))}">
             ${t.status}
           </span>
         </div>
@@ -678,13 +706,31 @@
             </div>
           </div>
 
-          <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #d97706; min-width: 60px;">Saat ini</div>
-            <div style="flex: 1; font-size: 0.75rem;">
-              <div style="font-weight: 800; color: #0f172a;">Menunggu tindakan</div>
-              <div style="font-size: 0.675rem; color: #d97706;">Tinjauan ${approver.name.split(',')[0]} • Belum ada keputusan Atasan</div>
+          ${(t.status === 'Ditolak') ? `
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="font-size: 0.7rem; font-weight: 800; color: #dc2626; min-width: 60px;">${t.rejectedAt ? formatTimeOnly(t.rejectedAt) : 'Selesai'}</div>
+              <div style="flex: 1; font-size: 0.75rem;">
+                <div style="font-weight: 800; color: #dc2626;">Pengajuan Ditolak</div>
+                <div style="font-size: 0.675rem; color: #7f1d1d;">Oleh ${t.approverName || approver.name} • "${t.rejectionReason || 'Alasan dinas belum memadai.'}"</div>
+              </div>
             </div>
-          </div>
+          ` : (isPending ? `
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="font-size: 0.7rem; font-weight: 800; color: #d97706; min-width: 60px;">Saat ini</div>
+              <div style="flex: 1; font-size: 0.75rem;">
+                <div style="font-weight: 800; color: #0f172a;">Menunggu tindakan</div>
+                <div style="font-size: 0.675rem; color: #d97706;">Tinjauan ${approver.name.split(',')[0]} • Belum ada keputusan Atasan</div>
+              </div>
+            </div>
+          ` : `
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="font-size: 0.7rem; font-weight: 800; color: #059669; min-width: 60px;">${t.approvedAt ? formatTimeOnly(t.approvedAt) : 'Selesai'}</div>
+              <div style="flex: 1; font-size: 0.75rem;">
+                <div style="font-weight: 800; color: #0f172a;">Disetujui Atasan</div>
+                <div style="font-size: 0.675rem; color: #059669;">Disetujui oleh ${t.approverName || approver.name}</div>
+              </div>
+            </div>
+          `)}
         </div>
       </div>
 
@@ -710,6 +756,18 @@
             </button>
           </div>
         </div>
+      ` : (t.status === 'Ditolak' ? `
+        <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5;">
+          <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
+            ✕ Pengajuan Ditolak
+          </div>
+          <div style="font-size: 0.725rem; color: #7f1d1d; margin-bottom: 10px;">
+            Alasan penolakan: "${t.rejectionReason || 'Alasan dinas belum memadai.'}"
+          </div>
+          <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('dashboard')">
+            Kembali ke Beranda
+          </button>
+        </div>
       ` : `
         <div class="mobile-card" style="text-align: center; padding: 14px;">
           <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
@@ -719,7 +777,7 @@
             Kembali ke Antrean
           </button>
         </div>
-      `}
+      `)}
     `;
   }
 
@@ -1289,6 +1347,7 @@
         t.status = 'Ditolak';
         t.emergencyLocked = true;
         t.qrLocked = true;
+        t.emergencyPasscode = undefined;
         t.rejectionReason = note;
         t.approverNote = `Ditolak: ${note}`;
         t.approverName = approver.name;
@@ -1536,6 +1595,10 @@
     const t = list.find(x => x.id === ticketId);
     if (!t) return;
 
+    const defaultReason = (t.isEmergency || (t.id && t.id.includes('-EMG-'))) 
+      ? 'Kondisi kedaruratan belum memenuhi kriteria evakuasi mendesak.' 
+      : 'Alasan keperluan dinas/operasional belum memadai.';
+
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 12px 16px;">
@@ -1551,21 +1614,26 @@
             <span>Aturan Penolakan (BRULE-04)</span>
           </div>
           <p style="font-size: 0.725rem; color: #7f1d1d; margin: 4px 0 0 0; line-height: 1.4;">
-            Atasan wajib memberikan alasan penolakan yang jelas agar karyawan memahami kendala dinas/operasional.
+            Pengajuan yang ditolak bersifat permanen dan membatalkan proses penerbitan izin keluar.
           </p>
         </div>
 
         <form onsubmit="event.preventDefault(); window.mobileConfirmRejectSubmit('${t.id}');">
           <div class="mobile-form-group">
             <label class="mobile-form-label" style="font-weight: 700;">Alasan Penolakan <span class="req" style="color: #dc2626;">*</span></label>
-            <textarea class="mobile-textarea" id="mRejectReasonInput" placeholder="Tuliskan alasan penolakan pengajuan ini (minimal 5 karakter)..." required style="min-height: 90px; font-size: 0.8125rem;" oninput="window.mobileCheckRejectInput(this.value)"></textarea>
-            <div id="mRejectCharHint" style="font-size: 0.7rem; color: #dc2626; margin-top: 4px; font-weight: 600;">Wajib diisi minimal 5 karakter.</div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+              <button type="button" class="mobile-chip-btn" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;" onclick="document.getElementById('mRejectReasonInput').value='Alasan keperluan dinas belum memadai.'; window.mobileCheckRejectInput(document.getElementById('mRejectReasonInput').value)">Dinas belum memadai</button>
+              <button type="button" class="mobile-chip-btn" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;" onclick="document.getElementById('mRejectReasonInput').value='Prioritas penugasan operasional di area kerja.'; window.mobileCheckRejectInput(document.getElementById('mRejectReasonInput').value)">Prioritas operasional</button>
+              <button type="button" class="mobile-chip-btn" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;" onclick="document.getElementById('mRejectReasonInput').value='Dokumen pendukung atau justifikasi tidak lengkap.'; window.mobileCheckRejectInput(document.getElementById('mRejectReasonInput').value)">Justifikasi tidak lengkap</button>
+            </div>
+            <textarea class="mobile-textarea" id="mRejectReasonInput" placeholder="Tuliskan alasan penolakan..." required style="min-height: 80px; font-size: 0.8125rem;" oninput="window.mobileCheckRejectInput(this.value)">${defaultReason}</textarea>
+            <div id="mRejectCharHint" style="font-size: 0.7rem; color: #059669; margin-top: 4px; font-weight: 600;">✓ Alasan memenuhi syarat (${defaultReason.length} karakter)</div>
           </div>
 
           <div style="display: flex; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
             <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px;" onclick="window.mobileCloseSheet()">Batal</button>
-            <button type="submit" id="mBtnConfirmReject" class="mobile-btn-danger" disabled style="flex: 1.5; min-height: 44px; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; opacity: 0.5; cursor: not-allowed;">
-              Konfirmasi Tolak
+            <button type="submit" id="mBtnConfirmReject" class="mobile-btn-danger" style="flex: 1.5; min-height: 44px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; font-weight: 800; cursor: pointer;">
+              Tolak Pengajuan
             </button>
           </div>
         </form>
@@ -1597,10 +1665,9 @@
 
   window.mobileConfirmRejectSubmit = function(ticketId) {
     const input = document.getElementById('mRejectReasonInput');
-    const reason = (input ? input.value : '').trim();
+    let reason = (input ? input.value : '').trim();
     if (!reason || reason.length < 5) {
-      if (typeof window.showToast === 'function') window.showToast('Alasan penolakan wajib diisi (minimal 5 karakter)!', 'danger');
-      return;
+      reason = 'Alasan penolakan: Keperluan dinas belum memadai.';
     }
     window.mobileAtasanExecuteDecision(ticketId, 'reject', reason);
   };
@@ -1611,11 +1678,13 @@
   window.mobileAtasanClearAllFinished = function () {
     const approver = getActiveApprover();
     const tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
-    const finishedTickets = tickets.filter(t =>
-      (t.approverName === approver.name || (!t.approverName && approver.name.includes('Hendra'))) &&
-      (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan') &&
-      !t.deletedByApprover
-    );
+    const isDewi = approver.name.toLowerCase().includes('dewi');
+    const finishedTickets = tickets.filter(t => {
+      const isMyTicket = isTicketAssignedToMobileApprover(t);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan');
+      const isDel = isDewi ? t.deletedByApprover2 : t.deletedByApprover1;
+      return isMyTicket && isFinished && !isDel;
+    });
     if (finishedTickets.length === 0) {
       if (typeof window.showToast === 'function') window.showToast('Tidak ada data izin selesai yang dapat dihapus.', 'info');
       return;
@@ -1624,7 +1693,11 @@
       return;
     }
     finishedTickets.forEach(t => {
-      t.deletedByApprover = true;
+      if (isDewi) {
+        t.deletedByApprover2 = true;
+      } else {
+        t.deletedByApprover1 = true;
+      }
     });
     if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
     if (typeof window.showToast === 'function') {
