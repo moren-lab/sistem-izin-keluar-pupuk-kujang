@@ -593,7 +593,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   ${(t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') ? `
                     <button type="button" class="btn-figma-delete-single" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.35); color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.6rem; border-radius: 6px; min-height: 34px; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.06)'" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                      <span>Hapus</span>
+                     
                     </button>
                   ` : `
                     <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600; white-space: nowrap; padding-left: 0.3rem; display: inline-flex; align-items: center; gap: 0.25rem;">
@@ -998,7 +998,14 @@ function confirmApproveDecision() {
 
 function confirmRejectDecision() {
   const rejectReasonInput = document.getElementById('rejectReasonInput');
-  const reason = (rejectReasonInput && rejectReasonInput.value.trim()) || 'Pengajuan tidak dapat disetujui saat ini sesuai pertimbangan operasional kerja.';
+  const reason = (rejectReasonInput && rejectReasonInput.value.trim()) || '';
+
+  if (!reason || reason.length < 5) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Alasan penolakan wajib diisi (minimal 5 karakter)!', 'danger');
+    }
+    return;
+  }
 
   const ticketsList = window.ticketsList || [];
   const ticketId = window.currentDecisionTicketId;
@@ -1018,6 +1025,8 @@ function confirmRejectDecision() {
   ticket.status = 'Ditolak';
   ticket.emergencyLocked = false;
   ticket.qrLocked = false;
+  ticket.rejectionReason = reason;
+  ticket.rejectReason = reason;
   ticket.approverNote = `Ditolak: ${reason}`;
   ticket.rejectedAt = nowFormatted;
   if (!ticket.timeline) ticket.timeline = [];

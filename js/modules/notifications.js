@@ -139,6 +139,40 @@
     return false;
   }
 
+  
+  // 4b. Delete Notification API (Soft Delete per Actor)
+  function deleteNotification(notifId) {
+    if (!notifId) return false;
+    const idx = notificationsList.findIndex(n => n.id === notifId);
+    if (idx !== -1) {
+      notificationsList.splice(idx, 1);
+      saveStoredNotifications(notificationsList);
+      updateNotificationBadges();
+      return true;
+    }
+    return false;
+  }
+
+  function clearAllNotificationsForActiveActor() {
+    const user = getActiveUserInfo();
+    notificationsList = notificationsList.filter(n => {
+      let isForUser = false;
+      if (user.roleKey === 'karyawan') {
+        isForUser = n.recipientRole === 'karyawan' && (!n.recipientNip || n.recipientNip === user.nip);
+      } else if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
+        isForUser = n.recipientRole === 'approver' && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
+      } else if (user.roleKey === 'security') {
+        isForUser = n.recipientRole === 'security';
+      }
+      return !isForUser;
+    });
+    saveStoredNotifications(notificationsList);
+    updateNotificationBadges();
+  }
+
+  window.deleteNotification = deleteNotification;
+  window.clearAllNotificationsForActiveActor = clearAllNotificationsForActiveActor;
+
   function markAllNotificationsAsRead() {
     const user = getActiveUserInfo();
     let updatedCount = 0;
@@ -199,11 +233,15 @@
     renderDesktopNotifDropdownContent();
   }
 
-  // 6. Navigasi Buka Tiket dari Notifikasi
-  function openTicketFromNotification(ticketId, notifId) {
+  // 6. Navigasi Buka Tiket dari Notifikasi (C1: Navigasi Kembali dari Notifikasi)
+  function openTicketFromNotification(ticketId, notifId, fromTab = 'all') {
     if (notifId) {
       markNotificationAsRead(notifId);
     }
+
+    // Set flag context C1 agar tombol kembali di detail tiket mengarahkan kembali ke notifikasi
+    window._openedFromNotification = true;
+    window._openedFromNotificationTab = fromTab;
 
     // Tutup panel/modal notifikasi
     closeDesktopNotifDropdown();
@@ -580,3 +618,21 @@
 
 })();
 
+
+
+  window.deleteMobileNotification = function(notifId, currentTab = 'all') {
+    deleteNotification(notifId);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Notifikasi berhasil dihapus.', 'info');
+    }
+    window.openMobileNotificationSheet(currentTab);
+  };
+
+  window.clearAllMobileNotifications = function(currentTab = 'all') {
+    if (!confirm('Apakah Anda yakin ingin menghapus seluruh riwayat notifikasi?')) return;
+    clearAllNotificationsForActiveActor();
+    if (typeof window.showToast === 'function') {
+      window.showToast('Seluruh riwayat notifikasi berhasil dibersihkan.', 'success');
+    }
+    window.openMobileNotificationSheet(currentTab);
+  };

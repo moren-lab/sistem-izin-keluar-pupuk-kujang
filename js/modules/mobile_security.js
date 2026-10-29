@@ -63,7 +63,7 @@
     if (!type) return 'Kembali ke Area';
     const s = String(type).trim();
     if (s === 'Pulang Mendahului' || s.includes('Pulang Mendahului') || s.includes('Pulang Lebih Awal') || s.includes('Tidak Kembali')) {
-      return 'Pulang Lebih Awal (Tidak Kembali)';
+      return 'Pulang Lebih Awal';
     }
     return s;
   }
@@ -317,9 +317,11 @@
               ${isLate ? `Terlambat ${t.lateMinutes || 30} menit` : 'Sesuai jadwal'}
             </div>
           </div>
-          <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-            Lihat Detail
-          </button>
+          <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
+            </button>
         </div>
       `;
     }).join('');
@@ -905,8 +907,10 @@
                   )
               }
             </div>
-            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-              Lihat Detail
+            <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -955,8 +959,10 @@
             <div style="font-size: 0.7rem; color: #334155; font-weight: 600;">
               Scan Out: <strong style="color: #0f172a;">${scanOutT || '—'}</strong> • Masuk: <strong style="color: ${isPulang ? '#64748b' : (scanInT ? '#047857' : '#dc2626')};">${isPulang ? '—' : (scanInT || 'Belum')}</strong>
             </div>
-            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-              Lihat Detail
+            <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -1018,28 +1024,22 @@
         <button type="button" id="mBtnClearRiwayatSecSearch" aria-label="Hapus teks pencarian" style="display: ${riwayatSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearSecurityRiwayatSearch()">✕</button>
       </div>
 
-      <!-- 2. Toolbar: Segment Toggle (Card/List), Filter on Left, Solid Red Hapus Riwayat on Right (Pekerjaan A: Samakan Tinggi 36px & Jaga Hit Area 44px) -->
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <!-- Segment Toggle: Card | List -->
-          <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 104px; height: 36px; box-sizing: border-box;">
-            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="height: 100%; font-size: 0.8125rem; font-weight: 700; padding: 0;" onclick="window.mobileSwitchRiwayatViewSec('card')">Card</button>
-            <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="height: 100%; font-size: 0.8125rem; font-weight: 700; padding: 0;" onclick="window.mobileSwitchRiwayatViewSec('list')">List</button>
-          </div>
-
-          <!-- Filter Button (Pekerjaan A: 36px visual, radius 10px, hit-area 44px) -->
-          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isSecurityRiwayatFilterOpen ? 'active' : ''}" style="height: 36px; min-height: 36px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 700; font-size: 0.8125rem; border-radius: 10px; border: 1.5px solid ${isSecurityRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isSecurityRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isSecurityRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box;" onclick="window.mobileToggleSecurityRiwayatFilter()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            <span>Filter</span>
-            ${(riwayatStatusFilter !== 'all' || riwayatCategoryFilter !== 'all' || riwayatPeriodFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #2563eb; display: inline-block;"></span>' : ''}
+      <!-- 2. Toolbar (Perubahan 2: Toggle Dihapus; Perubahan 3: Filter & Hapus Riwayat Berdampingan di Kanan Bawah Kolom Pencarian) -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: #475569;">
+          ${totalItems} log pemindaian
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px) -->
+          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isSecurityRiwayatFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isSecurityRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isSecurityRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isSecurityRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleSecurityRiwayatFilter()" title="Filter Riwayat Pemindaian" aria-label="Filter Riwayat Pemindaian">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            ${(riwayatStatusFilter !== 'all' || riwayatCategoryFilter !== 'all' || riwayatPeriodFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
+          </button>
+          <!-- Tombol Merah Solid Sampah (36x36px visual, Hit Area >= 44x44px) -->
+          <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('security')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
         </div>
-
-        <!-- Red Solid Button Hapus Riwayat (Pekerjaan A: 36px visual, radius 10px, hit-area 44px) -->
-        <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} aria-label="Hapus Riwayat Selesai" style="height: 36px; min-height: 36px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; border-radius: 10px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 5px;" onclick="window.mobileClearRiwayat('security')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-
-        </button>
       </div>
 
       <!-- 3. Collapsible Filter Panel -->
@@ -1101,7 +1101,7 @@
 
       <!-- 5. Items Container -->
       <div id="mSecurityRiwayatItemsContainer">
-        ${totalItems === 0 ? emptyHtml : (currentRiwayatView === 'card' ? cardsHtml : listHtml)}
+        ${totalItems === 0 ? emptyHtml : listHtml}
       </div>
 
       <!-- 6. Paginasi -->
@@ -1197,7 +1197,7 @@
               </div>
               <div>
                 <div class="mobile-meta-sub">${isPulang ? 'Tipe Kepulangan' : 'Batas Kembali'}</div>
-                <div class="mobile-meta-val">${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (formatDisplayDate(getTReturnTime(t)) || '13.00 WIB')}</div>
+                <div class="mobile-meta-val">${isPulang ? 'Pulang Lebih Awal' : (formatDisplayDate(getTReturnTime(t)) || '13.00 WIB')}</div>
               </div>
             </div>
           </div>

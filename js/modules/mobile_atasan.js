@@ -71,7 +71,7 @@
     if (!type) return 'Kembali ke Area';
     const s = String(type).trim();
     if (s === 'Pulang Mendahului' || s.includes('Pulang Mendahului') || s.includes('Pulang Lebih Awal') || s.includes('Tidak Kembali')) {
-      return 'Pulang Lebih Awal (Tidak Kembali)';
+      return 'Pulang Lebih Awal';
     }
     return s;
   }
@@ -174,8 +174,8 @@
 
     if (pendingEmergTicket) {
       priorityHtml = `
-        <div class="mobile-card" style="border-left: 4px solid #dc2626; background: #fef2f2; margin-bottom: 12px; padding: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <div class="mobile-card" style="border: 1.5px solid #fca5a5; background: #fff5f5; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px;">PRIORITAS TINGGI • IZIN DARURAT</span>
             <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">Menunggu Otorisasi</span>
           </div>
@@ -191,29 +191,19 @@
             <span>Kode Sandi Otorisasi:</span>
             <strong style="font-size: 0.85rem; letter-spacing: 2px;">${pendingEmergTicket.emergencyPasscode || '849201'}</strong>
           </div>
-          <button type="button" class="mobile-btn-primary" style="background: #dc2626; border-color: #dc2626; font-weight: 800; padding: 10px;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
-            <span>Setujui Izin Darurat (1-Click)</span>
-          </button>
-        </div>
-      `;
-    } else if (finishedEmergTicket) {
-      priorityHtml = `
-        <div class="mobile-card" style="border-left: 4px solid #b91c1c; background: #fff5f5; margin-bottom: 12px; padding: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px;">PRIORITAS • IZIN DARURAT</span>
-            <span class="mobile-badge darurat">Selesai Darurat</span>
+          <!-- B2: Atasan Bisa Lihat Detail Dulu, Baru Setujui / Tolak -->
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
+            </button>
+            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
+              Tolak
+            </button>
+            <button type="button" class="mobile-btn-primary" style="flex: 1.2; padding: 8px; font-size: 0.75rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
+              Setujui
+            </button>
           </div>
-          <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(finishedEmergTicket)}</div>
-          <div style="font-size: 0.725rem; color: #64748b;">${finishedEmergTicket.id} • ${finishedEmergTicket.category || 'Darurat'} • ${finishedEmergTicket.status}</div>
-          <div style="font-size: 0.7rem; color: #7f1d1d; margin: 4px 0 2px 0; font-weight: 700;">
-            Terbit ${finishedEmergTicket.createdAt ? formatTimeOnly(finishedEmergTicket.createdAt) : '09.15 WIB'} • Scan Out ${finishedEmergTicket.scanOutTime ? formatTimeOnly(finishedEmergTicket.scanOutTime) : '09.20 WIB'}
-          </div>
-          <p style="font-size: 0.725rem; color: #475569; margin: 4px 0 10px 0; line-height: 1.35;">
-            <strong>Peninjauan susulan:</strong> Perjalanan kedaruratan telah selesai. Alur darurat memerlukan peninjauan susulan oleh atasan langsung.
-          </p>
-          <button type="button" class="mobile-btn-secondary" style="border-color: #fca5a5; color: #991b1b; padding: 7px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileOpenAtasanDaruratModal('${finishedEmergTicket.id}')">
-            Lihat Detail
-          </button>
         </div>
       `;
     }
@@ -222,13 +212,13 @@
     let pendingTicketsHtml = '';
     if (pendingNew.length > 0) {
       pendingTicketsHtml = pendingNew.slice(0, 3).map(t => `
-        <div class="mobile-ticket-item" style="border-left: 4px solid #f59e0b; margin-bottom: 10px;">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
           <div class="mobile-ticket-item-header">
             <div>
               <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${t.id} • ${t.category}</div>
             </div>
-            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenAtasanDetailModal('${t.id}'); return false;">Lihat Detail</a>
+            <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg><span>Detail Pengajuan</span></button>
           </div>
 
           <div style="margin: 4px 0 6px 0;">
@@ -240,7 +230,7 @@
           </div>
 
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 7px 10px; font-size: 0.775rem;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 7px 10px; font-size: 0.775rem;" onclick="window.mobileOpenRejectSheet('${t.id}')">
               Tolak
             </button>
             <button type="button" class="mobile-btn-approve" style="flex: 1; padding: 7px 10px; font-size: 0.775rem;" onclick="window.mobileQuickApproveTicket('${t.id}')">
@@ -258,7 +248,7 @@
         const semula = formatTimeOnly(getTReturnTime(t)) || '11.15 WIB';
         const usulan = t.extensionRequestedTime ? t.extensionRequestedTime + ' WIB' : '12.00 WIB';
         return `
-          <div class="mobile-ticket-item" style="border-left: 4px solid #7c3aed; margin-bottom: 10px;">
+          <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
             <div class="mobile-ticket-item-header">
               <div>
                 <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
@@ -501,7 +491,7 @@
           const semula = formatTimeOnly(getTReturnTime(t)) || '11.15 WIB';
           const usulan = t.extensionRequestedTime ? t.extensionRequestedTime + ' WIB' : '12.00 WIB';
           return `
-            <div class="mobile-ticket-item" style="border-left: 4px solid #7c3aed; margin-bottom: 12px;">
+            <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
               <div class="mobile-ticket-item-header">
                 <div>
                   <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
@@ -726,7 +716,7 @@
           
 
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileOpenRejectSheet('${t.id}')">
               Tolak
             </button>
             <button type="button" class="mobile-btn-approve" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
@@ -792,7 +782,7 @@
       }
 
       return `
-        <div class="mobile-ticket-item" style="border-left: 4px solid ${isLate ? '#b91c1c' : (isOutside ? '#7c3aed' : '#047857')}; margin-bottom: 10px; ${isSelected ? 'background: #fbfdff; border-color: #2563eb;' : ''}">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
           <div class="mobile-ticket-item-header">
             <div>
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
@@ -1164,7 +1154,7 @@
             </div>
             <div>
               <div class="mobile-meta-sub">Jenis izin</div>
-              <div class="mobile-meta-val">${getTType(t) || 'Pulang Lebih Awal (Tidak Kembali)'}</div>
+              <div class="mobile-meta-val">${getTType(t) || 'Pulang Lebih Awal'}</div>
             </div>
           </div>
 
@@ -1548,3 +1538,85 @@
   window.renderMobileAtasan = renderMobileAtasan;
 
 })();
+
+
+  // -------------------------------------------------------------------
+  // B1: FORM PENOLAKAN DENGAN ALASAN WAJIB (BRULE-04)
+  // -------------------------------------------------------------------
+  window.mobileOpenRejectSheet = function (ticketId) {
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) return;
+
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
+    if (!t) return;
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="border-bottom: 1px solid #f1f5f9; padding: 12px 16px;">
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: #dc2626; margin: 0;">Tolak Pengajuan Izin</h3>
+          <p style="font-size: 0.725rem; color: #64748b; margin: 2px 0 0 0;">Tiket ${t.id} • ${getTName(t)}</p>
+        </div>
+        <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer;" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 16px;">
+        <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+          <div style="font-size: 0.775rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 6px;">
+            <span>Aturan Penolakan (BRULE-04)</span>
+          </div>
+          <p style="font-size: 0.725rem; color: #7f1d1d; margin: 4px 0 0 0; line-height: 1.4;">
+            Atasan wajib memberikan alasan penolakan yang jelas agar karyawan memahami kendala dinas/operasional.
+          </p>
+        </div>
+
+        <form onsubmit="event.preventDefault(); window.mobileConfirmRejectSubmit('${t.id}');">
+          <div class="mobile-form-group">
+            <label class="mobile-form-label" style="font-weight: 700;">Alasan Penolakan <span class="req" style="color: #dc2626;">*</span></label>
+            <textarea class="mobile-textarea" id="mRejectReasonInput" placeholder="Tuliskan alasan penolakan pengajuan ini (minimal 5 karakter)..." required style="min-height: 90px; font-size: 0.8125rem;" oninput="window.mobileCheckRejectInput(this.value)"></textarea>
+            <div id="mRejectCharHint" style="font-size: 0.7rem; color: #dc2626; margin-top: 4px; font-weight: 600;">Wajib diisi minimal 5 karakter.</div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px;" onclick="window.mobileCloseSheet()">Batal</button>
+            <button type="submit" id="mBtnConfirmReject" class="mobile-btn-danger" disabled style="flex: 1.5; min-height: 44px; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; opacity: 0.5; cursor: not-allowed;">
+              Konfirmasi Tolak
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
+  window.mobileCheckRejectInput = function(val) {
+    const btn = document.getElementById('mBtnConfirmReject');
+    const hint = document.getElementById('mRejectCharHint');
+    const len = (val || '').trim().length;
+    if (btn) {
+      if (len >= 5) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        if (hint) { hint.textContent = '✓ Alasan memenuhi syarat (' + len + ' karakter)'; hint.style.color = '#059669'; }
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        if (hint) { hint.textContent = 'Wajib diisi minimal 5 karakter (' + len + '/5)'; hint.style.color = '#dc2626'; }
+      }
+    }
+  };
+
+  window.mobileConfirmRejectSubmit = function(ticketId) {
+    const input = document.getElementById('mRejectReasonInput');
+    const reason = (input ? input.value : '').trim();
+    if (!reason || reason.length < 5) {
+      if (typeof window.showToast === 'function') window.showToast('Alasan penolakan wajib diisi (minimal 5 karakter)!', 'danger');
+      return;
+    }
+    window.mobileAtasanExecuteDecision(ticketId, 'reject', reason);
+  };

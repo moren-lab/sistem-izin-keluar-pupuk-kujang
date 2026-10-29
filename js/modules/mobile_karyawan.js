@@ -48,7 +48,7 @@
     if (!type) return 'Kembali ke Area';
     const s = String(type).trim();
     if (s === 'Pulang Mendahului' || s.includes('Pulang Mendahului') || s.includes('Pulang Lebih Awal') || s.includes('Tidak Kembali')) {
-      return 'Pulang Lebih Awal (Tidak Kembali)';
+      return 'Pulang Lebih Awal';
     }
     return s;
   }
@@ -243,7 +243,7 @@
               <span class="mobile-active-strip-badge" style="background: #0284c7; color: #ffffff;">Sedang di Luar</span>
             </div>
             <div class="mobile-active-strip-desc" style="color: #e0f2fe;">
-              ${activeTicket.category || 'Dinas Kantor'} — Scan Out ${activeTicket.scanOutTime ? formatTimeOnly(activeTicket.scanOutTime) : '10.05 WIB'} — ${activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal (Tidak Kembali)' : 'Batas kembali ' + (getTReturnTime(activeTicket) ? formatTimeOnly(getTReturnTime(activeTicket)) : '13.00 WIB')}
+              ${activeTicket.category || 'Dinas Kantor'} — Scan Out ${activeTicket.scanOutTime ? formatTimeOnly(activeTicket.scanOutTime) : '10.05 WIB'} — ${activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : 'Batas kembali ' + (getTReturnTime(activeTicket) ? formatTimeOnly(getTReturnTime(activeTicket)) : '13.00 WIB')}
             </div>
           </div>
         `;
@@ -282,7 +282,10 @@
           <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${t.id} <span class="mobile-badge ${getBadgeClass(t.status)}" style="margin-left: 4px;">${t.status}</span></div>
           <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">${t.category} • ${t.destination || 'Area Pabrik'}</div>
         </div>
-        <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenTicketDetail('${t.id}')">Lihat Detail</button>
+        <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; flex-shrink: 0; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>Detail Pengajuan</span>
+        </button>
       </div>
     `).join('');
 
@@ -317,12 +320,12 @@
         `}
       </section>
 
-      <!-- Switcher Segment: Ringkasan Perizinan | Total Pengajuan Izin -->
+      <!-- Switcher Segment: Ringkasan Perizinan | Total Pengajuan Izin (A2: Hijau Teks Putih) -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <button type="button" id="mBtnSegRingkasan" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${currentSegment === 'ringkasan' ? '#2563eb' : '#cbd5e1'}; background: ${currentSegment === 'ringkasan' ? '#2563eb' : '#ffffff'}; color: ${currentSegment === 'ringkasan' ? '#ffffff' : '#2563eb'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('ringkasan')">
+        <button type="button" id="mBtnSegRingkasan" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #059669; background: ${currentSegment === 'ringkasan' ? '#059669' : '#ffffff'}; color: ${currentSegment === 'ringkasan' ? '#ffffff' : '#059669'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('ringkasan')">
           Ringkasan Perizinan
         </button>
-        <button type="button" id="mBtnSegDonut" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${currentSegment === 'donut' ? '#2563eb' : '#cbd5e1'}; background: ${currentSegment === 'donut' ? '#2563eb' : '#ffffff'}; color: ${currentSegment === 'donut' ? '#ffffff' : '#2563eb'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('donut')">
+        <button type="button" id="mBtnSegDonut" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #059669; background: ${currentSegment === 'donut' ? '#059669' : '#ffffff'}; color: ${currentSegment === 'donut' ? '#ffffff' : '#059669'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('donut')">
           Total Pengajuan Izin
         </button>
       </div>
@@ -469,15 +472,18 @@
         </div>
       </section>
 
-      <!-- Action Buttons: Buat Pengajuan & Izin Darurat (Tepat di Bawah Informasi Pengajuan) -->
+      <!-- Action Buttons (Perubahan 4: Izin Darurat di Kiri, Buat Pengajuan di Kanan, Merah Solid A3) -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
-        <button type="button" class="mobile-btn-primary" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #059669; border: 1.5px solid #059669; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); cursor: pointer;" onclick="window.mobileOpenCreateModal(false)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="12" y2="12"></line></svg>
-          <span>Buat Pengajuan</span>
-        </button>
-        <button type="button" class="mobile-btn-danger" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #fee2e2; color: #b91c1c; border: 1.5px solid #fca5a5; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(185, 28, 28, 0.08); cursor: pointer;" onclick="window.mobileOpenCreateModal(true)">
+        <!-- Kolom 1 (Kiri): Izin Darurat (Merah Solid #dc2626, Teks Putih) -->
+        <button type="button" class="mobile-btn-danger" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25); cursor: pointer; ${activeTicket ? 'opacity: 0.65;' : ''}" onclick="${activeTicket ? `window.mobileOpenActiveBlockedSheet(window.ticketsList.find(x => x.id === '${activeTicket.id}'))` : 'window.mobileOpenCreateModal(true)'}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
           <span>Izin Darurat</span>
+        </button>
+
+        <!-- Kolom 2 (Kanan): Buat Pengajuan (Hijau Utama #059669, Teks Putih) -->
+        <button type="button" class="mobile-btn-primary" style="margin: 0; min-height: 42px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); cursor: pointer; ${activeTicket ? 'opacity: 0.65;' : ''}" onclick="${activeTicket ? `window.mobileOpenActiveBlockedSheet(window.ticketsList.find(x => x.id === '${activeTicket.id}'))` : 'window.mobileOpenCreateModal(false)'}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="12" y2="12"></line></svg>
+          <span>Buat Pengajuan</span>
         </button>
       </div>
 
@@ -578,8 +584,10 @@
                 : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
               }
             </div>
-            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenTicketDetail('${t.id}')">
-              Lihat Detail
+            <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -618,8 +626,10 @@
                 : `${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
               }
             </div>
-            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenTicketDetail('${t.id}')">
-              Lihat Detail
+            <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -676,25 +686,19 @@
         <button type="button" id="mBtnClearRiwayatSearch" aria-label="Hapus teks pencarian" style="display: ${riwayatSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearRiwayatSearch()">✕</button>
       </div>
 
-      <!-- 2. Toolbar: Segment Toggle (Card/List di kiri) & Filter + Tombol Sampah (di samping kanan sejajar) -->
+      <!-- 2. Toolbar (Perubahan 2: Toggle Dihapus; Perubahan 3: Filter & Hapus Riwayat Berdampingan di Kanan Bawah Kolom Pencarian) -->
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
-        <!-- Kiri: Segment Toggle (Card | List) -->
-        <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 104px; height: 36px; padding: 3px; border-radius: 10px; background: #e2e8f0; box-sizing: border-box; display: flex; align-items: center;">
-          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'card' ? 'active' : ''}" style="height: 100%; font-size: 0.775rem; font-weight: 700; padding: 0 10px; border-radius: 7px; border: none; cursor: pointer;" onclick="window.mobileSwitchRiwayatView('card')">Card</button>
-          <button type="button" class="mobile-seg-btn ${currentRiwayatView === 'list' ? 'active' : ''}" style="height: 100%; font-size: 0.775rem; font-weight: 700; padding: 0 10px; border-radius: 7px; border: none; cursor: pointer;" onclick="window.mobileSwitchRiwayatView('list')">List</button>
+        <div style="font-size: 0.75rem; font-weight: 700; color: #475569;">
+          ${totalItems} tiket riwayat
         </div>
-
-        <!-- Kanan: Filter di samping tombol Sampah (Sejajar & Ukuran Sama) -->
         <div style="display: flex; align-items: center; gap: 8px;">
-          <!-- Filter Button -->
-          <button type="button" class="mobile-filter-toggle-btn ${isRiwayatFilterOpen ? 'active' : ''}" style="height: 36px; min-height: 36px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; font-size: 0.775rem; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box;" onclick="window.mobileToggleRiwayatFilter()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            <span>Filter</span>
-            ${(riwayatStatusFilter !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #2563eb; display: inline-block;"></span>' : ''}
+          <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px) -->
+          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isRiwayatFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleRiwayatFilter()" title="Filter Status Riwayat" aria-label="Filter Status Riwayat">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            ${(riwayatStatusFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
           </button>
-
-          <!-- Tombol Merah Sampah -->
-          <button type="button" class="mobile-btn-clear-history" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="height: 36px; min-height: 36px; width: 36px; min-width: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('karyawan')">
+          <!-- Tombol Merah Solid Sampah (36x36px visual, Hit Area >= 44x44px) -->
+          <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('karyawan')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
         </div>
@@ -729,7 +733,7 @@
 
       <!-- 4. Items Container (Card View or List View) -->
       <div id="mRiwayatItemsContainer">
-        ${totalItems === 0 ? emptyHtml : (currentRiwayatView === 'card' ? cardsHtml : listHtml)}
+        ${totalItems === 0 ? emptyHtml : listHtml}
       </div>
 
       <!-- 5. Dynamic Pagination (Point 11.c) -->
@@ -812,7 +816,7 @@
     const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
     const col2Label = isPulang ? 'Tipe Kepulangan' : 'Batas Jam Kembali';
     const col2Val = isPulang
-      ? 'Pulang Lebih Awal (Tidak Kembali)'
+      ? 'Pulang Lebih Awal'
       : (getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '-');
 
     let actionButtonsHtml = '';
@@ -828,7 +832,7 @@
             </div>
           </div>
           <div class="mobile-btn-group-stacked" style="margin-top: 10px;">
-            <button type="button" class="mobile-btn-primary" style="background: #dc2626; border-color: #dc2626; font-weight: 800;" onclick="window.mobileOpenEmergencyUnlockSheet('${t.id}')">
+            <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; color: #ffffff; font-weight: 800;" onclick="window.mobileOpenEmergencyUnlockSheet('${t.id}')">
               <span>Buka Kunci QR Darurat</span>
             </button>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -852,7 +856,7 @@
             </button>
           </div>
           <div style="text-align: center; margin-top: 8px;">
-            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail</a>
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
           </div>
         `;
       }
@@ -864,7 +868,7 @@
           </button>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <button type="button" class="mobile-btn-secondary" style="font-weight: 600; min-height: 44px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
-              <span>Lihat Detail</span>
+              <span>Detail Pengajuan</span>
             </button>
             <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenCancelSheet('${t.id}')">
               <span>Batalkan Izin</span>
@@ -1035,6 +1039,16 @@
         <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body">
+        ${(t.status === 'Ditolak') ? `
+          <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px; margin-bottom: 12px; text-align: left;">
+            <div style="font-size: 0.775rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 5px;">
+              <span>⚠️ Pengajuan Ditolak oleh Atasan</span>
+            </div>
+            <div style="font-size: 0.75rem; color: #7f1d1d; margin-top: 4px; line-height: 1.45;">
+              <strong>Alasan Penolakan:</strong> "${t.rejectionReason || t.rejectReason || t.approverNote || 'Alasan dinas belum memenuhi ketentuan operasional.'}"
+            </div>
+          </div>
+        ` : ''}
         <div style="text-align: center; padding: 6px 0 16px 0;">
           <div style="width: 52px; height: 52px; border-radius: 50%; background: #fef3c7; border: 2px solid #fde68a; color: #b45309; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.5rem;">
             ⚠️
@@ -1199,7 +1213,7 @@
               <select class="mobile-select" id="mFormReturnType" required onchange="window.mobileToggleReturnType(this.value)">
                 <option value="">-- Pilih Tipe Kepulangan --</option>
                 <option value="Kembali ke Area" ${initialType === 'Kembali ke Area' || !initialType ? 'selected' : ''}>Kembali ke Area</option>
-                <option value="Pulang Mendahului" ${initialType === 'Pulang Mendahului' ? 'selected' : ''}>Pulang Lebih Awal (Tidak Kembali)</option>
+                <option value="Pulang Mendahului" ${initialType === 'Pulang Mendahului' ? 'selected' : ''}>Pulang Lebih Awal</option>
               </select>
             </div>
           </div>
@@ -1756,7 +1770,7 @@
           ` : `
             <div class="mobile-summary-row">
               <span class="mobile-summary-label">Perkiraan Kembali</span>
-              <span class="mobile-summary-value" style="color: #64748b;">Pulang Lebih Awal (Tidak Kembali)</span>
+              <span class="mobile-summary-value" style="color: #64748b;">Pulang Lebih Awal</span>
             </div>
           `}
         </div>
@@ -2269,7 +2283,7 @@
           <div>
             <div class="mobile-meta-sub">${isPulang ? 'Tipe' : 'Batas Jam Kembali'}</div>
             <div class="mobile-meta-val" style="${isOutside && !isPulang ? 'color:#b91c1c;' : ''}">
-              ${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (getTReturnTime(t) ? formatTimeOnly(getTReturnTime(t)) : '13.00 WIB')}
+              ${isPulang ? 'Pulang Lebih Awal' : (getTReturnTime(t) ? formatTimeOnly(getTReturnTime(t)) : '13.00 WIB')}
             </div>
           </div>
         </div>
@@ -2380,7 +2394,7 @@
               </div>
               <div>
                 <div class="mobile-meta-sub">${isPulang ? 'Tipe Kepulangan' : 'Batas Kembali'}</div>
-                <div class="mobile-meta-val">${isPulang ? 'Pulang Lebih Awal (Tidak Kembali)' : (getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '13.00 WIB')}</div>
+                <div class="mobile-meta-val">${isPulang ? 'Pulang Lebih Awal' : (getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '13.00 WIB')}</div>
               </div>
             </div>
           </div>
@@ -2628,19 +2642,19 @@
     const btnD = document.getElementById('mBtnSegDonut');
     if (btnR && btnD) {
       if (seg === 'ringkasan') {
-        btnR.style.background = '#2563eb';
+        btnR.style.background = '#059669';
         btnR.style.color = '#ffffff';
-        btnR.style.borderColor = '#2563eb';
+        btnR.style.borderColor = '#059669';
         btnD.style.background = '#ffffff';
-        btnD.style.color = '#2563eb';
-        btnD.style.borderColor = '#cbd5e1';
+        btnD.style.color = '#059669';
+        btnD.style.borderColor = '#059669';
       } else {
-        btnD.style.background = '#2563eb';
+        btnD.style.background = '#059669';
         btnD.style.color = '#ffffff';
-        btnD.style.borderColor = '#2563eb';
+        btnD.style.borderColor = '#059669';
         btnR.style.background = '#ffffff';
-        btnR.style.color = '#2563eb';
-        btnR.style.borderColor = '#cbd5e1';
+        btnR.style.color = '#059669';
+        btnR.style.borderColor = '#059669';
       }
     }
   };

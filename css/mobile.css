@@ -2121,3 +2121,42 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   border-color: #fca5a5;
   transform: scale(0.98);
 }
+
+/* ===================================================================
+   MOBILE REFINEMENT (BAGIAN A, B, C & PERUBAHAN 1-4)
+   =================================================================== */
+
+/* Touch Target Helper: visual 36px, hit-area >= 44x44px tanpa shifting */
+.mobile-touch-hit-44 {
+  position: relative;
+}
+.mobile-touch-hit-44::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  pointer-events: auto;
+}
+
+/* A8: Hilangkan garis aksen border-left kartu riwayat di mobile */
+.mobile-ticket-item,
+.mobile-ticket-card {
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+/* Solid Button Helpers */
+.mobile-btn-danger-solid {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+.mobile-btn-primary-solid {
+  background: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+}

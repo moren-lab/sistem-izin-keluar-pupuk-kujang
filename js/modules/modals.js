@@ -1356,6 +1356,9 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
       infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos 1 untuk Scan Out.`;
     } else if (ticket.status === 'Menunggu Persetujuan') {
       infoNoticeText.textContent = `Tiket sedang menunggu persetujuan dari Atasan langsung (${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}). QR belum aktif.`;
+    } else if (ticket.status === 'Ditolak') {
+      const rejReason = ticket.rejectionReason || ticket.rejectReason || ticket.approverNote || 'Alasan dinas belum memenuhi ketentuan operasional.';
+      infoNoticeText.innerHTML = `<span style="color:#dc2626; font-weight:800;">✕ PENGAJUAN DITOLAK ATASAN:</span> "${rejReason}"`;
     } else {
       infoNoticeText.textContent = `Status tiket: ${ticket.status}. Catatan tersimpan dalam audit trail sistem.`;
     }
