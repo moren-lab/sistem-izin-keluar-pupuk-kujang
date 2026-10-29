@@ -146,7 +146,12 @@ function showToast(message, type = 'success', duration = 2000) {
   toast.innerHTML = `<span>${message}</span>`;
   container.appendChild(toast);
 
-  const finalDuration = (message && message.includes('Beralih ke mode')) ? 2000 : (duration || 2000);
+  const isRoleSwitch = Boolean(message && message.includes('Beralih ke mode'));
+  const finalDuration = isRoleSwitch ? 1000 : (duration || 2000);
+  if (isRoleSwitch) {
+    toast.style.pointerEvents = 'none';
+    toast.style.opacity = '0.92';
+  }
 
   setTimeout(() => {
     toast.style.opacity = '0';

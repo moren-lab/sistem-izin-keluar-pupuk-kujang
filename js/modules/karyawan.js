@@ -1171,12 +1171,12 @@ function renderEmpCards(list, containerElement) {
 
             <!-- Detail Box (Tujuan, Keperluan, Rencana Waktu) -->
             <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Tujuan keluar</span>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
                 <span class="detail-val" style="font-size: 0.75rem; color: #0f172a; font-weight: 600; text-align: right; line-height: 1.35;">${t.destination}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Keperluan</span>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
                 <span class="detail-val" style="font-size: 0.75rem; color: #0f172a; font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;">${t.reason || '-'}</span>
               </div>
               <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed #e2e8f0;">

@@ -38,6 +38,43 @@ function isTicketReassignedFromCurrentApprover(ticket) {
   }
 }
 
+// Cek apakah tiket ini berada di bawah naungan atasan aktif saat ini
+// (Karyawan naungan Atasan 1 tetap terpantau meskipun mengajukan izin ke Atasan 2 atau lainnya)
+function isTicketUnderMySupervision(ticket) {
+  if (!ticket) return false;
+  const currentActor = getCurrentApproverActor();
+  const aName = (currentActor.name || '').toLowerCase();
+  
+  // 1. Jika tiket memang ditugaskan langsung ke atasan ini
+  if (isTicketAssignedToCurrentApprover(ticket)) return true;
+
+  // 2. Karyawan yang dinaungi Atasan 1 (Ir. Hendra Gunawan, M.T.):
+  // - Berdasarkan ticket.directSupervisor
+  // - Atau pemohon Budi Pratama (PK-2024-8841) / divisi Rekayasa & Pemeliharaan
+  const supervisor = (ticket.directSupervisor || '').toLowerCase();
+  if (aName.includes('hendra')) {
+    const isUnderHendra = supervisor.includes('hendra') || 
+      (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.department || '').toLowerCase().includes('rekayasa')));
+    if (isUnderHendra) return true;
+  }
+
+  // 3. Karyawan yang dinaungi Atasan 2 (Dewi Sartika):
+  if (aName.includes('dewi')) {
+    if (supervisor.includes('dewi')) return true;
+  }
+
+  return false;
+}
+window.isTicketUnderMySupervision = isTicketUnderMySupervision;
+
+// Cek apakah tiket dihapus khusus oleh atasan yang sedang aktif (riwayat terpisah Atasan 1 & Atasan 2)
+function isDeletedByCurrentApprover(ticket) {
+  if (!ticket) return false;
+  const isApprover2 = (window.currentActor === 'approver2');
+  return isApprover2 ? Boolean(ticket.deletedByApprover2) : Boolean(ticket.deletedByApprover1);
+}
+window.isDeletedByCurrentApprover = isDeletedByCurrentApprover;
+
 function updateApproverMetrics() {
   const ticketsList = window.ticketsList || [];
   const currentApprover = getCurrentApproverActor();
@@ -102,7 +139,7 @@ function renderApproverDashboard() {
   const ticketsList = window.ticketsList || [];
   const pendingTickets = ticketsList.filter(t => !t.isEmergency && !(t.id && t.id.startsWith('TK-EMG-')) && t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
   const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
-  const outsideTickets = ticketsList.filter(t => (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketAssignedToCurrentApprover(t));
+  const outsideTickets = ticketsList.filter(t => !isDeletedByCurrentApprover(t) && (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketUnderMySupervision(t));
 
   const approverUrgentBanner = document.getElementById('approverUrgentBanner');
   const approverDashboardPendingList = document.getElementById('approverDashboardPendingList');
@@ -475,12 +512,12 @@ function renderApproverCards(list, containerElement, isTracking = false) {
 
             <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
             <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.4rem 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Tujuan keluar</span>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
                 <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.destination}">${t.destination}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Keperluan</span>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
                 <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</span>
               </div>
               <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
@@ -730,7 +767,18 @@ function renderApproverView() {
       (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
     );
 
-    if (pendingList.length === 0 && reassignedAwayList.length === 0) {
+    // 3. Pengajuan bawahan naungan atasan aktif yang saat diajukan, karyawan memilih atasan lain
+    const supervisedOtherList = ticketsList.filter(t =>
+      t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      !isTicketAssignedToCurrentApprover(t) &&
+      !isTicketReassignedFromCurrentApprover(t) &&
+      isTicketUnderMySupervision(t) &&
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
+    );
+
+    if (pendingList.length === 0 && reassignedAwayList.length === 0 && supervisedOtherList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
       if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'flex';
     } else {
@@ -766,6 +814,24 @@ function renderApproverView() {
           `;
         }
 
+        if (supervisedOtherList.length > 0) {
+          queueHtml += `
+            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 2px dashed #cbd5e1;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+                <div style="font-size: 0.9rem; font-weight: 800; color: #0369a1; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>👥 Pengajuan Karyawan Naungan Anda (Menunggu Persetujuan Atasan Lain)</span>
+                </div>
+                <span style="font-size: 0.725rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 99px;">${supervisedOtherList.length} Pengajuan</span>
+              </div>
+              <div style="font-size: 0.775rem; color: #64748b; margin-bottom: 0.75rem;">
+                Karyawan di bawah naungan divisi Anda mengajukan izin ke pejabat atasan lain. Anda tetap dapat memantau perkembangan statusnya secara real-time.
+              </div>
+          `;
+          const tempDivSup = document.createElement('div');
+          renderApproverCards(supervisedOtherList, tempDivSup);
+          queueHtml += tempDivSup.innerHTML + `</div>`;
+        }
+
         containerApproverPendingQueue.innerHTML = queueHtml;
       }
     }
@@ -775,8 +841,8 @@ function renderApproverView() {
   // 3. PELACAKAN IZIN KARYAWAN
   if (currentApproverNav === 'pelacakan') {
     let list = ticketsList.filter(t => 
-      !t.deletedByApprover && 
-      isTicketAssignedToCurrentApprover(t) &&
+      !isDeletedByCurrentApprover(t) && 
+      isTicketUnderMySupervision(t) &&
       t.status !== 'Menunggu Persetujuan' &&
       t.status !== 'Menunggu Otorisasi Darurat'
     );
@@ -1300,18 +1366,24 @@ function rejectExtensionRequest(ticketId, reason) {
   }
 }
 
-// FITUR HAPUS DI PELACAKAN KARYAWAN (HAK AKSES ATASAN)
+// FITUR HAPUS DI PELACAKAN KARYAWAN (HAK AKSES ATASAN - TERPISAH ATASAN 1 & ATASAN 2)
 function deleteApproverTicket(ticketId) {
   const handler = () => {
     let tickets = window.ticketsList || [];
     const target = tickets.find(t => t.id === ticketId);
     if (target) {
-      target.deletedByApprover = true;
+      const isApprover2 = (window.currentActor === 'approver2');
+      if (isApprover2) {
+        target.deletedByApprover2 = true;
+      } else {
+        target.deletedByApprover1 = true;
+      }
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(tickets);
       }
       if (typeof window.showToast === 'function') {
-        window.showToast(`Catatan izin #${ticketId} berhasil dihapus dari pelacakan Atasan.`, 'info');
+        const who = isApprover2 ? 'Atasan 2 (Dewi Sartika)' : 'Atasan 1 (Ir. Hendra Gunawan)';
+        window.showToast(`Catatan izin #${ticketId} berhasil dihapus dari riwayat ${who}.`, 'info');
       }
       renderApproverView();
     }
@@ -1330,7 +1402,8 @@ function deleteApproverTicket(ticketId) {
 
 function clearApproverTrackingHistory() {
   let tickets = window.ticketsList || [];
-  const finishedTickets = tickets.filter(t => !t.deletedByApprover && (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa'));
+  const isApprover2 = (window.currentActor === 'approver2');
+  const finishedTickets = tickets.filter(t => !isDeletedByCurrentApprover(t) && isTicketUnderMySupervision(t) && (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa'));
   if (finishedTickets.length === 0) {
     if (typeof window.showToast === 'function') {
       window.showToast('Tidak ada riwayat permohonan selesai atau ditolak untuk dibersihkan.', 'warning');

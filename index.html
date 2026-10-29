@@ -4237,6 +4237,36 @@
             </div>
           </div>
 
+          <!-- Atasan Langsung (Naungan Pengawas) untuk Karyawan -->
+          <div class="form-group" id="adminSupervisorGroup" style="position: relative;">
+            <label class="form-label" for="adminInputSupervisorSearch">
+              Atasan Langsung / Naungan Pengawas
+            </label>
+            <input type="hidden" id="adminInputSupervisor" name="directSupervisor" value="Ir. Hendra Gunawan, M.T.">
+            <div class="searchable-dropdown" id="adminSupervisorSearchableDropdown">
+              <div class="searchable-dropdown-control">
+                <span class="searchable-dropdown-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                </span>
+                <input type="text" id="adminInputSupervisorSearch" class="searchable-dropdown-input"
+                  placeholder="Cari nama atasan langsung (cth: Hendra Gunawan, Dewi Sartika)..." autocomplete="off">
+                <button type="button" class="searchable-dropdown-clear" id="btnAdminSupervisorClear"
+                  title="Hapus pencarian atasan" style="display: none;">✕</button>
+                <span class="searchable-dropdown-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </div>
+              <div class="searchable-dropdown-menu" id="adminSupervisorDropdownMenu" role="listbox">
+                <!-- Populated dynamically via JS with available approvers -->
+              </div>
+            </div>
+            <div style="font-size: 0.725rem; color: var(--text-secondary); margin-top: 3px;">
+              Atasan yang menaungi karyawan. Atasan ini tetap dapat memantau status pengajuan izin karyawan meskipun persetujuan diajukan ke atasan lain.
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="adminInputStatus">
               Status Hak Akses <span style="color: var(--rose-danger);">*</span>
