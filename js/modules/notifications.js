@@ -497,22 +497,19 @@
             <div style="font-size: 0.75rem; color: #059669; font-weight: 800; text-transform: uppercase;">Pusat Pemberitahuan</div>
             <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 200px;">
-              <button type="button" class="mobile-seg-btn ${filterTab === 'all' ? 'active' : ''}" onclick="window.renderDesktopFullNotifikasiPage('all')">Semua (${allNotifsList.length})</button>
-              <button type="button" class="mobile-seg-btn ${filterTab === 'unread' ? 'active' : ''}" onclick="window.renderDesktopFullNotifikasiPage('unread')">Belum (${unreadCount})</button>
+          <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="mobile-segment-toggle" style="margin: 0; width: 210px; height: 38px; padding: 3px; display: inline-flex; align-items: center; box-sizing: border-box; border-radius: 10px;">
+              <button type="button" class="mobile-seg-btn ${filterTab === 'all' ? 'active' : ''}" style="height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 8px; font-size: 0.785rem; border-radius: 7px;" onclick="window.renderDesktopFullNotifikasiPage('all')">Semua (${allNotifsList.length})</button>
+              <button type="button" class="mobile-seg-btn ${filterTab === 'unread' ? 'active' : ''}" style="height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 8px; font-size: 0.785rem; border-radius: 7px;" onclick="window.renderDesktopFullNotifikasiPage('unread')">Belum (${unreadCount})</button>
             </div>
             ${unreadCount > 0 ? `
-              <button type="button" class="btn-card-detail" style="border: 1.5px solid #cbd5e1; background: #fff; color: #334155; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer;" onclick="window.markAllNotificationsAsRead(); window.renderDesktopFullNotifikasiPage('${filterTab}')">
+              <button type="button" class="btn-card-detail" style="border: 1.5px solid #cbd5e1; background: #fff; color: #334155; font-weight: 700; height: 38px; padding: 0 14px; font-size: 0.785rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" onclick="window.markAllNotificationsAsRead(); window.renderDesktopFullNotifikasiPage('${filterTab}')">
                 ✓ Tandai semua dibaca
               </button>
             ` : ''}
-            <button type="button" class="btn-clear-all-notifs" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: ${allNotifsList.length > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsList.length > 0 ? '1' : '0.4'}; display: inline-flex; align-items: center; gap: 6px;" ${allNotifsList.length > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
+            <button type="button" class="btn-clear-all-notifs" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; height: 38px; padding: 0 14px; font-size: 0.785rem; border-radius: 10px; cursor: ${allNotifsList.length > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsList.length > 0 ? '1' : '0.4'}; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; vertical-align: middle;" ${allNotifsList.length > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
               <span>Hapus Semua</span>
-            </button>
-            <button type="button" class="btn-card-detail" style="background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="window.closeDesktopFullNotifikasi()" title="Tutup Pusat Notifikasi (Esc)">
-              <span>✕ Tutup</span>
             </button>
           </div>
         </div>
