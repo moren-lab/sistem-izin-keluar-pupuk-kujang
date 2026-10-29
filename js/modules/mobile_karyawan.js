@@ -584,10 +584,11 @@
 
     // 4. Card View HTML (Points 1, 2, 4, 5, 6, 7, 8, 9, 10)
     const cardsHtml = pageTickets.map(t => {
+      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
       const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
       const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
       const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
-      const dateStr = formatDisplayDate(t.createdAt).split(',')[0];
+      const dateStr = (t.createdAt ? formatDisplayDate(t.createdAt) : 'Hari ini').split(',')[0];
 
       return `
         <div class="mobile-ticket-card">
@@ -633,10 +634,11 @@
 
     // 5. List View HTML (Points 1, 2, 4, 5, 6, 7, 8, 9, 10)
     const listHtml = pageTickets.map(t => {
+      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
       const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
       const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
       const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
-      const dateStr = formatDisplayDate(t.createdAt).split(',')[0];
+      const dateStr = (t.createdAt ? formatDisplayDate(t.createdAt) : 'Hari ini').split(',')[0];
 
       return `
         <div class="mobile-ticket-list-row">
