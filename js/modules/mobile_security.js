@@ -654,7 +654,10 @@
           ${statusInfoHtml}
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileSecurityInspectTicket('${t.id}')">Lihat Detail</button>
+            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail Pengajuan</span>
+            </button>
           </div>
         </div>
       `;
@@ -1227,10 +1230,8 @@
           </div>
         </div>
 
-        <!-- Action Buttons (Read-only for Pos Jaga, only operational Scan Out / Scan In when applicable) -->
+        <!-- Action Buttons (Pos Jaga: Operasional Scan Out & Verifikasi Gerbang) -->
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
-          <!-- Pos Jaga: Detail bersifat inspeksi. Scan Out dan Tap In hanya dilakukan oleh Karyawan -->
-
           ${(t.isEmergency && t.emergencyLocked) ? `
             <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #991b1b; text-align: center; font-weight: 700;">
               🚨 Tiket Darurat TERKUNCI: Menunggu otorisasi Atasan sebelum gerbang dapat dibuka.
@@ -1241,6 +1242,20 @@
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #92400e; text-align: center; font-weight: 700;">
               ⚠️ Akses Belum Diizinkan: Tiket belum disetujui oleh Atasan.
             </div>
+          ` : ''}
+
+          ${(isReadyOut && !t.scanOutTime && !(t.isEmergency && t.emergencyLocked)) ? `
+            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 48px; font-size: 0.875rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25); cursor: pointer;" onclick="window.mobileSecurityDirectScanOut('${t.id}')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Verifikasi Keluar (Scan Out)</span>
+            </button>
+          ` : ''}
+
+          ${(isReadyIn && !t.scanInTime && !isPulang) ? `
+            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 48px; font-size: 0.875rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25); cursor: pointer;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span>Verifikasi Masuk (Tap In Gerbang)</span>
+            </button>
           ` : ''}
 
           ${(isCompleted || isFinished) ? `
