@@ -181,6 +181,83 @@
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const processedTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak');
 
+    // Ekstrak riwayat audit trail asli dari seluruh tiket tim bawahan
+    const allActivities = [];
+    tickets.forEach(t => {
+      const empName = getTName(t);
+      const ticketId = t.id;
+
+      if (Array.isArray(t.timeline) && t.timeline.length > 0) {
+        t.timeline.forEach(item => {
+          allActivities.push({
+            ticketId: ticketId,
+            empName: empName,
+            title: item.event || item.title || `Aktivitas ${ticketId}`,
+            actor: item.by || item.actor || 'Sistem',
+            desc: item.desc || item.note || '',
+            rawTime: item.time || item.timestamp || t.createdAt,
+            status: item.status || t.status
+          });
+        });
+      } else {
+        if (t.createdAt) {
+          allActivities.push({
+            ticketId: ticketId,
+            empName: empName,
+            title: `Pengajuan Izin ${empName}`,
+            actor: empName,
+            desc: `${t.category || 'Dinas Kantor'} • ${getTType(t)}`,
+            rawTime: t.createdAt,
+            status: 'Menunggu Persetujuan'
+          });
+        }
+        if (t.approvedAt) {
+          allActivities.push({
+            ticketId: ticketId,
+            empName: empName,
+            title: `Izin ${empName} disetujui`,
+            actor: t.approverName || approver.name.split(',')[0],
+            desc: 'Disetujui oleh Atasan',
+            rawTime: t.approvedAt,
+            status: 'Disetujui'
+          });
+        }
+        if (t.scanOutTime) {
+          allActivities.push({
+            ticketId: ticketId,
+            empName: empName,
+            title: `${empName} Scan Out`,
+            actor: t.scanOutBy || 'Petugas Pos Jaga',
+            desc: `Keluar area melalui ${t.scanOutGate || 'Pos 1'}`,
+            rawTime: t.scanOutTime,
+            status: 'Sedang di Luar'
+          });
+        }
+        if (t.scanInTime) {
+          allActivities.push({
+            ticketId: ticketId,
+            empName: empName,
+            title: `${empName} Scan In (Kembali)`,
+            actor: t.scanInBy || 'Petugas Pos Jaga',
+            desc: `Kembali melalui ${t.scanInGate || 'Pos 1'}`,
+            rawTime: t.scanInTime,
+            status: 'Selesai'
+          });
+        }
+      }
+    });
+
+    allActivities.sort((a, b) => {
+      const parseTime = (item) => {
+        const raw = item.rawTime || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
+      };
+      return parseTime(b) - parseTime(a);
+    });
+
+    const recentActivities = allActivities.slice(0, 5);
+
     // Counts for summary card #3
     const emergencyCount = tickets.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')))).length;
     const approverDecidedCount = Math.max(0, processedTickets.length - emergencyCount);
@@ -384,7 +461,7 @@
         </div>
       </section>
 
-      <!-- Aktivitas Terbaru Timeline (Matching PDF Hal 1) -->
+      <!-- Aktivitas Terbaru Timeline (Data Asli Audit Trail Tiket Tim) -->
       <section class="mobile-card">
         <div class="mobile-card-header">
           <div>
@@ -393,29 +470,31 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
-          <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; min-width: 60px;">10.55 WIB</div>
-            <div style="flex: 1; font-size: 0.75rem; color: #0f172a;">
-              <div><strong>Izin Andi Wijaya disetujui</strong></div>
-              <div style="font-size: 0.675rem; color: #64748b;">${approver.name.split(',')[0]}</div>
+          ${recentActivities.length > 0 ? recentActivities.map(act => {
+            const isLate = (act.title.toLowerCase().includes('terlambat') || act.status === 'Terlambat');
+            const timeDisplay = formatTimeOnly(act.rawTime) || 'Hari ini';
+            return `
+              <div style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${act.ticketId}')">
+                <div style="font-size: 0.7rem; font-weight: 800; color: ${isLate ? '#b91c1c' : '#64748b'}; min-width: 60px; flex-shrink: 0;">
+                  ${timeDisplay}
+                </div>
+                <div style="flex: 1; font-size: 0.75rem; color: #0f172a; min-width: 0;">
+                  <div style="font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; ${isLate ? 'color: #b91c1c;' : ''}">
+                    ${act.title}
+                  </div>
+                  <div style="font-size: 0.675rem; color: #64748b; margin-top: 1px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>${act.actor}</span>
+                    <span>•</span>
+                    <span style="font-family: monospace; font-weight: 700;">${act.ticketId}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('') : `
+            <div style="text-align: center; color: #64748b; font-size: 0.75rem; padding: 14px;">
+              Belum ada aktivitas audit bawahan hari ini.
             </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; min-width: 60px;">10.50 WIB</div>
-            <div style="flex: 1; font-size: 0.75rem; color: #0f172a;">
-              <div><strong>Dimas mengajukan perpanjangan</strong></div>
-              <div style="font-size: 0.675rem; color: #7c3aed; font-weight: 700;">11.15 → 12.00 WIB</div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #b91c1c; min-width: 60px;">10.31 WIB</div>
-            <div style="flex: 1; font-size: 0.75rem; color: #0f172a;">
-              <div><strong style="color: #b91c1c;">Fajar tercatat Terlambat</strong></div>
-              <div style="font-size: 0.675rem; color: #94a3b8;">Penandaan oleh sistem</div>
-            </div>
-          </div>
+          `}
         </div>
       </section>
     `;
