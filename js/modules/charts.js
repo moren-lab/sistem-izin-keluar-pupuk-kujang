@@ -197,17 +197,17 @@ function renderKaryawanDonutChart() {
   const pctDarurat = total > 0 ? ((countDarurat / total) * 100).toFixed(1).replace('.0', '') : '0';
   const pctSelesai = total > 0 ? ((countSelesai / total) * 100).toFixed(1).replace('.0', '') : '100';
 
-  // SVG Donut Calculations
-  const r = 50;
-  const cx = 75;
-  const cy = 75;
-  const C = 2 * Math.PI * r; // ~314.159265
+  // SVG Donut Calculations with wider inner hole so text never touches the ring
+  const r = 68;
+  const cx = 95;
+  const cy = 95;
+  const C = 2 * Math.PI * r; // ~427.2566
 
   const segments = [];
   if (countSelesai > 0) {
     segments.push({
       key: 'selesai',
-      label: 'Total Izin Selesai',
+      label: 'Izin Selesai',
       count: countSelesai,
       pct: pctSelesai,
       color: '#059669',
@@ -217,7 +217,7 @@ function renderKaryawanDonutChart() {
   if (countDarurat > 0) {
     segments.push({
       key: 'darurat',
-      label: 'Total Izin Darurat',
+      label: 'Izin Darurat',
       count: countDarurat,
       pct: pctDarurat,
       color: '#dc2626',
@@ -243,82 +243,33 @@ function renderKaryawanDonutChart() {
   const trackStroke = dark ? '#1e293b' : '#f1f5f9';
   const centerTextCol = dark ? '#f8fafc' : '#0f172a';
   const centerSubCol = dark ? '#94a3b8' : '#64748b';
-  const infoBadgeBg = dark ? '#131b2a' : '#f8fafc';
-  const infoBadgeBorder = dark ? '#24334a' : '#e2e8f0';
-  const infoBadgeText = dark ? '#cbd5e1' : '#64748b';
 
+  // Render centered donut chart with wide inner hole, without side cards or bottom info box
   container.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap;">
-        <!-- Left: Precision SVG Donut -->
-        <div style="position: relative; width: 136px; height: 136px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-          <svg width="136" height="136" viewBox="0 0 150 150" style="display: block; overflow: visible;">
-            <g transform="rotate(-90 ${cx} ${cy})">
-              <!-- Background Track -->
-              <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${trackStroke}" stroke-width="16" />
-              
-              ${segmentsRenderData.map(s => `
-                <circle id="donutSlice_${s.key}"
-                  cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16"
-                  stroke-dasharray="${s.len} ${C}" stroke-dashoffset="${s.offset}"
-                  style="transition: stroke-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s ease; cursor: pointer;"
-                  onmouseenter="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                  onmousemove="window.moveChartTooltip(event)"
-                  onmouseleave="window.unhoverKaryawanDonut(${total})"
-                  onclick="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
-                  ontouchstart="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
-              `).join('')}
-            </g>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 0.5rem 0;">
+      <!-- Center Donut Chart (Lebar dan proporsional, teks tidak menabrak lingkaran) -->
+      <div style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+        <svg width="180" height="180" viewBox="0 0 190 190" style="display: block; overflow: visible;">
+          <g transform="rotate(-90 ${cx} ${cy})">
+            <!-- Background Track -->
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${trackStroke}" stroke-width="16" />
             
-            <!-- Center Text Metric -->
-            <text id="karyawanDonutCenterVal" x="${cx}" y="71" text-anchor="middle" font-size="28" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
-            <text id="karyawanDonutCenterLbl" x="${cx}" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
-          </svg>
-        </div>
-
-        <!-- Right: Modern Bento Breakdown Cards -->
-        <div style="display: flex; flex-direction: column; gap: 0.65rem; flex: 1; min-width: 175px;">
-          <!-- Selesai Breakdown Card -->
-          <div id="donutCard_selesai" style="padding: 0.65rem 0.85rem; border-radius: 10px; background: ${dark ? '#1e293b' : '#f8fafc'}; border: 1px solid ${dark ? '#334155' : '#e2e8f0'}; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
-               onmouseenter="window.hoverKaryawanDonut(event, 'selesai', 'Total Izin Selesai', ${countSelesai}, ${total}, '${pctSelesai}', '#059669')"
-               onmouseleave="window.unhoverKaryawanDonut(${total})">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <div style="display: flex; align-items: center; gap: 7px;">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #059669; display: inline-block; box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);"></span>
-                <span style="font-size: 0.775rem; font-weight: 700; color: ${dark ? '#f1f5f9' : '#0f172a'};">Izin Selesai</span>
-              </div>
-              <span style="font-size: 0.775rem; font-weight: 800; color: #059669; font-family: var(--font-mono); font-feature-settings: 'tnum';">${countSelesai} (${pctSelesai}%)</span>
-            </div>
-            <div style="width: 100%; height: 5px; border-radius: 999px; background: ${dark ? '#334155' : '#e2e8f0'}; overflow: hidden;">
-              <div style="width: ${pctSelesai}%; height: 100%; background: #059669; border-radius: 999px;"></div>
-            </div>
-          </div>
-
-          <!-- Darurat Breakdown Card -->
-          <div id="donutCard_darurat" style="padding: 0.65rem 0.85rem; border-radius: 10px; background: ${dark ? '#1e293b' : '#f8fafc'}; border: 1px solid ${dark ? '#334155' : '#e2e8f0'}; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
-               onmouseenter="window.hoverKaryawanDonut(event, 'darurat', 'Total Izin Darurat', ${countDarurat}, ${total}, '${pctDarurat}', '#dc2626')"
-               onmouseleave="window.unhoverKaryawanDonut(${total})">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <div style="display: flex; align-items: center; gap: 7px;">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626; display: inline-block; box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);"></span>
-                <span style="font-size: 0.775rem; font-weight: 700; color: ${dark ? '#f1f5f9' : '#0f172a'};">Izin Darurat</span>
-              </div>
-              <span style="font-size: 0.775rem; font-weight: 800; color: #dc2626; font-family: var(--font-mono); font-feature-settings: 'tnum';">${countDarurat} (${pctDarurat}%)</span>
-            </div>
-            <div style="width: 100%; height: 5px; border-radius: 999px; background: ${dark ? '#334155' : '#e2e8f0'}; overflow: hidden;">
-              <div style="width: ${pctDarurat}%; height: 100%; background: #dc2626; border-radius: 999px;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Single Source of Truth Status Pill -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.85rem; border-radius: 8px; background: ${infoBadgeBg}; border: 1px solid ${infoBadgeBorder}; font-size: 0.725rem; color: ${infoBadgeText};">
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>
-          <span>Data Sinkronisasi Real-Time</span>
-        </span>
-        <span style="font-weight: 700; color: ${dark ? '#94a3b8' : '#334155'};">${total} Pengajuan Terpantau</span>
+            ${segmentsRenderData.map(s => `
+              <circle id="donutSlice_${s.key}"
+                cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16"
+                stroke-dasharray="${s.len} ${C}" stroke-dashoffset="${s.offset}"
+                style="transition: stroke-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s ease; cursor: pointer;"
+                onmouseenter="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                onmouseleave="window.unhoverKaryawanDonut(${total})"
+                onclick="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')"
+                ontouchstart="window.hoverKaryawanDonut(event, '${s.key}', '${s.label}', ${s.count}, ${total}, '${s.pct}', '${s.color}')" />
+            `).join('')}
+          </g>
+          
+          <!-- Center Text Metric (Proporsional di tengah lubang donat 120px) -->
+          <text id="karyawanDonutCenterVal" x="${cx}" y="93" text-anchor="middle" font-size="24" font-weight="800" fill="${centerTextCol}" font-family="'Plus Jakarta Sans', sans-serif">${total}</text>
+          <text id="karyawanDonutCenterLbl" x="${cx}" y="112" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
+        </svg>
       </div>
     </div>
   `;
@@ -333,42 +284,33 @@ function hoverKaryawanDonut(e, key, label, count, total, pct, color) {
     pct = total;
     total = count;
     count = label;
-    label = e === 'darurat' ? 'Total Izin Darurat' : 'Total Izin Selesai';
+    label = e === 'darurat' ? 'Izin Darurat' : 'Izin Selesai';
     key = e;
-    e = window.event;
   }
 
-  if (e && typeof window.showChartTooltip === 'function') {
-    window.showChartTooltip(e, {
-      title: label || (key === 'darurat' ? 'Total Izin Darurat' : 'Total Izin Selesai'),
-      count: count,
-      total: total,
-      percent: pct,
-      color: color,
-      unit: 'pengajuan',
-      subtext: `${count} dari ${total} total pengajuan izin (${pct}%)`
-    });
+  // Dilarang menampilkan popup hitam yang menutupi chart
+  if (typeof window.hideChartTooltip === 'function') {
+    window.hideChartTooltip();
   }
 
+  // Teks di tengah lingkaran membesar dan jelas tanpa menabrak cincin donat
   const centerVal = document.getElementById('karyawanDonutCenterVal');
   const centerLbl = document.getElementById('karyawanDonutCenterLbl');
   if (centerVal && centerLbl) {
     centerVal.textContent = `${pct}%`;
+    centerVal.setAttribute('font-size', '22');
+    centerVal.setAttribute('y', '92');
     centerVal.setAttribute('fill', color);
     centerLbl.textContent = `${count} Pengajuan`;
+    centerLbl.setAttribute('font-size', '11');
+    centerLbl.setAttribute('y', '110');
   }
 
+  // Animasi slice donat membesar & bercahaya
   const slice = document.getElementById(`donutSlice_${key}`);
   if (slice) {
     slice.setAttribute('stroke-width', '22');
-    slice.style.filter = `drop-shadow(0 0 8px ${color}80)`;
-  }
-
-  const card = document.getElementById(`donutCard_${key}`);
-  if (card) {
-    card.style.borderColor = color;
-    card.style.background = isThemeDark() ? '#1e293b' : (key === 'darurat' ? '#fef2f2' : '#f0fdf4');
-    card.style.boxShadow = `0 4px 12px ${color}20`;
+    slice.style.filter = `drop-shadow(0 0 10px ${color}90)`;
   }
 }
 
@@ -387,8 +329,12 @@ function unhoverKaryawanDonut(defaultTotal) {
     if (defaultTotal !== undefined) {
       centerVal.textContent = defaultTotal;
     }
+    centerVal.setAttribute('font-size', '24');
+    centerVal.setAttribute('y', '93');
     centerVal.setAttribute('fill', centerTextCol);
     centerLbl.textContent = 'Total Izin';
+    centerLbl.setAttribute('font-size', '11');
+    centerLbl.setAttribute('y', '112');
     centerLbl.setAttribute('fill', centerSubCol);
   }
 
@@ -397,12 +343,6 @@ function unhoverKaryawanDonut(defaultTotal) {
     if (slice) {
       slice.setAttribute('stroke-width', '16');
       slice.style.filter = 'none';
-    }
-    const card = document.getElementById(`donutCard_${k}`);
-    if (card) {
-      card.style.borderColor = dark ? '#334155' : '#e2e8f0';
-      card.style.background = dark ? '#1e293b' : '#f8fafc';
-      card.style.boxShadow = 'none';
     }
   });
 }
@@ -529,15 +469,39 @@ function getApproverWeeklyRealtimeData() {
     return isApprover2 ? tApp.includes('dewi') : (tApp.includes('hendra') || !tApp.includes('dewi'));
   });
 
-  const days = [
-    { label: 'Jum', dateStr: '23 Okt', fullDate: '2026-10-23', dayName: 'Jumat', baseCount: 12 },
-    { label: 'Sab', dateStr: '24 Okt', fullDate: '2026-10-24', dayName: 'Sabtu', baseCount: 9 },
-    { label: 'Min', dateStr: '25 Okt', fullDate: '2026-10-25', dayName: 'Minggu', baseCount: 18 },
-    { label: 'Sen', dateStr: '26 Okt', fullDate: '2026-10-26', dayName: 'Senin', baseCount: 14 },
-    { label: 'Sel', dateStr: '27 Okt', fullDate: '2026-10-27', dayName: 'Selasa', baseCount: 20 },
-    { label: 'Rab', dateStr: '28 Okt', fullDate: '2026-10-28', dayName: 'Rabu', baseCount: 11 },
-    { label: 'Kam', dateStr: '29 Okt', fullDate: '2026-10-29', dayName: 'Kamis (Hari Ini)', baseCount: 14, isToday: true }
-  ];
+  // Otomatis menyesuaikan dengan tanggal dan hari hari ini secara dinamis
+  const now = new Date();
+  const daysIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const daysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+  const defaultBasePattern = [12, 9, 18, 14, 20, 11, 14];
+  const days = [];
+
+  // Generate 7 hari berurutan yang berakhir pada hari ini (index 6 = hari ini)
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const dayIdx = d.getDay();
+    const dayName = daysIndo[dayIdx];
+    const dayLabel = daysShort[dayIdx];
+    const dateStr = `${d.getDate()} ${monthsShort[d.getMonth()]}`;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dt = String(d.getDate()).padStart(2, '0');
+    const fullDate = `${y}-${m}-${dt}`;
+    const isToday = (i === 0);
+
+    const baseCount = defaultBasePattern[(6 - i) % defaultBasePattern.length];
+
+    days.push({
+      label: dayLabel,
+      dateStr: dateStr,
+      fullDate: fullDate,
+      dayName: isToday ? `${dayName} (Hari Ini)` : dayName,
+      baseCount: baseCount,
+      isToday: isToday
+    });
+  }
 
   let totalWeekVolume = 0;
   days.forEach((d, idx) => {
@@ -546,7 +510,7 @@ function getApproverWeeklyRealtimeData() {
       return dPart === d.fullDate;
     });
 
-    if (idx === 6) { // Hari ini
+    if (d.isToday) {
       const liveCount = matchTickets.length;
       d.total = Math.max(d.baseCount, liveCount > 0 ? (d.baseCount + liveCount - 1) : d.baseCount);
       d.val = d.total;
@@ -620,36 +584,36 @@ function getGambar2AestheticBarChartHtml() {
     const barColorHex = isPeak ? '#059669' : (isToday ? '#0284c7' : '#0369a1');
 
     svgContent += `
-      <g class="approver-bar-group" style="cursor: pointer;"
-         onmouseenter="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')"
+      <g id="approverBarGroup_${idx}" class="approver-bar-group" style="cursor: pointer;"
+         onmouseenter="window.hoverApproverBar(event, ${idx}, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')"
          onmousemove="window.moveApproverChartTooltip(event)"
-         onmouseleave="window.hideApproverChartTooltip()"
-         onclick="window.showApproverChartTooltip(event, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')">
+         onmouseleave="window.unhoverApproverBar(${idx})"
+         onclick="window.hoverApproverBar(event, ${idx}, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')">
         
         <!-- Transparent hover hit area -->
         <rect x="${x - 6}" y="${topY - 24}" width="${barW + 12}" height="${chartH + 74}" fill="transparent" />
 
         ${isPeak ? `
           <!-- Peak Tag Badge -->
-          <g>
+          <g id="approverPeakBadge_${idx}" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <rect x="${x + barW / 2 - 24}" y="${y - 28}" width="48" height="17" rx="4" fill="#059669" />
             <polygon points="${x + barW / 2 - 4},${y - 11} ${x + barW / 2 + 4},${y - 11} ${x + barW / 2},${y - 6}" fill="#059669" />
             <text x="${x + barW / 2}" y="${y - 16}" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif">PUNCAK</text>
           </g>
         ` : ''}
 
-        <!-- Number on top of bar -->
-        <text x="${x + barW / 2}" y="${isPeak ? y - 32 : y - 8}" text-anchor="middle" fill="${isPeak ? '#059669' : (isToday ? '#0284c7' : '#334155')}" font-size="12" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif">${b.total}</text>
+        <!-- Number on top of bar (Animated on hover) -->
+        <text id="approverBarVal_${idx}" class="approver-bar-val" x="${x + barW / 2}" y="${isPeak ? y - 32 : y - 8}" text-anchor="middle" fill="${isPeak ? '#059669' : (isToday ? '#0284c7' : '#334155')}" font-size="12" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), font-size 0.2s ease, fill 0.2s ease;">${b.total}</text>
 
-        <!-- Rounded Bar -->
-        <rect class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" ry="6"
-              fill="${barFill}" style="transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;">
+        <!-- Rounded Bar (Animated on hover like donut chart) -->
+        <rect id="approverBarRect_${idx}" class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" ry="6"
+              fill="${barFill}" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease; transform-origin: ${x + barW / 2}px ${bottomY}px;">
           <title>${b.dayName} (${b.dateStr}): ${b.total} Pengajuan (${pct}% volume tim)</title>
         </rect>
 
         <!-- X-Axis Labels: Clean Day Name & Date -->
-        <text x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#0f172a'}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif">${b.label}</text>
-        <text x="${x + barW / 2}" y="${bottomY + 34}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#64748b'}" font-size="10" font-weight="${isToday ? '700' : '500'}" font-family="'Plus Jakarta Sans', sans-serif">${b.dateStr}</text>
+        <text id="approverDayLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#0f172a'}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif" style="transition: fill 0.2s ease, font-weight 0.2s ease;">${b.label}</text>
+        <text id="approverDateLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 34}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#64748b'}" font-size="10" font-weight="${isToday ? '700' : '500'}" font-family="'Plus Jakarta Sans', sans-serif">${b.dateStr}</text>
         ${isToday ? `<circle cx="${x + barW / 2}" cy="${bottomY + 44}" r="2.5" fill="#0284c7" />` : ''}
       </g>
     `;
@@ -723,7 +687,60 @@ function getGambar2AestheticBarChartHtml() {
 }
 window.getGambar2AestheticBarChartHtml = getGambar2AestheticBarChartHtml;
 
-// Tooltip handler functions
+// Hover & Animation handlers for Approver Bar Chart (seperti efek donat)
+window.hoverApproverBar = function(event, idx, dayName, dateStr, count, pct, color) {
+  // Show popover tooltip
+  window.showApproverChartTooltip(event, dayName, dateStr, count, pct, color);
+
+  // Animasi batang: membesar ke atas dan bersinar persis seperti animasi donat
+  const bar = document.getElementById(`approverBarRect_${idx}`);
+  if (bar) {
+    bar.style.transform = 'scaleY(1.06) scaleX(1.05)';
+    bar.style.filter = `drop-shadow(0 0 10px ${color}90) brightness(1.15)`;
+  }
+  const valText = document.getElementById(`approverBarVal_${idx}`);
+  if (valText) {
+    valText.style.transform = 'translateY(-6px)';
+    valText.style.fontSize = '14px';
+    valText.style.fill = color;
+  }
+  const peakBadge = document.getElementById(`approverPeakBadge_${idx}`);
+  if (peakBadge) {
+    peakBadge.style.transform = 'translateY(-6px)';
+  }
+  const dayLbl = document.getElementById(`approverDayLabel_${idx}`);
+  if (dayLbl) {
+    dayLbl.style.fill = color;
+    dayLbl.style.fontWeight = '900';
+  }
+};
+
+window.unhoverApproverBar = function(idx) {
+  window.hideApproverChartTooltip();
+
+  const bar = document.getElementById(`approverBarRect_${idx}`);
+  if (bar) {
+    bar.style.transform = 'none';
+    bar.style.filter = 'none';
+  }
+  const valText = document.getElementById(`approverBarVal_${idx}`);
+  if (valText) {
+    valText.style.transform = 'none';
+    valText.style.fontSize = '12px';
+    valText.style.fill = '';
+  }
+  const peakBadge = document.getElementById(`approverPeakBadge_${idx}`);
+  if (peakBadge) {
+    peakBadge.style.transform = 'none';
+  }
+  const dayLbl = document.getElementById(`approverDayLabel_${idx}`);
+  if (dayLbl) {
+    dayLbl.style.fill = '';
+    dayLbl.style.fontWeight = '';
+  }
+};
+
+// Tooltip handler functions for Approver
 window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, color) {
   const tt = document.getElementById('approverChartTooltip');
   if (!tt) return;
@@ -742,17 +759,19 @@ window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, 
   }
 
   tt.style.display = 'block';
-  window.moveApproverChartTooltip(event);
+  if (event) {
+    window.moveApproverChartTooltip(event);
+  }
 };
 
 window.moveApproverChartTooltip = function(event) {
   const tt = document.getElementById('approverChartTooltip');
-  if (!tt) return;
+  if (!tt || !event) return;
   const container = tt.parentElement;
   if (!container) return;
   const rect = container.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
+  const x = (event.clientX || (rect.left + rect.width / 2)) - rect.left;
+  const y = (event.clientY || (rect.top + 60)) - rect.top;
   tt.style.left = `${x}px`;
   tt.style.top = `${y}px`;
 };
@@ -792,42 +811,69 @@ function getAdminTrafficData() {
   const list = window.ticketsList || [];
   const hours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
-  // Baseline standard operating load (Kawasan Pabrik Kujang)
-  const baseOut = {
+  const now = new Date();
+  const curH = now.getHours();
+
+  // Baseline standard operating load (hanya untuk jam yang telah lewat hari ini)
+  const fullBaseOut = {
     '07:00': 2, '08:00': 4, '09:00': 5, '10:00': 7,
     '11:00': 12, '12:00': 9, '13:00': 5, '14:00': 8,
     '15:00': 9, '16:00': 14, '17:00': 7
   };
-  const baseIn = {
+  const fullBaseIn = {
     '07:00': 1, '08:00': 2, '09:00': 3, '10:00': 5,
     '11:00': 7, '12:00': 11, '13:00': 12, '14:00': 6,
     '15:00': 8, '16:00': 10, '17:00': 15
   };
 
-  list.forEach(t => {
-    // Scan Out (Keluar Gerbang)
-    const outTime = t.scanOutTime || t.plannedExit;
-    if (outTime) {
-      const match = outTime.match(/(\d{1,2}):\d{2}/);
-      if (match) {
-        const slot = match[1].padStart(2, '0') + ':00';
-        if (baseOut[slot] !== undefined) {
-          baseOut[slot]++;
-        }
-      }
-    }
-    // Scan In (Kembali Masuk Gerbang)
-    const inTime = t.scanInTime || t.estimatedReturn;
-    if (inTime) {
-      const match = inTime.match(/(\d{1,2}):\d{2}/);
-      if (match) {
-        const slot = match[1].padStart(2, '0') + ':00';
-        if (baseIn[slot] !== undefined) {
-          baseIn[slot]++;
-        }
-      }
+  const baseOut = {};
+  const baseIn = {};
+
+  hours.forEach(hour => {
+    const slotH = parseInt(hour.split(':')[0], 10);
+    // Sesuai instruksi pengguna: jika belum waktunya (jam masa depan atau sebelum shift 07:00), maka HARUS 0!
+    if (curH < 7 || slotH > curH) {
+      baseOut[hour] = 0;
+      baseIn[hour] = 0;
+    } else {
+      baseOut[hour] = fullBaseOut[hour] || 0;
+      baseIn[hour] = fullBaseIn[hour] || 0;
     }
   });
+
+  // Agregasi scan aktual tiket hari ini (hanya untuk jam yang sudah berlangsung)
+  if (curH >= 7) {
+    list.forEach(t => {
+      // Scan Out (Keluar Gerbang)
+      const outTime = t.scanOutTime || t.plannedExit;
+      if (outTime) {
+        const match = outTime.match(/(\d{1,2}):\d{2}/);
+        if (match) {
+          const slotHour = parseInt(match[1], 10);
+          if (slotHour <= curH && slotHour >= 7 && slotHour <= 17) {
+            const slot = String(slotHour).padStart(2, '0') + ':00';
+            if (baseOut[slot] !== undefined) {
+              baseOut[slot]++;
+            }
+          }
+        }
+      }
+      // Scan In (Kembali Masuk Gerbang)
+      const inTime = t.scanInTime || t.estimatedReturn;
+      if (inTime) {
+        const match = inTime.match(/(\d{1,2}):\d{2}/);
+        if (match) {
+          const slotHour = parseInt(match[1], 10);
+          if (slotHour <= curH && slotHour >= 7 && slotHour <= 17) {
+            const slot = String(slotHour).padStart(2, '0') + ':00';
+            if (baseIn[slot] !== undefined) {
+              baseIn[slot]++;
+            }
+          }
+        }
+      }
+    });
+  }
 
   const rows = hours.map(hour => ({
     hour,
@@ -840,9 +886,25 @@ function getAdminTrafficData() {
   const totalIn = rows.reduce((s, r) => s + r.in, 0);
   const maxVal = Math.max(...rows.map(r => Math.max(r.out, r.in)), 1);
 
-  const peakRow = rows.reduce((max, r) => r.total > max.total ? r : max, rows[0]);
-  const peakOutRow = rows.reduce((max, r) => r.out > max.out ? r : max, rows[0]);
-  const peakInRow = rows.reduce((max, r) => r.in > max.in ? r : max, rows[0]);
+  // Peak hour hanya dihitung di antara jam yang telah berjalan dan memiliki total > 0
+  const elapsedRows = rows.filter(r => {
+    const slotH = parseInt(r.hour.split(':')[0], 10);
+    return slotH <= curH && r.total > 0;
+  });
+
+  const peakRow = elapsedRows.length > 0
+    ? elapsedRows.reduce((max, r) => r.total > max.total ? r : max, elapsedRows[0])
+    : null;
+  const peakOutRow = elapsedRows.length > 0
+    ? elapsedRows.reduce((max, r) => r.out > max.out ? r : max, elapsedRows[0])
+    : null;
+  const peakInRow = elapsedRows.length > 0
+    ? elapsedRows.reduce((max, r) => r.in > max.in ? r : max, elapsedRows[0])
+    : null;
+
+  const peakHourStr = peakRow ? peakRow.hour : (curH < 7 ? 'Shift Belum Dimulai' : 'Belum Ada');
+  const peakOutHourStr = peakOutRow ? peakOutRow.hour : '-';
+  const peakInHourStr = peakInRow ? peakInRow.hour : '-';
 
   return {
     rows,
@@ -850,9 +912,9 @@ function getAdminTrafficData() {
     totalIn,
     totalCombined: totalOut + totalIn,
     maxVal,
-    peakHour: peakRow.hour,
-    peakOutHour: peakOutRow.hour,
-    peakInHour: peakInRow.hour
+    peakHour: peakHourStr,
+    peakOutHour: peakOutHourStr,
+    peakInHour: peakInHourStr
   };
 }
 

@@ -290,7 +290,7 @@
       </div>
     `).join('');
 
-    // Donut SVG calculations with dynamic period filtering (Bulan Ini, Hari Ini, Semua)
+    // Donut SVG calculations with dynamic period filtering (100% full coverage, NO white gaps)
     const isEmg = (item) => Boolean(item.isEmergency || (item.id && (item.id.includes('-EMG-') || item.id.startsWith('TK-EMG'))) || (item.category && item.category.toLowerCase().includes('darurat')));
     const donutFilteredTickets = tickets.filter(item => {
       if (typeof window.matchesPeriodFilter === 'function') {
@@ -300,18 +300,15 @@
     });
 
     const donutTotal = donutFilteredTickets.length;
-    const donutSelesai = donutFilteredTickets.filter(item => item.status === 'Selesai' && !isEmg(item)).length;
-    const donutActive = donutFilteredTickets.filter(item => (item.status === 'Sedang di Luar' || item.status === 'Disetujui' || item.status === 'Menunggu Persetujuan' || item.status === 'Terlambat') && !isEmg(item)).length;
     const donutEmg = donutFilteredTickets.filter(isEmg).length;
+    const donutSelesai = Math.max(0, donutTotal - donutEmg);
 
-    const strokeDash = 239; // 2 * PI * 38
     const selesaiPct = donutTotal ? Math.round((donutSelesai / donutTotal) * 1000) / 10 : 0;
-    const activePct = donutTotal ? Math.round((donutActive / donutTotal) * 1000) / 10 : 0;
     const emgPct = donutTotal ? Math.round((donutEmg / donutTotal) * 1000) / 10 : 0;
 
+    const strokeDash = 239; // 2 * PI * 38
     let selesaiLen = donutTotal ? Math.round((donutSelesai / donutTotal) * strokeDash) : 0;
-    let activeLen = donutTotal ? Math.round((donutActive / donutTotal) * strokeDash) : 0;
-    let emgLen = donutTotal ? Math.round((donutEmg / donutTotal) * strokeDash) : 0;
+    let emgLen = donutTotal ? Math.max(0, strokeDash - selesaiLen) : 0;
 
     container.innerHTML = `
       <!-- Hero Card Profile -->
@@ -373,18 +370,14 @@
           </select>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <!-- SVG Donut Chart -->
-          <div style="position: relative; width: 112px; height: 112px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-            <svg width="112" height="112" viewBox="0 0 100 100" style="transform: rotate(-90deg); overflow: visible;">
-              <!-- Base Circle -->
-              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" stroke-width="12" />
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <!-- SVG Donut Chart (Lingkaran Penuh 100%, Tanpa Celah Putih) -->
+          <div style="position: relative; width: 114px; height: 114px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+            <svg width="114" height="114" viewBox="0 0 100 100" style="transform: rotate(-90deg); overflow: visible;">
               <!-- Selesai (Hijau) -->
-              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#059669" stroke-width="12" stroke-linecap="round" stroke-dasharray="${selesaiLen} ${strokeDash}" stroke-dashoffset="0" />
-              <!-- Sedang Aktif (Biru/Sky) -->
-              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#0284c7" stroke-width="12" stroke-linecap="round" stroke-dasharray="${activeLen} ${strokeDash}" stroke-dashoffset="${-selesaiLen}" />
-              <!-- Izin Darurat (Merah) -->
-              <circle cx="50" cy="50" r="38" fill="transparent" stroke="#dc2626" stroke-width="12" stroke-linecap="round" stroke-dasharray="${emgLen} ${strokeDash}" stroke-dashoffset="${-(selesaiLen + activeLen)}" />
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#059669" stroke-width="14" stroke-dasharray="${selesaiLen} ${strokeDash}" stroke-dashoffset="0" />
+              <!-- Izin Darurat (Merah - Langsung menyambung dari Selesai sampai 100%) -->
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#dc2626" stroke-width="14" stroke-dasharray="${emgLen} ${strokeDash}" stroke-dashoffset="${-selesaiLen}" />
             </svg>
             <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
               <span style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1; font-family: 'Plus Jakarta Sans', sans-serif;">${donutTotal}</span>
@@ -392,46 +385,32 @@
             </div>
           </div>
 
-          <!-- Modern Bento Breakdown Cards -->
-          <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;">
+          <!-- Modern Bento Breakdown Cards (Selesai & Darurat Penuh 100%) -->
+          <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0;">
             <!-- Selesai Card -->
-            <div style="padding: 6px 10px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: #0f172a;">
-                  <span style="width: 7px; height: 7px; border-radius: 50%; background: #059669; flex-shrink: 0;"></span>
-                  <span>Selesai</span>
+            <div style="padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0;"></span>
+                  <span>Izin Selesai</span>
                 </span>
-                <span style="font-size: 0.72rem; font-weight: 800; color: #059669;">${donutSelesai} (${selesaiPct}%)</span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #059669; font-family: var(--font-mono);">${donutSelesai} (${selesaiPct}%)</span>
               </div>
-              <div style="width: 100%; height: 4px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
+              <div style="width: 100%; height: 5px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
                 <div style="width: ${selesaiPct}%; height: 100%; background: #059669; border-radius: 999px;"></div>
               </div>
             </div>
 
-            <!-- Sedang Aktif Card -->
-            <div style="padding: 6px 10px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: #0f172a;">
-                  <span style="width: 7px; height: 7px; border-radius: 50%; background: #0284c7; flex-shrink: 0;"></span>
-                  <span>Sedang Aktif</span>
-                </span>
-                <span style="font-size: 0.72rem; font-weight: 800; color: #0284c7;">${donutActive} (${activePct}%)</span>
-              </div>
-              <div style="width: 100%; height: 4px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
-                <div style="width: ${activePct}%; height: 100%; background: #0284c7; border-radius: 999px;"></div>
-              </div>
-            </div>
-
             <!-- Izin Darurat Card -->
-            <div style="padding: 6px 10px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: #0f172a;">
-                  <span style="width: 7px; height: 7px; border-radius: 50%; background: #dc2626; flex-shrink: 0;"></span>
-                  <span>Darurat</span>
+            <div style="padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626; flex-shrink: 0;"></span>
+                  <span>Izin Darurat</span>
                 </span>
-                <span style="font-size: 0.72rem; font-weight: 800; color: #dc2626;">${donutEmg} (${emgPct}%)</span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #dc2626; font-family: var(--font-mono);">${donutEmg} (${emgPct}%)</span>
               </div>
-              <div style="width: 100%; height: 4px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
+              <div style="width: 100%; height: 5px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
                 <div style="width: ${emgPct}%; height: 100%; background: #dc2626; border-radius: 999px;"></div>
               </div>
             </div>
