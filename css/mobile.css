@@ -12,23 +12,29 @@
 }
 
 @media (max-width: 768px) {
-  html, body {
+
+  html,
+  body {
     overflow-x: clip !important;
   }
 
   #desktopAppContainer {
     display: none !important;
   }
-  
+
   #mobileAppContainer {
     display: block !important;
     background: #f8fafc;
     min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
     position: relative;
-    padding-bottom: 74px; /* Space for bottom nav */
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+    padding-bottom: 74px;
+    /* Space for bottom nav */
+    box-shadow: none;
     font-family: var(--font-sans, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
     color: #0f172a;
     -webkit-tap-highlight-color: transparent;
@@ -41,6 +47,7 @@
   #mobileAppContainer {
     display: none !important;
   }
+
   #desktopAppContainer {
     display: flex !important;
   }
@@ -50,6 +57,8 @@
    2. MOBILE TOP APP BAR
    ------------------------------------------------------------------- */
 .mobile-top-bar {
+  width: 100% !important;
+  box-sizing: border-box !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -363,7 +372,8 @@ body.theme-dark .mobile-top-role-pill {
   align-items: center;
   justify-content: center;
   padding: 0 8px;
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.8125rem;
+  /* 13px */
   font-weight: 700;
   color: #64748b;
   border-radius: 7px;
@@ -706,7 +716,9 @@ body.theme-dark .mobile-top-role-pill {
   border-radius: 8px !important;
   box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
 }
-.mobile-btn-edit-solid:hover, .mobile-btn-edit-solid:active {
+
+.mobile-btn-edit-solid:hover,
+.mobile-btn-edit-solid:active {
   background: #1d4ed8 !important;
   border-color: #1d4ed8 !important;
   color: #ffffff !important;
@@ -720,7 +732,9 @@ body.theme-dark .mobile-top-role-pill {
   border-radius: 8px !important;
   box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25) !important;
 }
-.mobile-btn-cancel-solid:hover, .mobile-btn-cancel-solid:active {
+
+.mobile-btn-cancel-solid:hover,
+.mobile-btn-cancel-solid:active {
   background: #b91c1c !important;
   border-color: #b91c1c !important;
   color: #ffffff !important;
@@ -734,7 +748,9 @@ body.theme-dark .mobile-top-role-pill {
   border-radius: 8px !important;
   box-shadow: 0 1px 3px rgba(217, 119, 6, 0.25) !important;
 }
-.mobile-btn-extend-solid:hover, .mobile-btn-extend-solid:active {
+
+.mobile-btn-extend-solid:hover,
+.mobile-btn-extend-solid:active {
   background: #b45309 !important;
   border-color: #b45309 !important;
   color: #ffffff !important;
@@ -748,12 +764,14 @@ body.theme-dark .mobile-top-role-pill {
   padding: 10px 12px;
   margin: 10px 0;
 }
+
 .mobile-info-box-blue-title {
   font-size: 0.75rem;
   font-weight: 800;
   color: #1e40af;
   margin-bottom: 2px;
 }
+
 .mobile-info-box-blue-desc {
   font-size: 0.7rem;
   color: #2563eb;
@@ -767,12 +785,14 @@ body.theme-dark .mobile-top-role-pill {
   padding: 10px 12px;
   margin: 10px 0;
 }
+
 .mobile-info-box-yellow-title {
   font-size: 0.75rem;
   font-weight: 800;
   color: #92400e;
   margin-bottom: 2px;
 }
+
 .mobile-info-box-yellow-desc {
   font-size: 0.7rem;
   color: #b45309;
@@ -788,6 +808,7 @@ body.theme-dark .mobile-top-role-pill {
   padding-top: 15px;
   gap: 8px;
 }
+
 .mobile-bar-col {
   flex: 1;
   display: flex;
@@ -797,11 +818,13 @@ body.theme-dark .mobile-top-role-pill {
   height: 100%;
   justify-content: flex-end;
 }
+
 .mobile-bar-value {
   font-size: 0.65rem;
   font-weight: 800;
   color: #64748b;
 }
+
 .mobile-bar-pillar {
   width: 100%;
   max-width: 28px;
@@ -809,9 +832,11 @@ body.theme-dark .mobile-top-role-pill {
   background: #cbd5e1;
   transition: height 0.3s ease;
 }
+
 .mobile-bar-pillar.peak {
   background: #2563eb;
 }
+
 .mobile-bar-label {
   font-size: 0.65rem;
   font-weight: 700;
@@ -1126,8 +1151,13 @@ body.theme-dark .mobile-top-role-pill {
 }
 
 @keyframes mobileScanMove {
-  0% { top: 10%; }
-  100% { top: 90%; }
+  0% {
+    top: 10%;
+  }
+
+  100% {
+    top: 90%;
+  }
 }
 
 .mobile-scanner-frame {
@@ -1415,6 +1445,7 @@ body.theme-dark .mobile-btn-secondary {
     transform: translateY(-20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -1726,7 +1757,8 @@ body.theme-dark .mobile-summary-value {
   height: 36px !important;
   min-height: 36px !important;
   padding: 0 10px !important;
-  font-size: 0.8125rem !important; /* 13px */
+  font-size: 0.8125rem !important;
+  /* 13px */
   font-weight: 700 !important;
   cursor: pointer !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
@@ -1762,6 +1794,7 @@ body.theme-dark .mobile-summary-value {
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1876,6 +1909,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   min-height: 48px;
   transition: all 0.15s ease;
 }
+
 .mobile-recent-card:active {
   background: #f8fafc;
   transform: scale(0.99);
@@ -1888,7 +1922,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   margin-bottom: 12px;
   background: #ffffff;
   padding: 14px 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Riwayat Ticket List Row (Non-clickable container to prevent accidental scroll opening) */
@@ -1898,7 +1932,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   margin-bottom: 10px;
   background: #ffffff;
   padding: 12px 14px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 /* Dedicated "Lihat Detail" Button (Min 44x44px touch target, bold text, NO icons) */
@@ -1921,6 +1955,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   box-sizing: border-box;
   white-space: nowrap;
 }
+
 .mobile-btn-detail:active {
   background: #dcfce7;
   border-color: #86efac;
@@ -1944,6 +1979,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   transition: all 0.15s ease;
   padding: 0;
 }
+
 .mobile-btn-trash:active {
   background: #f1f5f9;
   color: #b91c1c;
@@ -1972,10 +2008,12 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   white-space: nowrap;
   box-sizing: border-box;
 }
+
 .mobile-btn-clear-history:active:not(:disabled) {
   background: #b91c1c;
   transform: scale(0.98);
 }
+
 .mobile-btn-clear-history:disabled {
   background: #fca5a5 !important;
   border-color: #fca5a5 !important;
@@ -2012,10 +2050,12 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   transition: all 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
 .mobile-top-notif-btn:active {
   background: #f1f5f9;
   transform: scale(0.96);
 }
+
 .mobile-notif-badge {
   position: absolute;
   top: -2px;
@@ -2041,6 +2081,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
 .mobile-touch-hit-44 {
   position: relative;
 }
+
 .mobile-touch-hit-44::after {
   content: '';
   position: absolute;
@@ -2058,21 +2099,26 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   .mobile-top-bar {
     padding: 10px 12px !important;
   }
+
   .mobile-brand-left {
     gap: 8px !important;
   }
+
   .mobile-brand-name {
     font-size: 0.85rem !important;
   }
+
   .mobile-brand-sub {
     max-width: 90px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
+
   .mobile-top-actions {
     gap: 6px !important;
   }
+
   .mobile-top-role-pill {
     padding: 4px 8px !important;
     font-size: 0.725rem !important;
@@ -2089,6 +2135,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   gap: 12px;
   margin-bottom: 14px;
 }
+
 .mobile-avatar-sheet-circle {
   width: 48px;
   height: 48px;
@@ -2103,6 +2150,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
 }
+
 .mobile-btn-logout-item {
   width: 100%;
   min-height: 44px;
@@ -2121,6 +2169,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   transition: all 0.15s ease;
   box-sizing: border-box;
 }
+
 .mobile-btn-logout-item:active {
   background: #fef2f2;
   border-color: #fca5a5;
@@ -2135,6 +2184,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
 .mobile-touch-hit-44 {
   position: relative;
 }
+
 .mobile-touch-hit-44::after {
   content: "";
   position: absolute;
@@ -2160,6 +2210,7 @@ body.theme-dark #mobileAppContainer select.mobile-select {
   border-color: #dc2626 !important;
   color: #ffffff !important;
 }
+
 .mobile-btn-primary-solid {
   background: #059669 !important;
   border-color: #059669 !important;

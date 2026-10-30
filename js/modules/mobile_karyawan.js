@@ -509,7 +509,7 @@
 
           <!-- Kolom 2 (Kanan): Buat Pengajuan (Hijau Utama #059669, Teks Putih) -->
           <button type="button" class="mobile-btn-primary" style="margin: 0; min-height: 44px; padding: 0 10px; font-size: 0.8125rem; font-weight: 700; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); cursor: pointer;" onclick="window.mobileOpenCreateModal(false)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="12" y2="12"></line></svg>
+           
             <span>Buat Pengajuan</span>
           </button>
         </div>

@@ -526,7 +526,6 @@
           <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verifikasi nomor tiket</div>
           <form onsubmit="window.mobileSubmitManualScan(event)">
             <div class="mobile-form-group" style="margin-bottom: 10px;">
-              <label class="mobile-form-label">Nomor tiket <span class="req">*</span></label>
               <input type="text" class="mobile-input" id="mSecInputTicketId" placeholder="Masukkan nomor tiket" required style="font-size: 0.825rem; padding: 10px 12px; font-family: monospace;">
             </div>
             <button type="submit" class="mobile-btn-primary" style="padding: 10px; font-weight: 700;">
