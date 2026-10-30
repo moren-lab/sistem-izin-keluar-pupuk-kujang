@@ -321,6 +321,7 @@ function switchRole(role) {
   closeMobileSidebar();
 
   const btnSwitchKaryawan = document.getElementById('btnSwitchKaryawan');
+  const btnSwitchKaryawan2 = document.getElementById('btnSwitchKaryawan2');
   const btnSwitchApprover = document.getElementById('btnSwitchApprover');
   const btnSwitchApprover2 = document.getElementById('btnSwitchApprover2');
   const btnSwitchSecurity = document.getElementById('btnSwitchSecurity');
@@ -362,6 +363,7 @@ function switchRole(role) {
   }
 
   if (btnSwitchKaryawan) btnSwitchKaryawan.classList.remove('active');
+  if (btnSwitchKaryawan2) btnSwitchKaryawan2.classList.remove('active');
   if (btnSwitchApprover) btnSwitchApprover.classList.remove('active', 'approver');
   if (btnSwitchApprover2) btnSwitchApprover2.classList.remove('active', 'approver');
   if (btnSwitchSecurity) btnSwitchSecurity.classList.remove('active', 'security');
@@ -400,6 +402,21 @@ function switchRole(role) {
 
     setKaryawanNav(currentKaryawanNav || 'dashboard');
     if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Karyawan (${ACTORS.karyawan.name})`, 'info');
+  } else if (role === 'karyawan2') {
+    if (btnSwitchKaryawan2) btnSwitchKaryawan2.classList.add('active');
+    if (viewKaryawan) viewKaryawan.style.display = 'block';
+    if (navKaryawanGroup) navKaryawanGroup.style.display = 'flex';
+
+    const actK2 = (ACTORS && ACTORS.karyawan2) ? ACTORS.karyawan2 : { name: 'Arthur Morgan, S.Tr.T.', nip: 'PK-2024-8842' };
+    if (roleBadge) {
+      roleBadge.className = 'role-tag-pill role-karyawan';
+      roleBadge.textContent = 'Peran: Karyawan 2';
+    }
+    if (sidebarUserName) sidebarUserName.textContent = actK2.name;
+    if (sidebarUserSub) sidebarUserSub.textContent = `NIP: ${actK2.nip}`;
+
+    setKaryawanNav(currentKaryawanNav || 'dashboard');
+    if (typeof window.showToast === 'function') window.showToast(`Beralih ke mode Karyawan 2 (${actK2.name})`, 'info');
   } else if (role === 'approver') {
     if (btnSwitchApprover) btnSwitchApprover.classList.add('active', 'approver');
     if (viewApprover) viewApprover.style.display = 'block';
@@ -605,12 +622,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (menuAdminUsers) menuAdminUsers.addEventListener('click', () => setAdminNav('users'));
 
   const btnSwitchKaryawan = document.getElementById('btnSwitchKaryawan');
+  const btnSwitchKaryawan2 = document.getElementById('btnSwitchKaryawan2');
   const btnSwitchApprover = document.getElementById('btnSwitchApprover');
   const btnSwitchApprover2 = document.getElementById('btnSwitchApprover2');
   const btnSwitchSecurity = document.getElementById('btnSwitchSecurity');
   const btnSwitchAdmin = document.getElementById('btnSwitchAdmin');
 
   if (btnSwitchKaryawan) btnSwitchKaryawan.addEventListener('click', () => switchRole('karyawan'));
+  if (btnSwitchKaryawan2) btnSwitchKaryawan2.addEventListener('click', () => switchRole('karyawan2'));
   if (btnSwitchApprover) btnSwitchApprover.addEventListener('click', () => switchRole('approver'));
   if (btnSwitchApprover2) btnSwitchApprover2.addEventListener('click', () => switchRole('approver2'));
   if (btnSwitchSecurity) btnSwitchSecurity.addEventListener('click', () => switchRole('security'));

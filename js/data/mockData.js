@@ -38,6 +38,14 @@ const ACTORS = {
     roleLabel: 'Karyawan Pemohon',
     approverName: 'Ir. Hendra Gunawan, M.T.'
   },
+  karyawan2: {
+    nip: 'PK-2024-8842',
+    name: 'Arthur Morgan, S.Tr.T.',
+    title: 'Staf Instrumentasi & Otomasi Pabrik',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    roleLabel: 'Karyawan Pemohon 2',
+    approverName: 'Ir. Hendra Gunawan, M.T.'
+  },
   approver: {
     nip: 'PK-2015-1002',
     name: 'Ir. Hendra Gunawan, M.T.',
@@ -425,6 +433,17 @@ const DEFAULT_USERS = [
     lastLogin: 'Hari ini, 08:12 WIB'
   },
   {
+    kujangId: 'KJG-991025',
+    nip: 'PK-2024-8842',
+    name: 'Arthur Morgan, S.Tr.T.',
+    email: 'arthur.morgan@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    role: 'Karyawan',
+    roleKey: 'karyawan2',
+    status: 'Aktif',
+    lastLogin: 'Hari ini, 08:30 WIB'
+  },
+  {
     kujangId: 'KJG-881201',
     nip: 'PK-2015-1002',
     name: 'Ir. Hendra Gunawan, M.T.',
@@ -563,6 +582,30 @@ function syncActorsFromUsers(data) {
     window.ACTORS.karyawan.nip = activeEmpSync.nip;
     if (activeEmpSync.department) window.ACTORS.karyawan.department = activeEmpSync.department;
     if (activeEmpSync.role) window.ACTORS.karyawan.title = activeEmpSync.role;
+  }
+
+  // 1b. Sinkronisasi Karyawan Pemohon 2 (Arthur Morgan)
+  const activeEmp2Sync = users.find(u => u.roleKey === 'karyawan2' && u.status === 'Aktif');
+  if (window.ACTORS) {
+    if (activeEmp2Sync) {
+      window.ACTORS.karyawan2 = {
+        nip: activeEmp2Sync.nip || 'PK-2024-8842',
+        name: activeEmp2Sync.name,
+        title: activeEmp2Sync.role || 'Staf Instrumentasi & Otomasi Pabrik',
+        department: activeEmp2Sync.department || 'Departemen Rekayasa & Pemeliharaan',
+        roleLabel: 'Karyawan Pemohon 2',
+        approverName: primaryApprover ? primaryApprover.name : 'Ir. Hendra Gunawan, M.T.'
+      };
+    } else if (!window.ACTORS.karyawan2) {
+      window.ACTORS.karyawan2 = {
+        nip: 'PK-2024-8842',
+        name: 'Arthur Morgan, S.Tr.T.',
+        title: 'Staf Instrumentasi & Otomasi Pabrik',
+        department: 'Departemen Rekayasa & Pemeliharaan',
+        roleLabel: 'Karyawan Pemohon 2',
+        approverName: 'Ir. Hendra Gunawan, M.T.'
+      };
+    }
   }
 
   // 2. Sinkronisasi Atasan Utama (Approver 1 / Manager)

@@ -89,11 +89,11 @@ function parseTicketDateTime(val) {
   return null;
 }
 
-function getActiveTicket(nip = (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841')) {
+function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841'))) {
   // Ambil tiket terbaru dari window.ticketsList atau localStorage
   const list = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
   return list.find(t =>
-    (t.applicantNip === nip || !t.applicantNip) &&
+    (t.applicantNip === nip || (!t.applicantNip && nip === 'PK-2024-8841')) &&
     t.status !== 'Dibatalkan' &&
     t.status !== 'Ditolak' &&
     t.status !== 'Selesai' &&

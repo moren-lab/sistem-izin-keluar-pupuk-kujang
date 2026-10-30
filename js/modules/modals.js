@@ -125,6 +125,14 @@ function handleOpenNewRequest() {
   const formNewRequest = document.getElementById('formNewRequest');
   if (formNewRequest) formNewRequest.reset();
 
+  const modalNewSubtitle = document.getElementById('modalNewSubtitle');
+  if (modalNewSubtitle) {
+    const curEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : null;
+    if (curEmp) {
+      modalNewSubtitle.textContent = `${curEmp.name} — ${curEmp.nip} — ${curEmp.department || 'Rekayasa & Pemeliharaan'}`;
+    }
+  }
+
   // Reset dropdowns & fields agar form benar-benar kosong saat pertama kali dibuka
   const selectReqCategory = document.getElementById('selectReqCategory');
   const selectReqType = document.getElementById('selectReqType');
@@ -1589,7 +1597,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   // Button: Buka Tiket QR (Hanya untuk Karyawan dan hanya SEBELUM scan out)
   const btnDetailOpenQR = document.getElementById('btnDetailOpenQR');
   if (btnDetailOpenQR) {
-    const isKaryawan = (window.currentActor === 'karyawan');
+    const isKaryawan = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2');
     const canShowQR = isKaryawan && (ticket.status === 'Disetujui') && !ticket.scanOutTime;
     if (canShowQR) {
       btnDetailOpenQR.style.display = 'inline-flex';
@@ -1680,7 +1688,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const btnDetailEditTicket = document.getElementById('btnDetailEditTicket');
   const canEditTicketInDetail = (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || isEmergLockedInDetail) && !ticket.scanOutTime && ticket.status !== 'Disetujui';
   if (btnDetailEditTicket) {
-    if (canEditTicketInDetail && (window.currentActor === 'karyawan' || !window.currentActor)) {
+    if (canEditTicketInDetail && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor)) {
       btnDetailEditTicket.style.display = 'inline-flex';
       btnDetailEditTicket.onclick = () => {
         openEditTicketModal(ticket.id);
@@ -1694,7 +1702,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   // Cancel Action Button directly inside detail modal
   // Pos Jaga / Approver TIDAK berwenang membatalkan izin karyawan yang telah disetujui / aktif.
   // Hanya Karyawan (pemilik izin) yang dapat membatalkan pengajuan sebelum keluar area.
-  const isKaryawanActor = (window.currentActor === 'karyawan' || !window.currentActor);
+  const isKaryawanActor = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor);
   const btnDetailCancelTicket = document.getElementById('btnDetailCancelTicket');
   const canCancelInDetail = isKaryawanActor && (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || ticket.status === 'Disetujui' || ticket.status === 'Kedaluwarsa') && !ticket.scanOutTime;
   if (btnDetailCancelTicket) {
@@ -1932,7 +1940,7 @@ function openCancelModal(ticketId, callback) {
   }
 
   const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
-  if (ticket.applicantNip && ticket.applicantNip !== myNip && (window.currentActor === 'karyawan' || !window.currentActor)) {
+  if (ticket.applicantNip && ticket.applicantNip !== myNip && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor)) {
     if (typeof window.showToast === 'function') {
       window.showToast('Anda tidak berhak membatalkan izin milik karyawan lain.', 'danger');
     }
@@ -2647,15 +2655,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const ticketId = `TK-${dateCode}-${randomSuffix}`;
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
-      const empAccount = (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841'));
-      const directSup = (empAccount && empAccount.directSupervisor) || (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.');
+      const activeEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : ((window.currentActor === 'karyawan2' && ACTORS.karyawan2) ? ACTORS.karyawan2 : ACTORS.karyawan);
+      const empAccount = (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (activeEmp ? activeEmp.nip : 'PK-2024-8841'));
+      const directSup = (empAccount && empAccount.directSupervisor) || (activeEmp ? activeEmp.approverName : 'Ir. Hendra Gunawan, M.T.');
 
       const newTicket = {
         id: ticketId,
-        applicantName: ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.',
+        applicantName: activeEmp ? activeEmp.name : 'Budi Pratama, S.T.',
         directSupervisor: directSup,
-        applicantNip: ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841',
-        department: ACTORS.karyawan ? ACTORS.karyawan.department : 'Departemen Rekayasa & Pemeliharaan',
+        applicantNip: activeEmp ? activeEmp.nip : 'PK-2024-8841',
+        department: activeEmp ? (activeEmp.department || 'Departemen Rekayasa & Pemeliharaan') : 'Departemen Rekayasa & Pemeliharaan',
         category: window.pendingFormData.category,
         type: window.pendingFormData.type,
         destination: window.pendingFormData.destination,
@@ -3051,11 +3060,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ? window.generateEmergencyPasscode() 
         : String(Math.floor(100000 + Math.random() * 900000));
 
+      const activeEmergEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : ((window.currentActor === 'karyawan2' && ACTORS.karyawan2) ? ACTORS.karyawan2 : ACTORS.karyawan);
       const emergencyTicket = {
         id: ticketId,
-        applicantName: ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.',
-        applicantNip: ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841',
-        department: ACTORS.karyawan ? ACTORS.karyawan.department : 'Departemen Rekayasa & Pemeliharaan',
+        applicantName: activeEmergEmp ? activeEmergEmp.name : 'Budi Pratama, S.T.',
+        applicantNip: activeEmergEmp ? activeEmergEmp.nip : 'PK-2024-8841',
+        department: activeEmergEmp ? (activeEmergEmp.department || 'Departemen Rekayasa & Pemeliharaan') : 'Departemen Rekayasa & Pemeliharaan',
         category: categoryVal,
         type: typeVal,
         destination: dest,

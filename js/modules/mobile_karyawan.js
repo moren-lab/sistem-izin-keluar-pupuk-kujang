@@ -2432,7 +2432,7 @@
     // BRULE-08 & BRULE-12: Hanya Karyawan pemilik tiket yang melihat tombol aksi pemilik
     const emp = getActiveEmp();
     const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
-    const isOwner = (window.currentActor === 'karyawan' || !window.currentActor) && 
+    const isOwner = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor) && 
       (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841'));
 
     // Push state for Android / hardware back gesture

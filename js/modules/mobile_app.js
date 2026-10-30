@@ -15,7 +15,7 @@
   // -------------------------------------------------------------------
   function initMobileApp() {
     // Detect if desktop switched role (Mobile only supports Karyawan, Atasan 1, Atasan 2, Pos Jaga)
-    if (window.currentActor && ['karyawan', 'approver', 'approver2', 'security'].includes(window.currentActor)) {
+    if (window.currentActor && ['karyawan', 'karyawan2', 'approver', 'approver2', 'security'].includes(window.currentActor)) {
       currentMobileRole = window.currentActor;
     } else {
       currentMobileRole = 'karyawan';
@@ -71,6 +71,13 @@
       avatarEl.style.color = '#047857';
       avatarEl.style.borderColor = '#a7f3d0';
       avatarEl.title = 'Budi Pratama (Karyawan) — Klik untuk ganti peran';
+    } else if (currentMobileRole === 'karyawan2') {
+      subEl.textContent = 'Perizinan Keluar Area • Karyawan 2';
+      avatarEl.textContent = 'AM';
+      avatarEl.style.background = '#ccfbf1';
+      avatarEl.style.color = '#0f766e';
+      avatarEl.style.borderColor = '#99f6e4';
+      avatarEl.title = 'Arthur Morgan (Karyawan 2) — Klik untuk ganti peran';
     } else if (currentMobileRole === 'approver') {
       subEl.textContent = 'Perizinan Keluar Area • Atasan 1';
       avatarEl.textContent = 'HG';
@@ -99,7 +106,7 @@
     const navEl = document.getElementById('mobileBottomNav');
     if (!navEl) return;
 
-    if (currentMobileRole === 'karyawan') {
+    if (currentMobileRole === 'karyawan' || currentMobileRole === 'karyawan2') {
       navEl.innerHTML = `
         <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" onclick="window.mobileSwitchTab('dashboard')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -178,7 +185,7 @@
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (currentMobileRole === 'karyawan') {
+    if (currentMobileRole === 'karyawan' || currentMobileRole === 'karyawan2') {
       if (typeof window.renderMobileKaryawan === 'function') {
         window.renderMobileKaryawan(container, currentMobileTab);
       }
@@ -375,6 +382,7 @@
 
     const roleNames = {
       karyawan: 'Karyawan (Budi Pratama, S.T.)',
+      karyawan2: 'Karyawan 2 (Arthur Morgan, S.Tr.T.)',
       approver: 'Atasan 1 (Ir. Hendra Gunawan, M.T.)',
       approver2: 'Atasan 2 (Dewi Sartika, S.T., M.M.)',
       security: 'Pos Jaga (Sertu Agus - Pos 1)'
@@ -386,7 +394,7 @@
 
   // Synchronize Mobile when Desktop or Auth changes role
   window.syncMobileRole = function (role) {
-    if (['karyawan', 'approver', 'approver2', 'security'].includes(role)) {
+    if (['karyawan', 'karyawan2', 'approver', 'approver2', 'security'].includes(role)) {
       currentMobileRole = role;
     } else {
       currentMobileRole = 'karyawan';
@@ -443,6 +451,14 @@
         dept: 'Departemen Rekayasa & Pemeliharaan',
         initials: 'BP',
         avatarBg: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'
+      },
+      karyawan2: {
+        name: 'Arthur Morgan, S.Tr.T.',
+        nip: 'PK-2024-8842',
+        roleLabel: 'Karyawan Pemohon 2',
+        dept: 'Departemen Rekayasa & Pemeliharaan',
+        initials: 'AM',
+        avatarBg: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)'
       },
       approver: {
         name: 'Ir. Hendra Gunawan, M.T.',
@@ -685,8 +701,8 @@
     let roleLabel = 'Karyawan';
     let flag = 'deletedByKaryawan';
 
-    if (role === 'karyawan') {
-      const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+    if (role === 'karyawan' || role === 'karyawan2') {
+      const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || (role === 'karyawan2' ? 'PK-2024-8842' : 'PK-2024-8841');
       finishedTickets = tickets.filter(t => !t.deletedByKaryawan && 
         (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) &&
         FINISHED_STATUSES_RULE.includes(t.status)

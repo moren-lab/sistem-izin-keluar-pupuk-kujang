@@ -17,6 +17,28 @@ window.currentEmpViewMode = window.currentEmpViewMode || 'card';
  */
 function getCurrentEmployeeActor() {
   const users = window.MOCK_USERS || [];
+  const isK2 = (window.currentActor === 'karyawan2');
+
+  if (isK2) {
+    const activeEmp2 = users.find(u => u.roleKey === 'karyawan2' && u.status === 'Aktif');
+    if (activeEmp2) {
+      if (window.ACTORS && window.ACTORS.karyawan2) {
+        window.ACTORS.karyawan2.name = activeEmp2.name;
+        window.ACTORS.karyawan2.nip = activeEmp2.nip;
+        if (activeEmp2.department) window.ACTORS.karyawan2.department = activeEmp2.department;
+        if (activeEmp2.role) window.ACTORS.karyawan2.title = activeEmp2.role;
+      }
+      return activeEmp2;
+    }
+    return (window.ACTORS && window.ACTORS.karyawan2) || {
+      nip: 'PK-2024-8842',
+      name: 'Arthur Morgan, S.Tr.T.',
+      title: 'Staf Instrumentasi & Otomasi Pabrik',
+      department: 'Departemen Rekayasa & Pemeliharaan',
+      approverName: 'Ir. Hendra Gunawan, M.T.'
+    };
+  }
+
   const activeEmp = users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
   if (activeEmp) {
     if (window.ACTORS && window.ACTORS.karyawan) {
@@ -36,6 +58,7 @@ function getCurrentEmployeeActor() {
   };
 }
 window.getCurrentEmployeeActor = getCurrentEmployeeActor;
+window.getCurrentEmployeeUser = getCurrentEmployeeActor;
 
 function updateKaryawanMetrics() {
   const ticketsList = window.ticketsList || [];
