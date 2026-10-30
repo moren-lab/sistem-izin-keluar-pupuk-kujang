@@ -56,15 +56,38 @@
     return `${date.getDate()} ${months[date.getMonth()]}, ${timeFormatted}`;
   }
 
+  // Universal Role Category Helpers (Scalable for 100+ employees and approvers)
+  function isEmployeeRole(roleKey) {
+    if (!roleKey) return true;
+    const k = String(roleKey).toLowerCase();
+    return k === 'karyawan' || k.startsWith('karyawan') || k.includes('employee') || k.includes('pemohon');
+  }
+
+  function isApproverRole(roleKey) {
+    if (!roleKey) return false;
+    const k = String(roleKey).toLowerCase();
+    return k === 'approver' || k.startsWith('approver') || k.includes('atasan') || k.includes('manager');
+  }
+
+  function isSecurityRole(roleKey) {
+    if (!roleKey) return false;
+    const k = String(roleKey).toLowerCase();
+    return k === 'security' || k.startsWith('security') || k.includes('satpam') || k.includes('pos');
+  }
+
   // Helper Pengguna Aktif
   function getActiveUserInfo() {
     const actorKey = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
     const actors = window.ACTORS || {};
-    const actor = actors[actorKey] || {};
+    let actor = actors[actorKey];
+    if ((!actor || !actor.nip) && isEmployeeRole(actorKey) && typeof window.getCurrentEmployeeActor === 'function') {
+      actor = window.getCurrentEmployeeActor();
+    }
+    const defaultNip = (actorKey === 'approver' || actorKey.startsWith('approver')) ? 'PK-2015-1002' : (isSecurityRole(actorKey) ? 'SEC-2018-042' : 'PK-2024-8841');
     return {
       roleKey: actorKey,
-      nip: actor.nip || (actorKey === 'karyawan' ? 'PK-2024-8841' : (actorKey === 'approver' ? 'PK-2015-1002' : 'PK-2018-4421')),
-      name: actor.name || 'Pengguna'
+      nip: (actor && actor.nip) || defaultNip,
+      name: (actor && actor.name) || 'Pengguna'
     };
   }
 
@@ -109,14 +132,14 @@
     const list = notificationsList || [];
 
     return list.filter(n => {
-      if (user.roleKey === 'karyawan') {
-        return n.recipientRole === 'karyawan' && (!n.recipientNip || n.recipientNip === user.nip);
+      if (isEmployeeRole(user.roleKey)) {
+        return isEmployeeRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip);
       }
-      if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
-        return n.recipientRole === 'approver' && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
+      if (isApproverRole(user.roleKey)) {
+        return isApproverRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
       }
-      if (user.roleKey === 'security') {
-        return n.recipientRole === 'security';
+      if (isSecurityRole(user.roleKey)) {
+        return isSecurityRole(n.recipientRole);
       }
       return false;
     });
@@ -157,12 +180,12 @@
     const user = getActiveUserInfo();
     notificationsList = notificationsList.filter(n => {
       let isForUser = false;
-      if (user.roleKey === 'karyawan') {
-        isForUser = n.recipientRole === 'karyawan' && (!n.recipientNip || n.recipientNip === user.nip);
-      } else if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
-        isForUser = n.recipientRole === 'approver' && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
-      } else if (user.roleKey === 'security') {
-        isForUser = n.recipientRole === 'security';
+      if (isEmployeeRole(user.roleKey)) {
+        isForUser = isEmployeeRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip);
+      } else if (isApproverRole(user.roleKey)) {
+        isForUser = isApproverRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
+      } else if (isSecurityRole(user.roleKey)) {
+        isForUser = isSecurityRole(n.recipientRole);
       }
       return !isForUser;
     });
@@ -179,12 +202,12 @@
 
     notificationsList.forEach(n => {
       let isForUser = false;
-      if (user.roleKey === 'karyawan') {
-        isForUser = n.recipientRole === 'karyawan' && (!n.recipientNip || n.recipientNip === user.nip);
-      } else if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
-        isForUser = n.recipientRole === 'approver' && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
-      } else if (user.roleKey === 'security') {
-        isForUser = n.recipientRole === 'security';
+      if (isEmployeeRole(user.roleKey)) {
+        isForUser = isEmployeeRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip);
+      } else if (isApproverRole(user.roleKey)) {
+        isForUser = isApproverRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
+      } else if (isSecurityRole(user.roleKey)) {
+        isForUser = isSecurityRole(n.recipientRole);
       }
 
       if (isForUser && !n.isRead) {
@@ -265,11 +288,11 @@
     const isMobile = window.innerWidth <= 768;
 
     if (isMobile) {
-      if (user.roleKey === 'karyawan') {
+      if (isEmployeeRole(user.roleKey)) {
         if (typeof window.mobileOpenTicketDetail === 'function') {
           window.mobileOpenTicketDetail(ticketId);
         }
-      } else if (user.roleKey === 'approver' || user.roleKey === 'approver2') {
+      } else if (isApproverRole(user.roleKey)) {
         if (typeof window.mobileOpenAtasanDetailModal === 'function') {
           window.mobileOpenAtasanDetailModal(ticketId);
         } else if (typeof window.openTicketDetail === 'function') {
@@ -612,10 +635,10 @@
     if (notifView) notifView.style.display = 'none';
 
     const role = window.currentActor || 'karyawan';
-    if (role === 'karyawan') {
+    if (isEmployeeRole(role)) {
       const v = document.getElementById('viewKaryawan');
       if (v) v.style.display = 'block';
-    } else if (role === 'approver' || role === 'approver2') {
+    } else if (isApproverRole(role)) {
       const v = document.getElementById('viewApprover');
       if (v) v.style.display = 'block';
     } else if (role === 'security') {
