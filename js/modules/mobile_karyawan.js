@@ -910,7 +910,7 @@
     } else if (isApproved) {
       actionButtonsHtml = `
         <div class="mobile-btn-group-stacked" style="margin-top: 12px;">
-          <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 700;" onclick="window.mobileOpenQrModal('${t.id}')">
+          <button type="button" class="mobile-btn-secondary mobile-btn-qr-outline" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenQrModal('${t.id}')">
             <span>Buka QR Izin</span>
           </button>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1116,7 +1116,7 @@
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${(activeTicket.status === 'Disetujui' || activeTicket.status === 'Sedang di Luar') ? `
-            <button type="button" class="mobile-btn-primary" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${activeTicket.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-qr-outline" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${activeTicket.id}')">
               Buka QR Izin Aktif Ini
             </button>
           ` : ''}
@@ -1593,7 +1593,8 @@
     const retInput = document.getElementById('mFormEstimatedReturn');
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
-    const todayEnd = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T23:59`;
+    const maxHourStr = (now.getDay() === 5) ? '16:30' : '16:00';
+    const todayEnd = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${maxHourStr}`;
 
     if (val === 'Urusan Pribadi') {
       if (exitInput) exitInput.max = todayEnd;
@@ -1648,6 +1649,20 @@
   // Form Submit Handler -> Validates & Opens Step 2 Confirmation Summary
   window.mobileSubmitPermitForm = function (e, isEmergency) {
     e.preventDefault();
+
+    // 0. Validasi Jam Kerja Reguler Pengiriman (Senin - Kamis max 16:00, Jumat max 16:30, Sabtu/Minggu libur)
+    if (typeof window.isWithinOperationalHours === 'function') {
+      const opCheck = window.isWithinOperationalHours(new Date());
+      if (!opCheck.allowed) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(opCheck.message || `Pengajuan izin hanya dapat dilakukan saat jam kerja reguler (${opCheck.scheduleText})!`, 'danger');
+        } else {
+          alert(opCheck.message || `Pengajuan izin hanya dapat dilakukan saat jam kerja reguler (${opCheck.scheduleText})!`);
+        }
+        return;
+      }
+    }
+
     const approverName = document.getElementById('mFormApproverValue')?.value || '';
     const category = document.getElementById('mFormCategory')?.value || '';
     const returnType = document.getElementById('mFormReturnType')?.value || '';
@@ -1711,6 +1726,18 @@
       }
     }
 
+    // Validasi Rencana Waktu Keluar terhadap jam kerja pabrik (07:00 - 16:00/16:30)
+    if (typeof window.validateWorkingHours === 'function') {
+      const exitWorkCheck = window.validateWorkingHours(plannedExit, isEmergency ? 'Rencana waktu keluar darurat' : 'Rencana waktu keluar');
+      if (!exitWorkCheck.valid) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(exitWorkCheck.message, 'danger');
+        }
+        document.getElementById('mFormPlannedExit')?.focus();
+        return;
+      }
+    }
+
     // 7. Estimated return check
     if (returnType === 'Kembali ke Area') {
       if (!estimatedReturn) {
@@ -1727,6 +1754,18 @@
         const retD = new Date(estimatedReturn);
         if (retD.getDate() !== now.getDate() || retD.getMonth() !== now.getMonth() || retD.getFullYear() !== now.getFullYear()) {
           if (typeof window.showToast === 'function') window.showToast('Untuk keperluan Urusan Pribadi, perkiraan waktu kembali harus pada hari ini!', 'warning');
+          document.getElementById('mFormEstimatedReturn')?.focus();
+          return;
+        }
+      }
+
+      // Validasi Perkiraan Waktu Kembali terhadap jam kerja pabrik (07:00 - 16:00/16:30)
+      if (typeof window.validateWorkingHours === 'function') {
+        const returnWorkCheck = window.validateWorkingHours(estimatedReturn, isEmergency ? 'Perkiraan waktu kembali darurat' : 'Perkiraan waktu kembali');
+        if (!returnWorkCheck.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(returnWorkCheck.message, 'danger');
+          }
           document.getElementById('mFormEstimatedReturn')?.focus();
           return;
         }
@@ -2322,7 +2361,7 @@
         <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
 
         <!-- QR Box -->
-        <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 18px; margin: 16px auto; max-width: 220px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+        <div style="background: #ffffff; border: 2px solid #059669; border-radius: 16px; padding: 18px; margin: 16px auto; max-width: 220px; box-shadow: 0 4px 14px rgba(5,150,105,0.08);">
           <div id="mobileQrCanvasContainer" style="display:flex; justify-content:center; align-items:center;"></div>
           <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; margin-top: 8px;">PT PUPUK KUJANG CIKAMPEK</div>
         </div>
@@ -2480,7 +2519,7 @@
             </button>
           ` : ''}
           ${isApproved || isOutside ? `
-            <button type="button" class="mobile-btn-primary" style="background:#059669; border-color:#059669; min-height: 44px; font-weight: 700;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-qr-outline" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; min-height: 44px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
               Tampilkan QR Code Resmi
             </button>
           ` : ''}
@@ -2630,6 +2669,20 @@
 
     const selDate = new Date(newTime);
     const nowTime = new Date();
+
+    // 1. Validasi Jam Kerja Operasional Pabrik saat Pengajuan Perpanjangan
+    if (typeof window.isWithinOperationalHours === 'function') {
+      const workHoursCheck = window.isWithinOperationalHours(nowTime);
+      if (!workHoursCheck.allowed) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`, 'danger');
+        } else {
+          alert(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`);
+        }
+        return;
+      }
+    }
+
     if (isNaN(selDate.getTime()) || selDate.getTime() <= nowTime.getTime()) {
       if (typeof window.showToast === 'function') {
         window.showToast('Waktu perpanjangan tidak boleh di masa lampau!', 'warning');
@@ -2642,6 +2695,40 @@
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
+
+    // 2. Validasi Batas Usulan Jam Kembali Baru terhadap Jam Pulang Kerja
+    const isDinas = t.category && String(t.category).toLowerCase().includes('dinas');
+    if (!isDinas) {
+      if (selDate.getDate() !== nowTime.getDate() || selDate.getMonth() !== nowTime.getMonth() || selDate.getFullYear() !== nowTime.getFullYear()) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Perpanjangan waktu Urusan Pribadi hanya dapat diajukan untuk hari ini!', 'danger');
+        }
+        return;
+      }
+      const dayOfWeek = nowTime.getDay();
+      const returnHours = selDate.getHours();
+      const returnMins = selDate.getMinutes();
+      const returnTotalMins = returnHours * 60 + returnMins;
+      const maxAllowedMins = (dayOfWeek === 5) ? (16 * 60 + 30) : (16 * 60);
+      const closingStr = (dayOfWeek === 5) ? '16:30 WIB' : '16:00 WIB';
+
+      if (returnTotalMins > maxAllowedMins) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
+        }
+        return;
+      }
+    } else {
+      if (typeof window.validateWorkingHours === 'function') {
+        const extCheck = window.validateWorkingHours(newTime, 'Perkiraan waktu kembali perpanjangan');
+        if (!extCheck.valid) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(extCheck.message, 'danger');
+          }
+          return;
+        }
+      }
+    }
 
     const emp = getActiveEmp();
     const now = new Date();

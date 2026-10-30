@@ -756,6 +756,22 @@ body.theme-dark .mobile-top-role-pill {
   color: #ffffff !important;
 }
 
+.mobile-btn-qr-outline {
+  background: #ffffff !important;
+  color: #059669 !important;
+  border: 1.5px solid #059669 !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.1) !important;
+}
+
+.mobile-btn-qr-outline:hover,
+.mobile-btn-qr-outline:active {
+  background: #ecfdf5 !important;
+  border-color: #047857 !important;
+  color: #047857 !important;
+}
+
 /* Info Box Components */
 .mobile-info-box-blue {
   background: #eff6ff;

@@ -967,44 +967,141 @@ function getClosingTimeForDate(date) {
   };
 }
 
-function validateWorkingHours(dateInput, label = 'Waktu') {
+function validateWorkingHours(dateInput, label = 'Waktu', isDinas = false) {
   if (!dateInput) return { valid: false, message: `${label} wajib diisi!` };
   const d = (typeof dateInput === 'string') ? new Date(dateInput) : dateInput;
   if (!d || isNaN(d.getTime())) return { valid: false, message: `Format ${label} tidak valid!` };
 
-  // Mendukung operasional 24 jam untuk seluruh shift kerja (termasuk lembur, shift malam, dan regu satpam/K3)
   const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const day = d.getDay();
   const hours = d.getHours();
   const minutes = d.getMinutes();
-  const pad = (n) => String(n).padStart(2, '0');
+  const totalMinutes = hours * 60 + minutes;
 
+  // 1. Akhir Pekan (Sabtu & Minggu): Libur Pabrik
+  if (day === 0 || day === 6) {
+    return {
+      valid: false,
+      message: `${label} tidak dapat memilih hari libur akhir pekan (${dayNames[day]})!`
+    };
+  }
+
+  // 2. Minimal jam mulai kerja reguler 07:00 WIB
+  if (totalMinutes < 7 * 60) {
+    return {
+      valid: false,
+      message: `${label} tidak boleh sebelum jam masuk kantor (07:00 WIB)!`
+    };
+  }
+
+  // 3. Batas jam kerja reguler pabrik
+  if (day === 5) {
+    // Hari Jumat: maks 16:30 WIB
+    if (totalMinutes > 16 * 60 + 30) {
+      return {
+        valid: false,
+        message: `${label} hari Jumat tidak boleh melebihi jam kerja reguler (maksimal 16:30 WIB)!`
+      };
+    }
+  } else if (day >= 1 && day <= 4) {
+    // Senin - Kamis: maks 16:00 WIB
+    if (totalMinutes > 16 * 60) {
+      return {
+        valid: false,
+        message: `${label} hari ${dayNames[day]} tidak boleh melebihi jam kerja reguler (maksimal 16:00 WIB)!`
+      };
+    }
+  }
+
+  const closing = getClosingTimeForDate(d);
   return {
     valid: true,
-    closingInfo: {
-      day,
-      dayName: dayNames[day] || 'Hari Kerja',
-      hour: hours,
-      minute: minutes,
-      totalMinutes: hours * 60 + minutes,
-      closingStr: '24 Jam',
-      scheduleText: 'Operasional 24 Jam (Shift Siang / Malam / Lembur)'
-    }
+    closingInfo: closing
   };
 }
 
 function setInputMaxByDate(inputEl, baseDate = new Date()) {
   if (!inputEl) return;
-  // Bebaskan batasan jam agar karyawan shift malam atau lembur dapat mengajukan izin 24 jam
-  inputEl.removeAttribute('max');
+  const d = (typeof baseDate === 'string') ? new Date(baseDate) : baseDate;
+  if (!d || isNaN(d.getTime())) return;
+  const pad = n => String(n).padStart(2, '0');
+  const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const day = d.getDay();
+  const maxHourStr = (day === 5) ? '16:30' : '16:00';
+  inputEl.max = `${dateStr}T${maxHourStr}`;
 }
 
 function isWithinOperationalHours(date = new Date()) {
-  return {
-    allowed: true,
-    scheduleText: 'Operasional 24 Jam (Shift Pabrik & Pengamanan)',
-    closingHour: '24 Jam'
-  };
+  const d = (typeof date === 'string') ? new Date(date) : date;
+  if (!d || isNaN(d.getTime())) return { allowed: false, message: 'Format waktu tidak valid!' };
+
+  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const day = d.getDay();
+  const hours = d.getHours();
+  const minutes = d.getMinutes();
+  const totalMins = hours * 60 + minutes;
+
+  // 1. Akhir Pekan (Sabtu & Minggu): Libur Pabrik
+  if (day === 0 || day === 6) {
+    return {
+      allowed: false,
+      scheduleText: 'Hari Libur Akhir Pekan (Sabtu / Minggu)',
+      closingHour: 'Hari Libur',
+      message: 'Pengajuan izin tidak dapat dikirim pada hari libur akhir pekan (Sabtu & Minggu).'
+    };
+  }
+
+  // 2. Hari Jumat: 07:00 - 16:30 WIB
+  if (day === 5) {
+    if (totalMins >= 16 * 60 + 30) {
+      return {
+        allowed: false,
+        scheduleText: 'Jumat maksimal 16:30 WIB',
+        closingHour: '16:30 WIB',
+        message: 'Pengajuan izin tidak dapat dikirim karena jam kerja reguler hari Jumat telah berakhir (maksimal 16:30 WIB).'
+      };
+    }
+    if (totalMins < 7 * 60) {
+      return {
+        allowed: false,
+        scheduleText: 'Jumat pukul 07:00 - 16:30 WIB',
+        closingHour: '07:00 WIB',
+        message: 'Pengajuan izin hanya dapat dikirim saat jam kerja reguler (mulai pukul 07:00 WIB).'
+      };
+    }
+    return {
+      allowed: true,
+      scheduleText: 'Jumat pukul 07:00 - 16:30 WIB',
+      closingHour: '16:30 WIB'
+    };
+  }
+
+  // 3. Senin s.d. Kamis: 07:00 - 16:00 WIB
+  if (day >= 1 && day <= 4) {
+    if (totalMins >= 16 * 60) {
+      return {
+        allowed: false,
+        scheduleText: 'Senin - Kamis maksimal 16:00 WIB',
+        closingHour: '16:00 WIB',
+        message: `Pengajuan izin tidak dapat dikirim karena jam kerja reguler hari ${dayNames[day]} telah berakhir (maksimal 16:00 WIB).`
+      };
+    }
+    if (totalMins < 7 * 60) {
+      return {
+        allowed: false,
+        scheduleText: 'Senin - Kamis pukul 07:00 - 16:00 WIB',
+        closingHour: '07:00 WIB',
+        message: 'Pengajuan izin hanya dapat dikirim saat jam kerja reguler (mulai pukul 07:00 WIB).'
+      };
+    }
+    return {
+      allowed: true,
+      scheduleText: 'Senin - Kamis pukul 07:00 - 16:00 WIB',
+      closingHour: '16:00 WIB'
+    };
+  }
+
+  return { allowed: false, message: 'Di luar jam kerja reguler pabrik.' };
 }
 
 function isDinasCategory(category) {
@@ -3138,7 +3235,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (typeof window.createNotification === 'function') {
-        const ticketForExt = ticketsList.find(t => t.id === currentTicketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
+        const ticketForExt = ticket;
         if (ticketForExt) {
           window.createNotification({
             recipientRole: 'approver',
