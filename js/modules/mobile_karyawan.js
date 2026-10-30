@@ -1901,8 +1901,8 @@
   // 8. EXECUTE SAVE / UPDATE PERMIT (100% PARITY DENGAN PC MODAL 2 SUBMISSION)
   // -------------------------------------------------------------------
   window.mobileExecuteSubmitPermit = function () {
-    if (!pendingMobileFormData) return;
-    const data = pendingMobileFormData;
+    if (!pendingMobileFormData && !window.pendingMobileFormData) return;
+    const data = pendingMobileFormData || window.pendingMobileFormData;
     const emp = getActiveEmp();
     const tickets = window.ticketsList || [];
 
@@ -1917,6 +1917,10 @@
       const ticketId = data.editingTicketId;
       const t = tickets.find(x => x.id === ticketId);
       if (t) {
+        const oldApprover = t.approverName;
+        const newApprover = data.approverName;
+        const isApproverChanged = Boolean(oldApprover && newApprover && oldApprover !== newApprover);
+
         t.approverName = data.approverName;
         t.category = data.category;
         t.type = data.returnType;
@@ -1928,12 +1932,54 @@
         t.plannedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
 
         if (!t.timeline) t.timeline = [];
-        t.timeline.unshift({
-          event: 'Pengajuan Diperbarui (Diedit)',
-          time: nowFormatted,
-          by: `${emp.name} (Karyawan)`,
-          desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${t.approverName}).`
-        });
+
+        if (isApproverChanged) {
+          t.reassignedFrom = oldApprover;
+          t.reassignedTo = newApprover;
+          t.reassignedAt = nowFormatted;
+          t.reassignedBy = `${emp.name} (Karyawan)`;
+
+          t.timeline.unshift({
+            event: 'Persetujuan Dialihkan',
+            time: nowFormatted,
+            by: `${emp.name} (Karyawan)`,
+            desc: `Peninjauan persetujuan izin dialihkan dari ${oldApprover} ke ${newApprover}.`
+          });
+
+          // Notifikasi lonceng untuk kedua atasan jika sistem notifikasi aktif
+          if (typeof window.createNotification === 'function') {
+            // Untuk atasan baru yang menerima pengalihan
+            window.createNotification({
+              recipientRole: 'approver',
+              recipientName: newApprover,
+              actorSource: 'karyawan',
+              type: 'pengajuan_dialihkan',
+              title: 'Pengajuan Dialihkan ke Anda',
+              message: `Pengajuan #${ticketId} (${emp.name}) dialihkan dari ${oldApprover} ke Anda.`,
+              ticketId: ticketId,
+              priority: 'urgent'
+            });
+
+            // Untuk atasan lama yang dialihkan keluar
+            window.createNotification({
+              recipientRole: 'approver',
+              recipientName: oldApprover,
+              actorSource: 'karyawan',
+              type: 'pengajuan_dialihkan_keluar',
+              title: 'Pengajuan Dialihkan ke Atasan Lain',
+              message: `Pengajuan #${ticketId} (${emp.name}) dialihkan oleh pemohon ke ${newApprover}.`,
+              ticketId: ticketId,
+              priority: 'normal'
+            });
+          }
+        } else {
+          t.timeline.unshift({
+            event: 'Pengajuan Diperbarui (Diedit)',
+            time: nowFormatted,
+            by: `${emp.name} (Karyawan)`,
+            desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${t.approverName}).`
+          });
+        }
 
         window.editingTicketId = null;
         pendingMobileFormData = null;
@@ -1948,13 +1994,19 @@
         window.mobileCloseSheet();
 
         if (typeof window.showToast === 'function') {
-          window.showToast(`Pengajuan #${ticketId} berhasil diperbarui!`, 'success');
+          if (isApproverChanged) {
+            window.showToast(`Pengajuan #${ticketId} berhasil dialihkan ke ${newApprover}!`, 'success');
+          } else {
+            window.showToast(`Pengajuan #${ticketId} berhasil diperbarui!`, 'success');
+          }
         }
 
         renderMobileKaryawan(null, currentKaryawanTab);
         if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
         if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
         if (typeof window.renderApproverView === 'function') window.renderApproverView();
+        if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+        if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
         return;
       }
     }

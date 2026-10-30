@@ -57,7 +57,39 @@
     const app = getActiveApprover();
     const aName = (app.name || '').toLowerCase();
     const tApprover = (ticket.approverName || '').toLowerCase();
-    
+
+    if (aName.includes('dewi')) {
+      return tApprover.includes('dewi');
+    } else {
+      return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+    }
+  }
+
+  function isTicketReassignedFromMobileApprover(ticket) {
+    if (!ticket || !ticket.reassignedFrom) return false;
+    const app = getActiveApprover();
+    const aName = (app.name || '').toLowerCase();
+    const fromName = (ticket.reassignedFrom || '').toLowerCase();
+    if (aName.includes('dewi')) {
+      return fromName.includes('dewi');
+    } else {
+      return fromName.includes('hendra');
+    }
+  }
+
+  function isTicketReassignedToMobileApprover(ticket) {
+    if (!ticket || !ticket.reassignedFrom) return false;
+    return isTicketAssignedToMobileApprover(ticket);
+  }
+
+  function isTicketUnderMobileSupervision(ticket) {
+    if (!ticket) return false;
+    const app = getActiveApprover();
+    const aName = (app.name || '').toLowerCase();
+
+    if (isTicketAssignedToMobileApprover(ticket)) return true;
+    if (isTicketReassignedFromMobileApprover(ticket)) return true;
+
     let empSupervisor = ticket.directSupervisor || '';
     if (!empSupervisor && window.KUJANG_ACCOUNTS && ticket.applicantNip) {
       const acc = window.KUJANG_ACCOUNTS.find(a => a.nip === ticket.applicantNip);
@@ -67,15 +99,15 @@
       empSupervisor = 'Ir. Hendra Gunawan, M.T.';
     }
 
-    const isUnderSupervision = empSupervisor && empSupervisor.toLowerCase().includes(aName.includes('dewi') ? 'dewi' : 'hendra');
-    const deptMatch = Boolean(ticket.department && (app.department || app.dept) && 
-      ticket.department.toLowerCase() === (app.department || app.dept).toLowerCase());
-
-    if (aName.includes('dewi')) {
-      return tApprover.includes('dewi') || isUnderSupervision;
-    } else {
-      return tApprover.includes('hendra') || (!tApprover.includes('dewi')) || isUnderSupervision || deptMatch;
+    if (aName.includes('hendra')) {
+      const supervisor = (empSupervisor || '').toLowerCase();
+      return supervisor.includes('hendra') || (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.department || '').toLowerCase().includes('rekayasa')));
     }
+    if (aName.includes('dewi')) {
+      const supervisor = (empSupervisor || '').toLowerCase();
+      return supervisor.includes('dewi');
+    }
+    return false;
   }
 
   function isDeletedByCurrentMobileApprover(t) {
@@ -90,7 +122,7 @@
 
   function getTeamTickets() {
     const list = window.ticketsList || [];
-    return list.filter(t => !isDeletedByCurrentMobileApprover(t) && isTicketAssignedToMobileApprover(t));
+    return list.filter(t => !isDeletedByCurrentMobileApprover(t) && isTicketUnderMobileSupervision(t));
   }
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Bawahan'; }
@@ -185,6 +217,13 @@
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const processedTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak');
+
+    const reassignedAwayTickets = tickets.filter(t => 
+      isTicketReassignedFromMobileApprover(t) && 
+      t.status !== 'Selesai' && 
+      t.status !== 'Ditolak' && 
+      t.status !== 'Dibatalkan'
+    );
 
     // Ekstrak riwayat audit trail asli dari seluruh tiket tim bawahan
     const allActivities = [];
@@ -328,7 +367,11 @@
     // Top Pending Regular Tickets (matching PDF: Raka Pratama, Nisa Putri, etc.)
     let pendingTicketsHtml = '';
     if (pendingNew.length > 0) {
-      pendingTicketsHtml = pendingNew.slice(0, 3).map(t => `
+      pendingTicketsHtml = pendingNew.slice(0, 3).map(t => {
+        const isReassignedAway = isTicketReassignedFromMobileApprover(t);
+        const isReassignedToMe = isTicketReassignedToMobileApprover(t);
+
+        return `
         <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
           <div class="mobile-ticket-item-header">
             <div>
@@ -338,24 +381,48 @@
             <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg><span>Detail Pengajuan</span></button>
           </div>
 
-          <div style="margin: 4px 0 6px 0;">
+          <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
             <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
+            ${isReassignedAway ? `
+              <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #fde68a;">↳ Dialihkan ke ${t.approverName}</span>
+            ` : (isReassignedToMe ? `
+              <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #bfdbfe;">↳ Dialihkan dari ${t.reassignedFrom}</span>
+            ` : '')}
           </div>
+
+          ${isReassignedAway ? `
+            <div style="font-size: 0.725rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 8px; margin-bottom: 8px; line-height: 1.4;">
+              Pengajuan ini dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangannya.
+            </div>
+          ` : (isReassignedToMe ? `
+            <div style="font-size: 0.725rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px; margin-bottom: 8px; line-height: 1.4;">
+              ↳ <strong>Status:</strong> Pengajuan ini dialihkan dari <strong>${t.reassignedFrom}</strong> ke Anda.
+            </div>
+          ` : '')}
 
           <div style="font-size: 0.725rem; color: #475569; margin-bottom: 8px;">
             Rencana Keluar: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</strong>
           </div>
 
-          <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
-              Tolak
-            </button>
-            <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
-              Setujui
-            </button>
-          </div>
+          ${isReassignedAway ? `
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 40px; padding: 6px 10px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                Pantau Status Pengajuan
+              </button>
+            </div>
+          ` : `
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+                Tolak
+              </button>
+              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
+                Setujui
+              </button>
+            </div>
+          `}
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // Top Pending Extension if any (e.g. Dimas Saputra)
@@ -433,6 +500,21 @@
           <div style="font-size: 1.6rem; font-weight: 900; color: #7c3aed; line-height: 1.2; margin: 3px 0 2px 0;">${outsideTickets.length}</div>
         </div>
       </div>
+
+      <!-- Reassigned Away Banner (Atasan Lama) -->
+      ${reassignedAwayTickets.length > 0 ? `
+        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px; background: #fffbeb; border: 1.5px solid #fde68a;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a;">Dialihkan</span>
+              <span style="font-size: 0.8rem; font-weight: 800; color: #92400e;">${reassignedAwayTickets.length} Pengajuan Dialihkan ke Atasan Lain</span>
+            </div>
+          </div>
+          <div style="font-size: 0.725rem; color: #78350f; line-height: 1.4;">
+            ${reassignedAwayTickets.map(t => `Tiket <strong>${t.id}</strong> (${getTName(t)}) dialihkan ke <strong>${t.approverName}</strong>`).join(', ')}. Status pengajuan tetap dapat Anda pantau.
+          </div>
+        </div>
+      ` : ''}
 
       <!-- Priority Emergency Section -->
       ${priorityHtml}
@@ -543,6 +625,9 @@
       } else {
         itemsHtml = activeList.map(t => {
           const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
+          const isReassignedAway = isTicketReassignedFromMobileApprover(t);
+          const isReassignedToMe = isTicketReassignedToMobileApprover(t);
+
           return `
             <div class="mobile-ticket-item" style="margin-bottom: 12px;">
               <div class="mobile-ticket-item-header">
@@ -550,7 +635,14 @@
                   <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
                   <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
                 </div>
-                <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
+                  ${isReassignedAway ? `
+                    <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;">↳ Dialihkan ke ${t.approverName}</span>
+                  ` : (isReassignedToMe ? `
+                    <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;">↳ Dialihkan dari ${t.reassignedFrom}</span>
+                  ` : '')}
+                </div>
               </div>
 
               <div style="font-family: monospace; font-size: 0.775rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
@@ -560,6 +652,16 @@
               <div style="font-size: 0.75rem; color: #047857; font-weight: 700; margin-bottom: 4px;">
                 ${t.category} • ${getTType(t)}
               </div>
+
+              ${isReassignedAway ? `
+                <div style="font-size: 0.7rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; line-height: 1.35;">
+                  Pengajuan dialihkan ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau statusnya.
+                </div>
+              ` : (isReassignedToMe ? `
+                <div style="font-size: 0.7rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; line-height: 1.35;">
+                  ↳ Dialihkan dari <strong>${t.reassignedFrom}</strong> ke Anda.
+                </div>
+              ` : '')}
 
               <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px;">
                 Diajukan • ${t.createdAt ? t.createdAt.split(',')[0] : 'Hari ini'}, ${formatTimeOnly(t.createdAt || t.plannedExit)}
@@ -576,8 +678,8 @@
                 </div>
               </div>
 
-              <button type="button" class="mobile-btn-primary" style="margin-top: 4px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
-                Tinjau
+              <button type="button" class="mobile-btn-primary" style="margin-top: 4px; ${isReassignedAway ? 'background: #475569; border-color: #475569;' : ''}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                ${isReassignedAway ? 'Pantau Rincian' : 'Tinjau'}
               </button>
             </div>
           `;
@@ -700,6 +802,8 @@
 
     const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
     const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
+    const isReassignedAway = isTicketReassignedFromMobileApprover(t);
+    const isReassignedToMe = isTicketReassignedToMobileApprover(t);
 
     container.innerHTML = `
       <div style="margin-bottom: 10px;">
@@ -712,6 +816,29 @@
         <h1 class="mobile-page-title">Detail Pengajuan</h1>
        
       </div>
+
+      <!-- Banner Pengalihan Status jika ada -->
+      ${isReassignedAway ? `
+        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px; background: #fffbeb; border: 1.5px solid #fde68a;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a;">↳ Dialihkan</span>
+            <span style="font-size: 0.8rem; font-weight: 800; color: #92400e;">Pengajuan Dialihkan ke Atasan Lain</span>
+          </div>
+          <div style="font-size: 0.725rem; color: #78350f; line-height: 1.4;">
+            Pengajuan ini telah dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangan status pengajuan ini.
+          </div>
+        </div>
+      ` : (isReassignedToMe ? `
+        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px; background: #eff6ff; border: 1.5px solid #bfdbfe;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <span style="background: #dbeafe; color: #1e40af; font-size: 0.675rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid #bfdbfe;">↳ Dialihkan ke Anda</span>
+            <span style="font-size: 0.8rem; font-weight: 800; color: #1e40af;">Pengalihan Persetujuan</span>
+          </div>
+          <div style="font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
+            Pengajuan ini dialihkan oleh pemohon dari <strong>${t.reassignedFrom}</strong> kepada Anda pada ${t.reassignedAt || 'hari ini'}.
+          </div>
+        </div>
+      ` : '')}
 
       <!-- Kartu Pemohon -->
       <div class="mobile-card" style="margin-bottom: 12px; padding: 14px;">
@@ -728,8 +855,8 @@
 
         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <div>
-            <div class="mobile-meta-sub">Atasan langsung</div>
-            <div class="mobile-meta-val">${t.approverName || approver.name}</div>
+            <div class="mobile-meta-sub">${isReassignedAway ? 'Atasan saat ini' : 'Atasan langsung'}</div>
+            <div class="mobile-meta-val">${t.approverName || approver.name} ${isReassignedAway ? '<span style="font-size:0.675rem; color:#b45309; font-weight:700;">(Dialihkan dari Anda)</span>' : (isReassignedToMe ? `<span style="font-size:0.675rem; color:#1d4ed8; font-weight:700;">(Dialihkan dari ${t.reassignedFrom})</span>` : '')}</div>
           </div>
           <div>
             <div class="mobile-meta-sub">Diajukan pada</div>
@@ -822,7 +949,19 @@
       </div>
 
       <!-- Kartu Keputusan Atasan (Matching PDF Page 3) -->
-      ${isPending ? `
+      ${isPending ? (isReassignedAway ? `
+        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; background: #fffbeb; border: 1.5px solid #fde68a;">
+          <div style="font-size: 0.85rem; font-weight: 800; color: #92400e; margin-bottom: 4px;">
+            Keputusan Atasan Dialihkan
+          </div>
+          <div style="font-size: 0.75rem; color: #78350f; line-height: 1.4; margin-bottom: 10px;">
+            Hak keputusan persetujuan kini berada pada <strong>${t.approverName}</strong>. Anda tidak dapat mengambil keputusan pada pengajuan ini, namun tetap dapat memantau perkembangannya.
+          </div>
+          <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('antrean')">
+            Kembali ke Antrean
+          </button>
+        </div>
+      ` : `
         <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; border: 1.5px solid #cbd5e1;">
           <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a;">Keputusan Atasan</div>
           
@@ -843,7 +982,7 @@
             </button>
           </div>
         </div>
-      ` : (t.status === 'Ditolak' ? `
+      `) : (t.status === 'Ditolak' ? `
         <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5;">
           <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
             ✕ Pengajuan Ditolak
@@ -979,6 +1118,7 @@
           <div style="font-family: monospace; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
             ${t.id}
           </div>
+          ${t.reassignedTo ? `<div style="font-size: 0.7rem; color: #b45309; font-weight: 700; margin-bottom: 2px;">↳ Dialihkan ke ${t.reassignedTo}</div>` : ''}
           <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">
             ${statusSubtitle}
           </div>
@@ -1611,10 +1751,16 @@
   };
 
   window.mobileAtasanExecuteDecision = function (ticketId, decision, defaultNote) {
-    const note = defaultNote || document.getElementById('mAtasanDetailNote')?.value || (decision === 'approve' ? 'Disetujui.' : 'Ditolak: Alasan dinas belum memadai.');
-
     const list = window.ticketsList || [];
     const t = list.find(x => x.id === ticketId);
+    if (t && isTicketReassignedFromMobileApprover(t)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Pengajuan ini telah dialihkan ke atasan lain.', 'danger');
+      }
+      return;
+    }
+    const note = defaultNote || document.getElementById('mAtasanDetailNote')?.value || (decision === 'approve' ? 'Disetujui.' : 'Ditolak: Alasan dinas belum memadai.');
+
     if (t) {
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
@@ -1890,12 +2036,17 @@
   // B1: FORM PENOLAKAN DENGAN ALASAN WAJIB (BRULE-04)
   // -------------------------------------------------------------------
   window.mobileOpenRejectSheet = function (ticketId) {
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
+    if (t && isTicketReassignedFromMobileApprover(t)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Pengajuan ini telah dialihkan ke atasan lain.', 'danger');
+      }
+      return;
+    }
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (!sheet || !backdrop) return;
-
-    const list = window.ticketsList || [];
-    const t = list.find(x => x.id === ticketId);
     if (!t) return;
 
     const defaultReason = (t.isEmergency || (t.id && t.id.includes('-EMG-'))) 
