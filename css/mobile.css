@@ -756,20 +756,24 @@ body.theme-dark .mobile-top-role-pill {
   color: #ffffff !important;
 }
 
+.mobile-btn-qr-blue,
 .mobile-btn-qr-outline {
-  background: #ffffff !important;
-  color: #059669 !important;
-  border: 1.5px solid #059669 !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: 1.5px solid #2563eb !important;
   font-weight: 700 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.1) !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+  transition: all 0.15s ease !important;
 }
 
+.mobile-btn-qr-blue:hover,
+.mobile-btn-qr-blue:active,
 .mobile-btn-qr-outline:hover,
 .mobile-btn-qr-outline:active {
-  background: #ecfdf5 !important;
-  border-color: #047857 !important;
-  color: #047857 !important;
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
 }
 
 /* Info Box Components */

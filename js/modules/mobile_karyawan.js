@@ -910,7 +910,7 @@
     } else if (isApproved) {
       actionButtonsHtml = `
         <div class="mobile-btn-group-stacked" style="margin-top: 12px;">
-          <button type="button" class="mobile-btn-secondary mobile-btn-qr-outline" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenQrModal('${t.id}')">
+          <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenQrModal('${t.id}')">
             <span>Buka QR Izin</span>
           </button>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1116,7 +1116,7 @@
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${(activeTicket.status === 'Disetujui' || activeTicket.status === 'Sedang di Luar') ? `
-            <button type="button" class="mobile-btn-secondary mobile-btn-qr-outline" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${activeTicket.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${activeTicket.id}')">
               Buka QR Izin Aktif Ini
             </button>
           ` : ''}
@@ -2571,7 +2571,7 @@
             </button>
           ` : ''}
           ${isApproved || isOutside ? `
-            <button type="button" class="mobile-btn-secondary mobile-btn-qr-outline" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; min-height: 44px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
+            <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
               Tampilkan QR Code Resmi
             </button>
           ` : ''}
