@@ -740,7 +740,7 @@ function renderPengajuanSayaView() {
     if (isEmergLocked) {
       actionButtonsHtml = `
         <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
-          <span>Otorisasi Darurat (Input Sandi / Scan Wajah)</span>
+          <span>Otorisasi Darurat</span>
         </button>
         <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
           <span>Edit Pengajuan</span>
