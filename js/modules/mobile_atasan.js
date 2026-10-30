@@ -390,16 +390,6 @@
             ` : '')}
           </div>
 
-          ${isReassignedAway ? `
-            <div style="font-size: 0.725rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 8px; margin-bottom: 8px; line-height: 1.4;">
-              Pengajuan ini dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangannya.
-            </div>
-          ` : (isReassignedToMe ? `
-            <div style="font-size: 0.725rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px; margin-bottom: 8px; line-height: 1.4;">
-              ↳ <strong>Status:</strong> Pengajuan ini dialihkan dari <strong>${t.reassignedFrom}</strong> ke Anda.
-            </div>
-          ` : '')}
-
           <div style="font-size: 0.725rem; color: #475569; margin-bottom: 8px;">
             Rencana Keluar: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</strong>
           </div>
@@ -500,21 +490,6 @@
           <div style="font-size: 1.6rem; font-weight: 900; color: #7c3aed; line-height: 1.2; margin: 3px 0 2px 0;">${outsideTickets.length}</div>
         </div>
       </div>
-
-      <!-- Reassigned Away Banner (Atasan Lama) -->
-      ${reassignedAwayTickets.length > 0 ? `
-        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px; background: #fffbeb; border: 1.5px solid #fde68a;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a;">Dialihkan</span>
-              <span style="font-size: 0.8rem; font-weight: 800; color: #92400e;">${reassignedAwayTickets.length} Pengajuan Dialihkan ke Atasan Lain</span>
-            </div>
-          </div>
-          <div style="font-size: 0.725rem; color: #78350f; line-height: 1.4;">
-            ${reassignedAwayTickets.map(t => `Tiket <strong>${t.id}</strong> (${getTName(t)}) dialihkan ke <strong>${t.approverName}</strong>`).join(', ')}. Status pengajuan tetap dapat Anda pantau.
-          </div>
-        </div>
-      ` : ''}
 
       <!-- Priority Emergency Section -->
       ${priorityHtml}
@@ -652,16 +627,6 @@
               <div style="font-size: 0.75rem; color: #047857; font-weight: 700; margin-bottom: 4px;">
                 ${t.category} • ${getTType(t)}
               </div>
-
-              ${isReassignedAway ? `
-                <div style="font-size: 0.7rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; line-height: 1.35;">
-                  Pengajuan dialihkan ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau statusnya.
-                </div>
-              ` : (isReassignedToMe ? `
-                <div style="font-size: 0.7rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; line-height: 1.35;">
-                  ↳ Dialihkan dari <strong>${t.reassignedFrom}</strong> ke Anda.
-                </div>
-              ` : '')}
 
               <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px;">
                 Diajukan • ${t.createdAt ? t.createdAt.split(',')[0] : 'Hari ini'}, ${formatTimeOnly(t.createdAt || t.plannedExit)}
@@ -817,29 +782,6 @@
        
       </div>
 
-      <!-- Banner Pengalihan Status jika ada -->
-      ${isReassignedAway ? `
-        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px; background: #fffbeb; border: 1.5px solid #fde68a;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a;">↳ Dialihkan</span>
-            <span style="font-size: 0.8rem; font-weight: 800; color: #92400e;">Pengajuan Dialihkan ke Atasan Lain</span>
-          </div>
-          <div style="font-size: 0.725rem; color: #78350f; line-height: 1.4;">
-            Pengajuan ini telah dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangan status pengajuan ini.
-          </div>
-        </div>
-      ` : (isReassignedToMe ? `
-        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px; background: #eff6ff; border: 1.5px solid #bfdbfe;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <span style="background: #dbeafe; color: #1e40af; font-size: 0.675rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; border: 1px solid #bfdbfe;">↳ Dialihkan ke Anda</span>
-            <span style="font-size: 0.8rem; font-weight: 800; color: #1e40af;">Pengalihan Persetujuan</span>
-          </div>
-          <div style="font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
-            Pengajuan ini dialihkan oleh pemohon dari <strong>${t.reassignedFrom}</strong> kepada Anda pada ${t.reassignedAt || 'hari ini'}.
-          </div>
-        </div>
-      ` : '')}
-
       <!-- Kartu Pemohon -->
       <div class="mobile-card" style="margin-bottom: 12px; padding: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -950,12 +892,9 @@
 
       <!-- Kartu Keputusan Atasan (Matching PDF Page 3) -->
       ${isPending ? (isReassignedAway ? `
-        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; background: #fffbeb; border: 1.5px solid #fde68a;">
-          <div style="font-size: 0.85rem; font-weight: 800; color: #92400e; margin-bottom: 4px;">
-            Keputusan Atasan Dialihkan
-          </div>
-          <div style="font-size: 0.75rem; color: #78350f; line-height: 1.4; margin-bottom: 10px;">
-            Hak keputusan persetujuan kini berada pada <strong>${t.approverName}</strong>. Anda tidak dapat mengambil keputusan pada pengajuan ini, namun tetap dapat memantau perkembangannya.
+        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; text-align: center;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 8px;">
+            Hak keputusan persetujuan berada pada <strong>${t.approverName}</strong>
           </div>
           <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('antrean')">
             Kembali ke Antrean
