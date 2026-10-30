@@ -759,7 +759,7 @@
 
         <div style="margin-bottom: 8px;">
           <div class="mobile-meta-sub">Alasan pengajuan</div>
-          <p style="font-size: 0.75rem; color: #1e293b; margin: 2px 0 0 0; line-height: 1.4;">
+          <p style="font-size: 0.75rem; color: #1e293b; margin: 2px 0 0 0; line-height: 1.4; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">
             "${t.reason || 'Keperluan dinas kedinasan.'}"
           </p>
         </div>

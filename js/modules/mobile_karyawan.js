@@ -975,7 +975,7 @@
 
         <div style="font-size: 0.775rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
         <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 3px 0 2px 0;">${t.destination || 'Area Cikampek'}</div>
-        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-style: normal;">"${t.reason || 'Keperluan dinas kantor'}"</div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-style: normal; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">"${t.reason || 'Keperluan dinas kantor'}"</div>
 
         <div class="mobile-ticket-grid-meta">
           <div>

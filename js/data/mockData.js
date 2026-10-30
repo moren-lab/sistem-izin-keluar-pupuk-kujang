@@ -675,6 +675,13 @@ function getActiveApprovers() {
 }
 
 function saveTickets(data) {
+  const seenIds = new Set();
+  const cleanData = (data || []).filter(item => {
+    if (!item || !item.id || seenIds.has(item.id)) return false;
+    seenIds.add(item.id);
+    return true;
+  });
+  data = cleanData;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   window.ticketsList = data;
   if (typeof window.refreshAllDashboardData === 'function') {

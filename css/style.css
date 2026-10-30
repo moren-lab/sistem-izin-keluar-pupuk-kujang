@@ -9727,3 +9727,62 @@ body.theme-dark .btn-close-modal:hover {
   color: #f8fafc;
   border-color: rgba(255, 255, 255, 0.15);
 }
+
+
+/* ===================================================================
+   SIDEBAR SPLITTER RESIZER (DRAG TO RESIZE - SEPERTI GAMBAR PENGGUNA)
+   =================================================================== */
+.sidebar-resizer {
+  width: 8px;
+  margin-left: -4px;
+  margin-right: -4px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 55;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.sidebar-resizer-line {
+  width: 2px;
+  height: 100%;
+  background: transparent;
+  transition: all 0.15s ease;
+}
+
+/* Hover & Active Glowing Blue Line (Sesuai Screenshot Biru Pengguna) */
+.sidebar-resizer:hover .sidebar-resizer-line,
+body.is-resizing-sidebar .sidebar-resizer .sidebar-resizer-line {
+  background: #0284c7;
+  box-shadow: 0 0 8px rgba(2, 132, 199, 0.8), 0 0 2px rgba(2, 132, 199, 1);
+  width: 3px;
+}
+
+body.is-resizing-sidebar {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+body.is-resizing-sidebar .sidebar {
+  transition: none !important;
+  pointer-events: none !important;
+}
+
+body.is-resizing-sidebar .main-wrapper {
+  pointer-events: none !important;
+}
+
+@media (max-width: 900px) {
+  .sidebar-resizer {
+    display: none !important;
+  }
+}

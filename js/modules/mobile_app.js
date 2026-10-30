@@ -344,6 +344,7 @@
   // 4. GLOBAL SWITCHERS & ROUTING
   // -------------------------------------------------------------------
   window.mobileSwitchTab = function (tab, subParam) {
+    if (tab === 'beranda') tab = 'dashboard';
     if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'riwayat') {
       tab = 'dashboard';
     }

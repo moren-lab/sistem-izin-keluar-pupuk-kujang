@@ -1553,6 +1553,18 @@ function deleteSecurityTicket(ticketId, source) {
   const isPelacakan = source === 'pelacakan';
   const label = isPelacakan ? 'data pelacakan pos jaga' : 'riwayat pos jaga';
 
+  let ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+
+  const FINISHED_SEC_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+  if (!FINISHED_SEC_STATUSES.includes(t.status)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Karyawan yang sedang di luar area atau izin aktif tidak dapat dihapus dari pengawasan.', 'danger');
+    }
+    return;
+  }
+
   const handler = () => {
     let ticketsList = window.ticketsList || [];
     const t = ticketsList.find(x => x.id === ticketId);

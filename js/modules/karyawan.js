@@ -542,7 +542,7 @@ function renderKaryawanDashboard() {
             ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${activeTicket.destination} — ${activeTicket.reason}">${activeTicket.destination} — ${activeTicket.reason}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -1648,7 +1648,7 @@ function renderKaryawanMobileDashboard() {
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
           <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 10px;">Tujuan keluar</div>
           <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.destination}</div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${activeTicket.reason || '-'}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${activeTicket.reason || ''}">${activeTicket.reason || '-'}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}

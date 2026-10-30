@@ -343,12 +343,12 @@ function renderApproverDashboard() {
               <span class="tag-badge badge-outside" style="font-weight: 700;">Sedang di Luar</span>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom;" title="${t.destination}">${t.destination}</strong>
             </div>
             <div class="approver-detail-callout warning" style="border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.775rem; line-height: 1.45;">
               <div><strong>Estimasi Kembali Semula:</strong> ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : '-'}</div>
               <div><strong>Permohonan Waktu Baru:</strong> <strong class="callout-highlight">${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong></div>
-              <div style="margin-top: 2px;"><strong>Alasan:</strong> "${t.pendingExtension.reason}"</div>
+              <div style="margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.pendingExtension.reason || '').replace(/"/g, '&quot;')}"><strong>Alasan:</strong> "${t.pendingExtension.reason}"</div>
             </div>
             <div class="approver-feed-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
               <span style="font-size: 0.725rem; color: var(--text-muted);">
@@ -378,7 +378,7 @@ function renderApproverDashboard() {
             <div style="font-size: 0.825rem; color: var(--text-primary);">
               <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
             </div>
-            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">
+            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">
               "${t.reason}"
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem;">
@@ -547,7 +547,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                     ${t.selectedMethod === 'passcode' ? '🔑 Cara: Sandi / OTP' : (t.selectedMethod === 'facescan' ? '🤳 Cara: Scan Wajah' : '📱 Cara: Persetujuan di App')}
                   </span>
                 </div>
-                <div style="margin-top: 0.35rem; font-size: 0.75rem; line-height: 1.45;">
+                <div style="margin-top: 0.35rem; font-size: 0.75rem; line-height: 1.45; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Alasan: ${t.reason} — Tujuan: ${t.destination}">
                   <strong>Alasan:</strong> "${t.reason}" — <strong>Tujuan:</strong> ${t.destination}
                 </div>
                 ${t.selectedMethod === 'passcode' ? `
@@ -943,6 +943,13 @@ function openApproveModal(ticketId) {
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
+
+  if (!['Menunggu Persetujuan', 'Menunggu Otorisasi Darurat'].includes(ticket.status)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tiket ini sudah diproses dan tidak dapat disetujui ulang.', 'warning');
+    }
+    return;
+  }
 
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
@@ -1368,6 +1375,25 @@ function rejectExtensionRequest(ticketId, reason) {
 
 // FITUR HAPUS DI PELACAKAN KARYAWAN (HAK AKSES ATASAN - TERPISAH ATASAN 1 & ATASAN 2)
 function deleteApproverTicket(ticketId) {
+  let tickets = window.ticketsList || [];
+  const target = tickets.find(t => t.id === ticketId);
+  if (!target) return;
+
+  const FINISHED_APP_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+  if (!FINISHED_APP_STATUSES.includes(target.status)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tiket yang masih aktif atau dalam antrean tidak dapat dihapus.', 'error');
+    }
+    return;
+  }
+
+  if (typeof isTicketUnderMySupervision === 'function' && !isTicketUnderMySupervision(target)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Anda tidak memiliki wewenang atas tiket ini.', 'error');
+    }
+    return;
+  }
+
   const handler = () => {
     let tickets = window.ticketsList || [];
     const target = tickets.find(t => t.id === ticketId);

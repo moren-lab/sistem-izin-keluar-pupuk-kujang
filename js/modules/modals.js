@@ -1254,9 +1254,9 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const infoEmergencyBadge = document.getElementById('infoEmergencyBadge');
   if (infoEmergencyBadge) {
     if (isTicketEmerg) {
-      infoEmergencyBadge.innerHTML = `<span style="display:inline-flex; align-items:center; color:#b91c1c; font-weight:800; font-size:0.75rem;">Darurat (Evakuasi / Mendesak)</span>`;
+      infoEmergencyBadge.innerHTML = `<strong style="display:inline-flex; align-items:center; color:#b91c1c; font-weight:800; font-size:0.825rem;">Darurat (Evakuasi / Mendesak)</strong>`;
     } else {
-      infoEmergencyBadge.innerHTML = `<span style="display:inline-flex; align-items:center; color:#475569; font-weight:700; font-size:0.75rem;">Biasa (Reguler)</span>`;
+      infoEmergencyBadge.innerHTML = `<strong style="display:inline-flex; align-items:center; color:#0f172a; font-weight:700; font-size:0.825rem;">Biasa (Reguler)</strong>`;
     }
   }
 
@@ -1279,7 +1279,11 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   if (infoDestination) infoDestination.textContent = ticket.destination;
 
   const infoReason = document.getElementById('infoReason');
-  if (infoReason) infoReason.textContent = ticket.reason;
+  if (infoReason) {
+    infoReason.textContent = ticket.reason;
+    infoReason.style.fontWeight = '700';
+    infoReason.style.color = '#0f172a';
+  }
 
   const infoTimeSectionTitle = document.getElementById('infoTimeSectionTitle');
   if (infoTimeSectionTitle) {
@@ -1290,17 +1294,22 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   const infoTablePlanExit = document.getElementById('infoTablePlanExit');
   if (infoTablePlanExit) {
     infoTablePlanExit.textContent = ticket.plannedExit ? `${ticket.plannedExit.slice(11, 16).replace(':', '.')} WIB` : '09.00 WIB';
+    infoTablePlanExit.style.fontWeight = '700';
+    infoTablePlanExit.style.color = '#0f172a';
   }
 
   const infoTableActualExit = document.getElementById('infoTableActualExit');
   if (infoTableActualExit) {
     const scanOutStr = ticket.scanOutTime ? (ticket.scanOutTime.includes('WIB') ? ticket.scanOutTime : `${ticket.scanOutTime} WIB`) : '';
     infoTableActualExit.textContent = scanOutStr || (ticket.status === 'Selesai' ? '09.03 WIB' : '-');
+    infoTableActualExit.style.fontWeight = '700';
   }
 
   const infoTablePlanReturn = document.getElementById('infoTablePlanReturn');
   if (infoTablePlanReturn) {
     infoTablePlanReturn.textContent = ticket.estimatedReturn ? `${ticket.estimatedReturn.slice(11, 16).replace(':', '.')} WIB` : '-';
+    infoTablePlanReturn.style.fontWeight = '700';
+    infoTablePlanReturn.style.color = '#0f172a';
   }
 
   const infoTableActualReturn = document.getElementById('infoTableActualReturn');
@@ -1316,15 +1325,18 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
       : (ticket.status === 'Selesai' 
           ? (ticket.isLate ? '10.52 WIB — Terlambat' : '10.52 WIB — Tepat Waktu') 
           : (ticket.status === 'Terlambat' ? '⚠️ Belum Tap In (Terlambat)' : '-'));
+    infoTableActualReturn.style.fontWeight = '700';
   }
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `Catatan Atasan — <strong>${ticket.approverName}</strong> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
+      infoApproverLbl.innerHTML = `<strong>Catatan Atasan — ${ticket.approverName}</strong> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
     } else {
-      infoApproverLbl.textContent = `Catatan Atasan — ${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}`;
+      infoApproverLbl.innerHTML = `<strong>Catatan Atasan — ${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</strong>`;
     }
+    infoApproverLbl.style.fontWeight = '800';
+    infoApproverLbl.style.color = '#0f172a';
   }
 
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
@@ -1334,7 +1346,9 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoSecurityLbl = document.getElementById('infoSecurityLbl');
   if (infoSecurityLbl) {
-    infoSecurityLbl.textContent = `Catatan Petugas Pos Jaga — ${ticket.securityName || 'Agus Setiawan'}`;
+    infoSecurityLbl.innerHTML = `<strong>Catatan Petugas Pos Jaga — ${ticket.securityName || 'Agus Setiawan'}</strong>`;
+    infoSecurityLbl.style.fontWeight = '800';
+    infoSecurityLbl.style.color = '#0f172a';
   }
 
   const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
@@ -1820,6 +1834,14 @@ function openCancelModal(ticketId, callback) {
     return;
   }
 
+  const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+  if (ticket.applicantNip && ticket.applicantNip !== myNip && (window.currentActor === 'karyawan' || !window.currentActor)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Anda tidak berhak membatalkan izin milik karyawan lain.', 'danger');
+    }
+    return;
+  }
+
   // Close other modals so cancel modal is cleanly visible
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
@@ -1891,6 +1913,7 @@ function confirmCancelTicket() {
 }
 
 window.openCancelModal = openCancelModal;
+window.openCancelTicketModal = openCancelModal;
 window.confirmCancelTicket = confirmCancelTicket;
 
 // EMERGENCY PASS
