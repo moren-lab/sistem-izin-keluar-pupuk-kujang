@@ -1275,7 +1275,7 @@ function renderAdminUsers() {
         <td style="font-size: 0.825rem; color: var(--text-primary);">${u.department}</td>
         <td style="white-space: nowrap;">
           <span class="user-role-badge ${roleClass}">${u.role}</span>
-          ${u.roleKey === 'karyawan' ? `<div style="font-size: 0.685rem; color: #0369a1; font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong>${u.directSupervisor || 'Ir. Hendra Gunawan, M.T.'}</strong></div>` : ''}
+          ${u.roleKey === 'karyawan' ? `<div style="font-size: 0.685rem; color: var(--sky-text, #0284c7); font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong style="color: var(--sky-text, #0284c7);">${u.directSupervisor || 'Ir. Hendra Gunawan, M.T.'}</strong></div>` : ''}
         </td>
         <td>
           ${statusBadge}

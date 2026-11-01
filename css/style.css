@@ -9786,3 +9786,606 @@ body.is-resizing-sidebar .main-wrapper {
     display: none !important;
   }
 }
+
+
+/* ===================================================================
+   WEB ONLY DARK MODE REFINEMENTS & CONTRAST NORMALIZATION
+   =================================================================== */
+
+/* 1. Universal Root & Base Variables in Dark Mode */
+.theme-dark,
+html.theme-dark,
+body.theme-dark {
+  --bg-main: #0a0e14 !important;
+  --bg-card: #111622 !important;
+  --bg-subtle: #161f2e !important;
+  --border-color: rgba(255, 255, 255, 0.09) !important;
+  --text-primary: #f8fafc !important;
+  --text-secondary: #94a3b8 !important;
+  --text-muted: #64748b !important;
+}
+
+/* 2. Top Navbar & Desktop Controls */
+.theme-dark .top-navbar,
+body.theme-dark .top-navbar {
+  background: #0e1524 !important;
+  border-bottom: 1px solid #1e2c42 !important;
+}
+.theme-dark .navbar-clock-pill,
+body.theme-dark .navbar-clock-pill {
+  background: #141c2c !important;
+  border: 1px solid #1e2c42 !important;
+  color: #94a3b8 !important;
+}
+.theme-dark .btn-top-notif,
+body.theme-dark .btn-top-notif {
+  background: #162032 !important;
+  border: 1px solid #24334a !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark .btn-top-notif:hover,
+body.theme-dark .btn-top-notif:hover {
+  background: #1e2c42 !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+}
+.theme-dark .role-switcher-container,
+body.theme-dark .role-switcher-container {
+  background: #131b2a !important;
+  border: 1px solid #1e2c42 !important;
+}
+.theme-dark .btn-hero-action,
+body.theme-dark .btn-hero-action {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border: 1px solid #059669 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+.theme-dark .btn-hero-action:hover,
+body.theme-dark .btn-hero-action:hover {
+  background: #059669 !important;
+}
+
+/* 3. Desktop Notification Dropdown & Full Notification Page */
+.theme-dark .desktop-notif-dropdown,
+body.theme-dark .desktop-notif-dropdown {
+  background: #111622 !important;
+  border: 1px solid #1e2c42 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+.theme-dark .dropdown-notif-unread-pill,
+body.theme-dark .dropdown-notif-unread-pill,
+.theme-dark #desktopNotifUnreadText,
+body.theme-dark #desktopNotifUnreadText {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+.theme-dark .dropdown-notif-item,
+body.theme-dark .dropdown-notif-item {
+  background: #111622 !important;
+  border-bottom: 1px solid #1e2c42 !important;
+}
+.theme-dark .dropdown-notif-item:hover,
+body.theme-dark .dropdown-notif-item:hover {
+  background: #162032 !important;
+}
+.theme-dark .dropdown-notif-item.unread,
+body.theme-dark .dropdown-notif-item.unread {
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+.theme-dark .dropdown-notif-item.unread:hover,
+body.theme-dark .dropdown-notif-item.unread:hover {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+.theme-dark .notif-card-full,
+body.theme-dark .notif-card-full {
+  background: #111622 !important;
+  border: 1px solid #1e2c42 !important;
+}
+.theme-dark .notif-card-full.unread,
+body.theme-dark .notif-card-full.unread {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+}
+.theme-dark .btn-delete-notif-item,
+body.theme-dark .btn-delete-notif-item {
+  background: #182337 !important;
+  border: 1px solid #2e3e57 !important;
+  color: #f87171 !important;
+}
+.theme-dark .btn-delete-notif-item:hover,
+body.theme-dark .btn-delete-notif-item:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+}
+
+/* 4. Secondary & Page Pagination Buttons */
+.theme-dark .btn-figma-secondary,
+body.theme-dark .btn-figma-secondary,
+.theme-dark .btn-card-detail,
+body.theme-dark .btn-card-detail {
+  background: #182337 !important;
+  border: 1.5px solid #2e3e57 !important;
+  color: #e2e8f0 !important;
+}
+.theme-dark .btn-figma-secondary:hover,
+body.theme-dark .btn-figma-secondary:hover,
+.theme-dark .btn-card-detail:hover,
+body.theme-dark .btn-card-detail:hover {
+  background: #202d44 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+.theme-dark .btn-figma-page,
+body.theme-dark .btn-figma-page {
+  background: #182337 !important;
+  border: 1.5px solid #2e3e57 !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark .btn-figma-page:hover:not(:disabled),
+body.theme-dark .btn-figma-page:hover:not(:disabled) {
+  background: #202d44 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+.theme-dark .btn-figma-page.active,
+body.theme-dark .btn-figma-page.active {
+  background: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* 5. Tables & Thead */
+.theme-dark thead,
+body.theme-dark thead,
+.theme-dark thead tr,
+body.theme-dark thead tr,
+.theme-dark thead th,
+body.theme-dark thead th {
+  background: #131b2a !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #1e2c42 !important;
+}
+.theme-dark tbody td,
+body.theme-dark tbody td {
+  border-bottom: 1px solid #1a2436 !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark tbody tr:hover,
+body.theme-dark tbody tr:hover {
+  background: #141d2d !important;
+}
+
+/* 6. Form Inputs & Selects & Searchable Dropdowns */
+.theme-dark .form-input,
+body.theme-dark .form-input,
+.theme-dark .form-select,
+body.theme-dark .form-select,
+.theme-dark .form-textarea,
+body.theme-dark .form-textarea,
+.theme-dark .searchable-dropdown-input,
+body.theme-dark .searchable-dropdown-input,
+.theme-dark .figma-select-sm,
+body.theme-dark .figma-select-sm {
+  background-color: #182337 !important;
+  color: #f8fafc !important;
+  border-color: #2e3e57 !important;
+}
+.theme-dark .form-input:focus,
+body.theme-dark .form-input:focus,
+.theme-dark .form-select:focus,
+body.theme-dark .form-select:focus,
+.theme-dark .form-textarea:focus,
+body.theme-dark .form-textarea:focus,
+.theme-dark .searchable-dropdown-input:focus,
+body.theme-dark .searchable-dropdown-input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+}
+.theme-dark .form-label,
+body.theme-dark .form-label {
+  color: #cbd5e1 !important;
+}
+.theme-dark .approver-search-tip,
+body.theme-dark .approver-search-tip,
+.theme-dark #approverSearchTip,
+body.theme-dark #approverSearchTip,
+.theme-dark #emergApproverSearchTip,
+body.theme-dark #emergApproverSearchTip {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+.theme-dark .approver-floating-dropdown,
+body.theme-dark .approver-floating-dropdown {
+  background: #111622 !important;
+  border: 1px solid #1e2c42 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+.theme-dark .approver-dropdown-header,
+body.theme-dark .approver-dropdown-header {
+  background: #141c2c !important;
+  border-bottom: 1px solid #1e2c42 !important;
+  color: #94a3b8 !important;
+}
+.theme-dark .approver-item,
+body.theme-dark .approver-item {
+  border-bottom: 1px solid #1a2436 !important;
+}
+.theme-dark .approver-item:hover,
+body.theme-dark .approver-item:hover {
+  background: #182337 !important;
+}
+.theme-dark .approver-item-name,
+body.theme-dark .approver-item-name {
+  color: #f8fafc !important;
+}
+.theme-dark .approver-item-title,
+body.theme-dark .approver-item-title {
+  color: #94a3b8 !important;
+}
+
+/* 7. Modals: Card, Header, Footer & Tab Switchers */
+.theme-dark .modal-card,
+body.theme-dark .modal-card {
+  background: #111622 !important;
+  border: 1px solid #1e2c42 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75) !important;
+}
+.theme-dark .modal-header,
+body.theme-dark .modal-header {
+  background: #111622 !important;
+  border-bottom: 1px solid #1e2c42 !important;
+}
+.theme-dark .modal-header h3,
+body.theme-dark .modal-header h3 {
+  color: #f8fafc !important;
+}
+.theme-dark .modal-header p,
+body.theme-dark .modal-header p {
+  color: #94a3b8 !important;
+}
+.theme-dark .modal-footer,
+body.theme-dark .modal-footer {
+  background: #131b2a !important;
+  border-top: 1px solid #1e2c42 !important;
+}
+.theme-dark .figma-tab-btn,
+body.theme-dark .figma-tab-btn {
+  color: #94a3b8 !important;
+}
+.theme-dark .figma-tab-btn:hover,
+body.theme-dark .figma-tab-btn:hover {
+  color: #f8fafc !important;
+}
+.theme-dark .figma-tab-btn.active,
+body.theme-dark .figma-tab-btn.active {
+  color: #10b981 !important;
+  border-bottom-color: #10b981 !important;
+}
+
+/* 8. Emergency Otorisasi Modal (Tabs & Panes) */
+.theme-dark .option-card.emerg-opt.selected,
+body.theme-dark .option-card.emerg-opt.selected,
+.theme-dark #optEmergMethodApp.selected,
+body.theme-dark #optEmergMethodApp.selected {
+  background: rgba(225, 29, 72, 0.15) !important;
+  border: 1.5px solid rgba(225, 29, 72, 0.4) !important;
+  color: #fda4af !important;
+}
+.theme-dark .emg-tab-btn,
+body.theme-dark .emg-tab-btn {
+  background: #182337 !important;
+  border: 1.5px solid #2e3e57 !important;
+  color: #94a3b8 !important;
+}
+.theme-dark .emg-tab-btn:hover,
+body.theme-dark .emg-tab-btn:hover {
+  background: #202d44 !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark .emg-tab-btn.active,
+body.theme-dark .emg-tab-btn.active {
+  background: rgba(225, 29, 72, 0.2) !important;
+  border-color: rgba(225, 29, 72, 0.5) !important;
+  color: #fda4af !important;
+}
+.theme-dark #tabEmgApprove > div,
+body.theme-dark #tabEmgApprove > div {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+.theme-dark #tabEmgApprove div,
+body.theme-dark #tabEmgApprove div,
+.theme-dark #tabEmgApprove p,
+body.theme-dark #tabEmgApprove p,
+.theme-dark #tabEmgApprove span,
+body.theme-dark #tabEmgApprove span {
+  color: #34d399 !important;
+}
+.theme-dark #tabEmgPasscode > div,
+body.theme-dark #tabEmgPasscode > div {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+.theme-dark #tabEmgPasscode div,
+body.theme-dark #tabEmgPasscode div,
+.theme-dark #tabEmgPasscode p,
+body.theme-dark #tabEmgPasscode p {
+  color: #fbbf24 !important;
+}
+.theme-dark #emgPasscodeHintBox,
+body.theme-dark #emgPasscodeHintBox {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border: 1px dashed #f59e0b !important;
+}
+.theme-dark #tabEmgFaceScan > div,
+body.theme-dark #tabEmgFaceScan > div {
+  background: #141c2c !important;
+  border-color: #24334a !important;
+}
+
+/* 9. Scan Method Picker Cards */
+.theme-dark .scan-method-card.scan-method-primary,
+body.theme-dark .scan-method-card.scan-method-primary,
+.theme-dark #btnPickerStartCamera,
+body.theme-dark #btnPickerStartCamera {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  color: #f8fafc !important;
+}
+.theme-dark .scan-method-card.scan-method-primary:hover,
+body.theme-dark .scan-method-card.scan-method-primary:hover,
+.theme-dark #btnPickerStartCamera:hover,
+body.theme-dark #btnPickerStartCamera:hover {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+}
+.theme-dark .scan-method-card.scan-method-primary .scan-card-title,
+body.theme-dark .scan-method-card.scan-method-primary .scan-card-title {
+  color: #34d399 !important;
+}
+.theme-dark .scan-method-card.scan-method-primary .scan-card-desc,
+body.theme-dark .scan-method-card.scan-method-primary .scan-card-desc {
+  color: #a7f3d0 !important;
+}
+.theme-dark .scan-method-card.scan-method-secondary,
+body.theme-dark .scan-method-card.scan-method-secondary,
+.theme-dark #btnPickerUploadQr,
+body.theme-dark #btnPickerUploadQr {
+  background: #162032 !important;
+  border: 1.5px solid #24334a !important;
+  color: #f8fafc !important;
+}
+.theme-dark .scan-method-card.scan-method-secondary:hover,
+body.theme-dark .scan-method-card.scan-method-secondary:hover,
+.theme-dark #btnPickerUploadQr:hover,
+body.theme-dark #btnPickerUploadQr:hover {
+  background: #1e2c42 !important;
+  border-color: #38bdf8 !important;
+}
+
+/* 10. Badges, Rankings & Metrics */
+.theme-dark .dept-rank-badge.top-1,
+body.theme-dark .dept-rank-badge.top-1 {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+.theme-dark .dept-rank-badge.top-2,
+body.theme-dark .dept-rank-badge.top-2 {
+  background: rgba(56, 189, 248, 0.2) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+}
+.theme-dark .dept-rank-badge.top-3,
+body.theme-dark .dept-rank-badge.top-3 {
+  background: rgba(148, 163, 184, 0.2) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
+}
+.theme-dark .dept-rank-badge:not(.top-1):not(.top-2):not(.top-3),
+body.theme-dark .dept-rank-badge:not(.top-1):not(.top-2):not(.top-3) {
+  background: rgba(100, 116, 139, 0.2) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(100, 116, 139, 0.3) !important;
+}
+.theme-dark .dept-progress-track,
+body.theme-dark .dept-progress-track {
+  background: #1e293b !important;
+}
+.theme-dark .feed-item-icon,
+body.theme-dark .feed-item-icon {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+.theme-dark #adminTrafficBadge,
+body.theme-dark #adminTrafficBadge {
+  background: rgba(14, 165, 233, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(14, 165, 233, 0.3) !important;
+}
+.theme-dark .stat-icon.blue,
+body.theme-dark .stat-icon.blue {
+  background: rgba(59, 130, 246, 0.18) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+.theme-dark .audit-pill,
+body.theme-dark .audit-pill {
+  background: #182337 !important;
+  border: 1px solid #24334a !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark .extend-notice-box,
+body.theme-dark .extend-notice-box,
+.theme-dark .extend-summary-box,
+body.theme-dark .extend-summary-box,
+.theme-dark .pending-ext-card-box,
+body.theme-dark .pending-ext-card-box,
+.theme-dark .pending-ext-summary-box,
+body.theme-dark .pending-ext-summary-box {
+  background: #141c2c !important;
+  border: 1px solid #1e2c42 !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark .karyawan-pending-ext-banner,
+body.theme-dark .karyawan-pending-ext-banner {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+}
+.theme-dark .btn-pending-ext-notice,
+body.theme-dark .btn-pending-ext-notice {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
+}
+.theme-dark #btnCancelPendingExtension,
+body.theme-dark #btnCancelPendingExtension {
+  background: rgba(225, 29, 72, 0.18) !important;
+  color: #fda4af !important;
+  border: 1.5px solid rgba(225, 29, 72, 0.4) !important;
+}
+.theme-dark #digitalPassStatusBadge,
+body.theme-dark #digitalPassStatusBadge {
+  color: #c084fc !important;
+}
+.theme-dark #digitalPassQrContainer,
+body.theme-dark #digitalPassQrContainer {
+  background: #ffffff !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 11. Catch-all specific overrides for inline legacy styles inside desktopAppContainer and modals */
+.theme-dark #desktopAppContainer [style*="color: #0f172a"],
+.theme-dark #desktopAppContainer [style*="color:#0f172a"],
+.theme-dark .modal-overlay [style*="color: #0f172a"],
+.theme-dark .modal-overlay [style*="color:#0f172a"],
+body.theme-dark #desktopAppContainer [style*="color: #0f172a"],
+body.theme-dark #desktopAppContainer [style*="color:#0f172a"],
+body.theme-dark .modal-overlay [style*="color: #0f172a"],
+body.theme-dark .modal-overlay [style*="color:#0f172a"] {
+  color: #f8fafc !important;
+}
+
+.theme-dark #desktopAppContainer [style*="color: #1e293b"],
+.theme-dark #desktopAppContainer [style*="color:#1e293b"],
+.theme-dark .modal-overlay [style*="color: #1e293b"],
+.theme-dark .modal-overlay [style*="color:#1e293b"],
+body.theme-dark #desktopAppContainer [style*="color: #1e293b"],
+body.theme-dark #desktopAppContainer [style*="color:#1e293b"],
+body.theme-dark .modal-overlay [style*="color: #1e293b"],
+body.theme-dark .modal-overlay [style*="color:#1e293b"] {
+  color: #e2e8f0 !important;
+}
+
+.theme-dark #desktopAppContainer [style*="color: #334155"],
+.theme-dark #desktopAppContainer [style*="color:#334155"],
+.theme-dark .modal-overlay [style*="color: #334155"],
+.theme-dark .modal-overlay [style*="color:#334155"],
+body.theme-dark #desktopAppContainer [style*="color: #334155"],
+body.theme-dark #desktopAppContainer [style*="color:#334155"],
+body.theme-dark .modal-overlay [style*="color: #334155"],
+body.theme-dark .modal-overlay [style*="color:#334155"] {
+  color: #cbd5e1 !important;
+}
+
+.theme-dark #desktopAppContainer [style*="color: #475569"],
+.theme-dark #desktopAppContainer [style*="color:#475569"],
+.theme-dark .modal-overlay [style*="color: #475569"],
+.theme-dark .modal-overlay [style*="color:#475569"],
+body.theme-dark #desktopAppContainer [style*="color: #475569"],
+body.theme-dark #desktopAppContainer [style*="color:#475569"],
+body.theme-dark .modal-overlay [style*="color: #475569"],
+body.theme-dark .modal-overlay [style*="color:#475569"] {
+  color: #94a3b8 !important;
+}
+
+/* Digital Pass Info Banner in Light & Dark Mode */
+.digital-pass-info-banner {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+.theme-dark .digital-pass-info-banner,
+body.theme-dark .digital-pass-info-banner {
+  background: rgba(14, 165, 233, 0.12) !important;
+  border: 1px solid rgba(14, 165, 233, 0.3) !important;
+  color: #7dd3fc !important;
+}
+
+/* Logout Modal Icon Circle */
+.logout-icon-circle {
+  background: #fef2f2;
+  border: 2px solid #fecaca;
+  color: #dc2626;
+}
+.theme-dark .logout-icon-circle,
+body.theme-dark .logout-icon-circle {
+  background: rgba(220, 38, 38, 0.18) !important;
+  border: 2px solid rgba(220, 38, 38, 0.35) !important;
+  color: #f87171 !important;
+}
+
+/* Sidebar Brand Wrapper Link Color */
+.brand-wrapper {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+.theme-dark .brand-wrapper,
+body.theme-dark .brand-wrapper {
+  color: #ffffff !important;
+}
+.theme-dark .brand-text-group,
+body.theme-dark .brand-text-group {
+  color: #ffffff !important;
+}
+
+/* Notice no approver */
+.theme-dark #empNoApproverNotice,
+body.theme-dark #empNoApproverNotice {
+  background: rgba(220, 38, 38, 0.18) !important;
+  border-color: rgba(220, 38, 38, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+/* Sky text variables */
+:root {
+  --sky-text: #0284c7;
+}
+.theme-dark,
+body.theme-dark {
+  --sky-text: #38bdf8 !important;
+}
+
+/* Admin Traffic Live Clock Badge */
+.admin-traffic-live-badge {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+.theme-dark .admin-traffic-live-badge,
+body.theme-dark .admin-traffic-live-badge {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+}
+
+/* Option Cards in Emergency Modal */
+.theme-dark .option-card.emerg-opt .option-name,
+body.theme-dark .option-card.emerg-opt .option-name {
+  color: #f8fafc !important;
+}
+.theme-dark .option-card.emerg-opt.selected .option-name,
+body.theme-dark .option-card.emerg-opt.selected .option-name {
+  color: #fda4af !important;
+}
+.theme-dark .option-card.emerg-opt .option-desc,
+body.theme-dark .option-card.emerg-opt .option-desc {
+  color: #94a3b8 !important;
+}

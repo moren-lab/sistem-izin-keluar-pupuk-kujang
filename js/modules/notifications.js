@@ -470,7 +470,7 @@
       container.innerHTML = `
         <div style="padding: 30px 16px; text-align: center; color: #64748b;">
           <div style="font-size: 1.5rem; margin-bottom: 6px;">🔔</div>
-          <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">Belum ada notifikasi</div>
+          <div style="font-weight: 700; color: var(--text-primary, #0f172a); font-size: 0.85rem;">Belum ada notifikasi</div>
           <div style="font-size: 0.75rem; margin-top: 2px;">Pemberitahuan aktivitas perizinan akan muncul di sini.</div>
         </div>
       `;
@@ -481,20 +481,20 @@
       const isHigh = n.priority === 'high';
       const isUnread = !n.isRead;
       return `
-        <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+        <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 10px 14px; border-bottom: 1px solid var(--border-color, #f1f5f9); display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
           <div style="width: 32px; height: 32px; border-radius: 8px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
             ${getNotifIconSvg(n.type, n.priority)}
           </div>
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-              <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${n.title}</span>
+              <span class="dropdown-notif-title" style="font-size: 0.8rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${n.title}</span>
               ${isUnread ? '<span style="width: 7px; height: 7px; border-radius: 50%; background: #059669; flex-shrink: 0;"></span>' : ''}
             </div>
-            <div style="font-size: 0.725rem; color: #334155; line-height: 1.35; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            <div class="dropdown-notif-msg" style="font-size: 0.725rem; color: var(--text-secondary, #334155); line-height: 1.35; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
               ${n.message}
             </div>
-            <div style="font-size: 0.65rem; color: #64748b; font-weight: 600;">
-              ${n.ticketId ? `<span style="font-family: monospace; font-weight: 700; color: #0f172a;">${n.ticketId}</span> • ` : ''}${formatRelativeTime(n.createdAt)}
+            <div class="dropdown-notif-meta" style="font-size: 0.65rem; color: var(--text-muted, #64748b); font-weight: 600;">
+              ${n.ticketId ? `<span style="font-family: monospace; font-weight: 700; color: var(--text-primary, #0f172a);">${n.ticketId}</span> • ` : ''}${formatRelativeTime(n.createdAt)}
             </div>
           </div>
         </div>
@@ -517,10 +517,10 @@
     container.innerHTML = `
       <div style="max-width: 900px; margin: 0 auto; padding: 24px 16px;">
         <!-- Header Page -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid var(--border-color, #e2e8f0); padding-bottom: 16px;">
           <div>
             <div style="font-size: 0.75rem; color: #059669; font-weight: 800; text-transform: uppercase;">Pusat Pemberitahuan</div>
-            <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 2px 0 0 0;">Semua Notifikasi</h1>
+            <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
           <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <div class="mobile-segment-toggle" style="margin: 0; width: 210px; height: 38px; padding: 3px; display: inline-flex; align-items: center; box-sizing: border-box; border-radius: 10px;">
@@ -528,7 +528,7 @@
               <button type="button" class="mobile-seg-btn ${filterTab === 'unread' ? 'active' : ''}" style="height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 8px; font-size: 0.785rem; border-radius: 7px;" onclick="window.renderDesktopFullNotifikasiPage('unread')">Belum (${unreadCount})</button>
             </div>
             ${unreadCount > 0 ? `
-              <button type="button" class="btn-card-detail" style="border: 1.5px solid #cbd5e1; background: #fff; color: #334155; font-weight: 700; height: 38px; padding: 0 14px; font-size: 0.785rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" onclick="window.markAllNotificationsAsRead(); window.renderDesktopFullNotifikasiPage('${filterTab}')">
+              <button type="button" class="btn-card-detail btn-figma-secondary" style="font-weight: 700; height: 38px; padding: 0 14px; font-size: 0.785rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" onclick="window.markAllNotificationsAsRead(); window.renderDesktopFullNotifikasiPage('${filterTab}')">
                 ✓ Tandai semua dibaca
               </button>
             ` : ''}
@@ -545,13 +545,13 @@
             const isHigh = n.priority === 'high';
             const isUnread = !n.isRead;
             return `
-              <div class="card" style="position: relative; padding: 16px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+              <div class="card notif-card-full ${isUnread ? 'unread' : ''}" style="position: relative; padding: 16px; border-radius: 12px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
                 <div style="width: 42px; height: 42px; border-radius: 10px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
                   ${getNotifIconSvg(n.type, n.priority)}
                 </div>
                 <div style="flex: 1; padding-right: 40px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a);">
                       ${n.title}
                       ${isHigh ? '<span style="background: #dc2626; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">DARURAT</span>' : ''}
                     </div>
@@ -560,7 +560,7 @@
                       ${isUnread ? '<span style="width: 9px; height: 9px; border-radius: 50%; background: #059669;"></span>' : ''}
                     </div>
                   </div>
-                  <div style="font-size: 0.825rem; color: #334155; line-height: 1.5; margin-bottom: 6px;">
+                  <div style="font-size: 0.825rem; color: var(--text-secondary, #334155); line-height: 1.5; margin-bottom: 6px;">
                     ${n.message}
                   </div>
                   <div style="display: flex; align-items: center; gap: 12px; font-size: 0.725rem;">
@@ -568,7 +568,7 @@
                     <span style="color: #059669; font-weight: 700;">Klik untuk membuka detail izin →</span>
                   </div>
                 </div>
-                <button type="button" aria-label="Hapus Notifikasi" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; color: #dc2626; cursor: pointer; padding: 0;" onclick="event.stopPropagation(); window.deleteDesktopNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
+                <button type="button" class="btn-delete-notif-item" aria-label="Hapus Notifikasi" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; padding: 0;" onclick="event.stopPropagation(); window.deleteDesktopNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
               </div>
@@ -576,7 +576,7 @@
           }).join('') : `
             <div class="card" style="padding: 40px; text-align: center; border-radius: 12px;">
               <div style="font-size: 2rem; margin-bottom: 8px; color: #94a3b8;">🔔</div>
-              <div style="font-weight: 800; font-size: 1rem; color: #0f172a;">Belum Ada Notifikasi</div>
+              <div style="font-weight: 800; font-size: 1rem; color: var(--text-primary, #0f172a);">Belum Ada Notifikasi</div>
               <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Pemberitahuan terkait aktivitas pengajuan izin akan ditampilkan di sini.</div>
             </div>
           `}

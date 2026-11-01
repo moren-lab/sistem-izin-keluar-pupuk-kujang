@@ -531,7 +531,7 @@ function renderKaryawanDashboard() {
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         actionButtonsHtml = `
           ${hasPendingExt ? `
-            <button class="btn-figma-secondary" disabled style="opacity: 0.9; cursor: not-allowed; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+            <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
               <span>Menunggu Persetujuan Perpanjangan</span>
             </button>
           ` : (hasUsedExtension ? `
@@ -539,7 +539,7 @@ function renderKaryawanDashboard() {
               <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
             </button>
           ` : `
-            <button class="btn-figma-secondary" style="background:#ffffff; color:#0f172a; border: 1.5px solid #cbd5e1; font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
+            <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
               <span>Ajukan Perpanjangan</span>
             </button>
           `)}
@@ -782,7 +782,7 @@ function renderPengajuanSayaView() {
             <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
           </button>
         ` : `
-          <button class="btn-figma-secondary" style="background:#ffffff; color:#0f172a; border: 1.5px solid #cbd5e1; font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
+          <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
             <span>Ajukan Perpanjangan</span>
           </button>
         `)}
@@ -879,7 +879,7 @@ function renderPengajuanSayaView() {
               Permohonan Perpanjangan Sedang Ditinjau
             </div>
             <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px; line-height: 1.45;">
-              Usulan jam kembali baru: <strong style="color: #0f172a;">${activeTicket.pendingExtension.newEstimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(activeTicket.pendingExtension.newEstimatedReturn) : activeTicket.pendingExtension.newEstimatedReturn.replace('T', ' ')) : '-'}</strong>. Penandaan terlambat ditangguhkan sementara.
+              Usulan jam kembali baru: <strong style="color: var(--text-primary);">${activeTicket.pendingExtension.newEstimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(activeTicket.pendingExtension.newEstimatedReturn) : activeTicket.pendingExtension.newEstimatedReturn.replace('T', ' ')) : '-'}</strong>. Penandaan terlambat ditangguhkan sementara.
             </div>
           </div>
           <button class="btn-figma-secondary" style="background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; font-weight: 700; width: 100%; justify-content: center;" onclick="openPendingExtensionDetailModal('${activeTicket.id}')">
@@ -1180,7 +1180,7 @@ function renderEmpCards(list, containerElement) {
             <!-- Header ID & Status -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
               <div>
-                <div class="figma-ticket-id" style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; letter-spacing: -0.2px;">${t.id}</div>
+                <div class="figma-ticket-id" style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); letter-spacing: -0.2px;">${t.id}</div>
                 <div class="figma-ticket-date" style="font-size: 0.725rem; color: #64748b; margin-top: 2px; font-weight: 500;">Diajukan ${dateStr}</div>
               </div>
               <div style="text-align: right;">${getCleanEmpStatus(t.status, t)}</div>
@@ -1193,14 +1193,14 @@ function renderEmpCards(list, containerElement) {
             </div>
 
             <!-- Detail Box (Tujuan, Keperluan, Rencana Waktu) -->
-            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: #0f172a; font-weight: 600; text-align: right; line-height: 1.35;">${t.destination}</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35;">${t.destination}</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: #0f172a; font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;">${t.reason || '-'}</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;">${t.reason || '-'}</span>
               </div>
               <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed #e2e8f0;">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
@@ -1288,11 +1288,11 @@ function renderEmpTable(list, containerElement) {
     return `
               <tr>
                 <td>
-                  <div style="font-weight: 800; font-family: var(--font-mono); color: #0f172a;">${t.id}</div>
+                  <div style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">${t.id}</div>
                   <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${t.category} — ${t.type}</div>
                 </td>
                 <td>
-                  <div style="font-weight: 700; color: #0f172a;">${t.destination}</div>
+                  <div style="font-weight: 700; color: var(--text-primary);">${t.destination}</div>
                   <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</div>
                 </td>
                 <td>${scheduleWithDay}</td>
@@ -1795,7 +1795,7 @@ function renderKaryawanMobileDonutChart() {
           <circle cx="18" cy="18" r="15.915" fill="none" stroke="#dc2626" stroke-width="4" stroke-dasharray="${daruratPct} ${100 - daruratPct}" stroke-dashoffset="-${selesaiPct + aktifPct}"></circle>
         </svg>
         <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
-          <span style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1;">${total}</span>
+          <span style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); line-height: 1;">${total}</span>
           <span style="font-size: 0.65rem; color: #64748b; font-weight: 600; margin-top: 2px;">Total</span>
         </div>
       </div>

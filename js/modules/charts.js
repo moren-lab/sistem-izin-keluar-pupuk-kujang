@@ -529,6 +529,7 @@ function getApproverWeeklyRealtimeData() {
 window.getApproverWeeklyRealtimeData = getApproverWeeklyRealtimeData;
 
 function getGambar2AestheticBarChartHtml() {
+  const dark = isThemeDark();
   const chartData = getApproverWeeklyRealtimeData();
   const bars = chartData.days;
 
@@ -612,7 +613,7 @@ function getGambar2AestheticBarChartHtml() {
         </rect>
 
         <!-- X-Axis Labels: Clean Day Name & Date -->
-        <text id="approverDayLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#0f172a'}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif" style="transition: fill 0.2s ease, font-weight 0.2s ease;">${b.label}</text>
+        <text id="approverDayLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : (dark ? '#cbd5e1' : '#0f172a')}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif" style="transition: fill 0.2s ease, font-weight 0.2s ease;">${b.label}</text>
         <text id="approverDateLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 34}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#64748b'}" font-size="10" font-weight="${isToday ? '700' : '500'}" font-family="'Plus Jakarta Sans', sans-serif">${b.dateStr}</text>
         ${isToday ? `<circle cx="${x + barW / 2}" cy="${bottomY + 44}" r="2.5" fill="#0284c7" />` : ''}
       </g>
@@ -623,17 +624,17 @@ function getGambar2AestheticBarChartHtml() {
   const avgDaily = Math.round((chartData.totalWeekVolume || 98) / 7);
 
   return `
-    <div style="position: relative; width: 100%; max-width: 100%; background: #ffffff; border-radius: 12px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+    <div style="position: relative; width: 100%; max-width: 100%; background: var(--bg-card, #ffffff); border-radius: 12px; padding: 12px 14px; border: 1px solid var(--border-color, #e2e8f0);">
       <!-- Bento Summary Header Bar -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color, #f1f5f9); margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
           <div>
             <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Volume 7 Hari</span>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; line-height: 1.2;">
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary, #0f172a); line-height: 1.2;">
               <strong style="color: #0369a1;">${chartData.totalWeekVolume}</strong> <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">Pengajuan</span>
             </div>
           </div>
-          <div style="width: 1px; height: 26px; background: #e2e8f0;"></div>
+          <div style="width: 1px; height: 26px; background: var(--border-color, #e2e8f0);"></div>
           <div>
             <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Hari Puncak</span>
             <div style="font-size: 0.9rem; font-weight: 700; color: #059669; line-height: 1.2;">
@@ -919,6 +920,7 @@ function getAdminTrafficData() {
 }
 
 function renderAdminTrafficChart() {
+  const dark = isThemeDark();
   const container = document.getElementById('chartAdminTrafficContainer');
   if (!container) return;
 
@@ -990,7 +992,7 @@ function renderAdminTrafficChart() {
           <span>Scan In (Masuk)</span>
         </span>
       </div>
-      <div style="display: inline-flex; align-items: center; gap: 5px; color: #dc2626; font-size: 0.72rem; background: #fef2f2; padding: 2px 7px; border-radius: 6px; border: 1px solid #fecaca;">
+      <div class="admin-traffic-live-badge" style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; padding: 2px 7px; border-radius: 6px;">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);"></span>
         <span>Jam Sekarang: <strong>${timeNowFull}</strong></span>
       </div>
