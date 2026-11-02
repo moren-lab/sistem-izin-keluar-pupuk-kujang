@@ -624,23 +624,16 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   </button>
                 </div>
               ` : `
-                <!-- Single Balanced Row for Decided Tickets -->
-                <div class="card-actions-bar" style="display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
-                  <button class="btn-card-detail" style="flex: 1; min-width: 0; padding: 0.4rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <!-- Action Buttons Row -->
+                <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
+                  <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                     <span>Detail pengajuan</span>
                   </button>
-                  ${(t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') ? `
-                    <button type="button" class="btn-figma-delete-single" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.35); color: #ef4444; font-size: 0.725rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.6rem; border-radius: 6px; min-height: 34px; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.06)'" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                     
-                    </button>
-                  ` : `
-                    <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600; white-space: nowrap; padding-left: 0.3rem; display: inline-flex; align-items: center; gap: 0.25rem;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Diputuskan
-                    </span>
-                  `}
+                  <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Hapus</span>
+                  </button>
                 </div>
               `
             )}
@@ -671,7 +664,7 @@ function renderApproverTable(list, containerElement) {
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
             <th style="min-width: 180px;">Catatan Keputusan</th>
-            <th style="text-align: right; white-space: nowrap; min-width: 100px;">Tindakan</th>
+            <th style="text-align: right; white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
@@ -690,15 +683,17 @@ function renderApproverTable(list, containerElement) {
               catatanHtml = `<span style="color: #f59e0b; font-size: 0.725rem;">Dialihkan ke ${t.reassignedTo}</span>`;
             }
 
-            const canDelete = t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa';
             let tindakanHtml = `
-              <a href="#" class="figma-card-link" style="font-size: 0.775rem;" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>
-              ${canDelete ? `
-                <button type="button" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.65rem; display: inline-flex; align-items: center; gap: 0.2rem;" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  Hapus
+              <div class="action-pills-row">
+                <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  <span>Detail pengajuan</span>
                 </button>
-              ` : ''}
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Hapus</span>
+                </button>
+              </div>
             `;
 
             return `
@@ -1379,13 +1374,7 @@ function deleteApproverTicket(ticketId) {
   const target = tickets.find(t => t.id === ticketId);
   if (!target) return;
 
-  const FINISHED_APP_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
-  if (!FINISHED_APP_STATUSES.includes(target.status)) {
-    if (typeof window.showToast === 'function') {
-      window.showToast('Tiket yang masih aktif atau dalam antrean tidak dapat dihapus.', 'error');
-    }
-    return;
-  }
+  // Approver can delete/hide any ticket from tracking
 
   if (typeof isTicketUnderMySupervision === 'function' && !isTicketUnderMySupervision(target)) {
     if (typeof window.showToast === 'function') {

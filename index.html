@@ -843,12 +843,14 @@
                 <p class="figma-section-sub"></p>
               </div>
               <div>
-                <button type="button" class="btn-figma-secondary btn-clear-history" id="btnClearEmpRiwayat" onclick="window.deleteAllEmpRiwayat()" title="Hapus Seluruh Riwayat Pengajuan Selesai" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.28); font-size: 0.8rem; padding: 0.45rem 0.95rem; display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; border-radius: 7px; font-weight: 600;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearEmpRiwayat" onclick="window.deleteAllEmpRiwayat()" title="Hapus Seluruh Riwayat Pengajuan Selesai">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
                   </svg>
-                  <span>Hapus Semua Riwayat</span>
+                  <span>Hapus Semua</span>
                 </button>
               </div>
             </div>
@@ -1181,14 +1183,14 @@
                 <h1>Pelacakan Izin Karyawan</h1>
               </div>
               <div class="filters-group" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <button type="button" class="btn-figma-secondary btn-clear-history" id="btnClearApproverTracking"
-                  onclick="window.clearApproverTrackingHistory()"
-                  title="Hapus seluruh riwayat pengajuan yang sudah berstatus selesai atau dibatalkan">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearApproverTracking" onclick="window.clearApproverTrackingHistory()" title="Hapus seluruh riwayat pengajuan yang sudah berstatus selesai atau dibatalkan">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
                   </svg>
-                  <span>Hapus Riwayat Selesai</span>
+                  <span>Hapus Semua</span>
                 </button>
               </div>
             </div>
@@ -1747,12 +1749,14 @@
                 <h1>Riwayat Pemindaian Pos Jaga</h1>
               </div>
               <div>
-                <button type="button" class="btn-secondary" id="btnDeleteAllSecurityLogs" onclick="window.deleteAllSecurityLogs()" style="font-size: 0.8rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.28); display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; padding: 0.45rem 0.95rem; border-radius: 7px; font-weight: 600;" title="Hapus Semua Riwayat Pemindaian Selesai">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="btn-clear-history btn-danger-solid" id="btnDeleteAllSecurityLogs" onclick="window.deleteAllSecurityLogs()" title="Hapus Semua Riwayat Pemindaian Selesai">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
                   </svg>
-                  <span>Hapus Semua Riwayat</span>
+                  <span>Hapus Semua</span>
                 </button>
               </div>
             </div>
@@ -2126,10 +2130,12 @@
                 </p>
               </div>
               <div>
-                <button type="button" class="btn-secondary" id="btnDeleteAllAdminAudit" onclick="window.deleteAllAdminAudit()" style="font-size: 0.8rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.28); display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; padding: 0.45rem 0.95rem; border-radius: 7px; font-weight: 600;" title="Hapus Seluruh Catatan Audit Trail">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="btn-clear-history btn-danger-solid" id="btnDeleteAllAdminAudit" onclick="window.deleteAllAdminAudit()" title="Hapus Seluruh Catatan Audit Trail">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
                   </svg>
                   <span>Hapus Semua</span>
                 </button>

@@ -10569,3 +10569,355 @@ body.theme-dark .admin-emp-floating-dropdown {
   color: #34d399 !important;
   border-color: rgba(16, 185, 129, 0.3) !important;
 }
+
+
+/* ===================================================================
+   UNIFIED SOLID RED DANGER BUTTON ("HAPUS SEMUA" - SESUAI GAMBAR USER)
+   =================================================================== */
+.btn-clear-history,
+.btn-danger-solid {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #dc2626 !important;
+  border-radius: 8px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  padding: 0.45rem 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.28) !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  text-decoration: none !important;
+  line-height: 1.2 !important;
+}
+
+.btn-clear-history:hover,
+.btn-danger-solid:hover {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.38) !important;
+  transform: translateY(-1px);
+}
+
+.btn-clear-history:active,
+.btn-danger-solid:active {
+  transform: translateY(0);
+}
+
+.btn-clear-history svg,
+.btn-danger-solid svg {
+  stroke: #ffffff !important;
+}
+
+.btn-clear-history span,
+.btn-danger-solid span {
+  color: #ffffff !important;
+}
+
+body.theme-dark .btn-clear-history,
+body.theme-dark .btn-danger-solid,
+.theme-dark .btn-clear-history,
+.theme-dark .btn-danger-solid {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4) !important;
+}
+
+body.theme-dark .btn-clear-history:hover,
+body.theme-dark .btn-danger-solid:hover,
+.theme-dark .btn-clear-history:hover,
+.theme-dark .btn-danger-solid:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.5) !important;
+}
+
+/* ===================================================================
+   UNIFIED PILL ACTION BUTTONS ("DETAIL PENGAJUAN" & "HAPUS")
+   SESUAI GAMBAR REFERENSI USER (media_1793582659724_b642e7d9.png)
+   =================================================================== */
+.action-pills-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem !important;
+  flex-wrap: nowrap !important;
+  vertical-align: middle !important;
+}
+
+/* Full-width stretch on Cards (No empty dead space beside Detail Pengajuan) */
+.figma-card-footer .action-pills-row,
+.card-actions-bar {
+  width: 100% !important;
+  display: flex !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+}
+
+.figma-card-footer .action-pills-row .btn-pill-detail,
+.card-actions-bar .btn-pill-detail {
+  flex: 1 1 auto !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0.42rem 0.75rem !important;
+}
+
+.figma-card-footer .action-pills-row .btn-pill-delete,
+.card-actions-bar .btn-pill-delete {
+  flex: 0 0 auto !important;
+  justify-content: center !important;
+  padding: 0.42rem 0.75rem !important;
+}
+
+.btn-pill-action {
+  font-family: var(--font-main, 'Plus Jakarta Sans', sans-serif) !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease-in-out !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+
+.btn-pill-action svg {
+  flex-shrink: 0 !important;
+}
+
+.btn-pill-detail {
+  background: #ffffff !important;
+  color: #059669 !important;
+  border: 1px solid #6ee7b7 !important;
+}
+
+.btn-pill-detail svg {
+  stroke: #059669 !important;
+}
+
+.btn-pill-detail:hover {
+  background: #ecfdf5 !important;
+  border-color: #059669 !important;
+  color: #047857 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(5, 150, 105, 0.12);
+}
+
+.btn-pill-delete {
+  background: #fff5f5 !important;
+  color: #ef4444 !important;
+  border: 1px solid #fecaca !important;
+}
+
+.btn-pill-delete svg {
+  stroke: #ef4444 !important;
+}
+
+.btn-pill-delete:hover {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #dc2626 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.15);
+}
+
+.btn-pill-action:active {
+  transform: translateY(0) !important;
+}
+
+/* Dark mode support */
+body.theme-dark .btn-pill-detail,
+.theme-dark .btn-pill-detail {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+  color: #34d399 !important;
+}
+
+body.theme-dark .btn-pill-detail svg,
+.theme-dark .btn-pill-detail svg {
+  stroke: #34d399 !important;
+}
+
+body.theme-dark .btn-pill-detail:hover,
+.theme-dark .btn-pill-detail:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: #34d399 !important;
+  color: #6ee7b7 !important;
+}
+
+body.theme-dark .btn-pill-delete,
+.theme-dark .btn-pill-delete {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #f87171 !important;
+}
+
+body.theme-dark .btn-pill-delete svg,
+.theme-dark .btn-pill-delete svg {
+  stroke: #f87171 !important;
+}
+
+body.theme-dark .btn-pill-delete:hover,
+.theme-dark .btn-pill-delete:hover {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: #ef4444 !important;
+  color: #fca5a5 !important;
+}
+
+/* ===================================================================
+   NOTIFICATION SYSTEM - DARK MODE ADAPTATIONS (PUSAT PEMBERITAHUAN)
+   =================================================================== */
+.notif-icon-box {
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.notif-icon-box.icon-danger {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.notif-icon-box.icon-success {
+  background: #dcfce7;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.notif-icon-box.icon-info {
+  background: #dbeafe;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.notif-icon-box.icon-warning {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.notif-icon-box.icon-neutral {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.notif-icon-box svg {
+  stroke: currentColor !important;
+}
+
+.notif-ticket-pill {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: #0f172a;
+  background: #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  line-height: 1.3;
+}
+
+.notif-link-hint {
+  color: #059669;
+  font-weight: 700;
+  font-size: 0.725rem;
+}
+
+.notif-header-sub {
+  font-size: 0.75rem;
+  color: #059669;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* DARK MODE OVERRIDES */
+body.theme-dark .notif-icon-box.icon-danger,
+.theme-dark .notif-icon-box.icon-danger {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.28) !important;
+}
+
+body.theme-dark .notif-icon-box.icon-success,
+.theme-dark .notif-icon-box.icon-success {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
+}
+
+body.theme-dark .notif-icon-box.icon-info,
+.theme-dark .notif-icon-box.icon-info {
+  background: rgba(59, 130, 246, 0.16) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.28) !important;
+}
+
+body.theme-dark .notif-icon-box.icon-warning,
+.theme-dark .notif-icon-box.icon-warning {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+}
+
+body.theme-dark .notif-icon-box.icon-neutral,
+.theme-dark .notif-icon-box.icon-neutral {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+body.theme-dark .notif-icon-box svg,
+.theme-dark .notif-icon-box svg {
+  stroke: currentColor !important;
+}
+
+body.theme-dark .notif-ticket-pill,
+.theme-dark .notif-ticket-pill {
+  color: #cbd5e1 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+body.theme-dark .notif-link-hint,
+.theme-dark .notif-link-hint {
+  color: #34d399 !important;
+}
+
+body.theme-dark .notif-header-sub,
+.theme-dark .notif-header-sub {
+  color: #34d399 !important;
+}
+
+body.theme-dark .notif-card-full.unread,
+.theme-dark .notif-card-full.unread {
+  background: rgba(16, 185, 129, 0.06) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+body.theme-dark .notif-card-full:not(.unread),
+.theme-dark .notif-card-full:not(.unread) {
+  background: #111622 !important;
+  border: 1px solid #1e2c42 !important;
+}
+
+

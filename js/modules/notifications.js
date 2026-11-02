@@ -317,21 +317,35 @@
     }
   }
 
+    // Helper Class Type Icon
+  function getNotifIconTypeClass(type, priority) {
+    if (priority === 'high' || type === 'darurat_baru' || type === 'bawahan_terlambat' || type === 'ditolak' || type === 'perpanjangan_ditolak') {
+      return 'icon-danger';
+    }
+    if (type === 'disetujui' || type === 'perpanjangan_disetujui' || type === 'darurat_qr_aktif') {
+      return 'icon-success';
+    }
+    if (type === 'kedaluwarsa' || type === 'selesai') {
+      return 'icon-info';
+    }
+    return 'icon-neutral';
+  }
+
   // 7. Icon Helper untuk Jenis Notifikasi
   function getNotifIconSvg(type, priority) {
     if (priority === 'high' || type === 'darurat_baru' || type === 'bawahan_terlambat') {
-      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
     }
     if (type === 'disetujui' || type === 'perpanjangan_disetujui' || type === 'darurat_qr_aktif') {
-      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
     }
     if (type === 'ditolak' || type === 'perpanjangan_ditolak') {
-      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
     }
     if (type === 'kedaluwarsa' || type === 'selesai') {
-      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
     }
-    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
   }
 
   // 8. TAMPILAN MOBILE: SHEET NOTIFIKASI LAYAR PENUH (Hal 4)
@@ -355,7 +369,7 @@
       const isUnread = !n.isRead;
       return `
         <div class="mobile-notif-item ${isUnread ? 'unread' : ''} ${isHigh ? 'priority-high' : ''}" style="position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; margin-bottom: 8px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
-          <div style="width: 36px; height: 36px; border-radius: 10px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+          <div class="notif-icon-box ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 36px; height: 36px;">
             ${getNotifIconSvg(n.type, n.priority)}
           </div>
           <div style="flex: 1; min-width: 0; padding-right: 36px;">
@@ -364,7 +378,7 @@
                 ${n.title}
                 ${isHigh ? '<span style="background: #dc2626; color: #fff; font-size: 0.6rem; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-left: 4px; vertical-align: middle;">DARURAT</span>' : ''}
               </div>
-              ${isUnread ? '<span style="width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0; margin-top: 4px;"></span>' : ''}
+              ${isUnread ? '<span class="notif-unread-dot" style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;"></span>' : ''}
             </div>
             <div style="font-size: 0.75rem; color: #334155; line-height: 1.4; margin-bottom: 4px;">
               ${n.message}
@@ -488,13 +502,13 @@
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
               <span class="dropdown-notif-title" style="font-size: 0.8rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${n.title}</span>
-              ${isUnread ? '<span style="width: 7px; height: 7px; border-radius: 50%; background: #059669; flex-shrink: 0;"></span>' : ''}
+              ${isUnread ? '<span class="notif-unread-dot" style="width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;"></span>' : ''}
             </div>
             <div class="dropdown-notif-msg" style="font-size: 0.725rem; color: var(--text-secondary, #334155); line-height: 1.35; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
               ${n.message}
             </div>
             <div class="dropdown-notif-meta" style="font-size: 0.65rem; color: var(--text-muted, #64748b); font-weight: 600;">
-              ${n.ticketId ? `<span style="font-family: monospace; font-weight: 700; color: var(--text-primary, #0f172a);">${n.ticketId}</span> • ` : ''}${formatRelativeTime(n.createdAt)}
+              ${n.ticketId ? `<span class="notif-ticket-pill">${n.ticketId}</span> • ` : ''}${formatRelativeTime(n.createdAt)}
             </div>
           </div>
         </div>
@@ -519,7 +533,7 @@
         <!-- Header Page -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid var(--border-color, #e2e8f0); padding-bottom: 16px;">
           <div>
-            <div style="font-size: 0.75rem; color: #059669; font-weight: 800; text-transform: uppercase;">Pusat Pemberitahuan</div>
+            <div class="notif-header-sub">Pusat Pemberitahuan</div>
             <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
           <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -546,7 +560,7 @@
             const isUnread = !n.isRead;
             return `
               <div class="card notif-card-full ${isUnread ? 'unread' : ''}" style="position: relative; padding: 16px; border-radius: 12px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
-                <div style="width: 42px; height: 42px; border-radius: 10px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <div class="notif-icon-box ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 42px; height: 42px;">
                   ${getNotifIconSvg(n.type, n.priority)}
                 </div>
                 <div style="flex: 1; padding-right: 40px;">
@@ -557,15 +571,15 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">${formatRelativeTime(n.createdAt)}</span>
-                      ${isUnread ? '<span style="width: 9px; height: 9px; border-radius: 50%; background: #059669;"></span>' : ''}
+                      ${isUnread ? '<span class="notif-unread-dot" style="width: 9px; height: 9px; border-radius: 50%;"></span>' : ''}
                     </div>
                   </div>
                   <div style="font-size: 0.825rem; color: var(--text-secondary, #334155); line-height: 1.5; margin-bottom: 6px;">
                     ${n.message}
                   </div>
                   <div style="display: flex; align-items: center; gap: 12px; font-size: 0.725rem;">
-                    ${n.ticketId ? `<span style="font-family: monospace; font-weight: 800; color: #0f172a; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${n.ticketId}</span>` : ''}
-                    <span style="color: #059669; font-weight: 700;">Klik untuk membuka detail izin →</span>
+                    ${n.ticketId ? `<span class="notif-ticket-pill">${n.ticketId}</span>` : ''}
+                    <span class="notif-link-hint">Klik untuk membuka detail izin →</span>
                   </div>
                 </div>
                 <button type="button" class="btn-delete-notif-item" aria-label="Hapus Notifikasi" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; padding: 0;" onclick="event.stopPropagation(); window.deleteDesktopNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">

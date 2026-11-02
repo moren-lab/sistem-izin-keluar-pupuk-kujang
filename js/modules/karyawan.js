@@ -667,9 +667,18 @@ function renderKaryawanDashboard() {
               ${getCleanEmpStatus(t.status || 'Selesai', t)}
             </div>
 
-            <!-- Kolom 4: Aksi Detail Pengajuan -->
-            <div style="min-width: 110px; text-align: right;">
-              <a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>
+            <!-- Kolom 4: Aksi Detail Pengajuan & Hapus -->
+            <div style="min-width: 175px; text-align: right; white-space: nowrap;">
+              <div class="action-pills-row">
+                <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  <span>Detail pengajuan</span>
+                </button>
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Hapus</span>
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -1214,19 +1223,22 @@ function renderEmpCards(list, containerElement) {
             </div>
 
             <!-- Action Buttons Footer -->
-            <div class="figma-card-footer" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.55rem; border-top: 1px solid #f1f5f9;">
-              <div style="display: flex; gap: 0.65rem; align-items: center;">
-                ${(t.status === 'Disetujui' && !t.scanOutTime) ? `
-                  <button class="btn-figma-primary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;" onclick="openTicketDetail('${t.id}', 'qr')">
-                    Buka QR Izin
-                  </button>
-                ` : ''}
-                <a href="#" class="figma-card-link" style="font-size: 0.75rem; font-weight: 700; color: #0284c7;" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan →</a>
+            <div class="figma-card-footer" style="display: flex; gap: 0.5rem; align-items: center; width: 100%; margin-top: auto; padding-top: 0.55rem; border-top: 1px solid #f1f5f9;">
+              ${(t.status === 'Disetujui' && !t.scanOutTime) ? `
+                <button class="btn-figma-primary" style="padding: 0.42rem 0.65rem; font-size: 0.72rem; white-space: nowrap; flex-shrink: 0;" onclick="openTicketDetail('${t.id}', 'qr')">
+                  Buka QR Izin
+                </button>
+              ` : ''}
+              <div class="action-pills-row" style="flex: 1; width: 100%;">
+                <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  <span>Detail pengajuan</span>
+                </button>
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Hapus</span>
+                </button>
               </div>
-              <button type="button" class="btn-figma-delete-single" style="background: none; border: 1px solid #fee2e2; color: #ef4444; font-size: 0.72rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.28rem 0.5rem; border-radius: 6px; transition: background 0.15s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                <span>Hapus</span>
-              </button>
             </div>
           </div>
         `;
@@ -1252,35 +1264,24 @@ function renderEmpTable(list, containerElement) {
             <th>Rencana waktu</th>
             <th>Status</th>
             <th>Catatan</th>
-            <th style="text-align: right;">Tindakan</th>
+            <th style="text-align: right; white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
           ${list.map(t => {
     const statusHtml = getCleanEmpStatus(t.status, t);
     let catatanHtml = `<span style="color: #475569;">Tepat waktu — Disetujui ${t.approverName || 'Hendra Gunawan'}</span>`;
-    let tindakanHtml = `<a href="#" class="figma-card-link" onclick="openTicketDetail('${t.id}', 'detail'); return false;">Detail pengajuan</a>`;
-
-    if (t.status === 'Terlambat') {
-      catatanHtml = `<span style="color: #b91c1c; font-weight: 600;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
-    } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
-      catatanHtml = `<span style="color: #b45309; font-weight: 500;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} (+${lateStr})</span>`;
-    } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
-      catatanHtml = `<span style="color: #b91c1c;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
-    } else if (t.status === 'Kedaluwarsa' || t.status === 'Kadaluwarsa') {
-      catatanHtml = `<span style="color: #64748b;">Kedaluwarsa sebelum scan keluar</span>`;
-    } else if (t.status === 'Dibatalkan' || (t.status || '').toLowerCase().includes('batal')) {
-      catatanHtml = `<span style="color: #64748b;">Pengajuan dibatalkan oleh pemohon</span>`;
-    } else {
-      catatanHtml = `<span style="color: #475569;">Tepat waktu — Disetujui ${t.approverName || 'Atasan'}</span>`;
-    }
-
-    tindakanHtml += `
-      <button type="button" style="background: none; border: none; color: #ef4444; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.65rem; display: inline-flex; align-items: center; gap: 0.2rem;" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"></path></svg>
-        Hapus
-      </button>
+    let tindakanHtml = `
+      <div class="action-pills-row">
+        <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+          <span>Detail pengajuan</span>
+        </button>
+        <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <span>Hapus</span>
+        </button>
+      </div>
     `;
 
     const scheduleWithDay = formatTicketScheduleWithDay(t);
@@ -1298,7 +1299,7 @@ function renderEmpTable(list, containerElement) {
                 <td>${scheduleWithDay}</td>
                 <td>${statusHtml}</td>
                 <td style="font-size: 0.75rem;">${catatanHtml}</td>
-                <td style="text-align: right;">${tindakanHtml}</td>
+                <td style="text-align: right; white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
               </tr>
             `;
   }).join('')}
@@ -1383,18 +1384,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // DELETE FEATURE FOR RIWAYAT PENGAJUAN (STRICT SERVER-LEVEL RULES)
-const FINISHED_EMP_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
-
 function deleteEmpTicket(ticketId) {
   let ticketsList = window.ticketsList || [];
   const t = ticketsList.find(x => x.id === ticketId);
   const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
 
   if (!t) return;
-  if (!FINISHED_EMP_STATUSES.includes(t.status)) {
-    if (typeof window.showToast === 'function') window.showToast('Tiket yang masih berjalan tidak dapat dihapus.', 'error');
-    return;
-  }
   if (t.applicantNip && t.applicantNip !== myNip) {
     if (typeof window.showToast === 'function') window.showToast('Anda tidak berhak menghapus tiket karyawan lain.', 'error');
     return;
