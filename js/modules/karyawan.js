@@ -1426,7 +1426,7 @@ function deleteEmpTicket(ticketId) {
 function deleteAllEmpRiwayat() {
   const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
   const allFiltered = typeof filterEmpTickets === 'function' ? filterEmpTickets() : [];
-  const filtered = allFiltered.filter(t => FINISHED_EMP_STATUSES.includes(t.status) && (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')));
+  const filtered = allFiltered.filter(t => (FINISHED_EMP_STATUSES.includes(t.status) || (t.status === 'Terlambat' && t.scanInTime)) && (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')));
 
   if (filtered.length === 0) {
     if (typeof window.showToast === 'function') {

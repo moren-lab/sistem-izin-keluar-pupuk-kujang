@@ -501,7 +501,7 @@
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header">
         <div>
-          <h3 class="mobile-sheet-title" style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Menu Akun Pengguna</h3>
+          <h3 class="mobile-sheet-title" style="font-size: 1.05rem; font-weight: 800;">Menu Akun Pengguna</h3>
           <p style="font-size: 0.725rem; color: #64748b; margin: 1px 0 0 0;">Portal SAKTI • PT Pupuk Kujang</p>
         </div>
         <button type="button" class="mobile-sheet-close" aria-label="Tutup Menu Akun" onclick="window.mobileCloseSheet()">✕</button>
@@ -514,7 +514,7 @@
             ${profile.initials}
           </div>
           <div style="flex: 1; min-width: 0;">
-            <div style="font-size: 0.925rem; font-weight: 800; color: #0f172a; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <div class="mobile-avatar-sheet-name" style="font-size: 0.925rem; font-weight: 800; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               ${profile.name}
             </div>
             <div style="font-size: 0.75rem; color: #059669; font-weight: 700; margin-top: 2px;">
@@ -529,19 +529,19 @@
           </div>
         </div>
 
-        <div style="font-size: 0.725rem; color: #64748b; margin-bottom: 14px; line-height: 1.4; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+        <div class="mobile-sheet-info-box" style="font-size: 0.725rem; margin-bottom: 14px; line-height: 1.4; border-radius: 8px; padding: 10px;">
           Sesi aktif Anda terotentikasi melalui <strong>Portal SAKTI Kujang ID</strong>. Untuk mengakhiri sesi kerja dan kembali ke layar login, gunakan tombol keluar di bawah.
         </div>
 
         <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
           <!-- Logout Button (Pekerjaan B) -->
           <button type="button" class="mobile-btn-logout-item" onclick="window.openMobileLogoutConfirm('${profile.name.replace(/'/g, "\\'")}')" aria-label="Keluar dari akun SAKTI">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            <span style="color: #dc2626;">Keluar ke Portal SAKTI</span>
+            <span>Keluar ke Portal SAKTI</span>
           </button>
         </div>
       </div>
@@ -567,8 +567,8 @@
 
     const modalHtml = `
       <div id="mobileLogoutConfirmModal" class="mobile-modal-overlay open" style="display: flex; align-items: center; justify-content: center; z-index: 10001; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 20px;">
-        <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 340px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: mobileModalFadeIn 0.2s ease-out; text-align: center;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+        <div class="mobile-confirm-dialog-card" style="border-radius: 16px; width: 100%; max-width: 340px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: mobileModalFadeIn 0.2s ease-out; text-align: center;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(220, 38, 38, 0.15); color: #ef4444; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
@@ -576,7 +576,7 @@
             </svg>
           </div>
 
-          <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">Keluar dari aplikasi?</h3>
+          <h3 class="mobile-confirm-dialog-title" style="font-size: 1.05rem; font-weight: 800; margin: 0 0 6px 0;">Keluar dari aplikasi?</h3>
           <p style="font-size: 0.775rem; color: #64748b; margin: 0 0 12px 0; line-height: 1.45;">
             Anda akan keluar dari akun <strong>${userName || 'pengguna'}</strong>. Anda perlu masuk lagi melalui Portal SAKTI untuk memakai aplikasi.
           </p>

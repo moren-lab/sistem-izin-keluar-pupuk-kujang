@@ -1609,3 +1609,48 @@ window.openScanMethodPicker = openScanMethodPicker;
 window.closeScanMethodPicker = closeScanMethodPicker;
 window.deleteSecurityTicket = deleteSecurityTicket;
 
+function deleteAllSecurityLogs() {
+  const filtered = typeof filterSecurityLogTickets === 'function' ? filterSecurityLogTickets() : [];
+  const FINISHED_SEC_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+  const deletable = filtered.filter(t => FINISHED_SEC_STATUSES.includes(t.status) || (t.status === 'Terlambat' && t.scanInTime));
+
+  if (deletable.length === 0) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada riwayat pemindaian selesai untuk dihapus.', 'warning');
+    }
+    return;
+  }
+
+  const count = deletable.length;
+  const handler = () => {
+    const idsToDelete = new Set(deletable.map(t => t.id));
+    let ticketsList = window.ticketsList || [];
+    let deletedCount = 0;
+    ticketsList.forEach(t => {
+      if (idsToDelete.has(t.id) && (FINISHED_SEC_STATUSES.includes(t.status) || (t.status === 'Terlambat' && t.scanInTime))) {
+        t.deletedBySecurity = true;
+        deletedCount++;
+      }
+    });
+    window.saveTickets(ticketsList);
+
+    renderSecurityView();
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`${deletedCount} riwayat pemindaian berhasil dihapus.`, 'success');
+    }
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Hapus Riwayat Pemindaian',
+      message: `Hapus <strong>${count}</strong> riwayat pemindaian yang sudah selesai dari pos jaga? Personel yang masih di luar area tidak akan ikut terhapus.`,
+      onConfirm: handler
+    });
+  } else if (confirm(`Hapus ${count} riwayat pemindaian yang sudah selesai dari pos jaga?`)) {
+    handler();
+  }
+}
+
+window.deleteAllSecurityLogs = deleteAllSecurityLogs;
+

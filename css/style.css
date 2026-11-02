@@ -9987,21 +9987,39 @@ body.theme-dark .searchable-dropdown-input:focus {
 body.theme-dark .form-label {
   color: #cbd5e1 !important;
 }
+/* 6. Approver Search Combobox & Dropdown Dark Mode */
 .theme-dark .approver-search-tip,
 body.theme-dark .approver-search-tip,
 .theme-dark #approverSearchTip,
 body.theme-dark #approverSearchTip,
 .theme-dark #emergApproverSearchTip,
 body.theme-dark #emergApproverSearchTip {
-  background: rgba(16, 185, 129, 0.15) !important;
+  background: rgba(16, 185, 129, 0.12) !important;
   color: #34d399 !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
 }
 .theme-dark .approver-floating-dropdown,
 body.theme-dark .approver-floating-dropdown {
   background: #111622 !important;
   border: 1px solid #1e2c42 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65) !important;
+}
+.theme-dark .approver-before-search-banner,
+body.theme-dark .approver-before-search-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(13, 148, 136, 0.08) 100%) !important;
+  border-bottom: 1px solid #1e2c42 !important;
+}
+.theme-dark .before-search-badge,
+body.theme-dark .before-search-badge {
+  color: #34d399 !important;
+}
+.theme-dark .before-search-badge svg,
+body.theme-dark .before-search-badge svg {
+  color: #34d399 !important;
+}
+.theme-dark .before-search-text,
+body.theme-dark .before-search-text {
+  color: #94a3b8 !important;
 }
 .theme-dark .approver-dropdown-header,
 body.theme-dark .approver-dropdown-header {
@@ -10009,21 +10027,111 @@ body.theme-dark .approver-dropdown-header {
   border-bottom: 1px solid #1e2c42 !important;
   color: #94a3b8 !important;
 }
+.theme-dark .approver-found-badge,
+body.theme-dark .approver-found-badge {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #334155 !important;
+}
+.theme-dark .approver-items-list::-webkit-scrollbar-track,
+body.theme-dark .approver-items-list::-webkit-scrollbar-track {
+  background: #111622 !important;
+}
+.theme-dark .approver-items-list::-webkit-scrollbar-thumb,
+body.theme-dark .approver-items-list::-webkit-scrollbar-thumb {
+  background: #334155 !important;
+}
 .theme-dark .approver-item,
 body.theme-dark .approver-item {
-  border-bottom: 1px solid #1a2436 !important;
+  background: #141c2c !important;
+  border: 1px solid #1e2c42 !important;
+  margin-bottom: 4px !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .theme-dark .approver-item:hover,
-body.theme-dark .approver-item:hover {
-  background: #182337 !important;
+body.theme-dark .approver-item:hover,
+.theme-dark .approver-item.keyboard-focus,
+body.theme-dark .approver-item.keyboard-focus {
+  background: #1a2438 !important;
+  border-color: #38bdf8 !important;
+}
+.theme-dark .approver-item.is-selected,
+body.theme-dark .approver-item.is-selected {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
 }
 .theme-dark .approver-item-name,
 body.theme-dark .approver-item-name {
   color: #f8fafc !important;
 }
-.theme-dark .approver-item-title,
-body.theme-dark .approver-item-title {
+.theme-dark .approver-item-nip,
+body.theme-dark .approver-item-nip {
+  background: #1e293b !important;
   color: #94a3b8 !important;
+  border: 1px solid #334155 !important;
+}
+.theme-dark .approver-item-tag,
+body.theme-dark .approver-item-tag {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+.theme-dark .approver-item-role,
+body.theme-dark .approver-item-role {
+  color: #94a3b8 !important;
+}
+.theme-dark .approver-item-dept,
+body.theme-dark .approver-item-dept {
+  color: #64748b !important;
+}
+.theme-dark .approver-item-cta,
+body.theme-dark .approver-item-cta {
+  color: #34d399 !important;
+}
+.theme-dark .approver-selected-preview,
+body.theme-dark .approver-selected-preview {
+  background: #141c2c !important;
+  border: 1px solid #1e2c42 !important;
+}
+.theme-dark .approver-selected-card-inner,
+body.theme-dark .approver-selected-card-inner {
+  background: #141c2c !important;
+}
+.theme-dark .approver-selected-name,
+body.theme-dark .approver-selected-name {
+  color: #f8fafc !important;
+}
+.theme-dark .approver-selected-title,
+body.theme-dark .approver-selected-title {
+  color: #94a3b8 !important;
+}
+.theme-dark .btn-change-approver-choice,
+body.theme-dark .btn-change-approver-choice {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+.theme-dark .btn-change-approver-choice:hover,
+body.theme-dark .btn-change-approver-choice:hover {
+  background: #25334a !important;
+  color: #f8fafc !important;
+}
+.theme-dark .approver-empty-state,
+body.theme-dark .approver-empty-state {
+  color: #94a3b8 !important;
+}
+.theme-dark .btn-clear-approver-search,
+body.theme-dark .btn-clear-approver-search,
+.theme-dark .btn-toggle-approver-list,
+body.theme-dark .btn-toggle-approver-list {
+  color: #94a3b8 !important;
+}
+.theme-dark .btn-clear-approver-search:hover,
+body.theme-dark .btn-clear-approver-search:hover,
+.theme-dark .btn-toggle-approver-list:hover,
+body.theme-dark .btn-toggle-approver-list:hover {
+  color: #f8fafc !important;
+  background: #1e293b !important;
 }
 
 /* 7. Modals: Card, Header, Footer & Tab Switchers */
@@ -10388,4 +10496,76 @@ body.theme-dark .option-card.emerg-opt.selected .option-name {
 .theme-dark .option-card.emerg-opt .option-desc,
 body.theme-dark .option-card.emerg-opt .option-desc {
   color: #94a3b8 !important;
+}
+
+/* ===================================================================
+   ADMIN EMPLOYEE SEARCH COMBOBOX & AUTO-FILL STYLES
+   =================================================================== */
+.admin-search-field-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.admin-search-field-control .form-input {
+  width: 100%;
+  padding-right: 2.2rem;
+}
+
+.btn-clear-admin-emp {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  z-index: 5;
+}
+
+.btn-clear-admin-emp:hover {
+  color: var(--text-primary, #0f172a);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-dark .btn-clear-admin-emp:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-emp-floating-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10060;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-dark .admin-emp-floating-dropdown,
+body.theme-dark .admin-emp-floating-dropdown {
+  background: #111622 !important;
+  border: 1px solid #1e2c42 !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75) !important;
+}
+
+.theme-dark #adminEmpAutoFillBadge {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
 }

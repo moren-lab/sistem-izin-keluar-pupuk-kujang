@@ -1870,7 +1870,7 @@
           </button>
           <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 11px; font-weight: 700; background: #059669; border-color: #059669; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileExecuteSubmitPermit()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>${isEditing ? 'Simpan Perubahan' : (data.isEmergency ? '🚨 Terbitkan QR Darurat' : 'Kirim Pengajuan Izin')}</span>
+            <span>${isEditing ? 'Simpan Perubahan' : (data.isEmergency ? 'Terbitkan QR Darurat' : 'Kirim Pengajuan Izin')}</span>
           </button>
         </div>
       </div>
@@ -2073,7 +2073,7 @@
           recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
           actorSource: 'karyawan',
           type: 'darurat_baru',
-          title: '🚨 IZIN DARURAT BARU',
+          title: 'IZIN DARURAT BARU',
           message: `PERINGATAN: ${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin kedaruratan #${newTicket.id}. Memerlukan otorisasi segera.`,
           ticketId: newTicket.id,
           priority: 'high',
@@ -2083,7 +2083,7 @@
           recipientRole: 'security',
           actorSource: 'system',
           type: 'security_darurat',
-          title: '🚨 Tiket Darurat Melewati Gerbang',
+          title: 'Tiket Darurat Melewati Gerbang',
           message: `Izin darurat baru #${newTicket.id} (${newTicket.applicantName}) akan segera melewati pos pemeriksaan gerbang.`,
           ticketId: newTicket.id,
           priority: 'high',

@@ -1232,7 +1232,7 @@
 
           ${(t.isEmergency && t.emergencyLocked && t.status !== 'Ditolak') ? `
             <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #991b1b; text-align: center; font-weight: 700;">
-              🚨 Tiket Darurat TERKUNCI: Menunggu otorisasi Atasan sebelum gerbang dapat dibuka.
+              Tiket Darurat TERKUNCI: Menunggu otorisasi Atasan sebelum gerbang dapat dibuka.
             </div>
           ` : ''}
 

@@ -447,7 +447,7 @@ function renderApproverDashboard() {
               <div>
                 <div class="feed-item-title" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
                   <span>${t.applicantName} — ${t.destination}</span>
-                  ${isEmergency ? '<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">🚨 DARURAT</span>' : ''}
+                  ${isEmergency ? '<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>' : ''}
                 </div>
                 <div class="feed-item-sub">
                   ${t.id} — Est. Kembali: <span style="font-family: var(--font-mono); font-weight: 700;">${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang Hari Ini'}</span>
@@ -495,7 +495,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
                 <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
               </div>
-              <span style="font-weight: 700; font-size: 0.75rem; color: ${isEmergency ? '#b91c1c' : (isDinas ? '#059669' : '#d97706')};">${isEmergency ? '🚨 ' + t.category : t.category}</span>
+              <span style="font-weight: 700; font-size: 0.75rem; color: ${isEmergency ? '#b91c1c' : (isDinas ? '#059669' : '#d97706')};">${isEmergency ? '' + t.category : t.category}</span>
             </div>
 
             ${isTicketReassignedFromCurrentApprover(t) ? `
@@ -542,7 +542,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
             ${isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
               <div class="approver-alert-banner emergency" style="border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin: 0.65rem 0;">
                 <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
-                  <span>🚨 Hasil Penulisan Form Kedaruratan (K3/Medis)</span>
+                  <span>Hasil Penulisan Form Kedaruratan (K3/Medis)</span>
                   <span style="font-weight: 800; font-size: 0.75rem;">
                     ${t.selectedMethod === 'passcode' ? '🔑 Cara: Sandi / OTP' : (t.selectedMethod === 'facescan' ? '🤳 Cara: Scan Wajah' : '📱 Cara: Persetujuan di App')}
                   </span>

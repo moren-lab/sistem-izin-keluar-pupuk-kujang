@@ -377,6 +377,7 @@ function renderAdminAudit() {
   const employeeMap = new Map();
 
   tickets.forEach(ticket => {
+    if (ticket.deletedFromAudit) return;
     const empKey = (ticket.applicantNip || ticket.applicantName || 'karyawan').trim().toLowerCase();
     const logs = ticket.activityLog || ticket.timeline || [];
 
@@ -598,6 +599,50 @@ function deleteAdminAuditLog(ticketId, encodedTime, encodedEvent) {
   }
 }
 
+function deleteAllAdminAudit() {
+  const tickets = window.ticketsList || [];
+  const activeTickets = tickets.filter(t => !t.deletedFromAudit);
+
+  if (activeTickets.length === 0) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada log investigasi audit untuk dihapus.', 'warning');
+    }
+    return;
+  }
+
+  const count = activeTickets.length;
+  const handler = () => {
+    let ticketsList = window.ticketsList || [];
+    let deletedCount = 0;
+    ticketsList.forEach(t => {
+      if (!t.deletedFromAudit) {
+        t.deletedFromAudit = true;
+        t.activityLog = [];
+        t.timeline = [];
+        deletedCount++;
+      }
+    });
+
+    window.saveTickets(ticketsList);
+    renderAdminAudit();
+    if (typeof renderAdminRecentFeed === 'function') renderAdminRecentFeed();
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Seluruh catatan log investigasi audit (${deletedCount} data) berhasil dihapus.`, 'success');
+    }
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Hapus Semua Log Audit Trail',
+      message: `Apakah Anda yakin ingin menghapus <strong>seluruh (${count})</strong> catatan audit trail & log investigasi? Tindakan ini memerlukan otorisasi administrator dan tidak dapat dibatalkan.`,
+      onConfirm: handler
+    });
+  } else if (confirm(`Apakah Anda yakin ingin menghapus seluruh (${count}) catatan audit trail & log investigasi? Tindakan ini tidak dapat dibatalkan.`)) {
+    handler();
+  }
+}
+
 // ==========================================
 // 4. REPORTS & EXPORT EXCEL / PRINT PDF (FR-ADM-03, UC-22, UC-23)
 // ==========================================
@@ -787,19 +832,53 @@ function printAdminReport() {
 // ==========================================
 
 // ==========================================
-// 4C. SEARCHABLE DROPDOWN UNTUK ATASAN LANGSUNG KARYAWAN
+// 4C. SEARCHABLE COMBOBOX ATASAN LANGSUNG KARYAWAN (IDENTIK DENGAN BUAT PENGAJUAN & IZIN DARURAT)
 // ==========================================
 const AVAILABLE_SUPERVISORS = [
-  { name: 'Ir. Hendra Gunawan, M.T.', nip: 'PK-2015-1002', title: 'Manager Rekayasa & Pemeliharaan', roleLabel: 'Atasan 1' },
-  { name: 'Dewi Sartika, S.T., M.M.', nip: 'PK-2012-0845', title: 'Supervisor Operasional Lapangan (Plt. Manager)', roleLabel: 'Atasan 2' },
-  { name: 'Bambang Sutrisno, S.T.', nip: 'PK-2010-0012', title: 'Manager K3 & Keselamatan Kerja', roleLabel: 'Manajer K3' }
+  {
+    name: 'Ir. Hendra Gunawan, M.T.',
+    nip: 'PK-2015-1002',
+    title: 'Atasan 1 (Manager)',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    roleLabel: 'Atasan 1 (Manager)',
+    isDirectSupervisor: true,
+    avatarBg: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'
+  },
+  {
+    name: 'Dewi Sartika, S.T., M.M.',
+    nip: 'PK-2012-0845',
+    title: 'Atasan 2 (Supervisor / Plt)',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    roleLabel: 'Atasan 2 (Supervisor / Plt)',
+    isDirectSupervisor: false,
+    avatarBg: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+  },
+  {
+    name: 'Bambang Sutrisno, S.T.',
+    nip: 'PK-2010-0012',
+    title: 'Manager K3 & Keselamatan Kerja',
+    department: 'Departemen Pengamanan & K3',
+    roleLabel: 'Manajer K3',
+    isDirectSupervisor: false,
+    avatarBg: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
+  }
 ];
+
+function getAdminAvailableSupervisors() {
+  if (typeof window.getActiveApprovers === 'function') {
+    const apps = window.getActiveApprovers();
+    if (apps && apps.length > 0) return apps;
+  }
+  return AVAILABLE_SUPERVISORS;
+}
 
 function initAdminSupervisorSearchableDropdown() {
   const searchInput = document.getElementById('adminInputSupervisorSearch');
   const clearBtn = document.getElementById('btnAdminSupervisorClear');
-  const dd = document.getElementById('adminSupervisorSearchableDropdown');
-  if (!searchInput || !dd) return;
+  const toggleBtn = document.getElementById('btnToggleAdminSupervisorList');
+  const dropdown = document.getElementById('adminSupervisorFloatingDropdown');
+  const wrapper = document.getElementById('adminSupervisorComboboxWrapper');
+  if (!searchInput || !dropdown) return;
 
   if (searchInput.dataset.initialized) return;
   searchInput.dataset.initialized = 'true';
@@ -819,14 +898,28 @@ function initAdminSupervisorSearchableDropdown() {
     clearBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       searchInput.value = '';
+      const hiddenInput = document.getElementById('adminInputSupervisor');
+      if (hiddenInput) hiddenInput.value = '';
       clearBtn.style.display = 'none';
       searchInput.focus();
       renderAdminSupervisorDropdownItems('');
     });
   }
 
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dropdown.style.display === 'flex') {
+        closeAdminSupervisorDropdown();
+      } else {
+        openAdminSupervisorDropdown();
+        searchInput.focus();
+      }
+    });
+  }
+
   document.addEventListener('click', (e) => {
-    if (!dd.contains(e.target)) {
+    if (wrapper && !wrapper.contains(e.target)) {
       closeAdminSupervisorDropdown();
     }
   });
@@ -834,48 +927,139 @@ function initAdminSupervisorSearchableDropdown() {
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeAdminSupervisorDropdown();
+      return;
+    }
+
+    if (dropdown.style.display !== 'flex') {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        openAdminSupervisorDropdown();
+        e.preventDefault();
+      }
+      return;
+    }
+
+    const items = dropdown.querySelectorAll('.approver-item');
+    if (items.length === 0) return;
+
+    let focusedIdx = -1;
+    items.forEach((item, idx) => {
+      if (item.classList.contains('keyboard-focus')) focusedIdx = idx;
+    });
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedIdx = (focusedIdx + 1) % items.length;
+      items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === focusedIdx));
+      if (items[focusedIdx]) items[focusedIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedIdx = (focusedIdx - 1 + items.length) % items.length;
+      items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === focusedIdx));
+      if (items[focusedIdx]) items[focusedIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (focusedIdx >= 0 && items[focusedIdx]) {
+        items[focusedIdx].click();
+      }
     }
   });
 }
 
 function openAdminSupervisorDropdown() {
-  const menu = document.getElementById('adminSupervisorDropdownMenu');
+  const dropdown = document.getElementById('adminSupervisorFloatingDropdown');
+  const toggleBtn = document.getElementById('btnToggleAdminSupervisorList');
   const searchInput = document.getElementById('adminInputSupervisorSearch');
-  if (menu) {
-    menu.classList.add('open');
-    renderAdminSupervisorDropdownItems(searchInput ? searchInput.value : '');
+  const hiddenInput = document.getElementById('adminInputSupervisor');
+  if (dropdown) {
+    dropdown.style.display = 'flex';
+    if (toggleBtn) toggleBtn.classList.add('open');
+    const query = searchInput && hiddenInput && searchInput.value === hiddenInput.value ? '' : (searchInput ? searchInput.value : '');
+    renderAdminSupervisorDropdownItems(query);
   }
 }
 
 function closeAdminSupervisorDropdown() {
-  const menu = document.getElementById('adminSupervisorDropdownMenu');
-  if (menu) menu.classList.remove('open');
+  const dropdown = document.getElementById('adminSupervisorFloatingDropdown');
+  const toggleBtn = document.getElementById('btnToggleAdminSupervisorList');
+  if (dropdown) dropdown.style.display = 'none';
+  if (toggleBtn) toggleBtn.classList.remove('open');
 }
 
 function renderAdminSupervisorDropdownItems(filterText = '') {
-  const menu = document.getElementById('adminSupervisorDropdownMenu');
+  const listEl = document.getElementById('adminSupervisorItemsList');
+  const banner = document.getElementById('adminSupervisorBeforeSearchBanner');
+  const subtitle = document.getElementById('adminSupervisorDropdownSubtitle');
+  const badge = document.getElementById('adminSupervisorFoundBadge');
+  const emptyState = document.getElementById('adminSupervisorEmptyState');
+  const emptyTerm = document.getElementById('adminSupervisorEmptySearchTerm');
   const hiddenInput = document.getElementById('adminInputSupervisor');
-  if (!menu) return;
+  if (!listEl) return;
 
   const q = (filterText || '').toLowerCase().trim();
   const currentVal = hiddenInput ? hiddenInput.value : '';
+  const approvers = getAdminAvailableSupervisors();
 
-  const filtered = AVAILABLE_SUPERVISORS.filter(s => {
+  const filtered = approvers.filter(s => {
     if (!q) return true;
-    return s.name.toLowerCase().includes(q) || s.nip.toLowerCase().includes(q) || s.title.toLowerCase().includes(q);
+    return (
+      (s.name && s.name.toLowerCase().includes(q)) ||
+      (s.nip && s.nip.toLowerCase().includes(q)) ||
+      (s.title && s.title.toLowerCase().includes(q)) ||
+      (s.department && s.department.toLowerCase().includes(q)) ||
+      (s.roleLabel && s.roleLabel.toLowerCase().includes(q))
+    );
   });
 
+  if (!q) {
+    if (banner) banner.style.display = 'flex';
+    if (subtitle) subtitle.textContent = 'Daftar Atasan Peninjau';
+    if (badge) badge.textContent = `${approvers.length} Atasan`;
+  } else {
+    if (banner) banner.style.display = 'none';
+    if (subtitle) subtitle.textContent = 'Hasil Pencarian Atasan';
+    if (badge) badge.textContent = `${filtered.length} Ditemukan`;
+  }
+
   if (filtered.length === 0) {
-    menu.innerHTML = `<div class="searchable-dropdown-empty">Tidak ada nama atasan yang cocok dengan "${filterText}"</div>`;
+    listEl.innerHTML = '';
+    listEl.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'flex';
+    if (emptyTerm) emptyTerm.textContent = filterText;
     return;
   }
 
-  menu.innerHTML = filtered.map(s => {
+  if (emptyState) emptyState.style.display = 'none';
+  listEl.style.display = 'block';
+
+  listEl.innerHTML = filtered.map(s => {
     const isSelected = currentVal === s.name;
+    const initials = (typeof getApproverInitials === 'function' ? getApproverInitials(s.name) : (typeof getEmployeeInitials === 'function' ? getEmployeeInitials(s.name) : 'AT'));
+    const highlightedName = (typeof highlightApproverMatch === 'function' ? highlightApproverMatch(s.name, q) : highlightAdminEmpMatch(s.name, q));
+    const highlightedNip = (typeof highlightApproverMatch === 'function' ? highlightApproverMatch(s.nip, q) : highlightAdminEmpMatch(s.nip, q));
+    const highlightedTitle = (typeof highlightApproverMatch === 'function' ? highlightApproverMatch(s.title || s.roleLabel || '', q) : (s.title || s.roleLabel || ''));
+    const highlightedDept = (typeof highlightApproverMatch === 'function' ? highlightApproverMatch(s.department || '', q) : (s.department || ''));
+    const avatarBg = s.avatarBg || 'linear-gradient(135deg, #059669 0%, #0d9488 100%)';
+    const isDirect = s.isDirectSupervisor || (s.name && s.name.includes('Hendra Gunawan'));
+    const directTag = isDirect ? `<span class="approver-item-tag" title="Atasan langsung divisi Anda">Atasan Langsung</span>` : '';
+
     return `
-      <div class="searchable-dropdown-item ${isSelected ? 'selected' : ''}" onclick="window.setAdminSelectedSupervisor('${s.name.replace(/'/g, "\\'")}')">
-        <div style="font-weight: 700; color: #0f172a; font-size: 0.825rem;">${s.name}</div>
-        <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">${s.nip} • ${s.title} (${s.roleLabel})</div>
+      <div class="approver-item ${isSelected ? 'is-selected' : ''}" onclick="window.setAdminSelectedSupervisor('${s.name.replace(/'/g, "\\'")}')">
+        <div class="approver-item-avatar" style="background: ${avatarBg};">
+          ${initials}
+        </div>
+        <div class="approver-item-info">
+          <div class="approver-item-name-row">
+            <span class="approver-item-name">${highlightedName}</span>
+            <span class="approver-item-nip">${highlightedNip}</span>
+            ${directTag}
+          </div>
+          <div class="approver-item-role">${highlightedTitle}</div>
+          <div class="approver-item-dept">${highlightedDept}</div>
+        </div>
+        <div class="approver-item-cta">
+          <span>Pilih</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
       </div>
     `;
   }).join('');
@@ -886,7 +1070,8 @@ function setAdminSelectedSupervisor(name) {
   const searchInput = document.getElementById('adminInputSupervisorSearch');
   const clearBtn = document.getElementById('btnAdminSupervisorClear');
 
-  const sup = AVAILABLE_SUPERVISORS.find(s => s.name === name) || AVAILABLE_SUPERVISORS[0];
+  const approvers = getAdminAvailableSupervisors();
+  const sup = approvers.find(s => s.name === name) || approvers[0];
   const finalName = sup ? sup.name : name;
 
   if (hiddenInput) hiddenInput.value = finalName;
@@ -896,8 +1081,597 @@ function setAdminSelectedSupervisor(name) {
   closeAdminSupervisorDropdown();
 }
 
+window.AVAILABLE_SUPERVISORS = AVAILABLE_SUPERVISORS;
+window.getAdminAvailableSupervisors = getAdminAvailableSupervisors;
 window.initAdminSupervisorSearchableDropdown = initAdminSupervisorSearchableDropdown;
 window.setAdminSelectedSupervisor = setAdminSelectedSupervisor;
+window.openAdminSupervisorDropdown = openAdminSupervisorDropdown;
+window.closeAdminSupervisorDropdown = closeAdminSupervisorDropdown;
+window.renderAdminSupervisorDropdownItems = renderAdminSupervisorDropdownItems;
+
+
+// ==========================================
+// 4D. MASTER DIREKTORI KARYAWAN & COMBOBOX AUTO-FILL (PENCARIAN NAMA & NIP)
+// ==========================================
+const MASTER_EMPLOYEES = [
+  {
+    nip: 'PK-2024-8841',
+    name: 'Budi Pratama, S.T.',
+    email: 'budi.pratama@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Staf Rekayasa Mesin',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Rekayasa & Pemeliharaan'
+  },
+  {
+    nip: 'PK-2024-8842',
+    name: 'Arthur Morgan, S.Tr.T.',
+    email: 'arthur.morgan@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Staf Instrumentasi & Otomasi Pabrik',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Rekayasa & Pemeliharaan'
+  },
+  {
+    nip: 'PK-2022-7719',
+    name: 'Siti Rahmawati, S.Tr.',
+    email: 'siti.rahmawati@pupuk-kujang.co.id',
+    department: 'Departemen Produksi Amonia-1A',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Operator Lapangan Amonia-1A',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Operasional Pabrik'
+  },
+  {
+    nip: 'PK-2015-1002',
+    name: 'Ir. Hendra Gunawan, M.T.',
+    email: 'hendra.gunawan@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    supervisor: 'Dewi Sartika, S.T., M.M.',
+    title: 'Manager Rekayasa & Pemeliharaan',
+    roleKey: 'approver',
+    roleTitle: 'Atasan 1 (Manager)',
+    jabatan: 'Manajer'
+  },
+  {
+    nip: 'PK-2012-0845',
+    name: 'Dewi Sartika, S.T., M.M.',
+    email: 'dewi.sartika@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Supervisor Operasional Lapangan (Plt. Manager)',
+    roleKey: 'approver2',
+    roleTitle: 'Atasan 2 (Supervisor / Plt)',
+    jabatan: 'Supervisor / Plt'
+  },
+  {
+    nip: 'SEC-2018-042',
+    name: 'Sertu Agus',
+    email: 'pos1.security@pupuk-kujang.co.id',
+    department: 'Departemen Pengamanan & K3',
+    supervisor: 'Bambang Sutrisno, S.T.',
+    title: 'Petugas Pengamanan Pos 1',
+    roleKey: 'security',
+    roleTitle: 'Petugas Pos Jaga (Satpam)',
+    jabatan: 'Komandan Regu Pos Jaga'
+  },
+  {
+    nip: 'SEC-2019-088',
+    name: 'Kopral Dani',
+    email: 'pos2.security@pupuk-kujang.co.id',
+    department: 'Departemen Pengamanan & K3',
+    supervisor: 'Bambang Sutrisno, S.T.',
+    title: 'Petugas Pengamanan Pos 2',
+    roleKey: 'security',
+    roleTitle: 'Petugas Pos Jaga (Satpam)',
+    jabatan: 'Anggota Regu Pos Gerbang 1'
+  },
+  {
+    nip: 'SEC-2020-105',
+    name: 'Praka Ilham',
+    email: 'pos3.security@pupuk-kujang.co.id',
+    department: 'Departemen Pengamanan & K3',
+    supervisor: 'Bambang Sutrisno, S.T.',
+    title: 'Petugas Pengamanan Pos 3',
+    roleKey: 'security',
+    roleTitle: 'Petugas Pos Jaga (Satpam)',
+    jabatan: 'Anggota Regu Pos Gerbang 1'
+  },
+  {
+    nip: 'ADM-2016-019',
+    name: 'Bambang Sutrisno, S.T.',
+    email: 'bambang.sutrisno@pupuk-kujang.co.id',
+    department: 'Departemen Pengamanan & K3',
+    supervisor: 'Dr. Ahmad Subagja, M.M.',
+    title: 'Supervisi Pengamanan & K3',
+    roleKey: 'admin',
+    roleTitle: 'Administrator Pengamanan & K3',
+    jabatan: 'Super Admin K3 & Keamanan'
+  },
+  {
+    nip: 'PK-2012-0543',
+    name: 'Dr. Ahmad Subagja, M.M.',
+    email: 'ahmad.subagja@pupuk-kujang.co.id',
+    department: 'Departemen SDM & Organisasi',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Manager SDM & Organisasi',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Administrasi & K3'
+  },
+  {
+    nip: 'PK-2023-9102',
+    name: 'Rian Hidayat, S.T.',
+    email: 'rian.hidayat@pupuk-kujang.co.id',
+    department: 'Departemen Riset & Pengembangan Teknologi',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Perekayasa Proses Kimia',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Operasional Pabrik'
+  },
+  {
+    nip: 'PK-2021-6540',
+    name: 'Nurul Aini, S.Si.',
+    email: 'nurul.aini@pupuk-kujang.co.id',
+    department: 'Departemen Pengendalian Mutu & Laboratorium',
+    supervisor: 'Dewi Sartika, S.T., M.M.',
+    title: 'Analis Mutu Produk Pupuk',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Administrasi & K3'
+  },
+  {
+    nip: 'PK-2024-8855',
+    name: 'Dimas Prasetyo, A.Md.',
+    email: 'dimas.prasetyo@pupuk-kujang.co.id',
+    department: 'Departemen Pemeliharaan Listrik & Instrumen',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Teknisi Listrik Gardu Induk',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Rekayasa & Pemeliharaan'
+  },
+  {
+    nip: 'PK-2020-5421',
+    name: 'Farhan Alamsyah, S.T.',
+    email: 'farhan.alamsyah@pupuk-kujang.co.id',
+    department: 'Departemen Pabrik NPK Kujang 1B',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Supervisor Produksi Granulasi NPK',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Operasional Pabrik'
+  },
+  {
+    nip: 'PK-2023-8321',
+    name: 'Putri Wulandari, S.E.',
+    email: 'putri.wulandari@pupuk-kujang.co.id',
+    department: 'Departemen Pengadaan & Logistik Material',
+    supervisor: 'Dr. Ahmad Subagja, M.M.',
+    title: 'Staf Pengadaan Bahan Baku',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Administrasi & K3'
+  },
+  {
+    nip: 'PK-2019-4412',
+    name: 'Eko Prasetyo, S.T.',
+    email: 'eko.prasetyo@pupuk-kujang.co.id',
+    department: 'Departemen Pabrik Urea 1A',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    title: 'Pengawas Sintesis Urea',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Operasional Pabrik'
+  },
+  {
+    nip: 'PK-2022-7890',
+    name: 'Maya Anggraini, S.Kom.',
+    email: 'maya.anggraini@pupuk-kujang.co.id',
+    department: 'Departemen Teknologi Informasi & Transformasi Digital',
+    supervisor: 'Bambang Sutrisno, S.T.',
+    title: 'Spesialis Keamanan Siber & Jaringan',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Rekayasa & Pemeliharaan'
+  },
+  {
+    nip: 'PK-2021-6101',
+    name: 'Fajar Nugraha, S.T.',
+    email: 'fajar.nugraha@pupuk-kujang.co.id',
+    department: 'Departemen Perencanaan & Pengendalian Operasi',
+    supervisor: 'Dewi Sartika, S.T., M.M.',
+    title: 'Staf Perencanaan Distribusi Pupuk',
+    roleKey: 'karyawan',
+    roleTitle: 'Karyawan Pemohon',
+    jabatan: 'Staf Operasional Pabrik'
+  }
+];
+
+function getAdminAllEmployees() {
+  const merged = [...MASTER_EMPLOYEES];
+  const users = window.MOCK_USERS || [];
+  users.forEach(u => {
+    if (!merged.some(m => m.nip === u.nip || m.name.toLowerCase() === (u.name || '').toLowerCase())) {
+      merged.push({
+        nip: u.nip || '',
+        name: u.name || '',
+        email: u.email || '',
+        department: u.department || 'Departemen Rekayasa & Pemeliharaan',
+        supervisor: u.directSupervisor || 'Ir. Hendra Gunawan, M.T.',
+        title: u.role || 'Karyawan Pemohon',
+        roleKey: u.roleKey || 'karyawan',
+        roleTitle: u.role || 'Karyawan Pemohon',
+        jabatan: u.jabatan || u.role || 'Staf Operasional Pabrik'
+      });
+    }
+  });
+  return merged;
+}
+
+function getEmployeeInitials(name) {
+  if (!name) return 'PK';
+  const clean = name.replace(/^(Ir\.|Dr\.|Drs\.|Dra\.|H\.|Hj\.)\s*/i, '').replace(/,\s*.*$/, '').trim();
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function highlightAdminEmpMatch(text, query) {
+  if (!text) return "";
+  if (!query) return text;
+  const q = String(query).trim();
+  if (!q) return text;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp("(" + escaped + ")", "gi");
+  return String(text).replace(regex, "<mark class=\"approver-highlight\">$1</mark>");
+}
+
+function generateCorporateEmail(name) {
+  if (!name) return 'karyawan@pupuk-kujang.co.id';
+  const clean = name.toLowerCase()
+    .replace(/^(ir\.|dr\.|drs\.|dra\.|h\.|hj\.)\s*/gi, '')
+    .replace(/,\s*.*$/, '')
+    .trim()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, '.');
+  return `${clean}@pupuk-kujang.co.id`;
+}
+
+function generateCorporateEmail(name) {
+  if (!name) return 'karyawan@pupuk-kujang.co.id';
+  const clean = name.toLowerCase()
+    .replace(/^(ir\.|dr\.|drs\.|dra\.|h\.|hj\.)\s*/gi, '')
+    .replace(/,\s*.*$/, '')
+    .trim()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, '.');
+  return `${clean}@pupuk-kujang.co.id`;
+}
+
+let activeEmpSearchTarget = 'name';
+
+function openAdminEmpDropdown(targetField = 'name') {
+  activeEmpSearchTarget = targetField;
+  const dd = document.getElementById('adminEmpFloatingDropdown');
+  const bannerBadge = document.querySelector('#adminEmpBanner .before-search-badge span');
+  const bannerDesc = document.querySelector('#adminEmpBanner .before-search-text');
+  const subtitle = document.getElementById('adminEmpDropdownSubtitle');
+  const targetGroup = targetField === 'nip' ? document.getElementById('adminNipGroup') : document.getElementById('adminNameGroup');
+
+  if (dd) {
+    // Pindahkan dropdown tepat di bawah group input yang sedang aktif
+    if (targetGroup && dd.parentElement !== targetGroup) {
+      targetGroup.appendChild(dd);
+    }
+
+    if (targetField === 'nip') {
+      if (bannerBadge) bannerBadge.textContent = 'Ketik / cari NIP karyawan';
+      if (bannerDesc) bannerDesc.textContent = 'Ketik angka atau format NIP karyawan untuk auto-fill data akun:';
+      if (subtitle) subtitle.textContent = 'Direktori Karyawan Berdasarkan NIP';
+    } else {
+      if (bannerBadge) bannerBadge.textContent = 'Ketik / cari nama karyawan';
+      if (bannerDesc) bannerDesc.textContent = 'Ketik beberapa huruf nama karyawan untuk auto-fill data akun:';
+      if (subtitle) subtitle.textContent = 'Direktori Karyawan Berdasarkan Nama';
+    }
+
+    dd.style.display = 'flex';
+    const input = targetField === 'nip'
+      ? document.getElementById('adminInputNip')
+      : document.getElementById('adminInputName');
+    renderAdminEmpDropdownItems(input ? input.value : '', targetField);
+  }
+}
+
+function closeAdminEmpDropdown() {
+  const dd = document.getElementById('adminEmpFloatingDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+function renderAdminEmpDropdownItems(filterText = '', targetField = 'name') {
+  const listEl = document.getElementById('adminEmpItemsList');
+  const emptyEl = document.getElementById('adminEmpEmptyState');
+  const emptyQueryEl = document.getElementById('adminEmpEmptyQuery');
+  const badgeEl = document.getElementById('adminEmpFoundBadge');
+  const emptyDescEl = document.querySelector('#adminEmpEmptyState .empty-desc');
+  if (!listEl) return;
+
+  const q = (filterText || '').trim().toLowerCase();
+  const all = getAdminAllEmployees();
+
+  // PISAHKAN PENCARIAN NAMA DAN NIP SECARA MUTLAK (Sesuai Permintaan Revisi 5)
+  // Pencarian nama HANYA mencari field nama.
+  // Pencarian NIP HANYA mencari field nip.
+  const filtered = all.filter(emp => {
+    if (!q) return true;
+    if (targetField === 'nip') {
+      return emp.nip && emp.nip.toLowerCase().includes(q);
+    } else {
+      return emp.name && emp.name.toLowerCase().includes(q);
+    }
+  });
+
+  if (badgeEl) {
+    badgeEl.textContent = `${filtered.length} Karyawan`;
+  }
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'flex';
+    if (emptyQueryEl) emptyQueryEl.textContent = filterText;
+    if (emptyDescEl) {
+      if (targetField === 'nip') {
+        emptyDescEl.innerHTML = `Tidak ditemukan NIP karyawan dengan kata kunci "<b>${filterText}</b>". Pastikan format NIP sudah sesuai (cth: PK-2024-8841 atau SEC-).`;
+      } else {
+        emptyDescEl.innerHTML = `Tidak ditemukan nama karyawan dengan kata kunci "<b>${filterText}</b>". Pastikan ejaan nama sudah sesuai.`;
+      }
+    }
+    return;
+  }
+
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const avatarGradients = [
+    'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
+    'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+    'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+    'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+    'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
+  ];
+
+  listEl.innerHTML = filtered.map((emp, idx) => {
+    const initials = getEmployeeInitials(emp.name);
+    const grad = avatarGradients[idx % avatarGradients.length];
+    // Hanya highlight kolom yang dicari
+    const highlightedName = targetField === 'name' ? highlightAdminEmpMatch(emp.name, filterText) : emp.name;
+    const highlightedNip = targetField === 'nip' ? highlightAdminEmpMatch(emp.nip, filterText) : emp.nip;
+    const highlightedDept = emp.department;
+
+    return `
+      <div class="approver-item" data-nip="${emp.nip}" onclick="window.selectAdminEmployeeByNip('${emp.nip}')">
+        <div class="approver-item-avatar" style="background: ${grad};">
+          ${initials}
+        </div>
+        <div class="approver-item-info">
+          <div class="approver-item-name-row">
+            <span class="approver-item-name">${highlightedName}</span>
+            <span class="approver-item-nip">${highlightedNip}</span>
+          </div>
+          <div class="approver-item-role">${emp.title || 'Karyawan'} • Atasan: <strong style="color: var(--corp-teal, #0f766e);">${emp.supervisor}</strong></div>
+          <div class="approver-item-dept">${highlightedDept}</div>
+        </div>
+        <div class="approver-item-cta">
+          <span>Pilih</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectAdminEmployee(emp) {
+  if (!emp) return;
+  const inputNip = document.getElementById('adminInputNip');
+  const inputName = document.getElementById('adminInputName');
+  const inputEmail = document.getElementById('adminInputEmail');
+  const btnClearNip = document.getElementById('btnClearAdminNip');
+  const btnClearName = document.getElementById('btnClearAdminName');
+  const autoFillBadge = document.getElementById('adminEmpAutoFillBadge');
+  const autoFillText = document.getElementById('adminEmpAutoFillText');
+
+  if (inputNip) inputNip.value = emp.nip || '';
+  if (inputName) inputName.value = emp.name || '';
+  if (inputEmail) inputEmail.value = emp.email || generateCorporateEmail(emp.name);
+
+  if (btnClearNip) btnClearNip.style.display = emp.nip ? 'flex' : 'none';
+  if (btnClearName) btnClearName.style.display = emp.name ? 'flex' : 'none';
+
+  // Otomatis isi Departemen
+  if (typeof setAdminSelectedDept === 'function' && emp.department) {
+    setAdminSelectedDept(emp.department);
+  } else {
+    const dInput = document.getElementById('adminInputDept');
+    if (dInput) dInput.value = emp.department;
+  }
+
+  // Otomatis isi Atasan Langsung
+  if (typeof setAdminSelectedSupervisor === 'function' && emp.supervisor) {
+    setAdminSelectedSupervisor(emp.supervisor);
+  }
+
+  // OTOMATIS ISI HAK AKSES & JABATAN STRUKTURAL (Sesuai Permintaan Revisi 5)
+  if (typeof setAdminSelectedRole === 'function') {
+    const targetRoleKey = emp.roleKey || (
+      emp.nip && emp.nip.startsWith('SEC') ? 'security' :
+      emp.nip && emp.nip.startsWith('ADM') ? 'admin' :
+      emp.title && emp.title.includes('Manager Rekayasa') ? 'approver' :
+      emp.title && emp.title.includes('Supervisor Operasional') ? 'approver2' :
+      'karyawan'
+    );
+    const targetRoleTitle = emp.roleTitle || emp.title || 'Karyawan Pemohon';
+    setAdminSelectedRole(targetRoleKey, targetRoleTitle);
+  }
+
+  if (autoFillBadge && autoFillText) {
+    autoFillText.textContent = `Data ${emp.name} (${emp.nip}) dan Hak Akses terisi otomatis dari direktori.`;
+    autoFillBadge.style.display = 'flex';
+  }
+
+  closeAdminEmpDropdown();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Data ${emp.name} (${emp.nip}) dan Hak Akses berhasil dimuat otomatis.`, 'info');
+  }
+}
+
+function selectAdminEmployeeByNip(nip) {
+  const all = getAdminAllEmployees();
+  const emp = all.find(e => e.nip === nip);
+  if (emp) selectAdminEmployee(emp);
+}
+
+function checkAdminEmpBilateralMatch(field, value) {
+  const val = (value || '').trim().toLowerCase();
+  if (!val) return;
+
+  const all = getAdminAllEmployees();
+  let matched = null;
+
+  if (field === 'nip') {
+    matched = all.find(e => e.nip.toLowerCase() === val);
+  } else if (field === 'name') {
+    matched = all.find(e => e.name.toLowerCase() === val);
+  }
+
+  if (matched) {
+    selectAdminEmployee(matched);
+  }
+}
+
+function initAdminEmpSearchCombobox() {
+  const inputNip = document.getElementById('adminInputNip');
+  const inputName = document.getElementById('adminInputName');
+  const btnClearNip = document.getElementById('btnClearAdminNip');
+  const btnClearName = document.getElementById('btnClearAdminName');
+  const dropdown = document.getElementById('adminEmpFloatingDropdown');
+  if (!inputNip || !inputName) return;
+
+  if (inputName.dataset.empComboboxInitialized) return;
+  inputName.dataset.empComboboxInitialized = 'true';
+  inputNip.dataset.empComboboxInitialized = 'true';
+
+  // 1. Event listener pada input Nama
+  inputName.addEventListener('focus', () => {
+    openAdminEmpDropdown('name');
+  });
+
+  inputName.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (btnClearName) btnClearName.style.display = val ? 'flex' : 'none';
+    openAdminEmpDropdown('name');
+    renderAdminEmpDropdownItems(val, 'name');
+    checkAdminEmpBilateralMatch('name', val);
+  });
+
+  // 2. Event listener pada input NIP
+  inputNip.addEventListener('focus', () => {
+    openAdminEmpDropdown('nip');
+  });
+
+  inputNip.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (btnClearNip) btnClearNip.style.display = val ? 'flex' : 'none';
+    openAdminEmpDropdown('nip');
+    renderAdminEmpDropdownItems(val, 'nip');
+    checkAdminEmpBilateralMatch('nip', val);
+  });
+
+  // 3. Clear buttons
+  if (btnClearName) {
+    btnClearName.addEventListener('click', (e) => {
+      e.stopPropagation();
+      inputName.value = '';
+      btnClearName.style.display = 'none';
+      const badge = document.getElementById('adminEmpAutoFillBadge');
+      if (badge) badge.style.display = 'none';
+      inputName.focus();
+      openAdminEmpDropdown('name');
+      renderAdminEmpDropdownItems('', 'name');
+    });
+  }
+
+  if (btnClearNip) {
+    btnClearNip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      inputNip.value = '';
+      btnClearNip.style.display = 'none';
+      const badge = document.getElementById('adminEmpAutoFillBadge');
+      if (badge) badge.style.display = 'none';
+      inputNip.focus();
+      openAdminEmpDropdown('nip');
+      renderAdminEmpDropdownItems('', 'nip');
+    });
+  }
+
+  // 4. Keyboard Navigation (ArrowDown, ArrowUp, Enter, Escape)
+  const handleKeydown = (e) => {
+    if (!dropdown || dropdown.style.display === 'none') return;
+    const items = dropdown.querySelectorAll('.approver-item');
+    if (items.length === 0) return;
+
+    let focusedIdx = -1;
+    items.forEach((item, idx) => {
+      if (item.classList.contains('keyboard-focus')) focusedIdx = idx;
+    });
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedIdx = (focusedIdx + 1) % items.length;
+      items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === focusedIdx));
+      if (items[focusedIdx]) items[focusedIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedIdx = (focusedIdx - 1 + items.length) % items.length;
+      items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === focusedIdx));
+      if (items[focusedIdx]) items[focusedIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      if (focusedIdx >= 0 && items[focusedIdx]) {
+        e.preventDefault();
+        items[focusedIdx].click();
+      }
+    } else if (e.key === 'Escape') {
+      closeAdminEmpDropdown();
+    }
+  };
+
+  inputName.addEventListener('keydown', handleKeydown);
+  inputNip.addEventListener('keydown', handleKeydown);
+
+  // 5. Click outside to close
+  document.addEventListener('click', (e) => {
+    if (!inputName.contains(e.target) &&
+        !inputNip.contains(e.target) &&
+        (!dropdown || !dropdown.contains(e.target)) &&
+        (!btnClearName || !btnClearName.contains(e.target)) &&
+        (!btnClearNip || !btnClearNip.contains(e.target))) {
+      closeAdminEmpDropdown();
+    }
+  });
+}
+
+window.MASTER_EMPLOYEES = MASTER_EMPLOYEES;
+window.getAdminAllEmployees = getAdminAllEmployees;
+window.openAdminEmpDropdown = openAdminEmpDropdown;
+window.closeAdminEmpDropdown = closeAdminEmpDropdown;
+window.selectAdminEmployee = selectAdminEmployee;
+window.selectAdminEmployeeByNip = selectAdminEmployeeByNip;
+window.initAdminEmpSearchCombobox = initAdminEmpSearchCombobox;
 
 
 // 5. USER ACCESS MANAGEMENT / KUJANG ID (FR-ADM-06, UC-24, REQUIREMENT 1)
@@ -994,8 +1768,22 @@ function openAdminUserModal(mode, kujangId) {
   }
   if (typeof initAdminRoleSearchableDropdown === 'function') {
     initAdminRoleSearchableDropdown();
-  initAdminSupervisorSearchableDropdown();
   }
+  if (typeof initAdminSupervisorSearchableDropdown === 'function') {
+    initAdminSupervisorSearchableDropdown();
+  }
+  if (typeof initAdminEmpSearchCombobox === 'function') {
+    initAdminEmpSearchCombobox();
+  }
+
+  // Reset auto-fill status on modal open
+  const autoFillBadge = document.getElementById('adminEmpAutoFillBadge');
+  const btnClearNip = document.getElementById('btnClearAdminNip');
+  const btnClearName = document.getElementById('btnClearAdminName');
+  if (autoFillBadge) autoFillBadge.style.display = 'none';
+  if (btnClearNip) btnClearNip.style.display = mode === 'add' ? 'none' : 'flex';
+  if (btnClearName) btnClearName.style.display = mode === 'add' ? 'none' : 'flex';
+  if (typeof closeAdminEmpDropdown === 'function') closeAdminEmpDropdown();
 
   // Pastikan kolom input pencarian kosong hanya saat penambahan akun baru agar placeholder terlihat
   if (mode === 'add') {
@@ -1996,6 +2784,7 @@ window.updateAdminMetrics = updateAdminMetrics;
 window.renderAdminDashboard = renderAdminDashboard;
 window.renderAdminAudit = renderAdminAudit;
 window.deleteAdminAuditLog = deleteAdminAuditLog;
+window.deleteAllAdminAudit = deleteAllAdminAudit;
 window.renderAdminReports = renderAdminReports;
 window.renderAdminUsers = renderAdminUsers;
 window.renderAdminView = renderAdminView;
