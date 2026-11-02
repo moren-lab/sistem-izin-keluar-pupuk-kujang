@@ -497,7 +497,7 @@
       const isUnread = !n.isRead;
       return `
         <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 10px 14px; border-bottom: 1px solid var(--border-color, #f1f5f9); display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
-          <div style="width: 32px; height: 32px; border-radius: 8px; background: ${isHigh ? '#fee2e2' : (isUnread ? '#dcfce7' : '#f1f5f9')}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+          <div class="dropdown-notif-icon-box ${isHigh ? 'priority-high' : (isUnread ? 'unread' : 'read')} ${getNotifIconTypeClass(n.type, n.priority)}">
             ${getNotifIconSvg(n.type, n.priority)}
           </div>
           <div style="flex: 1; min-width: 0;">

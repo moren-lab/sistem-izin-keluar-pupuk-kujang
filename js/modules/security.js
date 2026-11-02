@@ -676,9 +676,10 @@ function filterSecurityLogTickets() {
       if (!isMyTicket) return false;
     }
 
-    // Hanya tiket yang relevan dengan transaksi pos gerbang atau selesai
-    const hasLog = t.scanOutTime || t.scanInTime || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat' || t.status === 'Disetujui';
-    if (!hasLog) return false;
+    // Riwayat Pos Jaga: HANYA tiket yang sudah 'Selesai' atau 'Terlambat'
+    // Status aktif ('Sedang di Luar', 'Disetujui', dsb.) TIDAK masuk ke riwayat pos jaga karena sudah ada di menu Pelacakan Karyawan di Luar
+    const isCompletedOrLate = (t.status === 'Selesai' || t.status === 'Terlambat' || t.isLate);
+    if (!isCompletedOrLate) return false;
 
     // Filter Gerbang Pos (Multi-gate Pos 1, 2, 3)
     if (gateFilter && gateFilter !== 'all') {

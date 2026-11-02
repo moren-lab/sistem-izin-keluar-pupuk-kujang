@@ -1243,7 +1243,7 @@ function renderAdminDeptChart() {
     </div>
 
     <!-- Admin Dept Summary Badge (Single Source of Info) -->
-    <div id="adminDeptBadge" style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+    <div id="adminDeptBadge" style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
       <span>🏢 Frekuensi per Departemen</span>
       <span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>
     </div>
@@ -1260,15 +1260,16 @@ function hoverDeptRow(name, count, pct, color, activeIdx) {
 
   // Only display hovered info in the single dedicated badge below the diagram
   const badge = document.getElementById('adminDeptBadge');
+  const isDark = document.body.classList.contains('theme-dark') || document.documentElement.classList.contains('theme-dark');
   if (badge) {
-    badge.style.background = '#f8fafc';
+    badge.style.background = isDark ? 'rgba(30, 41, 59, 0.95)' : '#f8fafc';
     badge.style.borderColor = color;
     badge.style.boxShadow = `0 2px 10px ${color}20`;
     badge.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
         <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0; max-width: 78%;">
           <span style="width: 8px; height: 8px; border-radius: 2px; background: ${color}; flex-shrink: 0; box-shadow: 0 0 6px ${color}80;"></span>
-          <span style="font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}: ${count} Izin</span>
+          <span style="font-weight: 700; color: ${isDark ? '#f8fafc' : '#0f172a'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}: ${count} Izin</span>
         </div>
         <span style="background: ${color}; color: #ffffff; padding: 2px 10px; border-radius: 999px; font-weight: 800; font-family: var(--font-mono); font-size: 0.725rem; flex-shrink: 0;">${pct}%</span>
       </div>
@@ -1281,11 +1282,12 @@ function unhoverDeptRow() {
     window.hideChartTooltip();
   }
   const badge = document.getElementById('adminDeptBadge');
+  const isDark = document.body.classList.contains('theme-dark') || document.documentElement.classList.contains('theme-dark');
   const { total, period } = getAdminDeptData();
   const periodText = period === 'year' ? 'Tahun Ini' : 'Bulan Ini';
   if (badge) {
-    badge.style.background = '#f8fafc';
-    badge.style.borderColor = 'var(--border-color)';
+    badge.style.background = isDark ? 'rgba(30, 41, 59, 0.95)' : '#f8fafc';
+    badge.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'var(--border-color)';
     badge.style.boxShadow = 'none';
     badge.innerHTML = `<span>🏢 Frekuensi per Departemen</span><span style="font-weight: 700; color: var(--text-primary);">Total: ${total} Izin (${periodText})</span>`;
   }

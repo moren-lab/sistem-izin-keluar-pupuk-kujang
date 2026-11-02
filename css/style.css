@@ -10993,3 +10993,66 @@ body.theme-dark .badge-geser-hint {
 #modalTicketDetail:not(.from-scanner-terminal) #btnDetailScanOut {
   display: none !important;
 }
+
+/* ===================================================================
+   DARK MODE CONTRAST FIXES: SEBARAN DEPARTEMEN & NOTIFIKASI DROPDOWN
+   =================================================================== */
+body.theme-dark .dept-rank-row:hover,
+.theme-dark .dept-rank-row:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+body.theme-dark #adminDeptBadge,
+.theme-dark #adminDeptBadge {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+.dropdown-notif-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.15s ease;
+}
+
+.dropdown-notif-icon-box.unread {
+  background: #dcfce7;
+  color: #059669;
+}
+
+.dropdown-notif-icon-box.priority-high {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.dropdown-notif-icon-box.read {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+body.theme-dark .dropdown-notif-icon-box.unread,
+.theme-dark .dropdown-notif-icon-box.unread {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+body.theme-dark .dropdown-notif-icon-box.priority-high,
+.theme-dark .dropdown-notif-icon-box.priority-high {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+body.theme-dark .dropdown-notif-icon-box.read,
+.theme-dark .dropdown-notif-icon-box.read {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
