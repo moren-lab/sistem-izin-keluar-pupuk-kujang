@@ -10918,3 +10918,78 @@ body.theme-dark .notif-card-full:not(.unread),
 }
 
 
+
+/* ===================================================================
+   ADMIN DASHBOARD: RESPONSIVE GRID SPLIT & MUSTER ROLL HORIZONTAL SCROLL
+   Memastikan "Aktivitas Terkini" selalu terlihat dan tabel Muster Roll dapat digeser
+   =================================================================== */
+.admin-grid-split {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr) !important;
+  gap: 1.25rem !important;
+  margin-top: 1.25rem !important;
+  align-items: start !important;
+  width: 100% !important;
+}
+
+.admin-grid-split > div {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#adminTableMusterRollWrap {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+  cursor: grab;
+  padding-bottom: 6px;
+}
+
+#adminTableMusterRollWrap.is-dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+#adminTableMusterRollWrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+#adminTableMusterRollWrap::-webkit-scrollbar-track {
+  background: var(--bg-subtle, #f1f5f9);
+  border-radius: 4px;
+}
+
+#adminTableMusterRollWrap::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+#adminTableMusterRollWrap::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+body.theme-dark #adminTableMusterRollWrap::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.theme-dark #adminTableMusterRollWrap::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+body.theme-dark .badge-geser-hint {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #94a3b8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===================================================================
+   SECURITY SCAN OUT BUTTON STRICT GUARD
+   Tombol Verifikasi Keluar (Scan Out) di modal detail HANYA boleh muncul
+   jika modal memiliki class 'from-scanner-terminal'.
+   Di luar terminal scanner (Notifikasi, Atasan, Karyawan, Admin, Riwayat),
+   tombol ini MUTLAK disembunyikan.
+   =================================================================== */
+#modalTicketDetail:not(.from-scanner-terminal) #btnDetailScanOut {
+  display: none !important;
+}

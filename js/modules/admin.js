@@ -177,7 +177,53 @@ function updateAdminMetrics() {
 // ==========================================
 // 2. LIVE MUSTER ROLL & DASHBOARD (FR-ADM-01, FR-ADM-05, UC-20)
 // ==========================================
+
+// Helper Geser Tabel Muster Roll & Aktivitas Terkini
+window.scrollMusterRollTable = function (distance) {
+  const wrap = document.getElementById('adminTableMusterRollWrap');
+  if (wrap) {
+    wrap.scrollBy({ left: distance, behavior: 'smooth' });
+  }
+};
+
+function initMusterRollDragScroll() {
+  const slider = document.getElementById('adminTableMusterRollWrap');
+  if (!slider || slider._dragInitialized) return;
+  slider._dragInitialized = true;
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  slider.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button, a, input, select')) return;
+    isDown = true;
+    slider.classList.add('is-dragging');
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  slider.addEventListener('mouseleave', () => {
+    isDown = false;
+    slider.classList.remove('is-dragging');
+  });
+
+  slider.addEventListener('mouseup', () => {
+    isDown = false;
+    slider.classList.remove('is-dragging');
+  });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  });
+}
+
 function renderAdminDashboard() {
+  setTimeout(initMusterRollDragScroll, 50);
   updateAdminMetrics();
   const tickets = window.ticketsList || [];
 

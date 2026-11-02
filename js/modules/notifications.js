@@ -264,6 +264,7 @@
 
     // Set flag context C1 agar tombol kembali di detail tiket mengarahkan kembali ke notifikasi
     window._openedFromNotification = true;
+    window._openedFromScannerTerminal = false;
     window._openedFromNotificationTab = fromTab;
 
     // Tutup dropdown notifikasi desktop jika terbuka
@@ -533,7 +534,7 @@
         <!-- Header Page -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid var(--border-color, #e2e8f0); padding-bottom: 16px;">
           <div>
-            <div class="notif-header-sub">Pusat Pemberitahuan</div>
+
             <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
           <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">

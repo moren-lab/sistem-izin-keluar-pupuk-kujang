@@ -9,9 +9,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261029_1330">
-  <link rel="stylesheet" href="css/auth.css?v=20261029_1330">
-  <link rel="stylesheet" href="css/mobile.css?v=20261029_1330">
+  <link rel="stylesheet" href="css/style.css?v=20261102_1050">
+  <link rel="stylesheet" href="css/auth.css?v=20261102_1050">
+  <link rel="stylesheet" href="css/mobile.css?v=20261102_1050">
   <link rel="icon" type="image/png" href="Pupuk Kujang Icon - Colored - zonalogo.com.png">
   <script>
     (function () {
@@ -1999,18 +1999,29 @@
             </div>
 
             <!-- Split Section: Muster Roll & Recent Logs -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-top: 1.25rem;"
-              class="admin-grid-split">
+            <div class="admin-grid-split">
               <!-- Left: Muster Roll -->
               <div class="content-section" style="padding: 1.25rem;">
-                <div class="section-header-compact" style="margin-bottom: 0.75rem;">
+                <div class="section-header-compact" style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap;">
                   <div>
-                    <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0;">
                       Personel Sedang di Luar Pabrik
                     </h3>
-                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 1px;">
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; margin-bottom: 0;">
                       Karyawan yang telah Scan Out gerbang dan belum memindai masuk kembali.
                     </p>
+                  </div>
+                  <div style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span class="badge-geser-hint" style="font-size: 0.7rem; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: var(--bg-subtle, #f1f5f9); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8L22 12L18 16"></path><path d="M6 8L2 12L6 16"></path><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                      Geser Tabel
+                    </span>
+                    <button type="button" class="btn-action-sm outline btn-geser-arrow" onclick="window.scrollMusterRollTable(-240)" title="Geser ke kiri" style="padding: 2px 8px; font-size: 0.7rem; border-radius: 6px; min-height: 26px;">
+                      ◀
+                    </button>
+                    <button type="button" class="btn-action-sm outline btn-geser-arrow" onclick="window.scrollMusterRollTable(240)" title="Geser ke kanan" style="padding: 2px 8px; font-size: 0.7rem; border-radius: 6px; min-height: 26px;">
+                      ▶
+                    </button>
                   </div>
                 </div>
 
@@ -4387,25 +4398,25 @@
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261029_1330"></script>
-  <script src="js/data/authData.js?v=20261029_1330"></script>
-  <script src="js/modules/notifications.js?v=20261029_1330"></script>
-  <script src="js/modules/ui.js?v=20261029_1330"></script>
-  <script src="js/modules/scheduler.js?v=20261029_1330"></script>
-  <script src="js/modules/navigation.js?v=20261029_1330"></script>
-  <script src="js/modules/karyawan.js?v=20261029_1330"></script>
-  <script src="js/modules/approver.js?v=20261029_1330"></script>
-  <script src="js/modules/security.js?v=20261029_1330"></script>
-  <script src="js/modules/admin.js?v=20261029_1330"></script>
-  <script src="js/modules/charts.js?v=20261029_1330"></script>
-  <script src="js/modules/emergency.js?v=20261029_1330"></script>
-  <script src="js/modules/modals.js?v=20261029_1335"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261029_1330"></script>
-  <script src="js/modules/mobile_atasan.js?v=20261029_1330"></script>
-  <script src="js/modules/mobile_security.js?v=20261029_1330"></script>
-  <script src="js/modules/mobile_app.js?v=20261029_1330"></script>
-  <script src="js/app.js?v=20261029_1330"></script>
-  <script src="js/modules/auth.js?v=20261029_1330"></script>
+  <script src="js/data/mockData.js?v=20261102_1050"></script>
+  <script src="js/data/authData.js?v=20261102_1050"></script>
+  <script src="js/modules/notifications.js?v=20261102_1050"></script>
+  <script src="js/modules/ui.js?v=20261102_1050"></script>
+  <script src="js/modules/scheduler.js?v=20261102_1050"></script>
+  <script src="js/modules/navigation.js?v=20261102_1050"></script>
+  <script src="js/modules/karyawan.js?v=20261102_1050"></script>
+  <script src="js/modules/approver.js?v=20261102_1050"></script>
+  <script src="js/modules/security.js?v=20261102_1050"></script>
+  <script src="js/modules/admin.js?v=20261102_1050"></script>
+  <script src="js/modules/charts.js?v=20261102_1050"></script>
+  <script src="js/modules/emergency.js?v=20261102_1050"></script>
+  <script src="js/modules/modals.js?v=20261102_1050"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261102_1050"></script>
+  <script src="js/modules/mobile_atasan.js?v=20261102_1050"></script>
+  <script src="js/modules/mobile_security.js?v=20261102_1050"></script>
+  <script src="js/modules/mobile_app.js?v=20261102_1050"></script>
+  <script src="js/app.js?v=20261102_1050"></script>
+  <script src="js/modules/auth.js?v=20261102_1050"></script>
 </body>
 
 </html>

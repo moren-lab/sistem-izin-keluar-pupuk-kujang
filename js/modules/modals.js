@@ -1757,22 +1757,24 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   // Security Action Buttons (Scan Out / Scan In) directly inside detail modal
   const btnDetailScanOut = document.getElementById('btnDetailScanOut');
   const btnDetailScanIn = document.getElementById('btnDetailScanIn');
-  const isSecurity = (window.currentActor === 'security');
+  const activeRole = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || '';
+  const isSecurity = (activeRole === 'security');
 
-  if (btnDetailScanOut) {
-    // Scan Out untuk Pos Jaga: Muncul saat di Terminal Verifikasi (kamera scan, unggah QR, input manual tiket)
-    const secScannerPage = document.getElementById('securityScannerPage');
-    const isScannerPageActive = Boolean(window._openedFromScannerTerminal) || 
-      (secScannerPage && secScannerPage.style.display !== 'none') || 
-      (window.currentActor === 'security');
+  // Scan Out HANYA DAN MUTLAK di Pos Jaga, HANYA saat melalui terminal pemindaian (kamera scan, input tiket manual, atau upload QR scan)
+  // TIDAK BOLEH muncul di atasan, notifikasi, karyawan, admin, atau riwayat
+  const fromScanner = Boolean(window._openedFromScannerTerminal) && !window._openedFromNotification;
+  const canScanOut = isSecurity && 
+    fromScanner && 
+    (ticket.status === 'Disetujui') && 
+    !ticket.scanOutTime && 
+    !(ticket.isEmergency && ticket.emergencyLocked);
 
-    // Syarat Scan Out: Tiket Disetujui, belum Scan Out, dan bukan darurat terkunci
-    const canScanOut = isScannerPageActive && 
-      (ticket.status === 'Disetujui') && 
-      !ticket.scanOutTime && 
-      !(ticket.isEmergency && ticket.emergencyLocked);
+  // Selalu reset flag scanner segera setelah evaluasi
+  window._openedFromScannerTerminal = false;
 
-    if (canScanOut) {
+  if (canScanOut) {
+    if (modalTicketDetail) modalTicketDetail.classList.add('from-scanner-terminal');
+    if (btnDetailScanOut) {
       btnDetailScanOut.style.display = 'inline-flex';
       btnDetailScanOut.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1788,11 +1790,15 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
           window.closeTicketDetailModal();
         } else if (modalTicketDetail) {
           modalTicketDetail.classList.remove('open');
+          modalTicketDetail.classList.remove('from-scanner-terminal');
           modalTicketDetail.style.display = 'none';
         }
       };
-    } else {
-      btnDetailScanOut.style.display = 'none';
+    }
+  } else {
+    if (modalTicketDetail) modalTicketDetail.classList.remove('from-scanner-terminal');
+    if (btnDetailScanOut) {
+      btnDetailScanOut.style.setProperty('display', 'none', 'important');
       btnDetailScanOut.onclick = null;
     }
   }
@@ -1914,9 +1920,16 @@ function closeTicketDetailModal() {
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) {
     modalTicketDetail.classList.remove('open');
+    modalTicketDetail.classList.remove('from-scanner-terminal');
     modalTicketDetail.style.display = 'none';
   }
+  const btnDetailScanOut = document.getElementById('btnDetailScanOut');
+  if (btnDetailScanOut) {
+    btnDetailScanOut.style.setProperty('display', 'none', 'important');
+    btnDetailScanOut.onclick = null;
+  }
   window._openedFromScannerTerminal = false;
+  window._openedFromNotification = false;
   document.body.classList.remove('modal-open');
 }
 window.closeTicketDetailModal = closeTicketDetailModal;
