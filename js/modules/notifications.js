@@ -75,23 +75,64 @@
     return k === 'security' || k.startsWith('security') || k.includes('satpam') || k.includes('pos');
   }
 
-  // Helper Pengguna Aktif
+  // Helper Pengguna Aktif yang Benar-Benar Akurat (Individual)
   function getActiveUserInfo() {
     const actorKey = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
     const actors = window.ACTORS || {};
+
+    // 1. Cek sesi login aktif Kujang ID jika ada
+    let sessionUser = null;
+    if (typeof window.getKujangCurrentUser === 'function') {
+      sessionUser = window.getKujangCurrentUser();
+    }
+
     let actor = actors[actorKey];
+    if (sessionUser && (sessionUser.role === actorKey || sessionUser.roleKey === actorKey)) {
+      actor = sessionUser;
+    }
+
+    // 2. Jika karyawan, sinkronisasi dengan aktor karyawan aktif
     if ((!actor || !actor.nip) && isEmployeeRole(actorKey) && typeof window.getCurrentEmployeeActor === 'function') {
       actor = window.getCurrentEmployeeActor();
     }
-    const defaultNip = (actorKey === 'approver' || actorKey.startsWith('approver')) ? 'PK-2015-1002' : (isSecurityRole(actorKey) ? 'SEC-2018-042' : 'PK-2024-8841');
+
+    // 3. Jika approver, pastikan Atasan 1 vs Atasan 2 dibedakan secara tegas
+    if (isApproverRole(actorKey)) {
+      const isApprover2 = (actorKey === 'approver2');
+      actor = isApprover2
+        ? (actors.approver2 || { name: 'Dewi Sartika, S.T., M.M.', nip: 'PK-2012-0845' })
+        : (actors.approver || { name: 'Ir. Hendra Gunawan, M.T.', nip: 'PK-2015-1002' });
+    }
+
+    // 4. Default NIP akurat per sub-aktor
+    let defaultNip = 'PK-2024-8841';
+    let defaultName = 'Budi Pratama, S.T.';
+
+    if (actorKey === 'approver2') {
+      defaultNip = 'PK-2012-0845';
+      defaultName = 'Dewi Sartika, S.T., M.M.';
+    } else if (actorKey === 'approver' || actorKey.startsWith('approver')) {
+      defaultNip = 'PK-2015-1002';
+      defaultName = 'Ir. Hendra Gunawan, M.T.';
+    } else if (actorKey === 'karyawan2') {
+      defaultNip = 'PK-2024-8842';
+      defaultName = 'Arthur Morgan, S.Tr.T.';
+    } else if (isSecurityRole(actorKey)) {
+      defaultNip = 'SEC-2018-042';
+      defaultName = 'Sertu Agus';
+    } else if (actorKey === 'admin') {
+      defaultNip = 'ADM-2016-019';
+      defaultName = 'Bambang Sutrisno, S.T.';
+    }
+
     return {
       roleKey: actorKey,
       nip: (actor && actor.nip) || defaultNip,
-      name: (actor && actor.name) || 'Pengguna'
+      name: (actor && actor.name) || defaultName
     };
   }
 
-  // 2. Core API: Create Notification (with Idempotency Check)
+  // 2. Core API: Create Notification (with Idempotency Check & Individual Target Resolution)
   function createNotification(payload) {
     if (!payload || !payload.title || !payload.message) return null;
 
@@ -101,13 +142,75 @@
       if (exists) return null;
     }
 
+    let recRole = payload.recipientRole || 'karyawan';
+    let recNip = payload.recipientNip || null;
+    let recName = payload.recipientName || null;
+
+    // Resolusi otomatis target penerima jika NIP belum disertakan (khusus Atasan & Karyawan)
+    if (isApproverRole(recRole)) {
+      if (!recNip && recName) {
+        const rnLower = recName.toLowerCase();
+        if (rnLower.includes('dewi') || rnLower.includes('sartika')) {
+          recNip = 'PK-2012-0845';
+          recName = 'Dewi Sartika, S.T., M.M.';
+        } else if (rnLower.includes('hendra') || rnLower.includes('gunawan')) {
+          recNip = 'PK-2015-1002';
+          recName = 'Ir. Hendra Gunawan, M.T.';
+        }
+      }
+      if (!recNip && payload.ticketId) {
+        const tickets = window.ticketsList || [];
+        const t = tickets.find(x => x.id === payload.ticketId);
+        if (t) {
+          if (t.approverNip) {
+            recNip = t.approverNip;
+          } else if (t.approverName) {
+            recName = recName || t.approverName;
+            const tnLower = t.approverName.toLowerCase();
+            if (tnLower.includes('dewi') || tnLower.includes('sartika')) {
+              recNip = 'PK-2012-0845';
+            } else {
+              recNip = 'PK-2015-1002';
+            }
+          }
+        }
+      }
+      if (!recNip) {
+        recNip = 'PK-2015-1002';
+        recName = recName || 'Ir. Hendra Gunawan, M.T.';
+      }
+    } else if (isEmployeeRole(recRole)) {
+      if (!recNip && recName) {
+        const rnLower = recName.toLowerCase();
+        if (rnLower.includes('arthur')) {
+          recNip = 'PK-2024-8842';
+          recName = 'Arthur Morgan, S.Tr.T.';
+        } else if (rnLower.includes('budi')) {
+          recNip = 'PK-2024-8841';
+          recName = 'Budi Pratama, S.T.';
+        }
+      }
+      if (!recNip && payload.ticketId) {
+        const tickets = window.ticketsList || [];
+        const t = tickets.find(x => x.id === payload.ticketId);
+        if (t && t.applicantNip) {
+          recNip = t.applicantNip;
+          recName = recName || t.applicantName;
+        }
+      }
+      if (!recNip) {
+        recNip = 'PK-2024-8841';
+        recName = recName || 'Budi Pratama, S.T.';
+      }
+    }
+
     const newNotif = {
       id: 'NOTIF-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
-      recipientRole: payload.recipientRole || 'karyawan', // 'karyawan' | 'approver' | 'security'
-      recipientNip: payload.recipientNip || null,
-      recipientName: payload.recipientName || null,
+      recipientRole: recRole, // 'karyawan' | 'approver' | 'security' | 'admin'
+      recipientNip: recNip,
+      recipientName: recName,
       actorSource: payload.actorSource || 'system',
-      type: payload.type || 'info', // 'disetujui' | 'ditolak' | 'kedaluwarsa' | 'selesai' | dll
+      type: payload.type || 'info',
       title: payload.title,
       message: payload.message,
       ticketId: payload.ticketId || null,
@@ -126,23 +229,106 @@
     return newNotif;
   }
 
-  // 3. Filter Notifikasi Khusus Aktor Saat Ini (Mencegah Kebocoran Antar Pengguna)
+  // 3. Helper Pencocokan Notifikasi Individual per Pengguna (Mencegah Kebocoran Antar Atasan/Karyawan)
+  function isNotificationForUser(n, user) {
+    if (!n || !user) return false;
+
+    // 3.1. Karyawan Pemohon (Individual matching)
+    if (isEmployeeRole(user.roleKey)) {
+      if (!isEmployeeRole(n.recipientRole)) return false;
+
+      // Pencocokan NIP eksak
+      if (n.recipientNip && user.nip) {
+        return n.recipientNip === user.nip;
+      }
+
+      // Pencocokan Nama
+      if (n.recipientName && user.name) {
+        const rName = n.recipientName.toLowerCase();
+        const uName = user.name.toLowerCase();
+        if (rName.includes('arthur') || uName.includes('arthur')) {
+          return rName.includes('arthur') && uName.includes('arthur');
+        }
+        if (rName.includes('budi') || uName.includes('budi')) {
+          return rName.includes('budi') && uName.includes('budi');
+        }
+        return rName.includes(uName) || uName.includes(rName);
+      }
+
+      // Cek tiket applicantNip jika ada
+      if (n.ticketId) {
+        const tickets = window.ticketsList || [];
+        const t = tickets.find(x => x.id === n.ticketId);
+        if (t && t.applicantNip) {
+          return t.applicantNip === user.nip;
+        }
+      }
+
+      // Default jika tanpa identitas spesifik: hanya milik akun default karyawan 1
+      return user.nip === 'PK-2024-8841';
+    }
+
+    // 3.2. Atasan Peninjau (Individual: Atasan 1 TIDAK BOLEH muncul di Atasan 2 dan sebaliknya)
+    if (isApproverRole(user.roleKey)) {
+      if (!isApproverRole(n.recipientRole)) return false;
+
+      // Pencocokan NIP eksak
+      if (n.recipientNip && user.nip) {
+        return n.recipientNip === user.nip;
+      }
+
+      // Pencocokan Nama
+      if (n.recipientName && user.name) {
+        const rName = n.recipientName.toLowerCase();
+        const uName = user.name.toLowerCase();
+        if (rName.includes('dewi') || rName.includes('sartika')) {
+          return uName.includes('dewi') || uName.includes('sartika') || user.nip === 'PK-2012-0845';
+        }
+        if (rName.includes('hendra') || rName.includes('gunawan')) {
+          return uName.includes('hendra') || uName.includes('gunawan') || user.nip === 'PK-2015-1002';
+        }
+        return rName.includes(uName) || uName.includes(rName);
+      }
+
+      // Cek tiket approverName jika ada
+      if (n.ticketId) {
+        const tickets = window.ticketsList || [];
+        const t = tickets.find(x => x.id === n.ticketId);
+        if (t) {
+          const tAppr = (t.approverName || t.directSupervisor || '').toLowerCase();
+          const uName = user.name.toLowerCase();
+          if (tAppr.includes('dewi') || tAppr.includes('sartika')) {
+            return uName.includes('dewi') || uName.includes('sartika') || user.nip === 'PK-2012-0845';
+          }
+          if (tAppr.includes('hendra') || tAppr.includes('gunawan')) {
+            return uName.includes('hendra') || uName.includes('gunawan') || user.nip === 'PK-2015-1002';
+          }
+        }
+      }
+
+      // Default jika tanpa identitas spesifik sama sekali: hanya milik Atasan 1 (Hendra Gunawan)
+      // dan TIDAK PERNAH bocor ke Atasan 2 (Dewi Sartika)!
+      return user.nip === 'PK-2015-1002' && !n.recipientNip && !n.recipientName;
+    }
+
+    // 3.3. Pos Jaga Pengamanan (Shared untuk pos pengamanan gerbang)
+    if (isSecurityRole(user.roleKey)) {
+      return isSecurityRole(n.recipientRole);
+    }
+
+    // 3.4. Administrator Pengamanan & K3
+    if (user.roleKey === 'admin') {
+      return n.recipientRole === 'admin';
+    }
+
+    return false;
+  }
+
+  // 3.5. Filter Notifikasi Khusus Aktor Saat Ini (Individual)
   function getNotificationsForActiveActor() {
     const user = getActiveUserInfo();
     const list = notificationsList || [];
-
-    return list.filter(n => {
-      if (isEmployeeRole(user.roleKey)) {
-        return isEmployeeRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip);
-      }
-      if (isApproverRole(user.roleKey)) {
-        return isApproverRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
-      }
-      if (isSecurityRole(user.roleKey)) {
-        return isSecurityRole(n.recipientRole);
-      }
-      return false;
-    });
+    return list.filter(n => isNotificationForUser(n, user));
   }
 
   function getUnreadCountForActiveActor() {
@@ -162,7 +348,6 @@
     return false;
   }
 
-  
   // 4b. Delete Notification API (Soft Delete per Actor)
   function deleteNotification(notifId) {
     if (!notifId) return false;
@@ -178,17 +363,7 @@
 
   function clearAllNotificationsForActiveActor() {
     const user = getActiveUserInfo();
-    notificationsList = notificationsList.filter(n => {
-      let isForUser = false;
-      if (isEmployeeRole(user.roleKey)) {
-        isForUser = isEmployeeRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip);
-      } else if (isApproverRole(user.roleKey)) {
-        isForUser = isApproverRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
-      } else if (isSecurityRole(user.roleKey)) {
-        isForUser = isSecurityRole(n.recipientRole);
-      }
-      return !isForUser;
-    });
+    notificationsList = notificationsList.filter(n => !isNotificationForUser(n, user));
     saveStoredNotifications(notificationsList);
     updateNotificationBadges();
   }
@@ -201,16 +376,7 @@
     let updatedCount = 0;
 
     notificationsList.forEach(n => {
-      let isForUser = false;
-      if (isEmployeeRole(user.roleKey)) {
-        isForUser = isEmployeeRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip);
-      } else if (isApproverRole(user.roleKey)) {
-        isForUser = isApproverRole(n.recipientRole) && (!n.recipientNip || n.recipientNip === user.nip || (n.recipientName && n.recipientName.includes(user.name)));
-      } else if (isSecurityRole(user.roleKey)) {
-        isForUser = isSecurityRole(n.recipientRole);
-      }
-
-      if (isForUser && !n.isRead) {
+      if (isNotificationForUser(n, user) && !n.isRead) {
         n.isRead = true;
         updatedCount++;
       }

@@ -495,11 +495,8 @@ function renderKaryawanDashboard() {
           <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
             <span>Otorisasi Darurat</span>
           </button>
-          <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+          <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
             <span>Edit Pengajuan</span>
-          </button>
-          <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-            <span>Detail pengajuan</span>
           </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
             <span>Batalkan Izin</span>
@@ -507,9 +504,9 @@ function renderKaryawanDashboard() {
         `;
       } else if (isPending) {
         actionButtonsHtml = `
-          <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
-            <span>Edit Pengajuan</span>
-          </button>
+          <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
+          <span>Edit Pengajuan</span>
+        </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
             <span>Batalkan Izin</span>
           </button>
@@ -520,7 +517,7 @@ function renderKaryawanDashboard() {
             <span>Buka QR Izin</span>
           </button>
           <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-            <span>Detail pengajuan</span>
+            <span>Detail Pengajuan</span>
           </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
             <span>Batalkan</span>
@@ -557,7 +554,7 @@ function renderKaryawanDashboard() {
             <span>Izin aktif saya</span>
             ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
           </h3>
-          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
         </div>
         <div>
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
@@ -672,7 +669,7 @@ function renderKaryawanDashboard() {
               <div class="action-pills-row">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-                  <span>Detail pengajuan</span>
+                  <span>Detail Pengajuan</span>
                 </button>
                 <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -751,11 +748,8 @@ function renderPengajuanSayaView() {
         <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
           <span>Otorisasi Darurat</span>
         </button>
-        <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+        <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
           <span>Edit Pengajuan</span>
-        </button>
-        <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-          <span>Detail pengajuan</span>
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
           <span>Batalkan Izin</span>
@@ -763,7 +757,7 @@ function renderPengajuanSayaView() {
       `;
     } else if (isPending) {
       actionButtonsHtml = `
-        <button class="btn-figma-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
+        <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
           <span>Edit Pengajuan</span>
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
@@ -776,7 +770,7 @@ function renderPengajuanSayaView() {
           <span>Buka QR Izin</span>
         </button>
         <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-          <span>Detail pengajuan</span>
+          <span>Detail Pengajuan</span>
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
           <span>Batalkan</span>
@@ -811,7 +805,7 @@ function renderPengajuanSayaView() {
             <span>Izin aktif saya</span>
             ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
           </h3>
-          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
         </div>
         <div>
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
@@ -1239,7 +1233,7 @@ function renderEmpCards(list, containerElement) {
               <div class="action-pills-row" style="flex: 1; width: 100%;">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-                  <span>Detail pengajuan</span>
+                  <span>Detail Pengajuan</span>
                 </button>
                 <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1282,7 +1276,7 @@ function renderEmpTable(list, containerElement) {
       <div class="action-pills-row">
         <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-          <span>Detail pengajuan</span>
+          <span>Detail Pengajuan</span>
         </button>
         <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1666,7 +1660,7 @@ function renderKaryawanMobileDashboard() {
       mobileCardActivePermit.innerHTML = `
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Izin aktif saya</h3>
-          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail pengajuan</a>
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
         </div>
         <div>
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">${activeTicket.id}</div>

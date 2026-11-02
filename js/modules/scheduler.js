@@ -210,6 +210,7 @@ function checkOverdueAndExpiredTickets(silent = true) {
                 // 2. Notifikasi ke Atasan
                 window.createNotification({
                   recipientRole: 'approver',
+                  recipientNip: (ticket.approverName && ticket.approverName.includes('Dewi')) ? 'PK-2012-0845' : 'PK-2015-1002',
                   recipientName: ticket.approverName || 'Ir. Hendra Gunawan, M.T.',
                   actorSource: 'system',
                   type: 'bawahan_terlambat',

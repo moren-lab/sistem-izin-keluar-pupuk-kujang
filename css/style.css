@@ -6661,6 +6661,44 @@ body.modal-open {
   border-color: #94a3b8;
 }
 
+.btn-figma-warning {
+  background: #eab308;
+  color: #1e293b;
+  border: 1px solid #ca8a04;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 2px 6px rgba(234, 179, 8, 0.25);
+}
+
+.btn-figma-warning:hover {
+  background: #ca8a04;
+  color: #ffffff;
+  border-color: #a16207;
+  box-shadow: 0 4px 10px rgba(202, 138, 4, 0.35);
+}
+
+body.theme-dark .btn-figma-warning,
+.theme-dark .btn-figma-warning {
+  background: #ca8a04 !important;
+  color: #ffffff !important;
+  border: 1px solid #eab308 !important;
+  box-shadow: 0 2px 6px rgba(202, 138, 4, 0.3) !important;
+}
+
+body.theme-dark .btn-figma-warning:hover,
+.theme-dark .btn-figma-warning:hover {
+  background: #a16207 !important;
+  border-color: #fde047 !important;
+  color: #ffffff !important;
+}
+
 .btn-figma-danger {
   background: #b91c1c;
   color: #ffffff;
@@ -10694,22 +10732,34 @@ body.theme-dark .btn-danger-solid:hover,
   flex-shrink: 0 !important;
 }
 
-.btn-pill-detail {
+.btn-pill-detail,
+.btn-card-detail,
+.btn-admin-detail {
   background: #ffffff !important;
-  color: #059669 !important;
-  border: 1px solid #6ee7b7 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
 }
 
-.btn-pill-detail svg {
-  stroke: #059669 !important;
+.btn-pill-detail svg,
+.btn-card-detail svg,
+.btn-admin-detail svg {
+  stroke: #64748b !important;
 }
 
-.btn-pill-detail:hover {
-  background: #ecfdf5 !important;
-  border-color: #059669 !important;
-  color: #047857 !important;
+.btn-pill-detail:hover,
+.btn-card-detail:hover,
+.btn-admin-detail:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(5, 150, 105, 0.12);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.btn-pill-detail:hover svg,
+.btn-card-detail:hover svg,
+.btn-admin-detail:hover svg {
+  stroke: #0f172a !important;
 }
 
 .btn-pill-delete {
@@ -10736,22 +10786,43 @@ body.theme-dark .btn-danger-solid:hover,
 
 /* Dark mode support */
 body.theme-dark .btn-pill-detail,
-.theme-dark .btn-pill-detail {
-  background: rgba(16, 185, 129, 0.08) !important;
-  border-color: rgba(52, 211, 153, 0.35) !important;
-  color: #34d399 !important;
+.theme-dark .btn-pill-detail,
+body.theme-dark .btn-card-detail,
+.theme-dark .btn-card-detail,
+body.theme-dark .btn-admin-detail,
+.theme-dark .btn-admin-detail {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #e2e8f0 !important;
 }
 
 body.theme-dark .btn-pill-detail svg,
-.theme-dark .btn-pill-detail svg {
-  stroke: #34d399 !important;
+.theme-dark .btn-pill-detail svg,
+body.theme-dark .btn-card-detail svg,
+.theme-dark .btn-card-detail svg,
+body.theme-dark .btn-admin-detail svg,
+.theme-dark .btn-admin-detail svg {
+  stroke: #94a3b8 !important;
 }
 
 body.theme-dark .btn-pill-detail:hover,
-.theme-dark .btn-pill-detail:hover {
-  background: rgba(16, 185, 129, 0.18) !important;
-  border-color: #34d399 !important;
-  color: #6ee7b7 !important;
+.theme-dark .btn-pill-detail:hover,
+body.theme-dark .btn-card-detail:hover,
+.theme-dark .btn-card-detail:hover,
+body.theme-dark .btn-admin-detail:hover,
+.theme-dark .btn-admin-detail:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+body.theme-dark .btn-pill-detail:hover svg,
+.theme-dark .btn-pill-detail:hover svg,
+body.theme-dark .btn-card-detail:hover svg,
+.theme-dark .btn-card-detail:hover svg,
+body.theme-dark .btn-admin-detail:hover svg,
+.theme-dark .btn-admin-detail:hover svg {
+  stroke: #ffffff !important;
 }
 
 body.theme-dark .btn-pill-delete,

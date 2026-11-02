@@ -2705,6 +2705,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof window.createNotification === 'function') {
         window.createNotification({
           recipientRole: 'approver',
+          recipientNip: (newTicket.approverName && newTicket.approverName.includes('Dewi')) ? 'PK-2012-0845' : 'PK-2015-1002',
           recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
           actorSource: 'karyawan',
           type: 'pengajuan_baru',
@@ -3262,6 +3263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ticketForExt) {
           window.createNotification({
             recipientRole: 'approver',
+            recipientNip: (ticketForExt.approverName && ticketForExt.approverName.includes('Dewi')) ? 'PK-2012-0845' : 'PK-2015-1002',
             recipientName: ticketForExt.approverName || 'Ir. Hendra Gunawan, M.T.',
             actorSource: 'karyawan',
             type: 'permohonan_perpanjangan',
