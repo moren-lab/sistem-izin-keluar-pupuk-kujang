@@ -1932,7 +1932,6 @@ body.theme-dark .headcount-card-calm {
 }
 body.theme-dark .headcount-card-calm.has-outside {
   background: #141c2c !important;
-  border-left: 4px solid #f59e0b !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 body.theme-dark .headcount-count-box {
@@ -3672,19 +3671,19 @@ body {
 }
 
 .btn-card-detail {
-  background: #ffffff;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-  border-radius: var(--radius-sm);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.775rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: all 0.15s ease;
-  min-height: 34px;
+  background: #ffffff !important;
+  color: #059669 !important;
+  border: 1px solid #6ee7b7 !important;
+  border-radius: 6px !important;
+  padding: 0.42rem 0.75rem !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
 }
 
 .btn-card-detail:hover {
@@ -4790,7 +4789,6 @@ body.modal-open {
 }
 
 .headcount-card-calm.has-outside {
-  border-left: 4px solid #d97706;
   background: #fffdfa;
 }
 
@@ -7201,7 +7199,6 @@ body.theme-dark .figma-contact-sub {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  border-top-width: 4px;
 }
 
 .figma-tag-badge {

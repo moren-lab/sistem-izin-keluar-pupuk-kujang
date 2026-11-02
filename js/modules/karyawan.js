@@ -584,7 +584,7 @@ function renderKaryawanDashboard() {
         </div>
 
         ${isEmergLocked ? `
-          <div style="margin-top: 0.85rem; font-size: 0.775rem; padding-top: 0.65rem; border-top: 1px solid #f1f5f9;">
+          <div style="margin-top: 0.85rem; font-size: 0.775rem; padding-top: 0.65rem; border-top: 1px solid var(--border-color);">
             <div style="font-weight: 800; color: #b91c1c; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
               <span>Izin Darurat Menunggu Otorisasi</span>
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
@@ -635,7 +635,7 @@ function renderKaryawanDashboard() {
       karyawanDashboardRecentList.innerHTML = completedItems.map((t, idx) => {
         const exitHour = t.plannedExit ? t.plannedExit.slice(11, 16) : '09:00';
         const returnHour = t.estimatedReturn ? t.estimatedReturn.slice(11, 16) : '11:00';
-        const timeSpan = `${exitHour}–${returnHour} WIB`;
+        const timeSpan = `${exitHour} s/d ${returnHour} WIB`;
 
         // Format tanggal secara akurat (hindari .slice(0,6) yang menghasilkan "2026-1")
         let dayMonth = 'Hari ini';
@@ -1062,7 +1062,14 @@ function formatTicketScheduleWithDay(t) {
     returnTimeStr = '(Pulang)';
   }
 
-  const timePart = returnTimeStr ? `${plannedTimeStr} – ${returnTimeStr}` : `${plannedTimeStr} WIB`;
+  let timePart = `${plannedTimeStr} WIB`;
+  if (returnTimeStr) {
+    if (returnTimeStr.startsWith('(')) {
+      timePart = `${plannedTimeStr} WIB ${returnTimeStr}`;
+    } else {
+      timePart = `${plannedTimeStr} s/d ${returnTimeStr}`;
+    }
+  }
   return `<div class="schedule-day-date" style="font-weight: 600; font-size: 0.72rem; line-height: 1.35; white-space: nowrap;">${dayName}, ${dateFormatted}</div><div class="schedule-time-text" style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono); font-weight: 500; margin-top: 1px; white-space: nowrap;">${timePart}</div>`;
 }
 
@@ -1419,24 +1426,24 @@ function deleteEmpTicket(ticketId) {
 }
 
 function deleteAllEmpRiwayat() {
-  const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+  const empActor = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : null;
+  const myNip = (empActor && empActor.nip) || 'PK-2024-8841';
   const allFiltered = typeof filterEmpTickets === 'function' ? filterEmpTickets() : [];
-  const filtered = allFiltered.filter(t => (FINISHED_EMP_STATUSES.includes(t.status) || (t.status === 'Terlambat' && t.scanInTime)) && (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')));
 
-  if (filtered.length === 0) {
+  if (allFiltered.length === 0) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Tidak ada riwayat selesai untuk dihapus.', 'warning');
+      window.showToast('Tidak ada riwayat pengajuan untuk dihapus.', 'warning');
     }
     return;
   }
 
-  const count = filtered.length;
+  const count = allFiltered.length;
   const handler = () => {
-    const idsToDelete = new Set(filtered.map(t => t.id));
+    const idsToDelete = new Set(allFiltered.map(t => t.id));
     let ticketsList = window.ticketsList || [];
     let deletedCount = 0;
     ticketsList.forEach(t => {
-      if (idsToDelete.has(t.id) && FINISHED_EMP_STATUSES.includes(t.status) && (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'))) {
+      if (idsToDelete.has(t.id)) {
         t.deletedByKaryawan = true;
         deletedCount++;
       }
@@ -1447,17 +1454,17 @@ function deleteAllEmpRiwayat() {
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
 
     if (typeof window.showToast === 'function') {
-      window.showToast(`${deletedCount} riwayat dihapus`, 'success');
+      window.showToast(`${deletedCount} riwayat berhasil dihapus`, 'success');
     }
   };
 
   if (typeof window.openDeleteConfirmModal === 'function') {
     window.openDeleteConfirmModal({
-      title: 'Hapus Riwayat Selesai',
-      message: `Hapus <strong>${count}</strong> riwayat yang sudah selesai? Tiket yang masih berjalan tidak akan ikut terhapus.`,
+      title: 'Hapus Semua Riwayat',
+      message: `Apakah Anda yakin ingin menghapus <strong>${count}</strong> riwayat pengajuan? Tiket yang masih berjalan tidak akan terhapus.`,
       onConfirm: handler
     });
-  } else if (confirm(`Hapus ${count} riwayat yang sudah selesai? Tiket yang masih berjalan tidak akan ikut terhapus.`)) {
+  } else if (confirm(`Apakah Anda yakin ingin menghapus ${count} riwayat pengajuan?`)) {
     handler();
   }
 }
@@ -1724,7 +1731,7 @@ function renderKaryawanMobileDashboard() {
         const dateStr = t.createdAt ? t.createdAt.slice(0, 11) : '19 Okt 2026';
         const plannedStr = t.plannedExit ? t.plannedExit.slice(11, 16) : '10.00';
         const returnStr = t.estimatedReturn ? t.estimatedReturn.slice(11, 16) : '';
-        const timeRange = returnStr ? `${plannedStr}–${returnStr} WIB` : `${plannedStr} WIB`;
+        const timeRange = returnStr ? `${plannedStr} s/d ${returnStr} WIB` : `${plannedStr} WIB`;
 
         return `
           <div style="padding: 10px 0; ${idx < pastTickets.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''} display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">

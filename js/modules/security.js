@@ -404,13 +404,11 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
         const isOverdue = t.status === 'Terlambat';
         const isLateCompleted = (t.status === 'Selesai') && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0));
         const isExpired = t.status === 'Kedaluwarsa';
+        const isEmergency = t.category === 'Darurat' || t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
         const isDinas = t.category === 'Dinas Kantor';
 
-        const borderColor = isReadyExit ? 'var(--corp-teal)' 
-                          : (isOverdue ? 'var(--rose-danger)' 
-                          : (isLateCompleted ? '#d97706' 
-                          : (isOutside ? '#0891b2' 
-                          : (isExpired ? '#94a3b8' : ''))));
+        // Hanya izin darurat yang memiliki aksen border samping (sesuai permintaan user: Hapus semua warna di samping card kecuali izin darurat)
+        const borderColor = isEmergency ? 'var(--rose-danger)' : '';
 
         const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
         const gateBadgeHtml = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;

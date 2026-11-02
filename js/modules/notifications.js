@@ -546,7 +546,7 @@
                 ✓ Tandai semua dibaca
               </button>
             ` : ''}
-            <button type="button" class="btn-clear-all-notifs" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; height: 38px; padding: 0 14px; font-size: 0.785rem; border-radius: 10px; cursor: ${allNotifsList.length > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsList.length > 0 ? '1' : '0.4'}; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; vertical-align: middle;" ${allNotifsList.length > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
+            <button type="button" class="btn-clear-history btn-danger-solid" style="height: 38px; cursor: ${allNotifsList.length > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsList.length > 0 ? '1' : '0.4'};" ${allNotifsList.length > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
               <span>Hapus Semua</span>
             </button>

@@ -481,7 +481,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
     const isDinas = t.category === 'Dinas Kantor';
 
     return `
-          <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : (isPending ? 'border-left: 4px solid var(--amber-warning);' : '')}">
+          <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : ''}">
             <div class="card-top">
               <div>
                 <span class="card-id-num">${t.id}</span>
@@ -522,7 +522,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
               <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
-                <div class="detail-schedule-val" style="text-align: right;">${typeof window.formatTicketScheduleWithDay === 'function' ? window.formatTicketScheduleWithDay(t) : `<div class="schedule-time-text">${t.plannedExit.replace('T', ' ')} → ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang'}</div>`}</div>
+                <div class="detail-schedule-val" style="text-align: right;">${typeof window.formatTicketScheduleWithDay === 'function' ? window.formatTicketScheduleWithDay(t) : `<div class="schedule-time-text">${t.plannedExit.replace('T', ' ')} s/d ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : 'Pulang'}</div>`}</div>
               </div>
             </div>
 
