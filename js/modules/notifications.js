@@ -452,14 +452,19 @@
     if (!ticketId) return;
 
     const user = getActiveUserInfo();
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = (window.innerWidth <= 768) || Boolean(document.getElementById('mobileAppShell')) || Boolean(window.currentMobileRole);
 
-    // NOTE PENTING: Notifikasi HANYA BISA MELIHAT AJA (View-Only / Read-Only).
-    // Tidak ada opsi setujui, tolak, scan out, tap in, edit darurat, dan lain-lain.
+    // NOTE PENTING: Pada Tampilan Mobile, gunakan action sheet native mobile (Image 2)
+    if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
+      setTimeout(() => {
+        window.mobileOpenTicketDetail(ticketId);
+      }, 50);
+      return;
+    }
+
+    // Tampilan Desktop (Web/PC)
     if (typeof window.openTicketDetail === 'function') {
       window.openTicketDetail(ticketId, 'readonly', { readOnlyFromNotif: true });
-    } else if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
-      window.mobileOpenTicketDetail(ticketId);
     }
   }
 

@@ -440,6 +440,19 @@
     } catch (e) {}
   };
 
+  // Interceptor: jika openTicketDetail dipanggil pada mode mobile, selalu arahkan ke mobile sheet asli (Image 2)
+  const _origOpenTicketDetail = window.openTicketDetail;
+  window.openTicketDetail = function (ticketId, mode, options) {
+    const isMobile = (window.innerWidth <= 768) || Boolean(document.getElementById('mobileAppShell')) || Boolean(window.currentMobileRole);
+    if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
+      window.mobileOpenTicketDetail(ticketId);
+      return;
+    }
+    if (typeof _origOpenTicketDetail === 'function') {
+      return _origOpenTicketDetail.apply(this, arguments);
+    }
+  };
+
 
   // -------------------------------------------------------------------
   // 5. AVATAR MENU & LOG OUT TO SAKTI (PEKERJAAN B)
