@@ -302,6 +302,7 @@ function renderApproverDashboard() {
 
       // Render Permohonan Izin Darurat di paling atas Antrean Persetujuan Cepat (Priority 1)
       lockedEmergencyTickets.forEach(emg => {
+        const isFaceScanMethod = (emg.selectedMethod === 'facescan');
         html += `
           <div class="feed-item" style="border-left: 4px solid #e11d48; background: #fff1f2; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
@@ -317,6 +318,9 @@ function renderApproverDashboard() {
             <div style="font-size: 0.775rem; color: #9f1239; background: #ffe4e6; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #fecdd3; line-height: 1.4;">
               <strong>Alasan Kedaruratan:</strong> "${emg.reason || '-'}"
             </div>
+            <div style="font-size: 0.75rem; color: ${isFaceScanMethod ? '#7e22ce' : '#047857'}; font-weight: 700;">
+              ${isFaceScanMethod ? '🤳 Metode: Scan Wajah Atasan di Tempat (Karyawan akan memindai wajah Anda)' : '📱 Metode: Persetujuan Langsung Atasan di App'}
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #fecdd3; flex-wrap: wrap; gap: 0.5rem;">
               <span style="font-size: 0.725rem; color: #9f1239; font-family: var(--font-mono);">
                 Diajukan: ${emg.createdAt ? emg.createdAt.slice(11, 16) : 'Hari ini'} WIB
@@ -326,8 +330,14 @@ function renderApproverDashboard() {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
-                <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="openRejectModal('${emg.id}')">✕ Tolak</button>
-                <button class="btn-approve" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; background: #059669; font-weight: 800; border-radius: 6px;" onclick="window.emergencyDirectApprove('${emg.id}')">⚡ Setujui</button>
+                ${!isFaceScanMethod ? `
+                  <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="openRejectModal('${emg.id}')">✕ Tolak</button>
+                  <button class="btn-approve" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; background: #059669; font-weight: 800; border-radius: 6px;" onclick="window.emergencyDirectApprove('${emg.id}')">⚡ Setujui</button>
+                ` : `
+                  <span style="font-size: 0.72rem; color: #7e22ce; background: #faf5ff; border: 1px solid #e9d5ff; padding: 4px 8px; border-radius: 6px; font-weight: 700;">
+                    Menunggu Scan Wajah
+                  </span>
+                `}
               </div>
             </div>
           </div>
@@ -596,14 +606,20 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                       <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="approveExtensionRequest('${t.id}')">
                         ✓ Setujui Perpanjang
                       </button>
-                    ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
-                      <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="openRejectModal('${t.id}')">
-                        ✕ Tolak Darurat
-                      </button>
-                      <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem; background: #059669;" onclick="window.emergencyDirectApprove('${t.id}')">
-                        ✓ Buka Kunci
-                      </button>
-                    ` : `
+                    ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? (
+                      t.selectedMethod === 'facescan' ? `
+                        <div style="grid-column: span 2; display: flex; align-items: center; justify-content: center; background: #faf5ff; border: 1px solid #e9d5ff; padding: 0.4rem 0.65rem; border-radius: 6px;">
+                          <span style="font-size: 0.725rem; color: #7e22ce; font-weight: 700;">🤳 Otorisasi Scan Wajah di Tempat (Menunggu Pemohon)</span>
+                        </div>
+                      ` : `
+                        <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="openRejectModal('${t.id}')">
+                          ✕ Tolak Darurat
+                        </button>
+                        <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem; background: #059669;" onclick="window.emergencyDirectApprove('${t.id}')">
+                          ✓ Setujui
+                        </button>
+                      `
+                    ) : `
                       <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.775rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem;" onclick="openRejectModal('${t.id}')">
                         ✕ Tolak
                       </button>
@@ -741,8 +757,30 @@ function renderApproverView() {
 
   // 2. ANTRIAN PERSETUJUAN (Termasuk Tiket Darurat Terkunci)
   if (currentApproverNav === 'antrian') {
+    const isEmgTicket = (t) => Boolean(
+      t.isEmergency || 
+      (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || 
+      t.status === 'Menunggu Otorisasi Darurat'
+    );
+
+    // Comparator: Izin Darurat SELALU diprioritaskan di paling awal antrean
+    const priorityEmergencyComparator = (a, b) => {
+      const aIsEmg = isEmgTicket(a);
+      const bIsEmg = isEmgTicket(b);
+      if (aIsEmg && !bIsEmg) return -1;
+      if (!aIsEmg && bIsEmg) return 1;
+
+      // Sekunder: terbaru diajukan tampil lebih dulu
+      const parseTime = (ticket) => {
+        const val = ticket.submittedAt || ticket.createdAt || ticket.plannedExit || 0;
+        const d = typeof window.parseTicketDateTime === 'function' ? window.parseTicketDateTime(val) : new Date(val);
+        return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
+      };
+      return parseTime(b) - parseTime(a);
+    };
+
     // 1. Pengajuan tertunda yang ditujukan ke atasan aktif saat ini
-    const pendingList = ticketsList.filter(t => 
+    const pendingListAll = ticketsList.filter(t => 
       t.status !== 'Dibatalkan' &&
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
@@ -751,18 +789,20 @@ function renderApproverView() {
        t.status === 'Menunggu Otorisasi Darurat' || 
        (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))
     );
+    pendingListAll.sort(priorityEmergencyComparator);
 
     // 2. Pengajuan yang sebelumnya diajukan ke atasan ini tapi dialihkan ke atasan lain
-    const reassignedAwayList = ticketsList.filter(t =>
+    const reassignedAwayListAll = ticketsList.filter(t =>
       t.status !== 'Dibatalkan' &&
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
       isTicketReassignedFromCurrentApprover(t) &&
       (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
     );
+    reassignedAwayListAll.sort(priorityEmergencyComparator);
 
     // 3. Pengajuan bawahan naungan atasan aktif yang saat diajukan, karyawan memilih atasan lain
-    const supervisedOtherList = ticketsList.filter(t =>
+    const supervisedOtherListAll = ticketsList.filter(t =>
       t.status !== 'Dibatalkan' &&
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
@@ -771,10 +811,63 @@ function renderApproverView() {
       isTicketUnderMySupervision(t) &&
       (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
     );
+    supervisedOtherListAll.sort(priorityEmergencyComparator);
+
+    // Hitung counter untuk badge filter antrean
+    const totalCount = pendingListAll.length;
+    const emgCount = pendingListAll.filter(isEmgTicket).length;
+    const regCount = pendingListAll.filter(t => !isEmgTicket(t)).length;
+
+    const countAntrianAll = document.getElementById('countAntrianAll');
+    const countAntrianEmergency = document.getElementById('countAntrianEmergency');
+    const countAntrianRegular = document.getElementById('countAntrianRegular');
+    const headingPendingBadge = document.getElementById('headingPendingBadge');
+
+    if (countAntrianAll) countAntrianAll.textContent = totalCount;
+    if (countAntrianEmergency) countAntrianEmergency.textContent = emgCount;
+    if (countAntrianRegular) countAntrianRegular.textContent = regCount;
+    if (headingPendingBadge) headingPendingBadge.textContent = totalCount;
+
+    // Filter Sifat Izin Aktif: 'all', 'emergency', 'regular'
+    const activeNature = window.currentApproverAntrianFilter || 'all';
+
+    const btnFilterAntrianAll = document.getElementById('btnFilterAntrianAll');
+    const btnFilterAntrianEmergency = document.getElementById('btnFilterAntrianEmergency');
+    const btnFilterAntrianRegular = document.getElementById('btnFilterAntrianRegular');
+
+    if (btnFilterAntrianAll) btnFilterAntrianAll.classList.toggle('active', activeNature === 'all');
+    if (btnFilterAntrianEmergency) btnFilterAntrianEmergency.classList.toggle('active', activeNature === 'emergency');
+    if (btnFilterAntrianRegular) btnFilterAntrianRegular.classList.toggle('active', activeNature === 'regular');
+
+    let pendingList = pendingListAll;
+    let reassignedAwayList = reassignedAwayListAll;
+    let supervisedOtherList = supervisedOtherListAll;
+
+    if (activeNature === 'emergency') {
+      pendingList = pendingListAll.filter(isEmgTicket);
+      reassignedAwayList = reassignedAwayListAll.filter(isEmgTicket);
+      supervisedOtherList = supervisedOtherListAll.filter(isEmgTicket);
+    } else if (activeNature === 'regular') {
+      pendingList = pendingListAll.filter(t => !isEmgTicket(t));
+      reassignedAwayList = reassignedAwayListAll.filter(t => !isEmgTicket(t));
+      supervisedOtherList = supervisedOtherListAll.filter(t => !isEmgTicket(t));
+    }
 
     if (pendingList.length === 0 && reassignedAwayList.length === 0 && supervisedOtherList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
-      if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'flex';
+      if (emptyApproverPendingBox) {
+        emptyApproverPendingBox.style.display = 'flex';
+        const emptyMsg = emptyApproverPendingBox.querySelector('p');
+        if (emptyMsg) {
+          if (activeNature === 'emergency') {
+            emptyMsg.textContent = 'Tidak ada permohonan izin darurat yang menunggu persetujuan Anda saat ini.';
+          } else if (activeNature === 'regular') {
+            emptyMsg.textContent = 'Tidak ada permohonan izin reguler yang menunggu persetujuan Anda saat ini.';
+          } else {
+            emptyMsg.textContent = 'Tidak ada permohonan izin baru yang menunggu persetujuan Anda saat ini.';
+          }
+        }
+      }
     } else {
       if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'none';
       if (containerApproverPendingQueue) {
@@ -1464,6 +1557,12 @@ window.openRejectExtensionModal = openRejectExtensionModal;
 window.rejectExtensionRequest = rejectExtensionRequest;
 window.deleteApproverTicket = deleteApproverTicket;
 window.clearApproverTrackingHistory = clearApproverTrackingHistory;
+window.setApproverAntrianFilter = function (filterNature) {
+  window.currentApproverAntrianFilter = filterNature || 'all';
+  if (typeof window.renderApproverView === 'function') {
+    window.renderApproverView();
+  }
+};
 
 // Wire Filter and View Switcher listeners for Approver Pelacakan
 document.addEventListener('DOMContentLoaded', () => {

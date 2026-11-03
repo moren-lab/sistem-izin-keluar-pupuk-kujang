@@ -1138,11 +1138,27 @@
             </div>
 
             <div class="content-section" style="margin-top: 1.5rem;">
-              <div class="section-header-row">
-                <h2 class="section-heading">
+              <div class="section-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                <h2 class="section-heading" style="margin-bottom: 0;">
                   <span id="approverSectionHeading">Daftar Antrean Menunggu Keputusan</span>
                   <span class="nav-badge-count" id="headingPendingBadge" style="font-size: 0.75rem;">0</span>
                 </h2>
+
+                <!-- Filter Antrean Persetujuan: Semua, Darurat, Reguler -->
+                <div class="antrian-filter-pills" id="antrianFilterGroup">
+                  <button type="button" class="btn-antrian-pill active" id="btnFilterAntrianAll" onclick="window.setApproverAntrianFilter('all')">
+                    <span>Semua</span>
+                    <span class="antrian-count-pill" id="countAntrianAll">0</span>
+                  </button>
+                  <button type="button" class="btn-antrian-pill pill-darurat" id="btnFilterAntrianEmergency" onclick="window.setApproverAntrianFilter('emergency')">
+                    <span>🚨 Izin Darurat</span>
+                    <span class="antrian-count-pill" id="countAntrianEmergency">0</span>
+                  </button>
+                  <button type="button" class="btn-antrian-pill pill-regular" id="btnFilterAntrianRegular" onclick="window.setApproverAntrianFilter('regular')">
+                    <span>📋 Izin Reguler</span>
+                    <span class="antrian-count-pill" id="countAntrianRegular">0</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Content Container Approver Antrian -->
@@ -2958,13 +2974,13 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" id="infoNotesContainer">
             <div>
               <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
-                id="infoApproverLbl">Catatan Atasan — Ir. Hendra Gunawan, M.T.</span>
+                id="infoApproverLbl">Ir. Hendra Gunawan, M.T. — Catatan Atasan:</span>
               <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
                 id="infoApproverNoteText">Disetujui. Sampaikan hasil pemeriksaan setelah kembali.</p>
             </div>
             <div>
               <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
-                id="infoSecurityLbl">Catatan Petugas Pos Jaga — Agus Setiawan</span>
+                id="infoSecurityLbl">Agus Setiawan — Catatan Petugas Pos Jaga:</span>
               <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
                 id="infoSecurityNoteText">Identitas dan QR sesuai. Scan In tercatat di Pos 1.</p>
             </div>
@@ -3440,7 +3456,7 @@ amily: var(--font-mono);"
         <div class="form-group" style="margin-top: 0.25rem; margin-bottom: 0;">
           <label class="form-label"
             style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-            Pilih Metode Otorisasi Buka Kunci QR <span style="color: var(--rose-danger);">*</span>
+            Pilih Metode Otorisasi QR <span style="color: var(--rose-danger);">*</span>
           </label>
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
             <label class="option-card emerg-opt selected" id="optEmergMethodApp"
@@ -3489,7 +3505,7 @@ amily: var(--font-mono);"
       <div class="modal-header" style="border-bottom: 1px solid var(--border-color, #e2e8f0); background: var(--bg-card, #ffffff);">
         <div>
           <h3 style="color: var(--text-primary, #0f172a); display: flex; align-items: center; gap: 0.45rem;">
-            <span>Otorisasi Buka Kunci QR Darurat</span>
+            <span>Otorisasi QR Darurat</span>
           </h3>
           <p style="color: var(--text-secondary, #64748b);">SOP Keamanan BRD PT Pupuk Kujang ("No Approval, No Exit")</p>
         </div>
@@ -3518,19 +3534,17 @@ amily: var(--font-mono);"
           </div>
         </div>
 
-        <!-- 3 Pilihan Tab Otorisasi Cepat -->
-        <div style="font-weight: 800; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.5rem;">
-          Pilih Salah Satu Metode Otorisasi Cepat:
-        </div>
-        <div class="emg-unlock-tabs">
-          <button type="button" class="emg-tab-btn active" data-tab="tabEmgApprove"
-            onclick="window.switchEmergencyUnlockTab('tabEmgApprove', true)">
-            <span>1. Persetujuan di App</span>
-          </button>
-
-          <button type="button" class="emg-tab-btn" data-tab="tabEmgFaceScan"
-            onclick="window.switchEmergencyUnlockTab('tabEmgFaceScan', true)">
-            <span>2. Scan Wajah</span>
+        <!-- Header Metode Terpilih (Sesuai pilihan di form permohonan) -->
+        <div id="emgUnlockSelectedMethodCard"
+          style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; background: var(--bg-subtle, #f8fafc); padding: 0.65rem 0.95rem; border-radius: 8px; border: 1.5px solid var(--border-color, #e2e8f0); gap: 0.75rem; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Metode Otorisasi Terpilih:</div>
+            <div style="font-size: 0.875rem; font-weight: 800; color: var(--text-primary);" id="emgUnlockMethodTitle">
+              📱 1. Persetujuan Langsung Atasan di App
+            </div>
+          </div>
+          <button type="button" class="btn-figma-blue" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;" onclick="window.closeEmergencyUnlockModal(); window.openEditTicketModal(window.currentEmergencyTicketId);">
+            <span>✏️ Ganti Metode di Edit Pengajuan</span>
           </button>
         </div>
 
@@ -3564,13 +3578,7 @@ amily: var(--font-mono);"
         </div>
 
         
-            <button type="button" class="btn-approve" id="btnSubmitEmergencyPasscode"
-              onclick="window.verifyEmergencyPasscode()"
-              style="width: 100%; justify-content: center; padding: 0.65rem; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 700;">
-              Verifikasi Kode Sandi & Buka QR
-            </button>
-          </div>
-        </div>
+
 
         <!-- PANE TAB 3: SCAN WAJAH (FACE SCAN) ATASAN -->
         <div class="emg-tab-pane" id="tabEmgFaceScan">

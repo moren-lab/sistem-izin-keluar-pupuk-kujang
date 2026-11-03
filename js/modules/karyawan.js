@@ -469,20 +469,20 @@ function renderKaryawanDashboard() {
   // 1.2 Card: Izin aktif saya
   if (cardActivePermitSummary) {
     if (activeTicket) {
+      const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
       const isEmergTicket = Boolean(
         activeTicket.isEmergency ||
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
       );
-      const isEmergLocked = isEmergTicket && (
+      const isEmergLocked = !isOutside && !activeTicket.scanOutTime && isEmergTicket && (
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         activeTicket.emergencyLocked === true ||
         activeTicket.qrLocked === true ||
-        (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Sedang di Luar' && activeTicket.status !== 'Selesai')
+        (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Selesai')
       );
-      const isPending = (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
-      const isApproved = (activeTicket.status === 'Disetujui');
-      const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
+      const isPending = !isOutside && (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
+      const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
 
       const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
       const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
@@ -490,8 +490,39 @@ function renderKaryawanDashboard() {
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let actionButtonsHtml = '';
-      if (isEmergLocked) {
+      if (isOutside) {
+        const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
+        const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
+        const isKembali = activeTicket.type !== 'Pulang Mendahului';
+
         actionButtonsHtml = `
+          ${isKembali ? (
+            hasPendingExt ? `
+              <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                <span>Menunggu Persetujuan Perpanjangan</span>
+              </button>
+            ` : (hasUsedExtension ? `
+              <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+                <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
+              </button>
+            ` : `
+              <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
+                <span>Ajukan Perpanjangan</span>
+              </button>
+            `)
+          ) : ''}
+          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
+            <span>✓ Tap In Kartu Akses (Masuk)</span>
+          </button>
+        `;
+      } else if (isEmergLocked) {
+        const isFaceScan = (activeTicket.selectedMethod === 'facescan');
+        actionButtonsHtml = `
+          ${isFaceScan ? `
+            <button class="btn-figma-primary" style="background:#059669; border-color:#059669; font-weight:800;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}', 'facescan')">
+              <span>🤳 Scan Wajah Atasan</span>
+            </button>
+          ` : ''}
           <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
             <span>Edit Pengajuan</span>
           </button>
@@ -518,27 +549,6 @@ function renderKaryawanDashboard() {
           </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
             <span>Batalkan</span>
-          </button>
-        `;
-      } else if (isOutside) {
-        const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
-        const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
-        actionButtonsHtml = `
-          ${hasPendingExt ? `
-            <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
-              <span>Menunggu Persetujuan Perpanjangan</span>
-            </button>
-          ` : (hasUsedExtension ? `
-            <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
-              <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
-            </button>
-          ` : `
-            <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
-              <span>Ajukan Perpanjangan</span>
-            </button>
-          `)}
-          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
-            <span>✓ Tap In Kartu Akses (Masuk)</span>
           </button>
         `;
       }
@@ -719,20 +729,20 @@ function renderPengajuanSayaView() {
 
   // Left Column
   if (colPengajuanLeft) {
+    const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
     const isEmergTicket = Boolean(
       activeTicket.isEmergency ||
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
     );
-    const isEmergLocked = isEmergTicket && (
+    const isEmergLocked = !isOutside && !activeTicket.scanOutTime && isEmergTicket && (
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       activeTicket.emergencyLocked === true ||
       activeTicket.qrLocked === true ||
-      (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Sedang di Luar' && activeTicket.status !== 'Selesai')
+      (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Selesai')
     );
-    const isPending = (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
-    const isApproved = (activeTicket.status === 'Disetujui');
-    const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
+    const isPending = !isOutside && (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
+    const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
 
     const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
@@ -740,8 +750,39 @@ function renderPengajuanSayaView() {
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
     let actionButtonsHtml = '';
-    if (isEmergLocked) {
+    if (isOutside) {
+      const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
+      const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
+      const isKembali = activeTicket.type !== 'Pulang Mendahului';
+
       actionButtonsHtml = `
+        ${isKembali ? (
+          hasPendingExt ? `
+            <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+              <span>Menunggu Persetujuan Perpanjangan</span>
+            </button>
+          ` : (hasUsedExtension ? `
+            <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+              <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
+            </button>
+          ` : `
+            <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
+              <span>Ajukan Perpanjangan</span>
+            </button>
+          `)
+        ) : ''}
+        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
+          <span>✓ Tap In Kartu Akses (Masuk)</span>
+        </button>
+      `;
+    } else if (isEmergLocked) {
+      const isFaceScan = (activeTicket.selectedMethod === 'facescan');
+      actionButtonsHtml = `
+        ${isFaceScan ? `
+          <button class="btn-figma-primary" style="background:#059669; border-color:#059669; font-weight:800;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}', 'facescan')">
+            <span>🤳 Scan Wajah Atasan</span>
+          </button>
+        ` : ''}
         <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
           <span>Edit Pengajuan</span>
         </button>
@@ -768,23 +809,6 @@ function renderPengajuanSayaView() {
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
           <span>Batalkan</span>
-        </button>
-      `;
-    } else if (isOutside) {
-      const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
-      const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
-      actionButtonsHtml = `
-        ${hasPendingExt ? '' : (hasUsedExtension ? `
-          <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
-            <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
-          </button>
-        ` : `
-          <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
-            <span>Ajukan Perpanjangan</span>
-          </button>
-        `)}
-        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
-          <span>✓ Tap In Kartu Akses (Masuk)</span>
         </button>
       `;
     }
@@ -832,7 +856,9 @@ function renderPengajuanSayaView() {
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
             </div>
             <div style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.45;">
-              Sesuai SOP K3, QR Code izin darurat terkunci sampai diverifikasi dan disetujui oleh Atasan.
+              ${activeTicket.selectedMethod === 'facescan'
+                ? 'Metode otorisasi: <strong>Scan Wajah Atasan di Tempat</strong>. Silakan klik tombol "Scan Wajah Atasan" di bawah dan arahkan kamera ke wajah Atasan untuk membuka QR Code.'
+                : 'Metode otorisasi: <strong>Persetujuan Langsung Atasan di App</strong>. Sistem sedang menunggu Atasan menekan tombol setujui di aplikasinya. Hendak mengganti metode? Klik "Edit Pengajuan".'}
             </div>
           </div>
         ` : ''}

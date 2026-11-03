@@ -11214,3 +11214,102 @@ body.theme-dark .dropdown-notif-icon-box.read,
   color: #94a3b8 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
+
+/* ===================================================================
+   ANTREAN PERSETUJUAN ATASAN: SIFAT IZIN FILTER PILLS
+   =================================================================== */
+.antrian-filter-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-subtle, #f1f5f9);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.btn-antrian-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.775rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-antrian-pill:hover {
+  color: var(--text-primary, #0f172a);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.btn-antrian-pill.active {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.btn-antrian-pill.pill-darurat.active {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fca5a5;
+  box-shadow: 0 1px 3px rgba(190, 18, 60, 0.08);
+}
+
+.btn-antrian-pill.pill-regular.active {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #86efac;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.08);
+}
+
+.antrian-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.675rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.15);
+  color: inherit;
+}
+
+body.theme-dark .antrian-filter-pills {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.theme-dark .btn-antrian-pill {
+  color: #94a3b8;
+}
+
+body.theme-dark .btn-antrian-pill:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.theme-dark .btn-antrian-pill.active {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.theme-dark .btn-antrian-pill.pill-darurat.active {
+  background: rgba(190, 18, 60, 0.2);
+  color: #fda4af;
+  border-color: rgba(244, 63, 94, 0.4);
+}
+
+body.theme-dark .btn-antrian-pill.pill-regular.active {
+  background: rgba(21, 128, 61, 0.2);
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.4);
+}

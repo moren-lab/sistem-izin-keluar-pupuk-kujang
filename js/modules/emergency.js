@@ -54,8 +54,17 @@ function openEmergencyUnlockModal(ticketId, defaultMethod = null) {
     };
   }
 
-  // Buka tab sesuai metode yang dipilih karyawan
+  // Buka tab sesuai metode yang dipilih karyawan (hanya membuka satu metode terpilih)
   const targetMethod = defaultMethod || ticket.selectedMethod || 'app';
+  const emgUnlockMethodTitle = document.getElementById('emgUnlockMethodTitle');
+  if (emgUnlockMethodTitle) {
+    if (targetMethod === 'facescan') {
+      emgUnlockMethodTitle.innerHTML = '🤳 2. Scan Wajah Atasan di Tempat';
+    } else {
+      emgUnlockMethodTitle.innerHTML = '📱 1. Persetujuan Langsung Atasan di App';
+    }
+  }
+
   let initialTab = 'tabEmgApprove';
   if (targetMethod === 'facescan') initialTab = 'tabEmgFaceScan';
 
@@ -73,31 +82,18 @@ function closeEmergencyUnlockModal() {
 
 // Switch Tab Otorisasi Darurat & Dukung Pengubahan Cara (Edit Otorisasi)
 function switchEmergencyUnlockTab(tabId, syncWithTicket = false) {
-  const tabBtns = document.querySelectorAll('.emg-tab-btn');
   const tabPanes = document.querySelectorAll('.emg-tab-pane');
 
-  tabBtns.forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-  });
-
   tabPanes.forEach(pane => {
-    pane.classList.toggle('active', pane.id === tabId);
+    const isActive = (pane.id === tabId);
+    pane.classList.toggle('active', isActive);
+    pane.style.display = isActive ? 'block' : 'none';
   });
 
   if (tabId === 'tabEmgFaceScan') {
     startEmergencyFaceScanner();
   } else {
     stopEmergencyFaceScanner();
-  }
-
-  if (syncWithTicket && window.currentEmergencyTicketId) {
-    let methodKey = 'app';
-    let methodLabel = 'Persetujuan Langsung di App';
-    if (tabId === 'tabEmgFaceScan') {
-      methodKey = 'facescan';
-      methodLabel = 'Scan Wajah Atasan';
-    }
-    changeEmergencyMethod(methodKey, methodLabel);
   }
 }
 

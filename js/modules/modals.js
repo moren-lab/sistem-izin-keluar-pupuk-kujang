@@ -328,14 +328,12 @@ function openEditEmergencyModal(ticket) {
     emergEstimatedReturn.value = ticket.estimatedReturn;
   }
 
-  // 7. Pilih Metode Otorisasi Buka Kunci QR
+  // 7. Pilih Metode Otorisasi Buka Kunci QR (Tepat satu metode)
   const method = ticket.selectedMethod || 'app';
   const optEmergMethodApp = document.getElementById('optEmergMethodApp');
-    const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
+  const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
   [optEmergMethodApp, optEmergMethodFaceScan].forEach(c => c && c.classList.remove('selected'));
-  if (method === 'passcode' && optEmergMethodPasscode) {
-    optEmergMethodPasscode.click();
-  } else if (method === 'facescan' && optEmergMethodFaceScan) {
+  if (method === 'facescan' && optEmergMethodFaceScan) {
     optEmergMethodFaceScan.click();
   } else if (optEmergMethodApp) {
     optEmergMethodApp.click();
@@ -1463,9 +1461,9 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     const approverName = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
     const approverPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(approverName, 22) : '';
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;"><strong>Catatan Atasan — </strong>${approverPhoto}<strong>${approverName}</strong></span> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
     } else {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;"><strong>Catatan Atasan — </strong>${approverPhoto}<strong>${approverName}</strong></span>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span>`;
     }
     infoApproverLbl.style.fontWeight = '800';
     infoApproverLbl.style.color = 'var(--text-primary, #0f172a)';
@@ -1480,7 +1478,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (infoSecurityLbl) {
     const secName = ticket.securityName || 'Agus Setiawan';
     const secPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(secName, 22) : '';
-    infoSecurityLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;"><strong>Catatan Petugas Pos Jaga — </strong>${secPhoto}<strong>${secName}</strong></span>`;
+    infoSecurityLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${secPhoto}<strong>${secName}</strong> — Catatan Petugas Pos Jaga:</span>`;
     infoSecurityLbl.style.fontWeight = '800';
     infoSecurityLbl.style.color = 'var(--text-primary, #0f172a)';
   }
@@ -1764,7 +1762,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const isReassignedFromMe = Boolean(tFrom && ((myApproverLower.includes('dewi') && tFrom.includes('dewi')) || (myApproverLower.includes('hendra') && tFrom.includes('hendra'))));
 
   if (btnDetailRejectTicket && btnDetailApproveTicket) {
-    if (isApproverActor && isPendingDecision && isAssignedToMe) {
+    const isEmergFaceScan = Boolean(ticket.isEmergency || (ticket.id && ticket.id.includes('-EMG-'))) && (ticket.selectedMethod === 'facescan') && (ticket.status === 'Menunggu Otorisasi Darurat' || ticket.emergencyLocked);
+    if (isApproverActor && isPendingDecision && isAssignedToMe && !isEmergFaceScan) {
       btnDetailRejectTicket.style.display = 'inline-flex';
       btnDetailApproveTicket.style.display = 'inline-flex';
       btnDetailRejectTicket.onclick = () => {
@@ -3077,7 +3076,9 @@ document.addEventListener('DOMContentLoaded', () => {
           ticket.plannedExit = plannedExitVal;
           ticket.estimatedReturn = estimatedReturnVal;
           ticket.selectedMethod = selectedMethod;
-          ticket.approverNote = `[Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${newApprover}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`;
+          ticket.approverNote = selectedMethod === 'facescan'
+            ? `[Izin Darurat - QR Terkunci]: Menunggu pemohon melakukan Scan Wajah Atasan (${newApprover}) di tempat.`
+            : `[Izin Darurat - QR Terkunci]: Menunggu Persetujuan Langsung Atasan (${newApprover}) di App.`;
 
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
