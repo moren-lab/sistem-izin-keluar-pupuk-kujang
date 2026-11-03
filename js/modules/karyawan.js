@@ -1125,7 +1125,7 @@ function renderEmpCards(list, containerElement) {
   target.innerHTML = `
     <div class="figma-card-grid">
       ${list.map(t => {
-        let catatanText = `✓ Tepat waktu — Disetujui ${t.approverName || 'Atasan'}`;
+        let catatanText = `<span style="display:inline-flex; align-items:center; gap:4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Ir. Hendra Gunawan, M.T.', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
         let catatanColor = '#059669';
         let catatanBg = '#f0fdf4';
         let catatanBorder = '#dcfce7';
@@ -1190,10 +1190,16 @@ function renderEmpCards(list, containerElement) {
               <div style="text-align: right;">${getCleanEmpStatus(t.status, t)}</div>
             </div>
 
-            <!-- Tags Kategori & Tipe Izin -->
-            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            <!-- Applicant Box with Photo & Category -->
+            <div style="background:var(--bg-subtle, #f8fafc); padding:0.55rem 0.75rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between; margin: 0.35rem 0;">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 34)}
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                  <div style="font-size:0.725rem; color:var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
+                </div>
+              </div>
               <span class="figma-tag-badge ${isDinas ? 'badge-dinas' : 'badge-pribadi'}">${t.category}</span>
-              <span class="figma-tag-badge badge-type">${t.type}</span>
             </div>
 
             <!-- Detail Box (Tujuan, Keperluan, Rencana Waktu) -->
@@ -1254,18 +1260,19 @@ function renderEmpTable(list, containerElement) {
       <table class="figma-table" style="min-width: 950px;">
         <thead>
           <tr>
-            <th>Nomor tiket / kategori & tipe</th>
-            <th>Tujuan & Keperluan</th>
-            <th>Rencana waktu</th>
-            <th>Status</th>
-            <th>Catatan</th>
+            <th style="min-width: 150px;">Nomor Tiket & Kategori</th>
+            <th style="min-width: 180px;">Pemohon & NIP</th>
+            <th style="min-width: 180px;">Tujuan & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
+            <th style="white-space: nowrap; min-width: 95px;">Status</th>
+            <th style="min-width: 180px;">Catatan</th>
             <th style="text-align: right; white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
           ${list.map(t => {
     const statusHtml = getCleanEmpStatus(t.status, t);
-    let catatanHtml = `<span style="color: #475569;">Tepat waktu — Disetujui ${t.approverName || 'Hendra Gunawan'}</span>`;
+    let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Hendra Gunawan', 18)} <span>${t.approverName || 'Hendra Gunawan'}</span></span>`;
     let tindakanHtml = `
       <div class="action-pills-row">
         <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
@@ -1283,13 +1290,22 @@ function renderEmpTable(list, containerElement) {
 
     return `
               <tr>
-                <td>
-                  <div style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">${t.id}</div>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem;">${t.id}</div>
                   <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${t.category} — ${t.type}</div>
                 </td>
-                <td>
-                  <div style="font-weight: 700; color: var(--text-primary);">${t.destination}</div>
-                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</div>
+                <td style="vertical-align: middle;">
+                  <div style="display: flex; align-items: center; gap: 0.55rem;">
+                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 30)}
+                    <div>
+                      <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem; line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                      <div style="font-size: 0.725rem; color: var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem;">${t.destination}</div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</div>
                 </td>
                 <td>${scheduleWithDay}</td>
                 <td>${statusHtml}</td>

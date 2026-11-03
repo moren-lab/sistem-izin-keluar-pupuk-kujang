@@ -343,10 +343,7 @@
           <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px;">
             <span style="font-style: normal;">"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</span>
           </div>
-          <div style="background: #ffffff; border: 1px dashed #fca5a5; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.725rem; color: #991b1b; display: flex; justify-content: space-between; align-items: center;">
-            <span>Kode Sandi Otorisasi:</span>
-            <strong style="font-size: 0.85rem; letter-spacing: 2px;">${pendingEmergTicket.emergencyPasscode || '849201'}</strong>
-          </div>
+          
           <!-- B2: Atasan Bisa Lihat Detail Dulu, Baru Setujui / Tolak -->
           <div style="display: flex; gap: 8px; margin-top: 8px;">
             <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">

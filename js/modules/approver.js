@@ -211,47 +211,7 @@ function renderApproverDashboard() {
       `;
     }
 
-    // 1. TIKET DARURAT BUTUH OTORISASI CEPAT (3 METODE)
-    if (lockedEmergencyTickets.length > 0) {
-      lockedEmergencyTickets.forEach(emg => {
-        bannerHtml += `
-          <div style="background: #fff1f2; border: 2px solid #e11d48; border-radius: 12px; padding: 1.1rem 1.35rem; margin-bottom: 0.85rem; box-shadow: 0 4px 14px rgba(225, 29, 72, 0.15);">
-            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-              <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
-                <div style="font-size: 1.8rem;">🚨</div>
-                <div>
-                  <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <span style="font-weight: 800; font-size: 0.95rem; color: #9f1239;">
-                      PERMOHONAN IZIN DARURAT (K3 / MEDIS)
-                    </span>
-                    <span class="status-pill emergency-locked" style="font-size: 0.65rem; padding: 2px 8px;">QR TERKUNCI</span>
-                  </div>
-                  <div style="font-size: 0.85rem; color: #881337; margin-top: 3px;">
-                    <span style="display:inline-flex; align-items:center;">${window.renderUserPhoto(emg.applicantName, 22)} <strong>${emg.applicantName}</strong></span> (${emg.id}) — Tujuan: <strong>${emg.destination}</strong>
-                  </div>
-                  <div style="font-size: 0.775rem; color: #9f1239; margin-top: 2px; font-style: normal;">
-                    "Alasan Kedaruratan: ${emg.reason}"
-                  </div>
-                </div>
-              </div>
-              <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <button type="button" class="btn-approve" style="padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 800; background: #059669; box-shadow: 0 2px 8px rgba(5,150,105,0.3);" onclick="window.emergencyDirectApprove('${emg.id}')">
-                  ⚡ 1. Setujui Langsung di App
-                </button>
-                <button type="button" class="btn-reject" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; font-weight: 700; background: #dc2626; color: #fff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="openRejectModal('${emg.id}')">
-                  ✕ Tolak Darurat
-                </button>
-                <button type="button" class="btn-card-detail" style="padding: 0.5rem 0.85rem; font-size: 0.8rem;" onclick="openTicketDetail('${emg.id}', 'detail')">
-                  Lihat Tiket
-                </button>
-              </div>
-            </div>
-
-            
-          </div>
-        `;
-      });
-    }
+    // Permohonan izin darurat kini dipindahkan langsung ke dalam Antrean Persetujuan Cepat
 
     if (activeEmergencyTickets.length > 0) {
       const emg = activeEmergencyTickets[0];
@@ -329,9 +289,9 @@ function renderApproverDashboard() {
     approverUrgentBanner.innerHTML = bannerHtml;
   }
 
-  // Pending queue quick inline list (Initial approvals + Extension requests)
+  // Pending queue quick inline list (Permohonan Darurat + Initial approvals + Extension requests)
   if (approverDashboardPendingList) {
-    if (pendingTickets.length === 0 && pendingExtensions.length === 0 && reassignedAwayTickets.length === 0) {
+    if (lockedEmergencyTickets.length === 0 && pendingTickets.length === 0 && pendingExtensions.length === 0 && reassignedAwayTickets.length === 0) {
       approverDashboardPendingList.innerHTML = `
         <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
           Tidak ada antrian izin yang menunggu keputusan. Semua beres!
@@ -339,6 +299,40 @@ function renderApproverDashboard() {
       `;
     } else {
       let html = '';
+
+      // Render Permohonan Izin Darurat di paling atas Antrean Persetujuan Cepat (Priority 1)
+      lockedEmergencyTickets.forEach(emg => {
+        html += `
+          <div class="feed-item" style="border-left: 4px solid #e11d48; background: #fff1f2; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="card-id-num" style="font-size: 0.85rem; color: #9f1239; font-weight: 800;">${emg.id}</span>
+                <span class="tag-badge" style="background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 0.7rem; border: 1px solid #fca5a5;">🚨 PERMOHONAN IZIN DARURAT</span>
+              </div>
+              <span class="status-pill emergency-locked" style="font-size: 0.65rem; padding: 2px 8px;">QR TERKUNCI</span>
+            </div>
+            <div style="font-size: 0.825rem; color: #881337;">
+              <span style="display:inline-flex; align-items:center; gap:6px;">${window.renderUserPhoto(emg.applicantName, 22)} <strong>${emg.applicantName}</strong></span> (${emg.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${emg.destination}</strong>
+            </div>
+            <div style="font-size: 0.775rem; color: #9f1239; background: #ffe4e6; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #fecdd3; line-height: 1.4;">
+              <strong>Alasan Kedaruratan:</strong> "${emg.reason || '-'}"
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #fecdd3; flex-wrap: wrap; gap: 0.5rem;">
+              <span style="font-size: 0.725rem; color: #9f1239; font-family: var(--font-mono);">
+                Diajukan: ${emg.createdAt ? emg.createdAt.slice(11, 16) : 'Hari ini'} WIB
+              </span>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <button class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${emg.id}', 'detail')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  <span>Detail Pengajuan</span>
+                </button>
+                <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="openRejectModal('${emg.id}')">✕ Tolak</button>
+                <button class="btn-approve" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; background: #059669; font-weight: 800; border-radius: 6px;" onclick="window.emergencyDirectApprove('${emg.id}')">⚡ Setujui</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
 
       // Render perpanjangan waktu terlebih dahulu (urgent)
       pendingExtensions.forEach(t => {
@@ -500,9 +494,12 @@ function renderApproverCards(list, containerElement, isTracking = false) {
             </div>
 
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
-              <div>
-                <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 34)}
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                  <div style="font-size:0.725rem; color:var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
+                </div>
               </div>
               <span style="font-weight: 700; font-size: 0.75rem; color: ${isEmergency ? '#b91c1c' : (isDinas ? '#059669' : '#d97706')};">${isEmergency ? '' + t.category : t.category}</span>
             </div>
@@ -700,8 +697,13 @@ function renderApproverTable(list, containerElement) {
                   <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'}</div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || '-'}</div>
+                  <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 32)}
+                    <div>
+                      <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'}</div>
+                      <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || '-'}</div>
+                    </div>
+                  </div>
                 </td>
                 <td style="vertical-align: middle;">
                   <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.destination}</div>

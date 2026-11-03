@@ -735,8 +735,7 @@ function renderAdminReports() {
           <span class="report-ticket-id">${t.id}</span>
         </td>
         <td>
-          <div class="report-emp-name">${t.applicantName}</div>
-          <div class="report-emp-nip">NIP: ${t.applicantNip}</div>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">${window.renderUserPhoto(t.applicantName, 30)} <div><div class="report-emp-name">${t.applicantName}</div><div class="report-emp-nip">NIP: ${t.applicantNip}</div></div></div>
         </td>
         <td>
           <div class="report-dept-name">${t.department}</div>
@@ -875,7 +874,7 @@ function printAdminReport() {
   window.print();
 }
 
-// ==========================================
+// ==========================================
 
 // ==========================================
 // 4C. SEARCHABLE COMBOBOX ATASAN LANGSUNG KARYAWAN (IDENTIK DENGAN BUAT PENGAJUAN & IZIN DARURAT)
@@ -2281,8 +2280,7 @@ function renderAdminStatusTracking() {
           <div style="margin-top: 3px;">${cleanCategoryBadge(t.category)}</div>
         </td>
         <td>
-          <div class="report-emp-name">${t.applicantName}</div>
-          <div class="report-emp-nip">NIP: ${t.applicantNip}</div>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">${window.renderUserPhoto(t.applicantName, 30)} <div><div class="report-emp-name">${t.applicantName}</div><div class="report-emp-nip">NIP: ${t.applicantNip}</div></div></div>
         </td>
         <td>
           <div class="report-dept-name">${t.department}</div>

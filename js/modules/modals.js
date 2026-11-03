@@ -184,6 +184,14 @@ function handleOpenNewRequest() {
 // ===================================================================
 
 function openEditTicketModal(ticketId) {
+  const isKaryawanActor = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor);
+  if (!isKaryawanActor) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Pengajuan izin hanya dapat diedit oleh Karyawan (pemohon).', 'warning');
+    }
+    return;
+  }
+
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) {
@@ -323,9 +331,8 @@ function openEditEmergencyModal(ticket) {
   // 7. Pilih Metode Otorisasi Buka Kunci QR
   const method = ticket.selectedMethod || 'app';
   const optEmergMethodApp = document.getElementById('optEmergMethodApp');
-  const optEmergMethodPasscode = document.getElementById('optEmergMethodPasscode');
-  const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
-  [optEmergMethodApp, optEmergMethodPasscode, optEmergMethodFaceScan].forEach(c => c && c.classList.remove('selected'));
+    const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
+  [optEmergMethodApp, optEmergMethodFaceScan].forEach(c => c && c.classList.remove('selected'));
   if (method === 'passcode' && optEmergMethodPasscode) {
     optEmergMethodPasscode.click();
   } else if (method === 'facescan' && optEmergMethodFaceScan) {
@@ -1293,12 +1300,30 @@ function openDigitalPassModal(ticketId) {
     document.body.classList.remove('printing-digital-pass');
   }, { once: true });
 
+  
+  // READ-ONLY MODE FROM NOTIFICATIONS
+  const isReadOnlyFromNotif = (initialTab === 'readonly' || (typeof options === 'object' && options && options.readOnlyFromNotif));
+  if (isReadOnlyFromNotif) {
+    if (topEmergencyAuthBanner) topEmergencyAuthBanner.style.display = 'none';
+    if (infoEmergencyDetailBox) infoEmergencyDetailBox.style.display = 'none';
+    if (btnDetailEditTicket) { btnDetailEditTicket.style.display = 'none'; btnDetailEditTicket.onclick = null; }
+    if (btnDetailCancelTicket) { btnDetailCancelTicket.style.display = 'none'; btnDetailCancelTicket.onclick = null; }
+    if (btnDetailRejectTicket) { btnDetailRejectTicket.style.display = 'none'; btnDetailRejectTicket.onclick = null; }
+    if (btnDetailApproveTicket) { btnDetailApproveTicket.style.display = 'none'; btnDetailApproveTicket.onclick = null; }
+    if (btnDetailScanOut) { btnDetailScanOut.style.display = 'none'; btnDetailScanOut.onclick = null; }
+    if (btnDetailEmergencyUnlock) { btnDetailEmergencyUnlock.style.display = 'none'; btnDetailEmergencyUnlock.onclick = null; }
+    const btnBannerEditEmergency = document.getElementById('btnBannerEditEmergency');
+    if (btnBannerEditEmergency) { btnBannerEditEmergency.style.display = 'none'; btnBannerEditEmergency.onclick = null; }
+    const detailFooterMeta = document.getElementById('detailFooterMeta');
+    if (detailFooterMeta) detailFooterMeta.textContent = 'Mode Pratinjau Notifikasi — Hanya melihat rincian izin';
+  }
+
   modal.classList.add('open');
 }
 window.openDigitalPassModal = openDigitalPassModal;
 
 // OPEN TICKET DETAIL & AUDIT TRAIL MODAL (FIGMA SCREEN 2 & 3)
-function openTicketDetail(ticketId, defaultTab = 'info') {
+function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (typeof window.checkOverdueAndExpiredTickets === 'function') {
     window.checkOverdueAndExpiredTickets(true);
   }
@@ -1435,13 +1460,15 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
+    const approverName = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
+    const approverPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(approverName, 22) : '';
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `<strong>Catatan Atasan — ${ticket.approverName}</strong> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;"><strong>Catatan Atasan — </strong>${approverPhoto}<strong>${approverName}</strong></span> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
     } else {
-      infoApproverLbl.innerHTML = `<strong>Catatan Atasan — ${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</strong>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;"><strong>Catatan Atasan — </strong>${approverPhoto}<strong>${approverName}</strong></span>`;
     }
     infoApproverLbl.style.fontWeight = '800';
-    infoApproverLbl.style.color = '#0f172a';
+    infoApproverLbl.style.color = 'var(--text-primary, #0f172a)';
   }
 
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
@@ -1451,9 +1478,11 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const infoSecurityLbl = document.getElementById('infoSecurityLbl');
   if (infoSecurityLbl) {
-    infoSecurityLbl.innerHTML = `<strong>Catatan Petugas Pos Jaga — ${ticket.securityName || 'Agus Setiawan'}</strong>`;
+    const secName = ticket.securityName || 'Agus Setiawan';
+    const secPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(secName, 22) : '';
+    infoSecurityLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;"><strong>Catatan Petugas Pos Jaga — </strong>${secPhoto}<strong>${secName}</strong></span>`;
     infoSecurityLbl.style.fontWeight = '800';
-    infoSecurityLbl.style.color = '#0f172a';
+    infoSecurityLbl.style.color = 'var(--text-primary, #0f172a)';
   }
 
   const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
@@ -1528,7 +1557,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
             <span class="figma-timeline-event">Pengajuan Dibuat</span>
             <span class="figma-timeline-time">${dayStr} — ${exitHour} WIB</span>
           </div>
-          <div class="figma-timeline-actor">${ticket.applicantName || 'Budi Pratama, S.T.'} — ${ticket.applicantNip || 'PK-2024-8841'}</div>
+          <div class="figma-timeline-actor" style="display:flex; align-items:center; gap:6px;">${window.renderUserPhoto(ticket.applicantName || 'Budi Pratama, S.T.', 20)} <span>${ticket.applicantName || 'Budi Pratama, S.T.'} — ${ticket.applicantNip || 'PK-2024-8841'}</span></div>
           <div class="figma-timeline-desc">${ticket.category} — ${ticket.destination}</div>
         </div>
       `;
@@ -1542,7 +1571,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
               <span class="figma-timeline-event">Disetujui Atasan</span>
               <span class="figma-timeline-time">${dayStr} — 08.32 WIB</span>
             </div>
-            <div class="figma-timeline-actor">${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
+            <div class="figma-timeline-actor" style="display:flex; align-items:center; gap:6px;">${window.renderUserPhoto(ticket.approverName || 'Ir. Hendra Gunawan, M.T.', 20)} <span>${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}</span></div>
             <div class="figma-timeline-desc">"${ticket.approverNote || 'Disetujui. Sampaikan hasil pemeriksaan setelah kembali.'}"</div>
           </div>
         `;
@@ -1557,7 +1586,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
               <span class="figma-timeline-event">Scan Out Pos Jaga</span>
               <span class="figma-timeline-time">${dayStr} — ${ticket.scanOutTime || '09.03'} WIB</span>
             </div>
-            <div class="figma-timeline-actor">Pos 1 — ${ticket.securityName || 'Agus Setiawan'}</div>
+            <div class="figma-timeline-actor" style="display:flex; align-items:center; gap:6px;">${window.renderUserPhoto(ticket.securityName || 'Agus Setiawan', 20)} <span>Pos 1 — ${ticket.securityName || 'Agus Setiawan'}</span></div>
             <div class="figma-timeline-desc">Identitas dan QR sesuai. Karyawan keluar area.</div>
           </div>
         `;
@@ -1646,9 +1675,19 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
       if (btnBannerOpenAllMethods) {
         btnBannerOpenAllMethods.onclick = () => window.openEmergencyUnlockModal(ticket.id, 'app');
       }
+      const isKaryawanActor = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor);
+      const isApproverOrSecurityOrAdmin = (window.currentActor === 'approver' || window.currentActor === 'approver2' || window.currentActor === 'security' || window.currentActor === 'admin');
+      const canEditEmergency = isKaryawanActor && !isApproverOrSecurityOrAdmin;
+
       const btnBannerEditEmergency = document.getElementById('btnBannerEditEmergency');
       if (btnBannerEditEmergency) {
-        btnBannerEditEmergency.onclick = () => openEditTicketModal(ticket.id);
+        if (canEditEmergency) {
+          btnBannerEditEmergency.style.setProperty('display', 'inline-flex', 'important');
+          btnBannerEditEmergency.onclick = () => openEditTicketModal(ticket.id);
+        } else {
+          btnBannerEditEmergency.style.setProperty('display', 'none', 'important');
+          btnBannerEditEmergency.onclick = null;
+        }
       }
     } else {
       topEmergencyAuthBanner.style.display = 'none';
@@ -1902,6 +1941,52 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
 
   const activeTabName = (defaultTab === 'timeline' || defaultTab === 'riwayat') ? 'timeline' : 'info';
   switchDetailTab(activeTabName);
+
+  // STRICT READ-ONLY MODE FROM NOTIFICATIONS
+  const isReadOnlyFromNotif = (defaultTab === 'readonly' || (typeof options === 'object' && options && options.readOnlyFromNotif) || window._openedFromNotification);
+  if (isReadOnlyFromNotif) {
+    const topEmergencyAuthBanner = document.getElementById('topEmergencyAuthBanner');
+    if (topEmergencyAuthBanner) topEmergencyAuthBanner.style.setProperty('display', 'none', 'important');
+    const infoEmergencyDetailBox = document.getElementById('infoEmergencyDetailBox');
+    if (infoEmergencyDetailBox) infoEmergencyDetailBox.style.setProperty('display', 'none', 'important');
+
+    const btnDetailEditTicket = document.getElementById('btnDetailEditTicket');
+    if (btnDetailEditTicket) { btnDetailEditTicket.style.setProperty('display', 'none', 'important'); btnDetailEditTicket.onclick = null; }
+    const btnDetailCancelTicket = document.getElementById('btnDetailCancelTicket');
+    if (btnDetailCancelTicket) { btnDetailCancelTicket.style.setProperty('display', 'none', 'important'); btnDetailCancelTicket.onclick = null; }
+    const btnDetailRejectTicket = document.getElementById('btnDetailRejectTicket');
+    if (btnDetailRejectTicket) { btnDetailRejectTicket.style.setProperty('display', 'none', 'important'); btnDetailRejectTicket.onclick = null; }
+    const btnDetailApproveTicket = document.getElementById('btnDetailApproveTicket');
+    if (btnDetailApproveTicket) { btnDetailApproveTicket.style.setProperty('display', 'none', 'important'); btnDetailApproveTicket.onclick = null; }
+    const btnDetailScanOut = document.getElementById('btnDetailScanOut');
+    if (btnDetailScanOut) { btnDetailScanOut.style.setProperty('display', 'none', 'important'); btnDetailScanOut.onclick = null; }
+    const btnDetailScanIn = document.getElementById('btnDetailScanIn');
+    if (btnDetailScanIn) { btnDetailScanIn.style.setProperty('display', 'none', 'important'); btnDetailScanIn.onclick = null; }
+    const btnDetailExtend = document.getElementById('btnDetailExtend');
+    if (btnDetailExtend) { btnDetailExtend.style.setProperty('display', 'none', 'important'); btnDetailExtend.onclick = null; }
+    const btnDetailDeleteTicket = document.getElementById('btnDetailDeleteTicket');
+    if (btnDetailDeleteTicket) { btnDetailDeleteTicket.style.setProperty('display', 'none', 'important'); btnDetailDeleteTicket.onclick = null; }
+    const btnDetailEmergencyUnlock = document.getElementById('btnDetailEmergencyUnlock');
+    if (btnDetailEmergencyUnlock) { btnDetailEmergencyUnlock.style.setProperty('display', 'none', 'important'); btnDetailEmergencyUnlock.onclick = null; }
+    const approverExtActionBtns = document.getElementById('approverExtActionBtns');
+    if (approverExtActionBtns) { approverExtActionBtns.style.setProperty('display', 'none', 'important'); }
+
+    // Make status badge on top right purely static (no button to unlock)
+    const detailStatusPillTop = document.getElementById('detailStatusPillTop');
+    if (detailStatusPillTop) {
+      const isEmergBadge = ticket.status === 'Menunggu Otorisasi Darurat' || (ticket.id && ticket.id.includes('-EMG-') && ticket.status !== 'Disetujui' && ticket.status !== 'Sedang di Luar' && ticket.status !== 'Selesai');
+      if (isEmergBadge) {
+        detailStatusPillTop.innerHTML = `<span style="color: #b91c1c; font-weight: 800; font-size: 0.8rem;">Menunggu Otorisasi Darurat</span>`;
+      }
+    }
+
+    const detailFooterMeta = document.getElementById('detailFooterMeta');
+    if (detailFooterMeta) {
+      detailFooterMeta.textContent = 'Mode Pratinjau Notifikasi — Hanya melihat rincian izin';
+      detailFooterMeta.style.color = '#64748b';
+    }
+  }
+
   if (modalTicketDetail) {
     modalTicketDetail.style.display = 'flex';
     modalTicketDetail.classList.add('open');
@@ -2144,8 +2229,7 @@ function handleOpenEmergency() {
   const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
   if (optEmergMethodApp && optEmergMethodPasscode && optEmergMethodFaceScan) {
     optEmergMethodApp.classList.add('selected');
-    optEmergMethodPasscode.classList.remove('selected');
-    optEmergMethodFaceScan.classList.remove('selected');
+        optEmergMethodFaceScan.classList.remove('selected');
     const input = optEmergMethodApp.querySelector('input[type="radio"]');
     if (input) input.checked = true;
   }
@@ -2812,10 +2896,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const optEmergMethodApp = document.getElementById('optEmergMethodApp');
   const optEmergMethodPasscode = document.getElementById('optEmergMethodPasscode');
   const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
-  [optEmergMethodApp, optEmergMethodPasscode, optEmergMethodFaceScan].forEach(card => {
+  [optEmergMethodApp, optEmergMethodFaceScan].forEach(card => {
     if (card) {
       card.addEventListener('click', () => {
-        [optEmergMethodApp, optEmergMethodPasscode, optEmergMethodFaceScan].forEach(c => c && c.classList.remove('selected'));
+        [optEmergMethodApp, optEmergMethodFaceScan].forEach(c => c && c.classList.remove('selected'));
         card.classList.add('selected');
         const r = card.querySelector('input[type="radio"]');
         if (r) r.checked = true;

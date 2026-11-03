@@ -454,33 +454,12 @@
     const user = getActiveUserInfo();
     const isMobile = window.innerWidth <= 768;
 
-    if (isMobile) {
-      if (isEmployeeRole(user.roleKey)) {
-        if (typeof window.mobileOpenTicketDetail === 'function') {
-          window.mobileOpenTicketDetail(ticketId);
-        }
-      } else if (isApproverRole(user.roleKey)) {
-        if (typeof window.mobileOpenAtasanDetailModal === 'function') {
-          window.mobileOpenAtasanDetailModal(ticketId);
-        } else if (typeof window.openTicketDetail === 'function') {
-          window.openTicketDetail(ticketId);
-        }
-      } else if (user.roleKey === 'security') {
-        if (typeof window.mobileSecurityInspectTicket === 'function') {
-          window.mobileSecurityInspectTicket(ticketId);
-        } else if (typeof window.openTicketDetail === 'function') {
-          window.openTicketDetail(ticketId);
-        }
-      } else {
-        if (typeof window.openTicketDetail === 'function') {
-          window.openTicketDetail(ticketId);
-        }
-      }
-    } else {
-      // Desktop: semua peran langsung membuka modal detail pengajuan
-      if (typeof window.openTicketDetail === 'function') {
-        window.openTicketDetail(ticketId);
-      }
+    // NOTE PENTING: Notifikasi HANYA BISA MELIHAT AJA (View-Only / Read-Only).
+    // Tidak ada opsi setujui, tolak, scan out, tap in, edit darurat, dan lain-lain.
+    if (typeof window.openTicketDetail === 'function') {
+      window.openTicketDetail(ticketId, 'readonly', { readOnlyFromNotif: true });
+    } else if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
+      window.mobileOpenTicketDetail(ticketId);
     }
   }
 

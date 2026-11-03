@@ -9,9 +9,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261103_0845">
-  <link rel="stylesheet" href="css/auth.css?v=20261103_0845">
-  <link rel="stylesheet" href="css/mobile.css?v=20261103_0845">
+  <link rel="stylesheet" href="css/style.css?v=20261103_0940">
+  <link rel="stylesheet" href="css/auth.css?v=20261103_0940">
+  <link rel="stylesheet" href="css/mobile.css?v=20261103_0940">
   <link rel="icon" type="image/png" href="Pupuk Kujang Icon - Colored - zonalogo.com.png">
   <script>
     (function () {
@@ -498,11 +498,7 @@
           Portal SAKTI / KUJANG ID
         </div>
         <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem;">
-          <div
-            style="width: 34px; height: 34px; border-radius: 50%; background: #2d523e; border: 1px solid #3d6a52; color: #a7f3d0; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
-            id="sidebarAvatarCircle">
-            BP
-          </div>
+          <div style="width: 36px; height: 36px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" id="sidebarAvatarCircle"><img src="img/avatars/budi.svg" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" alt="Avatar"></div>
           <div style="overflow: hidden;">
             <div
               style="font-size: 0.825rem; font-weight: 700; color: #ffffff; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
@@ -3458,22 +3454,13 @@ amily: var(--font-mono);"
               </div>
             </label>
 
-            <label class="option-card emerg-opt" id="optEmergMethodPasscode"
-              style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px;">
-              <input type="radio" name="emergMethod" value="passcode">
-              <div>
-                <div class="option-name" style="font-size: 0.85rem; font-weight: 700;">🔑 2. Input Kata Sandi / OTP
-                  Otorisasi</div>
-                <div class="option-desc" style="font-size: 0.725rem; color: var(--text-secondary);">Minta kode 6-digit
-                  ke Atasan via Telp/WA (jika Atasan tidak membuka app)</div>
-              </div>
-            </label>
+
 
             <label class="option-card emerg-opt" id="optEmergMethodFaceScan"
               style="padding: 0.65rem 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px;">
               <input type="radio" name="emergMethod" value="facescan">
               <div>
-                <div class="option-name" style="font-size: 0.85rem; font-weight: 700;">🤳 3. Scan Wajah Atasan di Tempat
+                <div class="option-name" style="font-size: 0.85rem; font-weight: 700;">🤳 2. Scan Wajah Atasan di Tempat
                 </div>
                 <div class="option-desc" style="font-size: 0.725rem; color: var(--text-secondary);">Verifikasi biometrik
                   wajah langsung melalui kamera ponsel pemohon</div>
@@ -3540,13 +3527,10 @@ amily: var(--font-mono);"
             onclick="window.switchEmergencyUnlockTab('tabEmgApprove', true)">
             <span>1. Persetujuan di App</span>
           </button>
-          <button type="button" class="emg-tab-btn" data-tab="tabEmgPasscode"
-            onclick="window.switchEmergencyUnlockTab('tabEmgPasscode', true)">
-            <span>2. Kode Sandi / OTP</span>
-          </button>
+
           <button type="button" class="emg-tab-btn" data-tab="tabEmgFaceScan"
             onclick="window.switchEmergencyUnlockTab('tabEmgFaceScan', true)">
-            <span>3. Scan Wajah</span>
+            <span>2. Scan Wajah</span>
           </button>
         </div>
 
@@ -3579,36 +3563,7 @@ amily: var(--font-mono);"
           </div>
         </div>
 
-        <!-- PANE TAB 2: KODE SANDI / OTP -->
-        <div class="emg-tab-pane" id="tabEmgPasscode">
-          <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 1rem;">
-            <div style="font-weight: 800; font-size: 0.875rem; color: #92400e; margin-bottom: 0.3rem;">
-              Masukkan 6-Digit Sandi Otorisasi Darurat
-            </div>
-            <p style="font-size: 0.775rem; color: #78350f; line-height: 1.45; margin-bottom: 0.75rem;">
-              Gunakan opsi ini jika Atasan sedang di luar pabrik / tidak memegang aplikasi. Hubungi Atasan via
-              <strong>Telepon / WhatsApp</strong>, dan masukkan kode sandi yang diberikan Atasan di bawah ini:
-            </p>
-            <div class="form-group" style="text-align: center;">
-              <input type="text" id="inputEmergencyPasscode" class="form-input" maxlength="6"
-                placeholder="Contoh: 849201"
-                style="font-family: var(--font-mono); font-size: 1.4rem; letter-spacing: 0.4rem; text-align: center; font-weight: 800; max-width: 260px; margin: 0 auto; color: #b45309;"
-                autocomplete="off">
-
-              <!-- Helper Hint Chip -->
-              <div id="emgPasscodeHintBox"
-                style="margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.5rem; background: #fef3c7; border: 1px dashed #d97706; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer;"
-                title="Klik untuk mengisi otomatis sandi ini">
-                <span style="font-size: 0.725rem; color: #92400e;">Sandi Tiket Ini: <strong id="emgUnlockPasscodeHint"
-                    style="font-family: var(--font-mono); font-size: 0.85rem; color: #b45309;">-</strong></span>
-                <span style="font-size: 0.7rem; color: #d97706; text-decoration: underline; font-weight: 700;">(Isi
-                  Otomatis)</span>
-              </div>
-
-              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem;">
-                * Atasan dapat melihat kode sandi ini di Dashboard Kedaruratan untuk dibagikan ke Anda
-              </div>
-            </div>
+        
             <button type="button" class="btn-approve" id="btnSubmitEmergencyPasscode"
               onclick="window.verifyEmergencyPasscode()"
               style="width: 100%; justify-content: center; padding: 0.65rem; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 700;">
@@ -3657,9 +3612,7 @@ amily: var(--font-mono);"
         </div>
       </div>
 
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <span style="font-size: 0.725rem; color: var(--text-muted);">PT Pupuk Kujang Security System</span>
-      </div>
+
     </div>
   </div>
 
@@ -4348,25 +4301,25 @@ amily: var(--font-mono);"
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261103_0845"></script>
-  <script src="js/data/authData.js?v=20261103_0845"></script>
-  <script src="js/modules/notifications.js?v=20261103_0845"></script>
-  <script src="js/modules/ui.js?v=20261103_0845"></script>
-  <script src="js/modules/scheduler.js?v=20261103_0845"></script>
-  <script src="js/modules/navigation.js?v=20261103_0845"></script>
-  <script src="js/modules/karyawan.js?v=20261103_0845"></script>
-  <script src="js/modules/approver.js?v=20261103_0845"></script>
-  <script src="js/modules/security.js?v=20261103_0845"></script>
-  <script src="js/modules/admin.js?v=20261103_0845"></script>
-  <script src="js/modules/charts.js?v=20261103_0845"></script>
-  <script src="js/modules/emergency.js?v=20261103_0845"></script>
-  <script src="js/modules/modals.js?v=20261103_0845"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261103_0845"></script>
-  <script src="js/modules/mobile_atasan.js?v=20261103_0845"></script>
-  <script src="js/modules/mobile_security.js?v=20261103_0845"></script>
-  <script src="js/modules/mobile_app.js?v=20261103_0845"></script>
-  <script src="js/app.js?v=20261103_0845"></script>
-  <script src="js/modules/auth.js?v=20261103_0845"></script>
+  <script src="js/data/mockData.js?v=20261103_0940"></script>
+  <script src="js/data/authData.js?v=20261103_0940"></script>
+  <script src="js/modules/notifications.js?v=20261103_0940"></script>
+  <script src="js/modules/ui.js?v=20261103_0940"></script>
+  <script src="js/modules/scheduler.js?v=20261103_0940"></script>
+  <script src="js/modules/navigation.js?v=20261103_0940"></script>
+  <script src="js/modules/karyawan.js?v=20261103_0940"></script>
+  <script src="js/modules/approver.js?v=20261103_0940"></script>
+  <script src="js/modules/security.js?v=20261103_0940"></script>
+  <script src="js/modules/admin.js?v=20261103_0940"></script>
+  <script src="js/modules/charts.js?v=20261103_0940"></script>
+  <script src="js/modules/emergency.js?v=20261103_0940"></script>
+  <script src="js/modules/modals.js?v=20261103_0940"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261103_0940"></script>
+  <script src="js/modules/mobile_atasan.js?v=20261103_0940"></script>
+  <script src="js/modules/mobile_security.js?v=20261103_0940"></script>
+  <script src="js/modules/mobile_app.js?v=20261103_0940"></script>
+  <script src="js/app.js?v=20261103_0940"></script>
+  <script src="js/modules/auth.js?v=20261103_0940"></script>
 </body>
 
 </html>

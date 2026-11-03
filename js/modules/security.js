@@ -452,9 +452,12 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
               <!-- Employee badge -->
               <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between; margin-bottom: 0.6rem;">
-                <div>
-                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama'}</div>
-                  <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Departemen Terkait'}</div>
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 34)}
+                  <div>
+                    <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama'}</div>
+                    <div style="font-size:0.725rem; color:var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Departemen Terkait'}</div>
+                  </div>
                 </div>
                 <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
               </div>
@@ -517,9 +520,12 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
             <!-- Employee badge in gate view -->
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
-              <div>
-                <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                <div style="font-size:0.725rem; color:var(--text-secondary);">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 34)}
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                  <div style="font-size:0.725rem; color:var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
+                </div>
               </div>
               <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}">${t.category}</span>
             </div>
@@ -792,7 +798,7 @@ function renderSecurityLogTable(list, containerElement) {
             const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
             const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
             
-            let catatanHtml = `<span style="color: #475569;">Tepat waktu — Disetujui ${t.approverName || 'Atasan'}</span>`;
+            let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
             if (t.scanInTime && t.scanOutTime) {
               const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
               const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
@@ -840,8 +846,13 @@ function renderSecurityLogTable(list, containerElement) {
                   ${gateBadge}
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${t.destination})</span></div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
+                  <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 32)}
+                    <div>
+                      <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${t.destination})</span></div>
+                      <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
+                    </div>
+                  </div>
                 </td>
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>

@@ -317,6 +317,19 @@ function switchRole(role) {
   }
 
   window.currentActor = role;
+  const ACTORS = window.ACTORS || {};
+  const sidebarAvatarCircle = document.getElementById('sidebarAvatarCircle');
+  if (sidebarAvatarCircle && typeof window.renderUserPhoto === 'function') {
+    let activeActorName = 'Budi Pratama, S.T.';
+    if (role === 'karyawan') activeActorName = (ACTORS && ACTORS.karyawan) ? ACTORS.karyawan.name : 'Budi Pratama, S.T.';
+    else if (role === 'karyawan2') activeActorName = (ACTORS && ACTORS.karyawan2) ? ACTORS.karyawan2.name : 'Arthur Morgan, S.Tr.T.';
+    else if (role === 'approver') activeActorName = (ACTORS && ACTORS.approver) ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
+    else if (role === 'approver2') activeActorName = (ACTORS && ACTORS.approver2) ? ACTORS.approver2.name : 'Dewi Sartika, S.T., M.M.';
+    else if (role === 'security') activeActorName = 'Sertu Agus';
+    else if (role === 'admin') activeActorName = (ACTORS && ACTORS.admin) ? ACTORS.admin.name : 'Bambang Sutrisno, S.T.';
+    sidebarAvatarCircle.innerHTML = window.renderUserPhoto(activeActorName, 36);
+  }
+
   currentActor = role;
   closeMobileSidebar();
 
@@ -381,7 +394,7 @@ function switchRole(role) {
   if (navSecurityGroup) navSecurityGroup.style.display = 'none';
   if (navAdminGroup) navAdminGroup.style.display = 'none';
 
-  const ACTORS = window.ACTORS;
+  // ACTORS is initialized at top of switchRole
   if (matchedUser && ACTORS && ACTORS[role]) {
     ACTORS[role].name = matchedUser.name;
     ACTORS[role].nip = matchedUser.nip;

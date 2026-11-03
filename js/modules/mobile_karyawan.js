@@ -1305,13 +1305,7 @@
                     <div style="color: #64748b; font-size: 0.675rem;">Notifikasi prioritas dikirim ke perangkat Atasan</div>
                   </div>
                 </label>
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.775rem; color: #1e293b; cursor: pointer;">
-                  <input type="radio" name="mEmgMethod" value="passcode">
-                  <div>
-                    <strong>Input Kode Sandi / OTP (6 Digit)</strong>
-                    <div style="color: #64748b; font-size: 0.675rem;">Minta kode sandi otorisasi dari Atasan</div>
-                  </div>
-                </label>
+                
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.775rem; color: #1e293b; cursor: pointer;">
                   <input type="radio" name="mEmgMethod" value="facescan">
                   <div>
@@ -2209,9 +2203,7 @@
           <button type="button" id="mTabBtnEmgApp" class="mobile-seg-btn active" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('app')">
             App Atasan
           </button>
-          <button type="button" id="mTabBtnEmgPass" class="mobile-seg-btn" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('passcode')">
-            Kode OTP
-          </button>
+          
           <button type="button" id="mTabBtnEmgFace" class="mobile-seg-btn" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('facescan')">
             Scan Wajah
           </button>
@@ -2229,28 +2221,7 @@
           </button>
         </div>
 
-        <!-- Tab 2: Passcode OTP -->
-        <div id="mPaneEmgPass" style="display: none; text-align: center; padding: 6px 0;">
-          <div style="margin-bottom: 6px; color: #64748b;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
-          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">Masukkan 6-Digit Sandi Otorisasi</div>
-          <p style="font-size: 0.75rem; color: #64748b; margin: 4px 0 10px 0;">
-            Minta 6-digit kode OTP darurat dari Atasan Anda:
-          </p>
-      
-          <div style="margin-bottom: 14px;">
-            <input type="text" id="mInputEmgPasscode" class="mobile-input" maxlength="6" placeholder="______" style="text-align: center; font-size: 1.4rem; letter-spacing: 8px; font-weight: 900; font-family: monospace; width: 190px; margin: 0 auto;">
-          </div>
-          <button type="button" class="mobile-btn-primary" style="font-weight: 800; padding: 11px;" onclick="window.mobileVerifyPasscodeUnlock('${t.id}')">
-            <span>Verifikasi Sandi & Buka QR</span>
-          </button>
-        </div>
-
-        <!-- Tab 3: Face Scan -->
-        <div id="mPaneEmgFace" style="display: none; text-align: center; padding: 6px 0;">
-          <div style="position: relative; width: 140px; height: 160px; margin: 0 auto 12px auto; border-radius: 50%; border: 3px dashed #059669; display: flex; align-items: center; justify-content: center; background: #0f172a; overflow: hidden;" id="mFaceScanRing">
-            <div style="color: #64748b;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-            <div id="mFaceScanOverlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(5,150,105,0.25); display:none;"></div>
-          </div>
+        
           <div id="mFaceStatusText" style="font-size: 0.775rem; color: #475569; margin-bottom: 12px;">
             Posisikan wajah Atasan di depan kamera lalu tekan tombol scan biometrik.
           </div>
