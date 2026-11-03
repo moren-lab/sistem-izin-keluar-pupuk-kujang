@@ -201,7 +201,7 @@ function checkOverdueAndExpiredTickets(silent = true) {
                   actorSource: 'system',
                   type: 'terlambat',
                   title: 'Peringatan Waktu Kembali',
-                  message: `Batas waktu kembali untuk izin #${ticket.id} telah terlewati. Harap segera kembali ke area pabrik atau ajukan perpanjangan waktu.`,
+                  message: `Batas waktu kembali untuk izin #${ticket.id} telah terlewati. Anda wajib segera kembali ke area pabrik dan melakukan Tap In di Pos Jaga.`,
                   ticketId: ticket.id,
                   priority: 'high',
                   eventId: `late_emp_${ticket.id}`

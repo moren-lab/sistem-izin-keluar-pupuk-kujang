@@ -924,6 +924,7 @@
         </div>
       `;
     } else if (isOutside) {
+      const isLateStatus = (t.status === 'Terlambat' || t.isLate);
       const hasPendingExt = Boolean(t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
       const hasUsedExt = Boolean(t.extensionApproved || (t.extensionCount && t.extensionCount >= 1));
 
@@ -948,17 +949,33 @@
         `;
       }
 
-      actionButtonsHtml = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-          ${extButtonHtml}
-          <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
-            <span>✓ Tap In Kartu Akses</span>
-          </button>
-        </div>
-        <div style="text-align: center; margin-top: 8px;">
-          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
-        </div>
-      `;
+      if (isLateStatus) {
+        actionButtonsHtml = `
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 800; min-height: 44px; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; width: 100%; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);" onclick="window.mobileExecuteTapIn('${t.id}')">
+              <span>✓ Tap In Kartu Akses (Masuk)</span>
+            </button>
+            <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 6px 10px; font-size: 0.72rem; color: #b91c1c; font-weight: 700; text-align: center; line-height: 1.35;">
+              ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 8px;">
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
+          </div>
+        `;
+      } else {
+        actionButtonsHtml = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+            ${extButtonHtml}
+            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
+              <span>✓ Tap In Kartu Akses</span>
+            </button>
+          </div>
+          <div style="text-align: center; margin-top: 8px;">
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
+          </div>
+        `;
+      }
     }
 
     return `
@@ -1340,6 +1357,15 @@
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
+
+    if (t.status === 'Terlambat' || t.isLate) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In.', 'danger');
+      } else {
+        alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In.');
+      }
+      return;
+    }
     window.editingTicketId = ticketId;
     window.mobileOpenCreateModal(t.isEmergency, {
       approver: t.approverName,
@@ -2525,7 +2551,11 @@
             </button>
           ` : ''}
           ${isOutside ? `
-            ${(t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) ? `
+            ${(t.status === 'Terlambat' || t.isLate) ? `
+              <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 10px; font-size: 0.725rem; color: #b91c1c; font-weight: 700; text-align: center; line-height: 1.35; margin-bottom: 2px;">
+                ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
+              </div>
+            ` : (t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) ? `
               <button type="button" class="mobile-btn-secondary" disabled style="background: #f8fafc; color: #94a3b8; border: 1.5px solid #e2e8f0; min-height: 44px; font-weight: 700; opacity: 0.85; cursor: not-allowed; border-radius: 8px; text-align: center;">
                 Perpanjangan Telah Digunakan (Maks. 1x)
               </button>
@@ -2589,6 +2619,15 @@
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId) || getActiveTicket();
     if (!t) return;
+
+    if (t.status === 'Terlambat' || t.isLate) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In.', 'danger');
+      } else {
+        alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In.');
+      }
+      return;
+    }
 
     if (t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) {
       if (typeof window.showToast === 'function') {

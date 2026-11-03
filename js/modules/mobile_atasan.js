@@ -395,9 +395,9 @@
           <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
             <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
             ${isReassignedAway ? `
-              <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #fde68a;">↳ Dialihkan ke ${t.approverName}</span>
+              <span style="background: #fef3c7; color: #92400e; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #fde68a;"> Dialihkan ke ${t.approverName}</span>
             ` : (isReassignedToMe ? `
-              <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #bfdbfe;">↳ Dialihkan dari ${t.reassignedFrom}</span>
+              <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #bfdbfe;"> Dialihkan dari ${t.reassignedFrom}</span>
             ` : '')}
           </div>
 
@@ -547,17 +547,6 @@
           </div>
         ` : ''}
       </section>
-        <div class="mobile-card-header" style="margin-bottom: 6px;">
-          <div>
-            <h3 class="mobile-card-title">Volume pengajuan tim</h3>
-          </div>
-        </div>
-        <div style="margin-top: 6px;">
-          ${(typeof window.getGambar2AestheticBarChartHtml === 'function') 
-            ? window.getGambar2AestheticBarChartHtml() 
-            : '<div style="text-align:center; padding: 12px; color: #64748b;">Memuat grafik...</div>'}
-        </div>
-      </section>
 
       <!-- Aktivitas Terbaru Timeline (Data Asli Audit Trail Tiket Tim) -->
       <section class="mobile-card">
@@ -665,9 +654,9 @@
                     <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
                   `}
                   ${isReassignedAway ? `
-                    <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;">↳ Dialihkan ke ${t.approverName}</span>
+                    <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;"> Dialihkan ke ${t.approverName}</span>
                   ` : (isReassignedToMe ? `
-                    <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;">↳ Dialihkan dari ${t.reassignedFrom}</span>
+                    <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;"> Dialihkan dari ${t.reassignedFrom}</span>
                   ` : '')}
                 </div>
               </div>

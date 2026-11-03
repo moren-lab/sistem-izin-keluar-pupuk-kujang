@@ -1461,7 +1461,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     const approverName = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
     const approverPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(approverName, 22) : '';
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(↳ Dialihkan dari ${ticket.reassignedFrom})</span>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">( Dialihkan dari ${ticket.reassignedFrom})</span>`;
     } else {
       infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span>`;
     }
@@ -1898,7 +1898,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   // Employee "Ajukan Perpanjangan" button in detail modal footer
   const btnDetailExtend = document.getElementById('btnDetailExtend');
   if (btnDetailExtend) {
-    const isOutsideKembali = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && ticket.type === 'Kembali ke Area';
+    const isOutsideKembali = (ticket.status === 'Sedang di Luar') && ticket.type === 'Kembali ke Area';
     const hasUsedExtension = ticket.extensionApproved || (ticket.extensionCount && ticket.extensionCount >= 1);
     if (window.currentActor === 'karyawan' && isOutsideKembali && !hasPendingExt && !hasUsedExtension) {
       btnDetailExtend.style.display = 'inline-flex';
@@ -3240,6 +3240,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const newReturnVal = inputExtendNewReturn ? inputExtendNewReturn.value : '';
       const reasonVal = inputExtendReason ? inputExtendReason.value.trim() : '';
 
+      if (ticket.status === 'Terlambat' || ticket.isLate) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.', 'danger');
+        } else {
+          alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.');
+        }
+        if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+        return;
+      }
+
       if (!newReturnVal) {
         if (typeof window.showToast === 'function') window.showToast('Harap pilih perkiraan waktu kembali baru!', 'danger');
         return;
@@ -3402,6 +3412,16 @@ function openExtendDurationModal(ticketId) {
       reason: 'Koordinasi teknis pemeriksaan komponen pompa P-204',
       estimatedReturn: '2026-10-21T14:00'
     };
+  }
+
+  // Jika tiket sudah terlambat, tolak perpanjangan dan instruksikan Tap In
+  if (ticket.status === 'Terlambat' || ticket.isLate) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.', 'danger');
+    } else {
+      alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.');
+    }
+    return;
   }
 
   // Jika sudah mengajukan perpanjangan dan masih menunggu persetujuan, langsung arahkan ke modal detail perpanjangan

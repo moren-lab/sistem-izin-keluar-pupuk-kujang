@@ -495,8 +495,9 @@ function renderKaryawanDashboard() {
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         const isKembali = activeTicket.type !== 'Pulang Mendahului';
 
+        const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
         actionButtonsHtml = `
-          ${isKembali ? (
+          ${(!isLateStatus && isKembali) ? (
             hasPendingExt ? `
               <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
                 <span>Menunggu Persetujuan Perpanjangan</span>
@@ -751,12 +752,13 @@ function renderPengajuanSayaView() {
 
     let actionButtonsHtml = '';
     if (isOutside) {
+      const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
       const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
       const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
       const isKembali = activeTicket.type !== 'Pulang Mendahului';
 
       actionButtonsHtml = `
-        ${isKembali ? (
+        ${(!isLateStatus && isKembali) ? (
           hasPendingExt ? `
             <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
               <span>Menunggu Persetujuan Perpanjangan</span>
@@ -878,7 +880,7 @@ function renderPengajuanSayaView() {
         <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">${activeTicket.approverTitle || 'Manajer Rekayasa & Pemeliharaan'}</div>
         ${activeTicket.reassignedFrom ? `
           <div style="margin-top: 0.45rem; font-size: 0.75rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 0.3rem 0.65rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
-            <span>↳ Dialihkan dari ${activeTicket.reassignedFrom}</span>
+            <span> Dialihkan dari ${activeTicket.reassignedFrom}</span>
           </div>
         ` : ''}
       </div>
@@ -1652,8 +1654,9 @@ function renderKaryawanMobileDashboard() {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
 
+        const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
         mobileBtnsHtml = `
-          ${hasPendingExt ? `
+          ${(!isLateStatus) ? (hasPendingExt ? `
             <button type="button" class="btn-mobile-secondary" disabled style="opacity: 0.7;">
               <span>Perpanjangan Sedang Ditinjau Atasan</span>
             </button>
@@ -1665,7 +1668,7 @@ function renderKaryawanMobileDashboard() {
             <button type="button" class="btn-mobile-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
               <span>Ajukan Perpanjangan</span>
             </button>
-          `)}
+          `)) : ''}
           <button type="button" class="btn-mobile-primary" style="background: #047857;" onclick="executeScanIn('${activeTicket.id}')">
             <span>✓ Tap In Kartu Akses (Masuk)</span>
           </button>
