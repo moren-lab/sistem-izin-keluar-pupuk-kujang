@@ -203,15 +203,25 @@
 
   function extractTicketId(raw) {
     if (!raw) return '';
-    let str = raw.trim();
+    let str = String(raw).trim();
     if (str.startsWith('KUJANG-PERMIT:')) {
       const parts = str.split(':');
       return parts[1] || str;
     }
-    if (str.includes('|')) {
+    if (str.startsWith('KUJANG-PASS|') || str.includes('|')) {
       const parts = str.split('|');
       return parts[1] || parts[0];
     }
+    // Handle JSON payload
+    if (str.startsWith('{') && str.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(str);
+        if (parsed.id || parsed.ticketId) return parsed.id || parsed.ticketId;
+      } catch (e) {}
+    }
+    // Match ticket ID pattern TK-xxx or IZ-xxx
+    const match = str.match(/(TK-[A-Za-z0-9-]+|IZ-[A-Za-z0-9-]+)/i);
+    if (match) return match[1];
     return str;
   }
 
@@ -483,23 +493,29 @@
 
         <div id="mCameraIdlePlaceholder" class="mobile-scanner-idle" style="display: ${isMobileCameraActive ? 'none' : 'block'};">
           <div style="margin-bottom: 8px; color: #64748b;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
-          <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0;">Kamera belum aktif</h4>
+          <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0;">Kamera pemindai siap digunakan</h4>
           <p style="font-size: 0.75rem; color: #64748b; margin: 0 0 16px 0; line-height: 1.4;">
-            Aktifkan kamera, lalu arahkan QR tiket ke dalam bingkai.
+            Aktifkan kamera untuk memindai QR Code tiket karyawan saat Scan Out gerbang.
           </p>
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <button type="button" class="mobile-btn-primary" style="padding: 10px 14px; font-weight: 700;" onclick="window.mobileStartCameraScanner()">
-              <span>Aktifkan Kamera</span>
+            <button type="button" class="mobile-btn-primary" style="padding: 12px 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.mobileStartCameraScanner()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <span>Aktifkan Kamera Pemindai</span>
             </button>
-            <button type="button" class="mobile-btn-secondary" style="padding: 10px 14px; font-weight: 700; background: #fff;" onclick="window.mobileTriggerUploadQr()">
-              <span>Unggah Gambar QR</span>
+            <button type="button" class="mobile-btn-secondary" style="padding: 11px 14px; font-weight: 700; background: #fff; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.mobileTriggerUploadQr()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <span>Unggah Gambar QR Tiket</span>
             </button>
-            <input type="file" id="mSecInputQrFile" accept="image/*" style="display: none;" onchange="window.mobileHandleQrFileUpload(event)">
+            <input type="file" id="mSecInputQrFile" accept="image/*" capture="environment" style="display: none;" onchange="window.mobileHandleQrFileUpload(event)">
           </div>
         </div>
 
         <div id="mCameraActiveBar" style="display: ${isMobileCameraActive ? 'flex' : 'none'}; gap: 8px; margin-bottom: 12px;">
-          <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px; background: #dc2626; color: #fff; border: none; font-weight: 700; border-radius: 8px;" onclick="window.mobileStopCameraScanner()">
+          <button type="button" id="mBtnSwitchCam" class="mobile-btn-secondary" style="flex: 1; padding: 10px; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; font-weight: 700; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchCameraDevice()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>Ganti Kamera</span>
+          </button>
+          <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px; background: #dc2626; color: #fff; border: none; font-weight: 700; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileStopCameraScanner()">
             <span>Hentikan Kamera</span>
           </button>
         </div>
@@ -544,17 +560,21 @@
           </ol>
         </div>
 
-        <!-- Quick Select scannable tickets (Convenient testing in browser) -->
-        <div class="mobile-card">
-          <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Tiket Aktif Siap Scan (Pilih Cepat)</div>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            ${scannableTickets.length === 0 ? '<div style="font-size:0.725rem; color:#94a3b8; font-style:italic;">Tidak ada tiket aktif yang siap dipindai.</div>' : ''}
-            ${scannableTickets.map(t => `
-              <button type="button" class="mobile-btn-secondary" style="font-size:0.725rem; justify-content:space-between; padding: 8px 10px;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-                <span><strong>${t.id}</strong> — ${getTName(t)} (${t.status === 'Disetujui' ? 'Siap Keluar' : 'Sedang di Luar'})</span> <span>→</span>
-              </button>
-            `).join('')}
-          </div>
+      </div>
+
+      <!-- Quick Select scannable tickets (Convenient testing & fast gate operation) -->
+      <div class="mobile-card" style="margin-top: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a;">Tiket Aktif Siap Scan Out & Verifikasi</div>
+          <span style="font-size: 0.675rem; color: #64748b; font-weight: 600;">${scannableTickets.length} tiket</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          ${scannableTickets.length === 0 ? '<div style="font-size:0.725rem; color:#94a3b8; font-style:italic; padding: 6px 0;">Tidak ada tiket aktif yang siap dipindai.</div>' : ''}
+          ${scannableTickets.map(t => `
+            <button type="button" class="mobile-btn-secondary" style="font-size:0.725rem; justify-content:space-between; padding: 9px 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+              <span style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><strong>${t.id}</strong> — ${getTName(t)} (${t.status === 'Disetujui' ? 'Siap Keluar' : 'Sedang di Luar'})</span> <span style="color: #059669; font-weight: 800;">→</span>
+            </button>
+          `).join('')}
         </div>
       </div>
     `;
@@ -1287,18 +1307,23 @@
   window.mobileSecurityDirectScanOut = function (ticketId) {
     localStorage.setItem('KUJANG_ACTIVE_GATE', activeGate);
 
-    if (typeof window.executeScanOut === 'function') {
-      window.executeScanOut(ticketId);
-      closeMobileSheet();
-      renderMobileSecurity(null, currentSecurityTab);
-      if (typeof window.renderActiveView === 'function') window.renderActiveView();
-      return;
-    }
-
     const tickets = getTickets();
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
 
+    if (t.status !== 'Disetujui' && t.status !== 'Kedaluwarsa') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Akses Ditolak: Hanya tiket Disetujui yang dapat Scan Out! (Status: ${t.status})`, 'danger');
+      }
+      return;
+    }
+
+    if (t.isEmergency && t.emergencyLocked) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Akses Ditolak: Tiket Darurat #${t.id} masih TERKUNCI!`, 'danger');
+      }
+      return;
+    }
     const officer = getActiveOfficer();
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
@@ -1433,18 +1458,22 @@
   window.mobileSecurityDirectTapIn = window.mobileSecurityDirectScanIn;
 
   // -------------------------------------------------------------------
-  // 7. REAL CAMERA SCANNER & FILE UPLOAD INTEGRATION
+  // 7. REAL CAMERA SCANNER & FILE UPLOAD INTEGRATION (Mobile Only)
   // -------------------------------------------------------------------
+  let availableCameraDevices = [];
+  let currentCameraIndex = 0;
+
   window.mobileStartCameraScanner = async function () {
     const statusMsg = document.getElementById('mCameraStatusMsg');
     const idleCard = document.getElementById('mCameraIdlePlaceholder');
     const activeBar = document.getElementById('mCameraActiveBar');
     const readerWrap = document.getElementById('mCameraReaderView');
+    const btnSwitchCam = document.getElementById('mBtnSwitchCam');
 
     if (typeof Html5Qrcode === 'undefined') {
       if (statusMsg) {
         statusMsg.style.display = 'block';
-        statusMsg.innerHTML = '<span style="color: #dc2626; font-weight: 700;">Library pemindai kamera (Html5Qrcode) belum termuat. Silakan gunakan Input Manual.</span>';
+        statusMsg.innerHTML = '<span style="color: #dc2626; font-weight: 700;">Library pemindai kamera (Html5Qrcode) belum termuat. Silakan gunakan Unggah Gambar QR atau Input Manual.</span>';
       }
       if (typeof window.showToast === 'function') window.showToast('Library pemindai kamera tidak termuat.', 'danger');
       return;
@@ -1456,8 +1485,42 @@
         statusMsg.innerHTML = 'Sedang mengaktifkan kamera...';
       }
 
-      if (!mobileHtml5QrScanner) {
-        mobileHtml5QrScanner = new Html5Qrcode('mCameraReaderView');
+      // CRITICAL: Display readerWrap BEFORE starting scanner so container has clientWidth > 0!
+      if (idleCard) idleCard.style.display = 'none';
+      if (readerWrap) {
+        readerWrap.style.display = 'block';
+        readerWrap.style.minHeight = '280px';
+      }
+
+      // Clean up previous scanner instance cleanly
+      if (mobileHtml5QrScanner) {
+        try {
+          if (mobileHtml5QrScanner.isScanning) {
+            await mobileHtml5QrScanner.stop();
+          }
+          await mobileHtml5QrScanner.clear();
+        } catch (e) {
+          console.warn('Error clearing existing mobile scanner:', e);
+        }
+        mobileHtml5QrScanner = null;
+      }
+
+      mobileHtml5QrScanner = new Html5Qrcode('mCameraReaderView');
+
+      // Enumerate cameras if available
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          availableCameraDevices = devices;
+          if (btnSwitchCam && devices.length > 1) {
+            btnSwitchCam.style.display = 'inline-flex';
+          }
+          // Prioritize back/rear camera on mobile devices
+          const backIdx = devices.findIndex(d => /back|rear|environment|belakang|pos/i.test(d.label));
+          currentCameraIndex = (backIdx >= 0) ? backIdx : (devices.length - 1);
+        }
+      } catch (e) {
+        console.warn('Camera device listing error:', e);
       }
 
       const config = {
@@ -1466,30 +1529,66 @@
         aspectRatio: 1.0
       };
 
-      // Prefer back camera on mobile (facingMode: environment)
-      await mobileHtml5QrScanner.start(
-        { facingMode: { ideal: "environment" } },
-        config,
-        (decodedText) => {
-          window.mobileHandleCameraDecode(decodedText);
-        },
-        () => { }
-      );
+      const targetCamera = (availableCameraDevices.length > 0 && availableCameraDevices[currentCameraIndex])
+        ? availableCameraDevices[currentCameraIndex].id
+        : { facingMode: "environment" };
+
+      try {
+        await mobileHtml5QrScanner.start(
+          targetCamera,
+          config,
+          (decodedText) => {
+            window.mobileHandleCameraDecode(decodedText);
+          },
+          () => { }
+        );
+      } catch (firstErr) {
+        console.warn('Primary camera start failed, retrying with facingMode user:', firstErr);
+        await mobileHtml5QrScanner.start(
+          { facingMode: "user" },
+          config,
+          (decodedText) => {
+            window.mobileHandleCameraDecode(decodedText);
+          },
+          () => { }
+        );
+      }
 
       isMobileCameraActive = true;
-      if (idleCard) idleCard.style.display = 'none';
-      if (readerWrap) readerWrap.style.display = 'block';
       if (activeBar) activeBar.style.display = 'flex';
       if (statusMsg) {
         statusMsg.style.display = 'block';
-        statusMsg.innerHTML = '<span style="color: #047857; font-weight: 700;">Kamera aktif: Arahkan ke QR Code tiket...</span>';
+        statusMsg.innerHTML = '<span style="color: #047857; font-weight: 700;">✓ Kamera aktif: Arahkan ke QR Code tiket...</span>';
       }
-      if (typeof window.showToast === 'function') window.showToast('Kamera pemindai aktif!', 'success');
+
+      // Add viewfinder overlay with animated laser if not present
+      if (readerWrap && !readerWrap.querySelector('.mobile-scanner-viewfinder')) {
+        const vf = document.createElement('div');
+        vf.className = 'mobile-scanner-viewfinder';
+        vf.innerHTML = `
+          <div class="mobile-scanner-box">
+            <div class="mobile-scanner-corner tl"></div>
+            <div class="mobile-scanner-corner tr"></div>
+            <div class="mobile-scanner-corner bl"></div>
+            <div class="mobile-scanner-corner br"></div>
+            <div class="mobile-scanner-laser"></div>
+          </div>
+          <div style="margin-top: 10px; font-size: 0.725rem; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); font-weight: 700; background: rgba(0,0,0,0.45); padding: 4px 12px; border-radius: 999px;">
+            Arahkan kamera ke QR Code Tiket
+          </div>
+        `;
+        readerWrap.appendChild(vf);
+      }
+
+      if (typeof window.showToast === 'function') window.showToast('Kamera pemindai aktif! Siap scan QR.', 'success');
     } catch (err) {
       console.warn('Mobile camera start error:', err);
       isMobileCameraActive = false;
       if (idleCard) idleCard.style.display = 'block';
-      if (readerWrap) readerWrap.style.display = 'none';
+      if (readerWrap) {
+        readerWrap.style.display = 'none';
+        readerWrap.innerHTML = '';
+      }
       if (activeBar) activeBar.style.display = 'none';
 
       let userMsg = 'Kamera tidak dapat diakses. Pastikan izin kamera diberikan di browser.';
@@ -1497,7 +1596,7 @@
       if (errStr.includes('permission') || errStr.includes('denied') || errStr.includes('notallowed')) {
         userMsg = 'Izin akses kamera ditolak. Silakan izinkan kamera di browser Anda.';
       } else if (errStr.includes('notfound') || errStr.includes('device')) {
-        userMsg = 'Perangkat kamera tidak ditemukan. Gunakan Input Manual / Barcode.';
+        userMsg = 'Perangkat kamera tidak ditemukan. Gunakan Unggah Gambar QR atau Input Manual.';
       }
 
       if (statusMsg) {
@@ -1508,13 +1607,26 @@
     }
   };
 
+  window.mobileSwitchCameraDevice = async function () {
+    if (!availableCameraDevices || availableCameraDevices.length < 2) return;
+    currentCameraIndex = (currentCameraIndex + 1) % availableCameraDevices.length;
+    const targetCam = availableCameraDevices[currentCameraIndex];
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Beralih ke: ${targetCam.label || 'Kamera ' + (currentCameraIndex + 1)}`, 'info');
+    }
+    await window.mobileStopCameraScanner();
+    await window.mobileStartCameraScanner();
+  };
+
   window.mobileStopCameraScanner = async function () {
     if (mobileHtml5QrScanner && isMobileCameraActive) {
       try {
         await mobileHtml5QrScanner.stop();
+        await mobileHtml5QrScanner.clear();
       } catch (e) {
         console.warn('Error stopping mobile camera:', e);
       }
+      mobileHtml5QrScanner = null;
     }
     isMobileCameraActive = false;
 
@@ -1525,7 +1637,10 @@
 
     if (idleCard) idleCard.style.display = 'block';
     if (activeBar) activeBar.style.display = 'none';
-    if (readerWrap) readerWrap.style.display = 'none';
+    if (readerWrap) {
+      readerWrap.style.display = 'none';
+      readerWrap.innerHTML = '';
+    }
     if (statusMsg) statusMsg.style.display = 'none';
   };
 
@@ -1537,11 +1652,36 @@
     const cleanId = extractTicketId(decodedText);
     if (!cleanId) return;
 
-    if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-    if (typeof window.showToast === 'function') window.showToast(`✓ QR Terbaca: ${cleanId}`, 'success');
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    if (typeof window.playScannerBeep === 'function') window.playScannerBeep();
 
     window.mobileStopCameraScanner();
-    window.mobileSecurityInspectTicket(cleanId);
+
+    const tickets = getTickets();
+    const t = tickets.find(x => x.id.toUpperCase() === cleanId.toUpperCase());
+
+    if (!t) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Tiket #${cleanId} tidak ditemukan dalam sistem!`, 'danger');
+      }
+      return;
+    }
+
+    if (t.status === 'Disetujui') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`✓ QR Terbaca: #${t.id} valid. Siap Scan Out!`, 'success');
+      }
+    } else if (t.status === 'Sedang di Luar' || t.status === 'Terlambat') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`✓ QR Terbaca: #${t.id} sedang berada di luar area.`, 'info');
+      }
+    } else {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`✓ QR Terbaca: #${t.id} (${t.status})`, 'info');
+      }
+    }
+
+    window.mobileSecurityInspectTicket(t.id);
   };
 
   window.mobileTriggerUploadQr = function () {

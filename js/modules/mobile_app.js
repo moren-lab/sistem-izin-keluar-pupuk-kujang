@@ -581,6 +581,8 @@
   window.openMobileLogoutConfirm = function (userName) {
     const sheet = document.getElementById('mobileActionSheet');
     if (sheet) sheet.classList.remove('open');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (backdrop) backdrop.classList.remove('open');
 
     // Check if employee has unsent form draft
     let hasUnsentDraft = false;
@@ -593,9 +595,9 @@
     }
 
     const modalHtml = `
-      <div id="mobileLogoutConfirmModal" class="mobile-modal-overlay open" style="display: flex; align-items: center; justify-content: center; z-index: 10001; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 20px;">
-        <div class="mobile-confirm-dialog-card" style="border-radius: 16px; width: 100%; max-width: 340px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: mobileModalFadeIn 0.2s ease-out; text-align: center;">
-          <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(220, 38, 38, 0.15); color: #ef4444; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+      <div id="mobileLogoutConfirmModal" class="mobile-modal-overlay open" style="display: flex; align-items: center; justify-content: center; z-index: 10060; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 20px;" onclick="if(event.target === this) window.closeMobileLogoutConfirm();">
+        <div class="mobile-confirm-dialog-card" style="background: #ffffff !important; border: 1px solid #e2e8f0; border-radius: 20px; width: 100%; max-width: 330px; padding: 24px 20px 20px 20px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25); animation: mobileModalFadeIn 0.2s ease-out; text-align: center; color: #0f172a; position: relative; z-index: 10061;" onclick="event.stopPropagation();">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
@@ -603,9 +605,9 @@
             </svg>
           </div>
 
-          <h3 class="mobile-confirm-dialog-title" style="font-size: 1.05rem; font-weight: 800; margin: 0 0 6px 0;">Keluar dari aplikasi?</h3>
-          <p style="font-size: 0.775rem; color: #64748b; margin: 0 0 12px 0; line-height: 1.45;">
-            Anda akan keluar dari akun <strong>${userName || 'pengguna'}</strong>. Anda perlu masuk lagi melalui Portal SAKTI untuk memakai aplikasi.
+          <h3 class="mobile-confirm-dialog-title" style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.01em;">Keluar dari aplikasi?</h3>
+          <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 16px 0; line-height: 1.5;">
+            Anda akan keluar dari akun <strong style="color: #0f172a;">${userName || 'pengguna'}</strong>. Anda perlu masuk lagi melalui Portal SAKTI untuk memakai aplikasi.
           </p>
 
           ${hasUnsentDraft ? `
@@ -614,11 +616,11 @@
             </div>
           ` : ''}
 
-          <div style="display: flex; gap: 8px; margin-top: 14px;">
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; height: 42px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem;" onclick="window.closeMobileLogoutConfirm()">
+          <div style="display: flex; gap: 10px; margin-top: 8px;">
+            <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; background: #ffffff; border: 1px solid #cbd5e1; color: #334155; cursor: pointer;" onclick="window.closeMobileLogoutConfirm()">
               Batal
             </button>
-            <button type="button" id="btnConfirmMobileLogout" class="mobile-btn-danger" style="flex: 1; height: 42px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #dc2626; color: #ffffff; border: 1px solid #dc2626;" onclick="window.executeMobileLogout()">
+            <button type="button" id="btnConfirmMobileLogout" class="mobile-btn-danger" style="flex: 1; min-height: 44px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25); cursor: pointer;" onclick="window.executeMobileLogout()">
               Keluar
             </button>
           </div>
