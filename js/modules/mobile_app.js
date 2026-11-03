@@ -766,10 +766,7 @@
           Hapus <strong>${finishedTickets.length} tiket</strong> riwayat selesai dari daftar tampilan Anda?
         </p>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
-          <div style="display: flex; gap: 6px; align-items: flex-start;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            <span>Riwayat akan disembunyikan dari perangkat ini. Log keamanan pos gerbang dan audit trail resmi di server tetap tersimpan aman. Tiket yang sedang berjalan tidak akan terhapus.</span>
-          </div>
+         
         </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
           <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 0.85rem;" onclick="window.mobileCloseSheet()">Batal</button>
@@ -823,7 +820,13 @@
 
   // SINGLE TICKET DELETION (Hapus 1 Riwayat dari Rincian Tiket)
   window.mobileDeleteTicketItem = function (ticketId, actor) {
-    const flag = actor === 'security' ? 'deletedBySecurity' : 'deletedByKaryawan';
+    let flag = 'deletedByKaryawan';
+    if (actor === 'security') {
+      flag = 'deletedBySecurity';
+    } else if (actor === 'approver' || actor === 'approver2') {
+      const isDewi = (window.currentMobileRole === 'approver2' || window.currentActor === 'approver2');
+      flag = isDewi ? 'deletedByApprover2' : 'deletedByApprover1';
+    }
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (!sheet || !backdrop) return;
@@ -873,6 +876,9 @@
         return;
       }
       t[flag] = true;
+      if (flag === 'deletedByApprover1' || flag === 'deletedByApprover2') {
+        t.deletedByApprover = true;
+      }
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(tickets);
       }

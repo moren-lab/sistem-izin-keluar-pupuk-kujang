@@ -9,6 +9,8 @@
 
   let currentAtasanTab = 'dashboard'; // 'dashboard' | 'antrean' | 'tim' | 'riwayat' | 'detail'
   let currentAntreanSegment = 'baru'; // 'baru' | 'perpanjangan'
+
+  let atasanDashboardSegment = 'ringkasan'; // 'ringkasan' | 'volume'
   let atasanSearchQuery = '';
   let atasanFilterDate = '';
   let atasanFilterStatus = 'all';
@@ -115,9 +117,9 @@
     const app = getActiveApprover();
     const aName = (app.name || '').toLowerCase();
     if (aName.includes('dewi')) {
-      return !!t.deletedByApprover2;
+      return !!t.deletedByApprover2 || !!t.deletedByApprover;
     }
-    return !!t.deletedByApprover1;
+    return !!t.deletedByApprover1 || !!t.deletedByApprover;
   }
 
   function getTeamTickets() {
@@ -305,6 +307,18 @@
     // Counts for summary card #3
     const emergencyCount = tickets.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')))).length;
     const approverDecidedCount = Math.max(0, processedTickets.length - emergencyCount);
+
+    // Kategori Breakdown untuk Segment Ringkasan Perizinan
+    const totalTeamCount = tickets.length;
+    const selesaiTeamCount = processedTickets.length;
+    const outsideTeamCount = outsideTickets.length;
+    const dinasCount = tickets.filter(t => (t.category || '').toLowerCase().includes('dinas')).length;
+    const pribadiCount = tickets.filter(t => (t.category || '').toLowerCase().includes('pribadi')).length;
+    const daruratCount = tickets.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')) || (t.category || '').toLowerCase().includes('darurat'))).length;
+    const catTotal = Math.max(1, dinasCount + pribadiCount + daruratCount);
+    const dinasPct = Math.round((dinasCount / catTotal) * 100);
+    const pribadiPct = Math.round((pribadiCount / catTotal) * 100);
+    const daruratPct = Math.round((daruratCount / catTotal) * 100);
 
     const now = new Date();
     const dateFormatted = formatDateIndo(now);
@@ -506,9 +520,97 @@
         ` : ''}
       </section>
 
-      <!-- Volume Pengajuan Tim Chart (Senin - Jumat) -->
-      <section class="mobile-card">
-        <div class="mobile-card-header">
+      <!-- Switcher Segment: Ringkasan perizinan | Volume pengajuan tim (A2 Parity dengan Karyawan) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+        <button type="button" id="mAtasanBtnSegRingkasan" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #065f46; background: ${atasanDashboardSegment === 'ringkasan' ? '#065f46' : '#ffffff'}; color: ${atasanDashboardSegment === 'ringkasan' ? '#ffffff' : '#065f46'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('ringkasan')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Ringkasan perizinan</span>
+        </button>
+        <button type="button" id="mAtasanBtnSegVolume" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #065f46; background: ${atasanDashboardSegment === 'volume' ? '#065f46' : '#ffffff'}; color: ${atasanDashboardSegment === 'volume' ? '#ffffff' : '#065f46'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('volume')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Volume pengajuan tim</span>
+        </button>
+      </div>
+
+      <!-- Segment 1: Ringkasan Perizinan (Stats Card + Bento Category Breakdown) -->
+      <div id="mAtasanSecRingkasan" style="display: ${atasanDashboardSegment === 'ringkasan' ? 'block' : 'none'}; margin-bottom: 14px;">
+        <!-- 3-Col Stats Card -->
+        <div class="mobile-stats-card" style="margin-bottom: 10px;">
+          <div class="mobile-stat-col">
+            <div class="mobile-stat-label">Total pengajuan</div>
+            <div class="mobile-stat-number" style="color: #0f172a;">${totalTeamCount}</div>
+          </div>
+          <div class="mobile-stat-col">
+            <div class="mobile-stat-label">Izin selesai</div>
+            <div class="mobile-stat-number" style="color: #059669;">${selesaiTeamCount}</div>
+          </div>
+          <div class="mobile-stat-col">
+            <div class="mobile-stat-label">Tim di luar</div>
+            <div class="mobile-stat-number" style="color: #7c3aed;">${outsideTeamCount}</div>
+          </div>
+        </div>
+
+        <!-- Bento Category Breakdown Card -->
+        <div class="mobile-card" style="margin-bottom: 0; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 14px; background: #ffffff;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+            <div>
+              <h3 style="font-size: 0.925rem; font-weight: 800; color: #0f172a; margin: 0;">Distribusi Kategori Izin Tim</h3>
+              <span style="font-size: 0.7rem; color: #64748b; font-weight: 500;">Berdasarkan permohonan bawahan</span>
+            </div>
+            <span style="font-size: 0.725rem; font-weight: 800; color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 999px;">
+              ${totalTeamCount} Total
+            </span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Dinas Kantor -->
+            <div style="padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0;"></span>
+                  <span>Dinas Kantor</span>
+                </span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #059669; font-family: monospace;">${dinasCount} (${dinasPct}%)</span>
+              </div>
+              <div style="width: 100%; height: 5px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
+                <div style="width: ${dinasPct}%; height: 100%; background: #059669; border-radius: 999px;"></div>
+              </div>
+            </div>
+
+            <!-- Keperluan Pribadi -->
+            <div style="padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #d97706; flex-shrink: 0;"></span>
+                  <span>Keperluan Pribadi</span>
+                </span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #d97706; font-family: monospace;">${pribadiCount} (${pribadiPct}%)</span>
+              </div>
+              <div style="width: 100%; height: 5px; border-radius: 999px; background: #e2e8f0; overflow: hidden;">
+                <div style="width: ${pribadiPct}%; height: 100%; background: #d97706; border-radius: 999px;"></div>
+              </div>
+            </div>
+
+            <!-- Izin Darurat (K3/Medis) -->
+            <div style="padding: 8px 12px; border-radius: 8px; background: #fff5f5; border: 1px solid #fecaca;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #b91c1c;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626; flex-shrink: 0;"></span>
+                  <span>Izin Darurat (K3/Medis)</span>
+                </span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #dc2626; font-family: monospace;">${daruratCount} (${daruratPct}%)</span>
+              </div>
+              <div style="width: 100%; height: 5px; border-radius: 999px; background: #fee2e2; overflow: hidden;">
+                <div style="width: ${daruratPct}%; height: 100%; background: #dc2626; border-radius: 999px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segment 2: Volume Pengajuan Tim (Realtime Chart Mingguan Identik Web) -->
+      <section id="mAtasanSecVolume" class="mobile-card" style="display: ${atasanDashboardSegment === 'volume' ? 'block' : 'none'}; margin-bottom: 14px;">
+        <div class="mobile-card-header" style="margin-bottom: 6px;">
           <div>
             <h3 class="mobile-card-title">Volume pengajuan tim</h3>
           </div>
@@ -991,6 +1093,11 @@
       return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
     };
 
+    const hasDeletableTickets = tickets.some(t => 
+      !isDeletedByCurrentMobileApprover(t) && 
+      (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+    );
+
     // Urutkan prioritas: Terlambat > Sedang di Luar > Disetujui > Selesai
     const sortedEligible = [...tickets].filter(t => 
       t.status === 'Sedang di Luar' || 
@@ -1117,11 +1224,17 @@
             </div>
           ` : ''}
 
-          <div style="display: flex; justify-content: flex-end;">
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
             <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Detail pengajuan</span>
             </button>
+            ${(t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa') ? `
+              <button type="button" class="mobile-btn-danger" style="padding: 6px 10px; font-size: 0.725rem; width: auto; font-weight: 700; background: #fff5f5; color: #dc2626; border: 1.2px solid #fecaca; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; cursor: pointer;" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Hapus</span>
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
@@ -1195,16 +1308,23 @@
         <button type="button" id="mBtnClearTimSearch" aria-label="Hapus teks pencarian" style="display: ${atasanTimSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearTimSearch()">✕</button>
       </div>
 
-      <!-- Toolbar: Ringkasan di Kiri, Tombol Filter di Kanan (Sejajar) -->
+      <!-- Toolbar: Ringkasan di Kiri, Tombol Hapus Semua & Filter di Kanan (Sejajar) -->
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
         <div style="font-size: 0.775rem; font-weight: 700; color: #475569;">
           ${totalTimItems} tiket pelacakan
         </div>
-        <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px, latar putih, border tipis, icon abu-abu, dot hijau aktif) -->
-        <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isAtasanTimFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isAtasanTimFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isAtasanTimFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isAtasanTimFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleAtasanTimFilter()" title="Filter Status Pelacakan" aria-label="Filter Status Pelacakan">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-          ${(atasanTimFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
-        </button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Tombol Hapus Semua (Hapus Seluruh Riwayat Selesai Pelacakan Atasan) -->
+          <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Semua Riwayat Selesai" aria-label="Hapus Semua Riwayat Selesai" style="height: 36px; padding: 0 10px; border-radius: 10px; background: ${hasDeletableTickets ? '#fee2e2' : '#f1f5f9'}; border: 1.5px solid ${hasDeletableTickets ? '#fca5a5' : '#e2e8f0'}; color: ${hasDeletableTickets ? '#dc2626' : '#94a3b8'}; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 5px; cursor: ${hasDeletableTickets ? 'pointer' : 'not-allowed'}; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileOpenAtasanClearModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            <span>Hapus Semua</span>
+          </button>
+          <!-- Tombol Filter Status Pelacakan -->
+          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isAtasanTimFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isAtasanTimFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isAtasanTimFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isAtasanTimFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleAtasanTimFilter()" title="Filter Status Pelacakan" aria-label="Filter Status Pelacakan">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            ${(atasanTimFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
+          </button>
+        </div>
       </div>
 
       <!-- One-line Active Filter Summary -->
@@ -1595,6 +1715,56 @@
   };
 
   // Helper actions
+  window.mobileSwitchAtasanDashboardSegment = function (segment) {
+
+    atasanDashboardSegment = segment;
+
+    const btnRingkasan = document.getElementById('mAtasanBtnSegRingkasan');
+
+    const btnVolume = document.getElementById('mAtasanBtnSegVolume');
+
+    const secRingkasan = document.getElementById('mAtasanSecRingkasan');
+
+    const secVolume = document.getElementById('mAtasanSecVolume');
+
+
+
+    if (btnRingkasan && btnVolume) {
+
+      if (segment === 'ringkasan') {
+
+        btnRingkasan.style.background = '#065f46';
+
+        btnRingkasan.style.color = '#ffffff';
+
+        btnVolume.style.background = '#ffffff';
+
+        btnVolume.style.color = '#065f46';
+
+      } else {
+
+        btnRingkasan.style.background = '#ffffff';
+
+        btnRingkasan.style.color = '#065f46';
+
+        btnVolume.style.background = '#065f46';
+
+        btnVolume.style.color = '#ffffff';
+
+      }
+
+    }
+
+
+
+    if (secRingkasan) secRingkasan.style.display = segment === 'ringkasan' ? 'block' : 'none';
+
+    if (secVolume) secVolume.style.display = segment === 'volume' ? 'block' : 'none';
+
+  };
+
+
+
   window.mobileOpenAtasanDetailModal = function (ticketId) {
     viewingTicketId = ticketId;
     renderMobileAtasan(null, 'detail');
@@ -2093,17 +2263,15 @@
     window.mobileAtasanExecuteDecision(ticketId, 'reject', reason);
   };
 
-})();
-
   // Fitur Hapus Semua Selesai di Pelacakan Tim Atasan
   window.mobileAtasanClearAllFinished = function () {
     const approver = getActiveApprover();
     const tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
     const isDewi = approver.name.toLowerCase().includes('dewi');
     const finishedTickets = tickets.filter(t => {
-      const isMyTicket = isTicketAssignedToMobileApprover(t);
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan');
-      const isDel = isDewi ? t.deletedByApprover2 : t.deletedByApprover1;
+      const isMyTicket = isTicketUnderMobileSupervision(t) || isTicketAssignedToMobileApprover(t);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+      const isDel = isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover);
       return isMyTicket && isFinished && !isDel;
     });
     if (finishedTickets.length === 0) {
@@ -2152,9 +2320,9 @@
     const tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
     const isDewi = approver.name.toLowerCase().includes('dewi');
     const finishedTickets = tickets.filter(t => {
-      const isMyTicket = isTicketAssignedToMobileApprover(t);
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan');
-      const isDel = isDewi ? t.deletedByApprover2 : t.deletedByApprover1;
+      const isMyTicket = isTicketUnderMobileSupervision(t) || isTicketAssignedToMobileApprover(t);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+      const isDel = isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover);
       return isMyTicket && isFinished && !isDel;
     });
 
@@ -2164,6 +2332,7 @@
       } else {
         t.deletedByApprover1 = true;
       }
+      t.deletedByApprover = true;
     });
     if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
     window.mobileCloseSheet();
@@ -2173,3 +2342,7 @@
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
   };
+
+  window.mobileOpenAtasanClearModal = window.mobileAtasanClearAllFinished;
+
+})();
