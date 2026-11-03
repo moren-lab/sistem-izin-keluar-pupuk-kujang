@@ -1875,16 +1875,22 @@ function saveAdminUserAccess(event) {
       const targetId = originalId || kujangId;
       const existingOccupant = users.find(u => u.kujangId !== targetId && u.status === 'Aktif' && u.roleKey === roleKey);
       if (existingOccupant) {
-        alert(
-          `⛔ GAGAL MEMBERIKAN HAK AKSES!\n\n` +
-          `Jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}] saat ini sedang aktif dipegang oleh:\n` +
-          `- Nama: ${existingOccupant.name}\n` +
-          `- NIP: ${existingOccupant.nip}\n` +
-          `- KUJANG ID: ${existingOccupant.kujangId}\n\n` +
-          `Sesuai tata kelola PT Pupuk Kujang, 1 jabatan manajerial/struktural hanya dapat diakses oleh 1 orang pejabat aktif.\n` +
-          `Sistem TIDAK MENGIZINKAN menimpa akun atasan aktif secara langsung.\n\n` +
-          `Silakan cabut (revoke) hak akses ${existingOccupant.name} terlebih dahulu melalui direktori akun jika Anda ingin mengalihkan jabatan ini kepada ${name}.`
-        );
+        const noticeMsg = `<strong>Jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}]</strong> saat ini sedang aktif dipegang oleh:<br><br>` +
+          `• <strong>Nama:</strong> ${existingOccupant.name}<br>` +
+          `• <strong>NIP:</strong> ${existingOccupant.nip}<br>` +
+          `• <strong>KUJANG ID:</strong> ${existingOccupant.kujangId}<br><br>` +
+          `Sesuai tata kelola PT Pupuk Kujang, 1 jabatan manajerial/struktural hanya dapat diakses oleh 1 orang pejabat aktif.<br>` +
+          `Sistem <strong>TIDAK MENGIZINKAN</strong> menimpa akun atasan aktif secara langsung.<br><br>` +
+          `Silakan cabut (revoke) hak akses <strong>${existingOccupant.name}</strong> terlebih dahulu melalui direktori akun jika Anda ingin mengalihkan jabatan ini kepada <strong>${name}</strong>.`;
+        if (typeof window.openNoticeModal === 'function') {
+          window.openNoticeModal({
+            title: 'Gagal Memberikan Hak Akses',
+            message: noticeMsg,
+            buttonText: 'Batal'
+          });
+        } else {
+          alert(noticeMsg.replace(/<[^>]+>/g, ''));
+        }
         return;
       }
     }

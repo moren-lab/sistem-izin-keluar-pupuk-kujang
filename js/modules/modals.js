@@ -1461,9 +1461,9 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     const approverName = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
     const approverPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(approverName, 22) : '';
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">( Dialihkan dari ${ticket.reassignedFrom})</span>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(Dialihkan dari ${ticket.reassignedFrom})</span></span>`;
     } else {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> — Catatan Atasan:</span>`;
+      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong></span>`;
     }
     infoApproverLbl.style.fontWeight = '800';
     infoApproverLbl.style.color = 'var(--text-primary, #0f172a)';
@@ -1471,21 +1471,36 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
   if (infoApproverNoteText) {
-    infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui. Sampaikan hasil pemeriksaan setelah kembali.';
+    infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui oleh Atasan langsung.';
   }
 
   const infoSecurityLbl = document.getElementById('infoSecurityLbl');
+  const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
+  const hasScannedOut = Boolean(ticket.scanOutTime);
+
   if (infoSecurityLbl) {
-    const secName = ticket.securityName || 'Agus Setiawan';
-    const secPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(secName, 22) : '';
-    infoSecurityLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${secPhoto}<strong>${secName}</strong> — Catatan Petugas Pos Jaga:</span>`;
+    if (!hasScannedOut) {
+      infoSecurityLbl.innerHTML = `<span style="color: var(--text-muted, #64748b); font-size: 0.775rem; font-weight: 700;">Petugas Pos Jaga: <em style="font-style: normal; color: var(--text-secondary, #475569);">(Belum Scan Out)</em></span>`;
+    } else {
+      const secName = ticket.securityOfficerOut || ticket.securityOfficer || ticket.securityName || 'Sertu Agus';
+      const secPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(secName, 22) : '';
+      infoSecurityLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${secPhoto}<strong>${secName}</strong></span>`;
+    }
     infoSecurityLbl.style.fontWeight = '800';
     infoSecurityLbl.style.color = 'var(--text-primary, #0f172a)';
   }
 
-  const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
   if (infoSecurityNoteText) {
-    infoSecurityNoteText.textContent = ticket.securityNote || 'Identitas dan QR sesuai. Tap In Kartu Akses tercatat di Pos 1.';
+    if (!hasScannedOut) {
+      infoSecurityNoteText.innerHTML = `<span style="color: var(--text-muted, #94a3b8); font-style: italic;">Identitas dan QR Code belum dipindai di pos jaga gerbang.</span>`;
+    } else {
+      const gateUsed = ticket.scanOutGate || 'Pos 1 Gerbang Utama';
+      if (ticket.status === 'Selesai' && ticket.scanInTime) {
+        infoSecurityNoteText.textContent = ticket.securityNote || `Identitas dan QR sesuai. Scan Out dan Tap In selesai diproses.`;
+      } else {
+        infoSecurityNoteText.textContent = ticket.securityNote || `Identitas dan QR sesuai. Scan Out tercatat di ${gateUsed}.`;
+      }
+    }
   }
 
   const infoNoticeText = document.getElementById('infoNoticeText');

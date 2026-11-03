@@ -415,7 +415,7 @@ function renderApproverDashboard() {
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
-                <span class="reassign-tag-text">↳ Dialihkan ke ${t.approverName}</span>
+                <span class="reassign-tag-text">Dialihkan ke ${t.approverName}</span>
               </div>
               <div>${window.getStatusPill(t.status, t)}</div>
             </div>

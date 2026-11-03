@@ -250,3 +250,27 @@ window.matchesPeriodFilter = matchesPeriodFilter;
 window.openDeleteConfirmModal = openDeleteConfirmModal;
 window.closeDeleteConfirmModal = closeDeleteConfirmModal;
 
+
+// UNIVERSAL NOTICE MODAL (GANTI BROWSER ALERT DENGAN TAMPILAN KARTU FIGMA & TOMBOL BATAL)
+function openNoticeModal({ title = 'Pemberitahuan', message = '', buttonText = 'Batal' } = {}) {
+  const modal = document.getElementById('modalNoticeAlert');
+  const titleEl = document.getElementById('noticeModalTitle');
+  const msgEl = document.getElementById('noticeModalMessage');
+  const btnDismiss = document.getElementById('btnNoticeDismiss');
+  if (!modal) {
+    alert(typeof message === 'string' ? message.replace(/<[^>]+>/g, '') : message);
+    return;
+  }
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
+  if (btnDismiss) btnDismiss.textContent = buttonText;
+  modal.classList.add('open');
+}
+
+function closeNoticeModal() {
+  const modal = document.getElementById('modalNoticeAlert');
+  if (modal) modal.classList.remove('open');
+}
+
+window.openNoticeModal = openNoticeModal;
+window.closeNoticeModal = closeNoticeModal;

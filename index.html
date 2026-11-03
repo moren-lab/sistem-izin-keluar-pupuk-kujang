@@ -2974,15 +2974,15 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" id="infoNotesContainer">
             <div>
               <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
-                id="infoApproverLbl">Ir. Hendra Gunawan, M.T. — Catatan Atasan:</span>
+                id="infoApproverLbl">Ir. Hendra Gunawan, M.T.</span>
               <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
-                id="infoApproverNoteText">Disetujui. Sampaikan hasil pemeriksaan setelah kembali.</p>
+                id="infoApproverNoteText">Disetujui oleh Atasan langsung.</p>
             </div>
             <div>
               <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
-                id="infoSecurityLbl">Agus Setiawan — Catatan Petugas Pos Jaga:</span>
+                id="infoSecurityLbl">Petugas Pos Jaga: (Belum Scan Out)</span>
               <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
-                id="infoSecurityNoteText">Identitas dan QR sesuai. Scan In tercatat di Pos 1.</p>
+                id="infoSecurityNoteText">Identitas dan QR Code belum dipindai di pos jaga gerbang.</p>
             </div>
           </div>
 
@@ -3676,6 +3676,28 @@ amily: var(--font-mono);"
     </div>
   </div>
 
+  <!-- ================= MODAL PEMBERITAHUAN (PENGGANTI ALERT) ================= -->
+  <div class="modal-overlay" id="modalNoticeAlert">
+    <div class="modal-card"
+      style="max-width: 460px; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);">
+      <div class="modal-header"
+        style="padding: 1.15rem 1.25rem 0.85rem; border-bottom: 1px solid #f1f5f9; background: #ffffff;">
+        <h3 id="noticeModalTitle" style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Pemberitahuan</h3>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem; font-size: 0.875rem; color: #334155; line-height: 1.55;">
+        <div id="noticeModalMessage"></div>
+      </div>
+      <div class="modal-footer"
+        style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-figma-secondary" id="btnNoticeDismiss"
+          style="padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc;"
+          onclick="window.closeNoticeModal()">
+          Batal
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL KONFIRMASI HAPUS RIWAYAT ================= -->
   <div class="modal-overlay" id="modalDeleteConfirm">
     <div class="modal-card"
@@ -3683,11 +3705,8 @@ amily: var(--font-mono);"
       <div class="modal-header"
         style="padding: 1.15rem 1.25rem 0.85rem; border-bottom: 1px solid #f1f5f9; background: #ffffff;">
         <div>
-          <h3 id="deleteModalTitle" style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Konfirmasi
-            Hapus</h3>
+          <h3 id="deleteModalTitle" style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Konfirmasi Hapus</h3>
         </div>
-        <button class="btn-close-modal" id="btnCloseDeleteConfirm" style="color: #64748b;"
-          onclick="window.closeDeleteConfirmModal()">✕</button>
       </div>
 
       <div class="modal-body" style="padding: 1.25rem; font-size: 0.875rem; color: #334155; line-height: 1.5;">
@@ -3698,6 +3717,11 @@ amily: var(--font-mono);"
 
       <div class="modal-footer"
         style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: flex-end; gap: 0.65rem;">
+        <button type="button" class="btn-figma-secondary" id="btnCancelDeleteConfirm"
+          style="padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; background: #ffffff; color: #334155;"
+          onclick="window.closeDeleteConfirmModal()">
+          Batal
+        </button>
         <button type="button" id="btnExecuteDeleteConfirm"
           style="background: #0284c7; color: #ffffff; border: 1px solid #0284c7; padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.15s;">
           OK
@@ -3714,7 +3738,6 @@ amily: var(--font-mono);"
           <h3 style="color: #dc2626;">Konfirmasi Logout</h3>
           <p>Portal Otentikasi KUJANG ID — PT Pupuk Kujang</p>
         </div>
-        <button class="btn-close-modal" id="btnCloseLogoutModal">✕</button>
       </div>
 
       <div class="modal-body">
@@ -3733,9 +3756,16 @@ amily: var(--font-mono);"
         </div>
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+        <button type="button" class="btn-figma-secondary" id="btnCancelLogoutModal"
+          style="padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; background: #ffffff; color: #334155;"
+          onclick="window.closeLogoutModal()">
+          Batal
+        </button>
         <button type="button" class="btn-primary-action" id="btnConfirmLogoutModal"
-          style="background: #dc2626; border-color: #dc2626;">Ya, Logout Sekarang</button>
+          style="background: #dc2626; border-color: #dc2626; padding: 0.45rem 1.25rem; font-size: 0.825rem; font-weight: 700;">
+          Ya, Logout Sekarang
+        </button>
       </div>
     </div>
   </div>
