@@ -95,13 +95,13 @@
       const acc = window.KUJANG_ACCOUNTS.find(a => a.nip === ticket.applicantNip);
       if (acc && acc.directSupervisor) empSupervisor = acc.directSupervisor;
     }
-    if (!empSupervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.applicantName || '').toLowerCase().includes('budi'))) {
+    if (!empSupervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.applicantName || '').toLowerCase().includes('budi') || ticket.applicantNip === 'PK-2024-8842' || (ticket.applicantName || '').toLowerCase().includes('arthur'))) {
       empSupervisor = 'Ir. Hendra Gunawan, M.T.';
     }
 
     if (aName.includes('hendra')) {
       const supervisor = (empSupervisor || '').toLowerCase();
-      return supervisor.includes('hendra') || (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.department || '').toLowerCase().includes('rekayasa')));
+      return supervisor.includes('hendra') || (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || ticket.applicantNip === 'PK-2024-8842' || (ticket.department || '').toLowerCase().includes('rekayasa')));
     }
     if (aName.includes('dewi')) {
       const supervisor = (empSupervisor || '').toLowerCase();
@@ -317,9 +317,9 @@
     else if (h >= 15 && h < 18) timeGreeting = 'sore';
     else if (h >= 18 || h < 5) timeGreeting = 'malam';
 
-    // Priority Cards: Emergency Ticket if exists
+    // Priority Cards: Emergency Tickets if exist (supports concurrent submissions)
     let priorityHtml = '';
-    const pendingEmergTicket = tickets.find(t => 
+    const pendingEmergTickets = tickets.filter(t => 
       (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && 
       (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
       t.status !== 'Ditolak' && 
@@ -328,8 +328,8 @@
     );
     const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
 
-    if (pendingEmergTicket) {
-      priorityHtml = `
+    if (pendingEmergTickets.length > 0) {
+      priorityHtml = pendingEmergTickets.map(pendingEmergTicket => `
         <div class="mobile-card" style="border: 1.5px solid #fca5a5; background: #fff5f5; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px;">PRIORITAS TINGGI • IZIN DARURAT</span>
@@ -358,7 +358,7 @@
             </button>
           </div>
         </div>
-      `;
+      `).join('');
     }
 
     // Top Pending Regular Tickets (matching PDF: Raka Pratama, Nisa Putri, etc.)
@@ -463,10 +463,10 @@
 
       <!-- 4-Grid Metrics Overview (2x2 Grid) -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <!-- Card 1: Izin baru menunggu -->
+        <!-- Card 1: Izin baru menunggu (Termasuk Izin Darurat yang menunggu otorisasi) -->
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('antrean', 'baru')">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Izin baru menunggu</div>
-          <div style="font-size: 1.6rem; font-weight: 900; color: #b45309; line-height: 1.2; margin: 3px 0 2px 0;">${pendingNew.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: #b45309; line-height: 1.2; margin: 3px 0 2px 0;">${pendingNew.length + pendingEmergTickets.length}</div>
         </div>
 
         <!-- Card 2: Perpanjangan menunggu -->
@@ -566,11 +566,22 @@
     const approver = getActiveApprover();
     const tickets = getTeamTickets();
 
-    const pendingNew = tickets.filter(t => 
+    const pendingEmergTickets = tickets.filter(t => 
+      (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && 
+      (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
+      t.status !== 'Ditolak' && 
+      t.status !== 'Selesai' && 
+      t.status !== 'Dibatalkan'
+    );
+
+    const pendingRegular = tickets.filter(t => 
       !t.isEmergency && 
       !t.id.includes('-EMG-') && 
       t.status === 'Menunggu Persetujuan'
     );
+
+    // Izin darurat diletakkan di puncak antrean dengan prioritas tertinggi
+    const pendingNew = [...pendingEmergTickets, ...pendingRegular];
     const pendingExt = tickets.filter(t => t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
 
     let activeList = currentAntreanSegment === 'baru' ? pendingNew : pendingExt;
@@ -596,19 +607,24 @@
         itemsHtml = `<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada permohonan izin baru dalam antrean.</div>`;
       } else {
         itemsHtml = activeList.map(t => {
+          const isEmg = Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')));
           const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
           const isReassignedAway = isTicketReassignedFromMobileApprover(t);
           const isReassignedToMe = isTicketReassignedToMobileApprover(t);
 
           return `
-            <div class="mobile-ticket-item" style="margin-bottom: 12px;">
+            <div class="mobile-ticket-item" style="margin-bottom: 12px; ${isEmg ? 'border: 1.5px solid #fca5a5; background: #fff5f5;' : ''}">
               <div class="mobile-ticket-item-header">
                 <div>
                   <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
                   <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                  <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
+                  ${isEmg ? `
+                    <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">PRIORITAS DARURAT</span>
+                  ` : `
+                    <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
+                  `}
                   ${isReassignedAway ? `
                     <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;">↳ Dialihkan ke ${t.approverName}</span>
                   ` : (isReassignedToMe ? `
@@ -621,8 +637,8 @@
                 ${t.id}
               </div>
 
-              <div style="font-size: 0.75rem; color: #047857; font-weight: 700; margin-bottom: 4px;">
-                ${t.category} • ${getTType(t)}
+              <div style="font-size: 0.75rem; color: ${isEmg ? '#b91c1c' : '#047857'}; font-weight: 700; margin-bottom: 4px;">
+                ${t.category || (isEmg ? 'Darurat Medis/K3' : '')} • ${getTType(t)}
               </div>
 
               <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px;">
@@ -640,9 +656,24 @@
                 </div>
               </div>
 
-              <button type="button" class="mobile-btn-primary" style="margin-top: 4px; ${isReassignedAway ? 'background: #475569; border-color: #475569;' : ''}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
-                ${isReassignedAway ? 'Pantau Rincian' : 'Tinjau'}
-              </button>
+              ${isEmg ? `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                  <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Detail</span>
+                  </button>
+                  <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+                    Tolak
+                  </button>
+                  <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${t.id}')">
+                    Setujui
+                  </button>
+                </div>
+              ` : `
+                <button type="button" class="mobile-btn-primary" style="margin-top: 4px; ${isReassignedAway ? 'background: #475569; border-color: #475569;' : ''}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                  ${isReassignedAway ? 'Pantau Rincian' : 'Tinjau'}
+                </button>
+              `}
             </div>
           `;
         }).join('');

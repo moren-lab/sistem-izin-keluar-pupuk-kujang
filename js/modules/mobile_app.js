@@ -64,42 +64,50 @@
     const avatarEl = document.getElementById('mobileUserAvatar');
     if (!subEl || !avatarEl) return;
 
+    avatarEl.style.padding = '0';
+    avatarEl.style.overflow = 'hidden';
+
+    let photoUrl = 'img/avatars/budi.svg';
+    let initials = 'BP';
+
     if (currentMobileRole === 'karyawan') {
       subEl.textContent = 'Perizinan Keluar Area';
-      avatarEl.textContent = 'BP';
+      photoUrl = 'img/avatars/budi.svg';
+      initials = 'BP';
       avatarEl.style.background = '#ecfdf5';
-      avatarEl.style.color = '#047857';
       avatarEl.style.borderColor = '#a7f3d0';
       avatarEl.title = 'Budi Pratama (Karyawan) — Klik untuk ganti peran';
     } else if (currentMobileRole === 'karyawan2') {
       subEl.textContent = 'Perizinan Keluar Area • Karyawan 2';
-      avatarEl.textContent = 'AM';
+      photoUrl = 'img/avatars/arthur.svg';
+      initials = 'AM';
       avatarEl.style.background = '#ccfbf1';
-      avatarEl.style.color = '#0f766e';
       avatarEl.style.borderColor = '#99f6e4';
       avatarEl.title = 'Arthur Morgan (Karyawan 2) — Klik untuk ganti peran';
     } else if (currentMobileRole === 'approver') {
       subEl.textContent = 'Perizinan Keluar Area • Atasan 1';
-      avatarEl.textContent = 'HG';
+      photoUrl = 'img/avatars/hendra.svg';
+      initials = 'HG';
       avatarEl.style.background = '#fef3c7';
-      avatarEl.style.color = '#b45309';
       avatarEl.style.borderColor = '#fde68a';
       avatarEl.title = 'Ir. Hendra Gunawan (Atasan 1) — Klik untuk ganti peran';
     } else if (currentMobileRole === 'approver2') {
       subEl.textContent = 'Perizinan Keluar Area • Atasan 2';
-      avatarEl.textContent = 'DS';
+      photoUrl = 'img/avatars/dewi.svg';
+      initials = 'DS';
       avatarEl.style.background = '#e0e7ff';
-      avatarEl.style.color = '#3730a3';
       avatarEl.style.borderColor = '#c7d2fe';
       avatarEl.title = 'Dewi Sartika (Atasan 2) — Klik untuk ganti peran';
     } else if (currentMobileRole === 'security') {
       subEl.textContent = 'Perizinan Keluar Area • Pos Jaga';
-      avatarEl.textContent = 'SA';
+      photoUrl = 'img/avatars/agus.svg';
+      initials = 'SA';
       avatarEl.style.background = '#e0f2fe';
-      avatarEl.style.color = '#0369a1';
       avatarEl.style.borderColor = '#bae6fd';
       avatarEl.title = 'Sertu Agus (Pos Jaga) — Klik untuk ganti peran';
     }
+
+    avatarEl.innerHTML = `<img src="${photoUrl}" alt="${initials}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.textContent='${initials}';">`;
   }
 
   function renderBottomNav() {
@@ -450,6 +458,7 @@
         roleLabel: 'Karyawan Pemohon',
         dept: 'Departemen Rekayasa & Pemeliharaan',
         initials: 'BP',
+        photoUrl: 'img/avatars/budi.svg',
         avatarBg: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'
       },
       karyawan2: {
@@ -458,6 +467,7 @@
         roleLabel: 'Karyawan Pemohon 2',
         dept: 'Departemen Rekayasa & Pemeliharaan',
         initials: 'AM',
+        photoUrl: 'img/avatars/arthur.svg',
         avatarBg: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)'
       },
       approver: {
@@ -466,6 +476,7 @@
         roleLabel: 'Atasan 1 (Manager Rekayasa & Pemeliharaan)',
         dept: 'Departemen Rekayasa & Pemeliharaan',
         initials: 'HG',
+        photoUrl: 'img/avatars/hendra.svg',
         avatarBg: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
       },
       approver2: {
@@ -474,6 +485,7 @@
         roleLabel: 'Atasan 2 (Supervisor Operasional Lapangan)',
         dept: 'Departemen Rekayasa & Pemeliharaan',
         initials: 'DS',
+        photoUrl: 'img/avatars/dewi.svg',
         avatarBg: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
       },
       security: {
@@ -482,6 +494,7 @@
         roleLabel: 'Petugas Pengamanan (Pos 1 Gerbang Utama)',
         dept: 'Departemen TI & Pengamanan Pabrik',
         initials: 'SA',
+        photoUrl: 'img/avatars/agus.svg',
         avatarBg: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
       }
     };
@@ -494,6 +507,7 @@
       roleLabel: defaultProfile.roleLabel,
       dept: (isSameRole && user.department) ? user.department : defaultProfile.dept,
       initials: defaultProfile.initials,
+      photoUrl: defaultProfile.photoUrl || 'img/avatars/default.svg',
       avatarBg: defaultProfile.avatarBg
     };
 
@@ -510,8 +524,8 @@
       <div class="mobile-sheet-body" style="padding-top: 10px;">
         <!-- User Info Card -->
         <div class="mobile-avatar-sheet-card">
-          <div class="mobile-avatar-sheet-circle" style="background: ${profile.avatarBg};">
-            ${profile.initials}
+          <div class="mobile-avatar-sheet-circle" style="background: ${profile.avatarBg}; overflow: hidden; padding: 0;">
+            <img src="${profile.photoUrl}" alt="${profile.initials}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.textContent='${profile.initials}';">
           </div>
           <div style="flex: 1; min-width: 0;">
             <div class="mobile-avatar-sheet-name" style="font-size: 0.925rem; font-weight: 800; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">

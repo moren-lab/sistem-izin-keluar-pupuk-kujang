@@ -2052,7 +2052,7 @@
           time: nowFormatted,
           by: `${emp.name} (Karyawan)`,
           desc: data.isEmergency
-            ? 'Izin darurat dibuat via sistem bypass, menunggu otorisasi sandi/wajah.'
+            ? 'Izin darurat dibuat via sistem bypass, menunggu otorisasi aplikasi Atasan atau scan wajah.'
             : `Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan (${data.approverName}).`
         }
       ]
@@ -2198,30 +2198,32 @@
       </div>
 
       <div class="mobile-sheet-body">
-        <!-- 3 Tabs Navigation -->
+        <!-- 2 Pilihan Metode Otorisasi Darurat: App Atasan & Scan Wajah -->
         <div style="display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 14px;">
           <button type="button" id="mTabBtnEmgApp" class="mobile-seg-btn active" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('app')">
-            App Atasan
+            App Atasan (1-Klik)
           </button>
-          
           <button type="button" id="mTabBtnEmgFace" class="mobile-seg-btn" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('facescan')">
-            Scan Wajah
+            Scan Wajah Biometrik
           </button>
         </div>
 
-        <!-- Tab 1: Persetujuan App -->
+        <!-- Tab 1: Persetujuan App Atasan -->
         <div id="mPaneEmgApp" style="display: block; text-align: center; padding: 6px 0;">
           <div style="margin-bottom: 6px; color: #64748b;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></div>
           <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">Persetujuan 1-Click di Aplikasi Atasan</div>
           <p style="font-size: 0.75rem; color: #64748b; line-height: 1.45; margin: 6px 0 14px 0;">
-            Notifikasi prioritas darurat telah diteruskan ke perangkat <strong>${t.approverName}</strong>. Atasan dapat menyetujui langsung dari HP atau sistem web.
+            Notifikasi prioritas darurat telah diteruskan ke perangkat <strong>${t.approverName}</strong>. Atasan dapat menyetujui langsung dari HP atau antrean sistem.
           </p>
           <button type="button" class="mobile-btn-primary" style="background: #059669; border-color: #059669; font-weight: 800; padding: 11px;" onclick="window.mobileSimulateApproverUnlock('${t.id}')">
             <span>Simulasikan Persetujuan Atasan</span>
           </button>
         </div>
 
-        
+        <!-- Tab 2: Scan Wajah Biometrik -->
+        <div id="mPaneEmgFace" style="display: none; text-align: center; padding: 6px 0;">
+          <div style="margin-bottom: 6px; color: #64748b;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H5a2 2 0 0 0-2 2v2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M3 17v2a2 2 0 0 0 2 2h2"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Pindai Wajah Atasan Langsung</div>
           <div id="mFaceStatusText" style="font-size: 0.775rem; color: #475569; margin-bottom: 12px;">
             Posisikan wajah Atasan di depan kamera lalu tekan tombol scan biometrik.
           </div>
@@ -2241,27 +2243,15 @@
 
   window.mobileSwitchEmgTab = function (tab) {
     const btnApp = document.getElementById('mTabBtnEmgApp');
-    const btnPass = document.getElementById('mTabBtnEmgPass');
     const btnFace = document.getElementById('mTabBtnEmgFace');
     const paneApp = document.getElementById('mPaneEmgApp');
-    const panePass = document.getElementById('mPaneEmgPass');
     const paneFace = document.getElementById('mPaneEmgFace');
 
     if (btnApp) btnApp.classList.toggle('active', tab === 'app');
-    if (btnPass) btnPass.classList.toggle('active', tab === 'passcode');
     if (btnFace) btnFace.classList.toggle('active', tab === 'facescan');
 
     if (paneApp) paneApp.style.display = tab === 'app' ? 'block' : 'none';
-    if (panePass) panePass.style.display = tab === 'passcode' ? 'block' : 'none';
     if (paneFace) paneFace.style.display = tab === 'facescan' ? 'block' : 'none';
-  };
-
-  window.mobileAutoFillPasscode = function (code) {
-    const input = document.getElementById('mInputEmgPasscode');
-    if (input) {
-      input.value = code;
-      input.focus();
-    }
   };
 
   function completeEmergencyUnlock(ticketId, method) {
@@ -2309,24 +2299,7 @@
     completeEmergencyUnlock(ticketId, 'Persetujuan Langsung Atasan di App');
   };
 
-  window.mobileVerifyPasscodeUnlock = function (ticketId) {
-    const input = document.getElementById('mInputEmgPasscode');
-    const val = (input?.value || '').trim();
-    const tickets = window.ticketsList || [];
-    const t = tickets.find(x => x.id === ticketId);
-    if (!t) return;
-    const targetCode = t.emergencyPasscode || '849201';
-
-    if (!val || val !== targetCode) {
-      if (typeof window.showToast === 'function') {
-        window.showToast('Kode sandi tidak valid! Pastikan 6 digit kode dari Atasan sesuai.', 'danger');
-      }
-      if (input) input.focus();
-      return;
-    }
-
-    completeEmergencyUnlock(ticketId, 'Input Kode Sandi / OTP');
-  };
+  // (Metode Kode Sandi / OTP telah dihapus sesuai BRD darurat terkini)
 
   window.mobileTriggerFaceScan = function (ticketId) {
     const btn = document.getElementById('mBtnTriggerFace');
