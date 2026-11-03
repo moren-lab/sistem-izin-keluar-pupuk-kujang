@@ -57,8 +57,7 @@ function openEmergencyUnlockModal(ticketId, defaultMethod = null) {
   // Buka tab sesuai metode yang dipilih karyawan
   const targetMethod = defaultMethod || ticket.selectedMethod || 'app';
   let initialTab = 'tabEmgApprove';
-  if (targetMethod === 'passcode') initialTab = 'tabEmgPasscode';
-  else if (targetMethod === 'facescan') initialTab = 'tabEmgFaceScan';
+  if (targetMethod === 'facescan') initialTab = 'tabEmgFaceScan';
 
   switchEmergencyUnlockTab(initialTab, false);
 
@@ -94,10 +93,7 @@ function switchEmergencyUnlockTab(tabId, syncWithTicket = false) {
   if (syncWithTicket && window.currentEmergencyTicketId) {
     let methodKey = 'app';
     let methodLabel = 'Persetujuan Langsung di App';
-    if (tabId === 'tabEmgPasscode') {
-      methodKey = 'passcode';
-      methodLabel = 'Input Kata Sandi / OTP';
-    } else if (tabId === 'tabEmgFaceScan') {
+    if (tabId === 'tabEmgFaceScan') {
       methodKey = 'facescan';
       methodLabel = 'Scan Wajah Atasan';
     }

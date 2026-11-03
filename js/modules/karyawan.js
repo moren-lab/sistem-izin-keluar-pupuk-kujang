@@ -400,7 +400,7 @@ function renderKaryawanDashboard() {
     if (nowH >= 11 && nowH < 15) timeGreeting = 'siang';
     else if (nowH >= 15 && nowH < 18) timeGreeting = 'sore';
     else if (nowH >= 18 || nowH < 5) timeGreeting = 'malam';
-    empHeroGreeting.textContent = `Selamat ${timeGreeting}, ${empActor.name} `;
+    empHeroGreeting.innerHTML = `Selamat ${timeGreeting}, ${window.renderUserPhoto(empActor.name, 32)} <span>${empActor.name}</span>`;
   }
   const primaryApprover = (typeof window.getPrimaryApprover === 'function') 
     ? window.getPrimaryApprover() 
@@ -410,7 +410,7 @@ function renderKaryawanDashboard() {
     const title = empActor.role || empActor.title || 'Staf Rekayasa Mesin';
     const dept = empActor.department || 'Departemen Rekayasa & Pemeliharaan';
     if (primaryApprover && primaryApprover.name) {
-      empHeroSub.textContent = `${title} | ${dept} | Atasan: ${primaryApprover.name}`;
+      empHeroSub.textContent = `Karyawan | ${dept} | Atasan: ${primaryApprover.name}`;
     } else {
       empHeroSub.textContent = `${title} | ${dept} | Atasan Anda tidak tersedia, jika ingin membuat pengajuan pilih atasan lain`;
     }
@@ -492,10 +492,7 @@ function renderKaryawanDashboard() {
       let actionButtonsHtml = '';
       if (isEmergLocked) {
         actionButtonsHtml = `
-          <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
-            <span>Otorisasi Darurat</span>
-          </button>
-          <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
+          <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
             <span>Edit Pengajuan</span>
           </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
@@ -504,9 +501,9 @@ function renderKaryawanDashboard() {
         `;
       } else if (isPending) {
         actionButtonsHtml = `
-          <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
-          <span>Edit Pengajuan</span>
-        </button>
+          <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>Edit Pengajuan</span>
+          </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
             <span>Batalkan Izin</span>
           </button>
@@ -587,7 +584,7 @@ function renderKaryawanDashboard() {
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
             </div>
             <div style="color: #475569; margin-top: 0.25rem; line-height: 1.45;">
-              Sesuai SOP K3, QR Code terkunci sampai diotorisasi. Hubungi Atasan untuk meminta <strong>Kode Sandi OTP</strong> atau gunakan <strong>Scan Wajah</strong> langsung.
+              Sesuai SOP K3, QR Code izin darurat terkunci sampai diverifikasi dan disetujui oleh Atasan.
             </div>
           </div>
         ` : ''}
@@ -745,10 +742,7 @@ function renderPengajuanSayaView() {
     let actionButtonsHtml = '';
     if (isEmergLocked) {
       actionButtonsHtml = `
-        <button class="btn-figma-primary" style="background:#be123c; border-color:#be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35); font-weight: 700;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
-          <span>Otorisasi Darurat</span>
-        </button>
-        <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
+        <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
           <span>Edit Pengajuan</span>
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
@@ -757,7 +751,7 @@ function renderPengajuanSayaView() {
       `;
     } else if (isPending) {
       actionButtonsHtml = `
-        <button class="btn-figma-warning" onclick="window.openEditTicketModal('${activeTicket.id}')">
+        <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
           <span>Edit Pengajuan</span>
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
@@ -838,7 +832,7 @@ function renderPengajuanSayaView() {
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
             </div>
             <div style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.45;">
-              Sesuai SOP K3, QR Code terkunci sampai diotorisasi. Hubungi Atasan untuk meminta <strong>Kode Sandi OTP</strong> atau gunakan <strong>Scan Wajah</strong> langsung.
+              Sesuai SOP K3, QR Code izin darurat terkunci sampai diverifikasi dan disetujui oleh Atasan.
             </div>
           </div>
         ` : ''}
@@ -854,7 +848,7 @@ function renderPengajuanSayaView() {
         <div class="figma-card-header">
           <h3 class="figma-card-title">Atasan langsung</h3>
         </div>
-        <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">${activeTicket.approverName || 'Ir. Hendra Gunawan, M.T.'}</div>
+        <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center;">${window.renderUserPhoto(activeTicket.approverName || "Ir. Hendra Gunawan, M.T.", 26)} <span>${activeTicket.approverName || "Ir. Hendra Gunawan, M.T."}</span></div>
         <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 2px;">${activeTicket.approverTitle || 'Manajer Rekayasa & Pemeliharaan'}</div>
         ${activeTicket.reassignedFrom ? `
           <div style="margin-top: 0.45rem; font-size: 0.75rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 0.3rem 0.65rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
@@ -1636,18 +1630,11 @@ function renderKaryawanMobileDashboard() {
         `;
       } else if (isPending) {
         mobileBtnsHtml = `
-          <button type="button" class="btn-mobile-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
-            <span>Edit Pengajuan</span>
-          </button>
-          <button type="button" class="btn-mobile-danger-outline" onclick="openCancelModal('${activeTicket.id}')">
-            <span>Batalkan Izin</span>
-          </button>
+          <button type="button" class="btn-mobile-secondary" style="background:#0284c7; color:#ffffff; border-color:#0284c7; font-weight:700;" onclick="window.openEditTicketModal('${activeTicket.id}')"><span>Edit Pengajuan</span></button><button type="button" class="btn-mobile-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626; font-weight:700;" onclick="openCancelModal('${activeTicket.id}')"><span>Batalkan Izin</span></button>
         `;
       } else if (isEmergency) {
         mobileBtnsHtml = `
-          <button type="button" class="btn-mobile-primary" style="background: #be123c;" onclick="window.openEmergencyUnlockModal('${activeTicket.id}')">
-            <span>⚡ Otorisasi Darurat (Input Sandi / Wajah)</span>
-          </button>
+          
           <button type="button" class="btn-mobile-secondary" onclick="window.openEditTicketModal('${activeTicket.id}')">
             <span>Edit Data Darurat</span>
           </button>

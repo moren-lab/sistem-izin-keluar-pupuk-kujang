@@ -95,7 +95,7 @@ function updateActiveSecurityGate(gateValue, notify = false) {
 
   const secHeroGreeting = document.getElementById('secHeroGreeting');
   const secHeroSub = document.getElementById('secHeroSub');
-  if (secHeroGreeting) secHeroGreeting.textContent = `Selamat bertugas, ${officer.name}`;
+  if (secHeroGreeting) secHeroGreeting.innerHTML = `Selamat bertugas, ${window.renderUserPhoto(officer.name, 32)} <span>${officer.name}</span>`;
   if (secHeroSub) {
     secHeroSub.textContent = `${officer.title} — ${officer.gateName} — Departemen Pengamanan & K3 — PT Pupuk Kujang`;
   }
@@ -234,12 +234,18 @@ function renderSecurityDashboard() {
   const secHeroGreeting = document.getElementById('secHeroGreeting');
   const secHeroSub = document.getElementById('secHeroSub');
   if (secHeroGreeting) {
-    secHeroGreeting.textContent = `Selamat bertugas, ${secActor.name}`;
+    const nowH = new Date().getHours();
+    let timeGreeting = 'bertugas';
+    if (nowH >= 5 && nowH < 11) timeGreeting = 'pagi';
+    else if (nowH >= 11 && nowH < 15) timeGreeting = 'siang';
+    else if (nowH >= 15 && nowH < 18) timeGreeting = 'sore';
+    else if (nowH >= 18 || nowH < 5) timeGreeting = 'malam';
+    secHeroGreeting.innerHTML = `Selamat ${timeGreeting}, ${window.renderUserPhoto(secActor.name, 32)} <span>${secActor.name}</span>`;
   }
   if (secHeroSub) {
     const title = secActor.role || secActor.title || 'Petugas Pengamanan';
     const dept = secActor.department || 'Departemen Pengamanan & K3';
-    secHeroSub.textContent = `${title} — ${secActor.gateName || 'Pos 1 Gerbang Utama'} — ${dept} — PT Pupuk Kujang`;
+    secHeroSub.textContent = `${title} | ${secActor.gateName || 'Pos 1 Gerbang Utama'} | ${dept}`;
   }
   updateSecurityMetrics();
   const readyExitTickets = ticketsList.filter(t => t.status === 'Disetujui');
@@ -248,6 +254,21 @@ function renderSecurityDashboard() {
   const recentTransactions = ticketsList
     .filter(t => t.scanOutTime || t.scanInTime)
     .slice(0, 5);
+
+  // Update Hero Strip (Identik Gambar 1 Karyawan)
+  const secHeroStripStatus = document.getElementById('secHeroStripStatus');
+  const secHeroStripSub = document.getElementById('secHeroStripSub');
+  if (secHeroStripStatus && secHeroStripSub) {
+    const readyCount = readyExitTickets.length;
+    const outCount = outsideTickets.length;
+    if (readyCount > 0) {
+      secHeroStripStatus.textContent = `Status Gerbang: ${readyCount} Karyawan Siap Keluar (Scan Out)`;
+      secHeroStripSub.textContent = `${outCount} personel sedang di luar pabrik. Terminal pemindaian aktif.`;
+    } else {
+      secHeroStripStatus.textContent = `Status Gerbang: Pos 1 Gerbang Utama Operasional`;
+      secHeroStripSub.textContent = `${outCount} personel sedang di luar pabrik. Siap memverifikasi tiket perizinan.`;
+    }
+  }
 
   const securityOverdueBanner = document.getElementById('securityOverdueBanner');
   const securityDashboardReadyExitList = document.getElementById('securityDashboardReadyExitList');

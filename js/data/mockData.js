@@ -772,3 +772,24 @@ try {
   window.MOCK_APPROVERS = getActiveApprovers();
 }
 
+
+
+// ==========================================
+// CENTRAL PROFILE PHOTO HELPERS (PT PUPUK KUJANG)
+// ==========================================
+window.getEmployeePhotoUrl = function(nameOrNip) {
+  if (!nameOrNip) return 'img/avatars/default.svg';
+  const str = String(nameOrNip).toLowerCase();
+  if (str.includes('budi') || str.includes('8841')) return 'img/avatars/budi.svg';
+  if (str.includes('arthur') || str.includes('morgan') || str.includes('8842')) return 'img/avatars/arthur.svg';
+  if (str.includes('hendra') || str.includes('gunawan') || str.includes('1002')) return 'img/avatars/hendra.svg';
+  if (str.includes('dewi') || str.includes('sartika') || str.includes('0845')) return 'img/avatars/dewi.svg';
+  if (str.includes('agus') || str.includes('sertu') || str.includes('042') || str.includes('sec')) return 'img/avatars/agus.svg';
+  if (str.includes('bambang') || str.includes('sutrisno') || str.includes('019') || str.includes('adm')) return 'img/avatars/bambang.svg';
+  return 'img/avatars/default.svg';
+};
+
+window.renderUserPhoto = function(nameOrNip, size = 24, extraStyle = '') {
+  const url = window.getEmployeePhotoUrl(nameOrNip);
+  return `<img src="${url}" alt="Foto ${nameOrNip || 'Karyawan'}" class="user-profile-photo-inline" style="width:${size}px; height:${size}px; min-width:${size}px; min-height:${size}px; border-radius:50%; object-fit:cover; vertical-align:middle; display:inline-block; margin-right:6px; border:1px solid rgba(0,0,0,0.12); box-shadow:0 1px 3px rgba(0,0,0,0.08); flex-shrink:0; ${extraStyle}">`;
+};

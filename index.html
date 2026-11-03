@@ -9,9 +9,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261102_1435">
-  <link rel="stylesheet" href="css/auth.css?v=20261102_1435">
-  <link rel="stylesheet" href="css/mobile.css?v=20261102_1435">
+  <link rel="stylesheet" href="css/style.css?v=20261103_0845">
+  <link rel="stylesheet" href="css/auth.css?v=20261103_0845">
+  <link rel="stylesheet" href="css/mobile.css?v=20261103_0845">
   <link rel="icon" type="image/png" href="Pupuk Kujang Icon - Colored - zonalogo.com.png">
   <script>
     (function () {
@@ -655,8 +655,7 @@
                   style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; width: 100%;">
                   <div>
                     <h2 id="empHeroGreeting">Selamat pagi, Budi Pratama, S.T. </h2>
-                    <p id="empHeroSub">Staf Rekayasa Mesin — Departemen Rekayasa & Pemeliharaan — Atasan: Ir. Hendra
-                      Gunawan, M.T.</p>
+                    <p id="empHeroSub">Karyawan | Departemen Rekayasa & Pemeliharaan | Atasan: Ir. Hendra Gunawan, M.T.</p>
                   </div>
                   <!-- Modern Toggle Switch Button (No Text) di atas chart dashboard -->
                   <div class="dash-theme-toggle-container" title="Beralih Mode Gelap / Terang">
@@ -986,70 +985,65 @@
 
           <!-- B1. HALAMAN DASHBOARD APPROVER -->
           <div id="approverDashboardPage">
-            <!-- Approver Hero Welcome Banner -->
-            <div class="dashboard-hero-banner approver-theme">
-              <div class="dashboard-hero-content">
-                <div class="dashboard-avatar-circle">👔</div>
-                <div class="dashboard-hero-text">
-                  <h2>Pusat Persetujuan & Monitoring Bawahan</h2>
-                  <p id="approverHeroSub">Ir. Hendra Gunawan, M.T. — Manager Rekayasa & Pemeliharaan — Prinsip:
-                    <strong>No Approval, No
-                      Exit</strong>
-                  </p>
+            <!-- Approver Hero Banner (Identik Karyawan Gambar 1) -->
+            <div class="figma-hero-banner approver-theme">
+              <div class="figma-hero-top">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; width: 100%;">
+                  <div>
+                    <h2 id="appHeroGreeting">Selamat pagi, Ir. Hendra Gunawan, M.T.</h2>
+                    <p id="approverHeroSub">Atasan 1 (Manager) | Departemen Rekayasa & Pemeliharaan | Prinsip: No Approval, No Exit</p>
+                  </div>
+                  <div class="dash-theme-toggle-container" title="Beralih Mode Gelap / Terang">
+                    <label class="modern-theme-switch" for="themeSwitchApp" title="Beralih Mode Gelap / Terang">
+                      <input type="checkbox" id="themeSwitchApp" class="theme-switch-input"
+                        onchange="window.toggleDarkMode()">
+                      <span class="theme-switch-slider">
+                        <span class="theme-switch-icon sun">☀️</span>
+                        <span class="theme-switch-icon moon">🌙</span>
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
-              <div class="dashboard-hero-actions"
-                style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                <button class="btn-primary-action" style="background: #0f766e;" onclick="setApproverNav('antrian')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  <span>Review Antrian Izin</span>
+              <div class="figma-hero-strip" id="appHeroStrip">
+                <div class="hero-strip-left">
+                  <span class="hero-strip-text" id="appHeroStripStatus">Status Antrean: 0 Pengajuan Menunggu Persetujuan</span>
+                  <span class="hero-strip-sub" id="appHeroStripSub">Tinjau dan berikan keputusan perizinan karyawan bawahan.</span>
+                </div>
+                <button class="btn-hero-action" onclick="setApproverNav('antrian')">
+                  Review Antrean Izin →
                 </button>
-                <!-- Modern Toggle Switch Button (No Text) -->
-                <label class="modern-theme-switch" for="themeSwitchApp" title="Beralih Mode Gelap / Terang">
-                  <input type="checkbox" id="themeSwitchApp" class="theme-switch-input"
-                    onchange="window.toggleDarkMode()">
-                  <span class="theme-switch-slider">
-                    <span class="theme-switch-icon sun">☀️</span>
-                    <span class="theme-switch-icon moon">🌙</span>
-                  </span>
-                </label>
               </div>
             </div>
 
-            <!-- Metrics Row Approver -->
-            <div class="stats-row" id="approverStatsRow" style="margin-top: 1.5rem;">
-              <div class="stat-box" id="statCardPendingApprovals">
-                <div class="stat-meta">
-                  <span class="stat-title">Perlu Keputusan Segera</span>
-                  <span class="stat-number" id="statAppPending" style="color: var(--amber-warning);">0</span>
-                </div>
-                <div class="stat-icon amber">⚡</div>
+            <!-- Section Bar Approver -->
+            <div class="figma-section-bar">
+              <div>
+                <h1 class="figma-section-title">Ringkasan Persetujuan</h1>
               </div>
+            </div>
 
-              <div class="stat-box">
-                <div class="stat-meta">
-                  <span class="stat-title">Telah Disetujui</span>
-                  <span class="stat-number" id="statAppApproved" style="color: var(--corp-teal);">0</span>
-                </div>
-                <div class="stat-icon teal">✅</div>
+            <!-- Unified Figma Stats Card (4-Column) -->
+            <div class="figma-stats-card figma-stats-4col" id="approverStatsRow">
+              <div class="figma-stat-col">
+                <span class="figma-stat-label">Perlu Keputusan Segera</span>
+                <span class="figma-stat-number" id="statAppPending" style="color: var(--amber-warning, #d97706);">0</span>
+                <span class="figma-stat-sub">Menunggu persetujuan</span>
               </div>
-
-              <div class="stat-box">
-                <div class="stat-meta">
-                  <span class="stat-title">Telah Ditolak</span>
-                  <span class="stat-number" id="statAppRejected" style="color: var(--rose-danger);">0</span>
-                </div>
-                <div class="stat-icon" style="background: var(--rose-light); color: var(--rose-danger);">✕</div>
+              <div class="figma-stat-col">
+                <span class="figma-stat-label">Telah Disetujui</span>
+                <span class="figma-stat-number" id="statAppApproved" style="color: #059669;">0</span>
+                <span class="figma-stat-sub">Tiket disetujui</span>
               </div>
-
-              <div class="stat-box">
-                <div class="stat-meta">
-                  <span class="stat-title">Total Permohonan Masuk</span>
-                  <span class="stat-number" id="statAppTotal">0</span>
-                </div>
-                <div class="stat-icon blue">📊</div>
+              <div class="figma-stat-col">
+                <span class="figma-stat-label">Ditolak</span>
+                <span class="figma-stat-number" id="statAppRejected" style="color: #dc2626;">0</span>
+                <span class="figma-stat-sub">Tidak diizinkan</span>
+              </div>
+              <div class="figma-stat-col">
+                <span class="figma-stat-label">Total Permohonan Masuk</span>
+                <span class="figma-stat-number" id="statAppTotal" style="color: #0284c7;">0</span>
+                <span class="figma-stat-sub">Bulan ini</span>
               </div>
             </div>
 
@@ -1314,86 +1308,63 @@
 
           <!-- C1. HALAMAN DASHBOARD SECURITY (FIGMA REDESIGN) -->
           <div id="securityDashboardPage">
-            <!-- Figma Hero Dark Banner (Pos Jaga) -->
+            <!-- Figma Hero Banner (Pos Jaga - Identik Karyawan Gambar 1) -->
             <div class="figma-hero-banner security-theme">
-              <div
-                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <div class="figma-hero-top">
-                  <h2 id="secHeroGreeting">Selamat bertugas, Sertu Agus</h2>
-                  <p id="secHeroSub">Petugas Pengamanan — Pos 1 Gerbang Utama — Departemen Pengamanan & K3 — PT Pupuk
-                    Kujang</p>
+              <div class="figma-hero-top">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; width: 100%;">
+                  <div>
+                    <h2 id="secHeroGreeting">Selamat bertugas, Sertu Agus</h2>
+                    <p id="secHeroSub">Petugas Pengamanan | Pos 1 Gerbang Utama | Departemen Pengamanan & K3</p>
+                  </div>
+                  <div class="dash-theme-toggle-container" title="Beralih Mode Gelap / Terang">
+                    <label class="modern-theme-switch" for="themeSwitchSec" title="Beralih Mode Gelap / Terang">
+                      <input type="checkbox" id="themeSwitchSec" class="theme-switch-input"
+                        onchange="window.toggleDarkMode()">
+                      <span class="theme-switch-slider">
+                        <span class="theme-switch-icon sun">☀️</span>
+                        <span class="theme-switch-icon moon">🌙</span>
+                      </span>
+                    </label>
+                  </div>
                 </div>
-                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                  <button class="btn-figma-secondary" onclick="setSecurityNav('scanner')"
-                    style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.25);">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.2">
-                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
-                      </path>
-                      <circle cx="12" cy="13" r="4"></circle>
-                    </svg>
-                    <span>Terminal Scan QR</span>
-                  </button>
-                  <button class="btn-figma-secondary" onclick="setSecurityNav('pelacakan')"
-                    style="background: #0284c7; color: #ffffff; border: none;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      stroke-width="2.2">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <span>Pelacakan di Luar</span>
-                  </button>
-                  <label class="modern-theme-switch" for="themeSwitchSec" title="Beralih Mode Gelap / Terang">
-                    <input type="checkbox" id="themeSwitchSec" class="theme-switch-input"
-                      onchange="window.toggleDarkMode()">
-                    <span class="theme-switch-slider">
-                      <span class="theme-switch-icon sun">☀️</span>
-                      <span class="theme-switch-icon moon">🌙</span>
-                    </span>
-                  </label>
+              </div>
+              <div class="figma-hero-strip" id="secHeroStrip">
+                <div class="hero-strip-left">
+                  <span class="hero-strip-text" id="secHeroStripStatus">Status Gerbang: Pos 1 Gerbang Utama Operasional</span>
+                  <span class="hero-strip-sub" id="secHeroStripSub">Siap melakukan verifikasi pemindaian tiket keluar & masuk.</span>
                 </div>
+                <button class="btn-hero-action" onclick="setSecurityNav('scanner')">
+                  Terminal Scan QR →
+                </button>
               </div>
             </div>
 
             <!-- Section Bar Pos Jaga -->
             <div class="figma-section-bar">
               <div>
-                
                 <h1 class="figma-section-title">Ringkasan Pemantauan Gerbang</h1>
-              
               </div>
             </div>
 
-            <!-- Unified Figma Stats Card (4-Column) -->
+            <!-- Unified Figma Stats Card (4-Column) - Non-Clickable Info Only (Gambar 2) -->
             <div class="figma-stats-card figma-stats-4col" id="securityStatsRow">
-              <div class="figma-stat-col" id="statCardOutsideHeadcount" style="cursor: pointer;"
-                onclick="setSecurityNav('pelacakan')" title="Klik untuk membuka pelacakan headcount">
+              <div class="figma-stat-col" style="cursor: default;">
                 <span class="figma-stat-label">Sedang di Luar (Headcount)</span>
                 <span class="figma-stat-number" id="statSecOutside" style="color: #0284c7;">0</span>
-               
               </div>
-              <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('dashboard')"
-                title="Izin disetujui siap gerbang">
+              <div class="figma-stat-col" style="cursor: default;">
                 <span class="figma-stat-label">Izin Siap Keluar (Scan Out)</span>
                 <span class="figma-stat-number" id="statSecReadyExit" style="color: #0d9488;">0</span>
-                
               </div>
-              <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('riwayat')"
-                title="Total scan out hari ini">
+              <div class="figma-stat-col" style="cursor: default;">
                 <span class="figma-stat-label">Scan Out Hari Ini</span>
                 <span class="figma-stat-number" id="statSecScanOutCount" style="color: #059669;">0</span>
-                
               </div>
-              <div class="figma-stat-col" style="cursor: pointer;" onclick="setSecurityNav('riwayat')"
-                title="Total scan in hari ini">
+              <div class="figma-stat-col" style="cursor: default;">
                 <span class="figma-stat-label">Scan In (Kembali)</span>
                 <span class="figma-stat-number" id="statSecScanInCount" style="color: #16a34a;">0</span>
-               
               </div>
             </div>
-
             <!-- Security Alert Banner (Overdue Warning) -->
             <div id="securityOverdueBanner" style="margin-top: 1.25rem;">
               <!-- Rendered via JS -->
@@ -2898,20 +2869,7 @@
           </div>
 
           <div style="display: flex; gap: 0.5rem; margin-top: 0.85rem; flex-wrap: wrap; align-items: center;">
-            <button type="button" class="btn-figma-primary" id="btnBannerOpenPasscode"
-              style="background: #d97706; border-color: #d97706; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
-              <span>🔑 Input Sandi / OTP</span>
-            </button>
-            <button type="button" class="btn-figma-primary" id="btnBannerOpenFaceScan"
-              style="background: #0284c7; border-color: #0284c7; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
-              <span>🤳 Buka Scan Wajah</span>
-            </button>
-            <button type="button" class="btn-figma-primary" id="btnBannerOpenAllMethods"
-              style="background: #be123c; border-color: #be123c; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
-              <span>⚡ Opsi Otorisasi (3 Cara)</span>
-            </button>
-            <button type="button" class="btn-figma-secondary" id="btnBannerEditEmergency"
-              style="background: #ffffff; color: #9f1239; border: 1.5px solid #fecdd3; font-size: 0.8rem; padding: 0.45rem 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <button type="button" class="btn-figma-blue" id="btnBannerEditEmergency">
               <span>✏️ Edit Data Darurat</span>
             </button>
           </div>
@@ -3051,13 +3009,9 @@
             </div>
             <p style="font-size: 0.775rem; color: #475569; margin: 0.4rem 0 0.65rem; line-height: 1.45;">
               Sesuai SOP Keamanan "No Approval, No Exit", QR Code izin darurat ini terkunci hingga diotorisasi oleh
-              Atasan (<strong id="infoEmgApproverName">Ir. Hendra Gunawan</strong>). Karyawan dapat memasukkan kode
-              sandi/OTP dari Atasan atau memindai wajah Atasan langsung.
+              Atasan (<strong id="infoEmgApproverName">Ir. Hendra Gunawan</strong>). Karyawan dapat mengedit data pengajuan atau membatalkan izin bila diperlukan.
             </p>
-            <button type="button" id="btnDetailOpenUnlockBox" class="btn-figma-primary"
-              style="background: #dc2626; border-color: #dc2626; font-size: 0.8rem; padding: 0.45rem 0.95rem; font-weight: 700; width: 100%; justify-content: center;">
-              Buka Otorisasi (Input Sandi / Scan Wajah)
-            </button>
+            
           </div>
         </div>
 
@@ -3080,12 +3034,8 @@
         style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 0.75rem; color: #64748b;" id="detailFooterMeta">Tiket selesai — QR tidak aktif</span>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" class="btn-figma-primary" id="btnDetailEmergencyUnlock"
-            style="display: none; background: #dc2626; border-color: #dc2626; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700;">
-            ⚡ Otorisasi Darurat (Sandi / Wajah)
-          </button>
-          <button type="button" class="btn-figma-secondary" id="btnDetailEditTicket"
-            style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 600;">
+          
+          <button type="button" class="btn-figma-secondary" id="btnDetailEditTicket" class="btn-figma-blue" style="display: none;">
             ✏️ Edit Pengajuan
           </button>
           <button type="button" class="btn-emergency" id="btnDetailCancelTicket"
@@ -4398,25 +4348,25 @@ amily: var(--font-mono);"
   <!-- Scripts -->
   <script src="qrcode.min.js"></script>
   <script src="html5-qrcode.min.js"></script>
-  <script src="js/data/mockData.js?v=20261102_1435"></script>
-  <script src="js/data/authData.js?v=20261102_1435"></script>
-  <script src="js/modules/notifications.js?v=20261102_1435"></script>
-  <script src="js/modules/ui.js?v=20261102_1435"></script>
-  <script src="js/modules/scheduler.js?v=20261102_1435"></script>
-  <script src="js/modules/navigation.js?v=20261102_1435"></script>
-  <script src="js/modules/karyawan.js?v=20261102_1435"></script>
-  <script src="js/modules/approver.js?v=20261102_1435"></script>
-  <script src="js/modules/security.js?v=20261102_1435"></script>
-  <script src="js/modules/admin.js?v=20261102_1435"></script>
-  <script src="js/modules/charts.js?v=20261102_1435"></script>
-  <script src="js/modules/emergency.js?v=20261102_1435"></script>
-  <script src="js/modules/modals.js?v=20261102_1435"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261102_1435"></script>
-  <script src="js/modules/mobile_atasan.js?v=20261102_1435"></script>
-  <script src="js/modules/mobile_security.js?v=20261102_1435"></script>
-  <script src="js/modules/mobile_app.js?v=20261102_1435"></script>
-  <script src="js/app.js?v=20261102_1435"></script>
-  <script src="js/modules/auth.js?v=20261102_1435"></script>
+  <script src="js/data/mockData.js?v=20261103_0845"></script>
+  <script src="js/data/authData.js?v=20261103_0845"></script>
+  <script src="js/modules/notifications.js?v=20261103_0845"></script>
+  <script src="js/modules/ui.js?v=20261103_0845"></script>
+  <script src="js/modules/scheduler.js?v=20261103_0845"></script>
+  <script src="js/modules/navigation.js?v=20261103_0845"></script>
+  <script src="js/modules/karyawan.js?v=20261103_0845"></script>
+  <script src="js/modules/approver.js?v=20261103_0845"></script>
+  <script src="js/modules/security.js?v=20261103_0845"></script>
+  <script src="js/modules/admin.js?v=20261103_0845"></script>
+  <script src="js/modules/charts.js?v=20261103_0845"></script>
+  <script src="js/modules/emergency.js?v=20261103_0845"></script>
+  <script src="js/modules/modals.js?v=20261103_0845"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261103_0845"></script>
+  <script src="js/modules/mobile_atasan.js?v=20261103_0845"></script>
+  <script src="js/modules/mobile_security.js?v=20261103_0845"></script>
+  <script src="js/modules/mobile_app.js?v=20261103_0845"></script>
+  <script src="js/app.js?v=20261103_0845"></script>
+  <script src="js/modules/auth.js?v=20261103_0845"></script>
 </body>
 
 </html>

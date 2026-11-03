@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="bgBudi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#064e3b"/>
+    </linearGradient>
+    <linearGradient id="skinBudi" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#bgBudi)"/>
+  <!-- Body / Clothes (Polo Kujang) -->
+  <path d="M22 88 C22 68, 35 62, 50 62 C65 62, 78 68, 78 88 Z" fill="#047857"/>
+  <!-- Polo Collar -->
+  <path d="M42 62 L50 74 L58 62 L50 66 Z" fill="#10b981"/>
+  <polygon points="50,67 43,62 50,65" fill="#065f46"/>
+  <polygon points="50,67 57,62 50,65" fill="#065f46"/>
+  <!-- ID Badge Lanyard -->
+  <path d="M46 72 L46 88 L54 88 L54 72 Z" fill="#e2e8f0" opacity="0.85"/>
+  <rect x="47" y="78" width="6" height="8" rx="1" fill="#0284c7"/>
+  <!-- Head & Neck -->
+  <rect x="44" y="50" width="12" height="15" rx="3" fill="#f59e0b"/>
+  <ellipse cx="50" cy="42" rx="17" ry="19" fill="#fcd34d"/>
+  <!-- Ears -->
+  <circle cx="33" cy="42" r="3.5" fill="#fcd34d"/>
+  <circle cx="67" cy="42" r="3.5" fill="#fcd34d"/>
+  <!-- Hair (Neat Side Part) -->
+  <path d="M33 38 C33 24, 42 20, 52 20 C64 20, 68 26, 68 36 C64 34, 60 33, 50 33 C40 33, 35 36, 33 38 Z" fill="#1e293b"/>
+  <!-- Eyes -->
+  <circle cx="44" cy="41" r="2" fill="#0f172a"/>
+  <circle cx="56" cy="41" r="2" fill="#0f172a"/>
+  <!-- Eyebrows -->
+  <path d="M41 37 Q44 35 47 37" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M53 37 Q56 35 59 37" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- Nose -->
+  <path d="M50 42 L48.5 46 L51.5 46" stroke="#d97706" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Smile -->
+  <path d="M45 49 Q50 53 55 49" stroke="#92400e" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.25"/>
+</svg>

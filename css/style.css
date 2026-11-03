@@ -384,6 +384,7 @@ body.theme-dark .figma-hero-banner {
   border: 1px solid #0f4b35 !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
 }
+body.theme-dark .figma-hero-banner.approver-theme,
 body.theme-dark .dashboard-hero-banner.approver-theme {
   background: linear-gradient(135deg, #0d223c 0%, #133357 50%, #08192d 100%) !important;
   border: 1px solid #1b4577 !important;
@@ -6733,13 +6734,90 @@ body.theme-dark .btn-figma-warning:hover,
   grid-template-columns: repeat(4, 1fr);
 }
 
+#securityStatsRow .figma-stat-col {
+  cursor: default !important;
+  user-select: none;
+}
+
+#securityStatsRow .figma-stat-col:hover {
+  background: transparent !important;
+  transform: none !important;
+}
+
 .figma-hero-banner.security-theme {
-  background: linear-gradient(135deg, #0b2239 0%, #061320 100%);
-  box-shadow: 0 4px 14px rgba(6, 19, 32, 0.25);
+  background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 60%, #082f49 100%) !important;
+  box-shadow: 0 4px 14px rgba(3, 105, 161, 0.25) !important;
 }
 
 .figma-hero-banner.security-theme .figma-hero-top p {
-  color: #7dd3fc;
+  color: #bae6fd !important;
+}
+
+.figma-hero-banner.approver-theme {
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 50%, #0f2b48 100%) !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25) !important;
+}
+
+.figma-hero-banner.approver-theme .figma-hero-top p {
+  color: #99f6e4 !important;
+}
+
+/* Figma Blue Button (Edit Pengajuan) */
+.btn-figma-blue,
+.btn-figma-edit {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border: 1px solid #0284c7 !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  padding: 0.55rem 1.15rem !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25) !important;
+}
+
+.btn-figma-blue:hover,
+.btn-figma-edit:hover {
+  background: #0369a1 !important;
+  border-color: #0369a1 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35) !important;
+}
+
+body.theme-dark .btn-figma-blue,
+body.theme-dark .btn-figma-edit {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border: 1px solid #38bdf8 !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+}
+
+body.theme-dark .btn-figma-blue:hover,
+body.theme-dark .btn-figma-edit:hover {
+  background: #0369a1 !important;
+  border-color: #7dd3fc !important;
+  color: #ffffff !important;
+}
+
+/* Inline Profile Photo */
+.user-profile-photo-inline {
+  display: inline-block;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease;
+}
+body.theme-dark .user-profile-photo-inline {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 992px) {
@@ -6803,6 +6881,9 @@ body.theme-dark .btn-figma-warning:hover,
   padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .figma-stat-col:not(:last-child) {
@@ -6813,6 +6894,8 @@ body.theme-dark .btn-figma-warning:hover,
   font-size: 0.775rem;
   color: #64748b;
   font-weight: 600;
+  text-align: center;
+  width: 100%;
 }
 
 .figma-stat-number {
@@ -6821,12 +6904,16 @@ body.theme-dark .btn-figma-warning:hover,
   color: #0f172a;
   line-height: 1.2;
   margin-top: 4px;
+  text-align: center;
+  width: 100%;
 }
 
 .figma-stat-sub {
   font-size: 0.725rem;
   color: #94a3b8;
   margin-top: 4px;
+  text-align: center;
+  width: 100%;
 }
 
 /* Figma 2-Column Grid */

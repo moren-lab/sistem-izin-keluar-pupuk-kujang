@@ -1333,7 +1333,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   if (modalDetailSubtitle) {
     const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Oktober 2026';
     const emergLabel = isTicketEmerg ? '<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span> — ' : '';
-    modalDetailSubtitle.innerHTML = `${ticket.applicantName || 'Budi Pratama, S.T.'} — ${emergLabel}${ticket.category} — ${dayStr}`;
+    modalDetailSubtitle.innerHTML = `${window.renderUserPhoto(ticket.applicantName || "Budi Pratama, S.T.", 20)} <span>${ticket.applicantName || "Budi Pratama, S.T."}</span> — ${emergLabel}${ticket.category} — ${dayStr}`;
   }
 
   // Status Badge on Top Right
@@ -1366,7 +1366,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   }
 
   const infoEmployeeName = document.getElementById('infoEmployeeName');
-  if (infoEmployeeName) infoEmployeeName.textContent = ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama, S.T.');
+  if (infoEmployeeName) infoEmployeeName.innerHTML = `${window.renderUserPhoto(ticket.applicantName || "Budi Pratama, S.T.", 26)} <span>${ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : "Budi Pratama, S.T.")}</span>`;
 
   const infoEmployeeNip = document.getElementById('infoEmployeeNip');
   if (infoEmployeeNip) infoEmployeeNip.textContent = ticket.applicantNip || (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841');
@@ -1674,15 +1674,7 @@ function openTicketDetail(ticketId, defaultTab = 'info') {
   }
 
   // 3. Footer Button (⚡ Otorisasi Darurat)
-  if (btnDetailEmergencyUnlock) {
-    if (isEmergLockedInDetail) {
-      btnDetailEmergencyUnlock.style.display = 'inline-flex';
-      btnDetailEmergencyUnlock.onclick = () => window.openEmergencyUnlockModal(ticket.id);
-    } else {
-      btnDetailEmergencyUnlock.style.display = 'none';
-      btnDetailEmergencyUnlock.onclick = null;
-    }
-  }
+  if (btnDetailEmergencyUnlock) { btnDetailEmergencyUnlock.style.display = "none"; btnDetailEmergencyUnlock.onclick = null; }
 
   // Edit Action Button directly inside detail modal
   const btnDetailEditTicket = document.getElementById('btnDetailEditTicket');
