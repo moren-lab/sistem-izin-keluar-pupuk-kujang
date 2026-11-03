@@ -1591,17 +1591,43 @@
       }
       if (activeBar) activeBar.style.display = 'none';
 
+      const isHttpInsecure = (typeof window !== 'undefined' && !window.isSecureContext && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1');
+
       let userMsg = 'Kamera tidak dapat diakses. Pastikan izin kamera diberikan di browser.';
+      let userHtml = '';
       const errStr = String(err ? (err.message || err) : '').toLowerCase();
-      if (errStr.includes('permission') || errStr.includes('denied') || errStr.includes('notallowed')) {
-        userMsg = 'Izin akses kamera ditolak. Silakan izinkan kamera di browser Anda.';
+
+      if (isHttpInsecure || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        userMsg = 'Kamera live diblokir Chrome pada alamat HTTP IP lokal. Gunakan tombol Unggah Gambar QR (bisa langsung jepret kamera HP).';
+        userHtml = `
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 12px; text-align: left; margin-top: 6px;">
+            <div style="font-weight: 800; color: #b91c1c; font-size: 0.775rem; margin-bottom: 4px;">⚠️ Kamera Live Diblokir oleh Kebijakan Chrome (HTTP IP)</div>
+            <p style="font-size: 0.725rem; color: #7f1d1d; margin: 0 0 8px 0; line-height: 1.4;">
+              Chrome Android membatasi streaming kamera langsung hanya pada <strong>HTTPS</strong> atau <strong>localhost</strong>.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <button type="button" class="mobile-btn-primary" style="padding: 8px 12px; font-size: 0.75rem; font-weight: 700; width: 100%;" onclick="window.mobileTriggerUploadQr()">
+                📸 Jepret QR dengan Kamera HP Sekarang
+              </button>
+            </div>
+            <div style="font-size: 0.675rem; color: #991b1b; margin-top: 6px; border-top: 1px solid #fee2e2; padding-top: 4px;">
+              Tip: Buka <strong>chrome://flags</strong> lalu cari <strong>unsafely-treat-insecure-origin-as-secure</strong> dan tambahkan ${window.location.origin} untuk mengaktifkan kamera live.
+            </div>
+          </div>
+        `;
+      } else if (errStr.includes('permission') || errStr.includes('denied') || errStr.includes('notallowed')) {
+        userMsg = 'Izin akses kamera ditolak. Silakan izinkan kamera di setelan situs browser Anda.';
+        userHtml = `<span style="color: #dc2626; font-weight: 700;">${userMsg}</span>`;
       } else if (errStr.includes('notfound') || errStr.includes('device')) {
         userMsg = 'Perangkat kamera tidak ditemukan. Gunakan Unggah Gambar QR atau Input Manual.';
+        userHtml = `<span style="color: #dc2626; font-weight: 700;">${userMsg}</span>`;
+      } else {
+        userHtml = `<span style="color: #dc2626; font-weight: 700;">${userMsg}</span>`;
       }
 
       if (statusMsg) {
         statusMsg.style.display = 'block';
-        statusMsg.innerHTML = `<span style="color: #dc2626; font-weight: 700;">${userMsg}</span>`;
+        statusMsg.innerHTML = userHtml;
       }
       if (typeof window.showToast === 'function') window.showToast(userMsg, 'danger');
     }
