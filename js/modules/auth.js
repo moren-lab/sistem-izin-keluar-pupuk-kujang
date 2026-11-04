@@ -420,6 +420,16 @@
     // Bersihkan sisa kunci lama di localStorage agar tab baru selalu mulai dari halaman login
     try { localStorage.removeItem('kujang_current_user'); } catch (e) {}
 
+    // Cek apakah ada query parameter ?role=karyawan / ?role=atasan1 / ?role=posjaga / ?role=admin untuk akses langsung
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlRole = urlParams.get('role');
+      if (urlRole && typeof window.kujangQuickLogin === 'function') {
+        window.kujangQuickLogin(urlRole);
+        return;
+      }
+    } catch (e) {}
+
     // Cek sesi login aktif di tab ini (tetap di dashboard saat refresh halaman F5)
     const existingUser = window.getKujangCurrentUser();
     const overlay = document.getElementById('kujangAuthOverlay');
