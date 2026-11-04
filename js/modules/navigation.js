@@ -321,10 +321,62 @@ function findUserByRoleOrId(roleOrId, maybeId) {
   return allUsers.find(u => u.roleKey === roleOrId || u.kujangId === roleOrId);
 }
 window.findUserByRoleOrId = findUserByRoleOrId;
+function isCurrentUserAccessRevoked() {
+  const currentActor = window.currentActor || 'karyawan';
+  const targetUser = (typeof window.findUserByRoleOrId === 'function') 
+    ? window.findUserByRoleOrId(currentActor) 
+    : null;
+  if (targetUser && (targetUser.status === 'Dicabut' || targetUser.status === 'Nonaktif')) {
+    return targetUser;
+  }
+  return null;
+}
+window.isCurrentUserAccessRevoked = isCurrentUserAccessRevoked;
+
+function guardActiveFeatureAccess() {
+  const revokedUser = isCurrentUserAccessRevoked();
+  if (revokedUser) {
+    const revokedMsg = `Hak akses untuk akun <strong>${revokedUser.name}</strong> (${revokedUser.role || revokedUser.roleKey}) telah <strong>DICABUT</strong> oleh Administrator.<br><br>Anda tidak dapat menggunakan fitur dalam sistem ini sebelum hak akses diaktifkan kembali oleh Administrator.`;
+    if (typeof window.openNoticeModal === 'function') {
+      window.openNoticeModal({
+        title: 'Hak Akses Anda Telah Dicabut',
+        message: revokedMsg,
+        buttonText: 'Batal'
+      });
+    } else {
+      alert(`[HAK AKSES DICABUT]\n\nAkun Anda (${revokedUser.name}) telah dicabut oleh Administrator.`);
+    }
+    return false;
+  }
+  return true;
+}
+window.guardActiveFeatureAccess = guardActiveFeatureAccess;
+
 
 function switchRole(role, kujangId) {
   // Validasi Hak Akses: Cegah akses jika status akun dicabut/nonaktif oleh Admin
   const targetUser = findUserByRoleOrId(role, kujangId);
+  // Cek apakah akun telah dihapus dari direktori
+  let deletedList = [];
+  try {
+    deletedList = JSON.parse(localStorage.getItem('KUJANG_DELETED_USERS') || '[]');
+  } catch(e) {}
+  const targetKujang = kujangId || (targetUser ? targetUser.kujangId : (role.startsWith('KJG-') ? role : null));
+  const isDeleted = deletedList.find(d => d.kujangId === targetKujang || (d.role === role && (!targetUser || targetUser.kujangId === d.kujangId)));
+  if (isDeleted) {
+    const delMsg = `Akun <strong>${isDeleted.name || isDeleted.kujangId}</strong> (${isDeleted.kujangId}) telah <strong>DIHAPUS</strong> oleh Administrator dari sistem PT Pupuk Kujang.<br><br>Akun ini tidak lagi memiliki hak akses dan tidak dapat digunakan.`;
+    if (typeof window.openNoticeModal === 'function') {
+      window.openNoticeModal({
+        title: 'Hak Akses Telah Dihapus',
+        message: delMsg,
+        buttonText: 'Batal'
+      });
+    } else {
+      alert(`[HAK AKSES DIHAPUS]\n\nAkun ${isDeleted.kujangId} telah dihapus dari sistem.`);
+    }
+    return false;
+  }
+
 
   if (targetUser && (targetUser.status === 'Dicabut' || targetUser.status === 'Nonaktif')) {
     const revokedMsg = `Hak akses untuk akun <strong>${targetUser.name}</strong> (${targetUser.role || targetUser.roleKey}) telah <strong>DICABUT</strong> oleh Administrator.<br><br>Sesuai tata kelola keamanan PT Pupuk Kujang, Anda <strong>TIDAK DAPAT MASUK</strong> ke akun ini sebelum hak akses diaktifkan kembali di Direktori Admin.`;

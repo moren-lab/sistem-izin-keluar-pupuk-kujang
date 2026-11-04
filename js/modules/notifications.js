@@ -439,15 +439,7 @@
       window.mobileCloseSheet();
     }
 
-    // Tutup halaman penuh notifikasi desktop jika sedang aktif
-    const notifView = document.getElementById('viewNotifikasi');
-    if (notifView && notifView.style.display === 'block') {
-      if (typeof window.closeDesktopFullNotifikasi === 'function') {
-        window.closeDesktopFullNotifikasi();
-      } else {
-        notifView.style.display = 'none';
-      }
-    }
+    // Tetap berada di halaman notifikasi desktop (jangan tutup viewNotifikasi)
 
     if (!ticketId) return;
 
@@ -624,7 +616,7 @@
     const badgeText = document.getElementById('desktopNotifUnreadText');
     if (!container) return;
 
-    const notifs = getNotificationsForActiveActor().slice(0, 10);
+    const notifs = getNotificationsForActiveActor().filter(n => !n.isRead).slice(0, 10);
     const unreadCount = getUnreadCountForActiveActor();
 
     if (badgeText) {
@@ -635,8 +627,8 @@
       container.innerHTML = `
         <div style="padding: 30px 16px; text-align: center; color: #64748b;">
           <div style="font-size: 1.5rem; margin-bottom: 6px;">🔔</div>
-          <div style="font-weight: 700; color: var(--text-primary, #0f172a); font-size: 0.85rem;">Belum ada notifikasi</div>
-          <div style="font-size: 0.75rem; margin-top: 2px;">Pemberitahuan aktivitas perizinan akan muncul di sini.</div>
+          <div style="font-weight: 700; color: var(--text-primary, #0f172a); font-size: 0.85rem;">Tidak ada notifikasi baru</div>
+          <div style="font-size: 0.75rem; margin-top: 2px;">Semua notifikasi telah dibaca. Buka halaman notifikasi untuk melihat riwayat lengkap.</div>
         </div>
       `;
       return;

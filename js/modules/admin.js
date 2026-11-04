@@ -1,3 +1,45 @@
+
+function autoCancelTicketsForRevokedUser(user) {
+  if (!user) return;
+  let tickets = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
+  let canceledCount = 0;
+  const userNip = user.nip;
+  const userName = user.name;
+  const userKujangId = user.kujangId;
+
+  tickets.forEach(t => {
+    const tNip = t.applicantNip || t.karyawanNip || (t.pemohon && t.pemohon.nip) || t.nip;
+    const tName = t.applicantName || (t.pemohon && t.pemohon.nama) || t.nama;
+    const isMatch = (tNip && userNip && tNip === userNip) ||
+                    (tName && userName && tName.toLowerCase() === userName.toLowerCase()) ||
+                    (t.kujangId && userKujangId && t.kujangId === userKujangId);
+    
+    const isFinished = (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak');
+    if (isMatch && !isFinished) {
+      t.status = 'Dibatalkan';
+      t.cancellationReason = `Pengajuan dibatalkan otomatis oleh sistem karena hak akses pemohon (${userName}) telah dicabut oleh Administrator.`;
+      if (!t.logs) t.logs = [];
+      t.logs.push({
+        event: 'Pengajuan Dibatalkan oleh Sistem',
+        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        by: 'Sistem Keamanan PT Pupuk Kujang',
+        desc: `Hak akses akun pemohon (${userName}) dicabut oleh Administrator.`
+      });
+      canceledCount++;
+    }
+  });
+
+  if (canceledCount > 0) {
+    window.ticketsList = tickets;
+    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+    if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+    if (typeof window.renderAdminView === 'function') window.renderAdminView();
+  }
+}
+window.autoCancelTicketsForRevokedUser = autoCancelTicketsForRevokedUser;
+
 /**
  * SISTEM PERIZINAN KELUAR AREA KARYAWAN - PT Pupuk Kujang Cikampek
  * Module: Administrator Pengamanan & K3 (Supervisor & Auditor Pusat)
@@ -1954,6 +1996,7 @@ function saveAdminUserAccess(event) {
     }
   }
 
+  if (status === 'Dicabut') { autoCancelTicketsForRevokedUser(users[idx] || { name, nip, kujangId }); }
   if (typeof window.saveUsers === 'function') {
     window.saveUsers(users);
   } else {
@@ -1978,94 +2021,161 @@ function saveAdminUserAccess(event) {
 }
 
 function toggleUserAccess(kujangId) {
-  let users = window.MOCK_USERS || [];
+  let users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
   const user = users.find(u => u.kujangId === kujangId);
   if (!user) return;
 
   if (user.roleKey === 'admin' && user.status === 'Aktif') {
     const activeAdmins = users.filter(u => u.roleKey === 'admin' && u.status === 'Aktif');
     if (activeAdmins.length <= 1) {
-      alert('Tidak dapat mencabut hak akses Administrator utama satu-satunya.');
+      if (typeof window.openNoticeModal === 'function') {
+        window.openNoticeModal({
+          title: 'Tindakan Ditolak',
+          message: 'Tidak dapat mencabut hak akses Administrator utama satu-satunya.',
+          buttonText: 'Batal'
+        });
+      } else {
+        alert('Tidak dapat mencabut hak akses Administrator utama satu-satunya.');
+      }
       return;
     }
   }
 
   const willRevoke = user.status === 'Aktif';
-
-  // REVISI LOGIKA PART 1: Jika hendak mengaktifkan kembali hak akses ("Beri Akses"),
-  // pastikan jabatan yang bersifat 1 orang (single-seat) tidak sedang dipegang pejabat lain
-  if (!willRevoke) {
-    const roleDef = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === user.roleKey && r.isSingleSeat);
-    if (roleDef) {
-      const existingOccupant = users.find(u => u.kujangId !== user.kujangId && u.status === 'Aktif' && u.roleKey === user.roleKey);
-      if (existingOccupant) {
-        alert(
-          `⛔ TIDAK DAPAT MENGAKTIFKAN HAK AKSES!\n\n` +
-          `Hak akses jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}] untuk ${user.name} tidak dapat diaktifkan karena saat ini sedang aktif dipegang oleh:\n` +
-          `- Nama: ${existingOccupant.name}\n` +
-          `- NIP: ${existingOccupant.nip}\n` +
-          `- KUJANG ID: ${existingOccupant.kujangId}\n\n` +
-          `Ketentuan Sistem: 1 jabatan manajerial/struktural hanya boleh diakses oleh 1 pejabat aktif.\n` +
-          `Sistem mencegah penimpaan akun atasan aktif secara otomatis.\n\n` +
-          `Harap cabut hak akses ${existingOccupant.name} terlebih dahulu jika ingin mengembalikan akses jabatan ini kepada ${user.name}.`
-        );
-        return;
-      }
-    }
-  }
-
   const actionText = willRevoke ? 'mencabut hak akses' : 'mengaktifkan kembali hak akses';
-  if (!confirm(`Apakah Anda yakin ingin ${actionText} untuk akun ${user.name} (${user.kujangId})?`)) {
-    return;
-  }
 
-  user.status = willRevoke ? 'Dicabut' : 'Aktif';
+  const executeToggle = () => {
+    user.status = willRevoke ? 'Dicabut' : 'Aktif';
+    if (user.status === 'Dicabut') {
+      autoCancelTicketsForRevokedUser(user);
+    }
 
-  if (typeof window.saveUsers === 'function') {
-    window.saveUsers(users);
-  }
+    if (typeof window.saveUsers === 'function') {
+      window.saveUsers(users);
+    }
 
-  renderAdminUsers();
-  if (typeof window.syncApproversToForms === 'function') {
-    window.syncApproversToForms();
-  }
+    renderAdminUsers();
+    if (typeof window.syncApproversToForms === 'function') {
+      window.syncApproversToForms();
+    }
 
-  if (typeof window.showToast === 'function') {
-    window.showToast(`Hak akses untuk ${user.name} berhasil ${user.status === 'Aktif' ? 'diaktifkan' : 'dicabut'}.`, user.status === 'Aktif' ? 'success' : 'warning');
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Hak akses untuk ${user.name} berhasil ${user.status === 'Aktif' ? 'diaktifkan' : 'dicabut'}.`, user.status === 'Aktif' ? 'success' : 'warning');
+    }
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: willRevoke ? 'Konfirmasi Cabut Hak Akses' : 'Konfirmasi Aktifkan Hak Akses',
+      message: `Apakah Anda yakin ingin ${actionText} untuk akun <strong>${user.name}</strong> (${user.kujangId})?`,
+      confirmText: willRevoke ? 'Cabut Akses' : 'Aktifkan',
+      onConfirm: executeToggle
+    });
+  } else {
+    executeToggle();
   }
 }
 
 function deleteAdminUser(kujangId) {
-  let users = window.MOCK_USERS || [];
+  let users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
   const user = users.find(u => u.kujangId === kujangId);
   if (!user) return;
 
   if (user.roleKey === 'admin') {
-    alert('Akun Administrator Pengamanan & K3 tidak dapat dihapus untuk keamanan sistem.');
+    if (typeof window.openNoticeModal === 'function') {
+      window.openNoticeModal({
+        title: 'Tindakan Ditolak',
+        message: 'Akun Administrator Pengamanan & K3 tidak dapat dihapus untuk menjamin keamanan sistem.',
+        buttonText: 'Batal'
+      });
+    } else {
+      alert('Akun Administrator Pengamanan & K3 tidak dapat dihapus untuk keamanan sistem.');
+    }
     return;
   }
 
-  if (!confirm(`Apakah Anda yakin ingin menghapus hak akses KUJANG ID ${kujangId} (${user.name})? Tindakan ini akan menghapus akun dari sistem.`)) {
-    return;
-  }
+  const executeDelete = () => {
+    // 1. Simpan riwayat KUJANG ID yang dihapus ke storage
+    let deletedList = [];
+    try {
+      deletedList = JSON.parse(localStorage.getItem('KUJANG_DELETED_USERS') || '[]');
+    } catch(e) {}
+    deletedList.push({
+      kujangId: user.kujangId,
+      name: user.name,
+      nip: user.nip,
+      role: user.role || user.roleKey,
+      deletedAt: new Date().toISOString()
+    });
+    localStorage.setItem('KUJANG_DELETED_USERS', JSON.stringify(deletedList));
+    window.DELETED_USERS = deletedList;
 
-  users = users.filter(u => u.kujangId !== kujangId);
+    // 2. Jika user yang dihapus adalah atasan, hapus nama atasan dari karyawan bawahannya
+    const deletedName = user.name;
+    users.forEach(u => {
+      if (u.directSupervisor === deletedName || u.supervisor === deletedName) {
+        u.directSupervisor = '';
+        u.supervisor = '';
+      }
+    });
 
-  if (typeof window.saveUsers === 'function') {
-    window.saveUsers(users);
-  } else {
+    if (window.ACTORS) {
+      if (window.ACTORS.karyawan && window.ACTORS.karyawan.approverName === deletedName) {
+        window.ACTORS.karyawan.approverName = '';
+      }
+      if (window.ACTORS.karyawan2 && window.ACTORS.karyawan2.approverName === deletedName) {
+        window.ACTORS.karyawan2.approverName = '';
+      }
+    }
+
+    // 3. Batalkan seluruh permohonan aktif pemohon jika user adalah karyawan
+    autoCancelTicketsForRevokedUser(user);
+
+    // 4. Hapus dari daftar users
+    users = users.filter(u => u.kujangId !== kujangId);
     window.MOCK_USERS = users;
-  }
 
-  renderAdminUsers();
-  if (typeof window.syncApproversToForms === 'function') {
-    window.syncApproversToForms();
-  }
+    if (typeof window.saveUsers === 'function') {
+      window.saveUsers(users);
+    }
 
-  if (typeof window.showToast === 'function') {
-    window.showToast(`Hak akses akun ${kujangId} berhasil dihapus dari direktori.`, 'info');
+    renderAdminUsers();
+    if (typeof window.syncActorsFromUsers === 'function') {
+      window.syncActorsFromUsers(users);
+    }
+    if (typeof window.syncApproversToForms === 'function') {
+      window.syncApproversToForms();
+    }
+    if (typeof window.renderKaryawanView === 'function') {
+      window.renderKaryawanView();
+    }
+
+    // Tampilkan modal pemberitahuan hak akses telah dihapus (Item 5)
+    const deletedNoticeMsg = `Hak akses untuk akun <strong>${user.name}</strong> (${user.kujangId}) telah <strong>DIHAPUS</strong> dari direktori sistem PT Pupuk Kujang.<br><br>Nama atasan ini telah otomatis dibersihkan dari seluruh data karyawan bawahannya.`;
+    if (typeof window.openNoticeModal === 'function') {
+      window.openNoticeModal({
+        title: 'Hak Akses Telah Dihapus',
+        message: deletedNoticeMsg,
+        buttonText: 'Batal'
+      });
+    }
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Akun ${user.name} (${kujangId}) berhasil dihapus.`, 'info');
+    }
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Hapus Hak Akses Pengguna',
+      message: `Apakah Anda yakin ingin menghapus akun <strong>${user.name}</strong> (${kujangId})? Tindakan ini akan menghapus akun dan seluruh wewenang terkait secara permanen.`,
+      onConfirm: executeDelete
+    });
+  } else if (confirm(`Apakah Anda yakin ingin menghapus hak akses KUJANG ID ${kujangId} (${user.name})?`)) {
+    executeDelete();
   }
 }
+window.deleteAdminUser = deleteAdminUser;
 
 function renderAdminUsers() {
   const users = window.MOCK_USERS || [];
@@ -2152,6 +2262,10 @@ function renderAdminUsers() {
               <span>Ubah</span>
             </button>
             
+                        <button type="button" class="btn-action-sm btn-admin-delete" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Hak Akses Pengguna" style="color: #dc2626; border-color: #fca5a5;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Hapus</span>
+            </button>
             <button type="button" class="btn-action-sm btn-admin-switch" onclick="${isRevoked ? `window.openNoticeModal({ title: 'Hak Akses Anda Telah Dicabut', message: 'Hak akses untuk akun <strong>${u.name}</strong> (${u.role || u.roleKey}) telah <strong>DICABUT</strong> oleh Administrator.<br><br>Sesuai tata kelola keamanan PT Pupuk Kujang, Anda <strong>TIDAK DAPAT MASUK</strong> ke akun ini sebelum hak akses diaktifkan kembali di Direktori Admin.', buttonText: 'Batal' })` : `window.switchRole('${u.kujangId === 'KJG-991025' ? 'karyawan2' : u.roleKey}', '${u.kujangId}')`}" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" ${isRevoked ? 'style="opacity: 0.45; cursor: not-allowed;"' : ''}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 8 20 11 17 14"></polyline><line x1="20" y1="11" x2="11" y2="11"></line></svg>
               <span>Beralih</span>

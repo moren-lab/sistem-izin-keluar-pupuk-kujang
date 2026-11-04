@@ -714,7 +714,7 @@ function getActiveApprovers() {
   const approverUsers = users.filter(u => {
     const isApproverRole = u.roleKey === 'approver' || u.roleKey === 'approver2' ||
       (u.role && (u.role.toLowerCase().includes('atasan') || u.role.toLowerCase().includes('manager') || u.role.toLowerCase().includes('supervisor')));
-    return isApproverRole && u.status === 'Aktif';
+    return isApproverRole;
   });
 
   const avatarPalettes = [
@@ -726,18 +726,23 @@ function getActiveApprovers() {
     'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)'
   ];
 
+  const currentEmpApprover = (window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan.approverName : '';
+
   return approverUsers.map((u, idx) => {
     const isApprover1 = u.roleKey === 'approver' || (u.name && u.name.includes('Hendra Gunawan'));
     const isApprover2 = u.roleKey === 'approver2' || (u.name && u.name.includes('Dewi Sartika'));
+    const isRevoked = u.status === 'Dicabut' || u.status === 'Nonaktif';
 
     return {
       nip: u.nip || '',
       name: u.name,
       displayName: u.name,
-      isUnavailable: false,
+      status: u.status || 'Aktif',
+      isUnavailable: isRevoked,
+      statusLabel: isRevoked ? 'Tidak tersedia' : 'Aktif',
       title: u.role || (isApprover1 ? 'Atasan 1 (Manager)' : 'Atasan 2 (Supervisor / Plt)'),
       department: u.department || 'Departemen Rekayasa & Pemeliharaan',
-      isDirectSupervisor: isApprover1,
+      isDirectSupervisor: (currentEmpApprover && currentEmpApprover === u.name) || (!currentEmpApprover && isApprover1),
       avatarBg: avatarPalettes[idx % avatarPalettes.length]
     };
   });

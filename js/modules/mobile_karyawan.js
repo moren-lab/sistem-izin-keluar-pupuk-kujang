@@ -1521,15 +1521,18 @@
     }
 
     dd.innerHTML = filtered.map(a => `
-      <div class="mobile-approver-item" onclick="window.mobileSelectApprover('${a.name.replace(/'/g, "\\'")}', '${(a.title || '').replace(/'/g, "\\'")}', '${(a.initials || 'HG')}')">
+      <div class="mobile-approver-item" style="${a.isUnavailable ? 'opacity: 0.6; cursor: not-allowed;' : ''}" onclick="${a.isUnavailable ? `window.showToast('Atasan ${a.name.replace(/'/g, "\\\'")} saat ini Tidak Tersedia karena hak aksesnya dicabut.', 'warning');` : `window.mobileSelectApprover('${a.name.replace(/'/g, "\\'")}', '${(a.title || '').replace(/'/g, "\\'")}', '${(a.initials || 'HG')}')`}">
         <div class="mobile-approver-item-avatar" style="background: ${a.avatarBg || 'linear-gradient(135deg, #059669 0%, #0d9488 100%)'};">
           ${a.initials || 'HG'}
         </div>
         <div class="mobile-approver-item-info">
-          <div class="mobile-approver-item-name">${a.name}</div>
+          <div class="mobile-approver-item-name" style="display: flex; align-items: center; gap: 6px;">
+            <span>${a.name}</span>
+            <span style="${a.isUnavailable ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;'} font-size: 0.625rem; font-weight: 700; padding: 1px 6px; border-radius: 9999px;">${a.isUnavailable ? 'Tidak tersedia' : 'Aktif'}</span>
+          </div>
           <div class="mobile-approver-item-role">${a.title || 'Manajer'} • ${a.department || 'Rekayasa'}</div>
         </div>
-        <span style="color: #059669; font-size: 0.75rem; font-weight: 700;">Pilih</span>
+        <span style="color: ${a.isUnavailable ? '#94a3b8' : '#059669'}; font-size: 0.75rem; font-weight: 700;">${a.isUnavailable ? 'Tutup' : 'Pilih'}</span>
       </div>
     `).join('');
   };

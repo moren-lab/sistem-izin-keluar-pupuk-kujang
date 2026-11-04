@@ -641,10 +641,12 @@ function setupSingleApproverCombobox(cfg) {
       const highlightedDept = highlightApproverMatch(approver.department, cleanQuery);
       const avatarBg = approver.avatarBg || 'linear-gradient(135deg, #059669 0%, #0d9488 100%)';
 
+      const isUnavailable = Boolean(approver.isUnavailable);
+      const statusTag = isUnavailable
+        ? `<span class="approver-item-tag" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-weight: 700; font-size: 0.675rem; padding: 2px 7px; border-radius: 9999px;">Tidak tersedia</span>`
+        : `<span class="approver-item-tag" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.675rem; padding: 2px 7px; border-radius: 9999px;">Aktif</span>`;
       let directTag = '';
-      if (approver.isUnavailable) {
-        directTag = `<span class="approver-item-tag" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">Sedang Tidak Tersedia</span>`;
-      } else if (approver.isDirectSupervisor) {
+      if (approver.isDirectSupervisor && !isUnavailable) {
         directTag = `<span class="approver-item-tag" title="Atasan langsung divisi Anda">Atasan Langsung</span>`;
       }
 
@@ -662,7 +664,7 @@ function setupSingleApproverCombobox(cfg) {
           <div class="approver-item-name-row">
             <span class="approver-item-name">${highlightedName}</span>
             <span class="approver-item-nip">${approver.nip || ''}</span>
-            ${directTag}
+            ${statusTag} ${directTag}
           </div>
           <div class="approver-item-role">${highlightedTitle}</div>
           <div class="approver-item-dept">${highlightedDept}</div>
@@ -677,7 +679,7 @@ function setupSingleApproverCombobox(cfg) {
         e.stopPropagation();
         if (approver.isUnavailable) {
           if (typeof window.showToast === 'function') {
-            window.showToast('Atasan 1 (Ir. Hendra Gunawan) sedang tidak tersedia karena wewenang dialihkan ke Atasan 2 (Dewi Sartika).', 'warning');
+            window.showToast(`Atasan ${approver.name} saat ini Tidak Tersedia karena hak aksesnya sedang dicabut oleh Administrator.`, 'warning');
           }
           return;
         }
@@ -2039,6 +2041,7 @@ window.closeTicketDetailModal = closeTicketDetailModal;
 
 // CANCELLATION FLOW
 function openCancelModal(ticketId, callback) {
+  if (typeof window.guardActiveFeatureAccess === 'function' && !window.guardActiveFeatureAccess()) return;
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
@@ -3714,6 +3717,38 @@ if (typeof document !== 'undefined') {
   });
 }
 
+
+window.openDeleteConfirmModal = function(options) {
+  const { title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus data ini?', confirmText = 'Hapus', onConfirm = null } = options || {};
+  const modal = document.getElementById('modalDeleteConfirm');
+  const titleEl = document.getElementById('deleteModalTitle');
+  const msgEl = document.getElementById('deleteModalMessage');
+  const btnExecute = document.getElementById('btnExecuteDeleteConfirm');
+  if (modal) {
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
+    if (btnExecute) {
+      btnExecute.textContent = confirmText;
+      btnExecute.onclick = function() {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+    }
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  } else if (confirm(typeof message === 'string' ? message.replace(/<[^>]+>/g, '') : message)) {
+    if (typeof onConfirm === 'function') onConfirm();
+  }
+};
+
+window.closeDeleteConfirmModal = function() {
+  const modal = document.getElementById('modalDeleteConfirm');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+};
 
 window.openNoticeModal = function(options) {
   const { title = 'Pemberitahuan', message = '', buttonText = 'Batal', onConfirm = null } = options || {};

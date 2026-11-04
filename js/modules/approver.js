@@ -1522,6 +1522,11 @@ function clearApproverTrackingHistory() {
 
   const handler = () => {
     finishedTickets.forEach(t => {
+      if (isApprover2) {
+        t.deletedByApprover2 = true;
+      } else {
+        t.deletedByApprover1 = true;
+      }
       t.deletedByApprover = true;
     });
     if (typeof window.saveTickets === 'function') {
