@@ -528,10 +528,11 @@ function getApproverWeeklyRealtimeData() {
 
 window.getApproverWeeklyRealtimeData = getApproverWeeklyRealtimeData;
 
-function getGambar2AestheticBarChartHtml() {
+function getGambar2AestheticBarChartHtml(isMobile = false) {
   const dark = isThemeDark();
   const chartData = getApproverWeeklyRealtimeData();
   const bars = chartData.days;
+  const prefix = isMobile ? 'mob_' : 'web_';
 
   // Determine peak day
   let maxCount = -1;
@@ -581,22 +582,22 @@ function getGambar2AestheticBarChartHtml() {
     const y = bottomY - barH;
     const pct = Math.round((b.total / (chartData.totalWeekVolume || 1)) * 100);
 
-    const barFill = isPeak ? 'url(#barGradPeak)' : (isToday ? 'url(#barGradToday)' : 'url(#barGradStandard)');
+    const barFill = isPeak ? `url(#${prefix}barGradPeak)` : (isToday ? `url(#${prefix}barGradToday)` : `url(#${prefix}barGradStandard)`);
     const barColorHex = isPeak ? '#059669' : (isToday ? '#0284c7' : '#0369a1');
 
     svgContent += `
-      <g id="approverBarGroup_${idx}" class="approver-bar-group" style="cursor: pointer;"
-         onmouseenter="window.hoverApproverBar(event, ${idx}, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')"
-         onmousemove="window.moveApproverChartTooltip(event)"
-         onmouseleave="window.unhoverApproverBar(${idx})"
-         onclick="window.hoverApproverBar(event, ${idx}, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}')">
+      <g id="${prefix}approverBarGroup_${idx}" class="approver-bar-group" style="cursor: pointer;"
+         onmouseenter="window.hoverApproverBar(event, ${idx}, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}', '${prefix}')"
+         onmousemove="window.moveApproverChartTooltip(event, '${prefix}')"
+         onmouseleave="window.unhoverApproverBar(${idx}, '${prefix}')"
+         onclick="window.hoverApproverBar(event, ${idx}, '${b.dayName}', '${b.dateStr}', ${b.total}, ${pct}, '${barColorHex}', '${prefix}')">
         
         <!-- Transparent hover hit area -->
         <rect x="${x - 6}" y="${topY - 24}" width="${barW + 12}" height="${chartH + 74}" fill="transparent" />
 
         ${isPeak ? `
           <!-- Peak Tag Badge -->
-          <g id="approverPeakBadge_${idx}" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);">
+          <g id="${prefix}approverPeakBadge_${idx}" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <rect x="${x + barW / 2 - 24}" y="${y - 28}" width="48" height="17" rx="4" fill="#059669" />
             <polygon points="${x + barW / 2 - 4},${y - 11} ${x + barW / 2 + 4},${y - 11} ${x + barW / 2},${y - 6}" fill="#059669" />
             <text x="${x + barW / 2}" y="${y - 16}" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif">PUNCAK</text>
@@ -604,17 +605,17 @@ function getGambar2AestheticBarChartHtml() {
         ` : ''}
 
         <!-- Number on top of bar (Animated on hover) -->
-        <text id="approverBarVal_${idx}" class="approver-bar-val" x="${x + barW / 2}" y="${isPeak ? y - 32 : y - 8}" text-anchor="middle" fill="${isPeak ? '#059669' : (isToday ? '#0284c7' : '#334155')}" font-size="12" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), font-size 0.2s ease, fill 0.2s ease;">${b.total}</text>
+        <text id="${prefix}approverBarVal_${idx}" class="approver-bar-val" x="${x + barW / 2}" y="${isPeak ? y - 32 : y - 8}" text-anchor="middle" fill="${isPeak ? '#059669' : (isToday ? '#0284c7' : '#334155')}" font-size="12" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), font-size 0.2s ease, fill 0.2s ease;">${b.total}</text>
 
-        <!-- Rounded Bar (Animated on hover like donut chart) -->
-        <rect id="approverBarRect_${idx}" class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" ry="6"
-              fill="${barFill}" style="transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease; transform-origin: ${x + barW / 2}px ${bottomY}px;">
+        <!-- Rounded Bar (With explicit solid fallback fill to guarantee rendering) -->
+        <rect id="${prefix}approverBarRect_${idx}" class="approver-svg-bar" x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" ry="6"
+              fill="${barColorHex}" style="fill: ${barFill}; fill-opacity: 1; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease; transform-origin: ${x + barW / 2}px ${bottomY}px;">
           <title>${b.dayName} (${b.dateStr}): ${b.total} Pengajuan (${pct}% volume tim)</title>
         </rect>
 
         <!-- X-Axis Labels: Clean Day Name & Date -->
-        <text id="approverDayLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : (dark ? '#cbd5e1' : '#0f172a')}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif" style="transition: fill 0.2s ease, font-weight 0.2s ease;">${b.label}</text>
-        <text id="approverDateLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 34}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#64748b'}" font-size="10" font-weight="${isToday ? '700' : '500'}" font-family="'Plus Jakarta Sans', sans-serif">${b.dateStr}</text>
+        <text id="${prefix}approverDayLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 18}" text-anchor="middle" fill="${isToday ? '#0284c7' : (dark ? '#cbd5e1' : '#0f172a')}" font-size="12" font-weight="${isToday ? '800' : '700'}" font-family="'Plus Jakarta Sans', sans-serif" style="transition: fill 0.2s ease, font-weight 0.2s ease;">${b.label}</text>
+        <text id="${prefix}approverDateLabel_${idx}" x="${x + barW / 2}" y="${bottomY + 34}" text-anchor="middle" fill="${isToday ? '#0284c7' : '#64748b'}" font-size="10" font-weight="${isToday ? '700' : '500'}" font-family="'Plus Jakarta Sans', sans-serif">${b.dateStr}</text>
         ${isToday ? `<circle cx="${x + barW / 2}" cy="${bottomY + 44}" r="2.5" fill="#0284c7" />` : ''}
       </g>
     `;
@@ -623,8 +624,10 @@ function getGambar2AestheticBarChartHtml() {
   const peakDayObj = bars[peakIdx] || { dayName: 'Selasa', total: 20 };
   const avgDaily = Math.round((chartData.totalWeekVolume || 98) / 7);
 
+  const containerPadding = isMobile ? 'padding: 8px 10px; border: none; background: transparent;' : 'padding: 12px 14px; border: 1px solid var(--border-color, #e2e8f0); background: var(--bg-card, #ffffff);';
+
   return `
-    <div style="position: relative; width: 100%; max-width: 100%; background: var(--bg-card, #ffffff); border-radius: 12px; padding: 12px 14px; border: 1px solid var(--border-color, #e2e8f0);">
+    <div style="position: relative; width: 100%; max-width: 100%; border-radius: 12px; ${containerPadding}">
       <!-- Bento Summary Header Bar -->
       <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color, #f1f5f9); margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
@@ -658,17 +661,17 @@ function getGambar2AestheticBarChartHtml() {
 
       <!-- SVG Chart -->
       <div style="width: 100%; overflow-x: auto;">
-        <svg viewBox="0 0 ${svgW} ${svgH}" style="width: 100%; height: auto; min-width: 320px; display: block;" preserveAspectRatio="xMidYMid meet">
+        <svg viewBox="0 0 ${svgW} ${svgH}" style="width: 100%; height: auto; display: block;" preserveAspectRatio="xMidYMid meet">
           <defs>
-            <linearGradient id="barGradPeak" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="${prefix}barGradPeak" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#10b981" />
               <stop offset="100%" stop-color="#059669" />
             </linearGradient>
-            <linearGradient id="barGradToday" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="${prefix}barGradToday" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#38bdf8" />
               <stop offset="100%" stop-color="#0284c7" />
             </linearGradient>
-            <linearGradient id="barGradStandard" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="${prefix}barGradStandard" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#0284c7" />
               <stop offset="100%" stop-color="#0369a1" />
             </linearGradient>
@@ -678,10 +681,10 @@ function getGambar2AestheticBarChartHtml() {
       </div>
 
       <!-- Floating Interactive Tooltip Popover -->
-      <div id="approverChartTooltip" style="display: none; position: absolute; z-index: 1000; pointer-events: none; background: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-size: 0.775rem; line-height: 1.4; transform: translate(-50%, -115%); transition: opacity 0.15s ease;">
-        <div id="approverTooltipDay" style="font-weight: 800; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 4px; color: #38bdf8;"></div>
-        <div id="approverTooltipVolume" style="font-weight: 700; color: #f8fafc;"></div>
-        <div id="approverTooltipPct" style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;"></div>
+      <div id="${prefix}approverChartTooltip" style="display: none; position: absolute; z-index: 1000; pointer-events: none; background: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-size: 0.775rem; line-height: 1.4; transform: translate(-50%, -115%); transition: opacity 0.15s ease;">
+        <div id="${prefix}approverTooltipDay" style="font-weight: 800; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 4px; color: #38bdf8;"></div>
+        <div id="${prefix}approverTooltipVolume" style="font-weight: 700; color: #f8fafc;"></div>
+        <div id="${prefix}approverTooltipPct" style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;"></div>
       </div>
     </div>
   `;
@@ -689,97 +692,93 @@ function getGambar2AestheticBarChartHtml() {
 window.getGambar2AestheticBarChartHtml = getGambar2AestheticBarChartHtml;
 
 // Hover & Animation handlers for Approver Bar Chart (seperti efek donat)
-window.hoverApproverBar = function(event, idx, dayName, dateStr, count, pct, color) {
+window.hoverApproverBar = function(event, idx, dayName, dateStr, count, pct, color, prefix = 'web_') {
   // Show popover tooltip
-  window.showApproverChartTooltip(event, dayName, dateStr, count, pct, color);
+  window.showApproverChartTooltip(event, dayName, dateStr, count, pct, color, prefix);
 
   // Animasi batang: membesar ke atas dan bersinar persis seperti animasi donat
-  const bar = document.getElementById(`approverBarRect_${idx}`);
+  const bar = document.getElementById(`${prefix}approverBarRect_${idx}`);
   if (bar) {
     bar.style.transform = 'scaleY(1.06) scaleX(1.05)';
     bar.style.filter = `drop-shadow(0 0 10px ${color}90) brightness(1.15)`;
   }
-  const valText = document.getElementById(`approverBarVal_${idx}`);
+  const valText = document.getElementById(`${prefix}approverBarVal_${idx}`);
   if (valText) {
     valText.style.transform = 'translateY(-6px)';
     valText.style.fontSize = '14px';
     valText.style.fill = color;
   }
-  const peakBadge = document.getElementById(`approverPeakBadge_${idx}`);
+  const peakBadge = document.getElementById(`${prefix}approverPeakBadge_${idx}`);
   if (peakBadge) {
     peakBadge.style.transform = 'translateY(-6px)';
   }
-  const dayLbl = document.getElementById(`approverDayLabel_${idx}`);
+  const dayLbl = document.getElementById(`${prefix}approverDayLabel_${idx}`);
   if (dayLbl) {
     dayLbl.style.fill = color;
     dayLbl.style.fontWeight = '900';
   }
 };
 
-window.unhoverApproverBar = function(idx) {
-  window.hideApproverChartTooltip();
+window.unhoverApproverBar = function(idx, prefix = 'web_') {
+  window.hideApproverChartTooltip(prefix);
 
-  const bar = document.getElementById(`approverBarRect_${idx}`);
+  const bar = document.getElementById(`${prefix}approverBarRect_${idx}`);
   if (bar) {
     bar.style.transform = 'none';
     bar.style.filter = 'none';
   }
-  const valText = document.getElementById(`approverBarVal_${idx}`);
+  const valText = document.getElementById(`${prefix}approverBarVal_${idx}`);
   if (valText) {
     valText.style.transform = 'none';
     valText.style.fontSize = '12px';
     valText.style.fill = '';
   }
-  const peakBadge = document.getElementById(`approverPeakBadge_${idx}`);
+  const peakBadge = document.getElementById(`${prefix}approverPeakBadge_${idx}`);
   if (peakBadge) {
     peakBadge.style.transform = 'none';
   }
-  const dayLbl = document.getElementById(`approverDayLabel_${idx}`);
+  const dayLbl = document.getElementById(`${prefix}approverDayLabel_${idx}`);
   if (dayLbl) {
     dayLbl.style.fill = '';
     dayLbl.style.fontWeight = '';
   }
 };
 
-// Tooltip handler functions for Approver
-window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, color) {
-  const tt = document.getElementById('approverChartTooltip');
+window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, color, prefix = 'web_') {
+  const tt = document.getElementById(`${prefix}approverChartTooltip`) || document.getElementById('approverChartTooltip');
   if (!tt) return;
-  const dayEl = document.getElementById('approverTooltipDay');
-  const volEl = document.getElementById('approverTooltipVolume');
-  const pctEl = document.getElementById('approverTooltipPct');
 
-  if (dayEl) {
-    dayEl.textContent = `${dayName} (${dateStr})`;
-    dayEl.style.color = color || '#38bdf8';
-  }
-  if (volEl) volEl.innerHTML = `<span style="color:#fff;">Total Volume Tim:</span> ${count} Pengajuan`;
-  if (pctEl) {
-    const isPeak = count >= 18;
-    pctEl.innerHTML = `${pct}% dari volume tim minggu ini ${isPeak ? '• <strong style="color:#f59e0b;">Volume Puncak</strong>' : ''}`;
-  }
+  const tDay = document.getElementById(`${prefix}approverTooltipDay`) || document.getElementById('approverTooltipDay');
+  const tVol = document.getElementById(`${prefix}approverTooltipVolume`) || document.getElementById('approverTooltipVolume');
+  const tPct = document.getElementById(`${prefix}approverTooltipPct`) || document.getElementById('approverTooltipPct');
+
+  if (tDay) tDay.textContent = `${dayName} • ${dateStr}`;
+  if (tVol) tVol.innerHTML = `Total Pengajuan: <strong style="color: ${color}; font-size: 0.95rem;">${count}</strong>`;
+  if (tPct) tPct.textContent = `Kontribusi ${pct}% dari total volume perizinan tim 7 hari.`;
 
   tt.style.display = 'block';
-  if (event) {
-    window.moveApproverChartTooltip(event);
-  }
+  tt.style.opacity = '1';
+
+  window.moveApproverChartTooltip(event, prefix);
 };
 
-window.moveApproverChartTooltip = function(event) {
-  const tt = document.getElementById('approverChartTooltip');
-  if (!tt || !event) return;
-  const container = tt.parentElement;
-  if (!container) return;
-  const rect = container.getBoundingClientRect();
-  const x = (event.clientX || (rect.left + rect.width / 2)) - rect.left;
-  const y = (event.clientY || (rect.top + 60)) - rect.top;
-  tt.style.left = `${x}px`;
-  tt.style.top = `${y}px`;
+window.moveApproverChartTooltip = function(event, prefix = 'web_') {
+  const tt = document.getElementById(`${prefix}approverChartTooltip`) || document.getElementById('approverChartTooltip');
+  if (!tt || tt.style.display === 'none') return;
+
+  const parentRect = tt.parentElement.getBoundingClientRect();
+  const mouseX = event.clientX - parentRect.left;
+  const mouseY = event.clientY - parentRect.top;
+
+  tt.style.left = `${mouseX}px`;
+  tt.style.top = `${mouseY}px`;
 };
 
-window.hideApproverChartTooltip = function() {
-  const tt = document.getElementById('approverChartTooltip');
-  if (tt) tt.style.display = 'none';
+window.hideApproverChartTooltip = function(prefix = 'web_') {
+  const tt = document.getElementById(`${prefix}approverChartTooltip`) || document.getElementById('approverChartTooltip');
+  if (!tt) return;
+  tt.style.opacity = '0';
+  tt.style.display = 'none';
 };
 
 function renderApproverBarChart() {
@@ -810,30 +809,39 @@ window.renderApproverBarChart = renderApproverBarChart;
 // ===================================================================
 function getAdminTrafficData() {
   const list = window.ticketsList || [];
-  const hours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-
   const now = new Date();
+  const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu, 4: Kamis, 5: Jumat, 6: Sabtu
+  const isFriday = (day === 5);
+
+  // Jadwal operasional realtime: Senin - Kamis s.d 16:00 WIB, Jumat s.d 16:30 WIB
+  const hours = isFriday
+    ? ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '16:30']
+    : ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+
   const curH = now.getHours();
+  const curM = now.getMinutes();
+  const curDecHour = curH + (curM / 60);
 
   // Baseline standard operating load (hanya untuk jam yang telah lewat hari ini)
   const fullBaseOut = {
     '07:00': 2, '08:00': 4, '09:00': 5, '10:00': 7,
     '11:00': 12, '12:00': 9, '13:00': 5, '14:00': 8,
-    '15:00': 9, '16:00': 14, '17:00': 7
+    '15:00': 9, '16:00': 14, '16:30': 8
   };
   const fullBaseIn = {
     '07:00': 1, '08:00': 2, '09:00': 3, '10:00': 5,
     '11:00': 7, '12:00': 11, '13:00': 12, '14:00': 6,
-    '15:00': 8, '16:00': 10, '17:00': 15
+    '15:00': 8, '16:00': 10, '16:30': 12
   };
 
   const baseOut = {};
   const baseIn = {};
 
   hours.forEach(hour => {
-    const slotH = parseInt(hour.split(':')[0], 10);
+    const parts = hour.split(':');
+    const slotDec = parseInt(parts[0], 10) + (parseInt(parts[1], 10) / 60);
     // Sesuai instruksi pengguna: jika belum waktunya (jam masa depan atau sebelum shift 07:00), maka HARUS 0!
-    if (curH < 7 || slotH > curH) {
+    if (curDecHour < 7 || slotDec > curDecHour) {
       baseOut[hour] = 0;
       baseIn[hour] = 0;
     } else {
@@ -945,8 +953,9 @@ function renderAdminTrafficChart() {
   const timeNowFull = `${timeNowStr}:${String(curS).padStart(2, '0')} WIB`;
 
   let currentX = null;
-  if (curDecHour >= 7 && curDecHour <= 17) {
-    const fraction = (curDecHour - 7) / (17 - 7);
+  const maxEndHourDec = data.length > 0 ? (parseInt(data[data.length - 1].hour.split(':')[0], 10) + parseInt(data[data.length - 1].hour.split(':')[1], 10) / 60) : 16.0;
+  if (curDecHour >= 7 && curDecHour <= maxEndHourDec) {
+    const fraction = (curDecHour - 7) / (maxEndHourDec - 7);
     currentX = padLeft + fraction * plotW;
   } else if (curDecHour < 7) {
     currentX = padLeft;
@@ -1055,7 +1064,7 @@ function renderAdminTrafficChart() {
               <circle id="trafficPointOut_${i}" cx="${ptOut.x}" cy="${ptOut.y}" r="${isCurrentSlot ? 5.5 : 4}" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" style="transition: all 0.2s ease;" />
               <!-- In Point -->
               <circle id="trafficPointIn_${i}" cx="${ptIn.x}" cy="${ptIn.y}" r="${isCurrentSlot ? 5 : 3.5}" fill="#ffffff" stroke="#10b981" stroke-width="2.2" style="transition: all 0.2s ease;" />
-              ${i % 2 === 0 ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${isCurrentSlot ? '#0f172a' : '#64748b'}" text-anchor="middle">${d.hour}</text>` : ''}
+              ${(i % 2 === 0 || i === data.length - 1) ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${isCurrentSlot ? '#0f172a' : '#64748b'}" text-anchor="middle">${d.hour}</text>` : ''}
             </g>
           `;
         }).join('')}
@@ -1083,7 +1092,7 @@ function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
     badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Scan In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
   }
 
-  for (let i = 0; i < 11; i++) {
+  for (let i = 0; i < 15; i++) {
     const line = document.getElementById(`trafficGuideLine_${i}`);
     const ptOut = document.getElementById(`trafficPointOut_${i}`);
     const ptIn = document.getElementById(`trafficPointIn_${i}`);

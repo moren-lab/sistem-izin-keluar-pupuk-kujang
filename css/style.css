@@ -11313,3 +11313,59 @@ body.theme-dark .btn-antrian-pill.pill-regular.active {
   color: #86efac;
   border-color: rgba(34, 197, 94, 0.4);
 }
+
+/* ===================================================================
+   DYNAMIC ROLE-BASED SIDEBAR COLORS (Identik Dashboard Banner Gambar 4 & 5)
+   =================================================================== */
+
+/* ATASAN / APPROVER SIDEBAR (Sesuai Banner Dashboard Atasan Gambar 4) */
+body.role-is-approver .sidebar {
+  background: linear-gradient(180deg, #115e59 0%, #0f766e 40%, #0f2b48 100%) !important;
+  border-right: 1px solid #0d4b47 !important;
+}
+body.role-is-approver .sidebar-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+body.role-is-approver .sidebar-footer-card {
+  background: rgba(15, 43, 72, 0.5) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+body.role-is-approver .sidebar-info-card {
+  background: rgba(15, 43, 72, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+body.role-is-approver .sidebar-navigation .nav-item.active {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  border-left: 3px solid #5eead4 !important;
+}
+body.role-is-approver .sidebar-navigation .nav-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* POS JAGA / SECURITY SIDEBAR (Sesuai Banner Dashboard Pos Jaga Gambar 5) */
+body.role-is-security .sidebar {
+  background: linear-gradient(180deg, #075985 0%, #0c4a6e 40%, #082f49 100%) !important;
+  border-right: 1px solid #073b5c !important;
+}
+body.role-is-security .sidebar-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+body.role-is-security .sidebar-footer-card {
+  background: rgba(8, 47, 73, 0.5) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+body.role-is-security .sidebar-info-card {
+  background: rgba(8, 47, 73, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+body.role-is-security .sidebar-navigation .nav-item.active {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  border-left: 3px solid #7dd3fc !important;
+}
+body.role-is-security .sidebar-navigation .nav-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}

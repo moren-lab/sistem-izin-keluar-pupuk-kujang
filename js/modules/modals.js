@@ -141,7 +141,7 @@ function handleOpenNewRequest() {
   const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
   if (selectReqCategory) selectReqCategory.value = '';
   if (selectReqType) selectReqType.value = '';
-  if (inputDestination) inputDestination.value = '';
+  if (inputDestination) { inputDestination.value = ''; const c = document.getElementById('countInputDestination'); if (c) c.textContent = '0'; }
   if (inputReason) inputReason.value = '';
   if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'block';
 
@@ -257,7 +257,7 @@ function openEditNormalModal(ticket) {
   // 3. Lokasi / Tujuan Keluar & 4. Alasan Keperluan Izin
   const inputDestination = document.getElementById('inputDestination');
   const inputReason = document.getElementById('inputReason');
-  if (inputDestination) inputDestination.value = ticket.destination || '';
+  if (inputDestination) { inputDestination.value = ticket.destination || ''; const c = document.getElementById('countInputDestination'); if (c) c.textContent = inputDestination.value.length; }
   if (inputReason) inputReason.value = ticket.reason || '';
 
   // 5. Rencana Waktu Keluar & 6. Perkiraan Waktu Kembali
@@ -315,7 +315,7 @@ function openEditEmergencyModal(ticket) {
   // 3. Lokasi / Tujuan Keluar & 4. Alasan Kedaruratan
   const emergDest = document.getElementById('emergDest');
   const emergReason = document.getElementById('emergReason');
-  if (emergDest) emergDest.value = ticket.destination || '';
+  if (emergDest) { emergDest.value = ticket.destination || ''; const c = document.getElementById('countEmergDest'); if (c) c.textContent = emergDest.value.length; }
   if (emergReason) emergReason.value = ticket.reason || '';
 
   // 5. Rencana Waktu Keluar & 6. Perkiraan Waktu Kembali
@@ -1404,13 +1404,25 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (infoType) infoType.textContent = ticket.type;
 
   const infoDestination = document.getElementById('infoDestination');
-  if (infoDestination) infoDestination.textContent = ticket.destination;
+  if (infoDestination) {
+    infoDestination.textContent = ticket.destination;
+    infoDestination.style.whiteSpace = 'pre-wrap';
+    infoDestination.style.wordBreak = 'break-word';
+    infoDestination.style.lineHeight = '1.55';
+    infoDestination.style.maxHeight = 'none';
+    infoDestination.style.overflowY = 'visible';
+  }
 
   const infoReason = document.getElementById('infoReason');
   if (infoReason) {
     infoReason.textContent = ticket.reason;
     infoReason.style.fontWeight = '700';
     infoReason.style.color = '#0f172a';
+    infoReason.style.whiteSpace = 'pre-wrap';
+    infoReason.style.wordBreak = 'break-word';
+    infoReason.style.lineHeight = '1.55';
+    infoReason.style.maxHeight = 'none';
+    infoReason.style.overflowY = 'visible';
   }
 
   const infoTimeSectionTitle = document.getElementById('infoTimeSectionTitle');
@@ -1471,7 +1483,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
   if (infoApproverNoteText) {
-    infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui oleh Atasan langsung.';
+    infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui';
   }
 
   const infoSecurityLbl = document.getElementById('infoSecurityLbl');
@@ -2231,7 +2243,7 @@ function handleOpenEmergency() {
   const selectEmergCategory = document.getElementById('selectEmergCategory');
   const selectEmergType = document.getElementById('selectEmergType');
 
-  if (emergDest) emergDest.value = '';
+  if (emergDest) { emergDest.value = ''; const c = document.getElementById('countEmergDest'); if (c) c.textContent = '0'; }
   if (emergReason) emergReason.value = '';
   if (selectEmergCategory) selectEmergCategory.value = '';
   if (selectEmergType) selectEmergType.value = '';
@@ -2493,7 +2505,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const category = selectReqCategory ? selectReqCategory.value : (formNewRequest.reqCategory ? formNewRequest.reqCategory.value : '');
       const type = selectReqType ? selectReqType.value : (formNewRequest.reqType ? formNewRequest.reqType.value : '');
-      const destination = inputDestination ? inputDestination.value.trim() : '';
+      const destination = inputDestination ? inputDestination.value.trim().slice(0, 300) : '';
       const reason = inputReason ? inputReason.value.trim() : '';
       const plannedExit = inputPlannedExit ? inputPlannedExit.value : '';
       const estimatedReturn = type === 'Kembali ke Area' ? (inputEstimatedReturn ? inputEstimatedReturn.value : null) : null;
@@ -2970,7 +2982,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const isKembali = typeVal === 'Kembali ke Area';
-      const dest = emergDest ? emergDest.value.trim() : '';
+      const dest = emergDest ? emergDest.value.trim().slice(0, 300) : '';
       const reason = emergReason ? emergReason.value.trim() : '';
       const plannedExitVal = emergPlannedExit ? emergPlannedExit.value : '';
       const estimatedReturnVal = isKembali ? (emergEstimatedReturn ? emergEstimatedReturn.value : null) : null;
@@ -3701,3 +3713,26 @@ if (typeof document !== 'undefined') {
     }
   });
 }
+
+
+window.openNoticeModal = function(options) {
+  const { title = 'Pemberitahuan', message = '', buttonText = 'Batal', onConfirm = null } = options || {};
+  const modal = document.getElementById('modalNoticeAlert');
+  const titleEl = document.getElementById('noticeModalTitle');
+  const msgEl = document.getElementById('noticeModalMessage');
+  const btnDismiss = document.getElementById('btnNoticeDismiss');
+  if (modal) {
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
+    if (btnDismiss) {
+      btnDismiss.textContent = buttonText;
+      btnDismiss.onclick = function() {
+        modal.classList.remove('open');
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+    }
+    modal.classList.add('open');
+  } else {
+    alert(typeof message === 'string' ? message.replace(/<[^>]+>/g, '') : message);
+  }
+};

@@ -497,7 +497,7 @@ function renderKaryawanDashboard() {
 
         const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
         actionButtonsHtml = `
-          ${(!isLateStatus && isKembali) ? (
+          ${(isKembali) ? (
             hasPendingExt ? `
               <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="opacity: 0.9; cursor: not-allowed; font-weight: 700;" title="Permohonan perpanjangan sedang ditinjau Atasan">
                 <span>Menunggu Persetujuan Perpanjangan</span>
@@ -833,7 +833,7 @@ function renderPengajuanSayaView() {
             ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${activeTicket.destination} — ${activeTicket.reason}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -868,7 +868,6 @@ function renderPengajuanSayaView() {
         <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
         </div>
-      </div>
       </div>
 
       <!-- Card 2: Atasan langsung -->
@@ -1234,11 +1233,11 @@ function renderEmpCards(list, containerElement) {
             <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px;">
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35;">${t.destination}</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;">${t.reason || '-'}</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
               </div>
               <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed #e2e8f0;">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
@@ -1332,8 +1331,8 @@ function renderEmpTable(list, containerElement) {
                   </div>
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem;">${t.destination}</div>
-                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.reason || '-'}</div>
+                  <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
                 </td>
                 <td>${scheduleWithDay}</td>
                 <td>${statusHtml}</td>
@@ -1698,8 +1697,8 @@ function renderKaryawanMobileDashboard() {
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">${activeTicket.id}</div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px; font-weight: 600;">${activeTicket.category} • ${activeTicket.type}</div>
           <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 10px;">Tujuan keluar</div>
-          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.destination}</div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${activeTicket.reason || ''}">${activeTicket.reason || '-'}</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '-').replace(/\r?\n+/g, ' ')}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.reason || '-').replace(/\r?\n+/g, ' ')}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}

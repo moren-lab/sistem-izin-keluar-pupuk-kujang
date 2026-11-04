@@ -1700,9 +1700,30 @@
               </div>
             </div>
 
-            <div class="figma-section-bar" style="margin-top: 1.25rem;">
-
-
+            <!-- View Switcher (Card vs List / Table) Pos Jaga -->
+            <div class="figma-results-bar" style="display: flex; justify-content: flex-end; align-items: center; margin: 0.75rem 0 0.5rem 0;">
+              <div class="figma-view-switcher">
+                <button type="button" class="btn-figma-toggle active" id="btnSecurityViewCard" onclick="window.setSecurityPelacakanViewMode('card')" title="Tampilan Kartu">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <span>Card</span>
+                </button>
+                <button type="button" class="btn-figma-toggle" id="btnSecurityViewTable" onclick="window.setSecurityPelacakanViewMode('table')" title="Tampilan List / Tabel">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                  </svg>
+                  <span>List</span>
+                </button>
+              </div>
             </div>
 
             <div class="content-section" style="margin-top: 0.75rem;">
@@ -2641,13 +2662,17 @@
 
           <!-- Lokasi / Tujuan Keluar -->
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" for="inputDestination"
-              style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-              Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
-            </label>
-            <input type="text" id="inputDestination" class="form-input" placeholder="Masukkan lokasi / tujuan keluar..."
-              required
-              style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <label class="form-label" for="inputDestination"
+                style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
+                Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
+              </label>
+              <span style="font-size: 0.7rem; color: #64748b;"><span id="countInputDestination">0</span>/300 huruf</span>
+            </div>
+            <textarea id="inputDestination" class="form-textarea" placeholder="Masukkan lokasi / tujuan keluar..."
+              required maxlength="300" rows="3"
+              oninput="const el = document.getElementById('countInputDestination'); if(el) el.textContent = this.value.length;"
+              style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px; min-height: 70px; height: auto; resize: vertical; line-height: 1.5;"></textarea>
           </div>
 
           <!-- Alasan Keperluan Izin -->
@@ -2657,8 +2682,8 @@
               Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
             </label>
             <textarea id="inputReason" class="form-textarea"
-              placeholder="Masukkan alasan keperluan izin..." required
-              style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px; min-height: 65px;"></textarea>
+              placeholder="Masukkan alasan keperluan izin..." required rows="3"
+              style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px; min-height: 80px; height: auto; resize: vertical; line-height: 1.5;"></textarea>
           </div>
 
           <!-- Rencana Waktu Keluar & Perkiraan Waktu Kembali -->
@@ -2924,15 +2949,15 @@
                 <strong style="font-size: 0.825rem; color: #0f172a;" id="infoType">Kembali ke Area</strong>
               </div>
               <div>
-                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Lokasi</span>
-                <strong style="font-size: 0.825rem; color: #0f172a;" id="infoDestination">Pelabuhan Cirebon</strong>
+                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Lokasi / Tujuan Keluar</span>
+                <div style="font-size: 0.825rem; color: #0f172a; font-weight: 700; white-space: pre-wrap; word-break: break-word; line-height: 1.5; margin-top: 2px;" id="infoDestination">Pelabuhan Cirebon</div>
               </div>
             </div>
             <div>
-              <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Alasan</span>
-              <p style="font-size: 0.825rem; color: #0f172a; margin: 2px 0 0; line-height: 1.45; font-weight: 700; max-height: 72px; overflow-y: auto; word-break: break-word;" id="infoReason">
+              <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Alasan Keperluan Izin</span>
+              <div style="font-size: 0.825rem; color: #0f172a; margin: 2px 0 0; line-height: 1.5; font-weight: 700; white-space: pre-wrap; word-break: break-word;" id="infoReason">
                 Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.
-              </p>
+              </div>
             </div>
           </div>
 
@@ -2976,7 +3001,7 @@
               <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
                 id="infoApproverLbl">Ir. Hendra Gunawan, M.T.</span>
               <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
-                id="infoApproverNoteText">Disetujui oleh Atasan langsung.</p>
+                id="infoApproverNoteText">Disetujui</p>
             </div>
             <div>
               <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
@@ -3407,12 +3432,17 @@ amily: var(--font-mono);"
 
         <!-- Lokasi Tujuan -->
         <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label" for="emergDest"
-            style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-            Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
-          </label>
-          <input type="text" id="emergDest" class="form-input" placeholder="Masukkan lokasi / tujuan keluar..." required
-            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label class="form-label" for="emergDest"
+              style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
+              Lokasi / Tujuan Keluar <span style="color: var(--rose-danger);">*</span>
+            </label>
+            <span style="font-size: 0.7rem; color: #64748b;"><span id="countEmergDest">0</span>/300 huruf</span>
+          </div>
+          <textarea id="emergDest" class="form-textarea" placeholder="Masukkan lokasi / tujuan keluar..." required
+            maxlength="300" rows="3"
+            oninput="const el = document.getElementById('countEmergDest'); if(el) el.textContent = this.value.length;"
+            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px; min-height: 70px; height: auto; resize: vertical; line-height: 1.5;"></textarea>
         </div>
 
         <!-- Alasan Kedaruratan -->
@@ -3422,7 +3452,7 @@ amily: var(--font-mono);"
             Alasan Kedaruratan <span style="color: var(--rose-danger);">*</span>
           </label>
           <textarea id="emergReason" class="form-textarea"
-            style="min-height: 65px; font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px;"
+            style="min-height: 80px; height: auto; font-size: 0.825rem; padding: 0.55rem 0.75rem; border-color: #cbd5e1; border-radius: 6px; resize: vertical; line-height: 1.5;"
             placeholder="Masukkan alasan kondisi kedaruratan..."
             required></textarea>
         </div>
@@ -3764,7 +3794,7 @@ amily: var(--font-mono);"
         </button>
         <button type="button" class="btn-primary-action" id="btnConfirmLogoutModal"
           style="background: #dc2626; border-color: #dc2626; padding: 0.45rem 1.25rem; font-size: 0.825rem; font-weight: 700;">
-          Ya, Logout Sekarang
+          Logout
         </button>
       </div>
     </div>

@@ -288,7 +288,58 @@ function setAdminNav(navKey) {
 }
 
 // 4-ACTOR ROLE SWITCHING (Karyawan | Atasan | Pos Jaga | Admin)
-function switchRole(role) {
+function findUserByRoleOrId(roleOrId, maybeId) {
+  const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+  if (maybeId) {
+    const byMaybe = allUsers.find(u => u.kujangId === maybeId || u.nip === maybeId);
+    if (byMaybe) return byMaybe;
+  }
+  if (roleOrId && (roleOrId.startsWith('KJG-') || roleOrId.startsWith('PK-'))) {
+    const byId = allUsers.find(u => u.kujangId === roleOrId || u.nip === roleOrId);
+    if (byId) return byId;
+  }
+  if (roleOrId === 'karyawan') {
+    return allUsers.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
+           allUsers.find(u => u.roleKey === 'karyawan');
+  }
+  if (roleOrId === 'karyawan2') {
+    return allUsers.find(u => u.kujangId === 'KJG-991025' || u.nip === 'PK-2024-8842' || (u.name && u.name.includes('Arthur Morgan'))) ||
+           allUsers.find(u => u.roleKey === 'karyawan2');
+  }
+  if (roleOrId === 'approver') {
+    return allUsers.find(u => u.roleKey === 'approver' || u.kujangId === 'KJG-881201' || u.nip === 'PK-2015-1002' || (u.name && u.name.includes('Hendra Gunawan')));
+  }
+  if (roleOrId === 'approver2') {
+    return allUsers.find(u => u.roleKey === 'approver2' || u.kujangId === 'KJG-881202' || u.nip === 'PK-2016-1044' || (u.name && u.name.includes('Dewi Sartika')));
+  }
+  if (roleOrId === 'security') {
+    return allUsers.find(u => u.roleKey === 'security' || u.kujangId === 'KJG-771101' || (u.name && u.name.includes('Agus')));
+  }
+  if (roleOrId === 'admin') {
+    return allUsers.find(u => u.roleKey === 'admin' || u.kujangId === 'KJG-101001' || (u.name && (u.name.includes('Subagja') || u.name.includes('Bambang'))));
+  }
+  return allUsers.find(u => u.roleKey === roleOrId || u.kujangId === roleOrId);
+}
+window.findUserByRoleOrId = findUserByRoleOrId;
+
+function switchRole(role, kujangId) {
+  // Validasi Hak Akses: Cegah akses jika status akun dicabut/nonaktif oleh Admin
+  const targetUser = findUserByRoleOrId(role, kujangId);
+
+  if (targetUser && (targetUser.status === 'Dicabut' || targetUser.status === 'Nonaktif')) {
+    const revokedMsg = `Hak akses untuk akun <strong>${targetUser.name}</strong> (${targetUser.role || targetUser.roleKey}) telah <strong>DICABUT</strong> oleh Administrator.<br><br>Sesuai tata kelola keamanan PT Pupuk Kujang, Anda <strong>TIDAK DAPAT MASUK</strong> ke akun ini sebelum hak akses diaktifkan kembali di Direktori Admin.`;
+    if (typeof window.openNoticeModal === 'function') {
+      window.openNoticeModal({
+        title: 'Hak Akses Anda Telah Dicabut',
+        message: revokedMsg,
+        buttonText: 'Ok'
+      });
+    } else {
+      alert(`[HAK AKSES DICABUT]\n\nAkun Anda (${targetUser.name}) telah dicabut oleh Administrator.`);
+    }
+    return false;
+  }
+
   if (role !== 'security' && typeof window.stopCameraScanner === 'function') {
     window.stopCameraScanner();
   }
@@ -539,6 +590,9 @@ function updateMobileBottomNav(role) {
 
   // Toggle body class so responsive CSS applies automatically
   document.body.classList.toggle('role-is-admin', role === 'admin');
+  document.body.classList.toggle('role-is-approver', role === 'approver' || role === 'approver2');
+  document.body.classList.toggle('role-is-security', role === 'security');
+  document.body.classList.toggle('role-is-karyawan', role === 'karyawan' || role === 'karyawan2');
 
   if (!mobileBottomNav) return;
 
@@ -754,7 +808,8 @@ function handleLoginSubmit() {
   const role = selectedOpt ? selectedOpt.getAttribute('data-role') : 'karyawan';
 
   if (typeof window.switchRole === 'function') {
-    window.switchRole(role);
+    const success = window.switchRole(role);
+    if (success === false) return;
   }
   if (portalLoginOverlay) {
     portalLoginOverlay.classList.remove('open');

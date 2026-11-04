@@ -596,7 +596,7 @@
         </div>
         <div class="mobile-chart-live-wrapper" style="margin-top: 6px;">
           ${(typeof window.getGambar2AestheticBarChartHtml === 'function') 
-            ? window.getGambar2AestheticBarChartHtml() 
+            ? window.getGambar2AestheticBarChartHtml(true) 
             : '<div style="text-align:center; padding: 12px; color: #64748b;">Memuat grafik...</div>'}
         </div>
       </section>
@@ -1946,7 +1946,7 @@
       if (segment === 'volume') {
         const liveWrapper = secVolume.querySelector('.mobile-chart-live-wrapper');
         if (liveWrapper && typeof window.getGambar2AestheticBarChartHtml === 'function') {
-          liveWrapper.innerHTML = window.getGambar2AestheticBarChartHtml();
+          liveWrapper.innerHTML = window.getGambar2AestheticBarChartHtml(true);
         }
       }
     }

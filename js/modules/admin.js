@@ -256,10 +256,8 @@ function renderAdminDashboard() {
               <div class="report-dept-name">${ticket.department}</div>
             </td>
             <td>
-              <div style="font-weight: 600; font-size: 0.825rem; color: var(--text-primary);">${ticket.destination || '-'}</div>
-              <div style="font-size: 0.725rem; color: var(--text-secondary); max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ticket.reason || ''}">
-                ${ticket.reason || '-'}
-              </div>
+              <div style="font-weight: 600; font-size: 0.825rem; color: var(--text-primary); max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(ticket.destination || '').replace(/"/g, '&quot;')}">${(ticket.destination || '-').replace(/\r?\n+/g, ' ')}</div>
+              <div style="font-size: 0.725rem; color: var(--text-secondary); max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(ticket.reason || '').replace(/"/g, '&quot;')}">${(ticket.reason || '-').replace(/\r?\n+/g, ' ')}</div>
             </td>
             <td>
               ${cleanScanDisplay(ticket.scanOutTime, ticket.gateOut)}
@@ -1349,7 +1347,7 @@ function getAdminAllEmployees() {
         name: u.name || '',
         email: u.email || '',
         department: u.department || 'Departemen Rekayasa & Pemeliharaan',
-        supervisor: u.directSupervisor || 'Ir. Hendra Gunawan, M.T.',
+        supervisor: u.directSupervisor || u.supervisor || 'Ir. Hendra Gunawan, M.T.',
         title: u.role || 'Karyawan Pemohon',
         roleKey: u.roleKey || 'karyawan',
         roleTitle: u.role || 'Karyawan Pemohon',
@@ -1804,6 +1802,13 @@ function openAdminUserModal(mode, kujangId) {
       }
       const inputStatus = document.getElementById('adminInputStatus');
       if (inputStatus) inputStatus.value = user.status || 'Aktif';
+
+      // Set user supervisor via searchable dropdown
+      const inputSup = document.getElementById('adminInputSupervisor');
+      const inputSupSearch = document.getElementById('adminInputSupervisorSearch');
+      const curSup = user.directSupervisor || user.supervisor || (user.roleKey === 'karyawan2' ? 'Ir. Hendra Gunawan, M.T.' : (window.ACTORS?.karyawan?.approverName || 'Ir. Hendra Gunawan, M.T.'));
+      if (inputSup) inputSup.value = curSup;
+      if (inputSupSearch) inputSupSearch.value = curSup;
     }
   }
 
@@ -1844,7 +1849,7 @@ function closeAdminUserModal() {
 }
 
 function saveAdminUserAccess(event) {
-  if (event) event.preventDefault();
+  if (event && typeof event.preventDefault === 'function') event.preventDefault();
   const mode = document.getElementById('adminUserEditMode').value;
   const originalId = document.getElementById('adminUserOriginalKujangId').value;
 
@@ -1853,7 +1858,8 @@ function saveAdminUserAccess(event) {
   const name = document.getElementById('adminInputName').value.trim();
   const email = document.getElementById('adminInputEmail').value.trim() || `${nip.toLowerCase().replace(/[^a-z0-9]/g, '')}@pupuk-kujang.co.id`;
   const department = document.getElementById('adminInputDept').value;
-  const roleKey = document.getElementById('adminInputRoleKey').value;
+  let roleKey = document.getElementById('adminInputRoleKey').value;
+  if (kujangId === 'KJG-991025' || (name && name.toLowerCase().includes('arthur morgan'))) { roleKey = 'karyawan2'; }
   const roleTitleInput = document.getElementById('adminInputRoleTitle')?.value || '';
   const status = document.getElementById('adminInputStatus').value;
   const directSupervisor = document.getElementById('adminInputSupervisor')?.value || 'Ir. Hendra Gunawan, M.T.';
@@ -1930,8 +1936,21 @@ function saveAdminUserAccess(event) {
         department,
         role: roleLabel,
         roleKey,
-        status
+        status,
+        directSupervisor: directSupervisor,
+        supervisor: directSupervisor
       };
+
+      // Sinkronisasi atasan langsung ke state aktif karyawan
+      if (users[idx].roleKey === 'karyawan' || users[idx].kujangId === 'KJG-881201' || (users[idx].name && users[idx].name.includes('Budi Pratama'))) {
+        if (window.ACTORS && window.ACTORS.karyawan) {
+          window.ACTORS.karyawan.approverName = directSupervisor;
+        }
+      } else if (users[idx].roleKey === 'karyawan2' || users[idx].kujangId === 'KJG-881202' || (users[idx].name && users[idx].name.includes('Arthur Morgan'))) {
+        if (window.ACTORS && window.ACTORS.karyawan2) {
+          window.ACTORS.karyawan2.approverName = directSupervisor;
+        }
+      }
     }
   }
 
@@ -1943,8 +1962,14 @@ function saveAdminUserAccess(event) {
 
   closeAdminUserModal();
   renderAdminUsers();
+  if (typeof window.syncActorsFromUsers === 'function') {
+    window.syncActorsFromUsers(users);
+  }
   if (typeof window.syncApproversToForms === 'function') {
     window.syncApproversToForms();
+  }
+  if (typeof window.renderKaryawanView === 'function') {
+    window.renderKaryawanView();
   }
 
   if (typeof window.showToast === 'function') {
@@ -2127,7 +2152,7 @@ function renderAdminUsers() {
               <span>Ubah</span>
             </button>
             
-            <button type="button" class="btn-action-sm btn-admin-switch" onclick="window.switchRole('${u.roleKey}')" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" ${isRevoked ? 'disabled style="opacity: 0.45; cursor: not-allowed;"' : ''}>
+            <button type="button" class="btn-action-sm btn-admin-switch" onclick="${isRevoked ? `window.openNoticeModal({ title: 'Hak Akses Anda Telah Dicabut', message: 'Hak akses untuk akun <strong>${u.name}</strong> (${u.role || u.roleKey}) telah <strong>DICABUT</strong> oleh Administrator.<br><br>Sesuai tata kelola keamanan PT Pupuk Kujang, Anda <strong>TIDAK DAPAT MASUK</strong> ke akun ini sebelum hak akses diaktifkan kembali di Direktori Admin.', buttonText: 'Batal' })` : `window.switchRole('${u.kujangId === 'KJG-991025' ? 'karyawan2' : u.roleKey}', '${u.kujangId}')`}" title="${isRevoked ? 'Akses dicabut' : 'Beralih ke peran ini'}" ${isRevoked ? 'style="opacity: 0.45; cursor: not-allowed;"' : ''}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 8 20 11 17 14"></polyline><line x1="20" y1="11" x2="11" y2="11"></line></svg>
               <span>Beralih</span>
             </button>
@@ -2292,10 +2317,8 @@ function renderAdminStatusTracking() {
           <div class="report-dept-name">${t.department}</div>
         </td>
         <td>
-          <div style="font-weight: 600; font-size: 0.825rem; color: var(--text-primary);">${t.destination || '-'}</div>
-          <div style="font-size: 0.725rem; color: var(--text-secondary); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.reason || ''}">
-            ${t.reason || '-'}
-          </div>
+          <div style="font-weight: 600; font-size: 0.825rem; color: var(--text-primary); max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</div>
+          <div style="font-size: 0.725rem; color: var(--text-secondary); max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
         </td>
         <td style="font-size: 0.775rem;">
           <div><span style="color: var(--text-muted);">Keluar:</span> ${cleanScanDisplay(t.scanOutTime, t.gateOut)}</div>
@@ -2643,6 +2666,13 @@ const AVAILABLE_ROLES_JABATAN = [
   }
 ];
 
+function updateAdminSupervisorVisibility(roleKey) {
+  const supervisorGroup = document.getElementById('adminSupervisorGroup');
+  if (!supervisorGroup) return;
+  const isKaryawan = (!roleKey) || roleKey === 'karyawan' || roleKey === 'karyawan2' || (typeof roleKey === 'string' && roleKey.startsWith('karyawan'));
+  supervisorGroup.style.display = isKaryawan ? 'block' : 'none';
+}
+
 function setAdminSelectedRole(roleKey, jabatanOrTitle) {
   const hiddenRoleKey = document.getElementById('adminInputRoleKey');
   const hiddenRoleTitle = document.getElementById('adminInputRoleTitle');
@@ -2665,6 +2695,7 @@ function setAdminSelectedRole(roleKey, jabatanOrTitle) {
   if (indicatorText) indicatorText.textContent = displayText;
   if (clearBtn) clearBtn.style.display = displayText ? 'flex' : 'none';
 
+  updateAdminSupervisorVisibility(roleKeyVal);
   renderAdminRoleDropdownItems(searchInput ? searchInput.value : '');
 }
 

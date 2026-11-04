@@ -464,13 +464,13 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
               <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
               <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin-bottom: 0.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Tujuan keluar</span>
-                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.destination}">${t.destination}</span>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
+                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '').replace(/\r?\n+/g, ' ')}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Keperluan</span>
-                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</span>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
+                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
                 </div>
                 <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
                   <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
@@ -531,14 +531,14 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             </div>
 
             <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
-            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.4rem 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Tujuan keluar</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.destination}">${t.destination}</span>
+            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.35rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Keperluan</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${t.reason || '-'}</span>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
               </div>
               <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
                 <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
@@ -590,6 +590,110 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
   `;
 }
 
+
+window.currentSecurityPelacakanViewMode = window.currentSecurityPelacakanViewMode || 'card';
+
+window.setSecurityPelacakanViewMode = function(mode) {
+  window.currentSecurityPelacakanViewMode = mode;
+  const btnSecurityViewCard = document.getElementById('btnSecurityViewCard');
+  const btnSecurityViewTable = document.getElementById('btnSecurityViewTable');
+  if (btnSecurityViewCard && btnSecurityViewTable) {
+    btnSecurityViewCard.classList.toggle('active', mode !== 'table');
+    btnSecurityViewTable.classList.toggle('active', mode === 'table');
+  }
+  if (typeof window.renderSecurityView === 'function') {
+    window.renderSecurityView();
+  }
+};
+
+function renderSecurityTable(list, containerElement) {
+  if (!containerElement) return;
+
+  containerElement.innerHTML = `
+    <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+      <table class="figma-table" style="min-width: 980px;">
+        <thead>
+          <tr>
+            <th style="min-width: 160px;">Nomor Tiket & Kategori</th>
+            <th style="min-width: 140px;">Gerbang Pos</th>
+            <th style="min-width: 200px;">Pemohon & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
+            <th style="white-space: nowrap; min-width: 95px;">Status</th>
+            <th style="min-width: 200px;">Catatan Realisasi</th>
+            <th style="text-align: right; white-space: nowrap; min-width: 170px;">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(t => {
+            const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
+            const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+            const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
+            
+            let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
+            if (t.scanInTime && t.scanOutTime) {
+              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+              const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
+              catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Scan In: ${inSimple}</span>`;
+            } else if (t.scanOutTime) {
+              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+              catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+            } else if (t.status === 'Terlambat') {
+              catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
+            } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
+              const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
+              catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
+            }
+
+            const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function' 
+              ? window.formatTicketScheduleWithDay(t) 
+              : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+
+            let tindakanHtml = `
+              <div class="action-pills-row">
+                <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  <span>Detail Pengajuan</span>
+                </button>
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'pelacakan')" title="Hapus Data #${t.id}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Hapus</span>
+                </button>
+              </div>
+            `;
+
+            const cleanDest = (t.destination || '-').replace(/\r?\n+/g, ' ');
+            const cleanReason = (t.reason || '-').replace(/\r?\n+/g, ' ');
+
+            return `
+              <tr>
+                <td style="vertical-align: middle;">
+                  <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
+                </td>
+                <td style="vertical-align: middle;">${gateBadge}</td>
+                <td style="vertical-align: middle;">
+                  <div style="display: flex; align-items: center; gap: 0.45rem;">
+                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 24)}
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                      <div style="font-size: 0.7rem; color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${cleanDest} • ${cleanReason}">${cleanDest} • ${cleanReason}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="vertical-align: middle;">${scheduleWithDay}</td>
+                <td style="vertical-align: middle;">${statusHtml}</td>
+                <td style="vertical-align: middle;">${catatanHtml}</td>
+                <td style="vertical-align: middle; text-align: right;">${tindakanHtml}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+window.renderSecurityTable = renderSecurityTable;
+
 function renderSecurityView() {
   if (typeof window.checkOverdueAndExpiredTickets === 'function') {
     window.checkOverdueAndExpiredTickets(true);
@@ -636,8 +740,19 @@ function renderSecurityView() {
       return;
     }
 
+    const btnSecurityViewCard = document.getElementById('btnSecurityViewCard');
+    const btnSecurityViewTable = document.getElementById('btnSecurityViewTable');
+    if (btnSecurityViewCard && btnSecurityViewTable) {
+      btnSecurityViewCard.classList.toggle('active', window.currentSecurityPelacakanViewMode !== 'table');
+      btnSecurityViewTable.classList.toggle('active', window.currentSecurityPelacakanViewMode === 'table');
+    }
+
     if (emptySecurityBox) emptySecurityBox.style.display = 'none';
-    renderSecurityCards(list, containerSecurityQueue);
+    if (window.currentSecurityPelacakanViewMode === 'table') {
+      renderSecurityTable(list, containerSecurityQueue);
+    } else {
+      renderSecurityCards(list, containerSecurityQueue);
+    }
     return;
   }
 
@@ -849,8 +964,8 @@ function renderSecurityLogTable(list, containerElement) {
                   <div style="display: flex; align-items: center; gap: 0.65rem;">
                     ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 32)}
                     <div>
-                      <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${t.destination})</span></div>
-                      <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.reason || ''}">${t.reason || '-'}</div>
+                      <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.applicantName || 'Budi Pratama'} (${(t.destination || '').replace(/"/g, '&quot;')})">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${(t.destination || '-').replace(/\r?\n+/g, ' ')})</span></div>
+                      <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
                     </div>
                   </div>
                 </td>

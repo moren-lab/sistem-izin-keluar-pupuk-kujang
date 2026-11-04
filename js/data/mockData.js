@@ -557,10 +557,33 @@ function loadUsers() {
   }
 }
 
-// Helper sentral untuk mendapatkan Atasan Utama yang sedang aktif
-function getPrimaryApprover() {
+// Helper sentral untuk mendapatkan Atasan Utama yang sedang aktif (menghormati naungan atasan masing-masing karyawan)
+function getPrimaryApprover(empNameOrKujangId) {
   const users = (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
-  return users.find(u => u.roleKey === 'approver' && u.status === 'Aktif') || null;
+  const currentEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : (window.ACTORS ? window.ACTORS.karyawan : null);
+  const targetEmpName = empNameOrKujangId || (currentEmp ? currentEmp.name : null);
+  let assignedSupName = null;
+
+  if (targetEmpName) {
+    const empUser = users.find(u => u.name === targetEmpName || u.kujangId === targetEmpName || u.nip === targetEmpName);
+    if (empUser && (empUser.directSupervisor || empUser.supervisor)) {
+      assignedSupName = empUser.directSupervisor || empUser.supervisor;
+    }
+  }
+
+  if (!assignedSupName && window.ACTORS && window.ACTORS.karyawan && window.ACTORS.karyawan.approverName) {
+    assignedSupName = window.ACTORS.karyawan.approverName;
+  }
+
+  if (assignedSupName) {
+    const matchedSup = users.find(u => u.name === assignedSupName && u.status === 'Aktif');
+    if (matchedSup) return matchedSup;
+    const partialMatch = users.find(u => (u.roleKey === 'approver' || u.roleKey === 'approver2') && u.status === 'Aktif' && (u.name.includes(assignedSupName) || assignedSupName.includes(u.name)));
+    if (partialMatch) return partialMatch;
+    return { name: assignedSupName, status: 'Aktif' };
+  }
+
+  return users.find(u => u.roleKey === 'approver' && u.status === 'Aktif') || users.find(u => u.roleKey === 'approver2' && u.status === 'Aktif') || null;
 }
 window.getPrimaryApprover = getPrimaryApprover;
 
@@ -582,7 +605,11 @@ function syncActorsFromUsers(data) {
     window.ACTORS.karyawan.nip = activeEmpSync.nip;
     if (activeEmpSync.department) window.ACTORS.karyawan.department = activeEmpSync.department;
     if (activeEmpSync.role) window.ACTORS.karyawan.title = activeEmpSync.role;
+    if (activeEmpSync.directSupervisor || activeEmpSync.supervisor) window.ACTORS.karyawan.approverName = activeEmpSync.directSupervisor || activeEmpSync.supervisor;
   }
+
+  // 2. Sinkronisasi Atasan Utama (Approver 1 / Manager)
+  const primaryApprover = users.find(u => u.roleKey === 'approver' && u.status === 'Aktif');
 
   // 1b. Sinkronisasi Karyawan Pemohon 2 (Arthur Morgan)
   const activeEmp2Sync = users.find(u => u.roleKey === 'karyawan2' && u.status === 'Aktif');
@@ -608,8 +635,7 @@ function syncActorsFromUsers(data) {
     }
   }
 
-  // 2. Sinkronisasi Atasan Utama (Approver 1 / Manager)
-  const primaryApprover = users.find(u => u.roleKey === 'approver' && u.status === 'Aktif');
+  // 2b. Sinkronisasi Data Approver 1 ke window.ACTORS
   if (window.ACTORS) {
     if (primaryApprover) {
       window.ACTORS.approver = {
@@ -619,7 +645,7 @@ function syncActorsFromUsers(data) {
         department: primaryApprover.department || 'Departemen Rekayasa & Pemeliharaan',
         roleLabel: 'Atasan 1 (Manager)'
       };
-      if (window.ACTORS.karyawan) {
+      if (window.ACTORS.karyawan && !window.ACTORS.karyawan.approverName) {
         window.ACTORS.karyawan.approverName = primaryApprover.name;
       }
     } else {
