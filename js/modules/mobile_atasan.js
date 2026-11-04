@@ -399,11 +399,11 @@
               </div>
             </div>
 
-            <div style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0;">
-              <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
+            <div style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(pendingEmergTicket.destination || '').replace(/"/g, '&quot;')}">
+              <strong>Tujuan:</strong> ${(pendingEmergTicket.destination || 'RS Pupuk Kujang').replace(/\r?\n+/g, ' ')}
             </div>
-            <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px;">
-              <span style="font-style: normal;">"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</span>
+            <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(pendingEmergTicket.reason || '').replace(/"/g, '&quot;')}">
+              <span style="font-style: normal;">"${(pendingEmergTicket.reason || 'Kondisi darurat mendadak').replace(/\r?\n+/g, ' ')}"</span>
             </div>
             
             <div style="display: flex; gap: 8px; margin-top: 8px;">
@@ -452,9 +452,9 @@
             </div>
           </div>
 
-          <div style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0;">
+          <div style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">
             Rencana Keluar: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</strong>
-            ${t.destination ? ` • Keperluan: <strong>${t.destination}</strong>` : ''}
+            ${t.destination ? ` • Keperluan: <strong>${t.destination.replace(/\r?\n+/g, ' ')}</strong>` : ''}
           </div>
 
           ${isReassignedAway ? `
@@ -1085,12 +1085,18 @@
           </div>
         </div>
 
-        <!-- Card 2: Keperluan Izin -->
+        <!-- Card 2: Keperluan Izin (Sesuai Format Tampilan Web Figma) -->
         <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">KEPERLUAN IZIN</div>
-          <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.45;">
-            <strong>Tujuan:</strong> ${t.destination || 'Area Cikampek'}<br>
-            <strong>Alasan:</strong> ${t.reason || 'Keperluan dinas kantor'}
+          <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.2rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;">
+              <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 85px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
+              <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || 'Area Cikampek').replace(/\r?\n+/g, ' ')}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;">
+              <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 85px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
+              <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || 'Keperluan dinas kantor').replace(/\r?\n+/g, ' ')}</span>
+            </div>
           </div>
         </div>
 

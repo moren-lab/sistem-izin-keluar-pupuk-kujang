@@ -610,8 +610,8 @@
           </div>
 
           <!-- Baris 2: Lokasi / Tujuan Keluar (Judul Utama) -->
-          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; line-height: 1.35;">
-            ${destText}
+          <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; line-height: 1.35; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${destText.replace(/"/g, '&quot;')}">
+            ${destText.replace(/\r?\n+/g, ' ')}
           </div>
 
           <!-- Baris 3: Kategori & Tipe Kepulangan -->
@@ -658,8 +658,8 @@
             <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
           </div>
 
-          <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 3px;">
-            ${destText}
+          <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 3px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${destText.replace(/"/g, '&quot;')}">
+            ${destText.replace(/\r?\n+/g, ' ')}
           </div>
 
           <div style="font-size: 0.725rem; font-weight: 600; color: #047857; margin-bottom: 6px;">
@@ -1862,11 +1862,11 @@
           </div>
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Lokasi / Tujuan</span>
-            <span class="mobile-summary-value">${data.destination}</span>
+            <span class="mobile-summary-value truncate" style="max-width: 195px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;" title="${(data.destination || '').replace(/"/g, '&quot;')}">${(data.destination || '-').replace(/\r?\n+/g, ' ')}</span>
           </div>
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Alasan Keperluan</span>
-            <span class="mobile-summary-value" style="font-style: normal; color: #334155;">"${data.reason}"</span>
+            <span class="mobile-summary-value truncate" style="max-width: 195px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; font-style: normal; color: #334155;" title="${(data.reason || '').replace(/"/g, '&quot;')}">"${(data.reason || '-').replace(/\r?\n+/g, ' ')}"</span>
           </div>
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Rencana Keluar</span>
@@ -2501,9 +2501,15 @@
 
           <div class="mobile-card" style="margin-bottom: 8px;">
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">KEPERLUAN IZIN</div>
-            <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.4;">
-              <strong>Tujuan:</strong> ${t.destination || 'Area Rekayasa'}<br>
-              <strong>Alasan:</strong> ${t.reason || 'Keperluan dinas kantor'}
+            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.2rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 85px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || 'Area Rekayasa').replace(/\r?\n+/g, ' ')}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;">
+                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 85px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
+                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || 'Keperluan dinas kantor').replace(/\r?\n+/g, ' ')}</span>
+              </div>
             </div>
           </div>
 

@@ -1692,6 +1692,32 @@ body.theme-dark .mobile-btn-secondary {
   font-size: 0.775rem;
 }
 
+.mobile-summary-value.truncate,
+.mobile-summary-row .mobile-summary-value.truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.mobile-text-truncate {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.mobile-text-truncate-inline {
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
 /* Dark mode overrides for new form elements */
 body.theme-dark .mobile-approver-input-box {
   background: #1e293b !important;
