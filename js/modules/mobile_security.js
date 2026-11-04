@@ -649,7 +649,7 @@
           </div>
 
           <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">${t.category} • ${getTType(t)}</div>
-          <div style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${((t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan').replace(/"/g, '&quot;')}">📍 ${(t.destination && t.destination.trim()) ? t.destination.trim().replace(/\r?\n+/g, ' ') : 'Tanpa tujuan'}</div>
+          <div class="mobile-clamp-1" style="font-size: 0.8rem; font-weight: 800; color: #1e293b; margin-bottom: 2px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${((t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan').replace(/"/g, '&quot;')}">📍 ${(t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan'}</div>
           <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">Rencana : ${t.createdAt ? t.createdAt.split(',')[0] : '19 Okt 2026'} • ${exitPlanT} – ${returnT}</div>
 
           <div class="mobile-ticket-grid-meta" style="margin-bottom: 8px;">
@@ -888,8 +888,8 @@
           </div>
 
           <!-- Baris 4: Tujuan / Lokasi Keluar -->
-          <div style="font-size: 0.825rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; line-height: 1.35; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${destText.replace(/"/g, '&quot;')}">
-            📍 ${destText.replace(/\r?\n+/g, ' ')}
+          <div class="mobile-clamp-2" style="font-size: 0.825rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;" title="${destText.replace(/"/g, '&quot;')}">
+            📍 ${destText}
           </div>
 
           <!-- Baris 5: Rencana Waktu -->
@@ -975,8 +975,8 @@
           <div style="font-size: 0.725rem; font-weight: 700; color: #047857; margin-bottom: 2px;">
             ${t.category || 'Dinas Kantor'} • ${typeDisplay}
           </div>
-          <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${destText.replace(/"/g, '&quot;')}">
-            📍 ${destText.replace(/\r?\n+/g, ' ')}
+          <div class="mobile-clamp-2" style="font-size: 0.8rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${destText.replace(/"/g, '&quot;')}">
+            📍 ${destText}
           </div>
 
           <!-- Baris 4: Info Gerbang Aktual + Tombol Lihat Detail -->
@@ -1188,17 +1188,17 @@
             </div>
           </div>
 
-          <!-- Card 2: Keperluan Izin (Sesuai Format Tampilan Web Figma) -->
-          <div class="mobile-card" style="margin-bottom: 8px;">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">KEPERLUAN IZIN</div>
-            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.2rem 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 85px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${((t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan').replace(/"/g, '&quot;')}">${((t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan').replace(/\r?\n+/g, ' ')}</span>
+          <!-- Card 2: Keperluan Izin -->
+          <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">KEPERLUAN IZIN</div>
+            <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
+              <div>
+                <div style="font-size: 0.7rem; color: #64748b; font-weight: 600; margin-bottom: 2px;">Tujuan Keluar</div>
+                <div style="font-size: 0.8rem; color: #0f172a; font-weight: 700; word-break: break-word; overflow-wrap: anywhere; line-height: 1.4;">${(t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan'}</div>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 85px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '-').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
+              <div style="border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                <div style="font-size: 0.7rem; color: #64748b; font-weight: 600; margin-bottom: 2px;">Alasan Keperluan</div>
+                <div style="font-size: 0.775rem; color: #334155; word-break: break-word; overflow-wrap: anywhere; line-height: 1.45;">"${t.reason || '-'}"</div>
               </div>
             </div>
           </div>
