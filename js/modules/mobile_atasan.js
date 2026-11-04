@@ -352,23 +352,18 @@
 
         if (isReassignedAway) {
           return `
-            <div class="mobile-card" style="border: 1.5px solid #fde68a; background: #fffbeb; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
+            <div class="mobile-ticket-item" style="border: 1.5px solid #fde68a !important; border-left: 1.5px solid #fde68a !important; background: #fffbeb; margin-bottom: 0; padding: 12px; border-radius: 10px;">
               <div style="font-size: 0.675rem; font-weight: 800; color: #b45309; letter-spacing: 0.5px; margin-bottom: 6px;">
                 PENGALIHAN WEWENANG • IZIN DARURAT
               </div>
               <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                 <div>
-                  <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
-                  <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+                  <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
                 </div>
-                <button type="button" class="mobile-btn-secondary" style="padding: 3px 8px; font-size: 0.675rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 6px; min-height: 28px; cursor: pointer; flex-shrink: 0;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Detail Pengajuan</span>
-                </button>
-              </div>
-
-              <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                <span class="mobile-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">Dialihkan ke ${pendingEmergTicket.approverName}</span>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                  <span class="mobile-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">Dialihkan ke ${pendingEmergTicket.approverName}</span>
+                </div>
               </div>
 
               <div style="font-size: 0.75rem; color: #78350f; margin: 4px 0 2px 0;">
@@ -379,8 +374,9 @@
               </div>
               
               <div style="margin-top: 8px;">
-                <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; padding: 8px 10px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
-                  Pantau Kronologi & Rincian
+                <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Detail Pengajuan</span>
                 </button>
               </div>
             </div>
@@ -388,17 +384,17 @@
         }
 
         return `
-          <div class="mobile-card" style="border: 1.5px solid #fca5a5; background: #fff5f5; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
-            <div style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px; margin-bottom: 6px;">
-              PRIORITAS TINGGI • IZIN DARURAT
+          <div class="mobile-ticket-item" style="border: 1.5px solid #fca5a5 !important; border-left: 1.5px solid #fca5a5 !important; background: #fff5f5; margin-bottom: 0; padding: 12px; border-radius: 10px;">
+            <div style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+              <span>🚨 PRIORITAS TINGGI • IZIN DARURAT</span>
             </div>
             <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
               <div>
-                <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
-                <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+                <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+                <div style="font-size: 0.7rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
               </div>
               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
-                <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">Menunggu Otorisasi</span>
+                <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800; border: 1px solid #fecaca;">Menunggu Otorisasi</span>
                 ${isReassignedToMe ? `<span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;">Dialihkan dari ${pendingEmergTicket.reassignedFrom}</span>` : ''}
               </div>
             </div>
@@ -411,10 +407,10 @@
             </div>
             
             <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
                 Tolak
               </button>
-              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
+              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
                 Setujui
               </button>
             </div>
@@ -431,33 +427,34 @@
       }).join('');
     }
 
-    // Top Pending Regular Tickets (matching PDF: Raka Pratama, Nisa Putri, etc.)
+    // All Pending Regular Tickets from all submitting employees
     let pendingTicketsHtml = '';
     if (pendingNew.length > 0) {
-      pendingTicketsHtml = pendingNew.slice(0, 3).map(t => {
+      pendingTicketsHtml = pendingNew.map(t => {
         const isReassignedAway = isTicketReassignedFromMobileApprover(t);
         const isReassignedToMe = isTicketReassignedToMobileApprover(t);
 
         return `
-        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 0; background: #ffffff;">
           <!-- Header: Kiri Nama & ID, Kanan Status Badge (Sesuai Permintaan User) -->
           <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div>
               <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
-              <div style="font-size: 0.7rem; color: #64748b;">${t.id} • ${t.category}</div>
+              <div style="font-size: 0.7rem; color: #64748b;">${t.id} • ${t.category || 'Dinas Kantor'}</div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
-              <span class="mobile-badge menunggu">Menunggu Persetujuan</span>
+              <span class="mobile-badge menunggu" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">Menunggu Persetujuan</span>
               ${isReassignedAway ? `
-                <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;"> Dialihkan ke ${t.approverName}</span>
+                <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;">Dialihkan ke ${t.approverName}</span>
               ` : (isReassignedToMe ? `
-                <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;"> Dialihkan dari ${t.reassignedFrom}</span>
+                <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;">Dialihkan dari ${t.reassignedFrom}</span>
               ` : '')}
             </div>
           </div>
 
           <div style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0;">
             Rencana Keluar: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</strong>
+            ${t.destination ? ` • Keperluan: <strong>${t.destination}</strong>` : ''}
           </div>
 
           ${isReassignedAway ? `
@@ -472,10 +469,10 @@
             </div>
           ` : `
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
                 Tolak
               </button>
-              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
+              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
                 Setujui
               </button>
             </div>
@@ -492,20 +489,20 @@
       }).join('');
     }
 
-    // Top Pending Extension if any (e.g. Dimas Saputra)
+    // All Pending Extension if any (e.g. Dimas Saputra)
     let pendingExtHtml = '';
     if (pendingExt.length > 0) {
-      pendingExtHtml = pendingExt.slice(0, 2).map(t => {
+      pendingExtHtml = pendingExt.map(t => {
         const semula = formatTimeOnly(getTReturnTime(t)) || '11.15 WIB';
         const usulan = t.extensionRequestedTime ? t.extensionRequestedTime + ' WIB' : '12.00 WIB';
         return `
-          <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
+          <div class="mobile-ticket-item" style="border: 1px solid #ddd6fe; border-radius: 10px; padding: 12px; margin-bottom: 0; background: #faf5ff;">
             <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
               <div>
                 <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
                 <div style="font-size: 0.7rem; color: #64748b;">${t.id} • Perpanjangan</div>
               </div>
-              <span class="mobile-badge sedang-di-luar" style="background:#f5f3ff; color:#7c3aed; font-size: 0.65rem; padding: 2px 8px; flex-shrink: 0;">Menunggu Perpanjangan</span>
+              <span class="mobile-badge sedang-di-luar" style="background:#f5f3ff; color:#7c3aed; font-size: 0.65rem; padding: 2px 8px; border: 1px solid #ddd6fe; flex-shrink: 0; font-weight: 700;">Menunggu Perpanjangan</span>
             </div>
 
             <div style="font-size: 0.75rem; color: #475569; margin: 4px 0 8px 0;">
@@ -601,22 +598,39 @@
         </div>
       </section>
 
-      <!-- Priority Emergency Section -->
-      ${priorityHtml}
-
-      <!-- Pending Permits Section -->
-      <section style="margin-bottom: 12px;">
-        <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-          <span>Pengajuan Menunggu Persetujuan</span>
-          <span style="font-size: 0.7rem; color: #64748b; font-weight: 600;">${pendingNew.length + pendingExt.length} item</span>
-        </div>
-        ${pendingTicketsHtml}
-        ${pendingExtHtml}
-        ${(pendingNew.length === 0 && pendingExt.length === 0) ? `
-          <div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.775rem; padding: 20px;">
-            Tidak ada pengajuan yang menunggu keputusan Anda saat ini.
+      <!-- Unified Section: Pengajuan Menunggu Persetujuan (Konsep Serupa Pengajuan Terbaru Karyawan dengan Aksi Atasan) -->
+      <section class="mobile-card" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; margin-bottom: 14px; padding: 14px;">
+        <div class="mobile-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+          <div>
+            <h3 class="mobile-card-title" style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #0f172a;">Pengajuan Menunggu Persetujuan</h3>
+            <div style="font-size: 0.7rem; color: #64748b; margin-top: 1px;">Daftar permohonan bawahan yang memerlukan keputusan</div>
           </div>
-        ` : ''}
+          <span class="mobile-badge" style="background: #f1f5f9; color: #334155; font-weight: 700; border: 1px solid #e2e8f0; font-size: 0.7rem;">
+            ${pendingEmergTickets.length + pendingNew.length + pendingExt.length} item
+          </span>
+        </div>
+
+        ${(pendingEmergTickets.length > 0 || pendingNew.length > 0 || pendingExt.length > 0) ? `
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            ${priorityHtml}
+            ${pendingTicketsHtml}
+            ${pendingExtHtml}
+          </div>
+        ` : `
+          <div style="text-align: center; color: #64748b; font-size: 0.775rem; padding: 24px 12px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.75" style="margin: 0 auto 8px auto; display: block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <div style="font-weight: 700; color: #334155;">Tidak Ada Pengajuan Menunggu</div>
+            <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">Semua izin permohonan tim bawahan telah diproses.</div>
+          </div>
+        `}
+
+        <!-- Footer Link: Menuju Halaman Antrean -->
+        <div style="text-align: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+          <a href="#" class="mobile-link-rincian" style="font-size: 0.775rem; color: #2563eb; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.mobileSwitchTab('antrean'); return false;">
+            <span>Lihat Semua Antrean</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
       </section>
 
       <!-- Aktivitas Terbaru Timeline (Data Asli Audit Trail Tiket Tim) -->
