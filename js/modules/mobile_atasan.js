@@ -21,12 +21,15 @@
   let isAtasanRiwayatFilterOpen = false;
   let isAtasanTimFilterOpen = false;
   let atasanTimFilter = 'all'; // 'all' | 'outside' | 'late' | 'ready'
+  let atasanTimDateFilter = 'all'; // 'all' | 'today' | 'yesterday' | '7days' | 'custom'
+  let atasanTimCustomDate = '';
   let atasanTimSearchQuery = '';
   let currentAtasanTimPage = 1;
   const atasanTimPageSize = 6;
   let atasanTimDebounceTimer = null;
   let selectedTimTicketId = null;
   let viewingTicketId = null;
+  let currentAtasanDetailTab = 'info'; // 'info' | 'jejak'
 
   function getActiveApprover() {
     let app = null;
@@ -358,8 +361,8 @@
                   <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
                   <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
                 </div>
-                <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer; flex-shrink: 0;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <button type="button" class="mobile-btn-secondary" style="padding: 3px 8px; font-size: 0.675rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 6px; min-height: 28px; cursor: pointer; flex-shrink: 0;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
               </div>
@@ -439,7 +442,7 @@
               <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${t.id} • ${t.category}</div>
             </div>
-            <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg><span>Detail Pengajuan</span></button>
+            <button type="button" class="mobile-btn-secondary" style="padding: 3px 8px; font-size: 0.675rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 6px; min-height: 28px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg><span>Detail Pengajuan</span></button>
           </div>
 
           <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -540,40 +543,42 @@
       <!-- Segment 1: Ringkasan Perizinan (Image 3: 4-Grid Metrics Overview) -->
       <div id="mAtasanSecRingkasan" style="display: ${atasanDashboardSegment === 'ringkasan' ? 'block' : 'none'}; margin-bottom: 12px;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <!-- Card 1: Izin baru menunggu (Termasuk Izin Darurat yang menunggu otorisasi) -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('antrean', 'baru')">
+          <!-- Card 1: Izin baru menunggu -->
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('antrean', 'baru')">
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Izin baru menunggu</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #b45309; line-height: 1.2; margin: 3px 0 2px 0;">${pendingNew.length + pendingEmergTickets.length}</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${pendingNew.length + pendingEmergTickets.length}</div>
           </div>
 
           <!-- Card 2: Perpanjangan menunggu -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('antrean', 'perpanjangan')">
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('antrean', 'perpanjangan')">
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Perpanjangan menunggu</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #7c3aed; line-height: 1.2; margin: 3px 0 2px 0;">${pendingExt.length}</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${pendingExt.length}</div>
           </div>
 
           <!-- Card 3: Pengajuan diproses -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('tim')">
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('tim')">
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Pengajuan diproses</div>
             <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${processedTickets.length}</div>
           </div>
 
           <!-- Card 4: Tim di luar area -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('tim')">
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('tim')">
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Tim di luar area</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #7c3aed; line-height: 1.2; margin: 3px 0 2px 0;">${outsideTickets.length}</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${outsideTickets.length}</div>
           </div>
         </div>
       </div>
 
       <!-- Segment 2: Volume Pengajuan Tim (Realtime Chart Mingguan Identik Web) -->
       <section id="mAtasanSecVolume" class="mobile-card" style="display: ${atasanDashboardSegment === 'volume' ? 'block' : 'none'}; margin-bottom: 12px;">
-        <div class="mobile-card-header" style="margin-bottom: 6px;">
-          <div>
-            <h3 class="mobile-card-title">Volume pengajuan tim</h3>
-          </div>
+        <div class="mobile-card-header" style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="mobile-card-title" style="margin: 0;">Volume pengajuan tim</h3>
+          <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.675rem; color: #047857; font-weight: 700; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 9999px;">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>
+            <span>Live Real-Time</span>
+          </span>
         </div>
-        <div style="margin-top: 6px;">
+        <div class="mobile-chart-live-wrapper" style="margin-top: 6px;">
           ${(typeof window.getGambar2AestheticBarChartHtml === 'function') 
             ? window.getGambar2AestheticBarChartHtml() 
             : '<div style="text-align:center; padding: 12px; color: #64748b;">Memuat grafik...</div>'}
@@ -611,7 +616,7 @@
             const isLate = (act.title.toLowerCase().includes('terlambat') || act.status === 'Terlambat');
             const timeDisplay = formatTimeOnly(act.rawTime) || 'Hari ini';
             return `
-              <div style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${act.ticketId}')">
+              <div style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${act.ticketId}')">
                 <div style="font-size: 0.7rem; font-weight: 800; color: ${isLate ? '#b91c1c' : '#64748b'}; min-width: 60px; flex-shrink: 0;">
                   ${timeDisplay}
                 </div>
@@ -869,6 +874,121 @@
     `;
   }
 
+
+  function getBadgeClass(status) {
+    if (!status) return 'menunggu';
+    const s = status.toLowerCase();
+    if (s.includes('menunggu')) return 'menunggu';
+    if (s.includes('setuju') || s.includes('aktif')) return 'disetujui';
+    if (s.includes('tolak')) return 'ditolak';
+    if (s.includes('luar') || s.includes('terlambat')) return 'sedang-di-luar';
+    if (s.includes('selesai')) return 'selesai';
+    return 'menunggu';
+  }
+
+  function renderAtasanTimelineHtml(t, approver) {
+    if (!t) return '<p style="font-size:0.75rem; color:#64748b; margin:0;">Tidak ada kronologi aktivitas.</p>';
+    if (t.timeline && t.timeline.length > 0) {
+      return t.timeline.map((item, idx) => `
+        <div class="mobile-timeline-item">
+          <div class="mobile-timeline-track">
+            <div class="mobile-timeline-dot ${idx === 0 ? 'active' : 'done'}"></div>
+            ${idx < t.timeline.length - 1 ? '<div class="mobile-timeline-line"></div>' : ''}
+          </div>
+          <div class="mobile-timeline-content">
+            <div class="mobile-timeline-time">${item.time || formatTimeOnly(item.rawTime) || 'Tercatat'}</div>
+            <div class="mobile-timeline-title">${item.event || item.title || 'Aktivitas'}</div>
+            <div class="mobile-timeline-desc">${item.desc || (item.by ? 'Oleh ' + item.by : '')}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const isApproved = t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat';
+    const isScanOut = t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat';
+    const isScanIn = t.status === 'Selesai';
+    const isRejected = t.status === 'Ditolak';
+
+    return `
+      <div class="mobile-timeline-item">
+        <div class="mobile-timeline-track">
+          <div class="mobile-timeline-dot done"></div>
+          <div class="mobile-timeline-line"></div>
+        </div>
+        <div class="mobile-timeline-content">
+          <div class="mobile-timeline-time">${t.createdAt ? formatTimeOnly(t.createdAt) : 'Tercatat'}</div>
+          <div class="mobile-timeline-title">Pengajuan Dikirim</div>
+          <div class="mobile-timeline-desc">${getTName(t)} • ${t.category || 'Dinas Kantor'}</div>
+        </div>
+      </div>
+
+      <div class="mobile-timeline-item">
+        <div class="mobile-timeline-track">
+          <div class="mobile-timeline-dot ${isApproved ? 'done' : (isRejected ? 'danger' : 'active')}"></div>
+          ${(isApproved || isScanOut) ? '<div class="mobile-timeline-line"></div>' : ''}
+        </div>
+        <div class="mobile-timeline-content">
+          <div class="mobile-timeline-time">${isApproved ? (t.approvedAt ? formatTimeOnly(t.approvedAt) : 'Telah Disetujui') : (isRejected ? (t.rejectedAt ? formatTimeOnly(t.rejectedAt) : 'Ditolak') : 'Menunggu')}</div>
+          <div class="mobile-timeline-title">${isApproved ? 'Disetujui oleh Atasan' : (isRejected ? 'Pengajuan Ditolak' : 'Menunggu Keputusan Atasan')}</div>
+          <div class="mobile-timeline-desc">${isApproved ? 'Disetujui • ' + (t.approverName || approver.name) : (isRejected ? 'Alasan: ' + (t.rejectionReason || 'Alasan belum memadai') : 'Menunggu tinjauan atasan')}</div>
+        </div>
+      </div>
+
+      ${isScanOut ? `
+        <div class="mobile-timeline-item">
+          <div class="mobile-timeline-track">
+            <div class="mobile-timeline-dot done"></div>
+            ${isScanIn ? '<div class="mobile-timeline-line"></div>' : ''}
+          </div>
+          <div class="mobile-timeline-content">
+            <div class="mobile-timeline-time">${t.scanOutTime ? formatTimeOnly(t.scanOutTime) : 'Tercatat'}</div>
+            <div class="mobile-timeline-title">Scan Out Tercatat</div>
+            <div class="mobile-timeline-desc">${t.scanOutGate || 'Pos 1'} • Meninggalkan area</div>
+          </div>
+        </div>
+      ` : ''}
+
+      ${isScanIn ? `
+        <div class="mobile-timeline-item">
+          <div class="mobile-timeline-track">
+            <div class="mobile-timeline-dot done"></div>
+          </div>
+          <div class="mobile-timeline-content">
+            <div class="mobile-timeline-time">${t.scanInTime ? formatTimeOnly(t.scanInTime) : 'Tercatat'}</div>
+            <div class="mobile-timeline-title">Scan In (Kembali)</div>
+            <div class="mobile-timeline-desc">${t.scanInGate || 'Pos 1'} • Kembali ke area pabrik</div>
+          </div>
+        </div>
+      ` : ''}
+    `;
+  }
+
+  window.mobileToggleAtasanDetailTab = function (tab) {
+    currentAtasanDetailTab = tab;
+    const btnInfo = document.getElementById('mAtasanDetailBtnInfo');
+    const btnJejak = document.getElementById('mAtasanDetailBtnJejak');
+    const secInfo = document.getElementById('mAtasanDetailSecInfo');
+    const secJejak = document.getElementById('mAtasanDetailSecJejak');
+    if (btnInfo && btnJejak && secInfo && secJejak) {
+      if (tab === 'info') {
+        btnInfo.classList.add('active');
+        btnJejak.classList.remove('active');
+        secInfo.style.display = 'block';
+        secJejak.style.display = 'none';
+      } else {
+        btnInfo.classList.remove('active');
+        btnJejak.classList.add('active');
+        secInfo.style.display = 'none';
+        secJejak.style.display = 'block';
+      }
+    }
+  };
+
+  window.mobileToggleTimCustomDateInput = function (val) {
+    const wrap = document.getElementById('mAtasanTimCustomDateWrap');
+    if (wrap) wrap.style.display = (val === 'custom') ? 'block' : 'none';
+  };
+
   // -------------------------------------------------------------------
   // 4. DETAIL PENGAJUAN (Figma PDF Page 3)
   // -------------------------------------------------------------------
@@ -888,173 +1008,145 @@
 
     container.innerHTML = `
       <div style="margin-bottom: 10px;">
-        <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; padding: 4px 0;" onclick="window.mobileSwitchTab('antrean')">
+        <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; padding: 4px 0; display: inline-flex; align-items: center; gap: 4px; color: #059669; font-weight: 700;" onclick="window.mobileSwitchTab('antrean')">
           ← Kembali ke antrean
         </button>
       </div>
 
-      <div class="mobile-page-header" style="margin-bottom: 12px;">
-        <h1 class="mobile-page-title">Detail Pengajuan</h1>
-       
-      </div>
-
-      <!-- Kartu Pemohon -->
+      <!-- Header Sheet Identik Karyawan (Status di kanan atas seperti detail pengajuan sebelumnya) -->
       <div class="mobile-card" style="margin-bottom: 12px; padding: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
           <div>
-            <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
-            <div style="font-size: 0.725rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
-            <div style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #334155; margin-top: 2px;">${t.id}</div>
+            <span style="font-size: 0.675rem; color: #059669; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">RINCIAN TIKET</span>
+            <div style="font-family: monospace; font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-top: 1px;">${t.id}</div>
           </div>
-          <span class="mobile-badge ${isPending ? 'menunggu' : (t.status === 'Ditolak' ? 'ditolak' : (t.status === 'Disetujui' ? 'disetujui' : (t.status === 'Sedang di Luar' ? 'sedang-di-luar' : 'selesai')))}">
+          <span class="mobile-badge ${getBadgeClass(t.status)}">
             ${t.status}
           </span>
         </div>
 
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 6px;">
           <div>
-            <div class="mobile-meta-sub">${isReassignedAway ? 'Atasan saat ini' : 'Atasan langsung'}</div>
-            <div class="mobile-meta-val">${t.approverName || approver.name} ${isReassignedAway ? '<span style="font-size:0.675rem; color:#b45309; font-weight:700;">(Dialihkan dari Anda)</span>' : (isReassignedToMe ? `<span style="font-size:0.675rem; color:#1d4ed8; font-weight:700;">(Dialihkan dari ${t.reassignedFrom})</span>` : '')}</div>
+            <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+            <div style="font-size: 0.725rem; color: #64748b;">${t.category || 'Dinas Kantor'} • ${getTType(t)}</div>
           </div>
-          <div>
-            <div class="mobile-meta-sub">Diajukan pada</div>
-            <div class="mobile-meta-val">${t.createdAt ? t.createdAt.split(',')[0] : 'Hari ini'}</div>
+          <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">
+            ${getTNip(t)}
           </div>
         </div>
       </div>
 
-      <!-- Kartu Informasi Izin -->
-      <div class="mobile-card" style="margin-bottom: 12px; padding: 14px;">
-        <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Informasi izin</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-          <div>
-            <div class="mobile-meta-sub">Kategori</div>
-            <div class="mobile-meta-val">${t.category}</div>
-          </div>
-          <div>
-            <div class="mobile-meta-sub">Jenis izin</div>
-            <div class="mobile-meta-val">${getTType(t)}</div>
+      <!-- Segment Toggle Identik Karyawan -->
+      <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
+        <button type="button" class="mobile-seg-btn ${currentAtasanDetailTab === 'info' ? 'active' : ''}" id="mAtasanDetailBtnInfo" onclick="window.mobileToggleAtasanDetailTab('info')">Informasi Tiket</button>
+        <button type="button" class="mobile-seg-btn ${currentAtasanDetailTab === 'jejak' ? 'active' : ''}" id="mAtasanDetailBtnJejak" onclick="window.mobileToggleAtasanDetailTab('jejak')">Riwayat Aktivitas</button>
+      </div>
+
+      <!-- Tab Content 1: Informasi Tiket -->
+      <div id="mAtasanDetailSecInfo" style="display: ${currentAtasanDetailTab === 'info' ? 'block' : 'none'};">
+        <!-- Card 1: Informasi Karyawan -->
+        <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
+          <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">INFORMASI KARYAWAN</div>
+          <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.45;">
+            <strong>Nama:</strong> ${getTName(t)}<br>
+            <strong>NIP:</strong> ${getTNip(t)}<br>
+            <strong>Departemen:</strong> ${t.department || 'Departemen Rekayasa & Pemeliharaan'}<br>
+            <strong>Atasan:</strong> ${t.approverName || approver.name}${isReassignedAway ? ` <span style="font-size: 0.675rem; color: #b45309; font-weight: 700;">(Dialihkan dari Anda)</span>` : (isReassignedToMe ? ` <span style="font-size: 0.675rem; color: #1d4ed8; font-weight: 700;">(Dialihkan dari ${t.reassignedFrom})</span>` : '')}
           </div>
         </div>
 
-        <div style="margin-bottom: 8px;">
-          <div class="mobile-meta-sub">Tujuan</div>
-          <div class="mobile-meta-val">${t.destination || 'Area Cikampek'}</div>
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <div class="mobile-meta-sub">Alasan pengajuan</div>
-          <p style="font-size: 0.75rem; color: #1e293b; margin: 2px 0 0 0; line-height: 1.4; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">
-            "${t.reason || 'Keperluan dinas kedinasan.'}"
-          </p>
-        </div>
-
-        <div class="mobile-ticket-grid-meta" style="margin: 0;">
-          <div>
-            <div class="mobile-meta-sub">Rencana keluar</div>
-            <div class="mobile-meta-val">${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</div>
+        <!-- Card 2: Keperluan Izin -->
+        <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
+          <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">KEPERLUAN IZIN</div>
+          <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.45;">
+            <strong>Tujuan:</strong> ${t.destination || 'Area Cikampek'}<br>
+            <strong>Alasan:</strong> ${t.reason || 'Keperluan dinas kantor'}
           </div>
-          <div>
-            <div class="mobile-meta-sub">Estimasi kembali</div>
-            <div class="mobile-meta-val">${isPulang ? '— (tidak kembali)' : (formatTimeOnly(getTReturnTime(t)) || '13.00 WIB')}</div>
+        </div>
+
+        <!-- Card 3: Waktu Keluar & Kembali -->
+        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px 14px;">
+          <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">${isPulang ? 'WAKTU KELUAR' : 'WAKTU KELUAR & KEMBALI'}</div>
+          <div class="mobile-ticket-grid-meta" style="margin: 4px 0 0 0;">
+            <div>
+              <div class="mobile-meta-sub">Waktu Keluar</div>
+              <div class="mobile-meta-val">${t.scanOutTime ? formatDisplayDate(t.scanOutTime) + ' (Aktual)' : (getTExitTime(t) ? formatDisplayDate(getTExitTime(t)) + ' (Rencana)' : '10.00 WIB')}</div>
+            </div>
+            <div>
+              <div class="mobile-meta-sub">${isPulang ? 'Tipe Kepulangan' : 'Batas Kembali'}</div>
+              <div class="mobile-meta-val">${isPulang ? 'Pulang Lebih Awal' : (getTReturnTime(t) ? formatDisplayDate(getTReturnTime(t)) : '13.00 WIB')}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Kotak Info Biru (Matching PDF Page 3) -->
-      
-
-      <!-- Aktivitas Pengajuan (Timeline) -->
-      <div class="mobile-card" style="margin-bottom: 12px; padding: 14px;">
-        <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Aktivitas pengajuan</div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; min-width: 60px;">
-              ${formatTimeOnly(t.createdAt || t.plannedExit)}
-            </div>
-            <div style="flex: 1; font-size: 0.75rem;">
-              <div style="font-weight: 800; color: #0f172a;">Pengajuan dikirim</div>
-              <div style="font-size: 0.675rem; color: #64748b;">${getTName(t)} • Menunggu Persetujuan</div>
-            </div>
+      <!-- Tab Content 2: Riwayat Aktivitas (Timeline) -->
+      <div id="mAtasanDetailSecJejak" style="display: ${currentAtasanDetailTab === 'jejak' ? 'block' : 'none'}; margin-bottom: 12px;">
+        <div class="mobile-card" style="padding: 14px;">
+          <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Kronologi Aktivitas Tiket</div>
+          <div class="mobile-timeline">
+            ${renderAtasanTimelineHtml(t, approver)}
           </div>
-
-          ${(t.status === 'Ditolak') ? `
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: #dc2626; min-width: 60px;">${t.rejectedAt ? formatTimeOnly(t.rejectedAt) : 'Selesai'}</div>
-              <div style="flex: 1; font-size: 0.75rem;">
-                <div style="font-weight: 800; color: #dc2626;">Pengajuan Ditolak</div>
-                <div style="font-size: 0.675rem; color: #7f1d1d;">Oleh ${t.approverName || approver.name} • "${t.rejectionReason || 'Alasan dinas belum memadai.'}"</div>
-              </div>
-            </div>
-          ` : (isPending ? `
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: #d97706; min-width: 60px;">Saat ini</div>
-              <div style="flex: 1; font-size: 0.75rem;">
-                <div style="font-weight: 800; color: #0f172a;">Menunggu tindakan</div>
-                <div style="font-size: 0.675rem; color: #d97706;">Tinjauan ${approver.name.split(',')[0]} • Belum ada keputusan Atasan</div>
-              </div>
-            </div>
-          ` : `
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: #059669; min-width: 60px;">${t.approvedAt ? formatTimeOnly(t.approvedAt) : 'Selesai'}</div>
-              <div style="flex: 1; font-size: 0.75rem;">
-                <div style="font-weight: 800; color: #0f172a;">Disetujui Atasan</div>
-                <div style="font-size: 0.675rem; color: #059669;">Disetujui oleh ${t.approverName || approver.name}</div>
-              </div>
-            </div>
-          `)}
         </div>
       </div>
 
-      <!-- Kartu Keputusan Atasan (Matching PDF Page 3) -->
+      <!-- Bagian Keputusan Atasan (Menggantikan tombol Edit & Batalkan milik Karyawan) -->
       ${isPending ? (isReassignedAway ? `
-        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; text-align: center;">
-          <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 8px;">
-            Hak keputusan persetujuan berada pada <strong>${t.approverName}</strong>
+        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; text-align: center; border: 1.5px solid #fde68a; background: #fffbeb;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #92400e; margin-bottom: 6px;">
+            ⚠️ Hak keputusan persetujuan berada pada <strong>${t.approverName}</strong>
           </div>
-          <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('antrean')">
+          <div style="font-size: 0.725rem; color: #b45309; margin-bottom: 10px;">
+            Tiket pengajuan ini telah dialihkan oleh pemohon ke atasan yang ditunjuk.
+          </div>
+          <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 700;" onclick="window.mobileSwitchTab('antrean')">
             Kembali ke Antrean
           </button>
         </div>
       ` : `
-        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; border: 1.5px solid #cbd5e1;">
-          <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a;">Keputusan Atasan</div>
-          
+        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; border: 1.5px solid #cbd5e1; background: #ffffff;">
+          <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Keputusan Atasan</div>
 
-          <div class="mobile-form-group" style="margin-bottom: 8px;">
-            <label class="mobile-form-label">Catatan persetujuan (opsional)</label>
-            <textarea class="mobile-textarea" id="mAtasanDetailNote" placeholder="Tambahkan catatan jika diperlukan" style="font-size: 0.75rem; min-height: 60px;"></textarea>
+          <div class="mobile-form-group" style="margin-bottom: 10px;">
+            <label class="mobile-form-label" style="font-size: 0.725rem; font-weight: 700; color: #475569;">Catatan persetujuan (opsional)</label>
+            <textarea class="mobile-textarea" id="mAtasanDetailNote" placeholder="Tambahkan instruksi atau catatan khusus jika diperlukan" style="font-size: 0.75rem; min-height: 60px;"></textarea>
           </div>
 
-          
-
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+            <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenRejectSheet('${t.id}')">
               Tolak
             </button>
-            <button type="button" class="mobile-btn-approve" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
+            <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
               Setujui
             </button>
           </div>
+
+          <!-- Keterangan Status di Bawah Tombol Setujui atau Tolak -->
+          <div style="font-size: 0.725rem; color: #d97706; text-align: center; margin-top: 8px; font-weight: 700;">
+            Pengajuan Menunggu Persetujuan Atasan Langsung
+          </div>
         </div>
       `) : (t.status === 'Ditolak' ? `
-        <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5;">
+        <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5; margin-bottom: 14px;">
           <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
             ✕ Pengajuan Ditolak
           </div>
           <div style="font-size: 0.725rem; color: #7f1d1d; margin-bottom: 10px;">
             Alasan penolakan: "${t.rejectionReason || 'Alasan dinas belum memadai.'}"
           </div>
-          <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('dashboard')">
-            Kembali ke Beranda
+          <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; font-weight: 600;" onclick="window.mobileSwitchTab('antrean')">
+            Kembali ke Antrean
           </button>
         </div>
       ` : `
-        <div class="mobile-card" style="text-align: center; padding: 14px;">
-          <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
-            Tiket ini berstatus <strong>${t.status}</strong>. Keputusan telah dicatat resmi.
+        <div class="mobile-card" style="text-align: center; padding: 14px; margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0;">
+          <div style="font-size: 0.75rem; color: #334155; margin-bottom: 4px;">
+            Tiket ini berstatus <strong>${t.status}</strong>.
           </div>
-          <button type="button" class="mobile-btn-secondary" onclick="window.mobileSwitchTab('antrean')">
+          <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px;">
+            ${t.approvedAt ? `Disetujui pada ${formatDisplayDate(t.approvedAt)}` : 'Keputusan telah dicatat resmi.'}
+          </div>
+          <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; font-weight: 600;" onclick="window.mobileSwitchTab('antrean')">
             Kembali ke Antrean
           </button>
         </div>
@@ -1116,6 +1208,49 @@
       const activeTickets = sortedEligible.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Disetujui');
       const recentDone = sortedEligible.filter(t => t.status === 'Selesai').slice(0, 5);
       teamCardsList = [...activeTickets, ...recentDone];
+    }
+
+    // Filter Berdasarkan Periode Hari / Tanggal (Item 5)
+    if (atasanTimDateFilter !== 'all') {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+      const yest = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      const yestStr = `${yest.getFullYear()}-${pad(yest.getMonth() + 1)}-${pad(yest.getDate())}`;
+
+      const d7 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+      const d7Str = `${d7.getFullYear()}-${pad(d7.getMonth() + 1)}-${pad(d7.getDate())}`;
+
+      teamCardsList = teamCardsList.filter(t => {
+        const raw = t.scanOutTime || t.approvedAt || t.createdAt || t.plannedExit || '';
+        let dPart = '';
+        if (raw.includes('-') && /^\d{4}-\d{2}-\d{2}/.test(raw)) {
+          dPart = raw.slice(0, 10);
+        } else if (raw) {
+          try {
+            const dt = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+            if (dt && !isNaN(dt.getTime())) {
+              dPart = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+            }
+          } catch(e) {}
+        }
+
+        if (!dPart && (atasanTimDateFilter === 'today' || atasanTimDateFilter === '7days')) {
+          return true; // Tiket aktif berjalan relevan untuk hari ini
+        }
+
+        if (atasanTimDateFilter === 'today') {
+          return dPart === todayStr;
+        } else if (atasanTimDateFilter === 'yesterday') {
+          return dPart === yestStr;
+        } else if (atasanTimDateFilter === '7days') {
+          return dPart >= d7Str;
+        } else if (atasanTimDateFilter === 'custom' && atasanTimCustomDate) {
+          return dPart === atasanTimCustomDate;
+        }
+        return true;
+      });
     }
 
     // Filter live search jika ada input pencarian
@@ -1211,14 +1346,14 @@
           ` : ''}
 
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Detail pengajuan</span>
             </button>
             ${(t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa') ? `
-              <button type="button" class="mobile-btn-danger" style="padding: 6px 10px; font-size: 0.725rem; width: auto; font-weight: 700; background: #fff5f5; color: #dc2626; border: 1.2px solid #fecaca; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; cursor: pointer;" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                <span>Hapus</span>
+              <button type="button" class="mobile-btn-danger" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span style="color: #ffffff;">Hapus</span>
               </button>
             ` : ''}
           </div>
@@ -1269,25 +1404,30 @@
     }
 
     // Active filter label
-    let filterLabel = 'Semua';
-    if (atasanTimFilter === 'outside') filterLabel = 'Di Luar';
+    let filterLabel = 'Semua Status';
+    if (atasanTimFilter === 'outside') filterLabel = 'Sedang di Luar';
     else if (atasanTimFilter === 'late') filterLabel = 'Terlambat';
     else if (atasanTimFilter === 'ready') filterLabel = 'Siap Keluar';
 
-    const activeFilterSummaryHtml = (atasanTimFilter !== 'all') ? `
+    let dateFilterLabel = '';
+    if (atasanTimDateFilter === 'today') dateFilterLabel = 'Hari Ini';
+    else if (atasanTimDateFilter === 'yesterday') dateFilterLabel = 'Kemarin';
+    else if (atasanTimDateFilter === '7days') dateFilterLabel = '7 Hari Terakhir';
+    else if (atasanTimDateFilter === 'custom') dateFilterLabel = atasanTimCustomDate ? `Tgl ${atasanTimCustomDate}` : 'Tanggal Spesifik';
+
+    const isFilterActive = (atasanTimFilter !== 'all' || atasanTimDateFilter !== 'all');
+    let combinedSummaryLabel = filterLabel;
+    if (dateFilterLabel) combinedSummaryLabel += ` • ${dateFilterLabel}`;
+
+    const activeFilterSummaryHtml = isFilterActive ? `
       <div style="font-size: 0.725rem; color: #047857; background: #ecfdf5; border: 1.2px solid #a7f3d0; border-radius: 8px; padding: 6px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-        <span>Filter: <strong>${filterLabel}</strong> • ${totalTimItems} tiket</span>
+        <span>Filter: <strong>${combinedSummaryLabel}</strong> • ${totalTimItems} tiket</span>
         <button type="button" onclick="window.mobileResetTimFilter()" style="background: none; border: none; color: #059669; font-size: 0.725rem; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 2px 4px;">Atur Ulang</button>
       </div>
     ` : '';
 
     container.innerHTML = `
-      <!-- Banner Status Perjalanan Tim -->
-      <div class="mobile-card" style="padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 0.75rem; color: #334155;">
-        <strong>Status perjalanan tim:</strong> <span style="color: #7c3aed; font-weight: 700;">${outsideTickets.length} di luar area</span>, termasuk <span style="color: #dc2626; font-weight: 700;">${lateTickets.length} terlambat</span>.
-      </div>
-
-      <!-- Live Search Bar -->
+      <!-- Live Search Bar (Banner Status Perjalanan Tim dihilangkan sesuai permintaan user) -->
       <div style="display: flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" style="flex-shrink: 0; margin-right: 8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" id="mAtasanTimLiveSearch" placeholder="Cari nama bawahan, NIP, nomor tiket..." value="${atasanTimSearchQuery}" style="flex: 1; border: none; background: transparent; font-size: 0.825rem; color: #0f172a; padding: 11px 0; outline: none; min-width: 0;" oninput="window.mobileDebounceTimSearch(this.value)">
@@ -1309,10 +1449,10 @@
               <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg>
           </button>
-          <!-- Tombol Filter Status Pelacakan -->
-          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isAtasanTimFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isAtasanTimFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isAtasanTimFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isAtasanTimFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleAtasanTimFilter()" title="Filter Status Pelacakan" aria-label="Filter Status Pelacakan">
+          <!-- Tombol Filter Status & Hari Pelacakan -->
+          <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isAtasanTimFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isAtasanTimFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isAtasanTimFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isAtasanTimFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleAtasanTimFilter()" title="Filter Pelacakan" aria-label="Filter Pelacakan">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            ${(atasanTimFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
+            ${isFilterActive ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
           </button>
         </div>
       </div>
@@ -1320,22 +1460,39 @@
       <!-- One-line Active Filter Summary -->
       ${activeFilterSummaryHtml}
 
-      <!-- Collapsible Filter Panel -->
+      <!-- Collapsible Filter Panel (Ditambah Filter Hari) -->
       <div id="mAtasanTimFilterCard" class="mobile-filter-panel" style="display: ${isAtasanTimFilterOpen ? 'block' : 'none'}; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div class="mobile-filter-panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-weight: 800; font-size: 0.8125rem; color: #0f172a;">Filter Status Pelacakan</span>
+          <span style="font-weight: 800; font-size: 0.8125rem; color: #0f172a;">Filter Pelacakan Tim</span>
           <button type="button" style="border: none; background: none; font-size: 0.85rem; color: #64748b; cursor: pointer; padding: 4px;" onclick="window.mobileToggleAtasanTimFilter()">✕</button>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
           <div>
             <label class="mobile-filter-label" style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Status Bawahan</label>
             <select class="mobile-filter-select" id="mAtasanSelectTimFilter" style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; color: #0f172a; background: #ffffff;">
-              <option value="all" ${atasanTimFilter === 'all' ? 'selected' : ''}>Semua (${sortedEligible.length})</option>
+              <option value="all" ${atasanTimFilter === 'all' ? 'selected' : ''}>Semua Status (${sortedEligible.length})</option>
               <option value="outside" ${atasanTimFilter === 'outside' ? 'selected' : ''}>Sedang di Luar (${outsideTickets.length})</option>
               <option value="late" ${atasanTimFilter === 'late' ? 'selected' : ''}>Terlambat (${lateTickets.length})</option>
               <option value="ready" ${atasanTimFilter === 'ready' ? 'selected' : ''}>Siap Keluar (${readyTickets.length})</option>
             </select>
           </div>
+
+          <div>
+            <label class="mobile-filter-label" style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Periode Hari (Filter Hari)</label>
+            <select class="mobile-filter-select" id="mAtasanSelectTimDate" style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; color: #0f172a; background: #ffffff;" onchange="window.mobileToggleTimCustomDateInput(this.value)">
+              <option value="all" ${atasanTimDateFilter === 'all' ? 'selected' : ''}>Semua Hari</option>
+              <option value="today" ${atasanTimDateFilter === 'today' ? 'selected' : ''}>Hari Ini</option>
+              <option value="yesterday" ${atasanTimDateFilter === 'yesterday' ? 'selected' : ''}>Kemarin</option>
+              <option value="7days" ${atasanTimDateFilter === '7days' ? 'selected' : ''}>7 Hari Terakhir</option>
+              <option value="custom" ${atasanTimDateFilter === 'custom' ? 'selected' : ''}>Pilih Tanggal Spesifik...</option>
+            </select>
+          </div>
+
+          <div id="mAtasanTimCustomDateWrap" style="display: ${atasanTimDateFilter === 'custom' ? 'block' : 'none'};">
+            <label class="mobile-filter-label" style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Pilih Tanggal</label>
+            <input type="date" class="mobile-filter-input" id="mAtasanTimInputDate" value="${atasanTimCustomDate}" style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; color: #0f172a; background: #ffffff; box-sizing: border-box;">
+          </div>
+
           <div style="display: flex; gap: 8px; margin-top: 4px;">
             <button type="button" class="mobile-btn-primary" style="flex: 1; min-height: 40px; padding: 0 12px; font-size: 0.775rem; font-weight: 700; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; cursor: pointer;" onclick="window.mobileApplyTimFilter()">
               Terapkan
@@ -1748,8 +1905,15 @@
 
 
     if (secRingkasan) secRingkasan.style.display = segment === 'ringkasan' ? 'block' : 'none';
-
-    if (secVolume) secVolume.style.display = segment === 'volume' ? 'block' : 'none';
+    if (secVolume) {
+      secVolume.style.display = segment === 'volume' ? 'block' : 'none';
+      if (segment === 'volume') {
+        const liveWrapper = secVolume.querySelector('.mobile-chart-live-wrapper');
+        if (liveWrapper && typeof window.getGambar2AestheticBarChartHtml === 'function') {
+          liveWrapper.innerHTML = window.getGambar2AestheticBarChartHtml();
+        }
+      }
+    }
 
   };
 
@@ -1777,10 +1941,13 @@
   };
 
   window.mobileApplyTimFilter = function () {
-    const sel = document.getElementById('mAtasanSelectTimFilter');
-    if (sel) {
-      atasanTimFilter = sel.value;
-    }
+    const selStatus = document.getElementById('mAtasanSelectTimFilter');
+    if (selStatus) atasanTimFilter = selStatus.value;
+    const selDate = document.getElementById('mAtasanSelectTimDate');
+    if (selDate) atasanTimDateFilter = selDate.value;
+    const inpCustom = document.getElementById('mAtasanTimInputDate');
+    if (inpCustom) atasanTimCustomDate = inpCustom.value;
+
     isAtasanTimFilterOpen = false;
     currentAtasanTimPage = 1;
     renderMobileAtasan(null, 'tim');
@@ -1788,6 +1955,8 @@
 
   window.mobileResetTimFilter = function () {
     atasanTimFilter = 'all';
+    atasanTimDateFilter = 'all';
+    atasanTimCustomDate = '';
     atasanTimSearchQuery = '';
     isAtasanTimFilterOpen = false;
     currentAtasanTimPage = 1;
