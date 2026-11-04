@@ -534,26 +534,48 @@ const DEFAULT_USERS = [
 ];
 
 function loadUsers() {
+  let deletedList = [];
+  try {
+    deletedList = JSON.parse(localStorage.getItem('KUJANG_DELETED_USERS') || '[]');
+  } catch (e) { }
+  const deletedNips = new Set(deletedList.map(d => d.nip).filter(Boolean));
+  const deletedKujangIds = new Set(deletedList.map(d => d.kujangId).filter(Boolean));
+  const deletedNames = new Set(deletedList.map(d => d.name).filter(Boolean));
+
+  const isUserDeleted = (u) => {
+    if (!u) return false;
+    if (u.kujangId && deletedKujangIds.has(u.kujangId)) return true;
+    if (u.nip && deletedNips.has(u.nip)) return true;
+    if (u.name && deletedNames.has(u.name)) return true;
+    return false;
+  };
+
   const saved = localStorage.getItem(USERS_STORAGE_KEY);
   if (!saved) {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
-    return JSON.parse(JSON.stringify(DEFAULT_USERS));
+    const initUsers = DEFAULT_USERS.filter(u => !isUserDeleted(u));
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initUsers));
+    return JSON.parse(JSON.stringify(initUsers));
   }
   try {
     let users = JSON.parse(saved);
+    // Explicitly strip any users in deletedList
+    users = users.filter(u => !isUserDeleted(u));
+
     let changed = false;
     DEFAULT_USERS.forEach(defU => {
-      if (!users.some(u => u.nip === defU.nip)) {
-        users.push(defU);
-        changed = true;
+      if (!isUserDeleted(defU)) {
+        if (!users.some(u => u.nip === defU.nip || u.kujangId === defU.kujangId)) {
+          users.push(defU);
+          changed = true;
+        }
       }
     });
-    if (changed) {
+    if (changed || users.length !== JSON.parse(saved).length) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
     }
     return users;
   } catch (e) {
-    return JSON.parse(JSON.stringify(DEFAULT_USERS));
+    return JSON.parse(JSON.stringify(DEFAULT_USERS.filter(u => !isUserDeleted(u))));
   }
 }
 
@@ -711,7 +733,19 @@ syncActorsFromUsers(MOCK_USERS);
 // Fungsi sentral untuk mendapatkan seluruh Atasan yang HAK AKSESNYA AKTIF
 function getActiveApprovers() {
   const users = (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
+  let deletedList = [];
+  try {
+    deletedList = JSON.parse(localStorage.getItem('KUJANG_DELETED_USERS') || '[]');
+  } catch (e) { }
+  const deletedNips = new Set(deletedList.map(d => d.nip).filter(Boolean));
+  const deletedKujangIds = new Set(deletedList.map(d => d.kujangId).filter(Boolean));
+  const deletedNames = new Set(deletedList.map(d => d.name).filter(Boolean));
+
   const approverUsers = users.filter(u => {
+    if (u.kujangId && deletedKujangIds.has(u.kujangId)) return false;
+    if (u.nip && deletedNips.has(u.nip)) return false;
+    if (u.name && deletedNames.has(u.name)) return false;
+
     const isApproverRole = u.roleKey === 'approver' || u.roleKey === 'approver2' ||
       (u.role && (u.role.toLowerCase().includes('atasan') || u.role.toLowerCase().includes('manager') || u.role.toLowerCase().includes('supervisor')));
     return isApproverRole;

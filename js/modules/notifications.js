@@ -677,6 +677,11 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid var(--border-color, #e2e8f0); padding-bottom: 16px;">
           <div>
 
+            <div style="margin-bottom: 8px;">
+              <button type="button" class="btn-figma-secondary" onclick="window.closeDesktopFullNotifikasi()" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 0.775rem; font-weight: 700; border-radius: 8px; cursor: pointer; border: 1px solid var(--border-color, #cbd5e1); background: #ffffff; color: var(--text-primary, #0f172a);" title="Kembali ke tampilan sebelumnya">
+                ← Kembali
+              </button>
+            </div>
             <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
           <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -804,13 +809,17 @@
     } else if (role === 'admin') {
       const v = document.getElementById('viewAdmin');
       if (v) v.style.display = 'block';
+      const currentNav = window.currentAdminNav || 'dashboard';
+      if (typeof window.setAdminNav === 'function') {
+        window.setAdminNav(currentNav);
+        return;
+      }
     }
 
     const breadcrumbSub = document.getElementById('breadcrumbSubpage');
     if (breadcrumbSub) breadcrumbSub.textContent = 'Dashboard';
   }
-
-  // Handle ESC key to close full desktop notif page
+// Handle ESC key to close full desktop notif page
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       const notifView = document.getElementById('viewNotifikasi');

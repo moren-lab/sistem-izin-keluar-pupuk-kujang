@@ -1923,23 +1923,14 @@ function saveAdminUserAccess(event) {
       const targetId = originalId || kujangId;
       const existingOccupant = users.find(u => u.kujangId !== targetId && u.status === 'Aktif' && u.roleKey === roleKey);
       if (existingOccupant) {
-        const noticeMsg = `<strong>Jabatan [${roleDef.hakAkses} - ${roleDef.jabatan}]</strong> saat ini sedang aktif dipegang oleh:<br><br>` +
-          `• <strong>Nama:</strong> ${existingOccupant.name}<br>` +
-          `• <strong>NIP:</strong> ${existingOccupant.nip}<br>` +
-          `• <strong>KUJANG ID:</strong> ${existingOccupant.kujangId}<br><br>` +
-          `Sesuai tata kelola PT Pupuk Kujang, 1 jabatan manajerial/struktural hanya dapat diakses oleh 1 orang pejabat aktif.<br>` +
-          `Sistem <strong>TIDAK MENGIZINKAN</strong> menimpa akun atasan aktif secara langsung.<br><br>` +
-          `Silakan cabut (revoke) hak akses <strong>${existingOccupant.name}</strong> terlebih dahulu melalui direktori akun jika Anda ingin mengalihkan jabatan ini kepada <strong>${name}</strong>.`;
-        if (typeof window.openNoticeModal === 'function') {
-          window.openNoticeModal({
-            title: 'Gagal Memberikan Hak Akses',
-            message: noticeMsg,
-            buttonText: 'Batal'
-          });
-        } else {
-          alert(noticeMsg.replace(/<[^>]+>/g, ''));
+        // Alihkan jabatan secara otomatis dengan mencabut pejabat sebelumnya
+        existingOccupant.status = 'Dicabut';
+        if (typeof window.autoCancelTicketsForRevokedUser === 'function') {
+          window.autoCancelTicketsForRevokedUser(existingOccupant);
         }
-        return;
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Jabatan ${roleDef.jabatan} dialihkan ke ${name}. Hak akses ${existingOccupant.name} otomatis dicabut.`, 'info');
+        }
       }
     }
   }
@@ -2126,14 +2117,24 @@ function deleteAdminUser(kujangId) {
       if (window.ACTORS.karyawan2 && window.ACTORS.karyawan2.approverName === deletedName) {
         window.ACTORS.karyawan2.approverName = '';
       }
+      if (window.ACTORS.approver && (window.ACTORS.approver.name === deletedName || window.ACTORS.approver.nip === user.nip)) {
+        window.ACTORS.approver = null;
+      }
+      if (window.ACTORS.approver2 && (window.ACTORS.approver2.name === deletedName || window.ACTORS.approver2.nip === user.nip)) {
+        window.ACTORS.approver2 = null;
+      }
     }
 
     // 3. Batalkan seluruh permohonan aktif pemohon jika user adalah karyawan
     autoCancelTicketsForRevokedUser(user);
 
-    // 4. Hapus dari daftar users
-    users = users.filter(u => u.kujangId !== kujangId);
+    // 4. Hapus dari daftar users dan DEFAULT_USERS
+    users = users.filter(u => u.kujangId !== kujangId && u.nip !== user.nip && u.name !== user.name);
     window.MOCK_USERS = users;
+
+    if (Array.isArray(window.DEFAULT_USERS)) {
+      window.DEFAULT_USERS = window.DEFAULT_USERS.filter(u => u.kujangId !== kujangId && u.nip !== user.nip && u.name !== user.name);
+    }
 
     if (typeof window.saveUsers === 'function') {
       window.saveUsers(users);
@@ -2148,6 +2149,17 @@ function deleteAdminUser(kujangId) {
     }
     if (typeof window.renderKaryawanView === 'function') {
       window.renderKaryawanView();
+    }
+
+    // Buat notifikasi audit admin
+    if (typeof window.createNotification === 'function') {
+      window.createNotification({
+        recipientRole: 'admin',
+        title: 'Hak Akses Pengguna Dihapus',
+        message: `Akun ${user.name} (${user.kujangId}) telah dihapus dari sistem. Seluruh data penugasan atasan terkait otomatis dibersihkan.`,
+        type: 'info',
+        priority: 'normal'
+      });
     }
 
     // Tampilkan modal pemberitahuan hak akses telah dihapus (Item 5)
@@ -2169,9 +2181,10 @@ function deleteAdminUser(kujangId) {
     window.openDeleteConfirmModal({
       title: 'Hapus Hak Akses Pengguna',
       message: `Apakah Anda yakin ingin menghapus akun <strong>${user.name}</strong> (${kujangId})? Tindakan ini akan menghapus akun dan seluruh wewenang terkait secara permanen.`,
+      confirmText: 'Hapus',
       onConfirm: executeDelete
     });
-  } else if (confirm(`Apakah Anda yakin ingin menghapus hak akses KUJANG ID ${kujangId} (${user.name})?`)) {
+  } else {
     executeDelete();
   }
 }
