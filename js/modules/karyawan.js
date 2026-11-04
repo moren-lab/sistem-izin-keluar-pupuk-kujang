@@ -1351,9 +1351,6 @@ function renderEmpTable(list, containerElement) {
  * Main Karyawan View Router
  */
 function renderKaryawanView() {
-  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
-    window.checkOverdueAndExpiredTickets(true);
-  }
   updateKaryawanMetrics();
   const currentKaryawanNav = window.currentKaryawanNav || 'dashboard';
 

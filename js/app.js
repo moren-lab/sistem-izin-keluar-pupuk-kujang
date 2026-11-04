@@ -114,25 +114,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===================================================================
   // INITIALIZATION & BOOTSTRAP
   // ===================================================================
-  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
-    window.checkOverdueAndExpiredTickets(true);
+  const activeUser = typeof window.getKujangCurrentUser === 'function' ? window.getKujangCurrentUser() : null;
+  if (activeUser && activeUser.role) {
+    if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+      window.checkOverdueAndExpiredTickets(true);
+    }
+    if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav('dashboard');
+    if (typeof window.setApproverNav === 'function') window.setApproverNav('dashboard');
+    if (typeof window.setSecurityNav === 'function') window.setSecurityNav('dashboard');
+    if (typeof window.setAdminNav === 'function') window.setAdminNav('dashboard');
+    if (typeof window.switchRole === 'function') window.switchRole(activeUser.role);
   }
 
-  if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav('dashboard');
-  if (typeof window.setApproverNav === 'function') window.setApproverNav('dashboard');
-  if (typeof window.setSecurityNav === 'function') window.setSecurityNav('dashboard');
-  if (typeof window.setAdminNav === 'function') window.setAdminNav('dashboard');
-  if (typeof window.switchRole === 'function') window.switchRole('karyawan');
-
-  // Background Scheduler: periksa status Terlambat & Kedaluwarsa secara berkala setiap 1 detik (real-time responsiveness)
+  // Background Scheduler: periksa status Terlambat & Kedaluwarsa hanya jika user aktif login
   setInterval(() => {
+    if (typeof window.getKujangCurrentUser === 'function' && !window.getKujangCurrentUser()) {
+      return; // Tetap diam saat di layar login KUJANG ID untuk mencegah browser lag
+    }
     if (typeof window.checkOverdueAndExpiredTickets === 'function') {
       window.checkOverdueAndExpiredTickets(false);
     }
     if (typeof window.updateAdminMetrics === 'function') {
       window.updateAdminMetrics();
     }
-  }, 1000);
+  }, 2000);
 
   // Periksa langsung ketika user kembali ke tab browser / membuka kunci layar laptop / mengubah jam sistem
   window.addEventListener('focus', () => {

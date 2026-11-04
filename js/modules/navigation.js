@@ -32,11 +32,6 @@ function updateClock() {
   if (liveDigitalClock) {
     liveDigitalClock.textContent = `${day}, ${d} ${m} ${y} — ${hh}:${mm}:${ss} WIB`;
   }
-
-  // Sinkronisasi otomatis status tiket (Terlambat & Kedaluwarsa) setiap detik mengikuti jam sistem laptop user
-  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
-    window.checkOverdueAndExpiredTickets(true);
-  }
 }
 
 // SIDEBAR TOGGLING

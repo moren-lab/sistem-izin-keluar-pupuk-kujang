@@ -695,9 +695,6 @@ function renderSecurityTable(list, containerElement) {
 window.renderSecurityTable = renderSecurityTable;
 
 function renderSecurityView() {
-  if (typeof window.checkOverdueAndExpiredTickets === 'function') {
-    window.checkOverdueAndExpiredTickets(true);
-  }
   updateSecurityMetrics();
   const currentSecurityNav = window.currentSecurityNav || 'dashboard';
   const ticketsList = window.ticketsList || [];

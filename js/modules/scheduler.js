@@ -106,7 +106,26 @@ function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurre
  * Pengecekan otomatis tiket Terlambat & Kedaluwarsa
  * Berjalan setiap detik secara real-time mengikuti jam sistem laptop user
  */
+let _isCheckingTickets = false;
+
 function checkOverdueAndExpiredTickets(silent = true) {
+  // Re-entrancy guard: hindari loop rekursif antar renderers
+  if (_isCheckingTickets) return;
+
+  // Login guard: jika user belum login (masih di portal KUJANG ID), diamkan agar browser tidak lag
+  if (typeof window.getKujangCurrentUser === 'function' && !window.getKujangCurrentUser()) {
+    return;
+  }
+
+  _isCheckingTickets = true;
+  try {
+    _executeCheckOverdueAndExpiredTickets(silent);
+  } finally {
+    _isCheckingTickets = false;
+  }
+}
+
+function _executeCheckOverdueAndExpiredTickets(silent = true) {
   // Selalu pastikan membaca array tiket termutakhir
   const list = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
   const now = new Date();

@@ -14,6 +14,11 @@
   // 1. INITIALIZATION & SYNC
   // -------------------------------------------------------------------
   function initMobileApp() {
+    // Login guard: jika user belum login, jangan render view berat di background
+    if (typeof window.getKujangCurrentUser === 'function' && !window.getKujangCurrentUser()) {
+      return;
+    }
+
     // Detect if desktop switched role (Mobile only supports Karyawan, Atasan 1, Atasan 2, Pos Jaga)
     if (window.currentActor && ['karyawan', 'karyawan2', 'approver', 'approver2', 'security'].includes(window.currentActor)) {
       currentMobileRole = window.currentActor;
