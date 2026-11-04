@@ -1183,7 +1183,8 @@
             <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.5;">
               <strong>Nama:</strong> ${getTName(t)}<br>
               <strong>NIP:</strong> ${getTNip(t)}<br>
-              <strong>Departemen:</strong> ${t.department || 'Departemen Rekayasa & Pemeliharaan'}
+              <strong>Departemen:</strong> ${t.department || 'Departemen Rekayasa & Pemeliharaan'}<br>
+              <strong>Atasan:</strong> ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}${t.reassignedFrom ? ` <span style="font-size: 0.675rem; color: #b45309; font-weight: 700;">(Dialihkan dari ${t.reassignedFrom})</span>` : ''}
             </div>
           </div>
 
@@ -1194,9 +1195,7 @@
               <strong>Kategori:</strong> ${t.category || 'Dinas Kantor'}<br>
               <strong>Tipe Kepulangan:</strong> ${getTType(t)}<br>
               <strong>Tujuan:</strong> ${(t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan'}<br>
-              <strong>Alasan:</strong> "${t.reason || '-'}"<br>
-              <strong>Atasan Pemberi Izin:</strong> ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}<br>
-              <strong>Moda Transportasi:</strong> ${getTTransport(t)}
+              <strong>Alasan:</strong> "${t.reason || '-'}"
             </div>
           </div>
 

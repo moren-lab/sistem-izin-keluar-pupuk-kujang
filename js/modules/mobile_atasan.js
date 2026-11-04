@@ -30,7 +30,7 @@
 
   function getActiveApprover() {
     let app = null;
-    if (window.currentActor === 'approver2') {
+    if (window.currentActor === 'approver2' || window.currentMobileRole === 'approver2') {
       app = { 
         name: 'Dewi Sartika, S.T., M.M.', 
         nip: 'PK-2012-0845', 
@@ -343,43 +343,86 @@
     const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
 
     if (pendingEmergTickets.length > 0) {
-      priorityHtml = pendingEmergTickets.map(pendingEmergTicket => `
-        <div class="mobile-card" style="border: 1.5px solid #fca5a5; background: #fff5f5; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
-          <div style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px; margin-bottom: 6px;">
-            PRIORITAS TINGGI • IZIN DARURAT
-          </div>
-          <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-            <div>
-              <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
-              <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+      priorityHtml = pendingEmergTickets.map(pendingEmergTicket => {
+        const isReassignedAway = isTicketReassignedFromMobileApprover(pendingEmergTicket);
+        const isReassignedToMe = isTicketReassignedToMobileApprover(pendingEmergTicket);
+
+        if (isReassignedAway) {
+          return `
+            <div class="mobile-card" style="border: 1.5px solid #fde68a; background: #fffbeb; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
+              <div style="font-size: 0.675rem; font-weight: 800; color: #b45309; letter-spacing: 0.5px; margin-bottom: 6px;">
+                PENGALIHAN WEWENANG • IZIN DARURAT
+              </div>
+              <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                <div>
+                  <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+                  <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+                </div>
+                <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer; flex-shrink: 0;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Detail Pengajuan</span>
+                </button>
+              </div>
+
+              <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <span class="mobile-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">Dialihkan ke ${pendingEmergTicket.approverName}</span>
+              </div>
+
+              <div style="font-size: 0.75rem; color: #78350f; margin: 4px 0 2px 0;">
+                <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
+              </div>
+              <div style="font-size: 0.725rem; color: #92400e; margin-bottom: 8px; background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 6px 10px; line-height: 1.4;">
+                ⚠️ Pengajuan izin darurat ini telah dialihkan oleh pemohon ke <strong>${pendingEmergTicket.approverName}</strong>. Wewenang keputusan persetujuan berada pada atasan yang ditunjuk.
+              </div>
+              
+              <div style="margin-top: 8px;">
+                <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; padding: 8px 10px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+                  Pantau Kronologi & Rincian
+                </button>
+              </div>
             </div>
-            <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer; flex-shrink: 0;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail Pengajuan</span>
-            </button>
-          </div>
+          `;
+        }
 
-          <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-            <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">Menunggu Otorisasi</span>
-          </div>
+        return `
+          <div class="mobile-card" style="border: 1.5px solid #fca5a5; background: #fff5f5; margin-bottom: 12px; padding: 14px; border-radius: 14px;">
+            <div style="font-size: 0.675rem; font-weight: 800; color: #b91c1c; letter-spacing: 0.5px; margin-bottom: 6px;">
+              PRIORITAS TINGGI • IZIN DARURAT
+            </div>
+            <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div>
+                <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+                <div style="font-size: 0.725rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+              </div>
+              <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer; flex-shrink: 0;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Detail Pengajuan</span>
+              </button>
+            </div>
 
-          <div style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0;">
-            <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
+            <div style="margin: 4px 0 6px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+              <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">Menunggu Otorisasi</span>
+              ${isReassignedToMe ? `<span style="background: #eff6ff; color: #1d4ed8; font-size: 0.675rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #bfdbfe;">Dialihkan dari ${pendingEmergTicket.reassignedFrom}</span>` : ''}
+            </div>
+
+            <div style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0;">
+              <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
+            </div>
+            <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px;">
+              <span style="font-style: normal;">"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</span>
+            </div>
+            
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
+                Tolak
+              </button>
+              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
+                Setujui
+              </button>
+            </div>
           </div>
-          <div style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px;">
-            <span style="font-style: normal;">"${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"</span>
-          </div>
-          
-          <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
-              Tolak
-            </button>
-            <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}')">
-              Setujui
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // Top Pending Regular Tickets (matching PDF: Raka Pratama, Nisa Putri, etc.)
@@ -691,7 +734,17 @@
                 </div>
               </div>
 
-              ${isEmg ? `
+              ${isEmg ? (isReassignedAway ? `
+                <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 0.725rem; color: #92400e; line-height: 1.4;">
+                  ⚠️ Pengajuan dialihkan ke <strong>${t.approverName}</strong>. Hak keputusan persetujuan berada pada atasan yang ditunjuk.
+                </div>
+                <div style="margin-top: 8px;">
+                  <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Pantau Rincian</span>
+                  </button>
+                </div>
+              ` : `
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
                   <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
@@ -704,7 +757,7 @@
                     Setujui
                   </button>
                 </div>
-              ` : `
+              `) : `
                 <button type="button" class="mobile-btn-primary" style="margin-top: 4px; ${isReassignedAway ? 'background: #475569; border-color: #475569;' : ''}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                   ${isReassignedAway ? 'Pantau Rincian' : 'Tinjau'}
                 </button>
@@ -2063,14 +2116,20 @@
   };
 
   window.mobileAtasanApproveEmergency = function (ticketId) {
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (t && isTicketReassignedFromMobileApprover(t)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Gagal: Pengajuan darurat ini telah dialihkan ke ${t.approverName}.`, 'danger');
+      }
+      return;
+    }
     if (typeof window.emergencyDirectApprove === 'function') {
       window.emergencyDirectApprove(ticketId);
       renderMobileAtasan(null, currentAtasanTab);
       if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
       return;
     }
-    const tickets = window.ticketsList || [];
-    const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
     const approver = getActiveApprover();
     t.status = 'Disetujui';

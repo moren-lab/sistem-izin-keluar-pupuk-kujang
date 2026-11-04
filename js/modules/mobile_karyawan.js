@@ -2491,7 +2491,8 @@
             <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.4;">
               <strong>Nama:</strong> ${getTName(t)}<br>
               <strong>NIP:</strong> ${getTNip(t)}<br>
-              <strong>Departemen:</strong> ${t.department || 'Departemen Rekayasa & Pemeliharaan'}
+              <strong>Departemen:</strong> ${t.department || 'Departemen Rekayasa & Pemeliharaan'}<br>
+              <strong>Atasan:</strong> ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}${t.reassignedFrom ? ` <span style="font-size: 0.675rem; color: #b45309; font-weight: 700;">(Dialihkan dari ${t.reassignedFrom})</span>` : ''}
             </div>
           </div>
 
@@ -2499,8 +2500,7 @@
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">KEPERLUAN IZIN</div>
             <div style="font-size: 0.75rem; color: #1e293b; line-height: 1.4;">
               <strong>Tujuan:</strong> ${t.destination || 'Area Rekayasa'}<br>
-              <strong>Alasan:</strong> ${t.reason || 'Keperluan dinas kantor'}<br>
-              <strong>Transportasi:</strong> ${getTTransport(t)}
+              <strong>Alasan:</strong> ${t.reason || 'Keperluan dinas kantor'}
             </div>
           </div>
 

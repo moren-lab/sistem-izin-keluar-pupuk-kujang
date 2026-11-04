@@ -131,7 +131,16 @@
       `;
     } else if (currentMobileRole === 'approver' || currentMobileRole === 'approver2') {
       const tickets = window.ticketsList || [];
-      const pendingCount = tickets.filter(t => t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat').length;
+      const pendingCount = tickets.filter(t => {
+        const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
+        if (!isPending) return false;
+        const approverName = (t.approverName || '').toLowerCase();
+        if (currentMobileRole === 'approver2') {
+          return approverName.includes('dewi');
+        } else {
+          return approverName.includes('hendra') || (!approverName.includes('dewi'));
+        }
+      }).length;
 
       navEl.innerHTML = `
         <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" onclick="window.mobileSwitchTab('dashboard')">
