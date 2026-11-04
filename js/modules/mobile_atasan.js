@@ -352,25 +352,22 @@
 
         if (isReassignedAway) {
           return `
-            <div class="mobile-ticket-item" style="border: 1.5px solid #fde68a !important; border-left: 1.5px solid #fde68a !important; background: #fffbeb; margin-bottom: 0; padding: 12px; border-radius: 10px;">
-              <div style="font-size: 0.675rem; font-weight: 800; color: #b45309; letter-spacing: 0.5px; margin-bottom: 6px;">
-                PENGALIHAN WEWENANG • IZIN DARURAT
-              </div>
+            <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; border-left: 3.5px solid #f59e0b; background: #ffffff; margin-bottom: 0; padding: 12px; border-radius: 10px;">
               <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                 <div>
-                  <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+                  <div style="font-size: 0.675rem; font-weight: 800; color: #b45309; text-transform: uppercase;">
+                    IZIN DARURAT (DIALIHKAN)
+                  </div>
+                  <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-top: 1px;">${getTName(pendingEmergTicket)}</div>
                   <div style="font-size: 0.7rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
-                  <span class="mobile-badge" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">Dialihkan ke ${pendingEmergTicket.approverName}</span>
+                  <span class="mobile-badge" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a; font-size: 0.65rem; border-radius: 6px; padding: 2px 7px;">↳ Dialihkan ke ${pendingEmergTicket.approverName}</span>
                 </div>
               </div>
 
-              <div style="font-size: 0.75rem; color: #78350f; margin: 4px 0 2px 0;">
-                <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
-              </div>
-              <div style="font-size: 0.725rem; color: #92400e; margin-bottom: 8px; background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 6px 10px; line-height: 1.4;">
-                ⚠️ Pengajuan izin darurat ini telah dialihkan oleh pemohon ke <strong>${pendingEmergTicket.approverName}</strong>. Wewenang keputusan persetujuan berada pada atasan yang ditunjuk.
+              <div class="mobile-clamp-2" style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;">
+                <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'} • Wewenang berada pada atasan yang ditunjuk
               </div>
               
               <div style="margin-top: 8px;">
@@ -458,9 +455,6 @@
           </div>
 
           ${isReassignedAway ? `
-            <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 6px 10px; font-size: 0.725rem; color: #92400e; margin-bottom: 8px; line-height: 1.4;">
-              ⚠️ Pengajuan dialihkan ke <strong>${t.approverName}</strong>. Wewenang keputusan berada pada atasan yang ditunjuk.
-            </div>
             <div style="margin-top: 8px;">
               <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
@@ -770,9 +764,6 @@
               </div>
 
               ${isEmg ? (isReassignedAway ? `
-                <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 0.725rem; color: #92400e; line-height: 1.4;">
-                  ⚠️ Pengajuan dialihkan ke <strong>${t.approverName}</strong>. Hak keputusan persetujuan berada pada atasan yang ditunjuk.
-                </div>
                 <div style="margin-top: 8px;">
                   <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
@@ -911,6 +902,8 @@
     if (s.includes('menunggu')) return 'menunggu';
     if (s.includes('setuju') || s.includes('aktif')) return 'disetujui';
     if (s.includes('tolak')) return 'ditolak';
+    if (s.includes('batal')) return 'dibatalkan';
+    if (s.includes('daluwarsa')) return 'kedaluwarsa';
     if (s.includes('luar') || s.includes('terlambat')) return 'sedang-di-luar';
     if (s.includes('selesai')) return 'selesai';
     return 'menunggu';
@@ -1114,9 +1107,66 @@
             </div>
           </div>
         </div>
+
+        <!-- Bagian Keputusan Atasan (Hanya muncul di Tab Informasi Tiket, bukan di Riwayat Aktivitas) -->
+        ${isPending ? (isReassignedAway ? `
+          <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; text-align: center; border: 1.5px solid #fde68a; background: #fffbeb;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #92400e; margin-bottom: 6px;">
+              ⚠️ Hak keputusan persetujuan berada pada <strong>${t.approverName}</strong>
+            </div>
+            <div style="font-size: 0.725rem; color: #b45309; margin-bottom: 10px;">
+              Tiket pengajuan ini telah dialihkan oleh pemohon ke atasan yang ditunjuk.
+            </div>
+            <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 700;" onclick="window.mobileSwitchTab('antrean')">
+              Kembali ke Antrean
+            </button>
+          </div>
+        ` : `
+          <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; border: 1.5px solid #cbd5e1; background: #ffffff;">
+            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Keputusan Atasan</div>
+
+            <div class="mobile-form-group" style="margin-bottom: 10px;">
+              <label class="mobile-form-label" style="font-size: 0.725rem; font-weight: 700; color: #475569;">Catatan persetujuan (opsional)</label>
+              <textarea class="mobile-textarea" id="mAtasanDetailNote" placeholder="Tambahkan instruksi atau catatan khusus jika diperlukan" style="font-size: 0.75rem; min-height: 60px;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+                Tolak
+              </button>
+              <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
+                Setujui
+              </button>
+            </div>
+          </div>
+        `) : (t.status === 'Ditolak' ? `
+          <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5; margin-bottom: 14px;">
+            <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
+              ✕ Pengajuan Ditolak
+            </div>
+            <div style="font-size: 0.725rem; color: #7f1d1d; margin-bottom: 10px;">
+              Alasan penolakan: "${t.rejectionReason || 'Alasan dinas belum memadai.'}"
+            </div>
+            <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; font-weight: 600;" onclick="window.mobileSwitchTab('antrean')">
+              Kembali ke Antrean
+            </button>
+          </div>
+        ` : `
+          <div class="mobile-card" style="text-align: center; padding: 14px; margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.75rem; color: #334155; margin-bottom: 4px;">
+              Tiket ini berstatus <strong>${t.status}</strong>.
+            </div>
+            <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px;">
+              ${t.approvedAt ? `Disetujui pada ${formatDisplayDate(t.approvedAt)}` : 'Keputusan telah dicatat resmi.'}
+            </div>
+            <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; font-weight: 600;" onclick="window.mobileSwitchTab('antrean')">
+              Kembali ke Antrean
+            </button>
+          </div>
+        `)}
       </div>
 
-      <!-- Tab Content 2: Riwayat Aktivitas (Timeline) -->
+      <!-- Tab Content 2: Riwayat Aktivitas (Timeline murni tanpa tombol aksi persetujuan) -->
       <div id="mAtasanDetailSecJejak" style="display: ${currentAtasanDetailTab === 'jejak' ? 'block' : 'none'}; margin-bottom: 12px;">
         <div class="mobile-card" style="padding: 14px;">
           <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Kronologi Aktivitas Tiket</div>
@@ -1125,66 +1175,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Bagian Keputusan Atasan (Menggantikan tombol Edit & Batalkan milik Karyawan) -->
-      ${isPending ? (isReassignedAway ? `
-        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; text-align: center; border: 1.5px solid #fde68a; background: #fffbeb;">
-          <div style="font-size: 0.8rem; font-weight: 700; color: #92400e; margin-bottom: 6px;">
-            ⚠️ Hak keputusan persetujuan berada pada <strong>${t.approverName}</strong>
-          </div>
-          <div style="font-size: 0.725rem; color: #b45309; margin-bottom: 10px;">
-            Tiket pengajuan ini telah dialihkan oleh pemohon ke atasan yang ditunjuk.
-          </div>
-          <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 700;" onclick="window.mobileSwitchTab('antrean')">
-            Kembali ke Antrean
-          </button>
-        </div>
-      ` : `
-        <div class="mobile-card" style="margin-bottom: 14px; padding: 14px; border: 1.5px solid #cbd5e1; background: #ffffff;">
-          <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Keputusan Atasan</div>
-
-          <div class="mobile-form-group" style="margin-bottom: 10px;">
-            <label class="mobile-form-label" style="font-size: 0.725rem; font-weight: 700; color: #475569;">Catatan persetujuan (opsional)</label>
-            <textarea class="mobile-textarea" id="mAtasanDetailNote" placeholder="Tambahkan instruksi atau catatan khusus jika diperlukan" style="font-size: 0.75rem; min-height: 60px;"></textarea>
-          </div>
-
-          <div style="display: flex; gap: 8px;">
-            <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenRejectSheet('${t.id}')">
-              Tolak
-            </button>
-            <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
-              Setujui
-            </button>
-          </div>
-
-          <!-- Keterangan Status di Bawah Tombol Setujui atau Tolak -->
-        
-        </div>
-      `) : (t.status === 'Ditolak' ? `
-        <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5; margin-bottom: 14px;">
-          <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
-            ✕ Pengajuan Ditolak
-          </div>
-          <div style="font-size: 0.725rem; color: #7f1d1d; margin-bottom: 10px;">
-            Alasan penolakan: "${t.rejectionReason || 'Alasan dinas belum memadai.'}"
-          </div>
-          <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; font-weight: 600;" onclick="window.mobileSwitchTab('antrean')">
-            Kembali ke Antrean
-          </button>
-        </div>
-      ` : `
-        <div class="mobile-card" style="text-align: center; padding: 14px; margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0;">
-          <div style="font-size: 0.75rem; color: #334155; margin-bottom: 4px;">
-            Tiket ini berstatus <strong>${t.status}</strong>.
-          </div>
-          <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px;">
-            ${t.approvedAt ? `Disetujui pada ${formatDisplayDate(t.approvedAt)}` : 'Keputusan telah dicatat resmi.'}
-          </div>
-          <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 40px; font-weight: 600;" onclick="window.mobileSwitchTab('antrean')">
-            Kembali ke Antrean
-          </button>
-        </div>
-      `)}
     `;
   }
 

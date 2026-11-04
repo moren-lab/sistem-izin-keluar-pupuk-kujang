@@ -123,11 +123,14 @@ function checkOverdueAndExpiredTickets(silent = true) {
     const isEmergencyTicket = Boolean(ticket.isEmergency || (ticket.id && (ticket.id.includes('-EMG-') || ticket.id.startsWith('TK-EMG'))));
 
     // -------------------------------------------------------------------------
-    // 1. KEDALUWARSA (BRULE-11):
-    // Tiket yang telah Disetujui tapi tidak kunjung dipindai keluar melewati toleransi rencana jam keluar (+10 menit)
-    // Tiket Darurat / Bypass tidak hangus otomatis.
+    // 1. KEDALUWARSA (BRULE-11 & User Request):
+    // Tiket biasa (Disetujui) atau Tiket Darurat (Disetujui / Menunggu Otorisasi Darurat)
+    // yang tidak kunjung dipindai keluar melewati toleransi rencana jam keluar (+10 menit) otomatis menjadi Kedaluwarsa
     // -------------------------------------------------------------------------
-    if (!isEmergencyTicket && statusNormalized === 'Disetujui' && ticket.plannedExit && !ticket.scanOutTime) {
+    const isPendingEmergency = isEmergencyTicket && (statusNormalized === 'Menunggu Otorisasi Darurat' || statusNormalized === 'Menunggu Persetujuan');
+    const isApprovedOrEmergencyPending = (statusNormalized === 'Disetujui' || isPendingEmergency);
+
+    if (isApprovedOrEmergencyPending && ticket.plannedExit && !ticket.scanOutTime) {
       const exitTime = parseTicketDateTime(ticket.plannedExit);
       const toleranceMs = 10 * 60 * 1000; // toleransi 10 menit
       if (exitTime && !isNaN(exitTime.getTime()) && (now.getTime() > exitTime.getTime() + toleranceMs)) {
@@ -141,20 +144,20 @@ function checkOverdueAndExpiredTickets(silent = true) {
               recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
               actorSource: 'system',
               type: 'kedaluwarsa',
-              title: 'Tiket Kedaluwarsa',
-              message: `Izin keluar area (#${ticket.id}) otomatis kedaluwarsa karena tidak dipindai keluar melewati batas toleransi rencana keluar.`,
+              title: isEmergencyTicket ? 'Izin Darurat Kedaluwarsa' : 'Tiket Kedaluwarsa',
+              message: `Izin ${isEmergencyTicket ? 'darurat ' : ''}keluar area (#${ticket.id}) otomatis kedaluwarsa karena tidak dipindai keluar melewati batas toleransi rencana keluar.`,
               ticketId: ticket.id,
-              priority: 'normal',
+              priority: isEmergencyTicket ? 'high' : 'normal',
               eventId: `expired_${ticket.id}`
             });
           }
         }
         if (!ticket.timeline) ticket.timeline = [];
         ticket.timeline.push({
-          event: 'Tiket Kedaluwarsa',
+          event: isEmergencyTicket ? 'Izin Darurat Kedaluwarsa' : 'Tiket Kedaluwarsa',
           time: nowFormatted,
           by: 'Sistem Otomatis (Scheduler)',
-          desc: 'Tiket otomatis hangus/kedaluwarsa karena tidak dipindai keluar melewati batas toleransi rencana keluar (+10 menit).'
+          desc: `Tiket ${isEmergencyTicket ? 'darurat ' : ''}otomatis hangus/kedaluwarsa karena tidak dipindai keluar melewati batas toleransi rencana keluar (+10 menit).`
         });
         hasChanges = true;
         newlyExpired++;

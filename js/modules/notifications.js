@@ -531,7 +531,7 @@
               <span style="color: #059669; font-weight: 700;">Lihat →</span>
             </div>
           </div>
-          <button type="button" aria-label="Hapus Notifikasi" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 0; border-radius: 8px;" onclick="event.stopPropagation(); window.deleteMobileNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
+          <button type="button" aria-label="Hapus Notifikasi" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 0; border-radius: 8px;" onclick="event.stopPropagation(); window.confirmDeleteMobileNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
@@ -556,7 +556,7 @@
           <h3 class="mobile-sheet-title" style="font-size: 1.05rem; margin: 0; color: #0f172a;">Notifikasi</h3>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Hapus Semua Notifikasi" class="btn-clear-all-notifs" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #dc2626; color: #ffffff; border: none; border-radius: 8px; cursor: ${allNotifsCount > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsCount > 0 ? '1' : '0.4'}; padding: 0;" ${allNotifsCount > 0 ? `onclick="window.confirmClearAllNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
+          <button type="button" aria-label="Hapus Semua Notifikasi" class="btn-clear-all-notifs" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #dc2626; color: #ffffff; border: none; border-radius: 8px; cursor: ${allNotifsCount > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsCount > 0 ? '1' : '0.4'}; padding: 0;" ${allNotifsCount > 0 ? `onclick="window.confirmClearAllMobileNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
           <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
@@ -879,31 +879,91 @@
     }
   };
 
-  window.confirmClearAllNotifications = function(currentTab = 'all') {
+  // Konfirmasi Hapus Satu Notifikasi (Mobile Bottom Sheet)
+  window.confirmDeleteMobileNotification = function(notifId, currentTab = 'all') {
+    const sheet = document.getElementById('mobileActionSheet');
+    if (!sheet) {
+      if (confirm('Hapus notifikasi ini?')) {
+        window.deleteMobileNotification(notifId, currentTab);
+      }
+      return;
+    }
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+        <h3 class="mobile-sheet-title" style="font-size: 1rem; margin: 0; color: #0f172a;">Konfirmasi Hapus</h3>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1rem; color: #64748b; cursor: pointer;" onclick="window.openMobileNotificationSheet('${currentTab}')">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 24px 16px; text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </div>
+        <div style="font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Hapus Notifikasi?</div>
+        <div style="font-size: 0.775rem; color: #64748b; margin-bottom: 20px; line-height: 1.45;">
+          Apakah Anda yakin ingin menghapus notifikasi ini? Tindakan ini tidak dapat dibatalkan.
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; font-weight: 700; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; font-size: 0.85rem;" onclick="window.openMobileNotificationSheet('${currentTab}')">
+            Batal
+          </button>
+          <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; font-weight: 700; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);" onclick="window.deleteMobileNotification('${notifId}', '${currentTab}')">
+            Hapus
+          </button>
+        </div>
+      </div>
+    `;
+  };
+
+  // Konfirmasi Hapus Semua Notifikasi (Mobile Bottom Sheet)
+  window.confirmClearAllMobileNotifications = function(currentTab = 'all') {
     const total = typeof window.getNotificationsForActiveActor === 'function' ? window.getNotificationsForActiveActor().length : 0;
-    const unread = typeof window.getUnreadCountForActiveActor === 'function' ? window.getUnreadCountForActiveActor() : 0;
     if (total === 0) return;
+    const sheet = document.getElementById('mobileActionSheet');
+    if (!sheet) {
+      if (confirm('Hapus semua notifikasi?')) {
+        if (typeof window.clearAllNotificationsForActiveActor === 'function') window.clearAllNotificationsForActiveActor();
+      }
+      return;
+    }
 
-    const msg = `Konfirmasi Hapus Semua Notifikasi\n\nTotal notifikasi: ${total}\nBelum dibaca: ${unread}\n\nApakah Anda yakin ingin menghapus semua riwayat notifikasi ini? Tindakan ini tidak dapat dibatalkan.`;
-    if (!confirm(msg)) return;
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+        <h3 class="mobile-sheet-title" style="font-size: 1rem; margin: 0; color: #0f172a;">Konfirmasi Hapus Semua</h3>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1rem; color: #64748b; cursor: pointer;" onclick="window.openMobileNotificationSheet('${currentTab}')">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 24px 16px; text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </div>
+        <div style="font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Hapus Semua Notifikasi?</div>
+        <div style="font-size: 0.775rem; color: #64748b; margin-bottom: 20px; line-height: 1.45;">
+          Seluruh riwayat notifikasi (${total} pesan) akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; font-weight: 700; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; font-size: 0.85rem;" onclick="window.openMobileNotificationSheet('${currentTab}')">
+            Batal
+          </button>
+          <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; font-weight: 700; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);" onclick="window.executeClearAllMobileNotifications('${currentTab}')">
+            Hapus Semua
+          </button>
+        </div>
+      </div>
+    `;
+  };
 
+  window.executeClearAllMobileNotifications = function(currentTab = 'all') {
     if (typeof window.clearAllNotificationsForActiveActor === 'function') {
       window.clearAllNotificationsForActiveActor();
     }
     if (typeof window.showToast === 'function') {
       window.showToast('Seluruh riwayat notifikasi berhasil dibersihkan.', 'success');
     }
-
-    const notifView = document.getElementById('viewNotifikasi');
-    if (notifView && notifView.style.display === 'block') {
-      if (typeof window.renderDesktopFullNotifikasiPage === 'function') {
-        window.renderDesktopFullNotifikasiPage(currentTab);
-      }
-    } else {
-      if (typeof window.openMobileNotificationSheet === 'function') {
-        window.openMobileNotificationSheet(currentTab);
-      }
+    if (typeof window.openMobileNotificationSheet === 'function') {
+      window.openMobileNotificationSheet(currentTab);
     }
   };
 
-  window.clearAllMobileNotifications = window.confirmClearAllNotifications;
+  window.confirmClearAllNotifications = window.confirmClearAllMobileNotifications;
+  window.clearAllMobileNotifications = window.confirmClearAllMobileNotifications;

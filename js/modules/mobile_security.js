@@ -116,7 +116,7 @@
     if (s.includes('luar')) return 'sedang-di-luar';
     if (s.includes('terlambat')) return 'terlambat';
     if (s.includes('selesai')) return 'selesai';
-    if (s.includes('kedaluwarsa')) return 'kedaluwarsa';
+    if (s.includes('daluwarsa')) return 'kedaluwarsa';
     if (s.includes('tolak')) return 'ditolak';
     if (s.includes('batal')) return 'dibatalkan';
     return 'disetujui';
@@ -294,7 +294,7 @@
             ${lateTickets.length} Karyawan Terlambat Kembali
           </div>
           <div class="mobile-emergency-banner-desc" style="color: #991b1b; font-size: 0.725rem; line-height: 1.4; margin-top: 4px;">
-            <strong>${getTName(overdueTicket)}</strong> terlambat ${lateMnt} menit. Batas kembali ${batasJam}; belum Tap In. Segera konfirmasi keberadaan atau tindak lanjuti di ${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]}.
+            <strong>${getTName(overdueTicket)}</strong> terlambat ${lateMnt} menit. Batas kembali ${batasJam}; belum Tap In. Tindak lanjuti di ${activeGate.split(' ')[0]} ${activeGate.split(' ')[1]}.
           </div>
           <button type="button" class="mobile-btn-danger" style="margin-top: 8px; padding: 6px 12px; font-size: 0.725rem; width: auto; background: #dc2626; color: #fff; border: none; font-weight: 700; border-radius: 6px;" onclick="window.mobileSwitchPelacakanTabAndFilter('outside', 'late')">
             Lihat Headcount Terlambat →
@@ -381,7 +381,7 @@
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchPelacakanTabAndFilter('outside')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Sedang di luar</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #7c3aed; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
         </div>
 
         <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchPelacakanTabAndFilter('ready')">
@@ -400,34 +400,13 @@
         </div>
       </div>
 
-      <!-- Akses Cepat (PDF Hal 1) -->
-      <section class="mobile-card" style="padding: 12px 14px; margin-bottom: 12px;">
-        <h3 class="mobile-card-title" style="margin-bottom: 8px;">Akses cepat</h3>
-        <div class="mobile-quick-card" onclick="window.mobileSwitchTab('scanner')">
-          <div>
-            <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">Pemindai QR & Manual</div>
-          </div>
-          <span style="color: #2563eb; font-weight: 800;">→</span>
-        </div>
-        <div class="mobile-quick-card" onclick="window.mobileSwitchTab('pelacakan')">
-          <div>
-            <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">Pelacakan di Luar</div>
-          </div>
-          <span style="color: #2563eb; font-weight: 800;">→</span>
-        </div>
-        <div class="mobile-quick-card" onclick="window.mobileSwitchTab('riwayat')">
-          <div>
-            <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">Log Riwayat Gerbang</div>
-          </div>
-          <span style="color: #2563eb; font-weight: 800;">→</span>
-        </div>
-      </section>
+
 
       <!-- Karyawan Sedang di Luar (PDF Hal 1) -->
       <section class="mobile-card">
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Karyawan sedang di luar</h3>
-          <span style="font-size: 0.7rem; color: #7c3aed; font-weight: 700;">${outsideTickets.length} Orang</span>
+          <span style="font-size: 0.7rem; color: #0f172a; font-weight: 700;">${outsideTickets.length} Orang</span>
         </div>
         ${outsideListHtml || '<p style="font-size: 0.75rem; color: #64748b; margin: 0;">Tidak ada karyawan di luar area pabrik saat ini.</p>'}
         <div style="text-align: center; margin-top: 10px;">
@@ -562,21 +541,7 @@
 
       </div>
 
-      <!-- Quick Select scannable tickets (Convenient testing & fast gate operation) -->
-      <div class="mobile-card" style="margin-top: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a;">Tiket Aktif Siap Scan Out & Verifikasi</div>
-          <span style="font-size: 0.675rem; color: #64748b; font-weight: 600;">${scannableTickets.length} tiket</span>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          ${scannableTickets.length === 0 ? '<div style="font-size:0.725rem; color:#94a3b8; font-style:italic; padding: 6px 0;">Tidak ada tiket aktif yang siap dipindai.</div>' : ''}
-          ${scannableTickets.map(t => `
-            <button type="button" class="mobile-btn-secondary" style="font-size:0.725rem; justify-content:space-between; padding: 9px 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-              <span style="text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><strong>${t.id}</strong> — ${getTName(t)} (${t.status === 'Disetujui' ? 'Siap Keluar' : 'Sedang di Luar'})</span> <span style="color: #059669; font-weight: 800;">→</span>
-            </button>
-          `).join('')}
-        </div>
-      </div>
+
     `;
   }
 
@@ -623,7 +588,7 @@
       if (isReady) {
         statusInfoHtml = `
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 0.7rem; color: #475569; margin-bottom: 8px; line-height: 1.4;">
-            Disetujui atasan • ${t.createdAt ? formatTimeOnly(t.createdAt) : '10.40 WIB'}. Belum meninggalkan area; bukan headcount.
+            Disetujui atasan • ${t.createdAt ? formatTimeOnly(t.createdAt) : '10.40 WIB'}. Belum meninggalkan area.
           </div>
         `;
       } else if (isLate) {
@@ -680,24 +645,18 @@
     container.innerHTML = `
      
 
-      <!-- 2 Summary Cards (PDF Hal 4 & 5) -->
+      <!-- 2 Summary Cards -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
         <div class="mobile-card" style="margin: 0; padding: 12px;">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Sedang di luar</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #7c3aed; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
           <div style="font-size: 0.675rem; color: #64748b;">Karyawan</div>
-          <div style="font-size: 0.65rem; color: #047857; font-weight: 700; margin-top: 4px; padding-top: 4px; border-top: 1px solid #f1f5f9;">
-            ${readyExitTickets.length} izin siap keluar • Bukan headcount
-          </div>
         </div>
 
         <div class="mobile-card" style="margin: 0; padding: 12px;">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Terlambat</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #b91c1c; line-height: 1.2; margin: 2px 0;">${lateTickets.length}</div>
           <div style="font-size: 0.675rem; color: #64748b;">Lewat batas kembali</div>
-          <div style="font-size: 0.65rem; color: #64748b; margin-top: 4px; padding-top: 4px; border-top: 1px solid #f1f5f9;">
-            Segera konfirmasi
-          </div>
         </div>
       </div>
 
@@ -717,9 +676,8 @@
           ${activeList.length} karyawan (${currentPelacakanFilter === 'outside' ? 'Di Luar Area' : 'Siap Keluar'})
         </span>
         <div style="display: flex; align-items: center; gap: 6px;">
-          <button type="button" class="mobile-filter-toggle-btn" style="background: #fff; color: #dc2626; border-color: #fca5a5; padding: 4px 8px; font-size: 0.725rem; display: inline-flex; align-items: center; gap: 4px;" onclick="window.mobileSecurityClearAllFinished()" title="Hapus Riwayat Selesai">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            <span>Hapus Selesai</span>
+          <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; border-radius: 8px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileSecurityClearAllFinished()" title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
           <button type="button" class="mobile-filter-toggle-btn ${isPelacakanFilterOpen ? 'active' : ''}" onclick="window.mobileTogglePelacakanFilter()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
@@ -771,15 +729,15 @@
 
     const hasDeletableTickets = tickets.some(t =>
       !t.deletedBySecurity &&
+      Boolean(t.scanOutTime) &&
       (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
     );
 
-    // 1. Filter log transaksi gerbang & tiket aktif
+    // 1. Filter log transaksi gerbang (HANYA tiket yang sudah dipindai keluar / Scan Out oleh Pos Jaga)
     let eligible = tickets.filter(t => {
       if (t.deletedBySecurity) return false;
-      const isEmergencyTicket = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
-      if (isEmergencyTicket) return true; // Izin darurat masuk riwayat segera setelah pengajuan dibuat
-      return Boolean(t.scanOutTime || t.scanInTime || t.status === 'Selesai' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Disetujui');
+      // Riwayat Pos Jaga hanya mulai ada setelah Pos Jaga melakukan Scan Out ke karyawannya
+      return Boolean(t.scanOutTime);
     });
 
     // 2. Filter Periode (Hari Ini, Minggu Ini, Bulan Ini, Tahun Ini, Semua Waktu)
@@ -1272,12 +1230,7 @@
             </button>
           ` : ''}
 
-          ${(isReadyIn && !t.scanInTime && !isPulang) ? `
-            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 48px; font-size: 0.875rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25); cursor: pointer;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              <span>Verifikasi Masuk (Tap In Gerbang)</span>
-            </button>
-          ` : ''}
+
 
           ${(isCompleted || isFinished) ? `
             <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px; font-size: 0.75rem; color: #047857; text-align: center; font-weight: 700;">

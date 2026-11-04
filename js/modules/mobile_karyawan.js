@@ -77,10 +77,22 @@
 
   function getActiveTicket() {
     const emp = getActiveEmp();
+    const tickets = getEmpTickets();
+    const nowMs = Date.now();
+
+    // Pastikan tiket darurat atau biasa yang melewati batas toleransi jam keluar (+10 mnt) otomatis menjadi Kedaluwarsa
+    tickets.forEach(t => {
+      if (!t.scanOutTime && t.plannedExit && (t.status === 'Disetujui' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan')) {
+        const exitTime = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(t.plannedExit) : new Date(t.plannedExit);
+        if (exitTime && !isNaN(exitTime.getTime()) && nowMs > (exitTime.getTime() + 10 * 60 * 1000)) {
+          t.status = 'Kedaluwarsa';
+        }
+      }
+    });
+
     if (typeof window.getActiveTicket === 'function') {
       return window.getActiveTicket(emp.nip);
     }
-    const tickets = getEmpTickets();
     return tickets.find(t =>
       t.status !== 'Dibatalkan' &&
       t.status !== 'Ditolak' &&
@@ -141,6 +153,7 @@
     if (s.includes('selesai')) return 'selesai';
     if (s.includes('tolak')) return 'ditolak';
     if (s.includes('batal')) return 'dibatalkan';
+    if (s.includes('daluwarsa')) return 'kedaluwarsa';
     return 'menunggu';
   }
 
