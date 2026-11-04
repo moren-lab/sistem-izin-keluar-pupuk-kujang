@@ -138,6 +138,26 @@
           diarahkan ke halaman login masing-masing.
         </div>
 
+        <!-- Akses Cepat Demo (1-Klik Masuk Langsung) -->
+        <div class="kujang-quick-direct-box" style="margin-top: 1.15rem; padding: 0.9rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.35rem;">
+              <span>⚡</span> <span>Akses Cepat Pengujian (1-Klik Masuk)</span>
+            </div>
+            <span style="font-size: 0.675rem; color: #059669; font-weight: 700; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 7px; border-radius: 9999px;">Bypass Form</span>
+          </div>
+          <div style="font-size: 0.725rem; color: #64748b; line-height: 1.4; margin-bottom: 0.65rem;">
+            Pilih salah satu peran di bawah untuk langsung membuka sistem tanpa perlu mengisi form & OTP:
+          </div>
+          <div class="kujang-demo-chips">
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('karyawan')" title="Masuk langsung sebagai Karyawan">👨‍💼 Karyawan</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('atasan1')" title="Masuk langsung sebagai Atasan 1">👔 Atasan 1</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('atasan2')" title="Masuk langsung sebagai Atasan 2">💼 Atasan 2</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('posjaga')" title="Masuk langsung sebagai Pos Jaga">🛡️ Pos Jaga</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('admin')" title="Masuk langsung sebagai Admin K3">⚙️ Admin</button>
+          </div>
+        </div>
+
         <!-- Perhatian: Keamanan Akun -->
         <div class="kujang-security-box">
           <div class="kujang-security-title">
@@ -213,18 +233,16 @@
         </form>
 
         <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
-          <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.4rem; font-weight: 600;">Pilih Cepat untuk
-            Demo:</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 700;">Masuk Langsung (1-Klik):</div>
+            <span style="font-size: 0.675rem; color: #64748b;">Password: <strong>123</strong></span>
+          </div>
           <div class="kujang-demo-chips">
-            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('karyawan')">👨‍💼
-              Karyawan</button>
-            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('atasan1')">👔 Atasan
-              1</button>
-            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('atasan2')">💼 Atasan
-              2</button>
-            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('posjaga')">🛡️ Pos
-              Jaga</button>
-            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickFill('admin')">⚙️ Admin</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('karyawan')">👨‍💼 Karyawan</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('atasan1')">👔 Atasan 1</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('atasan2')">💼 Atasan 2</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('posjaga')">🛡️ Pos Jaga</button>
+            <button type="button" class="kujang-chip-btn" onclick="window.kujangQuickLogin('admin')">⚙️ Admin</button>
           </div>
         </div>
       </div>
@@ -267,7 +285,16 @@
           <span>Verifikasi & Masuk SAKTI</span>
         </button>
 
-        <div style="text-align: center; margin-top: 1.15rem; font-size: 0.775rem; color: #64748b;">
+        <div style="margin-top: 1rem; padding: 0.75rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center;">
+          <div style="font-size: 0.725rem; color: #64748b; margin-bottom: 0.5rem;">
+            Kode demo default: <strong style="color: #0f172a; font-family: monospace;">884120</strong>
+          </div>
+          <button type="button" class="kujang-chip-btn" style="margin: 0 auto; display: inline-flex;" onclick="window.kujangFillOtp('884120')">
+            ⚡ Gunakan OTP Demo (884120) & Masuk
+          </button>
+        </div>
+
+        <div style="text-align: center; margin-top: 0.85rem; font-size: 0.775rem; color: #64748b;">
           Tidak menerima kode? <a href="#" onclick="window.handleKujangLoginSubmit(); return false;"
             style="color: #059669; font-weight: 700; text-decoration: none;">Kirim ulang OTP</a>
         </div>

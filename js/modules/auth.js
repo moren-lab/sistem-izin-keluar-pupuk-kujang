@@ -89,7 +89,13 @@
    * Helper pilih akun cepat (Auto-Fill untuk demo pengujian)
    */
   window.kujangQuickFill = function (roleKey) {
-    const acc = (window.KUJANG_ACCOUNTS || []).find(a => a.role === roleKey || a.username === roleKey);
+    const roleMap = {
+      atasan1: 'approver',
+      atasan2: 'approver2',
+      posjaga: 'security'
+    };
+    const targetRole = roleMap[roleKey] || roleKey;
+    const acc = (window.KUJANG_ACCOUNTS || []).find(a => a.role === targetRole || a.role === roleKey || a.username === roleKey);
     if (!acc) return;
 
     // Pastikan berada di step form login
@@ -104,6 +110,23 @@
 
     const errEl = document.getElementById('kujangLoginError');
     if (errEl) errEl.style.display = 'none';
+  };
+
+  /**
+   * Helper Masuk Langsung Cepat (1-Klik Langsung Masuk Demo Mode)
+   */
+  window.kujangQuickLogin = function (roleKey) {
+    const roleMap = {
+      atasan1: 'approver',
+      atasan2: 'approver2',
+      posjaga: 'security'
+    };
+    const targetRole = roleMap[roleKey] || roleKey;
+    const acc = (window.KUJANG_ACCOUNTS || []).find(a => a.role === targetRole || a.role === roleKey || a.username === roleKey);
+    if (!acc) return;
+
+    window.setKujangCurrentUser(acc);
+    completeLogin(acc);
   };
 
   /**
@@ -291,6 +314,9 @@
       window.switchRole(role);
     } else if (typeof window.setRole === 'function') {
       window.setRole(role);
+    }
+    if (typeof window.syncMobileRole === 'function') {
+      window.syncMobileRole(role);
     }
   }
 
