@@ -1074,10 +1074,15 @@ function openRejectModal(ticketId) {
 }
 
 function confirmApproveDecision() {
+  const btn = document.getElementById('btnConfirmApprove');
+  if (btn && btn.disabled) return;
+  if (btn) btn.disabled = true;
+  setTimeout(() => { if (btn) btn.disabled = false; }, 800);
+
   const ticketsList = window.ticketsList || [];
   const ticketId = window.currentDecisionTicketId;
   const ticket = ticketsList.find(t => t.id === ticketId);
-  if (!ticket) return;
+  if (!ticket || ticket.status === 'Disetujui') return;
 
   const approveNoteInput = document.getElementById('approveNoteInput');
   const note = (approveNoteInput && approveNoteInput.value.trim()) || 'Disetujui';
@@ -1331,7 +1336,14 @@ if (document.readyState === 'loading') {
 function approveExtensionRequest(ticketId) {
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
-  if (!ticket || !ticket.pendingExtension) return;
+  if (!ticket || !ticket.pendingExtension) {
+    if (typeof window.closeAllModals === 'function') window.closeAllModals();
+    if (typeof window.showToast === 'function') {
+      window.showToast('Permohonan perpanjangan sudah tidak aktif atau karyawan telah kembali ke area pabrik.', 'warning');
+    }
+    renderApproverView();
+    return;
+  }
 
   let newReturn = ticket.pendingExtension.newEstimatedReturn;
   if (typeof window.normalizeReturnDateTime === 'function') {
@@ -1412,7 +1424,14 @@ function openRejectExtensionModal(ticketId) {
 function rejectExtensionRequest(ticketId, reason) {
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
-  if (!ticket || !ticket.pendingExtension) return;
+  if (!ticket || !ticket.pendingExtension) {
+    if (typeof window.closeAllModals === 'function') window.closeAllModals();
+    if (typeof window.showToast === 'function') {
+      window.showToast('Permohonan perpanjangan sudah tidak aktif atau karyawan telah kembali ke area pabrik.', 'warning');
+    }
+    renderApproverView();
+    return;
+  }
 
   const rejectReason = reason || 'Karyawan diminta segera kembali sesuai jadwal semula.';
   const ACTORS = window.ACTORS || {};

@@ -2040,6 +2040,13 @@ function openCancelModal(ticketId, callback) {
     return;
   }
 
+  if (ticket && (ticket.scanOutTime || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai')) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Akses Ditolak: Tiket #${ticketId} tidak dapat dibatalkan karena sudah aktif di luar area atau telah selesai.`, 'danger');
+    }
+    return;
+  }
+
   const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
   if (ticket.applicantNip && ticket.applicantNip !== myNip && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor)) {
     if (typeof window.showToast === 'function') {
@@ -2073,6 +2080,14 @@ function confirmCancelTicket() {
   const ticketId = window.currentCancelTicketId;
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (ticket) {
+    if (ticket.scanOutTime || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Akses Ditolak: Tiket #${ticketId} tidak dapat dibatalkan karena sudah aktif di luar area atau telah selesai.`, 'danger');
+      }
+      const modalCancelRequest = document.getElementById('modalCancelRequest');
+      if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+      return;
+    }
     const ACTORS = window.ACTORS || {};
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
@@ -2664,6 +2679,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnFinalSubmitRequest) {
     btnFinalSubmitRequest.addEventListener('click', () => {
+      if (btnFinalSubmitRequest.disabled) return;
+      btnFinalSubmitRequest.disabled = true;
+      setTimeout(() => { if (btnFinalSubmitRequest) btnFinalSubmitRequest.disabled = false; }, 1000);
       if (!window.pendingFormData) return;
 
       if (window.editingTicketId) {

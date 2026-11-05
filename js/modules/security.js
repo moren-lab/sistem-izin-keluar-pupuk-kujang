@@ -1056,8 +1056,10 @@ function executeScanOut(ticketId) {
   }
 
   if (ticket.status === 'Kedaluwarsa') {
-    // Toleransi revalidasi Pos Jaga agar tidak stuck
-    ticket.status = 'Disetujui';
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Akses Ditolak: Tiket #${ticket.id} telah KEDALUWARSA. Karyawan wajib mengajukan izin baru.`, 'danger');
+    }
+    return;
   }
 
   if (ticket.status !== 'Disetujui') {
@@ -1177,14 +1179,11 @@ function executeScanIn(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
 
-  if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
-    if (ticket.status === 'Disetujui' && !ticket.scanOutTime) {
-      // Auto-proses scan out terlebih dahulu agar alur masuk tercatat lengkap
-      executeScanOut(ticketId);
-    } else if (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat') {
-      if (typeof window.showToast === 'function') window.showToast('Hanya tiket berstatus Sedang di Luar atau Terlambat yang dapat diproses Tap In Kartu Akses!', 'danger');
-      return;
+  if (!ticket.scanOutTime || (ticket.status !== 'Sedang di Luar' && ticket.status !== 'Terlambat')) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Tap In Ditolak: Tiket #${ticket.id} belum tercatat keluar (Scan Out) atau belum aktif!`, 'danger');
     }
+    return;
   }
 
   const selectGateLocation = document.getElementById('selectGateLocation');

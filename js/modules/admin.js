@@ -1921,15 +1921,23 @@ function saveAdminUserAccess(event) {
     const roleDef = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey && r.isSingleSeat);
     if (roleDef) {
       const targetId = originalId || kujangId;
-      const existingOccupant = users.find(u => u.kujangId !== targetId && u.status === 'Aktif' && u.roleKey === roleKey);
+      // Per aturan organisasi: Tiap departemen berhak memiliki Manajer / Supervisor sendiri.
+      // Pencabutan otomatis hanya berlaku jika ada pejabat aktif di peran yang sama DALAM DEPARTEMEN YANG SAMA.
+      // (Untuk role 'admin', single-seat berlaku global).
+      const existingOccupant = users.find(u => 
+        u.kujangId !== targetId && 
+        u.status === 'Aktif' && 
+        u.roleKey === roleKey && 
+        (roleKey === 'admin' || (u.department && department && u.department.trim().toLowerCase() === department.trim().toLowerCase()))
+      );
       if (existingOccupant) {
-        // Alihkan jabatan secara otomatis dengan mencabut pejabat sebelumnya
+        // Alihkan jabatan secara otomatis dengan mencabut pejabat sebelumnya di departemen yang sama
         existingOccupant.status = 'Dicabut';
         if (typeof window.autoCancelTicketsForRevokedUser === 'function') {
           window.autoCancelTicketsForRevokedUser(existingOccupant);
         }
         if (typeof window.showToast === 'function') {
-          window.showToast(`Jabatan ${roleDef.jabatan} dialihkan ke ${name}. Hak akses ${existingOccupant.name} otomatis dicabut.`, 'info');
+          window.showToast(`Jabatan ${roleDef.jabatan} di ${department} dialihkan ke ${name}. Hak akses ${existingOccupant.name} otomatis dicabut.`, 'info');
         }
       }
     }
@@ -1941,6 +1949,7 @@ function saveAdminUserAccess(event) {
   else if (roleKey === 'security') roleLabel = 'Petugas Pos Jaga (Satpam)';
   else if (roleKey === 'admin') roleLabel = 'Administrator Pengamanan & K3';
 
+  let idx = -1;
   if (mode === 'add') {
     if (users.some(u => u.kujangId.toLowerCase() === kujangId.toLowerCase())) {
       alert(`KUJANG ID ${kujangId} sudah terdaftar dalam sistem.`);
@@ -1958,8 +1967,9 @@ function saveAdminUserAccess(event) {
       lastLogin: 'Baru saja didaftarkan'
     };
     users.unshift(newUser);
+    idx = 0;
   } else {
-    const idx = users.findIndex(u => u.kujangId === originalId || u.kujangId === kujangId);
+    idx = users.findIndex(u => u.kujangId === originalId || u.kujangId === kujangId);
     if (idx !== -1) {
       users[idx] = {
         ...users[idx],
@@ -1975,11 +1985,11 @@ function saveAdminUserAccess(event) {
       };
 
       // Sinkronisasi atasan langsung ke state aktif karyawan
-      if (users[idx].roleKey === 'karyawan' || users[idx].kujangId === 'KJG-881201' || (users[idx].name && users[idx].name.includes('Budi Pratama'))) {
+      if (users[idx].roleKey === 'karyawan' || users[idx].kujangId === 'KJG-991024' || (users[idx].name && users[idx].name.includes('Budi Pratama'))) {
         if (window.ACTORS && window.ACTORS.karyawan) {
           window.ACTORS.karyawan.approverName = directSupervisor;
         }
-      } else if (users[idx].roleKey === 'karyawan2' || users[idx].kujangId === 'KJG-881202' || (users[idx].name && users[idx].name.includes('Arthur Morgan'))) {
+      } else if (users[idx].roleKey === 'karyawan2' || users[idx].kujangId === 'KJG-991025' || (users[idx].name && users[idx].name.includes('Arthur Morgan'))) {
         if (window.ACTORS && window.ACTORS.karyawan2) {
           window.ACTORS.karyawan2.approverName = directSupervisor;
         }
@@ -1987,7 +1997,9 @@ function saveAdminUserAccess(event) {
     }
   }
 
-  if (status === 'Dicabut') { autoCancelTicketsForRevokedUser(users[idx] || { name, nip, kujangId }); }
+  if (status === 'Dicabut') { 
+    autoCancelTicketsForRevokedUser((idx >= 0 ? users[idx] : null) || { name, nip, kujangId }); 
+  }
   if (typeof window.saveUsers === 'function') {
     window.saveUsers(users);
   } else {
@@ -2039,6 +2051,26 @@ function toggleUserAccess(kujangId) {
     user.status = willRevoke ? 'Dicabut' : 'Aktif';
     if (user.status === 'Dicabut') {
       autoCancelTicketsForRevokedUser(user);
+    } else {
+      // Jika diaktifkan kembali: periksa apakah ada pejabat lain di DEPARTEMEN YANG SAMA yang sedang aktif
+      const roleDef = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === user.roleKey && r.isSingleSeat);
+      if (roleDef) {
+        const existingOccupant = users.find(u => 
+          u.kujangId !== user.kujangId && 
+          u.status === 'Aktif' && 
+          u.roleKey === user.roleKey && 
+          (user.roleKey === 'admin' || (u.department && user.department && u.department.trim().toLowerCase() === user.department.trim().toLowerCase()))
+        );
+        if (existingOccupant) {
+          existingOccupant.status = 'Dicabut';
+          if (typeof window.autoCancelTicketsForRevokedUser === 'function') {
+            window.autoCancelTicketsForRevokedUser(existingOccupant);
+          }
+          if (typeof window.showToast === 'function') {
+            window.showToast(`Jabatan ${roleDef.jabatan} di ${user.department} dialihkan ke ${user.name}. Hak akses ${existingOccupant.name} dicabut.`, 'info');
+          }
+        }
+      }
     }
 
     if (typeof window.saveUsers === 'function') {
@@ -2262,7 +2294,7 @@ function renderAdminUsers() {
         <td style="font-size: 0.825rem; color: var(--text-primary);">${u.department}</td>
         <td style="white-space: nowrap;">
           <span class="user-role-badge ${roleClass}">${u.role}</span>
-          ${u.roleKey === 'karyawan' ? `<div style="font-size: 0.685rem; color: var(--sky-text, #0284c7); font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong style="color: var(--sky-text, #0284c7);">${u.directSupervisor || 'Ir. Hendra Gunawan, M.T.'}</strong></div>` : ''}
+          ${(!u.roleKey || u.roleKey.startsWith('karyawan')) ? `<div style="font-size: 0.685rem; color: var(--sky-text, #0284c7); font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong style="color: var(--sky-text, #0284c7);">${u.directSupervisor || u.supervisor || 'Dr. Ahmad Subagja, M.M.'}</strong></div>` : ''}
         </td>
         <td>
           ${statusBadge}
@@ -2274,8 +2306,11 @@ function renderAdminUsers() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               <span>Ubah</span>
             </button>
-            
-                        <button type="button" class="btn-action-sm btn-admin-delete" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Hak Akses Pengguna" style="color: #dc2626; border-color: #fca5a5;">
+            <button type="button" class="btn-action-sm ${isRevoked ? 'btn-admin-success' : 'btn-admin-warning'}" onclick="window.toggleUserAccess('${u.kujangId}')" title="${isRevoked ? 'Aktifkan Hak Akses Pengguna' : 'Cabut Hak Akses Pengguna'}" style="${isRevoked ? 'color: #059669; border-color: #a7f3d0;' : 'color: #d97706; border-color: #fde68a;'}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="${isRevoked ? 'M7 11V7a5 5 0 0 1 9.9-1' : 'M7 11V7a5 5 0 0 1 10 0v4'}"></path></svg>
+              <span>${isRevoked ? 'Beri Akses' : 'Cabut Akses'}</span>
+            </button>
+            <button type="button" class="btn-action-sm btn-admin-delete" onclick="window.deleteAdminUser('${u.kujangId}')" title="Hapus Hak Akses Pengguna" style="color: #dc2626; border-color: #fca5a5;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               <span>Hapus</span>
             </button>
@@ -2603,6 +2638,8 @@ function setAdminSelectedDept(deptName) {
   if (clearBtn) clearBtn.style.display = deptName ? 'flex' : 'none';
 
   renderAdminDeptDropdownItems(deptName);
+  const roleSearch = document.getElementById('adminInputRoleSearch');
+  renderAdminRoleDropdownItems(roleSearch ? roleSearch.value : '');
 }
 
 function renderAdminDeptDropdownItems(query = '') {
@@ -2807,9 +2844,15 @@ function setAdminSelectedRole(roleKey, jabatanOrTitle) {
   const indicatorText = document.getElementById('adminRoleSelectedText');
   const clearBtn = document.getElementById('btnAdminRoleClear');
 
-  let match = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey && (r.jabatan === jabatanOrTitle || r.fullTitle === jabatanOrTitle));
+  // Normalisasi: roleKey karyawan2 tetap dianggap karyawan dalam pilihan peran
+  const normalizedKey = (roleKey === 'karyawan2' || (roleKey && roleKey.startsWith('karyawan'))) ? 'karyawan' : roleKey;
+
+  let match = AVAILABLE_ROLES_JABATAN.find(r => 
+    (r.roleKey === roleKey || r.roleKey === normalizedKey) && 
+    (r.jabatan === jabatanOrTitle || r.fullTitle === jabatanOrTitle)
+  );
   if (!match) {
-    match = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey) || AVAILABLE_ROLES_JABATAN[0];
+    match = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === roleKey || r.roleKey === normalizedKey) || AVAILABLE_ROLES_JABATAN[0];
   }
 
   const roleKeyVal = match.roleKey;
@@ -2862,7 +2905,16 @@ function renderAdminRoleDropdownItems(query = '') {
     let occupant = null;
     let isOccupiedByOther = false;
     if (item.isSingleSeat) {
-      occupant = users.find(u => u.roleKey === item.roleKey && u.status === 'Aktif');
+      const currentDept = document.getElementById('adminInputDept')?.value || '';
+      if (item.roleKey === 'admin') {
+        occupant = users.find(u => u.roleKey === 'admin' && u.status === 'Aktif');
+      } else {
+        occupant = users.find(u => 
+          u.roleKey === item.roleKey && 
+          u.status === 'Aktif' && 
+          (!currentDept || (u.department && u.department.trim().toLowerCase() === currentDept.trim().toLowerCase()))
+        );
+      }
       if (occupant && occupant.kujangId !== currentKujangId) {
         isOccupiedByOther = true;
       }

@@ -6919,7 +6919,7 @@ body.theme-dark .user-profile-photo-inline {
 /* Figma 2-Column Grid */
 .figma-grid-2col {
   display: grid;
-  grid-template-columns: 1.45fr 1fr;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
   gap: 1.5rem;
   margin-top: 1.25rem;
   align-items: flex-start;
@@ -6935,6 +6935,8 @@ body.theme-dark .user-profile-photo-inline {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Figma Cards */
@@ -6944,6 +6946,9 @@ body.theme-dark .user-profile-photo-inline {
   border-radius: 10px;
   padding: 1.25rem 1.35rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .figma-card-header {

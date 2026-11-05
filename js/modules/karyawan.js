@@ -39,16 +39,23 @@ function getCurrentEmployeeActor() {
     };
   }
 
-  const activeEmp = users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
-  if (activeEmp) {
+  // Akun Karyawan 1 (Budi Pratama)
+  const budiEmp = users.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama')));
+  if (budiEmp) {
     if (window.ACTORS && window.ACTORS.karyawan) {
-      window.ACTORS.karyawan.name = activeEmp.name;
-      window.ACTORS.karyawan.nip = activeEmp.nip;
-      if (activeEmp.department) window.ACTORS.karyawan.department = activeEmp.department;
-      if (activeEmp.role) window.ACTORS.karyawan.title = activeEmp.role;
+      window.ACTORS.karyawan.name = budiEmp.name;
+      window.ACTORS.karyawan.nip = budiEmp.nip;
+      if (budiEmp.department) window.ACTORS.karyawan.department = budiEmp.department;
+      if (budiEmp.role) window.ACTORS.karyawan.title = budiEmp.role;
+      if (budiEmp.directSupervisor || budiEmp.supervisor) {
+        window.ACTORS.karyawan.approverName = budiEmp.directSupervisor || budiEmp.supervisor;
+      }
     }
-    return activeEmp;
+    return budiEmp;
   }
+
+  const activeEmp = users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+  if (activeEmp) return activeEmp;
   return (window.ACTORS && window.ACTORS.karyawan) || {
     nip: 'PK-2024-8841',
     name: 'Budi Pratama, S.T.',
@@ -545,9 +552,6 @@ function renderKaryawanDashboard() {
           <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
             <span>Buka QR Izin</span>
           </button>
-          <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-            <span>Detail Pengajuan</span>
-          </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
             <span>Batalkan</span>
           </button>
@@ -570,7 +574,7 @@ function renderKaryawanDashboard() {
             ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${activeTicket.destination} — ${activeTicket.reason}">${activeTicket.destination} — ${activeTicket.reason}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${activeTicket.destination} — ${activeTicket.reason}">${activeTicket.destination} — ${activeTicket.reason}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -806,9 +810,6 @@ function renderPengajuanSayaView() {
         <button class="btn-figma-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
           <span>Buka QR Izin</span>
         </button>
-        <button class="btn-figma-secondary" onclick="openTicketDetail('${activeTicket.id}', 'detail')">
-          <span>Detail Pengajuan</span>
-        </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
           <span>Batalkan</span>
         </button>
@@ -833,7 +834,7 @@ function renderPengajuanSayaView() {
             ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -964,7 +965,11 @@ function renderRiwayatView() {
   const pageItems = filtered.slice(startIndex, endIndex);
 
   if (figmaEmpPaginationMeta) {
-    figmaEmpPaginationMeta.textContent = `Menampilkan ${startIndex + 1}–${endIndex} dari ${totalItems} pengajuan`;
+    if (totalItems === 0) {
+      figmaEmpPaginationMeta.textContent = 'Menampilkan 0 dari 0 pengajuan';
+    } else {
+      figmaEmpPaginationMeta.textContent = `Menampilkan ${startIndex + 1}–${endIndex} dari ${totalItems} pengajuan`;
+    }
   }
 
   // Update pagination buttons
@@ -1149,6 +1154,17 @@ function renderEmpCards(list, containerElement) {
   const target = containerElement || document.getElementById('containerEmpRequests');
   if (!target) return;
 
+  if (!list || list.length === 0) {
+    target.innerHTML = `
+      <div style="text-align: center; padding: 3rem 1.5rem; background: var(--card-bg, #ffffff); border: 1px dashed var(--border-color, #e2e8f0); border-radius: 10px; margin-top: 0.85rem;">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📄</div>
+        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary, #0f172a);">Tidak Ada Data Pengajuan</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted, #64748b); margin-top: 0.25rem;">Tidak ditemukan pengajuan izin yang sesuai dengan filter atau kata kunci pencarian.</div>
+      </div>
+    `;
+    return;
+  }
+
   target.innerHTML = `
     <div class="figma-card-grid">
       ${list.map(t => {
@@ -1281,6 +1297,17 @@ function renderEmpCards(list, containerElement) {
 function renderEmpTable(list, containerElement) {
   const target = containerElement || document.getElementById('containerEmpRequests');
   if (!target) return;
+
+  if (!list || list.length === 0) {
+    target.innerHTML = `
+      <div style="text-align: center; padding: 3rem 1.5rem; background: var(--card-bg, #ffffff); border: 1px dashed var(--border-color, #e2e8f0); border-radius: 10px; margin-top: 0.85rem;">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📄</div>
+        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary, #0f172a);">Tidak Ada Data Pengajuan</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted, #64748b); margin-top: 0.25rem;">Tidak ditemukan pengajuan izin yang sesuai dengan filter atau kata kunci pencarian.</div>
+      </div>
+    `;
+    return;
+  }
 
   target.innerHTML = `
     <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">

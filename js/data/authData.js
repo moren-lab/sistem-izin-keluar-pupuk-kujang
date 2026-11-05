@@ -20,6 +20,22 @@ window.KUJANG_ACCOUNTS = [
     roleLabel: 'Karyawan Pemohon'
   },
   {
+    id: 'emp_02',
+    role: 'karyawan2',
+    username: 'karyawan2',
+    email: 'arthur.morgan@pupuk-kujang.co.id',
+    nip: 'PK-2024-8842',
+    name: 'Arthur Morgan, S.Tr.T.',
+    title: 'Staf Instrumentasi & Otomasi Pabrik',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    phone: '0812-8841-0006',
+    password: '123',
+    avatar: '🤠',
+    badgeColor: '#059669',
+    roleLabel: 'Karyawan Pemohon 2',
+    directSupervisor: 'Ir. Hendra Gunawan, M.T.'
+  },
+  {
     id: 'mgr_01',
     role: 'approver',
     approverLevel: 1,

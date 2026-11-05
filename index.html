@@ -2705,12 +2705,16 @@
 
           <!-- Alasan Keperluan Izin -->
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" for="inputReason"
-              style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-              Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
-            </label>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <label class="form-label" for="inputReason"
+                style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
+                Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
+              </label>
+              <span style="font-size: 0.7rem; color: #64748b;"><span id="countInputReason">0</span>/300 huruf</span>
+            </div>
             <textarea id="inputReason" class="form-textarea"
-              placeholder="Masukkan alasan keperluan izin..." required rows="3"
+              placeholder="Masukkan alasan keperluan izin..." required maxlength="300" rows="3"
+              oninput="const el = document.getElementById('countInputReason'); if(el) el.textContent = this.value.length;"
               style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px; min-height: 80px; height: auto; resize: vertical; line-height: 1.5;"></textarea>
           </div>
 
@@ -4369,7 +4373,7 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-secondary" id="btnCancelAdminUserModal" onclick="window.closeAdminUserModal()" style="display: none !important;">Batal</button>
+          <button type="button" class="btn-secondary" id="btnCancelAdminUserModal" onclick="window.closeAdminUserModal()">Batal</button>
           <button type="submit" class="btn-primary-action" id="btnSubmitAdminUser">
             💾 Simpan Hak Akses
           </button>

@@ -440,6 +440,9 @@ const DEFAULT_USERS = [
     department: 'Departemen Rekayasa & Pemeliharaan',
     role: 'Karyawan',
     roleKey: 'karyawan2',
+    title: 'Staf Instrumentasi & Otomasi Pabrik',
+    directSupervisor: 'Ir. Hendra Gunawan, M.T.',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
     status: 'Aktif',
     lastLogin: 'Hari ini, 08:30 WIB'
   },
@@ -620,14 +623,17 @@ try {
 function syncActorsFromUsers(data) {
   const users = data || (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
 
-  // 1. Sinkronisasi Karyawan Pemohon
-  const activeEmpSync = users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
-  if (activeEmpSync && window.ACTORS && window.ACTORS.karyawan) {
-    window.ACTORS.karyawan.name = activeEmpSync.name;
-    window.ACTORS.karyawan.nip = activeEmpSync.nip;
-    if (activeEmpSync.department) window.ACTORS.karyawan.department = activeEmpSync.department;
-    if (activeEmpSync.role) window.ACTORS.karyawan.title = activeEmpSync.role;
-    if (activeEmpSync.directSupervisor || activeEmpSync.supervisor) window.ACTORS.karyawan.approverName = activeEmpSync.directSupervisor || activeEmpSync.supervisor;
+  // 1. Sinkronisasi Karyawan Pemohon (Budi Pratama)
+  const budiEmpSync = users.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
+                      users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+  if (budiEmpSync && window.ACTORS && window.ACTORS.karyawan) {
+    window.ACTORS.karyawan.name = budiEmpSync.name;
+    window.ACTORS.karyawan.nip = budiEmpSync.nip;
+    if (budiEmpSync.department) window.ACTORS.karyawan.department = budiEmpSync.department;
+    if (budiEmpSync.role) window.ACTORS.karyawan.title = budiEmpSync.role;
+    if (budiEmpSync.directSupervisor || budiEmpSync.supervisor) {
+      window.ACTORS.karyawan.approverName = budiEmpSync.directSupervisor || budiEmpSync.supervisor;
+    }
   }
 
   // 2. Sinkronisasi Atasan Utama (Approver 1 / Manager)
@@ -760,7 +766,13 @@ function getActiveApprovers() {
     'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)'
   ];
 
-  const currentEmpApprover = (window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan.approverName : '';
+  // Ambil atasan langsung dari profil karyawan aktif saat ini
+  const activeEmpCur = (typeof window.getCurrentEmployeeActor === 'function') 
+    ? window.getCurrentEmployeeActor() 
+    : ((window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan : null);
+  const currentEmpApprover = (activeEmpCur && (activeEmpCur.directSupervisor || activeEmpCur.supervisor || activeEmpCur.approverName))
+    ? (activeEmpCur.directSupervisor || activeEmpCur.supervisor || activeEmpCur.approverName)
+    : ((window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan.approverName : '');
 
   return approverUsers.map((u, idx) => {
     const isApprover1 = u.roleKey === 'approver' || (u.name && u.name.includes('Hendra Gunawan'));
@@ -776,7 +788,13 @@ function getActiveApprovers() {
       statusLabel: isRevoked ? 'Tidak tersedia' : 'Aktif',
       title: u.role || (isApprover1 ? 'Atasan 1 (Manager)' : 'Atasan 2 (Supervisor / Plt)'),
       department: u.department || 'Departemen Rekayasa & Pemeliharaan',
-      isDirectSupervisor: (currentEmpApprover && currentEmpApprover === u.name) || (!currentEmpApprover && isApprover1),
+      isDirectSupervisor: Boolean(
+        currentEmpApprover && (
+          u.name.toLowerCase() === currentEmpApprover.toLowerCase() ||
+          u.name.toLowerCase().includes(currentEmpApprover.toLowerCase()) ||
+          currentEmpApprover.toLowerCase().includes(u.name.toLowerCase())
+        )
+      ),
       avatarBg: avatarPalettes[idx % avatarPalettes.length]
     };
   });

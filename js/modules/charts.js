@@ -192,10 +192,12 @@ function renderKaryawanDonutChart() {
   );
 
   const countDarurat = filteredTickets.filter(isEmergencyTicket).length;
-  const countSelesai = total - countDarurat;
+  const countSelesai = filteredTickets.filter(t => t.status === 'Selesai' && !isEmergencyTicket(t)).length;
+  const countProses = Math.max(0, total - countDarurat - countSelesai);
 
   const pctDarurat = total > 0 ? ((countDarurat / total) * 100).toFixed(1).replace('.0', '') : '0';
-  const pctSelesai = total > 0 ? ((countSelesai / total) * 100).toFixed(1).replace('.0', '') : '100';
+  const pctSelesai = total > 0 ? ((countSelesai / total) * 100).toFixed(1).replace('.0', '') : '0';
+  const pctProses = total > 0 ? ((countProses / total) * 100).toFixed(1).replace('.0', '') : '0';
 
   // SVG Donut Calculations with wider inner hole so text never touches the ring
   const r = 68;
@@ -211,6 +213,16 @@ function renderKaryawanDonutChart() {
       count: countSelesai,
       pct: pctSelesai,
       color: '#059669',
+      unit: 'pengajuan'
+    });
+  }
+  if (countProses > 0) {
+    segments.push({
+      key: 'proses',
+      label: 'Dalam Proses',
+      count: countProses,
+      pct: pctProses,
+      color: '#f59e0b',
       unit: 'pengajuan'
     });
   }
@@ -284,7 +296,9 @@ function hoverKaryawanDonut(e, key, label, count, total, pct, color) {
     pct = total;
     total = count;
     count = label;
-    label = e === 'darurat' ? 'Izin Darurat' : 'Izin Selesai';
+    if (e === 'darurat') label = 'Izin Darurat';
+    else if (e === 'proses') label = 'Dalam Proses';
+    else label = 'Izin Selesai';
     key = e;
   }
 
@@ -338,12 +352,11 @@ function unhoverKaryawanDonut(defaultTotal) {
     centerLbl.setAttribute('fill', centerSubCol);
   }
 
-  ['selesai', 'darurat'].forEach(k => {
-    const slice = document.getElementById(`donutSlice_${k}`);
-    if (slice) {
-      slice.setAttribute('stroke-width', '16');
-      slice.style.filter = 'none';
-    }
+  // Reset all slices including selesai, proses, and darurat
+  const allSlices = document.querySelectorAll('[id^="donutSlice_"]');
+  allSlices.forEach(slice => {
+    slice.setAttribute('stroke-width', '16');
+    slice.style.filter = 'none';
   });
 }
 
