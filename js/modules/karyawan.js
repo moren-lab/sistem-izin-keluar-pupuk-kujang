@@ -1458,7 +1458,8 @@ function deleteEmpTicket(ticketId) {
   const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
 
   if (!t) return;
-  if (t.applicantNip && t.applicantNip !== myNip) {
+  const targetNip = t.applicantNip || 'PK-2024-8841';
+  if (targetNip !== myNip) {
     if (typeof window.showToast === 'function') window.showToast('Anda tidak berhak menghapus tiket karyawan lain.', 'error');
     return;
   }

@@ -835,7 +835,14 @@ function saveTickets(data) {
     return true;
   });
   data = cleanData;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (err) {
+    console.warn('Gagal menyimpan tiket ke localStorage (kuota penuh atau akses terbatas):', err);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Peringatan: Memori browser penuh. Data disimpan di sesi aktif.', 'warning');
+    }
+  }
   window.ticketsList = data;
   if (typeof window.refreshAllDashboardData === 'function') {
     window.refreshAllDashboardData();

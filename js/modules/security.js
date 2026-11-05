@@ -1046,6 +1046,10 @@ function executeVerification(inputQuery) {
 
 // EXECUTE SCAN OUT
 function executeScanOut(ticketId) {
+  if (window._isProcessingScanOut) return;
+  window._isProcessingScanOut = true;
+  setTimeout(() => { window._isProcessingScanOut = false; }, 800);
+
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
@@ -1182,6 +1186,10 @@ function executeScanOut(ticketId) {
 
 // EXECUTE SCAN IN
 function executeScanIn(ticketId) {
+  if (window._isProcessingScanIn) return;
+  window._isProcessingScanIn = true;
+  setTimeout(() => { window._isProcessingScanIn = false; }, 800);
+
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;

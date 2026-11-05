@@ -454,7 +454,7 @@ function switchRole(role, kujangId) {
 
   // Check user access revocation (Admin Access Control)
   const users = window.MOCK_USERS || [];
-  const matchedUser = users.find(u => u.roleKey === role && u.status === 'Aktif') || users.find(u => u.roleKey === role);
+  const matchedUser = targetUser || users.find(u => u.roleKey === role && u.status === 'Aktif') || users.find(u => u.roleKey === role);
   if (matchedUser && (matchedUser.status === 'Dicabut' || matchedUser.status === 'Nonaktif')) {
     if (typeof window.showToast === 'function') {
       window.showToast(`⛔ Akses untuk ${matchedUser.name} (${matchedUser.role}) telah dicabut oleh Administrator!`, 'danger');
@@ -537,8 +537,9 @@ function switchRole(role, kujangId) {
       roleBadge.className = 'role-tag-pill role-approver';
       roleBadge.textContent = 'Peran: Atasan 1 (Manager)';
     }
-    if (sidebarUserName && ACTORS) sidebarUserName.textContent = ACTORS.approver.name;
-    if (sidebarUserSub && ACTORS) sidebarUserSub.textContent = `NIP: ${ACTORS.approver.nip}`;
+    const app1Obj = (ACTORS && ACTORS.approver) ? ACTORS.approver : { name: 'Ir. Hendra Gunawan, M.T.', nip: 'PK-2015-1002' };
+    if (sidebarUserName) sidebarUserName.textContent = app1Obj.name;
+    if (sidebarUserSub) sidebarUserSub.textContent = `NIP: ${app1Obj.nip}`;
 
     setApproverNav(currentApproverNav || 'dashboard');
     const approverDispName = (ACTORS && ACTORS.approver && ACTORS.approver.name) ? ACTORS.approver.name : (matchedUser ? matchedUser.name : 'Approver');

@@ -148,12 +148,17 @@
 
     // Resolusi otomatis target penerima jika NIP belum disertakan (khusus Atasan & Karyawan)
     if (isApproverRole(recRole)) {
+      const allUsers = window.MOCK_USERS || [];
       if (!recNip && recName) {
         const rnLower = recName.toLowerCase();
-        if (rnLower.includes('dewi') || rnLower.includes('sartika')) {
+        const found = allUsers.find(u => u.name && (u.name.toLowerCase() === rnLower || rnLower.includes(u.name.toLowerCase()) || u.name.toLowerCase().includes(rnLower)));
+        if (found) {
+          recNip = found.nip;
+          recName = found.name;
+        } else if (rnLower.includes('dewi') || rnLower.includes('sartika')) {
           recNip = 'PK-2012-0845';
           recName = 'Dewi Sartika, S.T., M.M.';
-        } else if (rnLower.includes('hendra') || rnLower.includes('gunawan')) {
+        } else {
           recNip = 'PK-2015-1002';
           recName = 'Ir. Hendra Gunawan, M.T.';
         }
@@ -167,7 +172,11 @@
           } else if (t.approverName) {
             recName = recName || t.approverName;
             const tnLower = t.approverName.toLowerCase();
-            if (tnLower.includes('dewi') || tnLower.includes('sartika')) {
+            const found = allUsers.find(u => u.name && (u.name.toLowerCase() === tnLower || tnLower.includes(u.name.toLowerCase()) || u.name.toLowerCase().includes(tnLower)));
+            if (found) {
+              recNip = found.nip;
+              recName = found.name;
+            } else if (tnLower.includes('dewi') || tnLower.includes('sartika')) {
               recNip = 'PK-2012-0845';
             } else {
               recNip = 'PK-2015-1002';

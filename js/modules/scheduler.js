@@ -91,7 +91,7 @@ function parseTicketDateTime(val) {
 
 function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841'))) {
   // Ambil tiket terbaru dari window.ticketsList atau localStorage
-  const list = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
+  const list = window.ticketsList || (typeof window.loadTickets === 'function' ? window.loadTickets() : []);
   return list.find(t =>
     (t.applicantNip === nip || (!t.applicantNip && nip === 'PK-2024-8841')) &&
     t.status !== 'Dibatalkan' &&
@@ -127,7 +127,7 @@ function checkOverdueAndExpiredTickets(silent = true) {
 
 function _executeCheckOverdueAndExpiredTickets(silent = true) {
   // Selalu pastikan membaca array tiket termutakhir
-  const list = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
+  const list = window.ticketsList || (typeof window.loadTickets === 'function' ? window.loadTickets() : []);
   const now = new Date();
   let hasChanges = false;
   let newlyOverdue = 0;
@@ -232,7 +232,11 @@ function _executeCheckOverdueAndExpiredTickets(silent = true) {
                 // 2. Notifikasi ke Atasan
                 window.createNotification({
                   recipientRole: 'approver',
-                  recipientNip: (ticket.approverName && ticket.approverName.includes('Dewi')) ? 'PK-2012-0845' : 'PK-2015-1002',
+                  recipientNip: (() => {
+                    const allUsers = window.MOCK_USERS || [];
+                    const found = allUsers.find(u => u.name && ticket.approverName && (u.name.toLowerCase() === ticket.approverName.toLowerCase() || ticket.approverName.toLowerCase().includes(u.name.toLowerCase())));
+                    return (found && found.nip) || (ticket.approverName && ticket.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+                  })(),
                   recipientName: ticket.approverName || 'Ir. Hendra Gunawan, M.T.',
                   actorSource: 'system',
                   type: 'bawahan_terlambat',

@@ -18,13 +18,16 @@ function autoCancelTicketsForRevokedUser(user) {
     if (isMatch && !isFinished) {
       t.status = 'Dibatalkan';
       t.cancellationReason = `Pengajuan dibatalkan otomatis oleh sistem karena hak akses pemohon (${userName}) telah dicabut oleh Administrator.`;
-      if (!t.logs) t.logs = [];
-      t.logs.push({
+      if (!t.timeline) t.timeline = [];
+      const cancelEntry = {
         event: 'Pengajuan Dibatalkan oleh Sistem',
         time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
         by: 'Sistem Keamanan PT Pupuk Kujang',
         desc: `Hak akses akun pemohon (${userName}) dicabut oleh Administrator.`
-      });
+      };
+      t.timeline.unshift(cancelEntry);
+      if (!t.logs) t.logs = [];
+      t.logs.push(cancelEntry);
       canceledCount++;
     }
   });
@@ -1901,7 +1904,7 @@ function saveAdminUserAccess(event) {
   const email = document.getElementById('adminInputEmail').value.trim() || `${nip.toLowerCase().replace(/[^a-z0-9]/g, '')}@pupuk-kujang.co.id`;
   const department = document.getElementById('adminInputDept').value;
   let roleKey = document.getElementById('adminInputRoleKey').value;
-  if (kujangId === 'KJG-991025' || (name && name.toLowerCase().includes('arthur morgan'))) { roleKey = 'karyawan2'; }
+  if ((kujangId === 'KJG-991025' || (name && name.toLowerCase().includes('arthur morgan'))) && roleKey === 'karyawan') { roleKey = 'karyawan2'; }
   const roleTitleInput = document.getElementById('adminInputRoleTitle')?.value || '';
   const status = document.getElementById('adminInputStatus').value;
   const directSupervisor = document.getElementById('adminInputSupervisor')?.value || 'Ir. Hendra Gunawan, M.T.';
@@ -1964,6 +1967,8 @@ function saveAdminUserAccess(event) {
       role: roleLabel,
       roleKey,
       status,
+      directSupervisor: directSupervisor,
+      supervisor: directSupervisor,
       lastLogin: 'Baru saja didaftarkan'
     };
     users.unshift(newUser);
@@ -2149,12 +2154,47 @@ function deleteAdminUser(kujangId) {
       if (window.ACTORS.karyawan2 && window.ACTORS.karyawan2.approverName === deletedName) {
         window.ACTORS.karyawan2.approverName = '';
       }
+      const activeApprovers = users.filter(u => (u.roleKey === 'approver' || u.roleKey === 'approver2') && u.status === 'Aktif' && u.name !== deletedName && u.nip !== user.nip);
+      const fallbackApp1 = activeApprovers.find(u => u.roleKey === 'approver') || activeApprovers[0];
+      const fallbackApp2 = activeApprovers.find(u => u.roleKey === 'approver2' && u !== fallbackApp1) || activeApprovers[1] || fallbackApp1;
+
       if (window.ACTORS.approver && (window.ACTORS.approver.name === deletedName || window.ACTORS.approver.nip === user.nip)) {
-        window.ACTORS.approver = null;
+        window.ACTORS.approver = fallbackApp1 ? {
+          nip: fallbackApp1.nip,
+          name: fallbackApp1.name,
+          title: fallbackApp1.role || 'Manager',
+          department: fallbackApp1.department || 'Departemen Rekayasa & Pemeliharaan',
+          roleLabel: 'Atasan 1 (Manager)'
+        } : { nip: 'PK-2015-1002', name: 'Atasan Pengganti', title: 'Manager Sementara', department: user.department || 'Departemen Rekayasa & Pemeliharaan', roleLabel: 'Atasan 1 (Manager)' };
       }
       if (window.ACTORS.approver2 && (window.ACTORS.approver2.name === deletedName || window.ACTORS.approver2.nip === user.nip)) {
-        window.ACTORS.approver2 = null;
+        window.ACTORS.approver2 = fallbackApp2 ? {
+          nip: fallbackApp2.nip,
+          name: fallbackApp2.name,
+          title: fallbackApp2.role || 'Supervisor / Plt',
+          department: fallbackApp2.department || 'Departemen Rekayasa & Pemeliharaan',
+          roleLabel: 'Atasan 2 (Supervisor / Plt)'
+        } : { nip: 'PK-2012-0845', name: 'Atasan 2 Pengganti', title: 'Supervisor Sementara', department: user.department || 'Departemen Rekayasa & Pemeliharaan', roleLabel: 'Atasan 2 (Supervisor / Plt)' };
       }
+
+      // TINGGI-05: Rekonsiliasi tiket antrean yang ditinggalkan atasan
+      const allTickets = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
+      const newApproverName = fallbackApp1 ? fallbackApp1.name : (fallbackApp2 ? fallbackApp2.name : 'Atasan Pengganti');
+      allTickets.forEach(t => {
+        if (t.approverName === deletedName && (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')) {
+          t.reassignedFrom = deletedName;
+          t.reassignedTo = newApproverName;
+          t.approverName = newApproverName;
+          if (!t.timeline) t.timeline = [];
+          t.timeline.unshift({
+            event: 'Dialihkan Otomatis oleh Sistem',
+            time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
+            by: 'Sistem Administrasi KUJANG ID',
+            desc: `Akun atasan sebelumnya (${deletedName}) dihapus/dicabut. Persetujuan dialihkan ke ${newApproverName}.`
+          });
+        }
+      });
+      if (typeof window.saveTickets === 'function') window.saveTickets(allTickets);
     }
 
     // 3. Batalkan seluruh permohonan aktif pemohon jika user adalah karyawan

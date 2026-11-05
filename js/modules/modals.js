@@ -2834,7 +2834,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof window.createNotification === 'function') {
         window.createNotification({
           recipientRole: 'approver',
-          recipientNip: (newTicket.approverName && newTicket.approverName.includes('Dewi')) ? 'PK-2012-0845' : 'PK-2015-1002',
+          recipientNip: (() => {
+            const allUsers = window.MOCK_USERS || [];
+            const found = allUsers.find(u => u.name && newTicket.approverName && (u.name.toLowerCase() === newTicket.approverName.toLowerCase() || newTicket.approverName.toLowerCase().includes(u.name.toLowerCase())));
+            return (found && found.nip) || (newTicket.approverName && newTicket.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+          })(),
           recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
           actorSource: 'karyawan',
           type: 'pengajuan_baru',
@@ -3257,6 +3261,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const ticketsList = window.ticketsList || [];
       ticketsList.unshift(emergencyTicket);
+
+      // SEDANG-01: Notifikasi Prioritas Tinggi K3 Kedaruratan
+      if (typeof window.createNotification === 'function') {
+        const allUsers = window.MOCK_USERS || [];
+        const apprUser = allUsers.find(u => u.name && emergencyTicket.approverName && (u.name.toLowerCase() === emergencyTicket.approverName.toLowerCase() || emergencyTicket.approverName.toLowerCase().includes(u.name.toLowerCase())));
+        const targetApprNip = (apprUser && apprUser.nip) || (emergencyTicket.approverName && emergencyTicket.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+
+        // Notifikasi ke Atasan
+        window.createNotification({
+          recipientRole: 'approver',
+          recipientNip: targetApprNip,
+          recipientName: emergencyTicket.approverName || 'Atasan Peninjau',
+          actorSource: 'karyawan',
+          type: 'izin_darurat',
+          title: '🚨 PERMOHONAN IZIN DARURAT K3',
+          message: `${emergencyTicket.applicantName} (${emergencyTicket.applicantNip}) mengajukan izin darurat keluar area (${emergencyTicket.category}). Membutuhkan otorisasi segera!`,
+          ticketId: emergencyTicket.id,
+          priority: 'urgent',
+          eventId: `emg_sub_${emergencyTicket.id}`
+        });
+
+        // Notifikasi ke Pos Jaga
+        window.createNotification({
+          recipientRole: 'security',
+          title: '🚨 Peringatan Izin Darurat Aktif',
+          message: `Tiket Darurat #${emergencyTicket.id} diterbitkan untuk ${emergencyTicket.applicantName}. Pantau status otorisasi sebelum gerbang dibuka.`,
+          ticketId: emergencyTicket.id,
+          type: 'izin_darurat',
+          priority: 'urgent',
+          eventId: `emg_sec_${emergencyTicket.id}`
+        });
+      }
+
       window.saveTickets(ticketsList);
 
       modalEmergency.classList.remove('open');
@@ -3412,7 +3449,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ticketForExt) {
           window.createNotification({
             recipientRole: 'approver',
-            recipientNip: (ticketForExt.approverName && ticketForExt.approverName.includes('Dewi')) ? 'PK-2012-0845' : 'PK-2015-1002',
+            recipientNip: (() => {
+            const allUsers = window.MOCK_USERS || [];
+            const found = allUsers.find(u => u.name && ticketForExt.approverName && (u.name.toLowerCase() === ticketForExt.approverName.toLowerCase() || ticketForExt.approverName.toLowerCase().includes(u.name.toLowerCase())));
+            return (found && found.nip) || (ticketForExt.approverName && ticketForExt.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+          })(),
             recipientName: ticketForExt.approverName || 'Ir. Hendra Gunawan, M.T.',
             actorSource: 'karyawan',
             type: 'permohonan_perpanjangan',
