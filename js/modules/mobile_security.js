@@ -401,7 +401,7 @@
       <section class="mobile-card">
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Karyawan sedang di luar</h3>
-          <span class="mobile-badge sedang-di-luar" style="font-size: 0.675rem; font-weight: 700;">Sedang di luar</span>
+          ${outsideTickets.length > 0 ? `<span class="mobile-badge sedang-di-luar" style="font-size: 0.675rem; font-weight: 700;">Sedang di luar</span>` : ''}
         </div>
         ${outsideListHtml || '<p style="font-size: 0.75rem; color: #64748b; margin: 0;">Tidak ada karyawan di luar area pabrik saat ini.</p>'}
         <div style="text-align: center; margin-top: 10px;">
