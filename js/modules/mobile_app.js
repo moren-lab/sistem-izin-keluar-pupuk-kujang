@@ -794,9 +794,7 @@
         <p style="font-size: 0.85rem; color: #1e293b; line-height: 1.5; margin: 0 0 10px 0;">
           Hapus <strong>${finishedTickets.length} tiket</strong> riwayat selesai dari daftar tampilan Anda?
         </p>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 20px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
-         
-        </div>
+       
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
           <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 700; border-radius: 10px; font-size: 0.85rem;" onclick="window.mobileCloseSheet()">Batal</button>
           <button type="button" style="flex: 1; min-height: 44px; padding: 10px 16px; font-weight: 800; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 10px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);" onclick="window.mobileConfirmBatchDelete('${flag}', ${finishedTickets.length})">Hapus Riwayat</button>
