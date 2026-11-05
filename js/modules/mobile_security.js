@@ -404,7 +404,7 @@
       <section class="mobile-card">
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Karyawan sedang di luar</h3>
-          <span style="font-size: 0.7rem; color: #0f172a; font-weight: 700;">Status</span>
+          <span class="mobile-badge sedang-di-luar" style="font-size: 0.675rem; font-weight: 700;">Sedang di luar</span>
         </div>
         ${outsideListHtml || '<p style="font-size: 0.75rem; color: #64748b; margin: 0;">Tidak ada karyawan di luar area pabrik saat ini.</p>'}
         <div style="text-align: center; margin-top: 10px;">
@@ -844,7 +844,7 @@
           </div>
 
           <!-- Baris 4: Tujuan / Lokasi Keluar -->
-          <div class="mobile-clamp-2" style="font-size: 0.825rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;" title="${destText.replace(/"/g, '&quot;')}">
+          <div class="mobile-clamp-2" style="font-size: 0.825rem; font-weight: 400; color: #334155; margin-bottom: 4px; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;" title="${destText.replace(/"/g, '&quot;')}">
             📍 ${destText}
           </div>
 
@@ -931,7 +931,7 @@
           <div style="font-size: 0.725rem; font-weight: 700; color: #047857; margin-bottom: 2px;">
             ${t.category || 'Dinas Kantor'} • ${typeDisplay}
           </div>
-          <div class="mobile-clamp-2" style="font-size: 0.8rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${destText.replace(/"/g, '&quot;')}">
+          <div class="mobile-clamp-2" style="font-size: 0.8rem; font-weight: 400; color: #334155; margin-bottom: 6px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${destText.replace(/"/g, '&quot;')}">
             📍 ${destText}
           </div>
 
