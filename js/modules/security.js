@@ -998,15 +998,19 @@ function executeVerification(inputQuery) {
   }
 
   // Parse if it's full QR payload e.g. KUJANG-PASS|TK-XXXX|...
-  let searchId = query;
+  let searchId = (query || '').trim();
   if (query.includes('|')) {
     const parts = query.split('|');
-    if (parts.length >= 2) searchId = parts[1];
+    if (parts.length >= 2) searchId = parts[1].trim();
   }
 
+  const cleanSearchId = (searchId || '').trim().toUpperCase();
+  const cleanQuery = (query || '').trim().toUpperCase();
+
   const ticket = ticketsList.find(t => 
-    t.id.toUpperCase() === searchId || 
-    (t.applicantNip && t.applicantNip.toUpperCase() === query)
+    (t.id && t.id.trim().toUpperCase() === cleanSearchId) || 
+    (t.applicantNip && t.applicantNip.trim().toUpperCase() === cleanQuery) ||
+    (t.id && t.id.trim().toUpperCase() === cleanQuery)
   );
 
   if (!ticket) {

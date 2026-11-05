@@ -432,7 +432,12 @@ function resetAllTicketsToDefault() {
     localStorage.clear();
   } catch (e) { }
   window.ticketsList = JSON.parse(JSON.stringify(DEFAULT_TICKETS));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(window.ticketsList));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(window.ticketsList));
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
+  } catch (e) { }
+  window.MOCK_USERS = JSON.parse(JSON.stringify(DEFAULT_USERS));
+  if (typeof window.syncActorsFromUsers === 'function') window.syncActorsFromUsers(window.MOCK_USERS);
   if (typeof window.switchRole === 'function') window.switchRole('karyawan');
   if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav('dashboard');
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();

@@ -2749,6 +2749,25 @@ document.addEventListener('DOMContentLoaded', () => {
               by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
               desc: `Peninjauan persetujuan izin dialihkan dari ${oldApprover} ke ${newApprover}.`
             });
+
+            // Kirim notifikasi pengalihan izin ke Atasan Baru
+            if (typeof window.createNotification === 'function') {
+              const allUsers = window.MOCK_USERS || [];
+              const newAppUser = allUsers.find(u => u.name && newApprover && (u.name.toLowerCase() === newApprover.toLowerCase() || newApprover.toLowerCase().includes(u.name.toLowerCase())));
+              const newAppNip = (newAppUser && newAppUser.nip) || (newApprover.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+              window.createNotification({
+                recipientRole: 'approver',
+                recipientNip: newAppNip,
+                recipientName: newApprover,
+                actorSource: 'karyawan',
+                type: 'pengalihan_izin',
+                title: 'Pelimpahan Persetujuan Izin',
+                message: `${ticket.applicantName} (${ticket.applicantNip}) mengalihkan peninjauan izin #${ticket.id} kepada Anda. Menunggu keputusan.`,
+                ticketId: ticket.id,
+                priority: 'normal',
+                eventId: `reassign_${ticket.id}_${Date.now()}`
+              });
+            }
           } else {
             ticket.timeline.unshift({
               event: 'Pengajuan Diperbarui (Diedit)',
@@ -3160,6 +3179,25 @@ document.addEventListener('DOMContentLoaded', () => {
               by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
               desc: `Peninjauan izin darurat dialihkan dari ${oldApprover} ke ${newApprover}.`
             });
+
+            // Kirim notifikasi pengalihan darurat ke Atasan Baru
+            if (typeof window.createNotification === 'function') {
+              const allUsers = window.MOCK_USERS || [];
+              const newAppUser = allUsers.find(u => u.name && newApprover && (u.name.toLowerCase() === newApprover.toLowerCase() || newApprover.toLowerCase().includes(u.name.toLowerCase())));
+              const newAppNip = (newAppUser && newAppUser.nip) || (newApprover.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+              window.createNotification({
+                recipientRole: 'approver',
+                recipientNip: newAppNip,
+                recipientName: newApprover,
+                actorSource: 'karyawan',
+                type: 'pengalihan_izin',
+                title: 'Pelimpahan Otorisasi Darurat',
+                message: `${ticket.applicantName} (${ticket.applicantNip}) mengalihkan otorisasi darurat izin #${ticket.id} kepada Anda.`,
+                ticketId: ticket.id,
+                priority: 'urgent',
+                eventId: `reassign_emg_${ticket.id}_${Date.now()}`
+              });
+            }
           } else {
             ticket.timeline.unshift({
               event: 'Pengajuan Darurat Diperbarui (Diedit)',
@@ -3332,22 +3370,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSubmitExtendDuration) {
     btnSubmitExtendDuration.addEventListener('click', () => {
-      const ticketsList = window.ticketsList || [];
-      const ticket = ticketsList.find(t => t.id === window.currentExtendTicketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : ticketsList[0]);
-      if (!ticket) return;
-
-      const newReturnVal = inputExtendNewReturn ? inputExtendNewReturn.value : '';
-      const reasonVal = inputExtendReason ? inputExtendReason.value.trim() : '';
-
-      if (ticket.status === 'Terlambat' || ticket.isLate) {
-        if (typeof window.showToast === 'function') {
-          window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.', 'danger');
-        } else {
-          alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.');
+      if (window._isSubmittingExtension) return;
+      window._isSubmittingExtension = true;
+      try {
+        const ticketsList = window.ticketsList || [];
+        const ticket = ticketsList.find(t => t.id === window.currentExtendTicketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
+        if (!ticket) {
+          if (typeof window.showToast === 'function') window.showToast('Data perizinan aktif tidak ditemukan.', 'warning');
+          if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+          return;
         }
-        if (modalExtendDuration) modalExtendDuration.classList.remove('open');
-        return;
-      }
+
+        if (ticket.status !== 'Sedang di Luar') {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Perpanjangan waktu hanya dapat diajukan saat Anda sedang berada di luar area!', 'warning');
+          }
+          if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+          return;
+        }
+
+        if (ticket.pendingExtension && ticket.pendingExtension.status === 'Menunggu Persetujuan') {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Anda sudah memiliki permohonan perpanjangan waktu yang sedang menunggu persetujuan Atasan!', 'warning');
+          }
+          if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+          return;
+        }
+
+        const newReturnVal = inputExtendNewReturn ? inputExtendNewReturn.value : '';
+        const reasonVal = inputExtendReason ? inputExtendReason.value.trim() : '';
+
+        if (ticket.status === 'Terlambat' || ticket.isLate) {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.', 'danger');
+          } else {
+            alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In di Pos Jaga.');
+          }
+          if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+          return;
+        }
 
       if (!newReturnVal) {
         if (typeof window.showToast === 'function') window.showToast('Harap pilih perkiraan waktu kembali baru!', 'danger');
@@ -3478,6 +3539,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
         window.openTicketDetail(ticket.id, 'detail');
       }
+      } finally {
+        window._isSubmittingExtension = false;
+      }
     });
   }
 
@@ -3506,15 +3570,13 @@ function openExtendDurationModal(ticketId) {
     ticket = window.getActiveTicket();
   }
   if (!ticket && ticketsList.length > 0) {
-    ticket = ticketsList.find(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat') || ticketsList[0];
+    ticket = ticketsList.find(t => t.status === 'Sedang di Luar');
   }
-  if (!ticket) {
-    ticket = {
-      id: 'IZ-20261019-013',
-      destination: 'PT Rekayasa Industri, Cikampek',
-      reason: 'Koordinasi teknis pemeriksaan komponen pompa P-204',
-      estimatedReturn: '2026-10-21T14:00'
-    };
+  if (!ticket || ticket.status !== 'Sedang di Luar') {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada perizinan aktif yang sedang berada di luar area untuk diperpanjang.', 'warning');
+    }
+    return;
   }
 
   // Jika tiket sudah terlambat, tolak perpanjangan dan instruksikan Tap In

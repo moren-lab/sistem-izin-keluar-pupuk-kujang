@@ -608,19 +608,14 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : ''}
 
-            ${isTicketReassignedFromCurrentApprover(t) ? `
-              <div class="card-actions-bar" style="display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
-                <button class="btn-card-detail" style="flex: 1; min-width: 0; padding: 0.4rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Detail Pengajuan</span>
-                </button>
-                <span style="font-size:0.72rem; color:#92400e; font-weight:700; white-space: nowrap; padding-left: 0.3rem;">
-                  Dialihkan ke ${t.approverName}
-                </span>
-              </div>
-            ` : (
-              (!isTrackingView && (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) ? `
-                <!-- Tiered Action Grid: Row 1 Decision (50%-50%), Row 2 Inspection (50%-50%) -->
+            ${(() => {
+              const isReassignedAway = isTicketReassignedFromCurrentApprover(t);
+              const isAssigned = isTicketAssignedToCurrentApprover(t);
+              const canDecide = !isTrackingView && isAssigned && !isReassignedAway;
+
+              if (canDecide && (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
+                // Decision Mode (Exclusive to Officially Assigned Approver)
+                return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; width: 100%;">
                     ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
@@ -656,21 +651,37 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     <span>Detail Pengajuan</span>
                   </button>
-                </div>
-              ` : `
-                <!-- Action Buttons Row -->
-                <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
-                  <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                </div>`;
+              }
+
+              // Monitoring / Read-Only Mode (Subordinate pending with other approver OR Reassigned Away)
+              if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
+                return `
+                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; background: ${isReassignedAway ? '#fffbeb' : '#eff6ff'}; border: 1px solid ${isReassignedAway ? '#fef3c7' : '#bfdbfe'}; border-radius: 6px; font-size: 0.725rem; color: ${isReassignedAway ? '#92400e' : '#1e40af'}; font-weight: 600;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                    <span>${isReassignedAway ? `Dialihkan ke: <strong>${t.approverName || 'Pejabat Terkait'}</strong>` : `Menunggu keputusan dari: <strong>${t.approverName || 'Pejabat Terkait'}</strong>`}</span>
+                  </div>
+                  <button class="btn-card-detail" style="width: 100%; padding: 0.45rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     <span>Detail Pengajuan</span>
                   </button>
-                  <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    <span>Hapus</span>
-                  </button>
-                </div>
-              `
-            )}
+                </div>`;
+              }
+
+              // Standard Tracking View (Pelacakan)
+              return `
+              <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
+                <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  <span>Detail Pengajuan</span>
+                </button>
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Hapus</span>
+                </button>
+              </div>`;
+            })()}
           </div>
         `;
   }).join('')}
@@ -1055,6 +1066,13 @@ function openApproveModal(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
 
+  if (!isTicketAssignedToCurrentApprover(ticket)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wewenang ditolak: Anda bukan atasan yang ditugaskan untuk menyetujui izin ini.', 'danger');
+    }
+    return;
+  }
+
   if (!['Menunggu Persetujuan', 'Menunggu Otorisasi Darurat'].includes(ticket.status)) {
     if (typeof window.showToast === 'function') {
       window.showToast('Tiket ini sudah diproses dan tidak dapat disetujui ulang.', 'warning');
@@ -1082,6 +1100,13 @@ function openRejectModal(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) return;
 
+  if (!isTicketAssignedToCurrentApprover(ticket)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wewenang ditolak: Anda bukan atasan yang ditugaskan untuk menolak izin ini.', 'danger');
+    }
+    return;
+  }
+
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
 
@@ -1107,6 +1132,12 @@ function confirmApproveDecision() {
   const ticketId = window.currentDecisionTicketId;
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket || ticket.status === 'Disetujui') return;
+  if (!isTicketAssignedToCurrentApprover(ticket)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wewenang ditolak: Anda bukan atasan yang ditugaskan untuk menyetujui izin ini.', 'danger');
+    }
+    return;
+  }
 
   const approveNoteInput = document.getElementById('approveNoteInput');
   const note = (approveNoteInput && approveNoteInput.value.trim()) || 'Disetujui';
@@ -1204,7 +1235,13 @@ function confirmRejectDecision() {
   const ticketsList = window.ticketsList || [];
   const ticketId = window.currentDecisionTicketId;
   const ticket = ticketsList.find(t => t.id === ticketId);
-  if (!ticket) return;
+  if (!ticket || ticket.status === 'Ditolak') return;
+  if (!isTicketAssignedToCurrentApprover(ticket)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wewenang ditolak: Anda bukan atasan yang ditugaskan untuk menolak izin ini.', 'danger');
+    }
+    return;
+  }
 
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
@@ -1371,6 +1408,16 @@ function approveExtensionRequest(ticketId) {
     return;
   }
 
+  if (!isTicketAssignedToCurrentApprover(ticket)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wewenang ditolak: Anda bukan atasan yang ditugaskan untuk menyetujui perpanjangan waktu ini.', 'danger');
+    }
+    return;
+  }
+
+  const currentActor = getCurrentApproverActor();
+  const approverName = currentActor ? currentActor.name : 'Ir. Hendra Gunawan, M.T.';
+
   let newReturn = ticket.pendingExtension.newEstimatedReturn;
   if (typeof window.normalizeReturnDateTime === 'function') {
     newReturn = window.normalizeReturnDateTime(newReturn);
@@ -1378,8 +1425,7 @@ function approveExtensionRequest(ticketId) {
     const lastIdx = newReturn.lastIndexOf('20');
     if (lastIdx > 0) newReturn = newReturn.slice(lastIdx);
   }
-  const ACTORS = window.ACTORS || {};
-  const approverName = ACTORS.approver ? ACTORS.approver.name : 'Ir. Hendra Gunawan, M.T.';
+  // approverName resolved from currentActor above
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];

@@ -735,24 +735,38 @@ function deleteAllAdminAudit() {
 // ==========================================
 // 4. REPORTS & EXPORT EXCEL / PRINT PDF (FR-ADM-03, UC-22, UC-23)
 // ==========================================
-function renderAdminReports() {
+function filterAdminReportTickets() {
   const tickets = window.ticketsList || [];
+  const statusEl = document.getElementById('adminReportStatusFilter');
+  const catEl = document.getElementById('adminReportCategoryFilter');
+  const activeStatus = (statusEl && statusEl.value) ? statusEl.value : adminReportStatusFilter;
+  const activeCat = (catEl && catEl.value) ? catEl.value : adminReportCategoryFilter;
+
+  return tickets.filter(ticket => {
+    if (activeStatus !== 'all' && ticket.status !== activeStatus) {
+      return false;
+    }
+    if (activeCat !== 'all') {
+      const isDinas = (ticket.category || 'Dinas Kantor') === 'Dinas Kantor';
+      if (activeCat === 'Dinas Kantor' && !isDinas) return false;
+      if (activeCat === 'Keperluan Pribadi' && isDinas) return false;
+    }
+    return true;
+  });
+}
+window.setAdminReportFilters = (status, cat) => {
+  if (status !== undefined) adminReportStatusFilter = status;
+  if (cat !== undefined) adminReportCategoryFilter = cat;
+};
+window.filterAdminReportTickets = filterAdminReportTickets;
+
+function renderAdminReports() {
   const tbody = document.getElementById('adminReportTableBody');
   const countEl = document.getElementById('adminReportRowCount');
   if (!tbody) return;
 
   // Filter tickets
-  const filtered = tickets.filter(ticket => {
-    if (adminReportStatusFilter !== 'all' && ticket.status !== adminReportStatusFilter) {
-      return false;
-    }
-    if (adminReportCategoryFilter !== 'all') {
-      const isDinas = (ticket.category || 'Dinas Kantor') === 'Dinas Kantor';
-      if (adminReportCategoryFilter === 'Dinas Kantor' && !isDinas) return false;
-      if (adminReportCategoryFilter === 'Keperluan Pribadi' && isDinas) return false;
-    }
-    return true;
-  });
+  const filtered = filterAdminReportTickets();
 
   if (countEl) {
     countEl.textContent = `${filtered.length} Data Tiket Perizinan`;
@@ -805,9 +819,11 @@ function renderAdminReports() {
 
 // Clean Export to CSV / Excel
 function exportAdminExcel() {
-  const tickets = window.ticketsList || [];
+  const tickets = (typeof filterAdminReportTickets === 'function') 
+    ? filterAdminReportTickets() 
+    : (window.ticketsList || []);
   if (tickets.length === 0) {
-    if (typeof window.showToast === 'function') window.showToast('Tidak ada data tiket untuk diexport', 'warning');
+    if (typeof window.showToast === 'function') window.showToast('Tidak ada data tiket sesuai filter untuk diexport', 'warning');
     return;
   }
 
@@ -902,6 +918,9 @@ function exportAdminExcel() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  setTimeout(() => {
+    try { URL.revokeObjectURL(url); } catch (e) {}
+  }, 1000);
 
   if (typeof window.showToast === 'function') {
     window.showToast(`Berhasil mengunduh rekap ${tickets.length} perizinan ke Excel (.csv)`, 'success');
