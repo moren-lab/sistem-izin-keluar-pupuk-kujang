@@ -653,10 +653,7 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
           </div>
         </div>
 
-        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #ecfdf5; border: 1px solid #a7f3d0; font-size: 0.725rem; font-weight: 700; color: #065f46;">
-          <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #059669; animation: pulseDot 2s infinite;"></span>
-          <span>Data Real-Time Tim</span>
-        </div>
+        
       </div>
 
       <!-- SVG Chart -->

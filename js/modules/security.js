@@ -1248,6 +1248,7 @@ function executeScanIn(ticketId) {
     });
     ticket.pendingExtension = null;
   }
+  ticket.hasExtensionPending = false;
 
   window.saveTickets(ticketsList);
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');

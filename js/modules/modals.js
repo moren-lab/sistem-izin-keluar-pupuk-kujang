@@ -1300,24 +1300,6 @@ function openDigitalPassModal(ticketId) {
     document.body.classList.remove('printing-digital-pass');
   }, { once: true });
 
-  
-  // READ-ONLY MODE FROM NOTIFICATIONS
-  const isReadOnlyFromNotif = (initialTab === 'readonly' || (typeof options === 'object' && options && options.readOnlyFromNotif));
-  if (isReadOnlyFromNotif) {
-    if (topEmergencyAuthBanner) topEmergencyAuthBanner.style.display = 'none';
-    if (infoEmergencyDetailBox) infoEmergencyDetailBox.style.display = 'none';
-    if (btnDetailEditTicket) { btnDetailEditTicket.style.display = 'none'; btnDetailEditTicket.onclick = null; }
-    if (btnDetailCancelTicket) { btnDetailCancelTicket.style.display = 'none'; btnDetailCancelTicket.onclick = null; }
-    if (btnDetailRejectTicket) { btnDetailRejectTicket.style.display = 'none'; btnDetailRejectTicket.onclick = null; }
-    if (btnDetailApproveTicket) { btnDetailApproveTicket.style.display = 'none'; btnDetailApproveTicket.onclick = null; }
-    if (btnDetailScanOut) { btnDetailScanOut.style.display = 'none'; btnDetailScanOut.onclick = null; }
-    if (btnDetailEmergencyUnlock) { btnDetailEmergencyUnlock.style.display = 'none'; btnDetailEmergencyUnlock.onclick = null; }
-    const btnBannerEditEmergency = document.getElementById('btnBannerEditEmergency');
-    if (btnBannerEditEmergency) { btnBannerEditEmergency.style.display = 'none'; btnBannerEditEmergency.onclick = null; }
-    const detailFooterMeta = document.getElementById('detailFooterMeta');
-    if (detailFooterMeta) detailFooterMeta.textContent = 'Mode Pratinjau Notifikasi — Hanya melihat rincian izin';
-  }
-
   modal.classList.add('open');
 }
 window.openDigitalPassModal = openDigitalPassModal;

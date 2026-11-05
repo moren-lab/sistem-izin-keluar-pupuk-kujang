@@ -1371,6 +1371,8 @@
     t.scanInTime = `${nowFormatted} (${activeGate})`;
     t.securityOfficerIn = officer.name;
     t.securityNipIn = officer.nip;
+    t.hasExtensionPending = false;
+    t.pendingExtension = null;
     if (!t.timeline) t.timeline = [];
 
     const wasOverdue = isTicketLate(t);

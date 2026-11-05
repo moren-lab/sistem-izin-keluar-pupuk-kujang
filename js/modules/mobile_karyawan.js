@@ -2042,7 +2042,6 @@
         if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
         if (typeof window.renderApproverView === 'function') window.renderApproverView();
         if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
-        if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
         return;
       }
     }
@@ -2194,6 +2193,8 @@
     t.status = 'Selesai';
     t.scanInTime = `${nowFormatted} (Pos 1 Gerbang Utama)`;
     t.scanInGate = 'Pos 1 Gerbang Utama';
+    t.hasExtensionPending = false;
+    t.pendingExtension = null;
     if (!t.timeline) t.timeline = [];
     t.timeline.push({
       event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Tepat Waktu)',

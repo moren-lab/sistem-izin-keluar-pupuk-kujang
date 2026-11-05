@@ -218,7 +218,7 @@
       !t.id.includes('-EMG-') && 
       t.status === 'Menunggu Persetujuan'
     );
-    const pendingExt = tickets.filter(t => t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
+    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa');
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const processedTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak');
@@ -689,7 +689,7 @@
 
     // Izin darurat diletakkan di puncak antrean dengan prioritas tertinggi
     const pendingNew = [...pendingEmergTickets, ...pendingRegular];
-    const pendingExt = tickets.filter(t => t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
+    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa');
 
     let activeList = currentAntreanSegment === 'baru' ? pendingNew : pendingExt;
 
@@ -1793,6 +1793,12 @@
 
        
 
+        ${(t.status === 'Selesai' || Boolean(t.scanInTime)) ? `
+        <div class="mobile-card" style="margin-bottom: 12px; padding: 14px; text-align: center; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px;">
+          <div style="font-size: 0.85rem; font-weight: 800; color: #166534; margin-bottom: 4px;">✓ Tiket Telah Selesai (Tap In)</div>
+          <div style="font-size: 0.725rem; color: #15803d; line-height: 1.4;">Karyawan telah tiba kembali di kawasan pabrik dan melakukan Tap In kartu akses. Konfirmasi perpanjangan waktu ditutup otomatis.</div>
+        </div>
+        ` : `
         <!-- Keputusan Perpanjangan -->
         <div class="mobile-card" style="margin-bottom: 12px; padding: 12px 14px;">
           <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Keputusan perpanjangan</div>
@@ -1805,8 +1811,6 @@
             <textarea class="mobile-textarea" id="mExtDecisionNote" placeholder="Tambahkan catatan jika diperlukan" style="font-size: 0.75rem; min-height: 50px;"></textarea>
           </div>
 
-          
-
           <div style="display: flex; gap: 8px;">
             <button type="button" class="mobile-btn-danger" style="flex: 1; padding: 10px;" onclick="window.mobileAtasanExecuteExtension('${t.id}', 'reject')">
               Tolak
@@ -1816,6 +1820,7 @@
             </button>
           </div>
         </div>
+        `}
       </div>
     `;
 
@@ -2223,6 +2228,16 @@
     const list = window.ticketsList || [];
     const t = list.find(x => x.id === ticketId);
     if (t) {
+      if (t.status === 'Selesai' || t.scanInTime) {
+        t.hasExtensionPending = false;
+        t.pendingExtension = null;
+        if (typeof window.showToast === 'function') {
+          window.showToast('Tiket ini sudah berstatus Selesai (karyawan telah Tap In). Konfirmasi perpanjangan tidak lagi diperlukan.', 'info');
+        }
+        window.mobileCloseSheet();
+        renderMobileAtasan(null, currentAtasanTab);
+        return;
+      }
       t.hasExtensionPending = false;
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
