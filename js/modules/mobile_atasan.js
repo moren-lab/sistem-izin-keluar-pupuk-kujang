@@ -8,6 +8,28 @@
   'use strict';
 
   let currentAtasanTab = 'dashboard'; // 'dashboard' | 'antrean' | 'tim' | 'riwayat' | 'detail'
+  let isExecutingAtasanDecision = false;
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+  }
+
+  function resolveDynamicApplicantInfo(t) {
+    let nip = t.applicantNip || t.employeeNip || '';
+    let name = t.applicantName || t.employeeName || '';
+    if (!nip && typeof window.KUJANG_ACCOUNTS !== 'undefined' && Array.isArray(window.KUJANG_ACCOUNTS)) {
+      const acc = window.KUJANG_ACCOUNTS.find(a => (name && a.name.toLowerCase() === name.toLowerCase()) || a.roleKey === 'karyawan');
+      if (acc) {
+        if (!nip) nip = acc.nip;
+        if (!name) name = acc.name;
+      }
+    }
+    return {
+      nip: nip || (typeof window.getActiveUserInfo === 'function' ? window.getActiveUserInfo().nip : 'PK-2024-8841'),
+      name: name || (typeof window.getActiveUserInfo === 'function' ? window.getActiveUserInfo().name : 'Karyawan')
+    };
+  }
   let currentAntreanSegment = 'baru'; // 'baru' | 'perpanjangan'
 
   let atasanDashboardSegment = 'ringkasan'; // 'ringkasan' | 'volume'
@@ -265,7 +287,7 @@
             ticketId: ticketId,
             empName: empName,
             title: `Izin ${empName} disetujui`,
-            actor: t.approverName || approver.name.split(',')[0],
+            actor: t.approverName || (approver && approver.name ? (approver.name.includes(',') ? approver.name.split(',')[0] : approver.name) : 'Atasan'),
             desc: 'Disetujui oleh Atasan',
             rawTime: t.approvedAt,
             status: 'Disetujui'
@@ -451,7 +473,7 @@
 
           <div class="mobile-clamp-2" style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.destination || '').replace(/"/g, '&quot;')}">
             Rencana Keluar: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</strong>
-            ${t.destination ? ` • Keperluan: <strong>${t.destination}</strong>` : ''}
+            ${t.destination ? ` • Keperluan: <strong>${escapeHtml(t.destination)}</strong>` : ''}
           </div>
 
           ${isReassignedAway ? `
@@ -1349,7 +1371,7 @@
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
             </div>
-            <span class="mobile-badge ${statusBadgeClass}">${t.status}</span>
+            <span class="mobile-badge ${statusBadgeClass}">${isLate ? 'Terlambat' : t.status}</span>
           </div>
 
           <div style="font-family: monospace; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
@@ -1605,7 +1627,8 @@
       
       let badgeDecisionClass = isDitolak ? 'ditolak' : 'disetujui';
       let badgeDecisionLabel = isDitolak ? 'Ditolak' : (isEmergency ? 'Penerbitan darurat' : 'Disetujui');
-      let deciderSource = isEmergency ? 'Sistem' : (t.approverName || approver.name.split(',')[0]);
+      const safeApproverName = (approver && approver.name) ? (approver.name.includes(',') ? approver.name.split(',')[0] : approver.name) : 'Atasan';
+      let deciderSource = isEmergency ? 'Sistem' : (t.approverName || safeApproverName);
 
       let currentStatusBadgeClass = 'selesai';
       if (isLate) currentStatusBadgeClass = 'terlambat';
@@ -2098,6 +2121,7 @@
   };
 
   window.mobileAtasanExecuteDecision = function (ticketId, decision, defaultNote) {
+    if (isExecutingAtasanDecision) return;
     const list = window.ticketsList || [];
     const t = list.find(x => x.id === ticketId);
     if (t && isTicketReassignedFromMobileApprover(t)) {
@@ -2106,6 +2130,18 @@
       }
       return;
     }
+
+    if (!t) return;
+
+    // TINGGI-06 FIX: Validasi status awal sebelum mengeksekusi keputusan
+    if (t.status !== 'Menunggu Persetujuan' && t.status !== 'Menunggu Otorisasi Darurat') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Gagal: Tiket telah berstatus '${t.status}' dan tidak dapat diproses ulang!`, 'warning');
+      }
+      return;
+    }
+
+    isExecutingAtasanDecision = true;
     const note = defaultNote || document.getElementById('mAtasanDetailNote')?.value || (decision === 'approve' ? 'Disetujui.' : 'Ditolak: Alasan dinas belum memadai.');
 
     if (t) {
@@ -2158,10 +2194,11 @@
 
       if (typeof window.createNotification === 'function') {
         if (decision === 'approve') {
+          const appInfo = resolveDynamicApplicantInfo(t);
           window.createNotification({
             recipientRole: 'karyawan',
-            recipientNip: t.applicantNip || 'PK-2024-8841',
-            recipientName: t.applicantName || 'Budi Pratama, S.T.',
+            recipientNip: appInfo.nip,
+            recipientName: appInfo.name,
             actorSource: 'approver',
             type: 'disetujui',
             title: 'Pengajuan Disetujui',
@@ -2181,10 +2218,11 @@
             eventId: `ready_sec_${t.id}`
           });
         } else {
+          const appInfoRej = resolveDynamicApplicantInfo(t);
           window.createNotification({
             recipientRole: 'karyawan',
-            recipientNip: t.applicantNip || 'PK-2024-8841',
-            recipientName: t.applicantName || 'Budi Pratama, S.T.',
+            recipientNip: appInfoRej.nip,
+            recipientName: appInfoRej.name,
             actorSource: 'approver',
             type: 'ditolak',
             title: 'Pengajuan Ditolak',
@@ -2220,6 +2258,7 @@
     }
     renderMobileAtasan(null, currentAtasanTab);
     if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
+    isExecutingAtasanDecision = false;
   };
 
   window.mobileAtasanExecuteExtension = function (ticketId, decision) {

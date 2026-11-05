@@ -19,6 +19,13 @@
   let riwayatSearchDebounceTimer = null;
   let selectedApproverData = null;
   let pendingMobileFormData = null;
+  let isSubmittingMobilePermit = false;
+  let isSubmittingPerpanjangan = false;
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+  }
 
   // -------------------------------------------------------------------
   // HELPER USER & TICKET GETTERS
@@ -1372,7 +1379,29 @@
   window.mobileOpenEditSheet = function (ticketId) {
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
-    if (!t) return;
+    if (!t) {
+      isSubmittingPerpanjangan = false;
+      return;
+    }
+
+    const emp = getActiveEmp();
+    // Guard: Validasi Kepemilikan Tiket
+    if (t.applicantNip && emp.nip && t.applicantNip !== emp.nip) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Anda tidak berhak mengajukan perpanjangan untuk izin ini.', 'danger');
+      }
+      isSubmittingPerpanjangan = false;
+      return;
+    }
+
+    // Guard: Hanya tiket yang sedang berada di luar area yang dapat diperpanjang
+    if (t.status !== 'Sedang di Luar') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Perpanjangan waktu hanya dapat diajukan saat Anda sedang berada di luar area! (Status saat ini: ${t.status})`, 'danger');
+      }
+      isSubmittingPerpanjangan = false;
+      return;
+    }
 
     if (t.status === 'Terlambat' || t.isLate) {
       if (typeof window.showToast === 'function') {
@@ -1394,7 +1423,7 @@
     });
   };
 
-  // Open Cancel Sheet
+  // Open Cancel Sheet (KRITIS-01 & KRITIS-05 FIX: Ownership, Status Guard, XSS Sanitation)
   window.mobileOpenCancelSheet = function (ticketId) {
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
@@ -1404,12 +1433,37 @@
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
 
+    const emp = getActiveEmp();
+
+    // Guard: Validasi Kepemilikan Tiket (Hanya pemohon yang berhak membatalkan)
+    if (t.applicantNip && emp.nip && t.applicantNip !== emp.nip) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Anda tidak berhak membatalkan permohonan izin karyawan lain!', 'danger');
+      }
+      return;
+    }
+
+    // Guard: Tiket yang sudah Scan Out atau Selesai tidak boleh dibatalkan mandiri
+    if (t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || t.scanOutTime) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Izin tidak dapat dibatalkan karena Anda telah tercatat keluar pabrik (Scan Out). Anda wajib melakukan Tap In di Pos Jaga.', 'danger');
+      }
+      return;
+    }
+
+    if (t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Izin telah berstatus '${t.status}' dan tidak dapat dibatalkan lagi.`, 'warning');
+      }
+      return;
+    }
+
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #fee2e2;">
         <div>
           <h3 style="font-size: 1.1rem; font-weight: 800; color: #b91c1c; margin: 0;">Batalkan Pengajuan Izin</h3>
-          <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0 0;">Tiket ${t.id}</p>
+          <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0 0;">Tiket ${escapeHtml(t.id)}</p>
         </div>
         <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
       </div>
@@ -1418,7 +1472,7 @@
         <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 14px;">
           <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Konfirmasi Pembatalan</div>
           <div style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
-            Apakah Anda yakin ingin membatalkan permohonan izin <strong>${t.category}</strong> ke <strong>${t.destination}</strong>?
+            Apakah Anda yakin ingin membatalkan permohonan izin <strong>${escapeHtml(t.category)}</strong> ke <strong>${escapeHtml(t.destination)}</strong>?
             Setelah dibatalkan, sistem akan mengizinkan Anda membuat pengajuan baru.
           </div>
         </div>
@@ -1429,7 +1483,7 @@
         </div>
 
         <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
-          <button type="button" class="mobile-btn-danger" style="width: 100%; padding: 11px; font-weight: 700; background: #dc2626; border-color: #dc2626; color: #ffffff;" onclick="window.mobileConfirmCancelTicket('${t.id}')">
+          <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="width: 100%; padding: 11px; font-weight: 700; background: #dc2626; border-color: #dc2626; color: #ffffff;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
             <span>Ya, Batalkan Izin</span>
           </button>
         </div>
@@ -1441,12 +1495,38 @@
   };
 
   window.mobileConfirmCancelTicket = function (ticketId) {
+    const btnCancel = document.getElementById('mBtnConfirmCancel');
+    if (btnCancel) {
+      if (btnCancel.disabled) return;
+      btnCancel.disabled = true;
+      btnCancel.style.opacity = '0.6';
+      btnCancel.style.pointerEvents = 'none';
+    }
+
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
 
-    const reason = (document.getElementById('mCancelReason')?.value || '').trim() || 'Dibatalkan mandiri oleh pemohon.';
     const emp = getActiveEmp();
+
+    // Guard: Validasi Kepemilikan Tiket
+    if (t.applicantNip && emp.nip && t.applicantNip !== emp.nip) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Anda tidak berhak membatalkan permohonan izin karyawan lain!', 'danger');
+      }
+      return;
+    }
+
+    // Guard: Tiket yang sudah Scan Out atau selesai tidak boleh dibatalkan mandiri
+    if (t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || t.scanOutTime) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Izin tidak dapat dibatalkan karena Anda telah tercatat keluar area pabrik (Scan Out). Anda wajib melakukan Tap In di Pos Jaga.', 'danger');
+      }
+      return;
+    }
+
+    const rawReason = (document.getElementById('mCancelReason')?.value || '').trim();
+    const reason = rawReason ? escapeHtml(rawReason) : 'Dibatalkan mandiri oleh pemohon.';
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -1480,6 +1560,50 @@
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  };
+
+  // SEDANG-05 FIX: Opsi Penarikan Permohonan Perpanjangan Waktu oleh Karyawan
+  window.mobileCancelPendingExtension = function (ticketId) {
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const emp = getActiveEmp();
+    if (t.applicantNip && emp.nip && t.applicantNip !== emp.nip) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Anda bukan pemilik izin ini.', 'danger');
+      }
+      return;
+    }
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+    t.hasExtensionPending = false;
+    t.pendingExtension = null;
+    t.extensionRequestedTime = null;
+    t.extensionReason = null;
+    if (!t.timeline) t.timeline = [];
+    t.timeline.push({
+      event: 'Perpanjangan Dibatalkan',
+      time: nowFormatted,
+      by: `${emp.name} (Karyawan)`,
+      desc: 'Permohonan perpanjangan waktu dibatalkan mandiri sebelum disetujui Atasan.'
+    });
+
+    if (typeof window.saveTickets === 'function') {
+      window.saveTickets(tickets);
+    } else {
+      localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+      window.ticketsList = tickets;
+    }
+
+    if (typeof window.showToast === 'function') {
+      window.showToast('Permohonan perpanjangan waktu berhasil dibatalkan.', 'info');
+    }
+    window.mobileCloseSheet();
+    renderMobileKaryawan(null, currentKaryawanTab);
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
   };
 
   // Combobox Helper Methods
@@ -1940,8 +2064,20 @@
   // 8. EXECUTE SAVE / UPDATE PERMIT (100% PARITY DENGAN PC MODAL 2 SUBMISSION)
   // -------------------------------------------------------------------
   window.mobileExecuteSubmitPermit = function () {
+    if (isSubmittingMobilePermit) return;
     if (!pendingMobileFormData && !window.pendingMobileFormData) return;
-    const data = pendingMobileFormData || window.pendingMobileFormData;
+    isSubmittingMobilePermit = true;
+
+    // Kunci tombol submit segera untuk mencegah double submission (KRITIS-04)
+    const submitBtn = document.querySelector('#mobileActionSheet .mobile-btn-primary');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.pointerEvents = 'none';
+    }
+
+    try {
+      const data = pendingMobileFormData || window.pendingMobileFormData;
     const emp = getActiveEmp();
     const tickets = window.ticketsList || [];
 
@@ -2058,6 +2194,7 @@
       }
       window.mobileCloseSheet();
       renderMobileKaryawan(null, 'pengajuan');
+      isSubmittingMobilePermit = false;
       return;
     }
 
@@ -2171,6 +2308,9 @@
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
+    } finally {
+      isSubmittingMobilePermit = false;
+    }
   };
 
   // -------------------------------------------------------------------
@@ -2591,8 +2731,11 @@
                 Perpanjangan Telah Digunakan (Maks. 1x)
               </button>
             ` : (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
-              <button type="button" class="mobile-btn-secondary" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 44px; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center;">
+              <button type="button" class="mobile-btn-secondary" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 44px; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center; width: 100%;">
                 Menunggu Persetujuan Perpanjangan
+              </button>
+              <button type="button" class="mobile-btn-secondary" style="background: #ffffff; color: #b91c1c; border: 1.5px solid #fca5a5; min-height: 40px; font-size: 0.775rem; font-weight: 700; border-radius: 8px; margin-top: 4px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer;" onclick="window.mobileCancelPendingExtension('${t.id}')">
+                ✕ Tarik / Batalkan Pengajuan Perpanjangan
               </button>
             ` : `
               <button type="button" class="mobile-btn-secondary mobile-btn-extend-solid" style="background: #d97706; color: #ffffff; border: 1.5px solid #d97706; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenPerpanjanganModal('${t.id}')">
@@ -2725,13 +2868,26 @@
 
   window.mobileSubmitPerpanjangan = function (e, ticketId) {
     e.preventDefault();
+    if (isSubmittingPerpanjangan) return;
+
+    const submitBtn = e.target && e.target.querySelector ? e.target.querySelector('button[type="submit"]') : null;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.pointerEvents = 'none';
+    }
+
     const newTime = document.getElementById('mPerpanjangNewTime')?.value || '';
-    const reason = (document.getElementById('mPerpanjangReason')?.value || '').trim();
+    const rawReason = (document.getElementById('mPerpanjangReason')?.value || '').trim();
+    const reason = rawReason ? escapeHtml(rawReason) : '';
 
     if (!newTime || !reason) {
       if (typeof window.showToast === 'function') window.showToast('Harap lengkapi waktu dan alasan perpanjangan!', 'warning');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.pointerEvents = 'auto'; }
       return;
     }
+
+    isSubmittingPerpanjangan = true;
 
     const selDate = new Date(newTime);
     const nowTime = new Date();
@@ -2849,6 +3005,7 @@
     renderMobileKaryawan(null, currentKaryawanTab);
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
+    isSubmittingPerpanjangan = false;
   };
 
   // -------------------------------------------------------------------

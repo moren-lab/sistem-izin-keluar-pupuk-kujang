@@ -29,6 +29,15 @@
     renderMobileShell();
     renderActiveView();
 
+    // TINGGI-02 FIX: Polling transisi overdue & expired tickets di background mobile
+    if (!window._mobileOverdueTimer) {
+      window._mobileOverdueTimer = setInterval(function () {
+        if (!document.hidden && typeof window.checkOverdueAndExpiredTickets === 'function') {
+          window.checkOverdueAndExpiredTickets(false);
+        }
+      }, 15000);
+    }
+
     // Hook to refresh on ticket updates
     const origSave = window.saveTickets;
     if (typeof origSave === 'function' && !window._mobileSaveHooked) {
@@ -205,6 +214,15 @@
     const container = document.getElementById('mobileMainContent');
     if (!container) return;
 
+    // TINGGI-02 FIX: Sinkronisasi tiket overdue secara real-time pada setiap render view
+    if (typeof window.checkOverdueAndExpiredTickets === 'function') {
+      try {
+        window.checkOverdueAndExpiredTickets(false);
+      } catch (e) {
+        console.warn('Overdue check error in mobile view:', e);
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (currentMobileRole === 'karyawan' || currentMobileRole === 'karyawan2') {
@@ -373,6 +391,13 @@
   // 4. GLOBAL SWITCHERS & ROUTING
   // -------------------------------------------------------------------
   window.mobileSwitchTab = function (tab, subParam) {
+    // SEDANG-02 FIX: Hentikan kamera scanner saat berpindah dari tab scanner pos jaga
+    if (currentMobileRole === 'security' && currentMobileTab === 'scanner' && tab !== 'scanner') {
+      if (typeof window.mobileStopCameraScanner === 'function') {
+        window.mobileStopCameraScanner();
+      }
+    }
+
     if (tab === 'beranda') tab = 'dashboard';
     if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'riwayat') {
       tab = 'dashboard';
@@ -390,6 +415,25 @@
   };
 
   window.mobileSwitchRole = function (role) {
+    // TINGGI-05 FIX: Cegah pergantian ke akun yang telah dicabut atau dinonaktifkan
+    let deletedUsers = [];
+    try {
+      deletedUsers = JSON.parse(localStorage.getItem('KUJANG_DELETED_USERS') || '[]');
+    } catch (e) {
+      deletedUsers = [];
+    }
+    if (deletedUsers.includes(role)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Akun ini telah dinonaktifkan atau dihapus dari sistem.', 'danger');
+      }
+      return;
+    }
+
+    // Pastikan scanner berhenti saat berpindah peran
+    if (typeof window.mobileStopCameraScanner === 'function') {
+      window.mobileStopCameraScanner();
+    }
+
     currentMobileRole = role;
     currentMobileTab = 'dashboard';
 

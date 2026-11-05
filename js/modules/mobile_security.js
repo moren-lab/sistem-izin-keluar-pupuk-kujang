@@ -9,6 +9,27 @@
 
   let currentSecurityTab = 'dashboard'; // 'dashboard' | 'scanner' | 'pelacakan' | 'riwayat'
   let currentScannerMode = 'camera'; // 'camera' | 'manual'
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+  }
+
+  function resolveDynamicApplicantInfo(t) {
+    let nip = t.applicantNip || t.employeeNip || '';
+    let name = t.applicantName || t.employeeName || '';
+    if (!nip && typeof window.KUJANG_ACCOUNTS !== 'undefined' && Array.isArray(window.KUJANG_ACCOUNTS)) {
+      const acc = window.KUJANG_ACCOUNTS.find(a => (name && a.name.toLowerCase() === name.toLowerCase()) || a.roleKey === 'karyawan');
+      if (acc) {
+        if (!nip) nip = acc.nip;
+        if (!name) name = acc.name;
+      }
+    }
+    return {
+      nip: nip || (typeof window.getActiveUserInfo === 'function' ? window.getActiveUserInfo().nip : 'PK-2024-8841'),
+      name: name || (typeof window.getActiveUserInfo === 'function' ? window.getActiveUserInfo().name : 'Karyawan')
+    };
+  }
   let currentPelacakanFilter = 'outside'; // 'outside' | 'ready'
   let pelacakanSearchQuery = '';
   let riwayatSearchQuery = '';
@@ -864,7 +885,7 @@
             </div>
             <div>
               <div class="mobile-meta-sub" style="font-size: 0.65rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Masuk Kembali</div>
-              <div class="mobile-meta-val" style="font-size: 0.775rem; color: ${isPulang ? '#64748b' : (scanInT ? '#047857' : (isLate ? '#b91c1c' : '#dc2626'))}; font-weight: 800;">
+              <div class="mobile-meta-val" style="font-size: 0.775rem; color: ${isPulang ? '#64748b' : (scanInT ? '#0f172a' : (isLate ? '#b91c1c' : '#dc2626'))}; font-weight: 800;">
                 ${isPulang ? 'Tidak kembali' : (scanInT || 'Belum kembali')}
               </div>
               <div style="font-size: 0.65rem; color: #475569; margin-top: 2px;">${scanInGateName}</div>
@@ -935,7 +956,7 @@
           <!-- Baris 4: Info Gerbang Aktual + Tombol Lihat Detail -->
           <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.7rem; color: #334155; font-weight: 600;">
-              Scan Out: <strong style="color: #0f172a;">${scanOutT || '—'}</strong> • Masuk: <strong style="color: ${isPulang ? '#64748b' : (scanInT ? '#047857' : '#dc2626')};">${isPulang ? '—' : (scanInT || 'Belum')}</strong>
+              Scan Out: <strong style="color: #0f172a;">${scanOutT || '—'}</strong> • Masuk: <strong style="color: ${isPulang ? '#64748b' : (scanInT ? '#0f172a' : '#dc2626')}; font-weight: 800;">${isPulang ? '—' : (scanInT || 'Belum')}</strong>
             </div>
             <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
@@ -1225,6 +1246,13 @@
             </button>
           ` : ''}
 
+          ${isReadyIn ? `
+            <button type="button" class="mobile-btn-primary" style="background: #0284c7; color: #ffffff; border: 1.5px solid #0284c7; font-weight: 700; min-height: 48px; font-size: 0.875rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25); cursor: pointer;" onclick="window.mobileSecurityDirectScanIn('${t.id}')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 6 9 12 15 18"></polyline></svg>
+              <span>Verifikasi Masuk (Tap In)</span>
+            </button>
+          ` : ''}
+
 
 
           ${(isCompleted || isFinished) ? `
@@ -1262,9 +1290,10 @@
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
 
-    if (t.status !== 'Disetujui' && t.status !== 'Kedaluwarsa') {
+    // TINGGI-01 FIX: Hanya tiket Disetujui yang sah untuk Scan Out (Kedaluwarsa dilarang keras)
+    if (t.status !== 'Disetujui') {
       if (typeof window.showToast === 'function') {
-        window.showToast(`Akses Ditolak: Hanya tiket Disetujui yang dapat Scan Out! (Status: ${t.status})`, 'danger');
+        window.showToast(`Akses Ditolak: Tiket berstatus '${t.status}'. Hanya tiket 'Disetujui' yang dapat diproses Scan Out!`, 'danger');
       }
       return;
     }
@@ -1291,10 +1320,11 @@
     if (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului') {
       t.status = 'Selesai';
       if (typeof window.createNotification === 'function') {
+        const applicantInfo = resolveDynamicApplicantInfo(t);
         window.createNotification({
           recipientRole: 'karyawan',
-          recipientNip: t.applicantNip || 'PK-2024-8841',
-          recipientName: t.applicantName || 'Budi Pratama, S.T.',
+          recipientNip: applicantInfo.nip,
+          recipientName: applicantInfo.name,
           actorSource: 'security',
           type: 'selesai',
           title: 'Izin Selesai Diproses',
@@ -1343,16 +1373,28 @@
     localStorage.setItem('KUJANG_ACTIVE_GATE', activeGate);
 
     if (typeof window.executeScanIn === 'function') {
-      window.executeScanIn(ticketId);
-      closeMobileSheet();
-      renderMobileSecurity(null, currentSecurityTab);
-      if (typeof window.renderActiveView === 'function') window.renderActiveView();
-      return;
+      try {
+        window.executeScanIn(ticketId);
+        closeMobileSheet();
+        renderMobileSecurity(null, currentSecurityTab);
+        if (typeof window.renderActiveView === 'function') window.renderActiveView();
+        return;
+      } catch (err) {
+        console.warn('executeScanIn threw error, falling back to mobile handler:', err);
+      }
     }
 
     const tickets = getTickets();
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
+
+    // Guard: Hanya tiket yang Sedang di Luar atau Terlambat yang dapat diproses Tap In
+    if (t.status !== 'Sedang di Luar' && t.status !== 'Terlambat') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Akses Ditolak: Tiket berstatus '${t.status}'. Hanya tiket 'Sedang di Luar' atau 'Terlambat' yang dapat diproses Tap In!`, 'danger');
+      }
+      return;
+    }
 
     const officer = getActiveOfficer();
     const now = new Date();
@@ -1372,10 +1414,11 @@
 
     const wasOverdue = isTicketLate(t);
     if (typeof window.createNotification === 'function') {
+      const applicantInfo = resolveDynamicApplicantInfo(t);
       window.createNotification({
         recipientRole: 'karyawan',
-        recipientNip: t.applicantNip || 'PK-2024-8841',
-        recipientName: t.applicantName || 'Budi Pratama, S.T.',
+        recipientNip: applicantInfo.nip,
+        recipientName: applicantInfo.name,
         actorSource: 'security',
         type: 'selesai',
         title: 'Izin Selesai Diproses',
@@ -1676,7 +1719,7 @@
     try {
       if (statusMsg) {
         statusMsg.style.display = 'block';
-        statusMsg.textContent = 'Memindai berkas gambar QR...';
+        statusMsg.innerHTML = '<div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #0284c7; font-weight: 700;"><span style="width: 14px; height: 14px; border: 2px solid #bae6fd; border-top-color: #0284c7; border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;"></span><span>Memindai berkas gambar QR...</span></div>';
       }
 
       if (isMobileCameraActive) {
