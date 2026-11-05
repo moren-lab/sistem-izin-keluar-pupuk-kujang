@@ -312,10 +312,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
           <div>
             <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a;">
-              ${getTName(t)}
-              <span class="mobile-badge ${isLate ? 'terlambat' : 'sedang-di-luar'}" style="margin-left: 4px;">
-                ${isLate ? 'Terlambat' : 'Sedang di Luar'}
-              </span>
+              ${getTName(t)}${isLate ? ' <span class="mobile-badge terlambat" style="margin-left: 4px;">Terlambat</span>' : ''}
             </div>
             <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">
               ${getTNip(t)} • ${t.department || 'Rekayasa & Pemeliharaan'}
