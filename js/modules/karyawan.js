@@ -27,6 +27,12 @@ function getCurrentEmployeeActor() {
         window.ACTORS.karyawan2.nip = activeEmp2.nip;
         if (activeEmp2.department) window.ACTORS.karyawan2.department = activeEmp2.department;
         if (activeEmp2.role) window.ACTORS.karyawan2.title = activeEmp2.role;
+        if (activeEmp2.directSupervisor || activeEmp2.supervisor) {
+          window.ACTORS.karyawan2.approverName = activeEmp2.directSupervisor || activeEmp2.supervisor;
+        }
+      }
+      if (!activeEmp2.approverName && (activeEmp2.directSupervisor || activeEmp2.supervisor)) {
+        activeEmp2.approverName = activeEmp2.directSupervisor || activeEmp2.supervisor;
       }
       return activeEmp2;
     }
@@ -574,7 +580,7 @@ function renderKaryawanDashboard() {
             ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${activeTicket.destination} — ${activeTicket.reason}">${activeTicket.destination} — ${activeTicket.reason}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
           <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
             <span style="color: var(--text-muted); font-weight: 600;">status:</span>
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -1463,6 +1469,8 @@ function deleteEmpTicket(ticketId) {
 
     renderRiwayatView();
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderAdminStatusTracking === 'function') window.renderAdminStatusTracking();
+    if (typeof window.updateAdminMetrics === 'function') window.updateAdminMetrics();
 
     if (typeof window.showToast === 'function') {
       window.showToast('1 riwayat dihapus', 'info');

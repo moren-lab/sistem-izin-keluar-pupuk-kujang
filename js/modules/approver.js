@@ -14,53 +14,77 @@ function getCurrentApproverActor() {
 function isTicketAssignedToCurrentApprover(ticket) {
   if (!ticket) return false;
   const currentActor = getCurrentApproverActor();
-  const aName = (currentActor.name || '').toLowerCase();
-  const tApprover = (ticket.approverName || '').toLowerCase();
+  const aName = (currentActor.name || '').trim().toLowerCase();
+  const aNip = (currentActor.nip || '').trim();
+  const tApprover = (ticket.approverName || '').trim().toLowerCase();
   
-  if (aName.includes('dewi')) {
-    return tApprover.includes('dewi');
+  // 1. Direct name match on approverName
+  if (tApprover && aName && (tApprover.includes(aName) || aName.includes(tApprover))) {
+    return true;
+  }
+
+  // 2. Direct approver NIP match
+  if (ticket.approverNip && aNip && ticket.approverNip === aNip) {
+    return true;
+  }
+
+  // 3. Fallback for role keys
+  const isApprover2 = (window.currentActor === 'approver2');
+  if (isApprover2) {
+    return tApprover.includes('dewi') || tApprover.includes('subagja');
   } else {
-    // Hendra Gunawan or default
-    return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+    return tApprover.includes('hendra');
   }
 }
 
 function isTicketReassignedFromCurrentApprover(ticket) {
   if (!ticket || !ticket.reassignedFrom) return false;
   const currentActor = getCurrentApproverActor();
-  const aName = (currentActor.name || '').toLowerCase();
-  const fromName = (ticket.reassignedFrom || '').toLowerCase();
+  const aName = (currentActor.name || '').trim().toLowerCase();
+  const fromName = (ticket.reassignedFrom || '').trim().toLowerCase();
   
-  if (aName.includes('dewi')) {
-    return fromName.includes('dewi');
+  if (fromName && aName && (fromName.includes(aName) || aName.includes(fromName))) {
+    return true;
+  }
+  const isApprover2 = (window.currentActor === 'approver2');
+  if (isApprover2) {
+    return fromName.includes('dewi') || fromName.includes('subagja');
   } else {
     return fromName.includes('hendra');
   }
 }
 
 // Cek apakah tiket ini berada di bawah naungan atasan aktif saat ini
-// (Karyawan naungan Atasan 1 tetap terpantau meskipun mengajukan izin ke Atasan 2 atau lainnya)
+// Memisahkan pelacakan Atasan 1 vs Atasan 2 secara presisi tanpa kebocoran antar-atasan
 function isTicketUnderMySupervision(ticket) {
   if (!ticket) return false;
   const currentActor = getCurrentApproverActor();
-  const aName = (currentActor.name || '').toLowerCase();
+  const aName = (currentActor.name || '').trim().toLowerCase();
+  const aNip = (currentActor.nip || '').trim();
   
   // 1. Jika tiket memang ditugaskan langsung ke atasan ini
   if (isTicketAssignedToCurrentApprover(ticket)) return true;
 
-  // 2. Karyawan yang dinaungi Atasan 1 (Ir. Hendra Gunawan, M.T.):
-  // - Berdasarkan ticket.directSupervisor
-  // - Atau pemohon Budi Pratama (PK-2024-8841) / divisi Rekayasa & Pemeliharaan
-  const supervisor = (ticket.directSupervisor || '').toLowerCase();
-  if (aName.includes('hendra')) {
-    const isUnderHendra = supervisor.includes('hendra') || 
-      (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.department || '').toLowerCase().includes('rekayasa')));
-    if (isUnderHendra) return true;
+  // 2. Karyawan bawahan langsung berdasarkan ticket.directSupervisor
+  const supervisor = (ticket.directSupervisor || '').trim().toLowerCase();
+  if (supervisor && aName && (supervisor.includes(aName) || aName.includes(supervisor))) {
+    return true;
+  }
+  if (ticket.directSupervisorNip && aNip && ticket.directSupervisorNip === aNip) {
+    return true;
   }
 
-  // 3. Karyawan yang dinaungi Atasan 2 (Dewi Sartika):
-  if (aName.includes('dewi')) {
-    if (supervisor.includes('dewi')) return true;
+  // 3. Jika permohonan dialihkan ke / dari atasan ini
+  if (ticket.reassignedTo && (ticket.reassignedTo.toLowerCase().includes(aName) || aName.includes(ticket.reassignedTo.toLowerCase()))) {
+    return true;
+  }
+  if (isTicketReassignedFromCurrentApprover(ticket)) {
+    return true;
+  }
+
+  // Fallback default: Karyawan Budi Pratama binaan Hendra Gunawan jika data supervisor kosong
+  if (!supervisor && aName.includes('hendra') && ticket.applicantNip === 'PK-2024-8841') {
+    return true;
   }
 
   return false;
@@ -1165,6 +1189,8 @@ function confirmApproveDecision() {
 }
 
 function confirmRejectDecision() {
+  if (window._isSubmittingRejectDecision) return;
+
   const rejectReasonInput = document.getElementById('rejectReasonInput');
   const reason = (rejectReasonInput && rejectReasonInput.value.trim()) || '';
 

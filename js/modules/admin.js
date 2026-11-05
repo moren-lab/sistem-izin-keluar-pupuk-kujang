@@ -744,7 +744,7 @@ function renderAdminReports() {
       return false;
     }
     if (adminReportCategoryFilter !== 'all') {
-      const isDinas = ticket.category === 'Dinas Kantor';
+      const isDinas = (ticket.category || 'Dinas Kantor') === 'Dinas Kantor';
       if (adminReportCategoryFilter === 'Dinas Kantor' && !isDinas) return false;
       if (adminReportCategoryFilter === 'Keperluan Pribadi' && isDinas) return false;
     }

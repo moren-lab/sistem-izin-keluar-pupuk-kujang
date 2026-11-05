@@ -676,7 +676,7 @@ function syncActorsFromUsers(data) {
         title: activeEmp2Sync.role || 'Staf Instrumentasi & Otomasi Pabrik',
         department: activeEmp2Sync.department || 'Departemen Rekayasa & Pemeliharaan',
         roleLabel: 'Karyawan Pemohon 2',
-        approverName: primaryApprover ? primaryApprover.name : 'Ir. Hendra Gunawan, M.T.'
+        approverName: (activeEmp2Sync.directSupervisor || activeEmp2Sync.supervisor) || (primaryApprover ? primaryApprover.name : 'Ir. Hendra Gunawan, M.T.')
       };
     } else if (!window.ACTORS.karyawan2) {
       window.ACTORS.karyawan2 = {

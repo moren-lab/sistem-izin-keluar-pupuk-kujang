@@ -717,18 +717,25 @@ function renderSecurityView() {
   }
 
   // 3. PELACAKAN KARYAWAN DI LUAR (HEADCOUNT)
+  // Menampilkan HANYA perizinan yang sedang berjalan/aktif.
+  // Tiket dengan status final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa) secara ketat hanya berada di Riwayat Scan.
   if (currentSecurityNav === 'pelacakan') {
     const queueMode = filterSecurityQueueTab ? filterSecurityQueueTab.value : 'outside';
 
-    let list = ticketsList;
+    const isTerminal = (t) => ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'].includes(t.status);
+    const activeTickets = ticketsList.filter(t => !isTerminal(t));
+
+    let list = activeTickets;
     if (queueMode === 'ready') {
-      list = ticketsList.filter(t => t.status === 'Disetujui');
+      list = activeTickets.filter(t => t.status === 'Disetujui');
     } else if (queueMode === 'outside') {
-      list = ticketsList.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+      list = activeTickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     } else if (queueMode === 'overdue') {
-      list = ticketsList.filter(t => t.status === 'Terlambat');
+      list = activeTickets.filter(t => t.status === 'Terlambat');
     } else if (queueMode === 'emergency') {
-      list = ticketsList.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+      list = activeTickets.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+    } else {
+      list = activeTickets;
     }
 
     if (list.length === 0) {

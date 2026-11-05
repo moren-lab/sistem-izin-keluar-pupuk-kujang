@@ -1,3 +1,17 @@
+// Helper untuk mendapatkan identitas Karyawan aktif pembuat aksi / pengajuan
+function getActiveEmployeeActorInfo() {
+  if (typeof window.getCurrentEmployeeActor === 'function') {
+    const act = window.getCurrentEmployeeActor();
+    if (act) return act;
+  }
+  const isK2 = (window.currentActor === 'karyawan2');
+  if (isK2 && window.ACTORS && window.ACTORS.karyawan2) {
+    return window.ACTORS.karyawan2;
+  }
+  return (window.ACTORS && window.ACTORS.karyawan) || { name: 'Budi Pratama, S.T.', nip: 'PK-2024-8841', approverName: 'Ir. Hendra Gunawan, M.T.' };
+}
+window.getActiveEmployeeActorInfo = getActiveEmployeeActorInfo;
+
 /**
  * SISTEM PERIZINAN KELUAR AREA KARYAWAN - PT Pupuk Kujang Cikampek
  * Modals Controller: New Request (Option C Enforcement), Active Blocked Modal,
@@ -88,7 +102,7 @@ function handleOpenNewRequest() {
           activeTicket.timeline.unshift({
             event: 'Izin Dibatalkan (Buat Baru)',
             time: nowFormatted,
-            by: `${window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+            by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
             desc: `Izin dibatalkan oleh pemohon agar dapat mengajukan izin baru.`
           });
           window.saveTickets(window.ticketsList || []);
@@ -2102,7 +2116,7 @@ function confirmCancelTicket() {
     ticket.timeline.push({
       event: 'Pengajuan Dibatalkan',
       time: nowFormatted,
-      by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+      by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
       desc: `Dibatalkan mandiri. Alasan: "${reason}".`
     });
 
@@ -2558,6 +2572,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      // Reset border merah saat pengguna mengetik/memperbaiki tanggal/jam
+      if (inputPlannedExit && !inputPlannedExit._borderResetBound) {
+        inputPlannedExit.addEventListener('input', () => { inputPlannedExit.style.borderColor = ''; });
+        inputPlannedExit._borderResetBound = true;
+      }
+      if (inputEstimatedReturn && !inputEstimatedReturn._borderResetBound) {
+        inputEstimatedReturn.addEventListener('input', () => { inputEstimatedReturn.style.borderColor = ''; });
+        inputEstimatedReturn._borderResetBound = true;
+      }
+
       // Validasi Rencana Waktu Keluar terhadap jam kerja kantor (Senin - Kamis max 16:00, Jumat max 16:30, minimal 07:00)
       const exitWorkCheck = validateWorkingHours(plannedExit, 'Rencana waktu keluar');
       if (!exitWorkCheck.valid) {
@@ -2717,19 +2741,19 @@ document.addEventListener('DOMContentLoaded', () => {
             ticket.reassignedFrom = oldApprover;
             ticket.reassignedTo = newApprover;
             ticket.reassignedAt = nowFormatted;
-            ticket.reassignedBy = `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`;
+            ticket.reassignedBy = `${getActiveEmployeeActorInfo().name} (Karyawan)`;
 
             ticket.timeline.unshift({
               event: 'Persetujuan Dialihkan',
               time: nowFormatted,
-              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
               desc: `Peninjauan persetujuan izin dialihkan dari ${oldApprover} ke ${newApprover}.`
             });
           } else {
             ticket.timeline.unshift({
               event: 'Pengajuan Diperbarui (Diedit)',
               time: nowFormatted,
-              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
               desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${ticket.approverName}).`
             });
           }
@@ -2799,7 +2823,7 @@ document.addEventListener('DOMContentLoaded', () => {
           {
             event: 'Pengajuan Dibuat',
             time: nowFormatted,
-            by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+            by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
             desc: 'Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan.'
           }
         ]
@@ -2863,9 +2887,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      const m = document.getElementById('modalTicketDetail');
-      if (m && m.classList.contains('open')) {
-        closeTicketDetailModal();
+      const activeModals = document.querySelectorAll('.modal-overlay.open, .modal.open');
+      if (activeModals.length > 0) {
+        if (typeof window.closeAllModals === 'function') {
+          window.closeAllModals();
+        } else {
+          activeModals.forEach(m => m.classList.remove('open'));
+        }
       }
     }
   });
@@ -3120,19 +3148,19 @@ document.addEventListener('DOMContentLoaded', () => {
             ticket.reassignedFrom = oldApprover;
             ticket.reassignedTo = newApprover;
             ticket.reassignedAt = nowFormatted;
-            ticket.reassignedBy = `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`;
+            ticket.reassignedBy = `${getActiveEmployeeActorInfo().name} (Karyawan)`;
 
             ticket.timeline.unshift({
               event: 'Persetujuan Dialihkan',
               time: nowFormatted,
-              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
               desc: `Peninjauan izin darurat dialihkan dari ${oldApprover} ke ${newApprover}.`
             });
           } else {
             ticket.timeline.unshift({
               event: 'Pengajuan Darurat Diperbarui (Diedit)',
               time: nowFormatted,
-              by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+              by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
               desc: `Formulir izin darurat berhasil diperbarui untuk Atasan: ${newApprover} (Metode Otorisasi: ${selectedMethod}).`
             });
           }
@@ -3203,7 +3231,11 @@ document.addEventListener('DOMContentLoaded', () => {
         emergencyUnlockedBy: null,
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
         approverName: approverVal,
-        directSupervisor: ((window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841')) || {}).directSupervisor || (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.'),
+        directSupervisor: (() => {
+          const actEmp = getActiveEmployeeActorInfo();
+          const acct = (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === actEmp.nip);
+          return (acct && acct.directSupervisor) || actEmp.directSupervisor || actEmp.supervisor || actEmp.approverName || 'Ir. Hendra Gunawan, M.T.';
+        })(),
         approverNote: `[Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${approverVal}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`,
         scanOutTime: null,
         scanInTime: null,
@@ -3211,7 +3243,7 @@ document.addEventListener('DOMContentLoaded', () => {
           {
             event: 'Izin Darurat Diajukan (QR Terkunci)',
             time: nowFormatted,
-            by: `${ACTORS.karyawan ? ACTORS.karyawan.name : 'Budi Pratama'} (Karyawan)`,
+            by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
             desc: `Tiket darurat dibuat. QR Code terkunci sesuai SOP "No Approval, No Exit" sampai diotorisasi Atasan.`
           },
           {

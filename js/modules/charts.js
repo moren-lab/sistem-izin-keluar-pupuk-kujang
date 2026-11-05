@@ -192,12 +192,10 @@ function renderKaryawanDonutChart() {
   );
 
   const countDarurat = filteredTickets.filter(isEmergencyTicket).length;
-  const countSelesai = filteredTickets.filter(t => t.status === 'Selesai' && !isEmergencyTicket(t)).length;
-  const countProses = Math.max(0, total - countDarurat - countSelesai);
+  const countBiasa = Math.max(0, total - countDarurat);
 
   const pctDarurat = total > 0 ? ((countDarurat / total) * 100).toFixed(1).replace('.0', '') : '0';
-  const pctSelesai = total > 0 ? ((countSelesai / total) * 100).toFixed(1).replace('.0', '') : '0';
-  const pctProses = total > 0 ? ((countProses / total) * 100).toFixed(1).replace('.0', '') : '0';
+  const pctBiasa = total > 0 ? ((countBiasa / total) * 100).toFixed(1).replace('.0', '') : '0';
 
   // SVG Donut Calculations with wider inner hole so text never touches the ring
   const r = 68;
@@ -206,23 +204,13 @@ function renderKaryawanDonutChart() {
   const C = 2 * Math.PI * r; // ~427.2566
 
   const segments = [];
-  if (countSelesai > 0) {
+  if (countBiasa > 0) {
     segments.push({
-      key: 'selesai',
-      label: 'Izin Selesai',
-      count: countSelesai,
-      pct: pctSelesai,
+      key: 'biasa',
+      label: 'Total Izin',
+      count: countBiasa,
+      pct: pctBiasa,
       color: '#059669',
-      unit: 'pengajuan'
-    });
-  }
-  if (countProses > 0) {
-    segments.push({
-      key: 'proses',
-      label: 'Dalam Proses',
-      count: countProses,
-      pct: pctProses,
-      color: '#f59e0b',
       unit: 'pengajuan'
     });
   }
@@ -256,12 +244,12 @@ function renderKaryawanDonutChart() {
   const centerTextCol = dark ? '#f8fafc' : '#0f172a';
   const centerSubCol = dark ? '#94a3b8' : '#64748b';
 
-  // Render centered donut chart with wide inner hole, without side cards or bottom info box
+  // Render centered donut chart with wide inner hole, quantitative legend, and zero stuck hover states
   container.innerHTML = `
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 0.5rem 0;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 0.5rem 0;" onmouseleave="window.unhoverKaryawanDonut(${total})">
       <!-- Center Donut Chart (Lebar dan proporsional, teks tidak menabrak lingkaran) -->
       <div style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-        <svg width="180" height="180" viewBox="0 0 190 190" style="display: block; overflow: visible;">
+        <svg width="180" height="180" viewBox="0 0 190 190" style="display: block; overflow: visible;" onmouseleave="window.unhoverKaryawanDonut(${total})">
           <g transform="rotate(-90 ${cx} ${cy})">
             <!-- Background Track -->
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${trackStroke}" stroke-width="16" />
@@ -283,6 +271,24 @@ function renderKaryawanDonutChart() {
           <text id="karyawanDonutCenterLbl" x="${cx}" y="112" text-anchor="middle" font-size="11" font-weight="600" fill="${centerSubCol}" font-family="'Plus Jakarta Sans', sans-serif">Total Izin</text>
         </svg>
       </div>
+
+      <!-- Quantitative Legend (Menjelaskan setiap warna secara kuantitatif & informatif) -->
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; max-width: 260px; margin-top: 1rem; padding: 0.6rem 0.75rem; background: ${dark ? 'rgba(30, 41, 59, 0.6)' : '#f8fafc'}; border: 1px solid ${dark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'}; border-radius: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #059669; display: inline-block; flex-shrink: 0;"></span>
+            <span style="color: ${dark ? '#cbd5e1' : '#334155'}; font-weight: 600;">Total Izin (Biasa)</span>
+          </div>
+          <span style="font-weight: 700; color: #059669; font-family: monospace;">${countBiasa} izin <span style="font-size: 0.725rem; font-weight: 500; color: ${centerSubCol};">(${pctBiasa}%)</span></span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #dc2626; display: inline-block; flex-shrink: 0;"></span>
+            <span style="color: ${dark ? '#cbd5e1' : '#334155'}; font-weight: 600;">Izin Darurat</span>
+          </div>
+          <span style="font-weight: 700; color: #dc2626; font-family: monospace;">${countDarurat} izin <span style="font-size: 0.725rem; font-weight: 500; color: ${centerSubCol};">(${pctDarurat}%)</span></span>
+        </div>
+      </div>
     </div>
   `;
 
@@ -290,22 +296,25 @@ function renderKaryawanDonutChart() {
 }
 
 function hoverKaryawanDonut(e, key, label, count, total, pct, color) {
-  // If called without event (legacy signature fallback)
   if (typeof e === 'string') {
     color = pct;
     pct = total;
     total = count;
     count = label;
     if (e === 'darurat') label = 'Izin Darurat';
-    else if (e === 'proses') label = 'Dalam Proses';
-    else label = 'Izin Selesai';
+    else label = 'Total Izin';
     key = e;
   }
 
-  // Dilarang menampilkan popup hitam yang menutupi chart
   if (typeof window.hideChartTooltip === 'function') {
     window.hideChartTooltip();
   }
+
+  const allSlices = document.querySelectorAll('[id^="donutSlice_"]');
+  allSlices.forEach(s => {
+    s.setAttribute('stroke-width', '16');
+    s.style.filter = 'none';
+  });
 
   // Teks di tengah lingkaran membesar dan jelas tanpa menabrak cincin donat
   const centerVal = document.getElementById('karyawanDonutCenterVal');
