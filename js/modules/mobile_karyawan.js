@@ -66,6 +66,15 @@
   }
   function getTExitTime(t) { return t.plannedExit || ''; }
 
+    function getAllEmpTickets() {
+    const emp = getActiveEmp();
+    const tickets = window.ticketsList || [];
+    const myNip = emp.nip || 'PK-2024-8841';
+    return tickets.filter(t => (
+      t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841'))
+    ));
+  }
+
   function getEmpTickets() {
     const emp = getActiveEmp();
     const tickets = window.ticketsList || [];
@@ -77,6 +86,7 @@
 
   function getActiveTicket() {
     const emp = getActiveEmp();
+    const allEmpTickets = getAllEmpTickets();
     const tickets = getEmpTickets();
     const nowMs = Date.now();
 
@@ -192,19 +202,20 @@
   // -------------------------------------------------------------------
   function renderDashboard(container) {
     const emp = getActiveEmp();
+    const allEmpTickets = getAllEmpTickets();
     const tickets = getEmpTickets();
     const activeTicket = getActiveTicket();
     const approver = (typeof window.getPrimaryApprover === 'function')
       ? window.getPrimaryApprover()
       : { name: 'Ir. Hendra Gunawan, M.T.' };
 
-    const totalCount = tickets.length;
-    const completedTickets = tickets.filter(t => t.status === 'Selesai');
+    const totalCount = allEmpTickets.length;
+    const completedTickets = allEmpTickets.filter(t => t.status === 'Selesai');
     const selesaiCount = completedTickets.length;
     const lateCompleted = completedTickets.filter(t => t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'))).length;
     const tepatWaktuCount = Math.max(0, selesaiCount - lateCompleted);
     const activeCount = activeTicket ? 1 : 0;
-    const terlambatCount = tickets.filter(t => t.status === 'Terlambat' || (t.status === 'Selesai' && ((t.lateMinutes && t.lateMinutes > 0) || (t.scanInTime || '').includes('[Terlambat]')))).length;
+    const terlambatCount = allEmpTickets.filter(t => t.status === 'Terlambat' || (t.status === 'Selesai' && ((t.lateMinutes && t.lateMinutes > 0) || (t.scanInTime || '').includes('[Terlambat]')))).length;
 
     // Greeting by time of day (matching PC)
     const nowH = new Date().getHours();
@@ -305,7 +316,7 @@
 
     // Donut SVG calculations with dynamic period filtering (100% full coverage, NO white gaps)
     const isEmg = (item) => Boolean(item.isEmergency || (item.id && (item.id.includes('-EMG-') || item.id.startsWith('TK-EMG'))) || (item.category && item.category.toLowerCase().includes('darurat')));
-    const donutFilteredTickets = tickets.filter(item => {
+    const donutFilteredTickets = allEmpTickets.filter(item => {
       if (typeof window.matchesPeriodFilter === 'function') {
         return window.matchesPeriodFilter(item, mobileDonutPeriod);
       }
@@ -387,10 +398,12 @@
           <!-- SVG Donut Chart (Lingkaran Penuh 100%, Tanpa Celah Putih) -->
           <div style="position: relative; width: 114px; height: 114px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
             <svg width="114" height="114" viewBox="0 0 100 100" style="transform: rotate(-90deg); overflow: visible;">
+              <!-- Lingkaran Dasar / Baseline Ring (Abu-abu Halus) -->
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#e2e8f0" stroke-width="14" />
               <!-- Selesai (Hijau) -->
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#059669" stroke-width="14" stroke-dasharray="${selesaiLen} ${strokeDash}" stroke-dashoffset="0" />
-              <!-- Izin Darurat (Merah - Langsung menyambung dari Selesai sampai 100%) -->
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#dc2626" stroke-width="14" stroke-dasharray="${emgLen} ${strokeDash}" stroke-dashoffset="${-selesaiLen}" />
+              ${selesaiLen > 0 ? `<circle cx="50" cy="50" r="38" fill="none" stroke="#059669" stroke-width="14" stroke-dasharray="${selesaiLen} ${strokeDash}" stroke-dashoffset="0" />` : ''}
+              <!-- Izin Darurat (Merah) -->
+              ${emgLen > 0 ? `<circle cx="50" cy="50" r="38" fill="none" stroke="#dc2626" stroke-width="14" stroke-dasharray="${emgLen} ${strokeDash}" stroke-dashoffset="${-selesaiLen}" />` : ''}
             </svg>
             <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
               <span style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1; font-family: 'Plus Jakarta Sans', sans-serif;">${donutTotal}</span>
@@ -2374,6 +2387,11 @@
   // 9. QR MODAL, DETAIL TIKET, DAN PERPANJANGAN WAKTU
   // -------------------------------------------------------------------
   window.mobileOpenQrModal = function (ticketId) {
+  };
+  window.mobileOpenDigitalPassSheet = function (ticketId) {
+    return window.mobileOpenQrModal(ticketId);
+  };
+  window.mobileOpenQrModal = function (ticketId) {
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (!sheet || !backdrop) return;
@@ -2439,12 +2457,12 @@
         container.innerHTML = '';
         if (typeof QRCode !== 'undefined') {
           new QRCode(container, {
-            text: `KUJANG-PERMIT:${t.id}:${t.employeeNip || 'PK-2024-8841'}`,
-            width: 170,
-            height: 170,
+            text: `KUJANG-PASS|${t.id}|${t.applicantNip || 'PK-2024-8841'}|${t.category || 'Dinas Kantor'}|${t.plannedExit || ''}`,
+            width: 180,
+            height: 180,
             colorDark: '#0f172a',
             colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
+            correctLevel: QRCode.CorrectLevel.M
           });
         } else {
           container.innerHTML = `<div style="font-family:monospace; font-size:0.8rem; padding:30px 10px; background:#f1f5f9; border-radius:8px;">[ QR CODE ${t.id} ]</div>`;
@@ -2883,31 +2901,143 @@
     }
   };
 
-  window.mobileDownloadQr = function (ticketId) {
-    const container = document.getElementById('mobileQrCanvasContainer');
-    if (!container) return;
-    const canvas = container.querySelector('canvas');
-    const img = container.querySelector('img');
-    let dataUrl = '';
-    if (canvas) {
-      dataUrl = canvas.toDataURL('image/png');
-    } else if (img && img.src) {
-      dataUrl = img.src;
-    }
-    if (dataUrl) {
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `Tiket-QR-${ticketId || 'Permit'}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      if (typeof window.showToast === 'function') {
-        window.showToast('QR Code berhasil diunduh ke perangkat!', 'success');
+    window.mobileDownloadQr = function (ticketId) {
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId) || {};
+    const safeId = t.id || ticketId || 'IZ-TIKET';
+    const safeNip = t.applicantNip || t.employeeNip || 'PK-2024-8841';
+    const safeName = t.applicantName || t.employeeName || 'Budi Pratama, S.T.';
+    const safeCategory = t.category || 'Dinas Kantor';
+    const safeDestination = t.destination || 'Area Industri Cikampek';
+    const safeReturn = t.estimatedReturn || t.plannedReturn || t.plannedExit || '-';
+    
+    // Standarisasi payload QR (Diakui penuh oleh scanner kamera & pos jaga)
+    const qrPayload = `KUJANG-PASS|${safeId}|${safeNip}|${safeCategory}|${safeReturn}`;
+
+    const finishCompositeDownload = (sourceCanvasOrImg) => {
+      try {
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = 480;
+        finalCanvas.height = 620;
+        const ctx = finalCanvas.getContext('2d');
+        if (!ctx) return;
+
+        // 1. Background kartu putih solid
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+        // 2. Header resmi Pupuk Kujang
+        ctx.fillStyle = '#065f46';
+        ctx.fillRect(0, 0, finalCanvas.width, 70);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('PT PUPUK KUJANG CIKAMPEK', finalCanvas.width / 2, 28);
+        ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#a7f3d0';
+        ctx.fillText('TIKET IZIN KELUAR DIGITAL (RESMI)', finalCanvas.width / 2, 48);
+
+        // 3. QR Code dengan Quiet Zone (Margin putih 40px sekeliling)
+        const qrSize = 300;
+        const qrX = (finalCanvas.width - qrSize) / 2;
+        const qrY = 92;
+
+        // Border halus sekeliling quiet zone
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24);
+
+        // Gambar QR Code
+        ctx.drawImage(sourceCanvasOrImg, qrX, qrY, qrSize, qrSize);
+
+        // 4. Panel Metadata Tiket di Bagian Bawah
+        const infoY = qrY + qrSize + 30;
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(24, infoY, finalCanvas.width - 48, 148);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(24, infoY, finalCanvas.width - 48, 148);
+
+        ctx.textAlign = 'left';
+        
+        // No. Tiket
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('NO. TIKET IZIN:', 40, infoY + 28);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '800 15px monospace';
+        ctx.fillText(safeId, 40, infoY + 48);
+
+        // Pemohon
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('NAMA & NIP PEMOHON:', 40, infoY + 74);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(`${safeName} (${safeNip})`, 40, infoY + 92);
+
+        // Kategori
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('KATEGORI & TUJUAN:', 40, infoY + 118);
+        ctx.fillStyle = '#047857';
+        ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(`${safeCategory} • ${safeDestination}`, 40, infoY + 134);
+
+        // 5. Unduh PNG
+        const dataUrl = finalCanvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `Tiket-QR-${safeId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        if (typeof window.showToast === 'function') {
+          window.showToast('Tiket QR resmi beresolusi tinggi berhasil diunduh!', 'success');
+        }
+      } catch (err) {
+        console.error('Download QR failed:', err);
       }
+    };
+
+    if (typeof QRCode !== 'undefined') {
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.width = '300px';
+      tempDiv.style.height = '300px';
+      document.body.appendChild(tempDiv);
+
+      new QRCode(tempDiv, {
+        text: qrPayload,
+        width: 300,
+        height: 300,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      setTimeout(() => {
+        const qrCanvas = tempDiv.querySelector('canvas');
+        const qrImg = tempDiv.querySelector('img');
+        if (qrCanvas) {
+          finishCompositeDownload(qrCanvas);
+        } else if (qrImg && qrImg.src) {
+          const imgObj = new Image();
+          imgObj.onload = () => finishCompositeDownload(imgObj);
+          imgObj.src = qrImg.src;
+        } else {
+          const mainContainer = document.getElementById('mobileQrCanvasContainer');
+          const fallbackC = mainContainer ? mainContainer.querySelector('canvas') : null;
+          if (fallbackC) finishCompositeDownload(fallbackC);
+        }
+        if (tempDiv.parentNode) tempDiv.parentNode.removeChild(tempDiv);
+      }, 70);
     } else {
-      if (typeof window.showToast === 'function') {
-        window.showToast('Menyiapkan gambar QR Code...', 'info');
-      }
+      if (typeof window.showToast === 'function') window.showToast('Library QR belum termuat.', 'danger');
     }
   };
 
@@ -2918,12 +3048,14 @@
     if (backdrop) backdrop.classList.remove('open');
   };
 
-  // Expose module function
-  window.renderMobileKaryawan = renderMobileKaryawan;
-
-})();
-
-  window.mobileSwitchDonutPeriod = function (period) {
-    mobileDonutPeriod = period;
+    window.mobileSwitchDonutPeriod = function (period) {
+    mobileDonutPeriod = period || 'month';
+    currentSegment = 'donut';
     renderMobileKaryawan(null, 'dashboard');
   };
+
+  // Expose module function
+  window.renderMobileKaryawan = renderMobileKaryawan;
+  window.getAllEmpTickets = getAllEmpTickets;
+
+})();

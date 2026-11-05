@@ -463,7 +463,7 @@
             </div>
           ` : `
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
@@ -776,7 +776,7 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     <span>Detail</span>
                   </button>
-                  <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+                  <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
                     Tolak
                   </button>
                   <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency('${t.id}')">
@@ -1126,12 +1126,12 @@
             <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Keputusan Atasan</div>
 
             <div class="mobile-form-group" style="margin-bottom: 10px;">
-              <label class="mobile-form-label" style="font-size: 0.725rem; font-weight: 700; color: #475569;">Catatan persetujuan (opsional)</label>
+              <label class="mobile-form-label" style="font-size: 0.725rem; font-weight: 700; color: #475569;">Catatan (Opsional)</label>
               <textarea class="mobile-textarea" id="mAtasanDetailNote" placeholder="Tambahkan instruksi atau catatan khusus jika diperlukan" style="font-size: 0.75rem; min-height: 60px;"></textarea>
             </div>
 
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
@@ -1807,7 +1807,7 @@
           </div>
 
           <div class="mobile-form-group">
-            <label class="mobile-form-label">Catatan persetujuan (opsional)</label>
+            <label class="mobile-form-label">Catatan (Opsional)</label>
             <textarea class="mobile-textarea" id="mExtDecisionNote" placeholder="Tambahkan catatan jika diperlukan" style="font-size: 0.75rem; min-height: 50px;"></textarea>
           </div>
 
@@ -2425,16 +2425,7 @@
         </div>
         <button type="button" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
-      <div class="mobile-sheet-body" style="padding: 16px;">
-        <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 12px; margin-bottom: 14px;">
-          <div style="font-size: 0.775rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 6px;">
-            <span>Aturan Penolakan (BRULE-04)</span>
-          </div>
-          <p style="font-size: 0.725rem; color: #7f1d1d; margin: 4px 0 0 0; line-height: 1.4;">
-            Pengajuan yang ditolak bersifat permanen dan membatalkan proses penerbitan izin keluar.
-          </p>
-        </div>
-
+      
         <form onsubmit="event.preventDefault(); window.mobileConfirmRejectSubmit('${t.id}');">
           <div class="mobile-form-group">
             <label class="mobile-form-label" style="font-weight: 700;">Alasan Penolakan <span class="req" style="color: #dc2626;">*</span></label>
@@ -2569,5 +2560,7 @@
   };
 
   window.mobileOpenAtasanClearModal = window.mobileAtasanClearAllFinished;
+  window.getTeamTickets = getTeamTickets;
+  window.getActiveApprover = getActiveApprover;
 
 })();

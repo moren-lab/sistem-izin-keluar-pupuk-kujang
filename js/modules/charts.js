@@ -471,18 +471,46 @@ function getApproverWeeklyData(period) {
 
 
 // Modernized Aesthetic Bar Chart Generator (Approver) - Dynamic Real-Time & Volume Tim
-function getApproverWeeklyRealtimeData() {
-  const tickets = window.ticketsList || [];
-  const currentActor = window.currentActor || 'approver';
+function getApproverWeeklyRealtimeData(isMobile = false) {
+  const tickets = (typeof window !== 'undefined' && window.ticketsList) ? window.ticketsList : [];
+  const currentActor = (typeof window !== 'undefined' && window.currentActor) ? window.currentActor : 'approver';
   const isApprover2 = (currentActor === 'approver2');
   const approverLabel = isApprover2 ? 'Dewi Sartika, S.T., M.M.' : 'Ir. Hendra Gunawan, M.T.';
 
-  const myTeamTickets = tickets.filter(t => {
-    const tApp = (t.approverName || '').toLowerCase();
-    return isApprover2 ? tApp.includes('dewi') : (tApp.includes('hendra') || !tApp.includes('dewi'));
-  });
+  let myTeamTickets = [];
+  if (typeof window !== 'undefined' && typeof window.getTeamTickets === 'function') {
+    myTeamTickets = window.getTeamTickets();
+  } else {
+    myTeamTickets = tickets.filter(t => {
+      const tApp = (t.approverName || '').toLowerCase();
+      return isApprover2 ? tApp.includes('dewi') : (tApp.includes('hendra') || !tApp.includes('dewi'));
+    });
+  }
 
-  // Otomatis menyesuaikan dengan tanggal dan hari hari ini secara dinamis
+  function parseTicketDateForChart(t) {
+    if (!t) return null;
+    if (t.plannedExit) {
+      const pd = new Date(t.plannedExit);
+      if (!isNaN(pd.getTime())) return pd;
+    }
+    if (t.createdAt) {
+      const cd = new Date(t.createdAt);
+      if (!isNaN(cd.getTime())) return cd;
+      const months = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'Mei': 4, 'Jun': 5, 'Jul': 6, 'Agu': 7, 'Sep': 8, 'Okt': 9, 'Nov': 10, 'Des': 11 };
+      const m = t.createdAt.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+      if (m && months[m[2]] !== undefined) {
+        return new Date(parseInt(m[3], 10), months[m[2]], parseInt(m[1], 10));
+      }
+    }
+    if (t.id) {
+      const idMatch = t.id.match(/(?:IZ|TK)(?:-EMG)?-(\d{4})(\d{2})(\d{2})/i);
+      if (idMatch) {
+        return new Date(parseInt(idMatch[1], 10), parseInt(idMatch[2], 10) - 1, parseInt(idMatch[3], 10));
+      }
+    }
+    return null;
+  }
+
   const now = new Date();
   const daysIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const daysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
@@ -510,6 +538,9 @@ function getApproverWeeklyRealtimeData() {
       label: dayLabel,
       dateStr: dateStr,
       fullDate: fullDate,
+      year: y,
+      month: d.getMonth(),
+      date: d.getDate(),
       dayName: isToday ? `${dayName} (Hari Ini)` : dayName,
       baseCount: baseCount,
       isToday: isToday
@@ -517,21 +548,22 @@ function getApproverWeeklyRealtimeData() {
   }
 
   let totalWeekVolume = 0;
-  days.forEach((d, idx) => {
+  days.forEach((d) => {
     const matchTickets = myTeamTickets.filter(t => {
-      const dPart = (t.createdAt || t.plannedExit || '').slice(0, 10);
-      return dPart === d.fullDate;
+      const td = parseTicketDateForChart(t);
+      if (!td) return false;
+      return td.getFullYear() === d.year && td.getMonth() === d.month && td.getDate() === d.date;
     });
 
-    if (d.isToday) {
-      const liveCount = matchTickets.length;
-      d.total = Math.max(d.baseCount, liveCount > 0 ? (d.baseCount + liveCount - 1) : d.baseCount);
+    d.liveCount = matchTickets.length;
+    d.tickets = matchTickets;
+
+    if (isMobile) {
+      d.total = matchTickets.length;
       d.val = d.total;
-      d.tickets = matchTickets;
     } else {
       d.total = d.baseCount + matchTickets.length;
       d.val = d.total;
-      d.tickets = matchTickets;
     }
     totalWeekVolume += d.total;
   });
@@ -543,7 +575,7 @@ window.getApproverWeeklyRealtimeData = getApproverWeeklyRealtimeData;
 
 function getGambar2AestheticBarChartHtml(isMobile = false) {
   const dark = isThemeDark();
-  const chartData = getApproverWeeklyRealtimeData();
+  const chartData = getApproverWeeklyRealtimeData(isMobile);
   const bars = chartData.days;
   const prefix = isMobile ? 'mob_' : 'web_';
 
@@ -566,12 +598,15 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
   const bottomY = 240;
   const chartH = bottomY - topY;
 
-  const yTicks = [0, 5, 10, 15, 20];
+  const yMax = isMobile ? Math.max(5, Math.ceil((maxCount || 1) / 5) * 5) : 20;
+  const yTicks = isMobile
+    ? [0, Math.round(yMax * 0.25), Math.round(yMax * 0.5), Math.round(yMax * 0.75), yMax]
+    : [0, 5, 10, 15, 20];
   let svgContent = '';
 
   // Background subtle grid lines and Y numeric labels
   yTicks.forEach(val => {
-    const y = bottomY - (chartH * val / 20);
+    const y = bottomY - (chartH * val / yMax);
     svgContent += `
       <line x1="${padLeft}" y1="${y}" x2="${padLeft + chartW}" y2="${y}" 
             stroke="${val === 0 ? '#94a3b8' : '#f1f5f9'}" 
@@ -590,7 +625,7 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
   bars.forEach((b, idx) => {
     const isPeak = (idx === peakIdx);
     const isToday = !!b.isToday;
-    const barH = Math.max(12, (b.val / 20) * chartH);
+    const barH = b.total === 0 ? 6 : Math.max(16, (b.val / yMax) * chartH);
     const x = padLeft + (idx * slotW) + (slotW - barW) / 2;
     const y = bottomY - barH;
     const pct = Math.round((b.total / (chartData.totalWeekVolume || 1)) * 100);

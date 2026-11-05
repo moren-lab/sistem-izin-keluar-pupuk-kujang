@@ -379,24 +379,24 @@
 
       <!-- 4 Stat Metric Cards -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchPelacakanTabAndFilter('outside')">
+        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchPelacakanTabAndFilter('outside')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Sedang di luar</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0; text-align: center;">${outsideTickets.length}</div>
         </div>
 
-        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchPelacakanTabAndFilter('ready')">
+        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchPelacakanTabAndFilter('ready')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Siap keluar</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0;">${readyExitTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0; text-align: center;">${readyExitTickets.length}</div>
         </div>
 
-        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer;" onclick="window.mobileSwitchTab('riwayat')">
+        <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('riwayat')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Scan Out hari ini</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${scanOutTodayTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0; text-align: center;">${scanOutTodayTickets.length}</div>
         </div>
 
-        <div class="mobile-card" style="margin: 0; padding: 12px;" onclick="window.mobileSwitchTab('riwayat')">
+        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center;" onclick="window.mobileSwitchTab('riwayat')">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Tap In hari ini</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0;">${tapInToday}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #047857; line-height: 1.2; margin: 2px 0; text-align: center;">${tapInToday}</div>
         </div>
       </div>
 
@@ -647,15 +647,15 @@
 
       <!-- 2 Summary Cards -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <div class="mobile-card" style="margin: 0; padding: 12px;">
+        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center;">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Sedang di luar</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0;">${outsideTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0; text-align: center;">${outsideTickets.length}</div>
           <div style="font-size: 0.675rem; color: #64748b;">Karyawan</div>
         </div>
 
-        <div class="mobile-card" style="margin: 0; padding: 12px;">
+        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center;">
           <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Terlambat</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #b91c1c; line-height: 1.2; margin: 2px 0;">${lateTickets.length}</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #b91c1c; line-height: 1.2; margin: 2px 0; text-align: center;">${lateTickets.length}</div>
           <div style="font-size: 0.675rem; color: #64748b;">Lewat batas kembali</div>
         </div>
       </div>

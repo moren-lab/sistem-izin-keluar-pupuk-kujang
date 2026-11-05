@@ -3,7 +3,7 @@
  * Data State & Shared Storage
  */
 
-const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V7';
+const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V8';
 
 /**
  * Universal Partial & Multi-token Search Matching Helper
@@ -101,6 +101,32 @@ const MOCK_APPROVERS = [
 let currentActor = 'karyawan'; // 'karyawan', 'approver', 'security', or 'admin'
 
 // Figma Exact Mock Dataset (8 Tickets in Oct 2026 matching screenshots)
+
+function getMockTicketDates(daysAgo, hOut, mOut, hIn, mIn) {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo, hOut, mOut);
+  const dIn = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo, hIn, mIn);
+  const dCreate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo, Math.max(0, hOut - 1), 20);
+  return {
+    plannedExit: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(hOut)}:${pad(mOut)}`,
+    estimatedReturn: `${dIn.getFullYear()}-${pad(dIn.getMonth() + 1)}-${pad(dIn.getDate())}T${pad(hIn)}:${pad(mIn)}`,
+    createdAt: `${pad(dCreate.getDate())} ${monthsShort[dCreate.getMonth()]} ${dCreate.getFullYear()}, ${pad(dCreate.getHours())}.${pad(dCreate.getMinutes())} WIB`,
+    scanOutTime: `${pad(d.getDate())} ${monthsShort[d.getMonth()]} ${d.getFullYear()}, ${pad(hOut)}.${pad(mOut + 5)} WIB (Pos 1 Gerbang Utama)`,
+    scanInTime: `${pad(dIn.getDate())} ${monthsShort[dIn.getMonth()]} ${dIn.getFullYear()}, ${pad(hIn)}.${pad(mIn - 5)} WIB (Pos 1 Gerbang Utama)`
+  };
+}
+
+const _d0 = getMockTicketDates(0, 10, 0, 13, 0);
+const _d1 = getMockTicketDates(0, 8, 30, 10, 45);
+const _d2 = getMockTicketDates(2, 9, 0, 11, 0);
+const _d3 = getMockTicketDates(3, 13, 0, 15, 30);
+const _d4 = getMockTicketDates(4, 10, 0, 12, 0);
+const _d5 = getMockTicketDates(12, 9, 0, 11, 30);
+const _d6 = getMockTicketDates(20, 8, 0, 10, 30);
+const _d7 = getMockTicketDates(28, 9, 0, 11, 40);
+
 const DEFAULT_TICKETS = [
   {
     id: 'IZ-20261019-013',
@@ -112,10 +138,10 @@ const DEFAULT_TICKETS = [
     destination: 'PT Rekayasa Industri, Cikampek',
     reason: 'Koordinasi perbaikan pompa P-204',
     transportMode: 'Kendaraan dinas',
-    plannedExit: '2026-10-19T10:00',
-    estimatedReturn: '2026-10-19T13:00',
+    plannedExit: _d0.plannedExit,
+    estimatedReturn: _d0.estimatedReturn,
     status: 'Selesai',
-    createdAt: '19 Okt 2026, 09.20 WIB',
+    createdAt: _d0.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverTitle: 'Manajer Rekayasa & Pemeliharaan',
     approverNote: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.',
@@ -138,10 +164,12 @@ const DEFAULT_TICKETS = [
     destination: 'Pelabuhan Cirebon',
     reason: 'Pemeriksaan pengapalan kargo suku cadang pompa industri',
     transportMode: 'Kendaraan dinas',
-    plannedExit: '2026-10-16T09:00',
-    estimatedReturn: '2026-10-16T11:00',
+    plannedExit: _d1.plannedExit,
+    estimatedReturn: _d1.estimatedReturn,
     status: 'Selesai',
-    createdAt: '16 Okt 2026, 08.15 WIB',
+    category: 'Izin Darurat',
+    isEmergency: true,
+    createdAt: _d1.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui. Selesai tepat waktu.',
     scanOutTime: '16 Okt 2026, 09.05 WIB (Pos 1)',
@@ -163,10 +191,10 @@ const DEFAULT_TICKETS = [
     destination: 'RSUD Karawang',
     reason: 'Pemeriksaan laboratorium lanjutan',
     transportMode: 'Kendaraan pribadi',
-    plannedExit: '2026-10-14T13:00',
-    estimatedReturn: '2026-10-14T14:30',
+    plannedExit: _d2.plannedExit,
+    estimatedReturn: _d2.estimatedReturn,
     status: 'Selesai',
-    createdAt: '14 Okt 2026, 11.30 WIB',
+    createdAt: _d2.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui.',
     scanOutGate: 'Pos 2 Gerbang Barat',
@@ -190,13 +218,12 @@ const DEFAULT_TICKETS = [
     destination: 'Kantor Distributor Bekasi',
     reason: 'Serah terima invoice dan dokumen garansi komponen teknis',
     transportMode: 'Kendaraan dinas',
-    plannedExit: '2026-10-12T10:00',
-    estimatedReturn: '2026-10-12T12:00',
+    plannedExit: _d3.plannedExit,
+    estimatedReturn: _d3.estimatedReturn,
     status: 'Selesai',
     isLate: true,
-    lateMinutes: 10,
-    actualReturnTime: '12.10 WIB',
-    createdAt: '12 Okt 2026, 09.00 WIB',
+    lateMinutes: 15,
+    createdAt: _d3.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Kembali terlambat 10 menit dikarenakan kepadatan jalur arteri Cikampek.',
     scanOutTime: '12 Okt 2026, 10.04 WIB (Pos 1)',
@@ -218,11 +245,10 @@ const DEFAULT_TICKETS = [
     destination: 'Rumah (keperluan keluarga)',
     reason: 'Urusan keluarga mendesak di rumah',
     transportMode: 'Kendaraan pribadi',
-    plannedExit: '2026-10-09T15:00',
-    estimatedReturn: null,
-    status: 'Ditolak',
-    rejectionReason: 'Ditolak: alasan tidak memadai',
-    createdAt: '09 Okt 2026, 14.10 WIB',
+    plannedExit: _d4.plannedExit,
+    estimatedReturn: _d4.estimatedReturn,
+    status: 'Selesai',
+    createdAt: _d4.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Ditolak: alasan tidak memadai. Mohon koordinasikan dengan rekan kerja terlebih dahulu.',
     scanOutTime: null,
@@ -242,10 +268,10 @@ const DEFAULT_TICKETS = [
     destination: 'Gudang Logistik Ciampei',
     reason: 'Pengecekan spesifikasi valve dan seal cadangan',
     transportMode: 'Kendaraan dinas',
-    plannedExit: '2026-10-07T09:00',
-    estimatedReturn: '2026-10-07T12:00',
+    plannedExit: _d5.plannedExit,
+    estimatedReturn: _d5.estimatedReturn,
     status: 'Selesai',
-    createdAt: '07 Okt 2026, 08.20 WIB',
+    createdAt: _d5.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui. Selesai tepat waktu.',
     scanOutGate: 'Pos 3 Gerbang Timur',
@@ -269,10 +295,10 @@ const DEFAULT_TICKETS = [
     destination: 'Balai Besar Uji Bahan Bandung',
     reason: 'Pengujian sampel metalurgi pipa retak',
     transportMode: 'Kendaraan dinas',
-    plannedExit: '2026-10-05T08:00',
-    estimatedReturn: '2026-10-05T16:00',
+    plannedExit: _d6.plannedExit,
+    estimatedReturn: _d6.estimatedReturn,
     status: 'Selesai',
-    createdAt: '05 Okt 2026, 07.15 WIB',
+    createdAt: _d6.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Disetujui.',
     scanOutTime: '05 Okt 2026, 08.10 WIB (Pos 1)',
@@ -294,11 +320,12 @@ const DEFAULT_TICKETS = [
     destination: 'Poliklinik Darurat Medika',
     reason: 'Penanganan alergi mendadak saat jam kerja',
     transportMode: 'Kendaraan pribadi',
-    plannedExit: '2026-10-02T10:00',
-    estimatedReturn: '2026-10-02T12:00',
+    plannedExit: _d7.plannedExit,
+    estimatedReturn: _d7.estimatedReturn,
     status: 'Selesai',
+    category: 'Izin Darurat',
     isEmergency: true,
-    createdAt: '02 Okt 2026, 09.50 WIB',
+    createdAt: _d7.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
     approverNote: 'Izin darurat disetujui.',
     scanOutTime: '02 Okt 2026, 09.55 WIB (Pos 1)',
@@ -314,7 +341,7 @@ const DEFAULT_TICKETS = [
 
 function loadTickets() {
   // Bersihkan cache dan data sesi lama otomatis agar simulasi selalu bersih
-  ['KUJANG_GATEPASS_TICKETS_V1', 'KUJANG_GATEPASS_TICKETS_V2', 'KUJANG_GATEPASS_TICKETS_V3', 'KUJANG_GATEPASS_TICKETS_V4', 'KUJANG_GATEPASS_TICKETS_V5', 'KUJANG_GATEPASS_TICKETS_V6'].forEach(k => localStorage.removeItem(k));
+  ['KUJANG_GATEPASS_TICKETS_V1', 'KUJANG_GATEPASS_TICKETS_V2', 'KUJANG_GATEPASS_TICKETS_V3', 'KUJANG_GATEPASS_TICKETS_V4', 'KUJANG_GATEPASS_TICKETS_V5', 'KUJANG_GATEPASS_TICKETS_V6', 'KUJANG_GATEPASS_TICKETS_V7', 'KUJANG_GATEPASS_TICKETS_V7'].forEach(k => localStorage.removeItem(k));
 
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {
