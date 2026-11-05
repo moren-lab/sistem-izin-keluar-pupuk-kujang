@@ -323,9 +323,7 @@
             <div style="font-size: 0.7rem; color: #475569; margin-top: 2px;">
               Scan Out ${scanOutT} • Kembali ${returnT}
             </div>
-            <div style="font-size: 0.675rem; color: ${isLate ? '#b91c1c' : '#047857'}; font-weight: 700; margin-top: 2px;">
-              ${isLate ? `Terlambat ${t.lateMinutes || 30} menit` : 'Sesuai jadwal'}
-            </div>
+            ${isLate ? `<div style="font-size: 0.675rem; color: #b91c1c; font-weight: 700; margin-top: 2px;">Terlambat ${t.lateMinutes || 30} menit</div>` : ''}
           </div>
           <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
@@ -406,7 +404,7 @@
       <section class="mobile-card">
         <div class="mobile-card-header">
           <h3 class="mobile-card-title">Karyawan sedang di luar</h3>
-          <span style="font-size: 0.7rem; color: #0f172a; font-weight: 700;">${outsideTickets.length} Orang</span>
+          <span style="font-size: 0.7rem; color: #0f172a; font-weight: 700;">Status</span>
         </div>
         ${outsideListHtml || '<p style="font-size: 0.75rem; color: #64748b; margin: 0;">Tidak ada karyawan di luar area pabrik saat ini.</p>'}
         <div style="text-align: center; margin-top: 10px;">
@@ -485,7 +483,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
               <span>Unggah Gambar QR Tiket</span>
             </button>
-            <input type="file" id="mSecInputQrFile" accept="image/*" capture="environment" style="display: none;" onchange="window.mobileHandleQrFileUpload(event)">
+            <input type="file" id="mSecInputQrFile" accept="image/png,image/jpeg,image/webp,image/*" style="display: none;" onchange="window.mobileHandleQrFileUpload(event)">
           </div>
         </div>
 
@@ -647,16 +645,16 @@
 
       <!-- 2 Summary Cards -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center;">
-          <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Sedang di luar</div>
+        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div style="font-size: 0.675rem; color: #64748b; font-weight: 700; text-align: center;">Sedang di luar</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 2px 0; text-align: center;">${outsideTickets.length}</div>
-          <div style="font-size: 0.675rem; color: #64748b;">Karyawan</div>
+          <div style="font-size: 0.675rem; color: #64748b; text-align: center;">Karyawan</div>
         </div>
 
-        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center;">
-          <div style="font-size: 0.675rem; color: #64748b; font-weight: 700;">Terlambat</div>
+        <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div style="font-size: 0.675rem; color: #64748b; font-weight: 700; text-align: center;">Terlambat</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #b91c1c; line-height: 1.2; margin: 2px 0; text-align: center;">${lateTickets.length}</div>
-          <div style="font-size: 0.675rem; color: #64748b;">Lewat batas kembali</div>
+          <div style="font-size: 0.675rem; color: #64748b; text-align: center;">Lewat batas kembali</div>
         </div>
       </div>
 
@@ -676,14 +674,14 @@
           ${activeList.length} karyawan (${currentPelacakanFilter === 'outside' ? 'Di Luar Area' : 'Siap Keluar'})
         </span>
         <div style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="mobile-filter-toggle-btn ${isPelacakanFilterOpen ? 'active' : ''}" onclick="window.mobileTogglePelacakanFilter()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>${isPelacakanFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+            ${pelacakanSearchQuery ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
+          </button>
           <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; border-radius: 8px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileSecurityClearAllFinished()" title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
-          <button type="button" class="mobile-filter-toggle-btn ${isPelacakanFilterOpen ? 'active' : ''}" onclick="window.mobileTogglePelacakanFilter()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-          <span>${isPelacakanFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
-          ${pelacakanSearchQuery ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
-        </button>
         </div>
       </div>
 

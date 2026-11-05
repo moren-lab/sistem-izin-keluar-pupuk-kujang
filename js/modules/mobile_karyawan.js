@@ -463,16 +463,6 @@
         </div>
       </section>
 
-      <!-- Card: Ketentuan Izin Keluar -->
-      <section class="mobile-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h3 class="mobile-card-title" style="margin-bottom: 6px;">Ketentuan Izin Keluar</h3>
-        <ul style="margin: 0; padding-left: 18px; font-size: 0.75rem; color: #475569; line-height: 1.45;">
-          <li>Izin reguler memerlukan persetujuan Atasan. Maksimal satu tiket aktif.</li>
-          <li>Tunjukkan QR kepada petugas satpam saat keluar dan kembali.</li>
-          <li>Ajukan perpanjangan waktu sebelum batas jam kembali jika terjadi kendala dinas.</li>
-        </ul>
-      </section>
-
       <!-- Card: Kontak Pos Jaga 1 -->
      
     `;
