@@ -2705,16 +2705,12 @@
 
           <!-- Alasan Keperluan Izin -->
           <div class="form-group" style="margin-bottom: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <label class="form-label" for="inputReason"
-                style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
-                Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
-              </label>
-              <span style="font-size: 0.7rem; color: #64748b;"><span id="countInputReason">0</span>/300 huruf</span>
-            </div>
+            <label class="form-label" for="inputReason"
+              style="font-weight: 600; color: #334155; font-size: 0.8rem; margin-bottom: 0.35rem;">
+              Alasan Keperluan Izin <span style="color: var(--rose-danger);">*</span>
+            </label>
             <textarea id="inputReason" class="form-textarea"
-              placeholder="Masukkan alasan keperluan izin..." required maxlength="300" rows="3"
-              oninput="const el = document.getElementById('countInputReason'); if(el) el.textContent = this.value.length;"
+              placeholder="Masukkan alasan keperluan izin..." required rows="3"
               style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px; min-height: 80px; height: auto; resize: vertical; line-height: 1.5;"></textarea>
           </div>
 
@@ -2912,7 +2908,7 @@
           </button>
         </div>
         <div id="detailStatusPillTop">
-          <span class="status-pill-green">Selesai</span>
+          <span class="figma-clean-status status-pending" style="font-weight: 700; font-size: 0.85rem; color: #d97706;">Menunggu Persetujuan</span>
         </div>
       </div>
 
@@ -2945,101 +2941,142 @@
         </div>
 
         <!-- TAB 1: INFORMASI TIKET (FIGMA SCREEN 2) -->
-        <div id="paneDetailInfo" style="display: flex; flex-direction: column; gap: 1.15rem;">
-          <!-- Row 1: Nama, NIP, Departemen -->
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-            <div>
-              <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Nama</span>
-              <strong style="font-size: 0.85rem; color: var(--text-primary, #0f172a);" id="infoEmployeeName">Budi Pratama, S.T.</strong>
+        <div id="paneDetailInfo" style="display: flex; flex-direction: column; gap: 1.25rem;">
+          
+          <!-- Section 1: Identitas Pemohon (Identik Gambar 1) -->
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-bottom: 0.65rem;">
+              Identitas Pemohon
             </div>
-            <div>
-              <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">NIP</span>
-              <strong style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-family: var(--font-mono);"
-                id="infoEmployeeNip">PK-2024-8841</strong>
-            </div>
-            <div>
-              <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Departemen</span>
-              <strong style="font-size: 0.85rem; color: var(--text-primary, #0f172a);" id="infoEmployeeDept">Rekayasa & Pemeliharaan</strong>
-            </div>
-          </div>
-
-          <!-- Middle Card: Sifat Izin, Kategori, Tipe, Lokasi, Alasan -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.95rem 1rem;">
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 0.75rem;">
-              <div>
-                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Sifat Izin</span>
-                <div id="infoEmergencyBadge" style="margin-top: 2px;">
-                  <span class="tag-badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">Biasa</span>
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div id="infoApplicantAvatar" style="width: 44px; height: 44px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 1rem; font-weight: 800; color: var(--text-primary, #0f172a);" id="infoEmployeeName">Budi Pratama, S.T.</div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                  NIP: <span id="infoEmployeeNip" style="font-family: var(--font-mono, monospace); font-weight: 600;">PK-2024-8841</span> • <span id="infoEmployeeDept">Departemen Rekayasa & Pemeliharaan</span>
                 </div>
               </div>
-              <div>
-                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Kategori</span>
-                <strong style="font-size: 0.825rem; color: #0f172a;" id="infoCategory">Dinas Kantor</strong>
-              </div>
-              <div>
-                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Tipe</span>
-                <strong style="font-size: 0.825rem; color: #0f172a;" id="infoType">Kembali ke Area</strong>
-              </div>
-              <div>
-                <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Lokasi / Tujuan Keluar</span>
-                <div style="font-size: 0.825rem; color: #0f172a; font-weight: 700; white-space: pre-wrap; word-break: break-word; line-height: 1.5; margin-top: 2px;" id="infoDestination">Pelabuhan Cirebon</div>
-              </div>
             </div>
-            <div>
-              <span style="font-size: 0.7rem; color: #64748b; display: block; font-weight: 500;">Alasan Keperluan Izin</span>
-              <div style="font-size: 0.825rem; color: #0f172a; margin: 2px 0 0; line-height: 1.5; font-weight: 700; white-space: pre-wrap; word-break: break-word;" id="infoReason">
-                Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.
+          </div>
+
+          <!-- Section 2: Informasi Izin (3 Columns Bento Box Identik Gambar 1) -->
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-bottom: 0.65rem;">
+              Informasi Izin
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
+              <div style="padding-right: 0.75rem;">
+                <span style="font-size: 0.75rem; color: #64748b; display: block; font-weight: 600;">Sifat Izin</span>
+                <div id="infoEmergencyBadge" style="margin-top: 3px;">
+                  <strong style="font-size: 0.9rem; color: var(--text-primary, #0f172a); font-weight: 800;">Biasa (Reguler)</strong>
+                </div>
+              </div>
+              <div style="border-left: 1px solid var(--border-color, #e2e8f0); padding-left: 1rem; padding-right: 0.75rem;">
+                <span style="font-size: 0.75rem; color: #64748b; display: block; font-weight: 600;">Kategori</span>
+                <div style="margin-top: 3px;">
+                  <strong style="font-size: 0.9rem; color: var(--text-primary, #0f172a); font-weight: 800;" id="infoCategory">Dinas Kantor</strong>
+                </div>
+              </div>
+              <div style="border-left: 1px solid var(--border-color, #e2e8f0); padding-left: 1rem;">
+                <span style="font-size: 0.75rem; color: #64748b; display: block; font-weight: 600;">Tipe</span>
+                <div style="margin-top: 3px;">
+                  <strong style="font-size: 0.9rem; color: var(--text-primary, #0f172a); font-weight: 800;" id="infoType">Kembali ke Area</strong>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Waktu Keluar & Kembali Section & Table -->
+          <!-- Section 3: Lokasi / Tujuan Keluar (Box Collapsible Identik Gambar 1) -->
           <div>
-            <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;"
-              id="infoTimeSectionTitle">
-              Waktu keluar & kembali — 16 Oktober 2026
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-bottom: 0.5rem;">
+              Lokasi / Tujuan Keluar
+            </div>
+            <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
+              <div id="infoDestination" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">Pelabuhan Cirebon</div>
+              <button type="button" id="btnToggleDestExpand" onclick="window.toggleDetailExpand('infoDestination', this)" style="display: none; background: none; border: none; padding: 4px 0 0 0; color: #2563eb; font-size: 0.775rem; font-weight: 700; cursor: pointer;">Lihat selengkapnya ∨</button>
+            </div>
+          </div>
+
+          <!-- Section 4: Alasan Keperluan Izin (Box Collapsible Identik Gambar 1) -->
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-bottom: 0.5rem;">
+              Alasan Keperluan Izin
+            </div>
+            <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
+              <div id="infoReason" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.</div>
+              <button type="button" id="btnToggleReasonExpand" onclick="window.toggleDetailExpand('infoReason', this)" style="display: none; background: none; border: none; padding: 4px 0 0 0; color: #2563eb; font-size: 0.775rem; font-weight: 700; cursor: pointer;">Lihat selengkapnya ∨</button>
+            </div>
+          </div>
+
+          <!-- Section 5: Jadwal Keluar & Kembali (Tabel Identik Gambar 1) -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a);" id="infoTimeSectionTitle">
+                Jadwal Keluar & Kembali
+              </div>
+              <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;" id="infoScheduleDate">
+                06-11-2026
+              </div>
             </div>
             <div style="border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; overflow: hidden;">
               <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
                 <thead>
-                  <tr
-                    style="background: var(--bg-subtle, #f8fafc); border-bottom: 1.5px solid var(--border-color, #cbd5e1); color: var(--text-primary, #0f172a); font-size: 0.725rem; text-transform: uppercase;">
+                  <tr style="background: var(--bg-subtle, #f1f5f9); border-bottom: 1.5px solid var(--border-color, #cbd5e1); color: var(--text-primary, #0f172a); font-size: 0.725rem; text-transform: uppercase;">
                     <th style="padding: 0.6rem 0.85rem; text-align: left; font-weight: 800; letter-spacing: 0.5px;">Pencatatan</th>
                     <th style="padding: 0.6rem 0.85rem; text-align: left; font-weight: 800; letter-spacing: 0.5px;">Rencana</th>
                     <th style="padding: 0.6rem 0.85rem; text-align: left; font-weight: 800; letter-spacing: 0.5px;">Waktu Tercatat</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <tr style="border-bottom: 1px solid var(--border-color, #f1f5f9);">
                     <td style="padding: 0.65rem 0.85rem; color: var(--text-secondary, #1e293b); font-weight: 600;">Waktu Keluar</td>
-                    <td style="padding: 0.65rem 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; font-family: var(--font-mono);" id="infoTablePlanExit">09.00 WIB</td>
-                    <td style="padding: 0.65rem 0.85rem; font-weight: 700; color: #059669; font-family: var(--font-mono);" id="infoTableActualExit">
-                      09.03 WIB</td>
+                    <td style="padding: 0.65rem 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; font-family: var(--font-mono, monospace);" id="infoTablePlanExit">07.24 WIB</td>
+                    <td style="padding: 0.65rem 0.85rem; font-weight: 700; color: #059669; font-family: var(--font-mono, monospace);" id="infoTableActualExit">-</td>
                   </tr>
                   <tr>
                     <td style="padding: 0.65rem 0.85rem; color: var(--text-secondary, #1e293b); font-weight: 600;">Waktu Kembali</td>
-                    <td style="padding: 0.65rem 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; font-family: var(--font-mono);" id="infoTablePlanReturn">11.00 WIB</td>
-                    <td style="padding: 0.65rem 0.85rem; font-weight: 700; color: #059669; font-family: var(--font-mono);" id="infoTableActualReturn">
-                      10.52 WIB — Tepat Waktu</td>
+                    <td style="padding: 0.65rem 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; font-family: var(--font-mono, monospace);" id="infoTablePlanReturn">08.24 WIB</td>
+                    <td style="padding: 0.65rem 0.85rem; font-weight: 700; color: #059669; font-family: var(--font-mono, monospace);" id="infoTableActualReturn">-</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Notes (Approver & Security) -->
+          <!-- Section 6: Persetujuan Atasan & Petugas Pos Jaga (Side-by-Side Bento Grid Identik Gambar 1) -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" id="infoNotesContainer">
-            <div>
-              <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
-                id="infoApproverLbl">Ir. Hendra Gunawan, M.T.</span>
-              <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
-                id="infoApproverNoteText">Disetujui</p>
+            <!-- Card Left: Persetujuan Atasan -->
+            <div style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem;">
+                Persetujuan Atasan
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem; overflow: hidden;">
+                  <div id="infoApproverAvatar" style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  </div>
+                  <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="infoApproverLbl">
+                    Arthur Morgan, S.Tr.T.
+                  </span>
+                </div>
+                <div id="infoApproverBadgeContainer">
+                  <span class="status-pill-green" id="infoApproverNoteText">Disetujui</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <span style="font-size: 0.775rem; color: var(--text-primary, #0f172a); display: block; font-weight: 800;"
-                id="infoSecurityLbl">Petugas Pos Jaga: (Belum Scan Out)</span>
-              <p style="font-size: 0.8rem; color: var(--text-secondary, #334155); margin-top: 2px; line-height: 1.4;"
-                id="infoSecurityNoteText">Identitas dan QR Code belum dipindai di pos jaga gerbang.</p>
+
+            <!-- Card Right: Petugas Pos Jaga -->
+            <div style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+              <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(15, 23, 42, 0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #1e293b; margin-top: 2px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Petugas Pos Jaga</div>
+                <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-top: 1px;" id="infoSecurityLbl">Belum Scan Out</div>
+                <div style="font-size: 0.725rem; color: #64748b; font-style: italic; margin-top: 2px; line-height: 1.35;" id="infoSecurityNoteText">Identitas dan QR Code belum dipindai di pos jaga gerbang.</div>
+              </div>
             </div>
           </div>
 
@@ -3080,7 +3117,6 @@
               Sesuai SOP Keamanan "No Approval, No Exit", QR Code izin darurat ini terkunci hingga diotorisasi oleh
               Atasan (<strong id="infoEmgApproverName">Ir. Hendra Gunawan</strong>). Karyawan dapat mengedit data pengajuan atau membatalkan izin bila diperlukan.
             </p>
-            
           </div>
         </div>
 
@@ -3101,7 +3137,10 @@
       <!-- Detail Modal Footer -->
       <div class="modal-footer" id="detailModalFooter"
         style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.75rem; color: #64748b;" id="detailFooterMeta">Tiket selesai — QR tidak aktif</span>
+        <div>
+          <div style="font-size: 0.7rem; color: #64748b; font-weight: 600; line-height: 1.2;">Status Tiket</div>
+          <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-top: 2px;" id="detailFooterMeta">Menunggu — QR belum aktif</div>
+        </div>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           
           <button type="button" class="btn-figma-secondary" id="btnDetailEditTicket" class="btn-figma-blue" style="display: none;">
@@ -3112,12 +3151,12 @@
             Batalkan Izin
           </button>
           <button type="button" class="btn-reject" id="btnDetailRejectTicket"
-            style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
-            ✕ Tolak
+            style="display: none; padding: 0.55rem 1.5rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a; cursor: pointer;">
+            Tolak
           </button>
           <button type="button" class="btn-approve" id="btnDetailApproveTicket"
-            style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
-            ✓ Setujui
+            style="display: none; padding: 0.55rem 1.6rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; background: #0f3a68; border: 1.5px solid #0f3a68; color: #ffffff; cursor: pointer; box-shadow: 0 1px 3px rgba(15, 58, 104, 0.2);">
+            Setujui
           </button>
           <button type="button" class="btn-figma-primary" id="btnDetailOpenQR"
             style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">

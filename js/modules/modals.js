@@ -1,3 +1,24 @@
+
+// Collapsible Detail Content Toggle (Identik Gambar 1 Pengguna)
+window.toggleDetailExpand = function(targetId, btn) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  const isExpanded = el.getAttribute('data-expanded') === 'true';
+  if (isExpanded) {
+    el.setAttribute('data-expanded', 'false');
+    el.style.display = '-webkit-box';
+    el.style.webkitLineClamp = '3';
+    el.style.webkitBoxOrient = 'vertical';
+    el.style.overflow = 'hidden';
+    if (btn) btn.innerHTML = 'Lihat selengkapnya ∨';
+  } else {
+    el.setAttribute('data-expanded', 'true');
+    el.style.display = 'block';
+    el.style.webkitLineClamp = 'none';
+    el.style.overflow = 'visible';
+    if (btn) btn.innerHTML = 'Tutup ∧';
+  }
+};
 // Helper untuk mendapatkan identitas Karyawan aktif pembuat aksi / pengajuan
 function getActiveEmployeeActorInfo() {
   if (typeof window.getCurrentEmployeeActor === 'function') {
@@ -1363,27 +1384,23 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   const modalDetailSubtitle = document.getElementById('modalDetailSubtitle');
   if (modalDetailSubtitle) {
-    const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Oktober 2026';
-    const emergLabel = isTicketEmerg ? '<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span> — ' : '';
-    modalDetailSubtitle.innerHTML = `${window.renderUserPhoto(ticket.applicantName || "Budi Pratama, S.T.", 20)} <span>${ticket.applicantName || "Budi Pratama, S.T."}</span> — ${emergLabel}${ticket.category} — ${dayStr}`;
+    const dayStr = ticket.createdAt ? (ticket.createdAt.slice(0, 10)) : '06-11-2026';
+    const emergLabel = isTicketEmerg ? 'DARURAT — ' : '';
+    modalDetailSubtitle.textContent = `${ticket.applicantName || "Budi Pratama, S.T."} — ${emergLabel}${ticket.category || 'Dinas Kantor'} — ${dayStr}`;
   }
 
-  // Status Badge on Top Right
+  // Status Badge on Top Right (Identik Gambar 1 - Clean Text, NO Pill)
   const detailStatusPillTop = document.getElementById('detailStatusPillTop');
   if (detailStatusPillTop) {
-    const isEmergBadge = ticket.status === 'Menunggu Otorisasi Darurat' || (ticket.id && ticket.id.includes('-EMG-') && ticket.status !== 'Disetujui' && ticket.status !== 'Sedang di Luar' && ticket.status !== 'Selesai');
-    if (isEmergBadge) {
-      detailStatusPillTop.innerHTML = `
-        <button type="button" 
-          style="cursor: pointer; background: transparent; color: #b91c1c; border: none; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px; padding: 0;" 
-          onclick="window.openEmergencyUnlockModal('${ticket.id}')" title="Klik untuk membuka opsi Otorisasi Darurat">
-          <span>Menunggu Otorisasi Darurat</span>
-        </button>
-      `;
+    if (typeof window.getCleanEmpStatus === 'function') {
+      detailStatusPillTop.innerHTML = window.getCleanEmpStatus(ticket.status, ticket);
     } else {
-      detailStatusPillTop.innerHTML = (typeof window.getCleanEmpStatus === 'function')
-        ? window.getCleanEmpStatus(ticket.status, ticket)
-        : window.getStatusPill(ticket.status, ticket);
+      let color = '#d97706';
+      if (ticket.status === 'Disetujui' || ticket.status === 'Selesai') color = '#059669';
+      else if (ticket.status === 'Sedang di Luar') color = '#0284c7';
+      else if (ticket.status === 'Terlambat' || ticket.status === 'Ditolak' || ticket.status === 'Menunggu Otorisasi Darurat') color = '#dc2626';
+      else if (ticket.status === 'Kedaluwarsa' || ticket.status === 'Dibatalkan') color = '#64748b';
+      detailStatusPillTop.innerHTML = `<span class="figma-clean-status" style="font-weight: 700; font-size: 0.85rem; color: ${color};">${ticket.status}</span>`;
     }
   }
 
@@ -1397,8 +1414,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     }
   }
 
+  const infoApplicantAvatar = document.getElementById('infoApplicantAvatar');
+  if (infoApplicantAvatar) {
+    infoApplicantAvatar.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+  }
+
   const infoEmployeeName = document.getElementById('infoEmployeeName');
-  if (infoEmployeeName) infoEmployeeName.innerHTML = `${window.renderUserPhoto(ticket.applicantName || "Budi Pratama, S.T.", 26)} <span>${ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : "Budi Pratama, S.T.")}</span>`;
+  if (infoEmployeeName) infoEmployeeName.textContent = ticket.applicantName || (ACTORS.karyawan ? ACTORS.karyawan.name : "Budi Pratama, S.T.");
 
   const infoEmployeeNip = document.getElementById('infoEmployeeNip');
   if (infoEmployeeNip) infoEmployeeNip.textContent = ticket.applicantNip || (ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841');
@@ -1413,31 +1435,62 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (infoType) infoType.textContent = ticket.type;
 
   const infoDestination = document.getElementById('infoDestination');
+  const btnToggleDest = document.getElementById('btnToggleDestExpand');
   if (infoDestination) {
-    infoDestination.textContent = ticket.destination;
-    infoDestination.style.whiteSpace = 'pre-wrap';
-    infoDestination.style.wordBreak = 'break-word';
-    infoDestination.style.lineHeight = '1.55';
-    infoDestination.style.maxHeight = 'none';
-    infoDestination.style.overflowY = 'visible';
+    infoDestination.textContent = ticket.destination || '-';
+    infoDestination.setAttribute('data-expanded', 'false');
+    const destStr = String(ticket.destination || '');
+    const isLongDest = destStr.length > 50 || destStr.includes('\n') || destStr.includes('\r');
+    if (isLongDest) {
+      infoDestination.style.display = '-webkit-box';
+      infoDestination.style.webkitLineClamp = '3';
+      infoDestination.style.webkitBoxOrient = 'vertical';
+      infoDestination.style.overflow = 'hidden';
+      if (btnToggleDest) {
+        btnToggleDest.style.display = 'inline-block';
+        btnToggleDest.innerHTML = 'Lihat selengkapnya ∨';
+      }
+    } else {
+      infoDestination.style.display = 'block';
+      infoDestination.style.webkitLineClamp = 'none';
+      infoDestination.style.overflow = 'visible';
+      if (btnToggleDest) btnToggleDest.style.display = 'none';
+    }
   }
 
   const infoReason = document.getElementById('infoReason');
+  const btnToggleReason = document.getElementById('btnToggleReasonExpand');
   if (infoReason) {
-    infoReason.textContent = ticket.reason;
-    infoReason.style.fontWeight = '700';
-    infoReason.style.color = '#0f172a';
-    infoReason.style.whiteSpace = 'pre-wrap';
-    infoReason.style.wordBreak = 'break-word';
-    infoReason.style.lineHeight = '1.55';
-    infoReason.style.maxHeight = 'none';
-    infoReason.style.overflowY = 'visible';
+    infoReason.textContent = ticket.reason || '-';
+    infoReason.setAttribute('data-expanded', 'false');
+    const reasonStr = String(ticket.reason || '');
+    const isLongReason = reasonStr.length > 50 || reasonStr.includes('\n') || reasonStr.includes('\r');
+    if (isLongReason) {
+      infoReason.style.display = '-webkit-box';
+      infoReason.style.webkitLineClamp = '3';
+      infoReason.style.webkitBoxOrient = 'vertical';
+      infoReason.style.overflow = 'hidden';
+      if (btnToggleReason) {
+        btnToggleReason.style.display = 'inline-block';
+        btnToggleReason.innerHTML = 'Lihat selengkapnya ∨';
+      }
+    } else {
+      infoReason.style.display = 'block';
+      infoReason.style.webkitLineClamp = 'none';
+      infoReason.style.overflow = 'visible';
+      if (btnToggleReason) btnToggleReason.style.display = 'none';
+    }
   }
 
   const infoTimeSectionTitle = document.getElementById('infoTimeSectionTitle');
   if (infoTimeSectionTitle) {
-    const dayStr = ticket.createdAt ? ticket.createdAt.slice(0, 11) : '16 Oktober 2026';
-    infoTimeSectionTitle.textContent = `Waktu keluar & kembali — ${dayStr}`;
+    infoTimeSectionTitle.textContent = 'Jadwal Keluar & Kembali';
+  }
+
+  const infoScheduleDate = document.getElementById('infoScheduleDate');
+  if (infoScheduleDate) {
+    const dayStr = ticket.createdAt ? (ticket.createdAt.slice(0, 10)) : '06-11-2026';
+    infoScheduleDate.textContent = dayStr;
   }
 
   const infoTablePlanExit = document.getElementById('infoTablePlanExit');
@@ -1477,21 +1530,34 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     infoTableActualReturn.style.fontWeight = '700';
   }
 
+  const approverName = ticket.approverName || 'Arthur Morgan, S.Tr.T.';
+  const infoApproverAvatar = document.getElementById('infoApproverAvatar');
+  if (infoApproverAvatar) {
+    infoApproverAvatar.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+  }
+
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
-    const approverName = ticket.approverName || 'Ir. Hendra Gunawan, M.T.';
-    const approverPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(approverName, 22) : '';
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong> <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(Dialihkan dari ${ticket.reassignedFrom})</span></span>`;
+      infoApproverLbl.innerHTML = `${approverName} <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(Dialihkan dari ${ticket.reassignedFrom})</span>`;
     } else {
-      infoApproverLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${approverPhoto}<strong>${approverName}</strong></span>`;
+      infoApproverLbl.textContent = approverName;
     }
     infoApproverLbl.style.fontWeight = '800';
     infoApproverLbl.style.color = 'var(--text-primary, #0f172a)';
   }
 
+  const infoApproverBadgeContainer = document.getElementById('infoApproverBadgeContainer');
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
-  if (infoApproverNoteText) {
+  if (infoApproverBadgeContainer) {
+    if (ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Selesai' || ticket.status === 'Terlambat') {
+      infoApproverBadgeContainer.innerHTML = '<span class="status-pill-green" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:0.75rem; padding:3px 10px; border-radius:9999px;">Disetujui</span>';
+    } else if (ticket.status === 'Ditolak') {
+      infoApproverBadgeContainer.innerHTML = '<span class="status-pill-red" style="background:#fee2e2; color:#b91c1c; font-weight:700; font-size:0.75rem; padding:3px 10px; border-radius:9999px;">Ditolak</span>';
+    } else {
+      infoApproverBadgeContainer.innerHTML = '<span class="status-pill-yellow" style="background:#fef3c7; color:#b45309; font-weight:700; font-size:0.75rem; padding:3px 10px; border-radius:9999px;">Menunggu</span>';
+    }
+  } else if (infoApproverNoteText) {
     infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui';
   }
 
@@ -1501,11 +1567,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   if (infoSecurityLbl) {
     if (!hasScannedOut) {
-      infoSecurityLbl.innerHTML = `<span style="color: var(--text-muted, #64748b); font-size: 0.775rem; font-weight: 700;">Petugas Pos Jaga: <em style="font-style: normal; color: var(--text-secondary, #475569);">(Belum Scan Out)</em></span>`;
+      infoSecurityLbl.textContent = 'Belum Scan Out';
     } else {
-      const secName = ticket.securityOfficerOut || ticket.securityOfficer || ticket.securityName || 'Sertu Agus';
-      const secPhoto = typeof window.renderUserPhoto === 'function' ? window.renderUserPhoto(secName, 22) : '';
-      infoSecurityLbl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">${secPhoto}<strong>${secName}</strong></span>`;
+      const scanOutDisplay = ticket.scanOutTime.includes('WIB') ? ticket.scanOutTime : `${ticket.scanOutTime} WIB`;
+      infoSecurityLbl.textContent = `Sudah Tap Out (${scanOutDisplay})`;
     }
     infoSecurityLbl.style.fontWeight = '800';
     infoSecurityLbl.style.color = 'var(--text-primary, #0f172a)';
@@ -1513,11 +1578,11 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   if (infoSecurityNoteText) {
     if (!hasScannedOut) {
-      infoSecurityNoteText.innerHTML = `<span style="color: var(--text-muted, #94a3b8); font-style: italic;">Identitas dan QR Code belum dipindai di pos jaga gerbang.</span>`;
+      infoSecurityNoteText.innerHTML = '<u>Identitas dan</u> QR Code belum dipindai di pos jaga gerbang.';
     } else {
       const gateUsed = ticket.scanOutGate || 'Pos 1 Gerbang Utama';
       if (ticket.status === 'Selesai' && ticket.scanInTime) {
-        infoSecurityNoteText.textContent = ticket.securityNote || `Identitas dan QR sesuai. Scan Out dan Tap In selesai diproses.`;
+        infoSecurityNoteText.textContent = ticket.securityNote || 'Identitas dan QR sesuai. Scan Out dan Tap In selesai diproses.';
       } else {
         infoSecurityNoteText.textContent = ticket.securityNote || `Identitas dan QR sesuai. Scan Out tercatat di ${gateUsed}.`;
       }
@@ -1649,11 +1714,17 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const detailFooterMeta = document.getElementById('detailFooterMeta');
   if (detailFooterMeta) {
     if (ticket.status === 'Selesai') {
-      detailFooterMeta.textContent = 'Tiket selesai — QR tidak aktif';
-    } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Disetujui') {
-      detailFooterMeta.textContent = 'Tiket aktif — QR dapat digunakan';
+      detailFooterMeta.textContent = 'Selesai — QR tidak aktif';
+    } else if (ticket.status === 'Sedang di Luar') {
+      detailFooterMeta.textContent = 'Sedang di Luar — Dalam pantauan pos jaga';
+    } else if (ticket.status === 'Disetujui' || ticket.status === 'Setuju') {
+      detailFooterMeta.textContent = 'Disetujui — QR aktif siap digunakan';
+    } else if (ticket.status === 'Ditolak') {
+      detailFooterMeta.textContent = 'Ditolak — Pengajuan tidak diizinkan';
+    } else if (ticket.status === 'Terlambat') {
+      detailFooterMeta.textContent = 'Terlambat — Waktu izin telah terlampaui';
     } else {
-      detailFooterMeta.textContent = 'Tiket menunggu — QR belum aktif';
+      detailFooterMeta.textContent = 'Menunggu — QR belum aktif';
     }
   }
 

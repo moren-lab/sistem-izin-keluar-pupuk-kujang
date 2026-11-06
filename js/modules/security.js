@@ -620,7 +620,7 @@ function renderSecurityTable(list, containerElement) {
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
             <th style="min-width: 200px;">Catatan Realisasi</th>
-            <th style="text-align: right; white-space: nowrap; min-width: 170px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 170px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
@@ -681,9 +681,9 @@ function renderSecurityTable(list, containerElement) {
                   </div>
                 </td>
                 <td style="vertical-align: middle;">${scheduleWithDay}</td>
-                <td style="vertical-align: middle;">${statusHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
                 <td style="vertical-align: middle;">${catatanHtml}</td>
-                <td style="vertical-align: middle; text-align: right;">${tindakanHtml}</td>
+                <td style="vertical-align: middle; white-space: nowrap;">${tindakanHtml}</td>
               </tr>
             `;
           }).join('')}
@@ -908,7 +908,7 @@ function renderSecurityLogTable(list, containerElement) {
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
             <th style="min-width: 200px;">Catatan Pemindaian</th>
-            <th style="text-align: right; white-space: nowrap; min-width: 170px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 170px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
@@ -976,7 +976,7 @@ function renderSecurityLogTable(list, containerElement) {
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
                 <td style="vertical-align: middle; line-height: 1.45;">${catatanHtml}</td>
-                <td style="text-align: right; white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
               </tr>
             `;
           }).join('')}

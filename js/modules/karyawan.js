@@ -1150,7 +1150,7 @@ function getCleanEmpStatus(status, ticket) {
   }
 
   // Pure clean text with semantic status class for perfect dark mode adaptation
-  return `<span class="figma-clean-status status-${statusKey}" style="font-weight: 700; font-size: 0.8rem; color: ${color};">${label}</span>`;
+  return `<span class="figma-clean-status status-${statusKey}" style="font-weight: 700; font-size: 0.8rem; color: ${color};" title="${(label || '').replace(/"/g, '&quot;')}">${label}</span>`;
 }
 
 /**
@@ -1326,7 +1326,7 @@ function renderEmpTable(list, containerElement) {
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
             <th style="min-width: 180px;">Catatan</th>
-            <th style="text-align: right; white-space: nowrap; min-width: 175px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
@@ -1368,9 +1368,9 @@ function renderEmpTable(list, containerElement) {
                   <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
                 </td>
                 <td>${scheduleWithDay}</td>
-                <td>${statusHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
                 <td style="font-size: 0.75rem;">${catatanHtml}</td>
-                <td style="text-align: right; white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
               </tr>
             `;
   }).join('')}

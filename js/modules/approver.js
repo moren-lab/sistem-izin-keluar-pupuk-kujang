@@ -709,7 +709,7 @@ function renderApproverTable(list, containerElement) {
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
             <th style="min-width: 180px;">Catatan Keputusan</th>
-            <th style="text-align: right; white-space: nowrap; min-width: 175px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
         <tbody>
@@ -763,7 +763,7 @@ function renderApproverTable(list, containerElement) {
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
                 <td style="vertical-align: middle; line-height: 1.45;">${catatanHtml}</td>
-                <td style="text-align: right; white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
               </tr>
             `;
           }).join('')}

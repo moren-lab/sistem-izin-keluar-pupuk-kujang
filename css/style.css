@@ -10777,6 +10777,36 @@ body.theme-dark .btn-danger-solid:hover,
   vertical-align: middle !important;
 }
 
+/* Natural left alignment in tables so Tindakan aligns with header (Gambar 3) */
+.figma-table td .action-pills-row,
+table td .action-pills-row {
+  justify-content: flex-start !important;
+}
+
+/* FIGMA CLEAN TEXT STATUS BADGE (Sesuai Gambar 1 & Gambar 4) */
+.figma-clean-status {
+  font-family: var(--font-main, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  line-height: 1.3;
+}
+
+/* Single line ellipsis truncation for status in table lists (Sesuai Gambar 4) */
+.figma-table td .figma-clean-status,
+.figma-table td span.figma-clean-status,
+table td .figma-clean-status {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 140px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
 /* Full-width stretch on Cards (No empty dead space beside Detail Pengajuan) */
 .figma-card-footer .action-pills-row,
 .card-actions-bar {
@@ -11445,4 +11475,249 @@ body.theme-dark .sidebar-brand-subtitle h4 {
 
 body.theme-dark .sidebar-brand-subtitle p {
   color: #34d399 !important;
+}
+
+
+/* ===================================================================
+   MODAL DETAIL PENGAJUAN STYLING (SESUAI GAMBAR 1 PENGGUNA)
+   =================================================================== */
+#modalTicketDetail .modal-card {
+  max-width: 800px;
+  width: 95%;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+#modalTicketDetail .modal-header {
+  padding: 1.25rem 1.5rem 0.85rem;
+  border-bottom: none;
+  background: var(--bg-card, #ffffff);
+}
+
+#modalTicketDetail #modalDetailHeading {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--text-primary, #0f172a);
+}
+
+#modalTicketDetail #modalDetailSubtitle {
+  font-size: 0.825rem;
+  color: var(--text-secondary, #64748b);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+#modalTicketDetail .figma-tab-btn {
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #64748b;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+#modalTicketDetail .figma-tab-btn.active {
+  color: var(--text-primary, #0f172a);
+}
+
+#modalTicketDetail .figma-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--text-primary, #0f172a);
+  border-radius: 2px;
+}
+
+#modalTicketDetail #detailStatusPillTop .status-pill-yellow,
+#modalTicketDetail #detailStatusPillTop .status-pill-warning {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#modalTicketDetail #detailStatusPillTop .status-pill-green,
+#modalTicketDetail #detailStatusPillTop .status-pill-success {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: none;
+}
+
+#modalTicketDetail .btn-toggle-expand {
+  color: #2563eb !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  transition: opacity 0.15s ease;
+}
+
+#modalTicketDetail .btn-toggle-expand:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+/* Modal Action Buttons (Gambar 1) */
+#modalTicketDetail .btn-detail-reject,
+#modalTicketDetail #btnDetailRejectTicket {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  padding: 0.55rem 1.35rem !important;
+  font-size: 0.85rem !important;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+#modalTicketDetail .btn-detail-reject:hover,
+#modalTicketDetail #btnDetailRejectTicket:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+}
+
+#modalTicketDetail .btn-detail-approve,
+#modalTicketDetail #btnDetailApproveTicket {
+  background: #0f3b75 !important;
+  border: 1.5px solid #0f3b75 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  padding: 0.55rem 1.35rem !important;
+  font-size: 0.85rem !important;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(15, 59, 117, 0.25);
+}
+
+#modalTicketDetail .btn-detail-approve:hover,
+#modalTicketDetail #btnDetailApproveTicket:hover {
+  background: #0a2d5c !important;
+  border-color: #0a2d5c !important;
+}
+
+/* Dark mode overrides for Modal Detail */
+body.theme-dark #modalTicketDetail .modal-card {
+  background: #0c1422 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark #modalTicketDetail .modal-header,
+body.theme-dark #modalTicketDetail .modal-footer {
+  background: #090e17 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark #modalTicketDetail .figma-tab-btn.active {
+  color: #f8fafc !important;
+}
+
+body.theme-dark #modalTicketDetail .figma-tab-btn.active::after {
+  background: #34d399 !important;
+}
+
+body.theme-dark #modalTicketDetail .detail-section > div,
+body.theme-dark #modalTicketDetail #paneDetailInfo > div > div[style*="background"] {
+  background: #111a2e !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark #modalTicketDetail table th {
+  background: #16243d !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark #modalTicketDetail table td {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark #modalTicketDetail #infoApproverLbl,
+body.theme-dark #modalTicketDetail #infoSecurityLbl {
+  color: #f8fafc !important;
+}
+
+body.theme-dark #modalTicketDetail #btnDetailRejectTicket {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f8fafc !important;
+}
+
+
+/* ===================================================================
+   TRUNCATED TABLE / LIST CELLS WITH ELLIPSIS (SESUAI GAMBAR 2 PENGGUNA)
+   Memotong teks panjang dengan "..." agar tabel rapi dan tidak melebar
+   =================================================================== */
+.table-truncate-text,
+.report-dept-name,
+.report-data-table td .dept-cell-truncate,
+.figma-table td .dept-cell-truncate {
+  max-width: 190px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* Potong kolom Unit Kerja & Institusi / Departemen di semua tabel */
+.report-data-table td:nth-child(3),
+.report-data-table td:nth-child(4) {
+  max-width: 200px;
+}
+
+.report-data-table td:nth-child(3) > *,
+.report-data-table td:nth-child(4) > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* User management table cells truncation */
+#adminUsersTableBody td:nth-child(2) .report-emp-name,
+#adminUsersTableBody td:nth-child(3),
+#adminUsersTableBody td:nth-child(4) {
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Universal Single-Row Ellipsis Truncation for Table Lists (Identik Gambar 2) */
+.figma-table td:nth-child(2) > div > div > div,
+.figma-table td:nth-child(3) > div,
+.figma-table td:nth-child(6) > div,
+.report-data-table td:nth-child(2) .report-emp-name,
+.report-data-table td:nth-child(3) .report-dept-name,
+.report-data-table td:nth-child(4) div {
+  max-width: 200px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+}
+
+/* Tooltip hint on hover */
+.figma-table td:hover div,
+.report-data-table td:hover div {
+  cursor: default;
 }

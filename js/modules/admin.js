@@ -2346,11 +2346,11 @@ function renderAdminUsers() {
           </span>
         </td>
         <td>
-          <div class="report-emp-name">${u.name}</div>
+          <div class="report-emp-name" style="max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(u.name || '').replace(/"/g, '&quot;')}">${u.name}</div>
           <div class="report-emp-nip">NIP: ${u.nip}</div>
         </td>
-        <td style="font-size: 0.8rem; color: var(--text-secondary);">${u.email || '-'}</td>
-        <td style="font-size: 0.825rem; color: var(--text-primary);">${u.department}</td>
+        <td style="font-size: 0.8rem; color: var(--text-secondary); max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(u.email || '').replace(/"/g, '&quot;')}">${u.email || '-'}</td>
+        <td style="font-size: 0.825rem; color: var(--text-primary); max-width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(u.department || '').replace(/"/g, '&quot;')}">${u.department}</td>
         <td style="white-space: nowrap;">
           <span class="user-role-badge ${roleClass}">${u.role}</span>
           ${(!u.roleKey || u.roleKey.startsWith('karyawan')) ? `<div style="font-size: 0.685rem; color: var(--sky-text, #0284c7); font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong style="color: var(--sky-text, #0284c7);">${u.directSupervisor || u.supervisor || 'Dr. Ahmad Subagja, M.M.'}</strong></div>` : ''}
