@@ -1,0 +1,87 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e6]
+        - generic [ref=f1e7]:
+          - generic [ref=f1e8]: PUPUK KUJANG
+          - generic [ref=f1e9]: Perizinan Keluar Area
+      - generic [ref=f1e10]:
+        - button "Karyawan ▼" [ref=f1e11] [cursor=pointer]:
+          - generic [ref=f1e15]: Karyawan
+          - generic [ref=f1e16]: ▼
+        - button "Notifikasi" [ref=f1e17] [cursor=pointer]:
+          - generic [ref=f1e21]: "3"
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e22] [cursor=pointer]:
+          - img "BP" [ref=f1e23]
+    - main [ref=f1e24]:
+      - generic [ref=f1e25]:
+        - generic [ref=f1e26]: Selamat malam,
+        - heading "Budi Pratama, S.T." [level=2] [ref=f1e27]
+        - generic [ref=f1e28]: Karyawan
+        - generic [ref=f1e29]: Departemen Rekayasa & Pemeliharaan
+        - generic [ref=f1e30]: "Atasan: Ir. Hendra Gunawan, M.T."
+        - button "Pengajuan Saya" [ref=f1e31] [cursor=pointer]
+      - generic [ref=f1e33]:
+        - button "Ringkasan Perizinan" [ref=f1e34] [cursor=pointer]
+        - button "Total Pengajuan Izin" [ref=f1e35] [cursor=pointer]
+      - generic [ref=f1e36]:
+        - generic [ref=f1e37]:
+          - generic [ref=f1e38]: Total pengajuan
+          - generic [ref=f1e39]: "10"
+        - generic [ref=f1e40]:
+          - generic [ref=f1e41]: Izin selesai
+          - generic [ref=f1e42]: "8"
+        - generic [ref=f1e43]:
+          - generic [ref=f1e44]: Izin aktif
+          - generic [ref=f1e45]: "1"
+      - generic [ref=f1e46]:
+        - generic [ref=f1e47]:
+          - generic [ref=f1e48]:
+            - generic [ref=f1e49]: IZIN AKTIF SAYA
+            - heading "TK-20261106-901" [level=3] [ref=f1e50]
+          - generic [ref=f1e51]: Terlambat
+        - generic [ref=f1e52]: Dinas Kantor • Kembali ke Area
+        - generic "PT Rekayasa Industri, Cikampek" [ref=f1e53]
+        - generic "Koordinasi perbaikan instalasi pipa amonia unit 2" [ref=f1e54]: "\"Koordinasi perbaikan instalasi pipa amonia unit 2\""
+        - generic [ref=f1e55]:
+          - generic [ref=f1e56]:
+            - generic [ref=f1e57]: Scan Out • Pos 1
+            - generic [ref=f1e58]: Jumat, 6 Nov 2026, 09.05 WIB
+          - generic [ref=f1e59]:
+            - generic [ref=f1e60]: Batas Jam Kembali
+            - generic [ref=f1e61]: Jumat, 6 Nov 2026, 14.30 WIB
+        - generic [ref=f1e62]:
+          - button "✓ Tap In Kartu Akses (Masuk)" [ref=f1e63] [cursor=pointer]
+          - generic [ref=f1e65]: ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
+        - link "Detail Pengajuan" [ref=f1e67] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f1e68]:
+        - heading "Pengajuan Terbaru" [level=3] [ref=f1e70]
+        - generic [ref=f1e71]:
+          - generic [ref=f1e72]:
+            - generic [ref=f1e73]:
+              - text: TK-20261106-443
+              - generic [ref=f1e74]: Kedaluwarsa
+            - generic [ref=f1e75]: Dinas Kantor • Kantor Pusat Pupuk Indonesia
+          - button "Detail Pengajuan" [ref=f1e76] [cursor=pointer]
+        - generic [ref=f1e81]:
+          - generic [ref=f1e82]:
+            - generic [ref=f1e83]:
+              - text: IZ-20261019-013
+              - generic [ref=f1e84]: Selesai
+            - generic [ref=f1e85]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f1e86] [cursor=pointer]
+        - link "Semua riwayat" [ref=f1e92] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f1e93]:
+      - generic [ref=f1e94] [cursor=pointer]: Dashboard
+      - generic [ref=f1e101] [cursor=pointer]: Pengajuan
+      - generic [ref=f1e106] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic: Beralih ke mode Karyawan (Budi Pratama, S.T.)
+    - generic [ref=f1e111]: Selamat datang, Budi Pratama, S.T. (Karyawan Pemohon)
+    - generic: Beralih ke mode Karyawan (Budi Pratama, S.T.)

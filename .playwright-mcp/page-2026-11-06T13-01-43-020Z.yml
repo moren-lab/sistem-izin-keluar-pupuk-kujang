@@ -1,0 +1,84 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: "1"
+        - generic [ref=e7]: Pilih akun
+      - generic [ref=e8]:
+        - generic [ref=e9]: "2"
+        - generic [ref=e10]: Verifikasi OTP
+      - generic [ref=e11]:
+        - generic [ref=e12]: "3"
+        - generic [ref=e13]: Masuk SAKTI
+    - generic [ref=e14]:
+      - generic [ref=e15]: K
+      - generic [ref=e16]:
+        - generic [ref=e17]: KUJANG ID
+        - generic [ref=e18]: Identity Provider · PT Pupuk Kujang
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - button "TKO" [ref=e21] [cursor=pointer]
+        - button "TKNO" [ref=e22] [cursor=pointer]
+        - button "Tamu / Eksternal" [ref=e23] [cursor=pointer]
+      - generic [ref=e24]: Pilih tipe akun Anda terlebih dahulu
+      - generic [ref=e25]: Pilih metode login sesuai akun Anda
+      - generic [ref=e26]:
+        - generic [ref=e27] [cursor=pointer]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: Identik / PI Smart
+            - generic [ref=e33]: Akun Pupuk Indonesia Group
+          - generic [ref=e34]: →
+        - generic [ref=e35] [cursor=pointer]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: ESS
+            - generic [ref=e41]: Employee Self Service
+          - generic [ref=e42]: →
+        - generic [ref=e43] [cursor=pointer]:
+          - generic [ref=e48]:
+            - generic [ref=e49]: DOF
+            - generic [ref=e50]: Digital Office
+          - generic [ref=e51]: →
+      - generic [ref=e52]: Karyawan Organik PKC tidak memasukkan username/password di sini. Pilih salah satu metode di atas untuk diarahkan ke halaman login masing-masing.
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]: ⚡
+            - generic [ref=e57]: Akses Cepat Pengujian (1-Klik Masuk)
+          - generic [ref=e58]: Bypass Form
+        - generic [ref=e59]: "Pilih salah satu peran di bawah untuk langsung membuka sistem tanpa perlu mengisi form & OTP:"
+        - generic [ref=e60]:
+          - button "👨‍💼 Karyawan" [ref=e61] [cursor=pointer]
+          - button "👔 Atasan 1" [ref=e62] [cursor=pointer]
+          - button "💼 Atasan 2" [ref=e63] [cursor=pointer]
+          - button "🛡️ Pos Jaga" [ref=e64] [cursor=pointer]
+          - button "⚙️ Admin" [ref=e65] [cursor=pointer]
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]: ⚠️
+          - generic [ref=e69]: "Perhatian: Keamanan Akun"
+        - list [ref=e70]:
+          - listitem [ref=e71]: Akun terkunci otomatis setelah 3x login gagal
+          - listitem [ref=e72]: Jangan bagikan password atau kode OTP kepada siapapun
+          - listitem [ref=e73]: Hubungi IT Support ext. 1234 jika akun terkunci
+      - button "▶ Petunjuk demo mockup & Akun Cepat ▶" [ref=e75] [cursor=pointer]:
+        - generic [ref=e76]: ▶ Petunjuk demo mockup & Akun Cepat
+        - generic [ref=e77]: ▶
+  - text: – – – – – – –
+  - generic [ref=e78]:
+    - banner [ref=e79]:
+      - generic [ref=e80]:
+        - img "Logo PT Pupuk Kujang" [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e84]: PUPUK KUJANG
+          - generic [ref=e85]: Perizinan Keluar Area
+      - generic [ref=e86]:
+        - button "Karyawan ▼" [ref=e87] [cursor=pointer]:
+          - generic [ref=e91]: Karyawan
+          - generic [ref=e92]: ▼
+        - button "Notifikasi" [ref=e93] [cursor=pointer]:
+          - generic [ref=e97]: "2"
+        - button "Menu Akun & Keluar SAKTI" [ref=e98] [cursor=pointer]: BP
+    - main [ref=e99]
+    - navigation [ref=e100]
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

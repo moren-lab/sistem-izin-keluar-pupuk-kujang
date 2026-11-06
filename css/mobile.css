@@ -3072,3 +3072,33 @@ body.theme-dark .mobile-notif-icon-box.read,
   background: rgba(255, 255, 255, 0.08) !important;
   color: #94a3b8 !important;
 }
+
+/* Web-style mobile notification sheet (Sesuai Gambar 1) */
+.mobile-sheet .dropdown-notif-item {
+  background: #ffffff;
+  transition: background 0.15s ease;
+}
+.mobile-sheet .dropdown-notif-item:active {
+  background: #f1f5f9 !important;
+}
+body.theme-dark .mobile-sheet .dropdown-notif-item,
+.theme-dark .mobile-sheet .dropdown-notif-item {
+  background: #111622 !important;
+  border-bottom-color: #1e2c42 !important;
+}
+body.theme-dark .mobile-sheet .dropdown-notif-item:active,
+.theme-dark .mobile-sheet .dropdown-notif-item:active {
+  background: #162032 !important;
+}
+body.theme-dark .mobile-sheet .dropdown-notif-title,
+.theme-dark .mobile-sheet .dropdown-notif-title {
+  color: #f8fafc !important;
+}
+body.theme-dark .mobile-sheet .dropdown-notif-msg,
+.theme-dark .mobile-sheet .dropdown-notif-msg {
+  color: #94a3b8 !important;
+}
+body.theme-dark .mobile-sheet .dropdown-notif-meta,
+.theme-dark .mobile-sheet .dropdown-notif-meta {
+  color: #64748b !important;
+}

@@ -1778,7 +1778,7 @@
     }
     const container = customContainer || document.getElementById('mobileMainContent');
     if (container) {
-      renderSecurityDashboard(container);
+      renderMobileSecurity(container, currentSecurityTab);
     }
   };
 

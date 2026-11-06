@@ -1155,7 +1155,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${(activeTicket.status === 'Disetujui' || activeTicket.status === 'Sedang di Luar') ? `
+          ${activeTicket.status === 'Disetujui' ? `
             <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; min-height: 44px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${activeTicket.id}')">
               Buka QR Izin Aktif Ini
             </button>
@@ -2698,7 +2698,7 @@
               Batalkan Izin Ini
             </button>
           ` : ''}
-          ${isApproved || isOutside ? `
+          ${isApproved && !isOutside ? `
             <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
               Tampilkan QR Code Resmi
             </button>
