@@ -3,7 +3,7 @@
  * Data State & Shared Storage
  */
 
-const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V8';
+const STORAGE_KEY = 'KUJANG_GATEPASS_TICKETS_V9';
 
 /**
  * Universal Partial & Multi-token Search Matching Helper
@@ -128,6 +128,54 @@ const _d6 = getMockTicketDates(20, 8, 0, 10, 30);
 const _d7 = getMockTicketDates(28, 9, 0, 11, 40);
 
 const DEFAULT_TICKETS = [
+  {
+    id: 'TK-20261106-901',
+    applicantName: 'Budi Pratama, S.T.',
+    applicantNip: 'PK-2024-8841',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Dinas Kantor',
+    type: 'Kembali ke Area',
+    destination: 'PT Rekayasa Industri, Cikampek',
+    reason: 'Koordinasi perbaikan instalasi pipa amonia unit 2',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-11-06T09:00',
+    estimatedReturn: '2026-11-06T14:30',
+    status: 'Sedang di Luar',
+    createdAt: '06 Nov 2026, 08.20 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverTitle: 'Manager Rekayasa & Pemeliharaan',
+    approverNote: 'Disetujui. Mohon koordinasikan progres via radio/WA.',
+    scanOutGate: 'Pos 1 Gerbang Utama',
+    securityOfficerOut: 'Sertu Agus',
+    scanOutTime: '06 Nov 2026, 09.05 WIB (Pos 1 Gerbang Utama)',
+    timeline: [
+      { event: 'Pengajuan dibuat', time: '06 Nov 2026, 08.20 WIB', by: 'Budi Pratama, S.T.', desc: 'Dinas Kantor — Kembali ke Area' },
+      { event: 'Disetujui oleh atasan', time: '06 Nov 2026, 08.45 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui untuk perbaikan instalasi pipa.' },
+      { event: 'Scan Out tercatat', time: '06 Nov 2026, 09.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 Gerbang Utama — Personel meninggalkan kawasan pabrik.' }
+    ]
+  },
+  {
+    id: 'TK-20261106-902',
+    applicantName: 'Arthur Morgan, S.Tr.T.',
+    applicantNip: 'PK-2024-8842',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    category: 'Dinas Kantor',
+    type: 'Kembali ke Area',
+    destination: 'Balai Standardisasi Industri Karawang',
+    reason: 'Pengambilan sertifikat kalibrasi sensor instrumentasi',
+    transportMode: 'Kendaraan dinas',
+    plannedExit: '2026-11-06T10:30',
+    estimatedReturn: '2026-11-06T15:00',
+    status: 'Disetujui',
+    createdAt: '06 Nov 2026, 08.40 WIB',
+    approverName: 'Ir. Hendra Gunawan, M.T.',
+    approverTitle: 'Manager Rekayasa & Pemeliharaan',
+    approverNote: 'Disetujui. Siap diproses keluar di gerbang.',
+    timeline: [
+      { event: 'Pengajuan dibuat', time: '06 Nov 2026, 08.40 WIB', by: 'Arthur Morgan, S.Tr.T.', desc: 'Dinas Kantor — Pengambilan sertifikat kalibrasi' },
+      { event: 'Disetujui oleh atasan', time: '06 Nov 2026, 09.10 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui. Tiket siap dipindai di pos jaga.' }
+    ]
+  },
   {
     id: 'IZ-20261019-013',
     applicantName: 'Budi Pratama, S.T.',
@@ -341,7 +389,7 @@ const DEFAULT_TICKETS = [
 
 function loadTickets() {
   // Bersihkan cache dan data sesi lama otomatis agar simulasi selalu bersih
-  ['KUJANG_GATEPASS_TICKETS_V1', 'KUJANG_GATEPASS_TICKETS_V2', 'KUJANG_GATEPASS_TICKETS_V3', 'KUJANG_GATEPASS_TICKETS_V4', 'KUJANG_GATEPASS_TICKETS_V5', 'KUJANG_GATEPASS_TICKETS_V6', 'KUJANG_GATEPASS_TICKETS_V7', 'KUJANG_GATEPASS_TICKETS_V7'].forEach(k => localStorage.removeItem(k));
+  ['KUJANG_GATEPASS_TICKETS_V1', 'KUJANG_GATEPASS_TICKETS_V2', 'KUJANG_GATEPASS_TICKETS_V3', 'KUJANG_GATEPASS_TICKETS_V4', 'KUJANG_GATEPASS_TICKETS_V5', 'KUJANG_GATEPASS_TICKETS_V6', 'KUJANG_GATEPASS_TICKETS_V7', 'KUJANG_GATEPASS_TICKETS_V8'].forEach(k => localStorage.removeItem(k));
 
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {

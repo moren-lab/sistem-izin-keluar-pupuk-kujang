@@ -2251,16 +2251,6 @@
           priority: 'high',
           eventId: `emg_alert_${newTicket.id}`
         });
-        window.createNotification({
-          recipientRole: 'security',
-          actorSource: 'system',
-          type: 'security_darurat',
-          title: 'Tiket Darurat Melewati Gerbang',
-          message: `Izin darurat baru #${newTicket.id} (${newTicket.applicantName}) akan segera melewati pos pemeriksaan gerbang.`,
-          ticketId: newTicket.id,
-          priority: 'high',
-          eventId: `emg_sec_${newTicket.id}`
-        });
       } else {
         window.createNotification({
           recipientRole: 'approver',

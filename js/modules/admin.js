@@ -542,7 +542,9 @@ function renderAdminAudit() {
     countBadge.textContent = `${filtered.length} riwayat karyawan`;
   }
 
+  const figmaAdminAuditPagination = document.getElementById('figmaAdminAuditPagination');
   if (filtered.length === 0) {
+    if (figmaAdminAuditPagination) figmaAdminAuditPagination.style.display = 'none';
     tbody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
@@ -555,7 +557,36 @@ function renderAdminAudit() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(log => {
+  // Pagination Audit Trail (6 per halaman)
+  const pageSize = 6;
+  const totalCount = filtered.length;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  let currentPage = window.adminAuditCurrentPage || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  window.adminAuditCurrentPage = currentPage;
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  const paginatedAudit = filtered.slice(startIndex, endIndex);
+
+  const figmaAdminAuditMeta = document.getElementById('figmaAdminAuditMeta');
+  const figmaAdminAuditBtns = document.getElementById('figmaAdminAuditBtns');
+
+  if (figmaAdminAuditPagination) {
+    figmaAdminAuditPagination.style.display = totalCount > 0 ? 'flex' : 'none';
+    if (figmaAdminAuditMeta) {
+      figmaAdminAuditMeta.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari total ${totalCount} aktivitas`;
+    }
+    if (figmaAdminAuditBtns && typeof window.renderGenericPaginationButtons === 'function') {
+      window.renderGenericPaginationButtons(figmaAdminAuditBtns, totalPages, currentPage, (newPage) => {
+        window.adminAuditCurrentPage = newPage;
+        renderAdminAudit();
+      });
+    }
+  }
+
+  tbody.innerHTML = paginatedAudit.map(log => {
     let pillClass = '';
     if (log.event.includes('Disetujui')) pillClass = 'event-approve';
     else if (log.event.includes('Ditolak')) pillClass = 'event-reject';
@@ -760,7 +791,7 @@ window.setAdminReportFilters = (status, cat) => {
 };
 window.filterAdminReportTickets = filterAdminReportTickets;
 
-function renderAdminReports() {
+function renderAdminReports(isPrinting = false) {
   const tbody = document.getElementById('adminReportTableBody');
   const countEl = document.getElementById('adminReportRowCount');
   if (!tbody) return;
@@ -772,7 +803,10 @@ function renderAdminReports() {
     countEl.textContent = `${filtered.length} Data Tiket Perizinan`;
   }
 
+  const figmaAdminReportPagination = document.getElementById('figmaAdminReportPagination');
+
   if (filtered.length === 0) {
+    if (figmaAdminReportPagination) figmaAdminReportPagination.style.display = 'none';
     tbody.innerHTML = `
       <tr>
         <td colspan="8" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
@@ -785,7 +819,36 @@ function renderAdminReports() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(t => {
+  // Pagination Rekapitulasi Data (6 per halaman, kecuali saat print resmi)
+  const pageSize = 6;
+  const totalCount = filtered.length;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  let currentPage = window.adminReportCurrentPage || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  window.adminReportCurrentPage = currentPage;
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  const paginatedReports = (isPrinting || window._isPrintingAdminReport) ? filtered : filtered.slice(startIndex, endIndex);
+
+  const figmaAdminReportMeta = document.getElementById('figmaAdminReportMeta');
+  const figmaAdminReportBtns = document.getElementById('figmaAdminReportBtns');
+
+  if (figmaAdminReportPagination) {
+    figmaAdminReportPagination.style.display = totalCount > 0 ? 'flex' : 'none';
+    if (figmaAdminReportMeta) {
+      figmaAdminReportMeta.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari total ${totalCount} perizinan`;
+    }
+    if (figmaAdminReportBtns && typeof window.renderGenericPaginationButtons === 'function') {
+      window.renderGenericPaginationButtons(figmaAdminReportBtns, totalPages, currentPage, (newPage) => {
+        window.adminReportCurrentPage = newPage;
+        renderAdminReports();
+      });
+    }
+  }
+
+  tbody.innerHTML = paginatedReports.map(t => {
     return `
       <tr>
         <td style="white-space: nowrap;">
@@ -933,7 +996,13 @@ function printAdminReport() {
     const now = new Date();
     printTitle.textContent = `Dicetak pada: ${now.toLocaleDateString('id-ID', { dateStyle: 'full' })} pukul ${now.toLocaleTimeString('id-ID')} WIB oleh Bambang Sutrisno, S.T. (Departemen Pengamanan & K3)`;
   }
+  window._isPrintingAdminReport = true;
+  renderAdminReports(true);
   window.print();
+  window._isPrintingAdminReport = false;
+  setTimeout(() => {
+    renderAdminReports(false);
+  }, 1000);
 }
 
 // ==========================================
@@ -2315,7 +2384,10 @@ function renderAdminUsers() {
 
   if (countEl) countEl.textContent = `${filtered.length} Akun Terdaftar`;
 
+  const figmaAdminUsersPagination = document.getElementById('figmaAdminUsersPagination');
+
   if (filtered.length === 0) {
+    if (figmaAdminUsersPagination) figmaAdminUsersPagination.style.display = 'none';
     tbody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
@@ -2327,7 +2399,36 @@ function renderAdminUsers() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(u => {
+  // Pagination Hak Akses KUJANG ID (6 per halaman)
+  const pageSize = 6;
+  const totalCount = filtered.length;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  let currentPage = window.adminUsersCurrentPage || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  window.adminUsersCurrentPage = currentPage;
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  const paginatedUsers = filtered.slice(startIndex, endIndex);
+
+  const figmaAdminUsersMeta = document.getElementById('figmaAdminUsersMeta');
+  const figmaAdminUsersBtns = document.getElementById('figmaAdminUsersBtns');
+
+  if (figmaAdminUsersPagination) {
+    figmaAdminUsersPagination.style.display = totalCount > 0 ? 'flex' : 'none';
+    if (figmaAdminUsersMeta) {
+      figmaAdminUsersMeta.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari total ${totalCount} akun`;
+    }
+    if (figmaAdminUsersBtns && typeof window.renderGenericPaginationButtons === 'function') {
+      window.renderGenericPaginationButtons(figmaAdminUsersBtns, totalPages, currentPage, (newPage) => {
+        window.adminUsersCurrentPage = newPage;
+        renderAdminUsers();
+      });
+    }
+  }
+
+  tbody.innerHTML = paginatedUsers.map(u => {
     let roleClass = 'karyawan';
     if (u.roleKey === 'approver' || u.roleKey === 'approver2') roleClass = 'approver';
     else if (u.roleKey === 'security') roleClass = 'security';
@@ -2593,12 +2694,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (auditSearch) {
     auditSearch.addEventListener('input', (e) => {
       adminAuditSearchTerm = e.target.value;
+      window.adminAuditCurrentPage = 1;
       renderAdminAudit();
     });
   }
   if (auditFilter) {
     auditFilter.addEventListener('change', (e) => {
       adminAuditEventFilter = e.target.value;
+      window.adminAuditCurrentPage = 1;
       renderAdminAudit();
     });
   }
@@ -2612,18 +2715,21 @@ document.addEventListener('DOMContentLoaded', () => {
   if (reportDate) {
     reportDate.addEventListener('change', (e) => {
       adminReportDateFilter = e.target.value;
+      window.adminReportCurrentPage = 1;
       renderAdminReports();
     });
   }
   if (reportStatus) {
     reportStatus.addEventListener('change', (e) => {
       adminReportStatusFilter = e.target.value;
+      window.adminReportCurrentPage = 1;
       renderAdminReports();
     });
   }
   if (reportCategory) {
     reportCategory.addEventListener('change', (e) => {
       adminReportCategoryFilter = e.target.value;
+      window.adminReportCurrentPage = 1;
       renderAdminReports();
     });
   }
@@ -2639,12 +2745,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userSearch) {
     userSearch.addEventListener('input', (e) => {
       adminUserSearchTerm = e.target.value;
+      window.adminUsersCurrentPage = 1;
       renderAdminUsers();
     });
   }
   if (userRole) {
     userRole.addEventListener('change', (e) => {
       adminUserRoleFilter = e.target.value;
+      window.adminUsersCurrentPage = 1;
       renderAdminUsers();
     });
   }

@@ -960,20 +960,20 @@ function renderApproverView() {
     return;
   }
 
-  // 3. PELACAKAN IZIN KARYAWAN
-  if (currentApproverNav === 'pelacakan') {
+  // 3. PELACAKAN IZIN KARYAWAN (HANYA IZIN AKTIF / BERJALAN)
+  if (currentApproverNav === 'pelacakan' || currentApproverNav === 'tim') {
+    const activeStatuses = ['Sedang di Luar', 'Terlambat', 'Disetujui'];
     let list = ticketsList.filter(t => 
       !isDeletedByCurrentApprover(t) && 
       isTicketUnderMySupervision(t) &&
-      t.status !== 'Menunggu Persetujuan' &&
-      t.status !== 'Menunggu Otorisasi Darurat'
+      activeStatuses.includes(t.status)
     );
 
     // Filter Pencarian (Cari tiket, alasan, tujuan, pemohon, NIP, departemen)
     const searchAppInput = document.getElementById('searchApproverInput');
     const searchVal = searchAppInput ? searchAppInput.value.trim().toLowerCase() : '';
     if (searchVal) {
-      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : null;
       if (matcher) {
         list = list.filter(t => matcher(searchVal, t.id, t.applicantName, t.applicantNip, t.destination, t.reason, t.department, t.approverName, t.category, t.type));
       } else {
@@ -1009,7 +1009,7 @@ function renderApproverView() {
       list = list.filter(t => t.type === typeVal);
     }
 
-    // Filter Status
+    // Filter Status (Hanya status aktif)
     const filterAppStatus = document.getElementById('filterApproverStatus');
     const statusVal = filterAppStatus ? filterAppStatus.value : 'all';
     if (statusVal === 'emergency') {
@@ -1020,7 +1020,7 @@ function renderApproverView() {
       list = list.filter(t => t.status === statusVal);
     }
 
-    // Sorting Pelacakan (Terbaru / Terlama)
+    // Sorting Pelacakan
     const sortAppEl = document.getElementById('sortApproverTracking');
     const sortAppOrder = sortAppEl ? sortAppEl.value : 'desc';
 
@@ -1036,7 +1036,7 @@ function renderApproverView() {
       return sortAppOrder === 'asc' ? dA - dB : dB - dA;
     });
 
-    // Sinkronisasi status aktif tombol toggle Card vs List
+    // View toggle state
     const btnApproverViewCard = document.getElementById('btnApproverViewCard');
     const btnApproverViewTable = document.getElementById('btnApproverViewTable');
     if (btnApproverViewCard && btnApproverViewTable) {
@@ -1044,7 +1044,29 @@ function renderApproverView() {
       btnApproverViewTable.classList.toggle('active', window.currentApproverViewMode === 'table');
     }
 
-    if (list.length === 0) {
+    const totalItems = list.length;
+    const pageSize = 6;
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+    window.appPelacakanCurrentPage = window.appPelacakanCurrentPage || 1;
+    if (window.appPelacakanCurrentPage > totalPages) window.appPelacakanCurrentPage = totalPages;
+    const currentPage = window.appPelacakanCurrentPage;
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalItems);
+    const pageItems = list.slice(startIndex, endIndex);
+
+    const metaEl = document.getElementById('figmaApproverPelacakanMeta');
+    const btnsEl = document.getElementById('figmaApproverPelacakanBtns');
+    const barEl = document.getElementById('figmaApproverPelacakanPagination');
+    if (barEl) barEl.style.display = totalItems === 0 ? 'none' : 'flex';
+    if (metaEl) metaEl.textContent = totalItems === 0 ? 'Menampilkan 0 dari 0 data' : `Menampilkan ${startIndex + 1}–${endIndex} dari ${totalItems} data`;
+    if (btnsEl && typeof window.renderGenericPaginationButtons === 'function') {
+      window.renderGenericPaginationButtons(btnsEl, totalPages, currentPage, (newPage) => {
+        window.appPelacakanCurrentPage = newPage;
+        renderApproverView();
+      });
+    }
+
+    if (totalItems === 0) {
       if (containerApproverRequests) containerApproverRequests.innerHTML = '';
       if (emptyApproverBox) emptyApproverBox.style.display = 'flex';
       return;
@@ -1052,14 +1074,135 @@ function renderApproverView() {
 
     if (emptyApproverBox) emptyApproverBox.style.display = 'none';
     if (window.currentApproverViewMode === 'table') {
-      renderApproverTable(list, containerApproverRequests);
+      renderApproverTable(pageItems, containerApproverRequests);
     } else {
-      renderApproverCards(list, containerApproverRequests, true);
+      renderApproverCards(pageItems, containerApproverRequests, true);
+    }
+    return;
+  }
+
+  // 4. RIWAYAT IZIN KARYAWAN (HANYA STATUS FINAL: SELESAI, DITOLAK, DIBATALKAN, KEDALUWARSA)
+  if (currentApproverNav === 'riwayat') {
+    const finalStatuses = ['Selesai', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'];
+    let list = ticketsList.filter(t =>
+      !isDeletedByCurrentApprover(t) &&
+      isTicketUnderMySupervision(t) &&
+      finalStatuses.includes(t.status)
+    );
+
+    // Filter Pencarian
+    const searchRiwayatInput = document.getElementById('searchApproverRiwayatInput');
+    const searchVal = searchRiwayatInput ? searchRiwayatInput.value.trim().toLowerCase() : '';
+    if (searchVal) {
+      const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : null;
+      if (matcher) {
+        list = list.filter(t => matcher(searchVal, t.id, t.applicantName, t.applicantNip, t.destination, t.reason, t.department, t.approverName, t.category, t.type));
+      } else {
+        list = list.filter(t => 
+          (t.id && t.id.toLowerCase().includes(searchVal)) ||
+          (t.applicantName && t.applicantName.toLowerCase().includes(searchVal)) ||
+          (t.applicantNip && t.applicantNip.toLowerCase().includes(searchVal)) ||
+          (t.destination && t.destination.toLowerCase().includes(searchVal)) ||
+          (t.reason && t.reason.toLowerCase().includes(searchVal)) ||
+          (t.department && t.department.toLowerCase().includes(searchVal))
+        );
+      }
+    }
+
+    // Filter Periode Tanggal
+    const filterRiwayatPeriod = document.getElementById('filterApproverRiwayatPeriod');
+    const period = filterRiwayatPeriod ? filterRiwayatPeriod.value : 'all';
+    if (period !== 'all' && typeof window.matchesPeriodFilter === 'function') {
+      list = list.filter(t => window.matchesPeriodFilter(t, period));
+    }
+
+    // Filter Kategori
+    const filterRiwayatCat = document.getElementById('filterApproverRiwayatCategory');
+    const catVal = filterRiwayatCat ? filterRiwayatCat.value : 'all';
+    if (catVal !== 'all') {
+      list = list.filter(t => t.category === catVal);
+    }
+
+    // Filter Tipe Izin
+    const filterRiwayatType = document.getElementById('filterApproverRiwayatType');
+    const typeVal = filterRiwayatType ? filterRiwayatType.value : 'all';
+    if (typeVal !== 'all') {
+      list = list.filter(t => t.type === typeVal);
+    }
+
+    // Filter Status Final
+    const filterRiwayatStatus = document.getElementById('filterApproverRiwayatStatus');
+    const statusVal = filterRiwayatStatus ? filterRiwayatStatus.value : 'all';
+    if (statusVal === 'emergency') {
+      list = list.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+    } else if (statusVal !== 'all') {
+      list = list.filter(t => t.status === statusVal);
+    }
+
+    // Sorting Riwayat
+    const sortRiwayatEl = document.getElementById('sortApproverRiwayat');
+    const sortOrder = sortRiwayatEl ? sortRiwayatEl.value : 'desc';
+
+    list = [...list];
+    list.sort((a, b) => {
+      const parseD = (t) => {
+        const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
+      };
+      const dA = parseD(a);
+      const dB = parseD(b);
+      return sortOrder === 'asc' ? dA - dB : dB - dA;
+    });
+
+    const containerApproverRiwayatRequests = document.getElementById('containerApproverRiwayatRequests');
+    const emptyApproverRiwayatBox = document.getElementById('emptyApproverRiwayatBox');
+
+    // View toggle state
+    const btnApproverRiwayatViewCard = document.getElementById('btnApproverRiwayatViewCard');
+    const btnApproverRiwayatViewTable = document.getElementById('btnApproverRiwayatViewTable');
+    if (btnApproverRiwayatViewCard && btnApproverRiwayatViewTable) {
+      btnApproverRiwayatViewCard.classList.toggle('active', window.currentApproverRiwayatViewMode !== 'table');
+      btnApproverRiwayatViewTable.classList.toggle('active', window.currentApproverRiwayatViewMode === 'table');
+    }
+
+    const totalItems = list.length;
+    const pageSize = 6;
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+    window.appRiwayatCurrentPage = window.appRiwayatCurrentPage || 1;
+    if (window.appRiwayatCurrentPage > totalPages) window.appRiwayatCurrentPage = totalPages;
+    const currentPage = window.appRiwayatCurrentPage;
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalItems);
+    const pageItems = list.slice(startIndex, endIndex);
+
+    const metaEl = document.getElementById('figmaApproverRiwayatMeta');
+    const btnsEl = document.getElementById('figmaApproverRiwayatBtns');
+    const barEl = document.getElementById('figmaApproverRiwayatPagination');
+    if (barEl) barEl.style.display = totalItems === 0 ? 'none' : 'flex';
+    if (metaEl) metaEl.textContent = totalItems === 0 ? 'Menampilkan 0 dari 0 data' : `Menampilkan ${startIndex + 1}–${endIndex} dari ${totalItems} data`;
+    if (btnsEl && typeof window.renderGenericPaginationButtons === 'function') {
+      window.renderGenericPaginationButtons(btnsEl, totalPages, currentPage, (newPage) => {
+        window.appRiwayatCurrentPage = newPage;
+        renderApproverView();
+      });
+    }
+
+    if (totalItems === 0) {
+      if (containerApproverRiwayatRequests) containerApproverRiwayatRequests.innerHTML = '';
+      if (emptyApproverRiwayatBox) emptyApproverRiwayatBox.style.display = 'flex';
+      return;
+    }
+
+    if (emptyApproverRiwayatBox) emptyApproverRiwayatBox.style.display = 'none';
+    if (window.currentApproverRiwayatViewMode === 'table') {
+      renderApproverTable(pageItems, containerApproverRiwayatRequests);
+    } else {
+      renderApproverCards(pageItems, containerApproverRiwayatRequests, true);
     }
     return;
   }
 }
-
 // APPROVAL & REJECTION MODALS
 function openApproveModal(ticketId) {
   const ticketsList = window.ticketsList || [];
@@ -1186,16 +1329,6 @@ function confirmApproveDecision() {
       ticketId: ticket.id,
       priority: 'normal',
       eventId: `approved_${ticket.id}`
-    });
-    window.createNotification({
-      recipientRole: 'security',
-      actorSource: 'approver',
-      type: 'security_siap_keluar',
-      title: 'Tiket Disetujui - Siap Keluar',
-      message: `Tiket #${ticket.id} (${ticket.applicantName} - ${ticket.category}) telah disetujui dan siap dipindai keluar di gerbang.`,
-      ticketId: ticket.id,
-      priority: 'normal',
-      eventId: `ready_sec_${ticket.id}`
     });
   }
   

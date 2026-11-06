@@ -210,7 +210,7 @@
   // -------------------------------------------------------------------
   function renderMobileAtasan(container, targetTab) {
     if (targetTab) {
-      currentAtasanTab = (targetTab === 'pelacakan') ? 'tim' : (targetTab === 'riwayat' ? 'dashboard' : targetTab);
+      currentAtasanTab = (targetTab === 'pelacakan') ? 'tim' : targetTab;
     }
     if (!container) container = document.getElementById('mobileMainContent');
     if (!container) return;
@@ -222,7 +222,7 @@
     } else if (currentAtasanTab === 'tim' || currentAtasanTab === 'pelacakan') {
       renderAtasanTim(container);
     } else if (currentAtasanTab === 'riwayat') {
-      renderAtasanDashboard(container);
+      renderAtasanRiwayat(container);
     } else if (currentAtasanTab === 'detail') {
       renderAtasanDetailFullPage(container, viewingTicketId);
     }
@@ -1224,8 +1224,16 @@
       (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
     );
 
-    // Urutkan prioritas pelacakan: Terlambat > Sedang di Luar > Disetujui > Darurat/Pending > Selesai > Ditolak
-    const sortedEligible = [...tickets].sort((a, b) => {
+    // HANYA perizinan yang sedang berjalan/aktif (Mirip Pelacakan Pos Jaga)
+    const activeRunningTickets = tickets.filter(t => 
+      t.status === 'Sedang di Luar' || 
+      t.status === 'Terlambat' || 
+      t.status === 'Disetujui' || 
+      (t.isEmergency && (t.emergencyLocked || t.status === 'Menunggu Otorisasi Darurat'))
+    );
+
+    // Urutkan prioritas pelacakan: Terlambat > Sedang di Luar > Disetujui
+    const sortedEligible = [...activeRunningTickets].sort((a, b) => {
       const getPriority = (x) => {
         if (x.status === 'Terlambat' || (x.isLate && x.status !== 'Selesai')) return 1;
         if (x.status === 'Sedang di Luar') return 2;
@@ -1674,9 +1682,8 @@
   function renderAtasanRiwayat(container) {
     const approver = getActiveApprover();
     const tickets = getTeamTickets().filter(t => {
-      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
-      if (isEmergency) return true; // Izin darurat masuk riwayat segera setelah pengajuan dibuat
-      return t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
+      // Riwayat Atasan strictly berstatus final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa)
+      return t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa';
     });
 
     const emergencyCount = tickets.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')))).length;
@@ -1709,57 +1716,88 @@
     });
 
     const cardsHtml = filtered.map(t => {
+      const isLate = (t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
+      const isOutside = (t.status === 'Sedang di Luar');
+      const isApproved = (t.status === 'Disetujui');
+      const isSelesai = (t.status === 'Selesai');
+      const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
       const isDitolak = (t.status === 'Ditolak');
-      const isEmergency = Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')));
-      const isLate = (t.status === 'Terlambat' || t.isLate);
-      
-      let badgeDecisionClass = isDitolak ? 'ditolak' : 'disetujui';
-      let badgeDecisionLabel = isDitolak ? 'Ditolak' : (isEmergency ? 'Penerbitan darurat' : 'Disetujui');
-      const safeApproverName = (approver && approver.name) ? (approver.name.includes(',') ? approver.name.split(',')[0] : approver.name) : 'Atasan';
-      let deciderSource = isEmergency ? 'Sistem' : (t.approverName || safeApproverName);
+      const isDibatalkan = (t.status === 'Dibatalkan');
+      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
 
-      let currentStatusBadgeClass = 'selesai';
-      if (isLate) currentStatusBadgeClass = 'terlambat';
-      else if (t.status === 'Sedang di Luar') currentStatusBadgeClass = 'sedang-di-luar';
-      else if (isDitolak) currentStatusBadgeClass = 'ditolak';
+      let statusBadgeClass = 'disetujui';
+      let statusSubtitle = 'Belum keluar • Izin masih berlaku';
+      if (isLate) {
+        statusBadgeClass = 'terlambat';
+        statusSubtitle = 'Terlambat • Melebihi batas jam kembali';
+      } else if (isOutside) {
+        statusBadgeClass = 'sedang-di-luar';
+        statusSubtitle = t.hasExtensionPending ? 'Menunggu keputusan perpanjangan' : 'Sedang berada di luar area pabrik';
+      } else if (isApproved) {
+        statusBadgeClass = 'disetujui';
+        statusSubtitle = 'Izin disetujui • Siap scan out di pos jaga';
+      } else if (isPending) {
+        statusBadgeClass = isEmergency ? 'darurat' : 'menunggu';
+        statusSubtitle = isEmergency ? 'Prioritas Darurat • Menunggu otorisasi' : 'Baru diajukan • Menunggu persetujuan Anda';
+      } else if (isDitolak) {
+        statusBadgeClass = 'ditolak';
+        statusSubtitle = 'Pengajuan izin ditolak oleh atasan';
+      } else if (isDibatalkan) {
+        statusBadgeClass = 'dibatalkan';
+        statusSubtitle = 'Pengajuan izin dibatalkan pemohon';
+      } else if (isSelesai) {
+        statusBadgeClass = 'selesai';
+        statusSubtitle = (t.isLate || t.actualReturnExceeded) ? 'Selesai • Kembali Terlambat' : 'Tepat Waktu • Selesai';
+      }
 
       return `
-        <div class="mobile-ticket-item" style="margin-bottom: 12px; padding: 12px 14px;">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; margin-bottom: 10px; background: #ffffff;">
           <div class="mobile-ticket-item-header">
             <div>
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
             </div>
-            <span class="mobile-badge ${badgeDecisionClass}">${badgeDecisionLabel}</span>
+            <span class="mobile-badge ${statusBadgeClass}">${t.status}</span>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;">
-            <span style="font-family: monospace; font-size: 0.775rem; font-weight: 700; color: #475569;">${t.id}</span>
-            ${isEmergency ? '<span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; border: 1.2px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Izin Darurat</span>' : ''}
+          <div style="font-family: monospace; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
+            ${t.id}
+          </div>
+          ${t.reassignedTo ? `<div style="font-size: 0.7rem; color: #b45309; font-weight: 700; margin-bottom: 2px;">↳ Dialihkan ke ${t.reassignedTo}</div>` : ''}
+          <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 6px;">
+            ${statusSubtitle}
           </div>
 
-          <div class="mobile-ticket-grid-meta" style="margin: 6px 0;">
+          <div class="mobile-ticket-grid-meta">
             <div>
-              <div class="mobile-meta-sub">Waktu keputusan</div>
-              <div class="mobile-meta-val">${t.approvedAt || t.rejectedAt || (t.createdAt ? t.createdAt.split(',')[0] + ' • ' + formatTimeOnly(t.createdAt) : 'Hari ini • 09.30 WIB')}</div>
+              <div class="mobile-meta-sub">Rencana keluar</div>
+              <div class="mobile-meta-val">${formatTimeOnly(getTExitTime(t)) || '—'}</div>
             </div>
             <div>
-              <div class="mobile-meta-sub">Keputusan / sumber</div>
-              <div class="mobile-meta-val">${deciderSource}</div>
+              <div class="mobile-meta-sub">Scan Out aktual</div>
+              <div class="mobile-meta-val">${t.scanOutTime ? formatTimeOnly(t.scanOutTime) : '—'}</div>
+            </div>
+            <div>
+              <div class="mobile-meta-sub">Estimasi kembali</div>
+              <div class="mobile-meta-val">
+                ${formatTimeOnly(getTReturnTime(t)) || '—'}
+              </div>
+            </div>
+            <div>
+              <div class="mobile-meta-sub">Scan In aktual</div>
+              <div class="mobile-meta-val">${t.scanInTime ? formatTimeOnly(t.scanInTime) : '—'}</div>
             </div>
           </div>
 
-          <div style="background: #f8fafc; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; font-size: 0.7rem; color: #475569;">
-            <strong>Catatan Atasan:</strong> "${t.approverNote || t.rejectionReason || (isEmergency ? 'Oleh sistem • Bukan keputusan Atasan.' : '—')}"
-          </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-            <div style="font-size: 0.7rem; color: #64748b;">
-              Status saat ini: <span class="mobile-badge ${currentStatusBadgeClass}">${t.status}</span>
-            </div>
-            <button type="button" class="mobile-btn-detail" aria-label="Lihat Detail tiket ${t.id}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
-            Lihat Detail
-          </button>
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Detail pengajuan</span>
+            </button>
+            <button type="button" class="mobile-btn-danger" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span style="color: #ffffff;">Hapus</span>
+            </button>
           </div>
         </div>
       `;
@@ -2294,16 +2332,6 @@
             ticketId: t.id,
             priority: 'normal',
             eventId: `approved_${t.id}`
-          });
-          window.createNotification({
-            recipientRole: 'security',
-            actorSource: 'approver',
-            type: 'security_siap_keluar',
-            title: 'Tiket Disetujui - Siap Keluar',
-            message: `Tiket #${t.id} (${t.applicantName} - ${t.category}) telah disetujui dan siap dipindai keluar di gerbang.`,
-            ticketId: t.id,
-            priority: 'normal',
-            eventId: `ready_sec_${t.id}`
           });
         } else {
           const appInfoRej = resolveDynamicApplicantInfo(t);

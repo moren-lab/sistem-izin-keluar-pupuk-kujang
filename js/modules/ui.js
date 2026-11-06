@@ -274,3 +274,73 @@ function closeNoticeModal() {
 
 window.openNoticeModal = openNoticeModal;
 window.closeNoticeModal = closeNoticeModal;
+
+
+// ===================================================================
+// UNIVERSAL FIGMA PAGINATION CONTROLLER (Sesuai Gambar 1 User)
+// Digunakan di: Riwayat Pos Jaga, Pelacakan Pos Jaga, Pelacakan Atasan,
+// Riwayat Atasan, Rekapitulasi Admin, Audit Trail Admin, Hak Akses Admin
+// ===================================================================
+function renderGenericPaginationButtons(btnsContainer, totalPages, currentPage, onPageChange) {
+  if (!btnsContainer) return;
+  if (!totalPages || totalPages < 1) {
+    totalPages = 1;
+  }
+
+  let html = '<button type="button" class="btn-figma-page btn-page-prev"' + (currentPage <= 1 ? ' disabled style="opacity: 0.5; cursor: not-allowed;"' : '') + '>Sebelumnya</button>';
+
+  let startP = Math.max(1, currentPage - 2);
+  let endP = Math.min(totalPages, startP + 4);
+  if (endP - startP < 4) {
+    startP = Math.max(1, endP - 4);
+  }
+
+  if (startP > 1) {
+    html += '<button type="button" class="btn-figma-page" data-page="1">1</button>';
+    if (startP > 2) {
+      html += '<span style="padding: 0 4px; color: var(--text-muted); font-size: 0.8rem;">...</span>';
+    }
+  }
+
+  for (let i = startP; i <= endP; i++) {
+    html += '<button type="button" class="btn-figma-page ' + (i === currentPage ? 'active' : '') + '" data-page="' + i + '">' + i + '</button>';
+  }
+
+  if (endP < totalPages) {
+    if (endP < totalPages - 1) {
+      html += '<span style="padding: 0 4px; color: var(--text-muted); font-size: 0.8rem;">...</span>';
+    }
+    html += '<button type="button" class="btn-figma-page" data-page="' + totalPages + '">' + totalPages + '</button>';
+  }
+
+  html += '<button type="button" class="btn-figma-page btn-page-next"' + (currentPage >= totalPages ? ' disabled style="opacity: 0.5; cursor: not-allowed;"' : '') + '>Berikutnya</button>';
+
+  btnsContainer.innerHTML = html;
+
+  const prevBtn = btnsContainer.querySelector('.btn-page-prev');
+  const nextBtn = btnsContainer.querySelector('.btn-page-next');
+
+  if (prevBtn) {
+    prevBtn.onclick = (e) => {
+      e.preventDefault();
+      if (currentPage > 1 && typeof onPageChange === 'function') onPageChange(currentPage - 1);
+    };
+  }
+
+  if (nextBtn) {
+    nextBtn.onclick = (e) => {
+      e.preventDefault();
+      if (currentPage < totalPages && typeof onPageChange === 'function') onPageChange(currentPage + 1);
+    };
+  }
+
+  btnsContainer.querySelectorAll('[data-page]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      const p = parseInt(btn.getAttribute('data-page'), 10);
+      if (p !== currentPage && typeof onPageChange === 'function') onPageChange(p);
+    };
+  });
+}
+
+window.renderGenericPaginationButtons = renderGenericPaginationButtons;

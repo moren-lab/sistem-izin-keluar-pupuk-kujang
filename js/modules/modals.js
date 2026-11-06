@@ -678,11 +678,11 @@ function setupSingleApproverCombobox(cfg) {
 
       const isUnavailable = Boolean(approver.isUnavailable);
       const statusTag = isUnavailable
-        ? `<span class="approver-item-tag" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-weight: 700; font-size: 0.675rem; padding: 2px 7px; border-radius: 9999px;">Tidak tersedia</span>`
-        : `<span class="approver-item-tag" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.675rem; padding: 2px 7px; border-radius: 9999px;">Aktif</span>`;
+        ? `<span class="approver-item-tag" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-weight: 700; font-size: 0.675rem; padding: 2px 8px; border-radius: 9999px;">Tidak tersedia</span>`
+        : `<span class="approver-item-tag" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.675rem; padding: 2px 8px; border-radius: 9999px;">Aktif</span>`;
       let directTag = '';
       if (approver.isDirectSupervisor && !isUnavailable) {
-        directTag = `<span class="approver-item-tag" title="Atasan langsung divisi Anda">Atasan Langsung</span>`;
+        directTag = `<span class="approver-item-tag" style="background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; font-weight: 700; font-size: 0.675rem; padding: 2px 8px; border-radius: 9999px;" title="Atasan langsung divisi Anda">Atasan Langsung</span>`;
       }
 
       if (approver.isUnavailable) {
@@ -699,7 +699,10 @@ function setupSingleApproverCombobox(cfg) {
           <div class="approver-item-name-row">
             <span class="approver-item-name">${highlightedName}</span>
             <span class="approver-item-nip">${approver.nip || ''}</span>
-            ${statusTag} ${directTag}
+            <div class="approver-item-tags-wrap">
+              ${statusTag}
+              ${directTag}
+            </div>
           </div>
           <div class="approver-item-role">${highlightedTitle}</div>
           <div class="approver-item-dept">${highlightedDept}</div>
@@ -3400,17 +3403,6 @@ document.addEventListener('DOMContentLoaded', () => {
           ticketId: emergencyTicket.id,
           priority: 'urgent',
           eventId: `emg_sub_${emergencyTicket.id}`
-        });
-
-        // Notifikasi ke Pos Jaga
-        window.createNotification({
-          recipientRole: 'security',
-          title: '🚨 Peringatan Izin Darurat Aktif',
-          message: `Tiket Darurat #${emergencyTicket.id} diterbitkan untuk ${emergencyTicket.applicantName}. Pantau status otorisasi sebelum gerbang dibuka.`,
-          ticketId: emergencyTicket.id,
-          type: 'izin_darurat',
-          priority: 'urgent',
-          eventId: `emg_sec_${emergencyTicket.id}`
         });
       }
 

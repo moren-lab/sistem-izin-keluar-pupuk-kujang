@@ -717,30 +717,33 @@ function renderSecurityView() {
   }
 
   // 3. PELACAKAN KARYAWAN DI LUAR (HEADCOUNT)
-  // Menampilkan HANYA perizinan yang sedang berjalan/aktif.
-  // Tiket dengan status final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa) secara ketat hanya berada di Riwayat Scan.
+  // Menampilkan HANYA perizinan yang SUDAH SCAN KELUAR dan sedang berada di luar area pabrik.
+  // Sebelum scan di gerbang, Pos Jaga tidak melihat status atau izin karyawan tersebut.
   if (currentSecurityNav === 'pelacakan') {
     const queueMode = filterSecurityQueueTab ? filterSecurityQueueTab.value : 'all';
 
-    const isTerminal = (t) => ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'].includes(t.status);
-    const activeTickets = ticketsList.filter(t => !isTerminal(t));
+    const outsideTickets = ticketsList.filter(t => 
+      !t.deletedBySecurity &&
+      Boolean(t.scanOutTime) && 
+      (t.status === 'Sedang di Luar' || t.status === 'Terlambat')
+    );
 
-    let list = activeTickets;
-    if (queueMode === 'ready') {
-      list = activeTickets.filter(t => t.status === 'Disetujui');
-    } else if (queueMode === 'outside') {
-      list = activeTickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
+    let list = outsideTickets;
+    if (queueMode === 'outside') {
+      list = outsideTickets.filter(t => t.status === 'Sedang di Luar');
     } else if (queueMode === 'overdue') {
-      list = activeTickets.filter(t => t.status === 'Terlambat');
+      list = outsideTickets.filter(t => t.status === 'Terlambat');
     } else if (queueMode === 'emergency') {
-      list = activeTickets.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
+      list = outsideTickets.filter(t => t.isEmergency || (t.id && t.id.startsWith('TK-EMG')));
     } else {
-      list = activeTickets;
+      list = outsideTickets;
     }
 
     if (list.length === 0) {
       if (containerSecurityQueue) containerSecurityQueue.innerHTML = '';
       if (emptySecurityBox) emptySecurityBox.style.display = 'flex';
+      const figmaSecurityPelacakanPagination = document.getElementById('figmaSecurityPelacakanPagination');
+      if (figmaSecurityPelacakanPagination) figmaSecurityPelacakanPagination.style.display = 'none';
       return;
     }
 
@@ -752,10 +755,41 @@ function renderSecurityView() {
     }
 
     if (emptySecurityBox) emptySecurityBox.style.display = 'none';
+
+    // Pagination Pelacakan Pos Jaga (6 per halaman sesuai permintaan Gambar 2)
+    const pageSize = 6;
+    const totalCount = list.length;
+    const totalPages = Math.ceil(totalCount / pageSize) || 1;
+    let currentPage = window.secPelacakanCurrentPage || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    window.secPelacakanCurrentPage = currentPage;
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalCount);
+    const paginatedList = list.slice(startIndex, endIndex);
+
+    const figmaSecurityPelacakanPagination = document.getElementById('figmaSecurityPelacakanPagination');
+    const figmaSecurityPelacakanMeta = document.getElementById('figmaSecurityPelacakanMeta');
+    const figmaSecurityPelacakanBtns = document.getElementById('figmaSecurityPelacakanBtns');
+
+    if (figmaSecurityPelacakanPagination) {
+      figmaSecurityPelacakanPagination.style.display = totalCount > 0 ? 'flex' : 'none';
+      if (figmaSecurityPelacakanMeta) {
+        figmaSecurityPelacakanMeta.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari total ${totalCount} izin`;
+      }
+      if (figmaSecurityPelacakanBtns && typeof window.renderGenericPaginationButtons === 'function') {
+        window.renderGenericPaginationButtons(figmaSecurityPelacakanBtns, totalPages, currentPage, (newPage) => {
+          window.secPelacakanCurrentPage = newPage;
+          renderSecurityView();
+        });
+      }
+    }
+
     if (window.currentSecurityPelacakanViewMode === 'table') {
-      renderSecurityTable(list, containerSecurityQueue);
+      renderSecurityTable(paginatedList, containerSecurityQueue);
     } else {
-      renderSecurityCards(list, containerSecurityQueue);
+      renderSecurityCards(paginatedList, containerSecurityQueue);
     }
     return;
   }
@@ -774,14 +808,47 @@ function renderSecurityView() {
     if (filteredLog.length === 0) {
       if (containerSecurityLog) containerSecurityLog.innerHTML = '';
       if (emptySecurityLogBox) emptySecurityLogBox.style.display = 'flex';
+      const figmaSecurityRiwayatPagination = document.getElementById('figmaSecurityRiwayatPagination');
+      if (figmaSecurityRiwayatPagination) figmaSecurityRiwayatPagination.style.display = 'none';
       return;
     }
 
     if (emptySecurityLogBox) emptySecurityLogBox.style.display = 'none';
+
+    // Pagination Riwayat Pos Jaga (6 per halaman sesuai permintaan Gambar 2)
+    const pageSize = 6;
+    const totalCount = filteredLog.length;
+    const totalPages = Math.ceil(totalCount / pageSize) || 1;
+    let currentPage = window.secRiwayatCurrentPage || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    window.secRiwayatCurrentPage = currentPage;
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalCount);
+    const paginatedLog = filteredLog.slice(startIndex, endIndex);
+
+    const figmaSecurityRiwayatPagination = document.getElementById('figmaSecurityRiwayatPagination');
+    const figmaSecurityRiwayatMeta = document.getElementById('figmaSecurityRiwayatMeta');
+    const figmaSecurityRiwayatBtns = document.getElementById('figmaSecurityRiwayatBtns');
+
+    if (figmaSecurityRiwayatPagination) {
+      figmaSecurityRiwayatPagination.style.display = totalCount > 0 ? 'flex' : 'none';
+      if (figmaSecurityRiwayatMeta) {
+        figmaSecurityRiwayatMeta.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari total ${totalCount} riwayat`;
+      }
+      if (figmaSecurityRiwayatBtns && typeof window.renderGenericPaginationButtons === 'function') {
+        window.renderGenericPaginationButtons(figmaSecurityRiwayatBtns, totalPages, currentPage, (newPage) => {
+          window.secRiwayatCurrentPage = newPage;
+          renderSecurityView();
+        });
+      }
+    }
+
     if (window.currentSecurityLogViewMode === 'table') {
-      renderSecurityLogTable(filteredLog, containerSecurityLog);
+      renderSecurityLogTable(paginatedLog, containerSecurityLog);
     } else {
-      renderSecurityCards(filteredLog, containerSecurityLog, true);
+      renderSecurityCards(paginatedLog, containerSecurityLog, true);
     }
     return;
   }
@@ -1604,7 +1671,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (filterSecurityQueueTab) filterSecurityQueueTab.addEventListener('change', renderSecurityView);
+  if (filterSecurityQueueTab) filterSecurityQueueTab.addEventListener('change', () => {
+    window.secPelacakanCurrentPage = 1;
+    renderSecurityView();
+  });
 
   // Riwayat Pemindaian Pos Jaga event listeners
   const searchSecurityLogInput = document.getElementById('searchSecurityLogInput');
@@ -1617,11 +1687,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSecurityLogViewTable = document.getElementById('btnSecurityLogViewTable');
   const btnSecurityLogExport = document.getElementById('btnSecurityLogExport');
 
-  if (searchSecurityLogInput) searchSecurityLogInput.addEventListener('input', renderSecurityView);
-  if (filterSecurityLogCategory) filterSecurityLogCategory.addEventListener('change', renderSecurityView);
-  if (filterSecurityLogStatus) filterSecurityLogStatus.addEventListener('change', renderSecurityView);
-  if (filterSecurityLogPeriod) filterSecurityLogPeriod.addEventListener('change', renderSecurityView);
-  if (sortSecurityLog) sortSecurityLog.addEventListener('change', renderSecurityView);
+  const onLogFilterChange = () => {
+    window.secRiwayatCurrentPage = 1;
+    renderSecurityView();
+  };
+  if (searchSecurityLogInput) searchSecurityLogInput.addEventListener('input', onLogFilterChange);
+  if (filterSecurityLogCategory) filterSecurityLogCategory.addEventListener('change', onLogFilterChange);
+  if (filterSecurityLogStatus) filterSecurityLogStatus.addEventListener('change', onLogFilterChange);
+  if (filterSecurityLogPeriod) filterSecurityLogPeriod.addEventListener('change', onLogFilterChange);
+  if (sortSecurityLog) sortSecurityLog.addEventListener('change', onLogFilterChange);
 
   if (filterSecurityLogGate) {
     filterSecurityLogGate.addEventListener('change', (e) => {

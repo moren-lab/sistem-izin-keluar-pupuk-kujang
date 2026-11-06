@@ -170,6 +170,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
           <span>Pelacakan</span>
         </div>
+        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>Riwayat</span>
+        </div>
       `;
     } else if (currentMobileRole === 'security') {
       navEl.innerHTML = `
@@ -399,9 +403,6 @@
     }
 
     if (tab === 'beranda') tab = 'dashboard';
-    if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'riwayat') {
-      tab = 'dashboard';
-    }
     currentMobileTab = tab;
     renderActiveView();
 

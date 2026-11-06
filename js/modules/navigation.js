@@ -120,6 +120,7 @@ function setApproverNav(navKey) {
   const menuApproverDashboard = document.getElementById('menuApproverDashboard');
   const menuApproverAntrian = document.getElementById('menuApproverAntrian');
   const menuApproverPelacakan = document.getElementById('menuApproverPelacakan');
+  const menuApproverRiwayat = document.getElementById('menuApproverRiwayat');
 
   const bnavAppDashboard = document.getElementById('bnavAppDashboard');
   const bnavAppAntrian = document.getElementById('bnavAppAntrian');
@@ -129,10 +130,12 @@ function setApproverNav(navKey) {
   const approverDashboardPage = document.getElementById('approverDashboardPage');
   const approverAntrianPage = document.getElementById('approverAntrianPage');
   const approverPelacakanPage = document.getElementById('approverPelacakanPage');
+  const approverRiwayatPage = document.getElementById('approverRiwayatPage');
 
   if (menuApproverDashboard) menuApproverDashboard.classList.toggle('active', navKey === 'dashboard');
   if (menuApproverAntrian) menuApproverAntrian.classList.toggle('active', navKey === 'antrian');
-  if (menuApproverPelacakan) menuApproverPelacakan.classList.toggle('active', navKey === 'pelacakan' || navKey === 'tim' || navKey === 'riwayat');
+  if (menuApproverPelacakan) menuApproverPelacakan.classList.toggle('active', navKey === 'pelacakan' || navKey === 'tim');
+  if (menuApproverRiwayat) menuApproverRiwayat.classList.toggle('active', navKey === 'riwayat');
 
   if (bnavAppDashboard) bnavAppDashboard.classList.toggle('active', navKey === 'dashboard');
   if (bnavAppAntrian) bnavAppAntrian.classList.toggle('active', navKey === 'antrian');
@@ -141,7 +144,8 @@ function setApproverNav(navKey) {
 
   if (approverDashboardPage) approverDashboardPage.style.display = navKey === 'dashboard' ? 'block' : 'none';
   if (approverAntrianPage) approverAntrianPage.style.display = navKey === 'antrian' ? 'block' : 'none';
-  if (approverPelacakanPage) approverPelacakanPage.style.display = (navKey === 'pelacakan' || navKey === 'tim' || navKey === 'riwayat') ? 'block' : 'none';
+  if (approverPelacakanPage) approverPelacakanPage.style.display = (navKey === 'pelacakan' || navKey === 'tim') ? 'block' : 'none';
+  if (approverRiwayatPage) approverRiwayatPage.style.display = navKey === 'riwayat' ? 'block' : 'none';
 
   if (navKey === 'tim') {
     const filterApproverStatus = document.getElementById('filterApproverStatus');
@@ -712,10 +716,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuApproverDashboard = document.getElementById('menuApproverDashboard');
   const menuApproverAntrian = document.getElementById('menuApproverAntrian');
   const menuApproverPelacakan = document.getElementById('menuApproverPelacakan');
+  const menuApproverRiwayat = document.getElementById('menuApproverRiwayat');
 
   if (menuApproverDashboard) menuApproverDashboard.addEventListener('click', () => setApproverNav('dashboard'));
   if (menuApproverAntrian) menuApproverAntrian.addEventListener('click', () => setApproverNav('antrian'));
   if (menuApproverPelacakan) menuApproverPelacakan.addEventListener('click', () => setApproverNav('pelacakan'));
+  if (menuApproverRiwayat) menuApproverRiwayat.addEventListener('click', () => setApproverNav('riwayat'));
 
   const menuSecurityDashboard = document.getElementById('menuSecurityDashboard');
   const menuSecurityScanner = document.getElementById('menuSecurityScanner');
