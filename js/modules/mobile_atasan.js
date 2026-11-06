@@ -182,20 +182,32 @@
 
   function formatDisplayDate(dateStr) {
     if (!dateStr) return '-';
-    let clean = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
-    clean = clean.replace(/(\d{1,2}):(\d{2})/g, '$1.$2');
-    if (clean.includes('Okt') || clean.includes('WIB') || clean.includes('Jan') || clean.includes('Feb') || clean.includes('Mar')) {
-      return clean;
+    let raw = String(dateStr).replace(/\s*\(Pos.*?\)/gi, '').trim();
+    if (typeof window !== 'undefined' && typeof window.normalizeReturnDateTime === 'function') {
+      raw = window.normalizeReturnDateTime(raw);
+    }
+    if (/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu)/i.test(raw)) {
+      return raw.replace(/(\d{1,2}):(\d{2})(\s*WIB)?/gi, '$1.$2 WIB');
+    }
+    if (typeof window !== 'undefined' && typeof window.formatDisplayDate === 'function') {
+      const globalFmt = window.formatDisplayDate(raw);
+      if (globalFmt && globalFmt !== raw) {
+        return globalFmt.replace(/(\d{1,2}):(\d{2})(\s*WIB)?/gi, '$1.$2 WIB');
+      }
     }
     try {
-      const dt = new Date(clean);
-      if (isNaN(dt.getTime())) return clean;
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const pad = n => String(n).padStart(2, '0');
-      return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
-    } catch (e) {
-      return clean;
-    }
+      const parseStr = raw.includes('T')
+        ? raw
+        : raw.replace(/(\d{4}-\d{2}-\d{2})[ ](\d{1,2})[.:](\d{2})(?:[.:](\d{2}))?/, '$1T$2:$3:00');
+      const dt = new Date(parseStr);
+      if (!isNaN(dt.getTime())) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const pad = n => String(n).padStart(2, '0');
+        return `${days[dt.getDay()]}, ${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
+      }
+    } catch (e) {}
+    return raw.replace(/(\d{1,2}):(\d{2})/g, '$1.$2 WIB');
   }
 
   function formatDateIndo(dateObj) {
@@ -380,8 +392,8 @@
                   <div style="font-size: 0.675rem; font-weight: 800; color: #b45309; text-transform: uppercase;">
                     IZIN DARURAT (DIALIHKAN)
                   </div>
-                  <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-top: 1px;">${getTName(pendingEmergTicket)}</div>
-                  <div style="font-size: 0.7rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+                  <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a; margin-top: 1px;">${getTName(pendingEmergTicket)}</div>
+                  <div style="font-size: 0.625rem; color: #64748b; font-weight: 600;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
                   <span class="mobile-badge" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a; font-size: 0.65rem; border-radius: 6px; padding: 2px 7px;">↳ Dialihkan ke ${pendingEmergTicket.approverName}</span>
@@ -409,8 +421,8 @@
             </div>
             <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
               <div>
-                <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
-                <div style="font-size: 0.7rem; color: #64748b;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
+                <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${getTName(pendingEmergTicket)}</div>
+                <div style="font-size: 0.625rem; color: #64748b; font-weight: 600;">${pendingEmergTicket.id} • ${pendingEmergTicket.category || 'Darurat Medis/K3'}</div>
               </div>
               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
                 <span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; font-weight: 800; border: 1px solid #fecaca;">Menunggu Otorisasi</span>
@@ -458,8 +470,8 @@
           <!-- Header: Kiri Nama & ID, Kanan Status Badge (Sesuai Permintaan User) -->
           <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div>
-              <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
-              <div style="font-size: 0.7rem; color: #64748b;">${t.id} • ${t.category || 'Dinas Kantor'}</div>
+              <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+              <div style="font-size: 0.625rem; color: #64748b; font-weight: 600;">${t.id} • ${t.category || 'Dinas Kantor'}</div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
               <span class="mobile-badge menunggu" style="background: #fef3c7; color: #92400e; font-weight: 800; border: 1px solid #fde68a;">Menunggu Persetujuan</span>
@@ -515,8 +527,8 @@
           <div class="mobile-ticket-item" style="border: 1px solid #ddd6fe; border-radius: 10px; padding: 12px; margin-bottom: 0; background: #faf5ff;">
             <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
               <div>
-                <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
-                <div style="font-size: 0.7rem; color: #64748b;">${t.id} • Perpanjangan</div>
+                <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+                <div style="font-size: 0.625rem; color: #64748b; font-weight: 600;">${t.id} • Perpanjangan</div>
               </div>
               <span class="mobile-badge sedang-di-luar" style="background:#f5f3ff; color:#7c3aed; font-size: 0.65rem; padding: 2px 8px; border: 1px solid #ddd6fe; flex-shrink: 0; font-weight: 700;">Menunggu Perpanjangan</span>
             </div>
@@ -745,7 +757,7 @@
             <div class="mobile-ticket-item" style="margin-bottom: 12px; ${isEmg ? 'border: 1.5px solid #fca5a5; background: #fff5f5;' : ''}">
               <div class="mobile-ticket-item-header">
                 <div>
-                  <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+                  <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
                   <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
@@ -762,11 +774,11 @@
                 </div>
               </div>
 
-              <div style="font-family: monospace; font-size: 0.775rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+              <div style="font-family: monospace; font-size: 0.7rem; font-weight: 700; color: #475569; margin-bottom: 3px;">
                 ${t.id}
               </div>
 
-              <div style="font-size: 0.75rem; color: ${isEmg ? '#b91c1c' : '#047857'}; font-weight: 700; margin-bottom: 4px;">
+              <div style="font-size: 0.675rem; color: ${isEmg ? '#b91c1c' : '#047857'}; font-weight: 700; margin-bottom: 4px;">
                 ${t.category || (isEmg ? 'Darurat Medis/K3' : '')} • ${getTType(t)}
               </div>
 
@@ -826,13 +838,13 @@
             <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0;">
               <div class="mobile-ticket-item-header">
                 <div>
-                  <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+                  <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
                   <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
                 </div>
                 <span class="mobile-badge sedang-di-luar" style="background: #f5f3ff; color: #7c3aed;">Perpanjangan</span>
               </div>
 
-              <div style="font-family: monospace; font-size: 0.775rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+              <div style="font-family: monospace; font-size: 0.7rem; font-weight: 700; color: #475569; margin-bottom: 3px;">
                 ${t.id}
               </div>
 

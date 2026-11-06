@@ -2907,3 +2907,168 @@ body.theme-dark .mobile-user-avatar,
   border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
   color: #34d399 !important;
 }
+
+
+/* ===================================================================
+   MICRO-INTERACTIONS & ANIMASI MOBILE EDITORIAL (ANTI AI SLOP)
+   =================================================================== */
+
+/* 1. Tactile Press Feedback pada Semua Tombol Mobile */
+.mobile-btn-primary,
+.mobile-btn-secondary,
+.mobile-btn-danger,
+.mobile-btn-approve,
+.mobile-hero-btn,
+.mobile-hero-btn-white,
+.mobile-btn-detail,
+.mobile-sheet-close,
+.mobile-seg-btn,
+.mobile-top-btn,
+.mobile-notif-row,
+.mobile-quick-card {
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.4, 1), background-color 0.15s ease, opacity 0.12s ease !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-btn-primary:active,
+.mobile-btn-secondary:active,
+.mobile-btn-danger:active,
+.mobile-btn-approve:active,
+.mobile-hero-btn:active {
+  transform: scale(0.96) !important;
+  opacity: 0.92;
+}
+
+.mobile-seg-btn:active {
+  transform: scale(0.94) !important;
+}
+
+.mobile-bottom-nav-item {
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.4, 1), color 0.15s ease !important;
+}
+
+.mobile-bottom-nav-item:active {
+  transform: scale(0.88) !important;
+}
+
+/* 2. Loading Spinner Minimalis Pupuk Kujang */
+@keyframes mobileSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mobile-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(5, 150, 105, 0.2);
+  border-top-color: #059669;
+  border-radius: 50%;
+  animation: mobileSpin 0.65s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.mobile-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+/* 3. Skeleton Loading Shimmer Halus */
+@keyframes mobileShimmerSweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.mobile-skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: mobileShimmerSweep 1.6s infinite ease-in-out;
+  border-radius: 6px;
+}
+
+/* 4. Notifikasi Gaya Web di Mobile */
+.mobile-notif-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.mobile-notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.12s ease, transform 0.12s ease !important;
+}
+
+.mobile-notif-row:last-child {
+  border-bottom: none;
+}
+
+.mobile-notif-row:active {
+  background: #f8fafc !important;
+  transform: scale(0.99) !important;
+}
+
+.mobile-notif-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mobile-notif-icon-box.unread {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.mobile-notif-icon-box.read {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.mobile-notif-icon-box.priority-high {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Dark mode overrides for mobile notif */
+body.theme-dark .mobile-notif-container,
+.theme-dark .mobile-notif-container {
+  background: #111622 !important;
+  border-color: #1e2c42 !important;
+}
+
+body.theme-dark .mobile-notif-row,
+.theme-dark .mobile-notif-row {
+  background: #111622 !important;
+  border-bottom-color: #1e2c42 !important;
+}
+
+body.theme-dark .mobile-notif-row:active,
+.theme-dark .mobile-notif-row:active {
+  background: #162032 !important;
+}
+
+body.theme-dark .mobile-notif-icon-box.unread,
+.theme-dark .mobile-notif-icon-box.unread {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+}
+
+body.theme-dark .mobile-notif-icon-box.read,
+.theme-dark .mobile-notif-icon-box.read {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}

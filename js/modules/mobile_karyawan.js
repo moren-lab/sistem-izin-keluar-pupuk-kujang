@@ -1005,10 +1005,10 @@
       <section class="mobile-card" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div class="mobile-card-header">
           <div>
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase;">
+            <div style="font-size: 0.625rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
               IZIN AKTIF SAYA ${isEmergency ? '<span style="color:#b91c1c; margin-left:4px;">[DARURAT]</span>' : ''}
             </div>
-            <h3 class="mobile-card-title" style="font-family: monospace; font-size: 1.05rem;">${t.id}</h3>
+            <h3 class="mobile-card-title" style="font-family: monospace; font-size: 0.95rem;">${t.id}</h3>
           </div>
           <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
         </div>

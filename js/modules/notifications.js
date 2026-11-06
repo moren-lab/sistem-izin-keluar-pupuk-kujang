@@ -516,85 +516,87 @@
     const allNotifsCount = getNotificationsForActiveActor().length;
     const unreadTotal = getUnreadCountForActiveActor();
 
-    const itemsHtml = notifs.length > 0 ? notifs.map(n => {
-      const isHigh = n.priority === 'high';
-      const isUnread = !n.isRead;
-      return `
-        <div class="mobile-notif-item ${isUnread ? 'unread' : ''} ${isHigh ? 'priority-high' : ''}" style="position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 12px; background: ${isUnread ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isHigh ? '#fca5a5' : (isUnread ? '#a7f3d0' : '#e2e8f0')}; margin-bottom: 8px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
-          <div class="notif-icon-box ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 36px; height: 36px;">
-            ${getNotifIconSvg(n.type, n.priority)}
-          </div>
-          <div style="flex: 1; min-width: 0; padding-right: 36px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 2px;">
-              <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; line-height: 1.3;">
-                ${n.title}
-                ${isHigh ? '<span style="background: #dc2626; color: #fff; font-size: 0.6rem; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-left: 4px; vertical-align: middle;">DARURAT</span>' : ''}
+    const itemsHtml = notifs.length > 0 ? `
+      <div class="mobile-notif-container">
+        ${notifs.map(n => {
+          const isHigh = n.priority === 'high';
+          const isUnread = !n.isRead;
+          return `
+            <div class="mobile-notif-row ${isUnread ? 'unread' : 'read'}" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+              <div class="mobile-notif-icon-box ${isHigh ? 'priority-high' : (isUnread ? 'unread' : 'read')}">
+                ${getNotifIconSvg(n.type, n.priority)}
               </div>
-              ${isUnread ? '<span class="notif-unread-dot" style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;"></span>' : ''}
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                  <span style="font-size: 0.825rem; font-weight: 800; color: #0f172a; line-height: 1.3;">
+                    ${n.title}
+                    ${isHigh ? '<span style="background: #dc2626; color: #fff; font-size: 0.6rem; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-left: 4px; vertical-align: middle;">DARURAT</span>' : ''}
+                  </span>
+                  ${isUnread ? '<span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex-shrink: 0;"></span>' : ''}
+                </div>
+                <div style="font-size: 0.75rem; color: #475569; line-height: 1.4; margin-bottom: 4px; word-break: break-word;">
+                  ${n.message}
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.685rem; color: #64748b; font-weight: 600;">
+                  ${n.ticketId ? `<span class="notif-ticket-pill" style="font-family: monospace; font-size: 0.68rem; font-weight: 700; color: #1e293b; background: #e2e8f0; padding: 1.5px 6px; border-radius: 4px;">${n.ticketId}</span><span>•</span>` : ''}
+                  <span>${formatRelativeTime(n.createdAt)}</span>
+                </div>
+              </div>
             </div>
-            <div style="font-size: 0.75rem; color: #334155; line-height: 1.4; margin-bottom: 4px;">
-              ${n.message}
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.675rem; color: #64748b; font-weight: 600;">
-              <span>${n.ticketId ? `<strong style="font-family: monospace; color: #0f172a;">${n.ticketId}</strong> • ` : ''}${formatRelativeTime(n.createdAt)}</span>
-              <span style="color: #059669; font-weight: 700;">Lihat →</span>
-            </div>
-          </div>
-          <button type="button" aria-label="Hapus Notifikasi" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 0; border-radius: 8px;" onclick="event.stopPropagation(); window.confirmDeleteMobileNotification('${n.id}', '${filterTab}')" title="Hapus notifikasi ini">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
+          `;
+        }).join('')}
+      </div>
+    ` : `
+      <div style="text-align: center; padding: 40px 16px; background: #ffffff; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+        <div style="color: #94a3b8; margin-bottom: 8px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         </div>
-      `;
-    }).join('') : `
-      <div style="text-align: center; padding: 40px 16px; background: #ffffff; border-radius: 14px; border: 1.5px dashed #cbd5e1; margin-top: 10px;">
-        <div style="color: #94a3b8; margin-bottom: 10px;">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        </div>
-        <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Belum Ada Notifikasi</div>
-        <div style="font-size: 0.775rem; color: #64748b; max-width: 250px; margin: 0 auto; line-height: 1.4;">
-          ${filterTab === 'unread' ? 'Tidak ada notifikasi yang belum dibaca.' : 'Pemberitahuan aktivitas perizinan Anda akan muncul di sini.'}
-        </div>
+        <div style="font-size: 0.9rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Tidak ada notifikasi baru</div>
+        <div style="font-size: 0.75rem; color: #64748b;">${filterTab === 'unread' ? 'Semua notifikasi telah Anda baca.' : 'Pemberitahuan aktivitas perizinan Anda akan muncul di sini.'}</div>
       </div>
     `;
 
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
-        <div>
-          <span style="font-size: 0.675rem; color: #059669; font-weight: 700; text-transform: uppercase;">KOTAK MASUK • ${user.roleKey.toUpperCase()}</span>
-          <h3 class="mobile-sheet-title" style="font-size: 1.05rem; margin: 0; color: #0f172a;">Notifikasi</h3>
-        </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Hapus Semua Notifikasi" class="btn-clear-all-notifs" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #dc2626; color: #ffffff; border: none; border-radius: 8px; cursor: ${allNotifsCount > 0 ? 'pointer' : 'not-allowed'}; opacity: ${allNotifsCount > 0 ? '1' : '0.4'}; padding: 0;" ${allNotifsCount > 0 ? `onclick="window.confirmClearAllMobileNotifications('${filterTab}')"` : 'disabled'} title="Hapus Semua Notifikasi">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-          </button>
-          <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+          <h3 class="mobile-sheet-title" style="font-size: 1.05rem; margin: 0; font-weight: 800; color: #0f172a;">Notifikasi</h3>
+          <span style="font-size: 0.725rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #e2e8f0; color: #334155;">
+            ${unreadTotal > 0 ? `${unreadTotal} baru` : 'Semua dibaca'}
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          ${unreadTotal > 0 ? `
+            <button type="button" style="border: none; background: none; color: #2563eb; font-size: 0.775rem; font-weight: 700; cursor: pointer; padding: 4px;" onclick="window.markAllNotificationsAsRead(); window.openMobileNotificationSheet('${filterTab}')">
+              Tandai semua dibaca
+            </button>
+          ` : ''}
+          <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1rem; color: #64748b; cursor: pointer;" onclick="window.mobileCloseSheet()">✕</button>
         </div>
       </div>
 
       <div class="mobile-sheet-body" style="padding: 14px 16px; max-height: calc(85vh - 70px); overflow-y: auto;">
-        <!-- Filter Tabs & Tandai Dibaca -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap;">
-          <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 170px;">
+        <!-- Sub-Bar: Filter Tabs (Semua / Belum Dibaca) & Opsi Bersihkan Riwayat -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 175px;">
             <button type="button" class="mobile-seg-btn ${filterTab === 'all' ? 'active' : ''}" onclick="window.openMobileNotificationSheet('all')">
-              Semua (${getNotificationsForActiveActor().length})
+              Semua (${allNotifsCount})
             </button>
             <button type="button" class="mobile-seg-btn ${filterTab === 'unread' ? 'active' : ''}" onclick="window.openMobileNotificationSheet('unread')">
               Belum (${unreadTotal})
             </button>
           </div>
 
-          ${unreadTotal > 0 ? `
-            <button type="button" class="mobile-btn-secondary" style="width: auto; min-height: 38px; padding: 6px 12px; font-size: 0.725rem; font-weight: 700; border-radius: 8px; border-color: #cbd5e1; color: #334155; margin: 0;" onclick="window.markAllNotificationsAsRead(); window.openMobileNotificationSheet('${filterTab}')">
-              ✓ Tandai semua dibaca
+          ${allNotifsCount > 0 ? `
+            <button type="button" style="border: none; background: transparent; color: #94a3b8; font-size: 0.725rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 6px;" onclick="window.confirmClearAllMobileNotifications('${filterTab}')" title="Hapus Riwayat Notifikasi">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Hapus Semua</span>
             </button>
           ` : ''}
         </div>
 
-        <!-- Daftar Notifikasi -->
-        <div style="display: flex; flex-direction: column;">
-          ${itemsHtml}
-        </div>
+        <!-- Daftar Notifikasi Sesuai Format Web -->
+        ${itemsHtml}
       </div>
     `;
 
