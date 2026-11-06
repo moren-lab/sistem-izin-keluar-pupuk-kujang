@@ -413,12 +413,6 @@ function getApproverWeeklyData(period) {
   const curDay = now.getDay(); // 0=Minggu, 1=Senin, 2=Selasa, 3=Rabu, 4=Kamis, 5=Jumat, 6=Sabtu
 
   if (isMonth) {
-    daysMap['Sen'].count = 14;
-    daysMap['Sel'].count = 21;
-    daysMap['Rab'].count = 18;
-    daysMap['Kam'].count = 25;
-    daysMap['Jum'].count = 34;
-
     list.forEach(t => {
       const dateStr = t.plannedExit || t.createdAt;
       if (dateStr) {
@@ -567,13 +561,8 @@ function getApproverWeeklyRealtimeData(isMobile = false) {
     d.liveCount = matchTickets.length;
     d.tickets = matchTickets;
 
-    if (isMobile) {
-      d.total = matchTickets.length;
-      d.val = d.total;
-    } else {
-      d.total = d.baseCount + matchTickets.length;
-      d.val = d.total;
-    }
+    d.total = matchTickets.length;
+    d.val = d.total;
     totalWeekVolume += d.total;
   });
 
@@ -588,8 +577,8 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
   const bars = chartData.days;
   const prefix = isMobile ? 'mob_' : 'web_';
 
-  // Determine peak day
-  let maxCount = -1;
+  // Determine peak day strictly when tickets exist
+  let maxCount = 0;
   let peakIdx = -1;
   bars.forEach((b, i) => {
     if (b.total > maxCount) {
@@ -607,10 +596,8 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
   const bottomY = 240;
   const chartH = bottomY - topY;
 
-  const yMax = isMobile ? Math.max(5, Math.ceil((maxCount || 1) / 5) * 5) : 20;
-  const yTicks = isMobile
-    ? [0, Math.round(yMax * 0.25), Math.round(yMax * 0.5), Math.round(yMax * 0.75), yMax]
-    : [0, 5, 10, 15, 20];
+  const yMax = Math.max(5, Math.ceil(Math.max(maxCount, 1) / 5) * 5);
+  const yTicks = [0, Math.round(yMax * 0.25), Math.round(yMax * 0.5), Math.round(yMax * 0.75), yMax];
   let svgContent = '';
 
   // Background subtle grid lines and Y numeric labels
@@ -678,8 +665,9 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
     `;
   });
 
-  const peakDayObj = bars[peakIdx] || { dayName: 'Selasa', total: 20 };
-  const avgDaily = Math.round((chartData.totalWeekVolume || 98) / 7);
+  const hasRealTickets = (peakIdx >= 0 && bars[peakIdx] && bars[peakIdx].total > 0);
+  const peakDayObj = hasRealTickets ? bars[peakIdx] : null;
+  const avgDaily = chartData.totalWeekVolume > 0 ? (chartData.totalWeekVolume / 7).toFixed(1) : '0';
 
   const containerPadding = isMobile ? 'padding: 8px 10px; border: none; background: transparent;' : 'padding: 12px 14px; border: 1px solid var(--border-color, #e2e8f0); background: var(--bg-card, #ffffff);';
 
@@ -698,7 +686,7 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
           <div>
             <span style="font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Hari Puncak</span>
             <div style="font-size: 0.9rem; font-weight: 700; color: #059669; line-height: 1.2;">
-              ${peakDayObj.dayName} (${peakDayObj.total})
+              ${peakDayObj ? `${peakDayObj.dayName.replace(' (Hari Ini)', '')} (${peakDayObj.total})` : 'Belum Ada'}
             </div>
           </div>
           <div style="width: 1px; height: 26px; background: #e2e8f0;"></div>

@@ -437,6 +437,9 @@ function resetAllTicketsToDefault() {
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
   } catch (e) { }
   window.MOCK_USERS = JSON.parse(JSON.stringify(DEFAULT_USERS));
+  if (typeof window.resetAllNotifications === 'function') {
+    window.resetAllNotifications();
+  }
   if (typeof window.syncActorsFromUsers === 'function') window.syncActorsFromUsers(window.MOCK_USERS);
   if (typeof window.switchRole === 'function') window.switchRole('karyawan');
   if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav('dashboard');

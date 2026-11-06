@@ -720,7 +720,7 @@ function renderSecurityView() {
   // Menampilkan HANYA perizinan yang sedang berjalan/aktif.
   // Tiket dengan status final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa) secara ketat hanya berada di Riwayat Scan.
   if (currentSecurityNav === 'pelacakan') {
-    const queueMode = filterSecurityQueueTab ? filterSecurityQueueTab.value : 'outside';
+    const queueMode = filterSecurityQueueTab ? filterSecurityQueueTab.value : 'all';
 
     const isTerminal = (t) => ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'].includes(t.status);
     const activeTickets = ticketsList.filter(t => !isTerminal(t));

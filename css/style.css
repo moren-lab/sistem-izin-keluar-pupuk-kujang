@@ -11374,3 +11374,75 @@ body.role-is-security .sidebar-navigation .nav-item.active {
 body.role-is-security .sidebar-navigation .nav-item:hover {
   background: rgba(255, 255, 255, 0.1) !important;
 }
+
+
+/* ===================================================================
+   COHESIVE EXECUTIVE DARK MODE FOR SIDEBAR ACROSS ALL ROLES
+   Eliminates harsh green/teal contrast shown in Gambar 2
+   =================================================================== */
+body.theme-dark .sidebar,
+body.theme-dark.role-is-approver .sidebar,
+body.theme-dark.role-is-security .sidebar,
+body.theme-dark.role-is-admin .sidebar {
+  background: #090e17 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+
+body.theme-dark .sidebar-header,
+body.theme-dark.role-is-approver .sidebar-header,
+body.theme-dark.role-is-security .sidebar-header,
+body.theme-dark.role-is-admin .sidebar-header {
+  background: #090e17 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark .sidebar-footer-card,
+body.theme-dark.role-is-approver .sidebar-footer-card,
+body.theme-dark.role-is-security .sidebar-footer-card,
+body.theme-dark.role-is-admin .sidebar-footer-card {
+  background: #0c1422 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+body.theme-dark .sidebar-info-card,
+body.theme-dark.role-is-approver .sidebar-info-card,
+body.theme-dark.role-is-security .sidebar-info-card,
+body.theme-dark.role-is-admin .sidebar-info-card {
+  background: #0c1422 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark .sidebar-navigation .nav-item,
+body.theme-dark.role-is-approver .sidebar-navigation .nav-item,
+body.theme-dark.role-is-security .sidebar-navigation .nav-item,
+body.theme-dark.role-is-admin .sidebar-navigation .nav-item {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .sidebar-navigation .nav-item:hover,
+body.theme-dark.role-is-approver .sidebar-navigation .nav-item:hover,
+body.theme-dark.role-is-security .sidebar-navigation .nav-item:hover,
+body.theme-dark.role-is-admin .sidebar-navigation .nav-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark .sidebar-navigation .nav-item.active,
+body.theme-dark.role-is-approver .sidebar-navigation .nav-item.active,
+body.theme-dark.role-is-security .sidebar-navigation .nav-item.active,
+body.theme-dark.role-is-admin .sidebar-navigation .nav-item.active {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34d399 !important;
+  border-left: 3px solid #10b981 !important;
+  box-shadow: none !important;
+}
+
+body.theme-dark .sidebar-brand-subtitle h4 {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .sidebar-brand-subtitle p {
+  color: #34d399 !important;
+}

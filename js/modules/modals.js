@@ -1329,12 +1329,23 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     return;
   }
 
-  const ticketsList = window.ticketsList || [];
-  const cleanId = String(ticketId || '').trim();
-  const ticket = ticketsList.find(t => t.id === cleanId || String(t.id).trim().toUpperCase() === cleanId.toUpperCase());
+  let cleanId = String(ticketId || '').trim();
+  if (cleanId.startsWith('#')) {
+    cleanId = cleanId.substring(1).trim();
+  }
+
+  let ticketsList = window.ticketsList || [];
+  let ticket = ticketsList.find(t => t.id === cleanId || String(t.id).trim().toUpperCase() === cleanId.toUpperCase() || String(t.id).replace(/^#/, '').trim().toUpperCase() === cleanId.toUpperCase());
+
+  if (!ticket && typeof window.loadTickets === 'function') {
+    ticketsList = window.loadTickets() || [];
+    window.ticketsList = ticketsList;
+    ticket = ticketsList.find(t => t.id === cleanId || String(t.id).trim().toUpperCase() === cleanId.toUpperCase() || String(t.id).replace(/^#/, '').trim().toUpperCase() === cleanId.toUpperCase());
+  }
+
   if (!ticket) {
     if (typeof window.showToast === 'function') {
-      window.showToast(`Tiket #${ticketId} tidak ditemukan di sistem.`, 'warning');
+      window.showToast(`Tiket #${cleanId} tidak ditemukan di sistem.`, 'warning');
     }
     return;
   }

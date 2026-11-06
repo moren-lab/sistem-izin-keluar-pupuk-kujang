@@ -851,6 +851,17 @@
   window.openTicketFromNotification = openTicketFromNotification;
   window.closeDesktopNotifDropdown = closeDesktopNotifDropdown;
 
+  function resetAllNotifications() {
+    notificationsList = [];
+    try {
+      localStorage.removeItem(NOTIF_STORAGE_KEY);
+    } catch (e) {
+      console.error('Failed to reset stored notifications:', e);
+    }
+    updateNotificationBadges();
+  }
+  window.resetAllNotifications = resetAllNotifications;
+
   // Initialize
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
