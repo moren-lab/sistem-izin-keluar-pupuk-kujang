@@ -150,6 +150,8 @@ function handleOpenNewRequest() {
 
   // Bersihkan mode edit untuk pengajuan baru
   window.editingTicketId = null;
+  const btnCancelFormRegular = document.getElementById('btnCancelFormRegular');
+  if (btnCancelFormRegular) btnCancelFormRegular.style.display = 'none';
   const modalTitle = modalNewRequest ? modalNewRequest.querySelector('.modal-header h3') : null;
   const modalDesc = modalNewRequest ? modalNewRequest.querySelector('.modal-header p') : null;
   const btnSubmitNewRequest = document.getElementById('btnSubmitNewRequest');
@@ -258,10 +260,28 @@ function openEditTicketModal(ticketId) {
 
 function openEditNormalModal(ticket) {
   window.editingTicketId = ticket.id;
+
+  const karyawanFullFormContainer = document.getElementById('karyawanFullFormContainer');
+  const karyawanActiveTicketWrapper = document.getElementById('karyawanActiveTicketWrapper');
+  if (karyawanFullFormContainer && karyawanActiveTicketWrapper) {
+    karyawanActiveTicketWrapper.style.display = 'none';
+    karyawanFullFormContainer.style.display = 'block';
+    const btnRegular = document.getElementById('btnFullTypeRegular');
+    const btnEmergency = document.getElementById('btnFullTypeEmergency');
+    const panelRegular = document.getElementById('panelFullRegular');
+    const panelEmergency = document.getElementById('panelFullEmergency');
+    if (btnRegular) btnRegular.classList.add('active');
+    if (btnEmergency) btnEmergency.classList.remove('active', 'emergency');
+    if (panelRegular) panelRegular.style.display = 'block';
+    if (panelEmergency) panelEmergency.style.display = 'none';
+  }
+
   const modalNewRequest = document.getElementById('modalNewRequest');
   const modalTitle = modalNewRequest ? modalNewRequest.querySelector('.modal-header h3') : null;
   const modalDesc = modalNewRequest ? modalNewRequest.querySelector('.modal-header p') : null;
   const btnSubmitNewRequest = document.getElementById('btnSubmitNewRequest');
+  const btnCancelFormRegular = document.getElementById('btnCancelFormRegular');
+  if (btnCancelFormRegular) btnCancelFormRegular.style.display = 'inline-flex';
 
   if (modalTitle) modalTitle.textContent = `Edit Pengajuan Izin — ${ticket.id}`;
   if (modalDesc) modalDesc.textContent = 'Perbarui data formulir izin keluar Anda sebelum disetujui Atasan';
@@ -310,10 +330,28 @@ function openEditNormalModal(ticket) {
 
 function openEditEmergencyModal(ticket) {
   window.editingEmergencyTicketId = ticket.id;
+
+  const karyawanFullFormContainer = document.getElementById('karyawanFullFormContainer');
+  const karyawanActiveTicketWrapper = document.getElementById('karyawanActiveTicketWrapper');
+  if (karyawanFullFormContainer && karyawanActiveTicketWrapper) {
+    karyawanActiveTicketWrapper.style.display = 'none';
+    karyawanFullFormContainer.style.display = 'block';
+    const btnRegular = document.getElementById('btnFullTypeRegular');
+    const btnEmergency = document.getElementById('btnFullTypeEmergency');
+    const panelRegular = document.getElementById('panelFullRegular');
+    const panelEmergency = document.getElementById('panelFullEmergency');
+    if (btnEmergency) btnEmergency.classList.add('active', 'emergency');
+    if (btnRegular) btnRegular.classList.remove('active');
+    if (panelRegular) panelRegular.style.display = 'none';
+    if (panelEmergency) panelEmergency.style.display = 'block';
+  }
+
   const modalEmergency = document.getElementById('modalEmergency');
   const modalTitle = document.getElementById('modalEmergencyTitle');
   const modalSubtitle = document.getElementById('modalEmergencySubtitle');
   const btnSubmitEmergency = document.getElementById('btnSubmitEmergency');
+  const btnCancelFormEmergency = document.getElementById('btnCancelFormEmergency');
+  if (btnCancelFormEmergency) btnCancelFormEmergency.style.display = 'inline-flex';
 
   if (modalTitle) {
     modalTitle.innerHTML = `<span>Edit Formulir Izin Darurat — ${ticket.id}</span>`;
@@ -2308,6 +2346,8 @@ function handleOpenEmergency() {
   const modalTitle = document.getElementById('modalEmergencyTitle');
   const modalSubtitle = document.getElementById('modalEmergencySubtitle');
   const btnSubmitEmergency = document.getElementById('btnSubmitEmergency');
+  const btnCancelFormEmergency = document.getElementById('btnCancelFormEmergency');
+  if (btnCancelFormEmergency) btnCancelFormEmergency.style.display = 'none';
   if (modalTitle) {
     modalTitle.innerHTML = `<span>Formulir Izin Darurat — Rancangan</span>`;
   }
@@ -2350,11 +2390,10 @@ function handleOpenEmergency() {
 
   // Reset emergency authorization method to default (app)
   const optEmergMethodApp = document.getElementById('optEmergMethodApp');
-  const optEmergMethodPasscode = document.getElementById('optEmergMethodPasscode');
   const optEmergMethodFaceScan = document.getElementById('optEmergMethodFaceScan');
-  if (optEmergMethodApp && optEmergMethodPasscode && optEmergMethodFaceScan) {
+  if (optEmergMethodApp && optEmergMethodFaceScan) {
     optEmergMethodApp.classList.add('selected');
-        optEmergMethodFaceScan.classList.remove('selected');
+    optEmergMethodFaceScan.classList.remove('selected');
     const input = optEmergMethodApp.querySelector('input[type="radio"]');
     if (input) input.checked = true;
   }

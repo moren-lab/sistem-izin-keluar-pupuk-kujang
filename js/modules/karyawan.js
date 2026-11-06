@@ -581,8 +581,7 @@ function renderKaryawanDashboard() {
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
-          <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
-            <span style="color: var(--text-muted); font-weight: 600;">status:</span>
+          <div style="margin-top: 8px; display: inline-flex; align-items: center;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
@@ -714,27 +713,80 @@ function renderKaryawanDonutChart() {
   }
 }
 
+// ===================================================================
+// FULL PAGE PERMIT APPLICATION FORM LOGIC (BENTO GRID DEDICATED VIEW)
+// ===================================================================
+
+/**
+ * Tab switcher untuk Formulir Penuh Pengajuan Izin Keluar (Bento Grid)
+ * Menghubungkan 100% sistem asli: Search Atasan dinamis, Otorisasi QR Darurat, validasi SOP, konfirmasi ringkasan
+ */
+window.switchFullPermitTab = function(tab) {
+  const btnRegular = document.getElementById('btnFullTypeRegular');
+  const btnEmergency = document.getElementById('btnFullTypeEmergency');
+  const panelRegular = document.getElementById('panelFullRegular');
+  const panelEmergency = document.getElementById('panelFullEmergency');
+
+  if (tab === 'emergency') {
+    if (btnEmergency) btnEmergency.classList.add('active', 'emergency');
+    if (btnRegular) btnRegular.classList.remove('active');
+    if (panelRegular) panelRegular.style.display = 'none';
+    if (panelEmergency) panelEmergency.style.display = 'block';
+    if (typeof window.handleOpenEmergency === 'function') {
+      window.handleOpenEmergency();
+    }
+  } else {
+    if (btnRegular) btnRegular.classList.add('active');
+    if (btnEmergency) btnEmergency.classList.remove('active', 'emergency');
+    if (panelRegular) panelRegular.style.display = 'block';
+    if (panelEmergency) panelEmergency.style.display = 'none';
+    if (typeof window.handleOpenNewRequest === 'function') {
+      window.handleOpenNewRequest();
+    }
+  }
+};
+
+window.handleCancelFullForm = function() {
+  const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
+  if (activeTicket) {
+    if (typeof renderPengajuanSayaView === 'function') {
+      renderPengajuanSayaView();
+    }
+  } else {
+    if (typeof setKaryawanNav === 'function') {
+      setKaryawanNav('dashboard');
+    }
+  }
+};
+
 /**
  * 2. PENGAJUAN SAYA (FIGMA SCREEN 2)
  */
 function renderPengajuanSayaView() {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
+  const karyawanActiveTicketWrapper = document.getElementById('karyawanActiveTicketWrapper');
+  const karyawanFullFormContainer = document.getElementById('karyawanFullFormContainer');
   const colPengajuanLeft = document.getElementById('colPengajuanLeft');
+  const colPengajuanRight = document.getElementById('colPengajuanRight');
   const emptyEmpActiveBox = document.getElementById('emptyEmpActiveBox');
-  const btnOpenEmergencyModal = document.getElementById('btnOpenEmergencyModal');
-  const btnOpenNewRequestModal = document.getElementById('btnOpenNewRequestModal');
 
-  if (btnOpenEmergencyModal) btnOpenEmergencyModal.style.display = activeTicket ? 'none' : 'inline-flex';
-  if (btnOpenNewRequestModal) btnOpenNewRequestModal.style.display = activeTicket ? 'none' : 'inline-flex';
-
+  // Skenario 1: Belum Ada Izin Aktif -> Langsung Tampilkan Formulir Penuh (Full Page Bento Grid)
   if (!activeTicket) {
+    if (karyawanActiveTicketWrapper) karyawanActiveTicketWrapper.style.display = 'none';
     if (colPengajuanLeft) colPengajuanLeft.style.display = 'none';
     if (colPengajuanRight) colPengajuanRight.style.display = 'none';
-    if (emptyEmpActiveBox) emptyEmpActiveBox.style.display = 'flex';
+    if (emptyEmpActiveBox) emptyEmpActiveBox.style.display = 'none';
+    if (karyawanFullFormContainer) {
+      karyawanFullFormContainer.style.display = 'block';
+      window.switchFullPermitTab('regular');
+    }
     return;
   }
 
+  // Skenario 2: Sudah Ada Izin Aktif -> Tampilkan Kartu Izin Aktif & Kronologi (Sesuai Gambar Pengguna)
+  if (karyawanFullFormContainer) karyawanFullFormContainer.style.display = 'none';
   if (emptyEmpActiveBox) emptyEmpActiveBox.style.display = 'none';
+  if (karyawanActiveTicketWrapper) karyawanActiveTicketWrapper.style.display = 'block';
   if (colPengajuanLeft) colPengajuanLeft.style.display = 'flex';
   if (colPengajuanRight) colPengajuanRight.style.display = 'flex';
 
@@ -841,8 +893,7 @@ function renderPengajuanSayaView() {
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
-          <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
-            <span style="color: var(--text-muted); font-weight: 600;">status:</span>
+          <div style="margin-top: 8px; display: inline-flex; align-items: center;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
@@ -1149,8 +1200,35 @@ function getCleanEmpStatus(status, ticket) {
     statusKey = 'cancelled';
   }
 
-  // Pure clean text with semantic status class for perfect dark mode adaptation
-  return `<span class="figma-clean-status status-${statusKey}" style="font-weight: 700; font-size: 0.8rem; color: ${color};" title="${(label || '').replace(/"/g, '&quot;')}">${label}</span>`;
+  const bgMap = {
+    'selesai': 'rgba(16, 185, 129, 0.1)',
+    'selesai-late': 'rgba(245, 158, 11, 0.12)',
+    'outside': 'rgba(2, 132, 199, 0.1)',
+    'late': 'rgba(220, 38, 38, 0.1)',
+    'approved': 'rgba(16, 185, 129, 0.1)',
+    'pending': 'rgba(245, 158, 11, 0.12)',
+    'emergency': 'rgba(190, 18, 60, 0.1)',
+    'rejected': 'rgba(220, 38, 38, 0.1)',
+    'expired': 'rgba(100, 116, 139, 0.1)',
+    'cancelled': 'rgba(100, 116, 139, 0.1)'
+  };
+  const borderMap = {
+    'selesai': 'rgba(16, 185, 129, 0.25)',
+    'selesai-late': 'rgba(245, 158, 11, 0.3)',
+    'outside': 'rgba(2, 132, 199, 0.25)',
+    'late': 'rgba(220, 38, 38, 0.25)',
+    'approved': 'rgba(16, 185, 129, 0.25)',
+    'pending': 'rgba(245, 158, 11, 0.3)',
+    'emergency': 'rgba(190, 18, 60, 0.25)',
+    'rejected': 'rgba(220, 38, 38, 0.25)',
+    'expired': 'rgba(100, 116, 139, 0.25)',
+    'cancelled': 'rgba(100, 116, 139, 0.25)'
+  };
+
+  const currentBg = bgMap[statusKey] || 'rgba(100, 116, 139, 0.1)';
+  const currentBorder = borderMap[statusKey] || 'rgba(100, 116, 139, 0.25)';
+
+  return `<span class="figma-clean-status status-${statusKey}" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; border-radius: 9999px; font-weight: 700; font-size: 0.775rem; background: ${currentBg}; color: ${color}; border: 1px solid ${currentBorder}; line-height: 1.3;" title="${(label || '').replace(/"/g, '&quot;')}"><span style="width: 6px; height: 6px; border-radius: 50%; background: ${color}; display: inline-block;"></span><span>${label}</span></span>`;
 }
 
 /**
@@ -1732,8 +1810,7 @@ function renderKaryawanMobileDashboard() {
           <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 10px;">Tujuan keluar</div>
           <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '-').replace(/\r?\n+/g, ' ')}</div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.reason || '-').replace(/\r?\n+/g, ' ')}</div>
-          <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.775rem;">
-            <span style="color: var(--text-muted); font-weight: 600;">status:</span>
+          <div style="margin-top: 8px; display: inline-flex; align-items: center;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
