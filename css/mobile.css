@@ -1663,33 +1663,47 @@ body.theme-dark .mobile-btn-secondary {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 14px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   font-size: 0.8rem;
 }
 
 .mobile-summary-row {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.mobile-summary-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.mobile-summary-row:first-child {
+  padding-top: 0;
 }
 
 .mobile-summary-label {
   color: #64748b;
   font-weight: 600;
-  flex-shrink: 0;
+  flex: 0 0 115px;
   font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: left;
 }
 
 .mobile-summary-value {
   color: #0f172a;
   font-weight: 700;
-  text-align: right;
+  flex: 1;
+  text-align: left;
   word-break: break-word;
+  overflow-wrap: anywhere;
   font-size: 0.775rem;
+  line-height: 1.45;
 }
 
 .mobile-summary-value.truncate,

@@ -1199,8 +1199,15 @@
 
     const isEditing = Boolean(window.editingTicketId);
     const now = new Date();
-    const defaultExit = prefillData?.plannedExit || formatDateTimeLocal(new Date(now.getTime() + 5 * 60000));
-    const defaultReturn = prefillData?.estimatedReturn || formatDateTimeLocal(new Date(now.getTime() + 2 * 60 * 60000));
+    const formatForInput = (val, defaultMinutes) => {
+      if (!val) return formatDateTimeLocal(new Date(now.getTime() + defaultMinutes * 60000));
+      if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(val)) return val;
+      const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(val) : new Date(val);
+      if (d && !isNaN(d.getTime())) return formatDateTimeLocal(d);
+      return formatDateTimeLocal(new Date(now.getTime() + defaultMinutes * 60000));
+    };
+    const defaultExit = formatForInput(prefillData?.plannedExit, 5);
+    const defaultReturn = formatForInput(prefillData?.estimatedReturn, 120);
 
     // Approver resolution
     const approvers = getMobileApprovers();
@@ -1321,11 +1328,11 @@
           <div class="mobile-form-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px;">
             <div class="mobile-form-group" style="margin: 0;">
               <label class="mobile-form-label">Rencana Waktu Keluar <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultExit}" required oninput="window.mobileHandleExitChange(this.value)" onchange="window.mobileHandleExitChange(this.value)">
+              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${isEditing ? '' : formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultExit}" required oninput="window.mobileHandleExitChange(this.value)" onchange="window.mobileHandleExitChange(this.value)">
             </div>
             <div class="mobile-form-group" id="mFormWrapReturn" style="margin: 0; display: ${initialType === 'Pulang Mendahului' ? 'none' : 'block'};">
               <label class="mobile-form-label">Perkiraan Waktu Kembali <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'} oninput="window.mobileHandleReturnChange(this.value)" onchange="window.mobileHandleReturnChange(this.value)">
+              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${isEditing ? '' : formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'} oninput="window.mobileHandleReturnChange(this.value)" onchange="window.mobileHandleReturnChange(this.value)">
             </div>
           </div>
 
@@ -1379,41 +1386,32 @@
   window.mobileOpenEditSheet = function (ticketId) {
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
-    if (!t) {
-      isSubmittingPerpanjangan = false;
-      return;
-    }
+    if (!t) return;
 
     const emp = getActiveEmp();
     // Guard: Validasi Kepemilikan Tiket
     if (t.applicantNip && emp.nip && t.applicantNip !== emp.nip) {
       if (typeof window.showToast === 'function') {
-        window.showToast('Gagal: Anda tidak berhak mengajukan perpanjangan untuk izin ini.', 'danger');
+        window.showToast('Gagal: Anda tidak berhak mengedit permohonan izin karyawan lain!', 'danger');
       }
-      isSubmittingPerpanjangan = false;
       return;
     }
 
-    // Guard: Hanya tiket yang sedang berada di luar area yang dapat diperpanjang
-    if (t.status !== 'Sedang di Luar') {
+    // Guard: Hanya tiket yang berstatus Menunggu Persetujuan atau Menunggu Otorisasi Darurat yang dapat diedit
+    const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
+    if (!isPending || t.scanOutTime || t.status === 'Disetujui') {
       if (typeof window.showToast === 'function') {
-        window.showToast(`Perpanjangan waktu hanya dapat diajukan saat Anda sedang berada di luar area! (Status saat ini: ${t.status})`, 'danger');
-      }
-      isSubmittingPerpanjangan = false;
-      return;
-    }
-
-    if (t.status === 'Terlambat' || t.isLate) {
-      if (typeof window.showToast === 'function') {
-        window.showToast('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In.', 'danger');
+        window.showToast('Pengajuan hanya dapat diedit saat berstatus Menunggu Persetujuan (sebelum disetujui Atasan atau diproses keluar)!', 'warning');
       } else {
-        alert('Izin telah berstatus Terlambat! Anda tidak dapat mengajukan perpanjangan dan wajib melakukan Tap In.');
+        alert('Pengajuan hanya dapat diedit saat berstatus Menunggu Persetujuan (sebelum disetujui Atasan atau diproses keluar)!');
       }
       return;
     }
+
     window.editingTicketId = ticketId;
-    window.mobileOpenCreateModal(t.isEmergency, {
+    window.mobileOpenCreateModal(Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-'))), {
       approver: t.approverName,
+      approverName: t.approverName,
       category: t.category,
       type: t.type || t.returnType,
       destination: t.destination,
@@ -1961,10 +1959,9 @@
   window.mobileOpenConfirmSummarySheet = function () {
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (!sheet || !backdrop || !pendingMobileFormData) return;
-
+    if (!sheet || !backdrop || (!pendingMobileFormData && !window.pendingMobileFormData)) return;
+    const data = pendingMobileFormData || window.pendingMobileFormData;
     const emp = getActiveEmp();
-    const data = pendingMobileFormData;
     const isEditing = data.isEditing;
 
     sheet.innerHTML = `
@@ -2000,13 +1997,13 @@
             <span class="mobile-summary-label">Tipe Kepulangan</span>
             <span class="mobile-summary-value">${data.returnType}</span>
           </div>
-          <div class="mobile-summary-row" style="align-items: flex-start;">
+          <div class="mobile-summary-row">
             <span class="mobile-summary-label">Lokasi / Tujuan</span>
-            <span class="mobile-summary-value mobile-clamp-2" style="max-width: 195px; text-align: right; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(data.destination || '').replace(/"/g, '&quot;')}">${data.destination || '-'}</span>
+            <span class="mobile-summary-value" title="${(data.destination || '').replace(/"/g, '&quot;')}">${escapeHtml(data.destination || '-')}</span>
           </div>
-          <div class="mobile-summary-row" style="align-items: flex-start;">
+          <div class="mobile-summary-row">
             <span class="mobile-summary-label">Alasan Keperluan</span>
-            <span class="mobile-summary-value mobile-clamp-2" style="max-width: 195px; text-align: right; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35; font-style: normal; color: #334155;" title="${(data.reason || '').replace(/"/g, '&quot;')}">"${data.reason || '-'}"</span>
+            <span class="mobile-summary-value" style="font-style: normal; color: #334155;" title="${(data.reason || '').replace(/"/g, '&quot;')}">"${escapeHtml(data.reason || '-')}"</span>
           </div>
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Rencana Keluar</span>
@@ -3193,6 +3190,8 @@
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (sheet) sheet.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
+    window.editingTicketId = null;
+    pendingMobileFormData = null;
   };
 
     window.mobileSwitchDonutPeriod = function (period) {

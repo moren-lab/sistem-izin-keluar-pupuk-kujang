@@ -47,7 +47,7 @@
   let atasanTimCustomDate = '';
   let atasanTimSearchQuery = '';
   let currentAtasanTimPage = 1;
-  const atasanTimPageSize = 6;
+  const atasanTimPageSize = 10;
   let atasanTimDebounceTimer = null;
   let selectedTimTicketId = null;
   let viewingTicketId = null;
@@ -1328,7 +1328,8 @@
     }
     const selectedTicket = tickets.find(x => x.id === selectedTimTicketId) || teamCardsList[0];
 
-    const listHtml = pageTeamCards.map(t => {
+// Helper function to render a team ticket card item
+    function renderTeamCardItem(t) {
       const isLate = (t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
       const isOutside = (t.status === 'Sedang di Luar');
       const isApproved = (t.status === 'Disetujui');
@@ -1337,7 +1338,6 @@
       const isDitolak = (t.status === 'Ditolak');
       const isDibatalkan = (t.status === 'Dibatalkan');
       const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
-      const isSelected = (selectedTicket && selectedTicket.id === t.id);
 
       let statusBadgeClass = 'disetujui';
       let statusSubtitle = 'Belum keluar • Izin masih berlaku';
@@ -1365,7 +1365,7 @@
       }
 
       return `
-        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; margin-bottom: 10px;">
+        <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; margin-bottom: 10px; background: #ffffff;">
           <div class="mobile-ticket-item-header">
             <div>
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
@@ -1423,7 +1423,95 @@
           </div>
         </div>
       `;
-    }).join('');
+    }
+
+    // Pemisahan domain Pelacakan Aktif (Prioritas) vs Riwayat Selesai
+    const isHistoryStatus = (t) => (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+    const isActiveStatus = (t) => !isHistoryStatus(t);
+
+    const allActiveCards = teamCardsList.filter(t => isActiveStatus(t));
+    const allHistoryCards = teamCardsList.filter(t => isHistoryStatus(t));
+
+    const pageActiveCards = pageTeamCards.filter(t => isActiveStatus(t));
+    const pageHistoryCards = pageTeamCards.filter(t => isHistoryStatus(t));
+
+    const showActiveSection = (atasanTimFilter !== 'finished');
+    const showHistorySection = (atasanTimFilter === 'all' || atasanTimFilter === 'finished');
+
+    let sectionsHtml = '';
+
+    // 1. SEKSI ATAS: PELACAKAN KARYAWAN AKTIF (PRIORITAS)
+    if (showActiveSection) {
+      const activeListHtml = pageActiveCards.length > 0
+        ? pageActiveCards.map(t => renderTeamCardItem(t)).join('')
+        : `
+          <div style="background: #f8fafc; border: 1.5px dashed #e2e8f0; border-radius: 12px; padding: 14px 16px; text-align: center; font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">
+            ${atasanTimSearchQuery ? 'Tidak ada tiket aktif yang cocok dengan kata kunci pencarian.' : 'Tidak ada bawahan yang sedang berada di luar area atau menunggu perizinan saat ini.'}
+          </div>
+        `;
+
+      sectionsHtml += `
+        <div class="mobile-tracking-section-active" style="margin-bottom: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 style="font-size: 0.925rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">
+                Pelacakan Karyawan Aktif
+              </h3>
+              <span style="background: #ecfdf5; color: #059669; font-weight: 800; font-size: 0.725rem; padding: 2px 8px; border-radius: 999px; border: 1px solid #a7f3d0;">
+                ${allActiveCards.length}
+              </span>
+            </div>
+            <span style="font-size: 0.675rem; font-weight: 700; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 999px; padding: 2px 8px;">
+              Prioritas Pantau
+            </span>
+          </div>
+          ${activeListHtml}
+        </div>
+      `;
+    }
+
+    // 2. PEMISAH VISUAL DASHED DIVIDER (Gaya Web Referensi Image 2)
+    if (showActiveSection && showHistorySection && (pageActiveCards.length > 0 || pageHistoryCards.length > 0)) {
+      sectionsHtml += `
+        <div style="margin: 20px 0 16px 0; border-top: 1.5px dashed #cbd5e1; position: relative;">
+          <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f8fafc; padding: 0 10px; font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+            Penyelesaian
+          </span>
+        </div>
+      `;
+    }
+
+    // 3. SEKSI BAWAH: RIWAYAT PENYELESAIAN KARYAWAN
+    if (showHistorySection) {
+      const historyListHtml = pageHistoryCards.length > 0
+        ? pageHistoryCards.map(t => renderTeamCardItem(t)).join('')
+        : `
+          <div style="background: #f8fafc; border: 1.5px dashed #e2e8f0; border-radius: 12px; padding: 14px 16px; text-align: center; font-size: 0.75rem; color: #64748b;">
+            ${atasanTimSearchQuery ? 'Tidak ada riwayat selesai yang cocok dengan kata kunci pencarian.' : 'Belum ada catatan riwayat perizinan selesai pada periode ini.'}
+          </div>
+        `;
+
+      sectionsHtml += `
+        <div class="mobile-tracking-section-history" style="margin-top: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 style="font-size: 0.925rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">
+                Riwayat Penyelesaian Karyawan
+              </h3>
+              <span style="background: #f1f5f9; color: #475569; font-weight: 800; font-size: 0.725rem; padding: 2px 8px; border-radius: 999px; border: 1px solid #cbd5e1;">
+                ${allHistoryCards.length}
+              </span>
+            </div>
+            <span style="font-size: 0.675rem; font-weight: 700; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 2px 8px;">
+              Selesai / Final
+            </span>
+          </div>
+          ${historyListHtml}
+        </div>
+      `;
+    }
+
+    const listHtml = sectionsHtml;
 
     // Empty state
     const emptyHtml = `
@@ -1503,7 +1591,7 @@
       <!-- Toolbar: Ringkasan di Kiri, Tombol Hapus Semua & Filter di Kanan (Sejajar) -->
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
         <div style="font-size: 0.775rem; font-weight: 700; color: #475569;">
-          ${totalTimItems} tiket pelacakan
+          ${totalTimItems} tiket pelacakan (${allActiveCards.length} aktif • ${allHistoryCards.length} selesai)
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <!-- Tombol Hapus Semua (Icon Tong Sampah Putih #ffffff) -->

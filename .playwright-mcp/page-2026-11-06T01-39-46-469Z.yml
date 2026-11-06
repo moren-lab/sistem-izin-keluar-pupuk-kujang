@@ -1,0 +1,127 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e6]
+        - generic [ref=f1e7]:
+          - generic [ref=f1e8]: PUPUK KUJANG
+          - generic [ref=f1e9]: Perizinan Keluar Area • Atasan 1
+      - generic [ref=f1e10]:
+        - button "Atasan 1 ▼" [ref=f1e11] [cursor=pointer]:
+          - generic [ref=f1e15]: Atasan 1
+          - generic [ref=f1e16]: ▼
+        - button "Notifikasi" [ref=f1e17] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e21] [cursor=pointer]:
+          - img "HG" [ref=f1e22]
+    - main [ref=f1e23]:
+      - generic [ref=f1e24]:
+        - generic [ref=f1e25]: Pusat Persetujuan & Monitoring Bawahan
+        - generic [ref=f1e26]: Ir. Hendra Gunawan, M.T.
+        - generic [ref=f1e27]: Atasan
+      - generic [ref=f1e29]:
+        - button "Ringkasan perizinan" [ref=f1e30] [cursor=pointer]
+        - button "Volume pengajuan tim" [ref=f1e37] [cursor=pointer]
+      - generic [ref=f1e41]:
+        - generic [ref=f1e42] [cursor=pointer]:
+          - generic [ref=f1e43]: Izin baru menunggu
+          - generic [ref=f1e44]: "1"
+        - generic [ref=f1e45] [cursor=pointer]:
+          - generic [ref=f1e46]: Perpanjangan menunggu
+          - generic [ref=f1e47]: "0"
+        - generic [ref=f1e48] [cursor=pointer]:
+          - generic [ref=f1e49]: Pengajuan diproses
+          - generic [ref=f1e50]: "8"
+        - generic [ref=f1e51] [cursor=pointer]:
+          - generic [ref=f1e52]: Tim di luar area
+          - generic [ref=f1e53]: "2"
+      - generic [ref=f1e54]:
+        - generic [ref=f1e55]:
+          - generic [ref=f1e56]:
+            - heading "Pengajuan Menunggu Persetujuan" [level=3] [ref=f1e57]
+            - generic [ref=f1e58]: Daftar permohonan bawahan yang memerlukan keputusan
+          - generic [ref=f1e59]: 1 item
+        - generic [ref=f1e61]:
+          - generic [ref=f1e62]:
+            - generic [ref=f1e63]:
+              - generic [ref=f1e64]: Budi Pratama, S.T.
+              - generic [ref=f1e65]: TK-20261106-999 • Dinas Kantor
+            - generic [ref=f1e66]: Menunggu Persetujuan
+          - generic "Gedung Pusat Rekayasa" [ref=f1e68]:
+            - text: "Rencana Keluar:"
+            - strong [ref=f1e69]: 08.21 WIB
+            - text: "• Keperluan:"
+            - strong [ref=f1e70]: Gedung Pusat Rekayasa
+          - generic [ref=f1e71]:
+            - button "Tolak" [ref=f1e72] [cursor=pointer]
+            - button "Setujui" [ref=f1e73] [cursor=pointer]
+          - button "Detail Pengajuan" [ref=f1e75] [cursor=pointer]
+        - link "Lihat Semua Antrean" [ref=f1e81] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f1e85]:
+        - heading "Aktivitas terbaru" [level=3] [ref=f1e88]
+        - generic [ref=f1e89]:
+          - generic [ref=f1e90] [cursor=pointer]:
+            - generic [ref=f1e91]: 08.07 WIB
+            - generic [ref=f1e92]:
+              - generic [ref=f1e93]: Pengajuan Diperbarui (Diedit)
+              - generic [ref=f1e94]:
+                - generic [ref=f1e95]: Budi Pratama, S.T. (Karyawan)
+                - generic [ref=f1e96]: •
+                - generic [ref=f1e97]: TK-20261106-999
+          - generic [ref=f1e98] [cursor=pointer]:
+            - generic [ref=f1e99]: 08.00 WIB
+            - generic [ref=f1e100]:
+              - generic [ref=f1e101]: Budi Pratama, S.T. Scan Out
+              - generic [ref=f1e102]:
+                - generic [ref=f1e103]: Petugas Pos Jaga
+                - generic [ref=f1e104]: •
+                - generic [ref=f1e105]: TK-TEST-OUTSIDE
+          - generic [ref=f1e106] [cursor=pointer]:
+            - generic [ref=f1e107]: 07.56 WIB
+            - generic [ref=f1e108]:
+              - generic [ref=f1e109]: Pengajuan Dibuat
+              - generic [ref=f1e110]:
+                - generic [ref=f1e111]: Budi Pratama, S.T. (Karyawan)
+                - generic [ref=f1e112]: •
+                - generic [ref=f1e113]: TK-20261106-999
+          - generic [ref=f1e114] [cursor=pointer]:
+            - generic [ref=f1e115]: 14.26 WIB
+            - generic [ref=f1e116]:
+              - generic [ref=f1e117]: Perpanjangan Dibatalkan
+              - generic [ref=f1e118]:
+                - generic [ref=f1e119]: Budi Pratama, S.T. (Karyawan)
+                - generic [ref=f1e120]: •
+                - generic [ref=f1e121]: TK-TEST-PENDING-EXT-001
+          - generic [ref=f1e122] [cursor=pointer]:
+            - generic [ref=f1e123]: 12.50 WIB
+            - generic [ref=f1e124]:
+              - generic [ref=f1e125]: Scan In tercatat
+              - generic [ref=f1e126]:
+                - generic [ref=f1e127]: Sertu Agus (Pos 1)
+                - generic [ref=f1e128]: •
+                - generic [ref=f1e129]: IZ-20261019-013
+    - navigation [ref=f1e130]:
+      - generic [ref=f1e131] [cursor=pointer]: Dashboard
+      - generic [ref=f1e138] [cursor=pointer]:
+        - generic [ref=f1e142]: Antrean
+        - generic [ref=f1e143]: "1"
+      - generic [ref=f1e144] [cursor=pointer]: Pelacakan
+  - option "-- Pilih Kategori --" [selected]
+  - option "Dinas Kantor"
+  - option "Urusan Pribadi"
+  - option "-- Pilih Tipe Kepulangan --" [selected]
+  - option "Kembali ke Area"
+  - option "Pulang Lebih Awal (Tidak Kembali)"
+  - option "-- Pilih Kategori --" [selected]
+  - option "Dinas Kantor"
+  - option "Urusan Pribadi"
+  - option "-- Pilih Tipe Kepulangan --" [selected]
+  - option "Kembali ke Area"
+  - option "Pulang Lebih Awal (Tidak Kembali)"
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic: Beralih ke mode Atasan 1 / Approver (Ir. Hendra Gunawan, M.T.)
+    - generic [ref=f1e149]: Selamat datang, Ir. Hendra Gunawan, M.T. (Atasan 1 (Manager))
+    - generic: Beralih ke mode Atasan 1 / Approver (Ir. Hendra Gunawan, M.T.)
