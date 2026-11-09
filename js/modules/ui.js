@@ -116,6 +116,26 @@ function formatDayAndDate(dateStr) {
 }
 window.formatDayAndDate = formatDayAndDate;
 
+function formatDisplayCreatedDate(dateStr) {
+  if (!dateStr) return '-';
+  const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : new Date(dateStr);
+  if (!d || isNaN(d.getTime())) return dateStr;
+  const pad = (n) => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  return `${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())} WIB`;
+}
+window.formatDisplayCreatedDate = formatDisplayCreatedDate;
+
+function formatDisplayDateOnly(dateStr) {
+  if (!dateStr) return '-';
+  const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(dateStr) : new Date(dateStr);
+  if (!d || isNaN(d.getTime())) return dateStr;
+  const pad = (n) => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  return `${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+window.formatDisplayDateOnly = formatDisplayDateOnly;
+
 function playScannerBeep() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;

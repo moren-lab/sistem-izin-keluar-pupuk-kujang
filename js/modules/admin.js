@@ -828,10 +828,14 @@ function renderAdminReports(isPrinting = false) {
   }
 
   tbody.innerHTML = paginatedReports.map(t => {
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
     return `
-      <tr>
+      <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
         <td style="white-space: nowrap;">
-          <span class="report-ticket-id">${t.id}</span>
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span class="report-ticket-id">${t.id}</span>
+            ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+          </div>
         </td>
         <td>
           <div style="display: flex; align-items: center; gap: 0.65rem;">${window.renderUserPhoto(t.applicantName, 30)} <div><div class="report-emp-name">${t.applicantName}</div><div class="report-emp-nip">NIP: ${t.applicantNip}</div></div></div>
@@ -2633,12 +2637,16 @@ function renderAdminStatusTracking() {
       progressionText = `Ditolak oleh atasan: ${t.rejectReason || 'Alasan operasional'}`;
     }
 
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
     return `
-      <tr>
+      <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
         <td>
-          <a href="javascript:void(0)" onclick="window.viewAdminTicketDetail('${t.id}')" class="report-ticket-id" style="text-decoration: none; font-weight: 700; color: var(--primary-accent);">
-            ${t.id}
-          </a>
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <a href="javascript:void(0)" onclick="window.viewAdminTicketDetail('${t.id}')" class="report-ticket-id" style="text-decoration: none; font-weight: 700; color: var(--primary-accent);">
+              ${t.id}
+            </a>
+            ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+          </div>
           <div style="margin-top: 3px;">${cleanCategoryBadge(t.category)}</div>
         </td>
         <td>

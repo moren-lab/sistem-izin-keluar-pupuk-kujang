@@ -407,7 +407,7 @@ function renderApproverDashboard() {
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #fecdd3; flex-wrap: wrap; gap: 0.5rem;">
               <span style="font-size: 0.725rem; color: #9f1239; font-family: var(--font-mono);">
-                Diajukan: ${emg.createdAt ? emg.createdAt.slice(11, 16) : 'Hari ini'} WIB
+                Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(emg.createdAt) : emg.createdAt}
               </span>
               <div style="display: flex; gap: 0.35rem; align-items: center;">
                 <button class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${emg.id}', 'detail')">
@@ -574,28 +574,36 @@ function renderApproverCards(list, containerElement, isTracking = false) {
     <div class="cards-grid">
       ${list.map(t => {
     const isPending = t.status === 'Menunggu Persetujuan';
-    const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
-    const isDinas = t.category === 'Dinas Kantor';
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+    let displayCategory = t.category;
+    if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+      displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+    }
+    const isDinas = displayCategory === 'Dinas Kantor';
 
     return `
           <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : ''}">
             <div class="card-top">
               <div>
                 <span class="card-id-num">${t.id}</span>
-                <div class="card-created-meta">Diajukan: ${t.createdAt}</div>
+                <div class="card-created-meta">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
               </div>
               ${window.getStatusPill(t.status, t)}
             </div>
 
-            <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
-              <div style="display: flex; align-items: center; gap: 0.65rem;">
-                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 34)}
-                <div>
+            <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:flex-start; justify-content:space-between; gap: 0.75rem;">
+              <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 36)}
+                <div style="display: flex; flex-direction: column; gap: 2px;">
                   <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                  <div style="font-size:0.725rem; color:var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Rekayasa Mesin'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25;">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
                 </div>
               </div>
-              <span style="font-weight: 700; font-size: 0.75rem; color: ${isEmergency ? '#b91c1c' : (isDinas ? '#059669' : '#d97706')};">${isEmergency ? '' + t.category : t.category}</span>
+              <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                <span style="font-weight: 700; font-size: 0.75rem; color: ${isDinas ? '#059669' : '#d97706'}; white-space: nowrap;">${displayCategory}</span>
+                ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+              </div>
             </div>
 
             ${isTicketReassignedFromCurrentApprover(t) ? `
@@ -639,7 +647,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : ''}
 
-            ${isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? `
+            ${isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || (t.emergencyLocked && t.status !== 'Disetujui' && !['Selesai', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status))) ? `
               <div class="approver-alert-banner emergency" style="border-radius: 8px; padding: 0.75rem 0.95rem; font-size: 0.8rem; margin: 0.65rem 0;">
                 <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
                   <span>Hasil Penulisan Form Kedaruratan (K3/Medis)</span>
@@ -672,8 +680,9 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               const isReassignedAway = isTicketReassignedFromCurrentApprover(t);
               const isAssigned = isTicketAssignedToCurrentApprover(t);
               const canDecide = !isTrackingView && isAssigned && !isReassignedAway;
+              const isEmergDeciding = isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || (t.emergencyLocked && t.status !== 'Disetujui' && !['Selesai', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status)));
 
-              if (canDecide && (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
+              if (canDecide && (isPending || isEmergDeciding || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
                 // Decision Mode (Exclusive to Officially Assigned Approver)
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
@@ -685,7 +694,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                       <button class="btn-approve" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="approveExtensionRequest('${t.id}')">
                         ✓ Setujui Perpanjang
                       </button>
-                    ` : (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked) ? (
+                    ` : (isEmergDeciding ? (
                       t.selectedMethod === 'facescan' ? `
                         <div style="grid-column: span 2; display: flex; align-items: center; justify-content: center; background: #faf5ff; border: 1px solid #e9d5ff; padding: 0.4rem 0.65rem; border-radius: 6px;">
                           <span style="font-size: 0.725rem; color: #7e22ce; font-weight: 700;">🤳 Otorisasi Scan Wajah di Tempat (Menunggu Pemohon)</span>
@@ -715,7 +724,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               }
 
               // Monitoring / Read-Only Mode (Subordinate pending with other approver OR Reassigned Away)
-              if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || (isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || t.emergencyLocked)) || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
+              if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || isEmergDeciding || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; background: ${isReassignedAway ? '#fffbeb' : '#eff6ff'}; border: 1px solid ${isReassignedAway ? '#fef3c7' : '#bfdbfe'}; border-radius: 6px; font-size: 0.725rem; color: ${isReassignedAway ? '#92400e' : '#1e40af'}; font-weight: 600;">
@@ -774,6 +783,11 @@ function renderApproverTable(list, containerElement) {
         </thead>
         <tbody>
           ${list.map(t => {
+            const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+            let displayCategory = t.category;
+            if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+              displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+            }
             const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
             const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
               ? window.formatTicketScheduleWithDay(t)
@@ -802,17 +816,21 @@ function renderApproverTable(list, containerElement) {
             `;
 
             return `
-              <tr>
+              <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
+                  <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                    <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</span>
+                    ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+                  </div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${displayCategory} — ${t.type}</div>
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
                     ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 32)}
-                    <div>
-                      <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35;">${t.applicantName || 'Budi Pratama'}</div>
-                      <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || '-'}</div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem; line-height: 1.3;">${t.applicantName || 'Budi Pratama'}</div>
+                      <div style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                      <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.25;">${t.department || '-'}</div>
                     </div>
                   </div>
                 </td>

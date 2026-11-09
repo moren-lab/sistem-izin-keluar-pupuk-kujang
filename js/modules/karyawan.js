@@ -512,19 +512,20 @@ function renderKaryawanDashboard() {
   if (cardActivePermitSummary) {
     if (activeTicket) {
       const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
+      const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+      const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
+      const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
       const isEmergTicket = Boolean(
         activeTicket.isEmergency ||
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
       );
-      const isEmergLocked = !isOutside && !activeTicket.scanOutTime && isEmergTicket && (
+      const isEmergLocked = !isOutside && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
-        activeTicket.emergencyLocked === true ||
-        activeTicket.qrLocked === true ||
-        (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Selesai')
+        (activeTicket.emergencyLocked === true && activeTicket.status !== 'Disetujui') ||
+        (activeTicket.qrLocked === true && activeTicket.status !== 'Disetujui')
       );
-      const isPending = !isOutside && (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
-      const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
+      const isPending = !isOutside && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
 
       const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
       const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
@@ -597,16 +598,13 @@ function renderKaryawanDashboard() {
 
       cardActivePermitSummary.innerHTML = `
         <div class="figma-card-header">
-          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
-            <span>Izin aktif saya</span>
-            ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
-          </h3>
+          <h3 class="figma-card-title">Izin aktif saya</h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
         </div>
         <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
+            ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
@@ -627,7 +625,7 @@ function renderKaryawanDashboard() {
         </div>
 
         ${isEmergLocked ? `
-          <div style="margin-top: 0.85rem; font-size: 0.775rem; padding-top: 0.65rem; border-top: 1px solid var(--border-color);">
+          <div style="margin-top: 0.85rem; font-size: 0.775rem; padding-top: 0.65rem; border-top: 1px solid var(--border-color, #f1f5f9);">
             <div style="font-weight: 800; color: #b91c1c; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
               <span>Izin Darurat Menunggu Otorisasi</span>
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
@@ -831,19 +829,20 @@ function renderPengajuanSayaView() {
   // Left Column
   if (colPengajuanLeft) {
     const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
+    const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+    const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
+    const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
     const isEmergTicket = Boolean(
       activeTicket.isEmergency ||
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
     );
-    const isEmergLocked = !isOutside && !activeTicket.scanOutTime && isEmergTicket && (
+    const isEmergLocked = !isOutside && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
-      activeTicket.emergencyLocked === true ||
-      activeTicket.qrLocked === true ||
-      (activeTicket.status !== 'Disetujui' && activeTicket.status !== 'Selesai')
+      (activeTicket.emergencyLocked === true && activeTicket.status !== 'Disetujui') ||
+      (activeTicket.qrLocked === true && activeTicket.status !== 'Disetujui')
     );
-    const isPending = !isOutside && (activeTicket.status === 'Menunggu Persetujuan' || activeTicket.status === 'Menunggu Otorisasi Darurat');
-    const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
+    const isPending = !isOutside && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
 
     const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
@@ -918,16 +917,13 @@ function renderPengajuanSayaView() {
       <!-- Card 1: Izin aktif saya -->
       <div class="figma-card">
         <div class="figma-card-header">
-          <h3 class="figma-card-title" style="display: flex; align-items: center; gap: 0.4rem;">
-            <span>Izin aktif saya</span>
-            ${isEmergency ? `<span style="color:#b91c1c; font-weight:800; font-size:0.75rem;">DARURAT</span>` : ''}
-          </h3>
+          <h3 class="figma-card-title">Izin aktif saya</h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
         </div>
         <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.725rem; color: #be123c; font-weight: 700;">[IZIN DARURAT]</span>` : ''}
+            ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
@@ -953,10 +949,10 @@ function renderPengajuanSayaView() {
               <span>Izin Darurat Menunggu Otorisasi</span>
               <span style="font-weight: 700; color: #b91c1c;">QR Terkunci</span>
             </div>
-            <div style="color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.45;">
+            <div style="color: #475569; margin-top: 0.25rem; line-height: 1.45;">
               ${activeTicket.selectedMethod === 'facescan'
                 ? 'Metode otorisasi: <strong>Scan Wajah Atasan di Tempat</strong>. Silakan klik tombol "Scan Wajah Atasan" di bawah dan arahkan kamera ke wajah Atasan untuk membuka QR Code.'
-                : 'Metode otorisasi: <strong>Persetujuan Langsung Atasan di App</strong>. Sistem sedang menunggu Atasan menekan tombol setujui di aplikasinya. Hendak mengganti metode? Klik "Edit Pengajuan".'}
+                : 'Sesuai SOP K3, QR Code izin darurat terkunci sampai diverifikasi dan disetujui oleh Atasan.'}
             </div>
           </div>
         ` : ''}
@@ -1345,29 +1341,38 @@ function renderEmpCards(list, containerElement) {
         }
 
         const scheduleWithDay = formatTicketScheduleWithDay(t);
-        const isDinas = t.category === 'Dinas Kantor';
+        const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+        let displayCategory = t.category;
+        if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+          displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+        }
+        const isDinas = displayCategory === 'Dinas Kantor';
 
         return `
-          <div class="figma-grid-item" data-status="${t.status}">
+          <div class="figma-grid-item" data-status="${t.status}" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48);' : ''}">
             <!-- Header ID & Status -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
               <div>
                 <div class="figma-ticket-id" style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); letter-spacing: -0.2px;">${t.id}</div>
-                <div class="figma-ticket-date" style="font-size: 0.725rem; color: #64748b; margin-top: 2px; font-weight: 500;">Diajukan ${dateStr}</div>
+                <div class="figma-ticket-date" style="font-size: 0.725rem; color: #64748b; margin-top: 2px; font-weight: 500;">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : (t.createdAt || 'Hari ini')}</div>
               </div>
               <div style="text-align: right;">${getCleanEmpStatus(t.status, t)}</div>
             </div>
 
             <!-- Applicant Box with Photo & Category -->
-            <div style="background:var(--bg-subtle, #f8fafc); padding:0.55rem 0.75rem; border-radius:6px; display:flex; align-items:center; justify-content:space-between; margin: 0.35rem 0;">
-              <div style="display: flex; align-items: center; gap: 0.65rem;">
-                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 34)}
-                <div>
+            <div style="background:var(--bg-subtle, #f8fafc); padding:0.55rem 0.75rem; border-radius:6px; display:flex; align-items:flex-start; justify-content:space-between; gap: 0.75rem; margin: 0.35rem 0;">
+              <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 36)}
+                <div style="display: flex; flex-direction: column; gap: 2px;">
                   <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                  <div style="font-size:0.725rem; color:var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'} — ${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25;">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
                 </div>
               </div>
-              <span class="figma-tag-badge ${isDinas ? 'badge-dinas' : 'badge-pribadi'}">${t.category}</span>
+              <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                <span class="figma-tag-badge ${isDinas ? 'badge-dinas' : 'badge-pribadi'}" style="white-space: nowrap;">${displayCategory}</span>
+                ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+              </div>
             </div>
 
             <!-- Detail Box (Tujuan, Keperluan, Rencana Waktu) -->
@@ -1466,19 +1471,28 @@ function renderEmpTable(list, containerElement) {
     `;
 
     const scheduleWithDay = formatTicketScheduleWithDay(t);
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+    let displayCategory = t.category;
+    if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+      displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+    }
 
     return `
-              <tr>
+              <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem;">${t.id}</div>
-                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${t.category} — ${t.type}</div>
+                  <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                    <span style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem;">${t.id}</span>
+                    ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+                  </div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${displayCategory} — ${t.type}</div>
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="display: flex; align-items: center; gap: 0.55rem;">
+                  <div style="display: flex; align-items: flex-start; gap: 0.55rem;">
                     ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 30)}
-                    <div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
                       <div style="font-weight: 700; color: var(--text-primary); font-size: 0.8rem; line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                      <div style="font-size: 0.725rem; color: var(--text-secondary); margin-top: 1px;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                      <div style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                      <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.25;">${t.department || '-'}</div>
                     </div>
                   </div>
                 </td>
