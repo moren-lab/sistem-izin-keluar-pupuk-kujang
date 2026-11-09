@@ -379,6 +379,12 @@
     );
     const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
 
+    // 4 Metrik Ringkasan Perizinan (Identik Akurat dengan Versi Web/PC)
+    const needDecisionCount = pendingNew.length + pendingEmergTickets.length + pendingExt.length + reassignedAwayTickets.length;
+    const approvedCount = tickets.filter(t => t.status === 'Disetujui' && isTicketAssignedToMobileApprover(t)).length;
+    const rejectedCount = tickets.filter(t => t.status === 'Ditolak' && isTicketAssignedToMobileApprover(t)).length;
+    const totalCount = tickets.filter(t => isTicketAssignedToMobileApprover(t)).length;
+
     if (pendingEmergTickets.length > 0) {
       priorityHtml = pendingEmergTickets.map(pendingEmergTicket => {
         const isReassignedAway = isTicketReassignedFromMobileApprover(pendingEmergTicket);
@@ -581,31 +587,31 @@
         </button>
       </div>
 
-      <!-- Segment 1: Ringkasan Perizinan (Image 3: 4-Grid Metrics Overview) -->
+      <!-- Segment 1: Ringkasan Perizinan (Identik dengan Versi Web/PC) -->
       <div id="mAtasanSecRingkasan" style="display: ${atasanDashboardSegment === 'ringkasan' ? 'block' : 'none'}; margin-bottom: 12px;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <!-- Card 1: Izin baru menunggu -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('antrean', 'baru')">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Izin baru menunggu</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${pendingNew.length + pendingEmergTickets.length}</div>
+          <!-- Card 1: Perlu Keputusan Segera -->
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('antrean')">
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Perlu Keputusan Segera</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${needDecisionCount}</div>
           </div>
 
-          <!-- Card 2: Perpanjangan menunggu -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('antrean', 'perpanjangan')">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Perpanjangan menunggu</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${pendingExt.length}</div>
+          <!-- Card 2: Telah Disetujui -->
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('pelacakan')">
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Telah Disetujui</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${approvedCount}</div>
           </div>
 
-          <!-- Card 3: Pengajuan diproses -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('tim')">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Pengajuan diproses</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${processedTickets.length}</div>
+          <!-- Card 3: Ditolak -->
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('riwayat')">
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Ditolak</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${rejectedCount}</div>
           </div>
 
-          <!-- Card 4: Tim di luar area -->
-          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('tim')">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Tim di luar area</div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${outsideTickets.length}</div>
+          <!-- Card 4: Total Permohonan -->
+          <div class="mobile-card" style="margin: 0; padding: 12px; cursor: pointer; text-align: center;" onclick="window.mobileSwitchTab('riwayat')">
+            <div style="font-size: 0.7rem; color: #64748b; font-weight: 700;">Total Permohonan</div>
+            <div style="font-size: 1.6rem; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 3px 0 2px 0;">${totalCount}</div>
           </div>
         </div>
       </div>
