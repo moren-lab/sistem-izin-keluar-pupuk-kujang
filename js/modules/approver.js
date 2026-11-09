@@ -71,17 +71,30 @@ function isTicketAssignedToCurrentApprover(ticket) {
 }
 
 function isTicketReassignedFromCurrentApprover(ticket) {
-  if (!ticket || !ticket.reassignedFrom) return false;
+  if (!ticket) return false;
   const currentActor = getCurrentApproverActor();
   const aName = (currentActor.name || '').trim();
   const aNip = (currentActor.nip || '').trim();
   const cActorName = cleanPersonName(aName);
   const cFromName = cleanPersonName(ticket.reassignedFrom);
 
-  if (ticket.reassignedFromNip && aNip && ticket.reassignedFromNip === aNip) return true;
-  if (cFromName && cActorName && (cFromName === cActorName || cFromName.includes(cActorName) || cActorName.includes(cFromName))) {
-    return true;
+  // 1. Jika tiket memiliki catatan pengalihan resmi (reassignedFrom)
+  if (ticket.reassignedFrom) {
+    if (ticket.reassignedFromNip && aNip && ticket.reassignedFromNip === aNip) return true;
+    if (cFromName && cActorName && (cFromName === cActorName || cFromName.includes(cActorName) || cActorName.includes(cFromName))) {
+      return true;
+    }
   }
+
+  // 2. Jika tiket diajukan oleh bawahan langsung, tetapi pemohon memilih atasan lain (dialihkan sejak awal):
+  if (!isTicketAssignedToCurrentApprover(ticket)) {
+    if (ticket.directSupervisorNip && aNip && ticket.directSupervisorNip === aNip) return true;
+    const cDirectSup = cleanPersonName(ticket.directSupervisor);
+    if (cDirectSup && cActorName && (cDirectSup === cActorName || cDirectSup.includes(cActorName) || cActorName.includes(cDirectSup))) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -116,9 +129,14 @@ function isTicketUnderMySupervision(ticket) {
 }
 window.isTicketUnderMySupervision = isTicketUnderMySupervision;
 
-// Cek apakah tiket dihapus khusus oleh atasan yang sedang aktif (riwayat terpisah Atasan 1 & Atasan 2)
+// Cek apakah tiket dihapus khusus oleh atasan yang sedang aktif (riwayat terpisah dinamis per NIP atasan)
 function isDeletedByCurrentApprover(ticket) {
   if (!ticket) return false;
+  const currentApprover = (typeof getCurrentApproverActor === 'function') ? getCurrentApproverActor() : null;
+  const nip = currentApprover ? currentApprover.nip : null;
+  if (nip && Array.isArray(ticket.deletedByApproverNips)) {
+    if (ticket.deletedByApproverNips.includes(nip)) return true;
+  }
   const isApprover2 = (window.currentActor === 'approver2');
   return isApprover2 ? Boolean(ticket.deletedByApprover2) : Boolean(ticket.deletedByApprover1);
 }
@@ -141,7 +159,18 @@ function updateApproverMetrics() {
     isTicketAssignedToCurrentApprover(t)
   ).length;
 
-  const pending = pendingInitial + pendingExtensions;
+  // Tiket bawahan langsung yang dialihkan ke atasan lain
+  const reassignedAwayCount = ticketsList.filter(t =>
+    t.status !== 'Dibatalkan' &&
+    t.status !== 'Ditolak' &&
+    t.status !== 'Selesai' &&
+    isTicketReassignedFromCurrentApprover(t) &&
+    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
+  ).length;
+
+  const directPending = pendingInitial + pendingExtensions;
+  const totalQueue = directPending + reassignedAwayCount;
+
   const approved = ticketsList.filter(t => t.status === 'Disetujui' && isTicketAssignedToCurrentApprover(t)).length;
   const rejected = ticketsList.filter(t => t.status === 'Ditolak' && isTicketAssignedToCurrentApprover(t)).length;
   const total = ticketsList.filter(t => isTicketAssignedToCurrentApprover(t)).length;
@@ -151,7 +180,7 @@ function updateApproverMetrics() {
   const statAppRejected = document.getElementById('statAppRejected');
   const statAppTotal = document.getElementById('statAppTotal');
 
-  if (statAppPending) statAppPending.textContent = pending;
+  if (statAppPending) statAppPending.textContent = totalQueue;
   if (statAppApproved) statAppApproved.textContent = approved;
   if (statAppRejected) statAppRejected.textContent = rejected;
   if (statAppTotal) statAppTotal.textContent = total;
@@ -160,11 +189,17 @@ function updateApproverMetrics() {
   const headingPendingBadge = document.getElementById('headingPendingBadge');
   const bnavPendingBadge = document.getElementById('bnavPendingBadge');
 
-  if (sidebarPendingBadge) sidebarPendingBadge.textContent = pending;
-  if (headingPendingBadge) headingPendingBadge.textContent = pending;
+  if (sidebarPendingBadge) {
+    sidebarPendingBadge.textContent = totalQueue;
+    sidebarPendingBadge.style.display = totalQueue > 0 ? 'inline-block' : 'none';
+  }
+  if (headingPendingBadge) {
+    headingPendingBadge.textContent = directPending;
+    headingPendingBadge.style.display = directPending > 0 ? 'inline-flex' : 'none';
+  }
   if (bnavPendingBadge) {
-    bnavPendingBadge.textContent = pending;
-    bnavPendingBadge.style.display = pending > 0 ? 'inline-block' : 'none';
+    bnavPendingBadge.textContent = totalQueue;
+    bnavPendingBadge.style.display = totalQueue > 0 ? 'inline-block' : 'none';
   }
 }
 
@@ -796,6 +831,11 @@ function renderApproverTable(list, containerElement) {
       </table>
     </div>
   `;
+
+  const card = target.querySelector('.figma-table-card');
+  if (card && typeof window.enableDragScroll === 'function') {
+    window.enableDragScroll(card);
+  }
 }
 
 function renderApproverView() {
@@ -1695,6 +1735,14 @@ function deleteApproverTicket(ticketId) {
     let tickets = window.ticketsList || [];
     const target = tickets.find(t => t.id === ticketId);
     if (target) {
+      const currentApprover = (typeof getCurrentApproverActor === 'function') ? getCurrentApproverActor() : null;
+      const nip = currentApprover ? currentApprover.nip : null;
+      if (!Array.isArray(target.deletedByApproverNips)) {
+        target.deletedByApproverNips = [];
+      }
+      if (nip && !target.deletedByApproverNips.includes(nip)) {
+        target.deletedByApproverNips.push(nip);
+      }
       const isApprover2 = (window.currentActor === 'approver2');
       if (isApprover2) {
         target.deletedByApprover2 = true;
@@ -1705,7 +1753,7 @@ function deleteApproverTicket(ticketId) {
         window.saveTickets(tickets);
       }
       if (typeof window.showToast === 'function') {
-        const who = isApprover2 ? 'Atasan 2 (Dewi Sartika)' : 'Atasan 1 (Ir. Hendra Gunawan)';
+        const who = currentApprover ? currentApprover.name : (isApprover2 ? 'Atasan 2 (Dewi Sartika)' : 'Atasan 1 (Ir. Hendra Gunawan)');
         window.showToast(`Catatan izin #${ticketId} berhasil dihapus dari riwayat ${who}.`, 'info');
       }
       renderApproverView();
@@ -1737,7 +1785,15 @@ function clearApproverTrackingHistory() {
   }
 
   const handler = () => {
+    const currentApprover = (typeof getCurrentApproverActor === 'function') ? getCurrentApproverActor() : null;
+    const nip = currentApprover ? currentApprover.nip : null;
     finishedTickets.forEach(t => {
+      if (!Array.isArray(t.deletedByApproverNips)) {
+        t.deletedByApproverNips = [];
+      }
+      if (nip && !t.deletedByApproverNips.includes(nip)) {
+        t.deletedByApproverNips.push(nip);
+      }
       if (isApprover2) {
         t.deletedByApprover2 = true;
       } else {
@@ -1749,7 +1805,8 @@ function clearApproverTrackingHistory() {
       window.saveTickets(tickets);
     }
     if (typeof window.showToast === 'function') {
-      window.showToast(`${finishedTickets.length} riwayat permohonan selesai telah dihapus dari pelacakan Atasan.`, 'info');
+      const who = currentApprover ? currentApprover.name : (isApprover2 ? 'Atasan 2' : 'Atasan 1');
+      window.showToast(`${finishedTickets.length} riwayat permohonan selesai telah dibersihkan dari riwayat ${who}.`, 'info');
     }
     renderApproverView();
   };
@@ -1757,12 +1814,31 @@ function clearApproverTrackingHistory() {
   if (typeof window.openDeleteConfirmModal === 'function') {
     window.openDeleteConfirmModal({
       title: 'Hapus Riwayat Selesai',
-      message: `Hapus <strong>${finishedTickets.length}</strong> riwayat izin yang sudah selesai/diputuskan dari pelacakan Atasan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`,
+      message: `Hapus <strong>${finishedTickets.length}</strong> riwayat izin yang sudah selesai/diputuskan dari riwayat Atasan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`,
       onConfirm: handler
     });
-  } else if (confirm(`Hapus ${finishedTickets.length} riwayat izin yang sudah selesai/diputuskan dari pelacakan? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`)) {
+  } else if (confirm(`Hapus ${finishedTickets.length} riwayat izin yang sudah selesai/diputuskan dari riwayat? Permohonan yang sedang aktif/berjalan tidak akan dihapus.`)) {
     handler();
   }
+}
+
+// Global View Switcher handlers for Approver
+function setApproverViewMode(mode) {
+  window.currentApproverViewMode = mode;
+  const btnApproverViewCard = document.getElementById('btnApproverViewCard');
+  const btnApproverViewTable = document.getElementById('btnApproverViewTable');
+  if (btnApproverViewCard) btnApproverViewCard.classList.toggle('active', mode !== 'table');
+  if (btnApproverViewTable) btnApproverViewTable.classList.toggle('active', mode === 'table');
+  renderApproverView();
+}
+
+function setApproverRiwayatViewMode(mode) {
+  window.currentApproverRiwayatViewMode = mode;
+  const btnApproverRiwayatViewCard = document.getElementById('btnApproverRiwayatViewCard');
+  const btnApproverRiwayatViewTable = document.getElementById('btnApproverRiwayatViewTable');
+  if (btnApproverRiwayatViewCard) btnApproverRiwayatViewCard.classList.toggle('active', mode !== 'table');
+  if (btnApproverRiwayatViewTable) btnApproverRiwayatViewTable.classList.toggle('active', mode === 'table');
+  renderApproverView();
 }
 
 // Expose globally
@@ -1778,6 +1854,9 @@ window.openRejectExtensionModal = openRejectExtensionModal;
 window.rejectExtensionRequest = rejectExtensionRequest;
 window.deleteApproverTicket = deleteApproverTicket;
 window.clearApproverTrackingHistory = clearApproverTrackingHistory;
+window.clearApproverRiwayatHistory = clearApproverTrackingHistory;
+window.setApproverViewMode = setApproverViewMode;
+window.setApproverRiwayatViewMode = setApproverRiwayatViewMode;
 window.setApproverAntrianFilter = function (filterNature) {
   window.currentApproverAntrianFilter = filterNature || 'all';
   if (typeof window.renderApproverView === 'function') {
@@ -1785,29 +1864,41 @@ window.setApproverAntrianFilter = function (filterNature) {
   }
 };
 
-// Wire Filter and View Switcher listeners for Approver Pelacakan
+// Wire Filter and View Switcher listeners for Approver Pelacakan & Riwayat
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Pelacakan View Mode Switcher
   const btnApproverViewCard = document.getElementById('btnApproverViewCard');
   const btnApproverViewTable = document.getElementById('btnApproverViewTable');
 
   if (btnApproverViewCard) {
     btnApproverViewCard.addEventListener('click', () => {
-      window.currentApproverViewMode = 'card';
-      btnApproverViewCard.classList.add('active');
-      if (btnApproverViewTable) btnApproverViewTable.classList.remove('active');
-      renderApproverView();
+      setApproverViewMode('card');
     });
   }
 
   if (btnApproverViewTable) {
     btnApproverViewTable.addEventListener('click', () => {
-      window.currentApproverViewMode = 'table';
-      btnApproverViewTable.classList.add('active');
-      if (btnApproverViewCard) btnApproverViewCard.classList.remove('active');
-      renderApproverView();
+      setApproverViewMode('table');
     });
   }
 
+  // 2. Riwayat View Mode Switcher
+  const btnApproverRiwayatViewCard = document.getElementById('btnApproverRiwayatViewCard');
+  const btnApproverRiwayatViewTable = document.getElementById('btnApproverRiwayatViewTable');
+
+  if (btnApproverRiwayatViewCard) {
+    btnApproverRiwayatViewCard.addEventListener('click', () => {
+      setApproverRiwayatViewMode('card');
+    });
+  }
+
+  if (btnApproverRiwayatViewTable) {
+    btnApproverRiwayatViewTable.addEventListener('click', () => {
+      setApproverRiwayatViewMode('table');
+    });
+  }
+
+  // 3. Pelacakan Filter Listeners
   const searchApproverInput = document.getElementById('searchApproverInput');
   const filterApproverPeriod = document.getElementById('filterApproverPeriod');
   const sortApproverTracking = document.getElementById('sortApproverTracking');
@@ -1817,8 +1908,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   [searchApproverInput, filterApproverPeriod, sortApproverTracking, filterApproverCategory, filterApproverType, filterApproverStatus].forEach(el => {
     if (el) {
-      el.addEventListener('input', () => renderApproverView());
-      el.addEventListener('change', () => renderApproverView());
+      el.addEventListener('input', () => {
+        window.appPelacakanCurrentPage = 1;
+        renderApproverView();
+      });
+      el.addEventListener('change', () => {
+        window.appPelacakanCurrentPage = 1;
+        renderApproverView();
+      });
+    }
+  });
+
+  // 4. Riwayat Filter Listeners
+  const searchApproverRiwayatInput = document.getElementById('searchApproverRiwayatInput');
+  const filterApproverRiwayatPeriod = document.getElementById('filterApproverRiwayatPeriod');
+  const sortApproverRiwayat = document.getElementById('sortApproverRiwayat');
+  const filterApproverRiwayatCategory = document.getElementById('filterApproverRiwayatCategory');
+  const filterApproverRiwayatType = document.getElementById('filterApproverRiwayatType');
+  const filterApproverRiwayatStatus = document.getElementById('filterApproverRiwayatStatus');
+
+  [searchApproverRiwayatInput, filterApproverRiwayatPeriod, sortApproverRiwayat, filterApproverRiwayatCategory, filterApproverRiwayatType, filterApproverRiwayatStatus].forEach(el => {
+    if (el) {
+      el.addEventListener('input', () => {
+        window.appRiwayatCurrentPage = 1;
+        renderApproverView();
+      });
+      el.addEventListener('change', () => {
+        window.appRiwayatCurrentPage = 1;
+        renderApproverView();
+      });
     }
   });
 });

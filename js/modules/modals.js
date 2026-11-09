@@ -19,6 +19,48 @@ window.toggleDetailExpand = function(targetId, btn) {
     if (btn) btn.innerHTML = 'Tutup ∧';
   }
 };
+
+// Deteksi overflow DOM nyata untuk teks panjang (Hanya muncul jika benar-benar terpotong vertikal)
+function checkAndApplyTextExpand(elementId, buttonId) {
+  const el = document.getElementById(elementId);
+  const btn = document.getElementById(buttonId);
+  if (!el) return;
+
+  // Reset awal ke status ter-clamp 3 baris
+  el.setAttribute('data-expanded', 'false');
+  el.style.display = '-webkit-box';
+  el.style.webkitLineClamp = '3';
+  el.style.webkitBoxOrient = 'vertical';
+  el.style.overflow = 'hidden';
+  if (btn) btn.style.display = 'none';
+
+  // Ukur setelah siklus render DOM selesai
+  setTimeout(() => {
+    // Jika modal tidak tampak atau elemen belum memiliki tinggi (0px), jangan tampilkan tombol
+    if (el.clientHeight === 0) {
+      if (btn) btn.style.display = 'none';
+      return;
+    }
+
+    // scrollHeight > clientHeight menandakan teks benar-benar melebihi kapasitas 3 baris
+    const isOverflowing = el.scrollHeight > (el.clientHeight + 2);
+    if (isOverflowing) {
+      if (btn) {
+        btn.style.display = 'inline-block';
+        btn.innerHTML = 'Lihat selengkapnya ∨';
+      }
+    } else {
+      // Teks muat sepenuhnya dalam kotak tanpa terpotong
+      el.style.display = 'block';
+      el.style.webkitLineClamp = 'none';
+      el.style.overflow = 'visible';
+      if (btn) {
+        btn.style.display = 'none';
+      }
+    }
+  }, 40);
+}
+window.checkAndApplyTextExpand = checkAndApplyTextExpand;
 // Helper untuk mendapatkan identitas Karyawan aktif pembuat aksi / pengajuan
 function getActiveEmployeeActorInfo() {
   if (typeof window.getCurrentEmployeeActor === 'function') {
@@ -1242,6 +1284,10 @@ function switchDetailTab(tab) {
     if (tabNavTimeline) tabNavTimeline.classList.remove('active');
     if (paneDetailInfo) paneDetailInfo.style.display = 'flex';
     if (paneDetailTimeline) paneDetailTimeline.style.display = 'none';
+    if (typeof window.checkAndApplyTextExpand === 'function') {
+      window.checkAndApplyTextExpand('infoDestination', 'btnToggleDestExpand');
+      window.checkAndApplyTextExpand('infoReason', 'btnToggleReasonExpand');
+    }
   }
 }
 
@@ -1504,51 +1550,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (infoType) infoType.textContent = ticket.type;
 
   const infoDestination = document.getElementById('infoDestination');
-  const btnToggleDest = document.getElementById('btnToggleDestExpand');
   if (infoDestination) {
     infoDestination.textContent = ticket.destination || '-';
-    infoDestination.setAttribute('data-expanded', 'false');
-    const destStr = String(ticket.destination || '');
-    const isLongDest = destStr.length > 50 || destStr.includes('\n') || destStr.includes('\r');
-    if (isLongDest) {
-      infoDestination.style.display = '-webkit-box';
-      infoDestination.style.webkitLineClamp = '3';
-      infoDestination.style.webkitBoxOrient = 'vertical';
-      infoDestination.style.overflow = 'hidden';
-      if (btnToggleDest) {
-        btnToggleDest.style.display = 'inline-block';
-        btnToggleDest.innerHTML = 'Lihat selengkapnya ∨';
-      }
-    } else {
-      infoDestination.style.display = 'block';
-      infoDestination.style.webkitLineClamp = 'none';
-      infoDestination.style.overflow = 'visible';
-      if (btnToggleDest) btnToggleDest.style.display = 'none';
-    }
   }
 
   const infoReason = document.getElementById('infoReason');
-  const btnToggleReason = document.getElementById('btnToggleReasonExpand');
   if (infoReason) {
     infoReason.textContent = ticket.reason || '-';
-    infoReason.setAttribute('data-expanded', 'false');
-    const reasonStr = String(ticket.reason || '');
-    const isLongReason = reasonStr.length > 50 || reasonStr.includes('\n') || reasonStr.includes('\r');
-    if (isLongReason) {
-      infoReason.style.display = '-webkit-box';
-      infoReason.style.webkitLineClamp = '3';
-      infoReason.style.webkitBoxOrient = 'vertical';
-      infoReason.style.overflow = 'hidden';
-      if (btnToggleReason) {
-        btnToggleReason.style.display = 'inline-block';
-        btnToggleReason.innerHTML = 'Lihat selengkapnya ∨';
-      }
-    } else {
-      infoReason.style.display = 'block';
-      infoReason.style.webkitLineClamp = 'none';
-      infoReason.style.overflow = 'visible';
-      if (btnToggleReason) btnToggleReason.style.display = 'none';
-    }
   }
 
   const infoTimeSectionTitle = document.getElementById('infoTimeSectionTitle');
@@ -1602,59 +1610,85 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const approverName = ticket.approverName || 'Arthur Morgan, S.Tr.T.';
   const infoApproverAvatar = document.getElementById('infoApproverAvatar');
   if (infoApproverAvatar) {
-    infoApproverAvatar.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+    if (typeof window.renderUserPhoto === 'function') {
+      infoApproverAvatar.innerHTML = window.renderUserPhoto(approverName, 34);
+    } else {
+      infoApproverAvatar.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+    }
   }
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
     if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `${approverName} <span style="font-size:0.75rem; color:#b45309; font-weight:700;">(Dialihkan dari ${ticket.reassignedFrom})</span>`;
+      infoApproverLbl.innerHTML = `
+        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${approverName}</div>
+        <div style="font-size:0.725rem; color:#b45309; font-weight:600; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">↳ Dialihkan dari ${ticket.reassignedFrom}</div>
+      `;
     } else {
-      infoApproverLbl.textContent = approverName;
+      infoApproverLbl.innerHTML = `
+        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${approverName}</div>
+      `;
     }
-    infoApproverLbl.style.fontWeight = '800';
-    infoApproverLbl.style.color = 'var(--text-primary, #0f172a)';
   }
 
   const infoApproverBadgeContainer = document.getElementById('infoApproverBadgeContainer');
   const infoApproverNoteText = document.getElementById('infoApproverNoteText');
   if (infoApproverBadgeContainer) {
     if (ticket.status === 'Disetujui' || ticket.status === 'Sedang di Luar' || ticket.status === 'Selesai' || ticket.status === 'Terlambat') {
+      infoApproverBadgeContainer.style.display = 'block';
       infoApproverBadgeContainer.innerHTML = '<span class="status-pill-green" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:0.75rem; padding:3px 10px; border-radius:9999px;">Disetujui</span>';
     } else if (ticket.status === 'Ditolak') {
+      infoApproverBadgeContainer.style.display = 'block';
       infoApproverBadgeContainer.innerHTML = '<span class="status-pill-red" style="background:#fee2e2; color:#b91c1c; font-weight:700; font-size:0.75rem; padding:3px 10px; border-radius:9999px;">Ditolak</span>';
     } else {
-      infoApproverBadgeContainer.innerHTML = '<span class="status-pill-yellow" style="background:#fef3c7; color:#b45309; font-weight:700; font-size:0.75rem; padding:3px 10px; border-radius:9999px;">Menunggu</span>';
+      // Hilangkan badge 'Menunggu' dari baris atasan sesuai permintaan
+      infoApproverBadgeContainer.style.display = 'none';
+      infoApproverBadgeContainer.innerHTML = '';
     }
   } else if (infoApproverNoteText) {
     infoApproverNoteText.textContent = ticket.approverNote || 'Disetujui';
   }
 
+  const infoSecurityAvatar = document.getElementById('infoSecurityAvatar');
   const infoSecurityLbl = document.getElementById('infoSecurityLbl');
   const infoSecurityNoteText = document.getElementById('infoSecurityNoteText');
   const hasScannedOut = Boolean(ticket.scanOutTime);
 
-  if (infoSecurityLbl) {
-    if (!hasScannedOut) {
-      infoSecurityLbl.textContent = 'Belum Scan Out';
-    } else {
-      const scanOutDisplay = ticket.scanOutTime.includes('WIB') ? ticket.scanOutTime : `${ticket.scanOutTime} WIB`;
-      infoSecurityLbl.textContent = `Sudah Tap Out (${scanOutDisplay})`;
-    }
-    infoSecurityLbl.style.fontWeight = '800';
-    infoSecurityLbl.style.color = 'var(--text-primary, #0f172a)';
-  }
+  if (hasScannedOut) {
+    const officerName = ticket.securityOfficerOut || 'Sertu Agus';
+    const gateUsed = ticket.scanOutGate || 'Pos 1 (Gerbang Utama)';
+    const scanOutSimple = (ticket.scanOutTime || '').replace(/\s*\(Pos.*?\)/gi, '');
 
-  if (infoSecurityNoteText) {
-    if (!hasScannedOut) {
-      infoSecurityNoteText.innerHTML = '<u>Identitas dan</u> QR Code belum dipindai di pos jaga gerbang.';
-    } else {
-      const gateUsed = ticket.scanOutGate || 'Pos 1 Gerbang Utama';
-      if (ticket.status === 'Selesai' && ticket.scanInTime) {
-        infoSecurityNoteText.textContent = ticket.securityNote || 'Identitas dan QR sesuai. Scan Out dan Tap In selesai diproses.';
+    if (infoSecurityAvatar) {
+      if (typeof window.renderUserPhoto === 'function') {
+        infoSecurityAvatar.innerHTML = window.renderUserPhoto(officerName, 34);
       } else {
-        infoSecurityNoteText.textContent = ticket.securityNote || `Identitas dan QR sesuai. Scan Out tercatat di ${gateUsed}.`;
+        infoSecurityAvatar.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
       }
+    }
+    if (infoSecurityLbl) {
+      infoSecurityLbl.innerHTML = `
+        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${officerName}</div>
+      `;
+    }
+    if (infoSecurityNoteText) {
+      infoSecurityNoteText.innerHTML = `
+        <div style="font-size:0.725rem; color:#047857; font-weight:600; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${gateUsed} • Tap Out ${scanOutSimple}</div>
+      `;
+    }
+  } else {
+    if (infoSecurityAvatar) {
+      infoSecurityAvatar.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
+    }
+    if (infoSecurityLbl) {
+      infoSecurityLbl.innerHTML = `
+        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">Belum Scan Out</div>
+      `;
+    }
+    if (infoSecurityNoteText) {
+      infoSecurityNoteText.innerHTML = `
+        <div style="font-size:0.725rem; color:#64748b; font-style:italic; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Identitas & QR belum dipindai di pos gerbang</div>
+      `;
     }
   }
 
@@ -2165,6 +2199,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (modalTicketDetail) {
     modalTicketDetail.style.display = 'flex';
     modalTicketDetail.classList.add('open');
+    if (typeof window.checkAndApplyTextExpand === 'function') {
+      window.checkAndApplyTextExpand('infoDestination', 'btnToggleDestExpand');
+      window.checkAndApplyTextExpand('infoReason', 'btnToggleReasonExpand');
+    }
   }
 }
 
@@ -3010,6 +3048,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const apprUser = allUsers.find(u => u.name && chosenApproverName && (u.name.toLowerCase() === chosenApproverName.toLowerCase() || u.name.toLowerCase().includes(chosenApproverName.toLowerCase()) || chosenApproverName.toLowerCase().includes(u.name.toLowerCase())));
       const approverNip = (apprUser && apprUser.nip) || (chosenApproverName.includes('Subagja') ? 'PK-2012-0543' : (chosenApproverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002'));
 
+      const isReassignedFromStart = Boolean(directSup && chosenApproverName && (typeof window.cleanPersonName === 'function' ? window.cleanPersonName(chosenApproverName) !== window.cleanPersonName(directSup) : chosenApproverName.toLowerCase().trim() !== directSup.toLowerCase().trim()));
+
       const newTicket = {
         id: ticketId,
         applicantName: activeEmp ? activeEmp.name : 'Budi Pratama, S.T.',
@@ -3028,6 +3068,11 @@ document.addEventListener('DOMContentLoaded', () => {
         approverName: chosenApproverName,
         approverNip: approverNip,
         approverNote: null,
+        reassignedFrom: isReassignedFromStart ? directSup : null,
+        reassignedFromNip: isReassignedFromStart ? directSupNip : null,
+        reassignedTo: isReassignedFromStart ? chosenApproverName : null,
+        reassignedToNip: isReassignedFromStart ? approverNip : null,
+        reassignedAt: isReassignedFromStart ? nowFormatted : null,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
@@ -3035,7 +3080,9 @@ document.addEventListener('DOMContentLoaded', () => {
             event: 'Pengajuan Dibuat',
             time: nowFormatted,
             by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
-            desc: 'Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan.'
+            desc: isReassignedFromStart
+              ? `Pengajuan tiket dibuat dan dialihkan ke ${chosenApproverName} untuk ditinjau (Atasan Langsung: ${directSup}).`
+              : 'Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan.'
           }
         ]
       };
@@ -3049,12 +3096,29 @@ document.addEventListener('DOMContentLoaded', () => {
           recipientName: chosenApproverName,
           actorSource: 'karyawan',
           type: 'pengajuan_baru',
-          title: 'Pengajuan Izin Baru',
-          message: `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category}. Menunggu persetujuan Anda.`,
+          title: isReassignedFromStart ? 'Pengajuan Izin Dialihkan ke Anda' : 'Pengajuan Izin Baru',
+          message: isReassignedFromStart
+            ? `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category} yang dialihkan ke Anda (Atasan Langsung: ${directSup}). Menunggu persetujuan Anda.`
+            : `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category}. Menunggu persetujuan Anda.`,
           ticketId: newTicket.id,
           priority: 'normal',
           eventId: `new_sub_${newTicket.id}`
         });
+
+        if (isReassignedFromStart && directSupNip) {
+          window.createNotification({
+            recipientRole: 'approver',
+            recipientNip: directSupNip,
+            recipientName: directSup,
+            actorSource: 'karyawan',
+            type: 'pengajuan_dialihkan',
+            title: 'Izin Bawahan Dialihkan',
+            message: `Bawahan langsung Anda, ${newTicket.applicantName}, mengajukan izin ${newTicket.category} (#${newTicket.id}) yang dialihkan ke ${chosenApproverName}. Anda dapat memantau statusnya di menu Antrian / Pelacakan.`,
+            ticketId: newTicket.id,
+            priority: 'normal',
+            eventId: `reassign_notice_${newTicket.id}`
+          });
+        }
       }
       window.saveTickets(ticketsList);
 
@@ -3481,6 +3545,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const emergApprUser = allUsersEmerg.find(u => u.name && chosenEmergApprover && (u.name.toLowerCase() === chosenEmergApprover.toLowerCase() || u.name.toLowerCase().includes(chosenEmergApprover.toLowerCase()) || chosenEmergApprover.toLowerCase().includes(u.name.toLowerCase())));
       const emergApproverNip = (emergApprUser && emergApprUser.nip) || (chosenEmergApprover.includes('Subagja') ? 'PK-2012-0543' : (chosenEmergApprover.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002'));
 
+      const isEmergReassigned = Boolean(emergDirectSup && chosenEmergApprover && (typeof window.cleanPersonName === 'function' ? window.cleanPersonName(chosenEmergApprover) !== window.cleanPersonName(emergDirectSup) : chosenEmergApprover.toLowerCase().trim() !== emergDirectSup.toLowerCase().trim()));
+
       const emergencyTicket = {
         id: ticketId,
         applicantName: activeEmergEmp ? activeEmergEmp.name : 'Budi Pratama, S.T.',
@@ -3506,6 +3572,11 @@ document.addEventListener('DOMContentLoaded', () => {
         approverName: chosenEmergApprover,
         approverNip: emergApproverNip,
         approverNote: `[Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${chosenEmergApprover}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`,
+        reassignedFrom: isEmergReassigned ? emergDirectSup : null,
+        reassignedFromNip: isEmergReassigned ? emergDirectSupNip : null,
+        reassignedTo: isEmergReassigned ? chosenEmergApprover : null,
+        reassignedToNip: isEmergReassigned ? emergApproverNip : null,
+        reassignedAt: isEmergReassigned ? nowFormatted : null,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
@@ -3513,7 +3584,9 @@ document.addEventListener('DOMContentLoaded', () => {
             event: 'Izin Darurat Diajukan (QR Terkunci)',
             time: nowFormatted,
             by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
-            desc: `Tiket darurat dibuat. QR Code terkunci sesuai SOP "No Approval, No Exit" sampai diotorisasi Atasan.`
+            desc: isEmergReassigned
+              ? `Tiket darurat dibuat dan dialihkan ke ${chosenEmergApprover} (Atasan Langsung: ${emergDirectSup}). QR Code terkunci sesuai SOP "No Approval, No Exit" sampai diotorisasi Atasan.`
+              : `Tiket darurat dibuat. QR Code terkunci sesuai SOP "No Approval, No Exit" sampai diotorisasi Atasan.`
           },
           {
             event: 'Kode Sandi Darurat Diterbitkan',
@@ -3774,6 +3847,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCancelExtensionAction) {
     btnCancelExtensionAction.addEventListener('click', executeCancelPendingExtension);
   }
+
+  window.addEventListener('resize', () => {
+    const modalDetail = document.getElementById('modalTicketDetail');
+    if (modalDetail && (modalDetail.classList.contains('open') || modalDetail.style.display === 'flex')) {
+      if (typeof window.checkAndApplyTextExpand === 'function') {
+        window.checkAndApplyTextExpand('infoDestination', 'btnToggleDestExpand');
+        window.checkAndApplyTextExpand('infoReason', 'btnToggleReasonExpand');
+      }
+    }
+  });
 });
 
 // TIME EXTENSION MODAL TRIGGER FUNCTION

@@ -1497,6 +1497,11 @@ function renderEmpTable(list, containerElement) {
       </table>
     </div>
   `;
+
+  const card = containerElement ? containerElement.querySelector('.figma-table-card') : document.querySelector('.figma-table-card');
+  if (card && typeof window.enableDragScroll === 'function') {
+    window.enableDragScroll(card);
+  }
 }
 
 /**
@@ -1520,6 +1525,18 @@ function renderKaryawanView() {
   }
 }
 
+// Global View Switcher function
+window.setEmpViewMode = function(mode) {
+  window.currentEmpViewMode = mode;
+  const btnEmpViewCard = document.getElementById('btnEmpViewCard');
+  const btnEmpViewTable = document.getElementById('btnEmpViewTable');
+  if (btnEmpViewCard) btnEmpViewCard.classList.toggle('active', mode !== 'table');
+  if (btnEmpViewTable) btnEmpViewTable.classList.toggle('active', mode === 'table');
+  if (typeof renderRiwayatView === 'function') {
+    renderRiwayatView();
+  }
+};
+
 // Wire Filter and View Switcher listeners
 document.addEventListener('DOMContentLoaded', () => {
   const btnEmpViewCard = document.getElementById('btnEmpViewCard');
@@ -1527,19 +1544,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnEmpViewCard) {
     btnEmpViewCard.addEventListener('click', () => {
-      window.currentEmpViewMode = 'card';
-      btnEmpViewCard.classList.add('active');
-      if (btnEmpViewTable) btnEmpViewTable.classList.remove('active');
-      renderRiwayatView();
+      window.setEmpViewMode('card');
     });
   }
 
   if (btnEmpViewTable) {
     btnEmpViewTable.addEventListener('click', () => {
-      window.currentEmpViewMode = 'table';
-      btnEmpViewTable.classList.add('active');
-      if (btnEmpViewCard) btnEmpViewCard.classList.remove('active');
-      renderRiwayatView();
+      window.setEmpViewMode('table');
     });
   }
 

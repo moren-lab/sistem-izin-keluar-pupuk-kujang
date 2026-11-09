@@ -3704,6 +3704,21 @@ body.theme-dark .role-dropdown-item.active {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.table-responsive.is-dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.table-responsive::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .data-table {
@@ -7478,24 +7493,20 @@ body.theme-dark .figma-contact-sub {
   -webkit-overflow-scrolling: touch;
   margin-top: 0.85rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  cursor: grab;
+  scrollbar-width: none; /* Hide default scrollbar on Firefox */
+  -ms-overflow-style: none; /* Hide default scrollbar on IE/Edge */
+}
+
+.figma-table-card.is-dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
 }
 
 .figma-table-card::-webkit-scrollbar {
-  height: 6px;
-}
-
-.figma-table-card::-webkit-scrollbar-track {
-  background: #f8fafc;
-  border-radius: 3px;
-}
-
-.figma-table-card::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.figma-table-card::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  display: none; /* Hide default scrollbar on Chrome, Safari & Opera */
+  width: 0;
+  height: 0;
 }
 
 .figma-table {
@@ -11354,7 +11365,8 @@ body.theme-dark .notif-card-full:not(.unread),
 #adminTableMusterRollWrap {
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: thin !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
   cursor: grab;
   padding-bottom: 6px;
 }
@@ -11365,7 +11377,9 @@ body.theme-dark .notif-card-full:not(.unread),
 }
 
 #adminTableMusterRollWrap::-webkit-scrollbar {
-  height: 6px;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 #adminTableMusterRollWrap::-webkit-scrollbar-track {

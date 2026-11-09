@@ -233,38 +233,9 @@ window.scrollMusterRollTable = function (distance) {
 
 function initMusterRollDragScroll() {
   const slider = document.getElementById('adminTableMusterRollWrap');
-  if (!slider || slider._dragInitialized) return;
-  slider._dragInitialized = true;
-
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-
-  slider.addEventListener('mousedown', (e) => {
-    if (e.target.closest('button, a, input, select')) return;
-    isDown = true;
-    slider.classList.add('is-dragging');
-    startX = e.pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
-  });
-
-  slider.addEventListener('mouseleave', () => {
-    isDown = false;
-    slider.classList.remove('is-dragging');
-  });
-
-  slider.addEventListener('mouseup', () => {
-    isDown = false;
-    slider.classList.remove('is-dragging');
-  });
-
-  slider.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - slider.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    slider.scrollLeft = scrollLeft - walk;
-  });
+  if (slider && typeof window.enableDragScroll === 'function') {
+    window.enableDragScroll(slider);
+  }
 }
 
 function renderAdminDashboard() {
@@ -395,6 +366,10 @@ function renderAdminRecentFeed() {
       </div>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 // ==========================================
@@ -680,6 +655,10 @@ function renderAdminAudit() {
       </tr>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 // DELETE FEATURE FOR AUDIT TRAIL LOG (REQUIREMENT 7)
@@ -878,6 +857,10 @@ function renderAdminReports(isPrinting = false) {
       </tr>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 // Clean Export to CSV / Excel
@@ -1248,6 +1231,10 @@ function renderAdminSupervisorDropdownItems(filterText = '') {
       </div>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 function setAdminSelectedSupervisor(name) {
@@ -1658,6 +1645,10 @@ function renderAdminEmpDropdownItems(filterText = '', targetField = 'name') {
       </div>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 function selectAdminEmployee(emp) {
@@ -2497,6 +2488,10 @@ function renderAdminUsers() {
       </tr>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 // ==========================================
@@ -2677,6 +2672,10 @@ function renderAdminStatusTracking() {
       </tr>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 function viewAdminTicketDetail(ticketId) {
@@ -2699,6 +2698,10 @@ function renderAdminView() {
     renderAdminReports();
   } else if (nav === 'users') {
     renderAdminUsers();
+  }
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 30);
   }
 }
 
@@ -2871,6 +2874,10 @@ function renderAdminDeptDropdownItems(query = '') {
       </div>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 function selectAdminDept(deptName) {
@@ -3131,6 +3138,10 @@ function renderAdminRoleDropdownItems(query = '') {
       </div>
     `;
   }).join('');
+
+  if (typeof window.initAllTableDragScroll === 'function') {
+    setTimeout(window.initAllTableDragScroll, 20);
+  }
 }
 
 function selectAdminRole(roleKey, jabatan) {

@@ -1358,7 +1358,7 @@
 
               </div>
               <div class="figma-view-switcher">
-                <button class="btn-figma-toggle active" id="btnEmpViewCard" title="Tampilan Kartu">
+                <button type="button" class="btn-figma-toggle active" id="btnEmpViewCard" onclick="window.setEmpViewMode('card')" title="Tampilan Kartu">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -1367,7 +1367,7 @@
                   </svg>
                   <span>Card</span>
                 </button>
-                <button class="btn-figma-toggle" id="btnEmpViewTable" title="Tampilan List / Tabel">
+                <button type="button" class="btn-figma-toggle" id="btnEmpViewTable" onclick="window.setEmpViewMode('table')" title="Tampilan List / Tabel">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -1705,7 +1705,7 @@
             <!-- Results Subbar (Card / List Switcher) Sesuai Gambar 2 -->
             <div class="figma-results-bar" style="display: flex; justify-content: flex-end; align-items: center; margin: 0.75rem 0 1rem 0;">
               <div class="figma-view-switcher">
-                <button class="btn-figma-toggle active" id="btnApproverViewCard" title="Tampilan Kartu">
+                <button type="button" class="btn-figma-toggle active" id="btnApproverViewCard" onclick="window.setApproverViewMode('card')" title="Tampilan Kartu">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -1714,7 +1714,7 @@
                   </svg>
                   <span>Card</span>
                 </button>
-                <button class="btn-figma-toggle" id="btnApproverViewTable" title="Tampilan List / Tabel">
+                <button type="button" class="btn-figma-toggle" id="btnApproverViewTable" onclick="window.setApproverViewMode('table')" title="Tampilan List / Tabel">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -1840,7 +1840,7 @@
             <!-- Results Subbar (Card / List Switcher) -->
             <div class="figma-results-bar" style="display: flex; justify-content: flex-end; align-items: center; margin: 0.75rem 0 1rem 0;">
               <div class="figma-view-switcher">
-                <button class="btn-figma-toggle active" id="btnApproverRiwayatViewCard" title="Tampilan Kartu">
+                <button type="button" class="btn-figma-toggle active" id="btnApproverRiwayatViewCard" onclick="window.setApproverRiwayatViewMode('card')" title="Tampilan Kartu">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -1849,7 +1849,7 @@
                   </svg>
                   <span>Card</span>
                 </button>
-                <button class="btn-figma-toggle" id="btnApproverRiwayatViewTable" title="Tampilan List / Tabel">
+                <button type="button" class="btn-figma-toggle" id="btnApproverRiwayatViewTable" onclick="window.setApproverRiwayatViewMode('table')" title="Tampilan List / Tabel">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -2696,7 +2696,7 @@
 
               <!-- Tracking Table -->
               <div class="table-responsive"
-                style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                style="border: 1px solid var(--border-color); border-radius: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
                 <table class="report-data-table">
                   <thead>
                     <tr>
@@ -3466,34 +3466,42 @@
           <!-- Section 6: Persetujuan Atasan & Petugas Pos Jaga (Side-by-Side Bento Grid Identik Gambar 1) -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" id="infoNotesContainer">
             <!-- Card Left: Persetujuan Atasan -->
-            <div style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: space-between; min-height: 84px;">
               <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem;">
                 Persetujuan Atasan
               </div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.6rem; overflow: hidden;">
-                  <div id="infoApproverAvatar" style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                <div style="display: flex; align-items: center; gap: 0.65rem; overflow: hidden; min-width: 0; flex: 1;">
+                  <div id="infoApproverAvatar" style="width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                   </div>
-                  <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="infoApproverLbl">
-                    Arthur Morgan, S.Tr.T.
-                  </span>
+                  <div style="min-width: 0; flex: 1;" id="infoApproverLbl">
+                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">Arthur Morgan, S.Tr.T.</div>
+                  </div>
                 </div>
-                <div id="infoApproverBadgeContainer">
+                <div id="infoApproverBadgeContainer" style="flex-shrink: 0;">
                   <span class="status-pill-green" id="infoApproverNoteText">Disetujui</span>
                 </div>
               </div>
             </div>
 
             <!-- Card Right: Petugas Pos Jaga -->
-            <div style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
-              <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(15, 23, 42, 0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #1e293b; margin-top: 2px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <div style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: space-between; min-height: 84px;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem;">
+                Petugas Pos Jaga
               </div>
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Petugas Pos Jaga</div>
-                <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-top: 1px;" id="infoSecurityLbl">Belum Scan Out</div>
-                <div style="font-size: 0.725rem; color: #64748b; font-style: italic; margin-top: 2px; line-height: 1.35;" id="infoSecurityNoteText">Identitas dan QR Code belum dipindai di pos jaga gerbang.</div>
+              <div style="display: flex; align-items: center; gap: 0.65rem; overflow: hidden; min-width: 0; flex: 1;">
+                <div id="infoSecurityAvatar" style="width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                  <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;" id="infoSecurityLbl">
+                    Belum Scan Out
+                  </div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;" id="infoSecurityNoteText">
+                    Identitas & QR belum dipindai di pos gerbang
+                  </div>
+                </div>
               </div>
             </div>
           </div>

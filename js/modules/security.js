@@ -748,6 +748,11 @@ function renderSecurityTable(list, containerElement) {
       </table>
     </div>
   `;
+
+  const card = containerElement ? containerElement.querySelector('.figma-table-card') : null;
+  if (card && typeof window.enableDragScroll === 'function') {
+    window.enableDragScroll(card);
+  }
 }
 window.renderSecurityTable = renderSecurityTable;
 
@@ -1108,6 +1113,11 @@ function renderSecurityLogTable(list, containerElement) {
       </table>
     </div>
   `;
+
+  const card = containerElement ? containerElement.querySelector('.figma-table-card') : null;
+  if (card && typeof window.enableDragScroll === 'function') {
+    window.enableDragScroll(card);
+  }
 }
 
 // VERIFICATION ENGINE

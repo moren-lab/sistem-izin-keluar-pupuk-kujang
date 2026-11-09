@@ -344,3 +344,63 @@ function renderGenericPaginationButtons(btnsContainer, totalPages, currentPage, 
 }
 
 window.renderGenericPaginationButtons = renderGenericPaginationButtons;
+
+/**
+ * Fitur Drag-to-Scroll (Klik & Geser Horisontal) untuk Tabel Data Figma
+ * Memungkinkan pengguna menggeser tabel ke kiri-kanan dengan klik-tahan mouse tanpa scrollbar kaku
+ */
+function enableDragScroll(slider) {
+  if (!slider || slider._dragInitialized) return;
+  slider._dragInitialized = true;
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  slider.addEventListener('mousedown', (e) => {
+    // Jangan aktifkan drag jika yang diklik adalah tombol interaktif, link, input, select
+    if (e.target.closest('button, a, input, select, label')) return;
+
+    isDown = true;
+    slider.classList.add('is-dragging');
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  const stopDrag = () => {
+    if (!isDown) return;
+    isDown = false;
+    slider.classList.remove('is-dragging');
+  };
+
+  slider.addEventListener('mouseleave', stopDrag);
+  slider.addEventListener('mouseup', stopDrag);
+  window.addEventListener('mouseup', stopDrag);
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5; // Rasio kecepatan geser responsif
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  // Dukungan scroll roda mouse (horizontal / shift-wheel)
+  slider.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) > 0 || e.shiftKey) {
+      slider.scrollLeft += (e.deltaX || e.deltaY);
+    }
+  }, { passive: true });
+}
+
+function initAllTableDragScroll() {
+  const tableCards = document.querySelectorAll('.figma-table-card, .table-card-scroll, #adminTableMusterRollWrap, .table-responsive');
+  tableCards.forEach(card => enableDragScroll(card));
+}
+
+window.enableDragScroll = enableDragScroll;
+window.initAllTableDragScroll = initAllTableDragScroll;
+
+document.addEventListener('DOMContentLoaded', () => {
+  initAllTableDragScroll();
+});
