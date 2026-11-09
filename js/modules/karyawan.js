@@ -546,7 +546,7 @@ function renderKaryawanDashboard() {
                 <span>Menunggu Persetujuan Perpanjangan</span>
               </button>
             ` : (hasUsedExtension ? `
-              <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+              <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #d97706;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
                 <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
               </button>
             ` : `
@@ -863,7 +863,7 @@ function renderPengajuanSayaView() {
               <span>Menunggu Persetujuan Perpanjangan</span>
             </button>
           ` : (hasUsedExtension ? `
-            <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #f8fafc;" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
+            <button class="btn-figma-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #d97706" title="Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui">
               <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
             </button>
           ` : `

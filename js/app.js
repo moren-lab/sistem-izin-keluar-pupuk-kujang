@@ -125,10 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.checkOverdueAndExpiredTickets === 'function') {
       window.checkOverdueAndExpiredTickets(true);
     }
-    if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav('dashboard');
-    if (typeof window.setApproverNav === 'function') window.setApproverNav('dashboard');
-    if (typeof window.setSecurityNav === 'function') window.setSecurityNav('dashboard');
-    if (typeof window.setAdminNav === 'function') window.setAdminNav('dashboard');
+    const savedKaryawanNav = (function () { try { return sessionStorage.getItem('KUJANG_KARYAWAN_NAV'); } catch (e) { return null; } })() || 'dashboard';
+    const savedApproverNav = (function () { try { return sessionStorage.getItem('KUJANG_APPROVER_NAV'); } catch (e) { return null; } })() || 'dashboard';
+    const savedSecNav = (function () { try { return sessionStorage.getItem('KUJANG_SEC_NAV'); } catch (e) { return null; } })() || 'dashboard';
+    const savedAdminNav = (function () { try { return sessionStorage.getItem('KUJANG_ADMIN_NAV'); } catch (e) { return null; } })() || 'dashboard';
+
+    if (typeof window.setKaryawanNav === 'function') window.setKaryawanNav(savedKaryawanNav);
+    if (typeof window.setApproverNav === 'function') window.setApproverNav(savedApproverNav);
+    if (typeof window.setSecurityNav === 'function') window.setSecurityNav(savedSecNav);
+    if (typeof window.setAdminNav === 'function') window.setAdminNav(savedAdminNav);
     const targetRole = activeUser.roleKey || activeUser.role;
     if (typeof window.switchRole === 'function') window.switchRole(targetRole, activeUser);
   }

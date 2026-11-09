@@ -493,7 +493,7 @@
         }
         return;
       }
-      const storageKey = window.STORAGE_KEY || 'KUJANG_GATEPASS_TICKETS_V7';
+      const storageKey = window.STORAGE_KEY || 'KUJANG_GATEPASS_TICKETS_V9';
       if (e.key === storageKey || e.key === 'ticketsList' || e.key === 'empTickets') {
         const activeUser = window.getKujangCurrentUser();
         if (!activeUser) return;

@@ -1142,7 +1142,7 @@ function renderSecurityLogTable(list, containerElement) {
 }
 
 // VERIFICATION ENGINE
-function executeVerification(inputQuery) {
+function executeVerification(inputQuery, directScanOut = false) {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   const ticketsList = window.ticketsList || [];
 
@@ -1185,18 +1185,18 @@ function executeVerification(inputQuery) {
   } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sedang di luar kawasan. Tap In Masuk dilakukan oleh Karyawan bersangkutan.`, 'info');
   } else if (ticket.status === 'Disetujui') {
-    if (ticket.isEmergency) {
-      if (typeof window.showToast === 'function') {
-        window.showToast(`PERINGATAN POS JAGA: Tiket Izin Darurat #${ticket.id} SAH (Diotorisasi: ${ticket.emergencyUnlockedBy || 'Resmi'}). Pastikan periksa kondisi fisik/kendaraan darurat sebelum Scan Out!`, 'warning');
-      }
-    } else {
-      if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} valid dan disetujui. Siap diproses Scan Out!`, 'success');
+    // Alur 1-Klik: Jika tiket sah & disetujui, langsung eksekusi Scan Out tanpa perantara modal ganda
+    if (directScanOut || !ticket.emergencyLocked) {
+      if (typeof window.playScannerBeep === 'function') window.playScannerBeep();
+      executeScanOut(ticket.id);
+      if (inputScanTicketCode) inputScanTicketCode.value = '';
+      return;
     }
   } else if (ticket.status === 'Selesai') {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah selesai diproses.`, 'info');
   }
 
-  // Langsung buka Rincian Tiket tanpa kartu perantara terpisah
+  // Jika tiket bermasalah / belum disetujui, buka Rincian Tiket agar petugas dapat melihat alasan penolakan
   if (typeof window.openTicketDetail === 'function') {
     window._openedFromScannerTerminal = true;
     window.openTicketDetail(ticket.id, 'detail');
@@ -1313,35 +1313,41 @@ function executeScanOut(ticketId) {
     if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil di ${gate}! Petugas (${officer.name}) memverifikasi keberangkatan tiket #${ticket.id}.`, 'success');
   }
 
-  if (typeof window.createNotification === 'function') {
-    if (isPulang) {
-      window.createNotification({
-        recipientRole: 'karyawan',
-        recipientNip: ticket.applicantNip || 'PK-2024-8841',
-        recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
-        actorSource: 'security',
-        type: 'selesai',
-        title: 'Izin Selesai Diproses',
-        message: `Kepulangan Anda (#${ticket.id}) telah diverifikasi di ${gate}. Tiket selesai.`,
-        ticketId: ticket.id,
-        priority: 'normal',
-        eventId: `completed_${ticket.id}`
-      });
-    } else {
-      window.createNotification({
-        recipientRole: 'karyawan',
-        recipientNip: ticket.applicantNip || 'PK-2024-8841',
-        recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
-        actorSource: 'security',
-        type: 'info',
-        title: 'Verifikasi Keluar Area',
-        message: `Keberangkatan keluar kawasan (#${ticket.id}) telah diverifikasi di ${gate}. Harap kembali sebelum batas waktu estimasi.`,
-        ticketId: ticket.id,
-        priority: 'normal',
-        eventId: `scanout_${ticket.id}`
-      });
+  const isPulang = (ticket.type === 'Pulang Mendahului');
+  try {
+    if (typeof window.createNotification === 'function') {
+      if (isPulang) {
+        window.createNotification({
+          recipientRole: 'karyawan',
+          recipientNip: ticket.applicantNip || 'PK-2024-8841',
+          recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+          actorSource: 'security',
+          type: 'selesai',
+          title: 'Izin Selesai Diproses',
+          message: `Kepulangan Anda (#${ticket.id}) telah diverifikasi di ${gate}. Tiket selesai.`,
+          ticketId: ticket.id,
+          priority: 'normal',
+          eventId: `completed_${ticket.id}`
+        });
+      } else {
+        window.createNotification({
+          recipientRole: 'karyawan',
+          recipientNip: ticket.applicantNip || 'PK-2024-8841',
+          recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+          actorSource: 'security',
+          type: 'info',
+          title: 'Verifikasi Keluar Area',
+          message: `Keberangkatan keluar kawasan (#${ticket.id}) telah diverifikasi di ${gate}. Harap kembali sebelum batas waktu estimasi.`,
+          ticketId: ticket.id,
+          priority: 'normal',
+          eventId: `scanout_${ticket.id}`
+        });
+      }
     }
+  } catch (notifErr) {
+    console.warn('Pemberitahuan notifikasi dilewati saat scan out:', notifErr);
   }
+
   window.saveTickets(ticketsList);
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   if (inputScanTicketCode) inputScanTicketCode.value = '';
@@ -1611,7 +1617,7 @@ function handleCameraQrSuccess(decodedText) {
   if (cameraScanStatus) cameraScanStatus.textContent = `QR Terbaca: ${searchId}`;
   if (typeof window.showToast === 'function') window.showToast(`QR Code Terbaca: ${searchId}!`, 'success');
 
-  executeVerification(searchId);
+  executeVerification(searchId, true);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1767,10 +1773,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (btnExecuteScanSearch) btnExecuteScanSearch.addEventListener('click', () => executeVerification());
+  if (btnExecuteScanSearch) btnExecuteScanSearch.addEventListener('click', () => executeVerification(null, true));
   if (inputScanTicketCode) {
     inputScanTicketCode.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') executeVerification();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeVerification(null, true);
+      }
     });
   }
 

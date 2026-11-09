@@ -3,10 +3,10 @@
  * Navigation Controllers, Role Switcher, Clock & Responsive Sidebar
  */
 
-let currentKaryawanNav = 'dashboard'; // 'dashboard', 'pengajuan', 'riwayat'
-let currentApproverNav = 'dashboard'; // 'dashboard', 'antrian', 'pelacakan'
-let currentSecurityNav = 'dashboard'; // 'dashboard', 'scanner', 'pelacakan', 'riwayat'
-let currentAdminNav = 'dashboard'; // 'dashboard', 'audit', 'report', 'users'
+let currentKaryawanNav = (function () { try { return sessionStorage.getItem('KUJANG_KARYAWAN_NAV'); } catch (e) { return null; } })() || 'dashboard';
+let currentApproverNav = (function () { try { return sessionStorage.getItem('KUJANG_APPROVER_NAV'); } catch (e) { return null; } })() || 'dashboard';
+let currentSecurityNav = (function () { try { return sessionStorage.getItem('KUJANG_SEC_NAV'); } catch (e) { return null; } })() || 'dashboard';
+let currentAdminNav = (function () { try { return sessionStorage.getItem('KUJANG_ADMIN_NAV'); } catch (e) { return null; } })() || 'dashboard';
 
 window.currentKaryawanNav = currentKaryawanNav;
 window.currentApproverNav = currentApproverNav;
@@ -59,6 +59,7 @@ function closeMobileSidebar() {
 function setKaryawanNav(navKey) {
   currentKaryawanNav = navKey;
   window.currentKaryawanNav = navKey;
+  try { sessionStorage.setItem('KUJANG_KARYAWAN_NAV', navKey); } catch (e) {}
   closeMobileSidebar();
 
   const viewNotifEl = document.getElementById('viewNotifikasi');
@@ -110,6 +111,7 @@ function setKaryawanNav(navKey) {
 function setApproverNav(navKey) {
   currentApproverNav = navKey;
   window.currentApproverNav = navKey;
+  try { sessionStorage.setItem('KUJANG_APPROVER_NAV', navKey); } catch (e) {}
   closeMobileSidebar();
 
   const viewNotifEl = document.getElementById('viewNotifikasi');
@@ -181,6 +183,7 @@ function setApproverNav(navKey) {
 function setSecurityNav(navKey) {
   currentSecurityNav = navKey;
   window.currentSecurityNav = navKey;
+  try { sessionStorage.setItem('KUJANG_SEC_NAV', navKey); } catch (e) {}
   closeMobileSidebar();
 
   const viewNotifEl = document.getElementById('viewNotifikasi');
@@ -240,6 +243,7 @@ function setSecurityNav(navKey) {
 function setAdminNav(navKey) {
   currentAdminNav = navKey;
   window.currentAdminNav = navKey;
+  try { sessionStorage.setItem('KUJANG_ADMIN_NAV', navKey); } catch (e) {}
   closeMobileSidebar();
 
   const viewNotifEl = document.getElementById('viewNotifikasi');
