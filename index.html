@@ -3732,21 +3732,22 @@
       </div>
 
       <div class="modal-body">
-        <p style="font-size: 0.85rem; color: var(--text-primary);">
+        <p style="font-size: 0.9rem; color: var(--text-primary); margin: 0; line-height: 1.5;">
           Apakah Anda yakin ingin membatalkan tiket izin <strong id="cancelTicketId">-</strong>?
         </p>
-        <div class="form-group" style="margin-top: 0.75rem;">
-          <label class="form-label" for="cancelReasonInput">
-            Alasan Pembatalan <span style="color: var(--rose-danger);">*</span>
-          </label>
-          <input type="text" id="cancelReasonInput" class="form-input"
-            placeholder="Masukkan alasan pembatalan izin..." required>
-        </div>
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff;">
+        <button type="button" class="btn-figma-secondary" id="btnAbortCancel"
+          style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155;"
+          onclick="document.getElementById('modalCancelRequest').classList.remove('open')">
+          Tidak, Kembali
+        </button>
         <button type="button" class="btn-emergency" id="btnConfirmCancelTicket"
-          onclick="window.confirmCancelTicket()">Ya, Batalkan Izin</button>
+          style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700;"
+          onclick="window.confirmCancelTicket()">
+          Ya, Batalkan Izin
+        </button>
       </div>
     </div>
   </div>
@@ -4606,7 +4607,7 @@
   <script src="js/modules/charts.js?v=20261103_0940"></script>
   <script src="js/modules/emergency.js?v=20261103_0940"></script>
   <script src="js/modules/modals.js?v=20261103_0940"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261106_2000"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261109_0855"></script>
   <script src="js/modules/mobile_atasan.js?v=20261109_0830"></script>
   <script src="js/modules/mobile_security.js?v=20261106_2000"></script>
   <script src="js/modules/mobile_app.js?v=20261103_0940"></script>

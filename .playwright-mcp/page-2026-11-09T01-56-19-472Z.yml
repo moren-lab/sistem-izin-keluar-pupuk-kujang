@@ -1,0 +1,165 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - complementary [ref=f2e3]:
+      - link "Pupuk Kujang Logo PUPUK KUJANG PT Pupuk Kujang" [ref=f2e5] [cursor=pointer]:
+        - /url: "#"
+        - img "Pupuk Kujang Logo" [ref=f2e7]
+        - generic [ref=f2e8]:
+          - generic [ref=f2e9]: PUPUK KUJANG
+          - generic [ref=f2e10]: PT Pupuk Kujang
+      - navigation [ref=f2e11]:
+        - generic [ref=f2e12]: MENU UTAMA
+        - generic "Dashboard" [ref=f2e13] [cursor=pointer]
+        - generic "Pengajuan Saya" [ref=f2e21] [cursor=pointer]: "1"
+        - generic "Riwayat Pengajuan" [ref=f2e28] [cursor=pointer]
+      - generic [ref=f2e34]:
+        - generic [ref=f2e35]: TERHUBUNG MELALUI
+        - generic [ref=f2e36]: Portal SAKTI / KUJANG ID
+        - generic [ref=f2e37]:
+          - img "Foto Budi Pratama, S.T." [ref=f2e39]
+          - generic [ref=f2e40]:
+            - generic [ref=f2e41]: Budi Pratama, S.T.
+            - generic [ref=f2e42]: "NIP: PK-2024-8841"
+        - button "Keluar" [ref=f2e43] [cursor=pointer]
+    - generic "Geser untuk mengatur lebar menu (Klik ganda untuk reset 260px)" [ref=f2e48]
+    - generic [ref=f2e50]:
+      - banner [ref=f2e51]:
+        - generic [ref=f2e52]:
+          - button "Toggle Sidebar" [ref=f2e53] [cursor=pointer]
+          - generic [ref=f2e55]:
+            - generic [ref=f2e56]: Karyawan
+            - generic [ref=f2e57]: ›
+            - generic [ref=f2e58]: Dashboard
+        - generic [ref=f2e59]:
+          - generic [ref=f2e60]: Senin, 9 Nov 2026 — 08:56:18 WIB
+          - button "Notifikasi" [ref=f2e64] [cursor=pointer]:
+            - generic [ref=f2e68]: "1"
+          - generic "Beralih peran untuk menguji alur terintegrasi" [ref=f2e69]:
+            - button "Karyawan" [ref=f2e71] [cursor=pointer]
+            - button "Atasan" [ref=f2e77] [cursor=pointer]
+            - button "Pos Jaga" [ref=f2e84] [cursor=pointer]
+            - button "Admin K3" [ref=f2e89] [cursor=pointer]
+            - button "Reset" [ref=f2e94] [cursor=pointer]
+      - main [ref=f2e99]:
+        - generic [ref=f2e101]:
+          - generic [ref=f2e102]:
+            - generic [ref=f2e104]:
+              - generic [ref=f2e105]:
+                - heading [level=2] [ref=f2e106]:
+                  - text: Selamat pagi,
+                  - img "Foto Budi Pratama, S.T." [ref=f2e107]
+                  - text: Budi Pratama, S.T.
+                - paragraph [ref=f2e108]: "Karyawan | Departemen Rekayasa & Pemeliharaan | Atasan: Ir. Hendra Gunawan, M.T."
+              - generic "Beralih Mode Gelap / Terang" [ref=f2e109]:
+                - generic "Beralih Mode Gelap / Terang" [ref=f2e110] [cursor=pointer]:
+                  - checkbox "☀️ 🌙"
+                  - generic [ref=f2e111]:
+                    - generic [ref=f2e112]: ☀️
+                    - generic [ref=f2e113]: 🌙
+            - generic [ref=f2e114]:
+              - generic [ref=f2e115]:
+                - generic "Selesai (Terlambat (2 hari))" [ref=f2e116]
+                - generic [ref=f2e118]: "Status: Terlambat Kembali — TK-20261106-901"
+                - generic [ref=f2e119]: Dinas Kantor — Batas waktu Jumat, 6 Nov 2026, 14.30 WIB TELAH TERLEWAT! Segera Tap In Kartu Akses di Pos 1.
+              - button "Pengajuan Saya →" [ref=f2e120] [cursor=pointer]
+          - heading "Ringkasan Perizinan" [level=1] [ref=f2e123]
+          - generic [ref=f2e124]:
+            - generic [ref=f2e125]:
+              - generic [ref=f2e126]: Total pengajuan bulan ini
+              - generic [ref=f2e127]: "9"
+              - generic [ref=f2e128]: 1–19 Oktober 2026
+            - generic [ref=f2e129]:
+              - generic [ref=f2e130]: Izin selesai
+              - generic [ref=f2e131]: "8"
+              - generic [ref=f2e132]: 7 tepat waktu, 1 terlambat
+            - generic [ref=f2e133]:
+              - generic [ref=f2e134]: Izin aktif
+              - generic [ref=f2e135]: "1"
+              - generic [ref=f2e136]: ⚠️ Terlambat Kembali
+          - generic [ref=f2e137]:
+            - generic [ref=f2e138]:
+              - generic [ref=f2e139]:
+                - generic [ref=f2e140]:
+                  - heading "Izin aktif saya" [level=3] [ref=f2e141]
+                  - link "Detail Pengajuan" [ref=f2e142] [cursor=pointer]:
+                    - /url: "#"
+                - generic [ref=f2e143]:
+                  - generic [ref=f2e144]: TK-20261106-901
+                  - generic [ref=f2e146]: Dinas Kantor — Kembali ke Area
+                  - generic "PT Rekayasa Industri, Cikampek — Koordinasi perbaikan instalasi pipa amonia unit 2" [ref=f2e147]
+                  - generic "Selesai (Terlambat (2 hari))" [ref=f2e149]
+                - generic [ref=f2e151]:
+                  - generic [ref=f2e152]:
+                    - generic [ref=f2e153]: Scan Out Pos 1
+                    - generic [ref=f2e154]: 06 Nov 2026, 09.05 WIB
+                  - generic [ref=f2e155]:
+                    - generic [ref=f2e156]: Batas kembali
+                    - generic [ref=f2e157]: Jumat, 6 Nov 2026, 14.30 WIB
+                - generic [ref=f2e158]:
+                  - button "Ajukan Perpanjangan" [ref=f2e159] [cursor=pointer]
+                  - button "✓ Tap In Kartu Akses (Masuk)" [ref=f2e161] [cursor=pointer]
+              - generic [ref=f2e163]:
+                - generic [ref=f2e164]:
+                  - heading "Pengajuan terbaru" [level=3] [ref=f2e165]
+                  - link "Semua riwayat" [ref=f2e166] [cursor=pointer]:
+                    - /url: "#"
+                - generic [ref=f2e167]:
+                  - generic [ref=f2e168]:
+                    - generic [ref=f2e169]:
+                      - generic [ref=f2e170]: IZ-20261019-013
+                      - generic [ref=f2e171]: 9 Nov — Dinas Kantor
+                    - generic [ref=f2e172]: 10:00 s/d 13:00 WIB
+                    - generic "Selesai" [ref=f2e174]
+                    - generic [ref=f2e177]:
+                      - button "Detail Pengajuan" [ref=f2e178] [cursor=pointer]
+                      - button "Hapus" [ref=f2e183] [cursor=pointer]
+                  - generic [ref=f2e187]:
+                    - generic [ref=f2e188]:
+                      - generic [ref=f2e189]: IZ-20261016-006
+                      - generic [ref=f2e190]: 9 Nov — Dinas Kantor
+                    - generic [ref=f2e191]: 08:30 s/d 10:45 WIB
+                    - generic "Selesai" [ref=f2e193]
+                    - generic [ref=f2e196]:
+                      - button "Detail Pengajuan" [ref=f2e197] [cursor=pointer]
+                      - button "Hapus" [ref=f2e202] [cursor=pointer]
+            - generic [ref=f2e206]:
+              - generic [ref=f2e207]:
+                - generic [ref=f2e208]:
+                  - heading "Total Pengajuan Izin" [level=3] [ref=f2e209]
+                  - combobox "Filter Periode" [ref=f2e210] [cursor=pointer]:
+                    - option "Bulan Ini" [selected]
+                    - option "Tahun Ini"
+                    - option "Semua Riwayat"
+                - generic [ref=f2e212]:
+                  - img [ref=f2e214]:
+                    - generic [ref=f2e215]:
+                      - generic [ref=f2e217] [cursor=pointer]
+                      - generic [ref=f2e218] [cursor=pointer]
+                    - generic [ref=f2e219]: "6"
+                    - generic [ref=f2e220]: Total Izin
+                  - generic [ref=f2e221]:
+                    - generic [ref=f2e222]:
+                      - generic [ref=f2e223]: Total Izin (Biasa)
+                      - generic [ref=f2e226]: 5 izin (83.3%)
+                    - generic [ref=f2e227]:
+                      - generic [ref=f2e228]: Izin Darurat
+                      - generic [ref=f2e231]: 1 izin (16.7%)
+              - generic [ref=f2e232]:
+                - heading "Ketentuan izin keluar" [level=3] [ref=f2e234]
+                - list [ref=f2e235]:
+                  - listitem [ref=f2e236]: – Izin reguler memerlukan persetujuan Atasan. Maksimal satu tiket aktif.
+                  - listitem [ref=f2e237]: – Tunjukkan QR kepada petugas saat keluar dan kembali.
+                  - listitem [ref=f2e238]: – Ajukan perpanjangan sebelum batas jam kembali.
+              - generic [ref=f2e239]:
+                - heading "Kontak Pos Jaga 1" [level=3] [ref=f2e241]
+                - generic [ref=f2e242]:
+                  - generic [ref=f2e243]: Petugas Pengamanan — 24 jam
+                  - generic [ref=f2e244]: Ekstensi 110 / 0264 316 110
+                  - generic [ref=f2e245]: Hubungi petugas jika terjadi kendala pemindaian QR.
+        - text: – – – –
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic [ref=f2e246]: Beralih ke akun Budi Pratama, S.T.
+    - generic [ref=f2e248]: Selamat datang, Budi Pratama, S.T. (undefined)
+    - generic [ref=f2e250]: Beralih ke akun Budi Pratama, S.T.

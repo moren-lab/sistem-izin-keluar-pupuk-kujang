@@ -1464,21 +1464,18 @@
       </div>
 
       <div class="mobile-sheet-body">
-        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
           <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Konfirmasi Pembatalan</div>
-          <div style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
-            Apakah Anda yakin ingin membatalkan permohonan izin <strong>${escapeHtml(t.category)}</strong> ke <strong>${escapeHtml(t.destination)}</strong>?
-            Setelah dibatalkan, sistem akan mengizinkan Anda membuat pengajuan baru.
+          <div style="font-size: 0.825rem; color: #475569; line-height: 1.45;">
+            Apakah Anda yakin ingin membatalkan permohonan tiket izin <strong>${escapeHtml(t.id)}</strong> (${escapeHtml(t.category || 'Izin')} ke ${escapeHtml(t.destination || '-')})?
           </div>
         </div>
 
-        <div class="mobile-form-group">
-          <label class="mobile-form-label">Alasan Pembatalan <span class="req">*</span></label>
-          <textarea class="mobile-textarea" id="mCancelReason" placeholder="Masukkan alasan pembatalan izin..." style="min-height: 75px;"></textarea>
-        </div>
-
-        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
-          <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="width: 100%; padding: 11px; font-weight: 700; background: #dc2626; border-color: #dc2626; color: #ffffff;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
+            <span>Tidak, Kembali</span>
+          </button>
+          <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
             <span>Ya, Batalkan Izin</span>
           </button>
         </div>
