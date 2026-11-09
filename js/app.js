@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Click outside modal overlay to close
   document.querySelectorAll('.modal-overlay').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
+      if (e.target === modal && !modal.closest('#karyawanFullFormContainer')) {
         if (modal.id === 'modalEmergencyUnlock' && typeof window.stopEmergencyFaceScanner === 'function') {
           window.stopEmergencyFaceScanner();
         }
@@ -92,19 +92,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ESC key closes active modal
+  // ESC key closes active modal (kecuali formulir inline penuh)
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (typeof window.stopEmergencyFaceScanner === 'function') {
         window.stopEmergencyFaceScanner();
       }
-      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+      document.querySelectorAll('.modal-overlay.open').forEach(m => {
+        if (!m.closest('#karyawanFullFormContainer')) {
+          m.classList.remove('open');
+        }
+      });
     }
   });
 
-  // Modal background scroll lock observer
+  // Modal background scroll lock observer (hanya untuk modal pop-up floating asli, bukan formulir inline penuh)
   const modalObserver = new MutationObserver(() => {
-    const hasOpenModal = document.querySelectorAll('.modal-overlay.open').length > 0;
+    const hasOpenModal = Array.from(document.querySelectorAll('.modal-overlay.open')).some(
+      m => !m.closest('#karyawanFullFormContainer')
+    );
     document.body.classList.toggle('modal-open', hasOpenModal);
   });
   document.querySelectorAll('.modal-overlay').forEach(modal => {
@@ -115,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // INITIALIZATION & BOOTSTRAP
   // ===================================================================
   const activeUser = typeof window.getKujangCurrentUser === 'function' ? window.getKujangCurrentUser() : null;
-  if (activeUser && activeUser.role) {
+  if (activeUser && (activeUser.role || activeUser.roleKey)) {
     if (typeof window.checkOverdueAndExpiredTickets === 'function') {
       window.checkOverdueAndExpiredTickets(true);
     }
@@ -123,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.setApproverNav === 'function') window.setApproverNav('dashboard');
     if (typeof window.setSecurityNav === 'function') window.setSecurityNav('dashboard');
     if (typeof window.setAdminNav === 'function') window.setAdminNav('dashboard');
-    if (typeof window.switchRole === 'function') window.switchRole(activeUser.role);
+    const targetRole = activeUser.roleKey || activeUser.role;
+    if (typeof window.switchRole === 'function') window.switchRole(targetRole, activeUser);
   }
 
   // Background Scheduler: periksa status Terlambat & Kedaluwarsa hanya jika user aktif login

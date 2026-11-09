@@ -1226,18 +1226,33 @@ function executeScanOut(ticketId) {
   }
 
   if (typeof window.createNotification === 'function') {
-    window.createNotification({
-      recipientRole: 'karyawan',
-      recipientNip: ticket.applicantNip || 'PK-2024-8841',
-      recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
-      actorSource: 'security',
-      type: 'selesai',
-      title: 'Izin Selesai Diproses',
-      message: `Kepulangan Anda (#${ticket.id}) telah diverifikasi di ${gate}. Tiket selesai.`,
-      ticketId: ticket.id,
-      priority: 'normal',
-      eventId: `completed_${ticket.id}`
-    });
+    if (isPulang) {
+      window.createNotification({
+        recipientRole: 'karyawan',
+        recipientNip: ticket.applicantNip || 'PK-2024-8841',
+        recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+        actorSource: 'security',
+        type: 'selesai',
+        title: 'Izin Selesai Diproses',
+        message: `Kepulangan Anda (#${ticket.id}) telah diverifikasi di ${gate}. Tiket selesai.`,
+        ticketId: ticket.id,
+        priority: 'normal',
+        eventId: `completed_${ticket.id}`
+      });
+    } else {
+      window.createNotification({
+        recipientRole: 'karyawan',
+        recipientNip: ticket.applicantNip || 'PK-2024-8841',
+        recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+        actorSource: 'security',
+        type: 'info',
+        title: 'Verifikasi Keluar Area',
+        message: `Keberangkatan keluar kawasan (#${ticket.id}) telah diverifikasi di ${gate}. Harap kembali sebelum batas waktu estimasi.`,
+        ticketId: ticket.id,
+        priority: 'normal',
+        eventId: `scanout_${ticket.id}`
+      });
+    }
   }
   window.saveTickets(ticketsList);
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');

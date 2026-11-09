@@ -328,7 +328,7 @@
     if (overlay) overlay.style.display = 'none';
 
     // Set role bawaan aplikasi (karyawan, approver, approver2, security, admin)
-    activateAppRole(account.role);
+    activateAppRole(account.roleKey || account.role);
 
     // Update profil akun di topbar/sidebar aplikasi
     updateAppUserBadge(account);

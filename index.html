@@ -608,53 +608,56 @@
             </div>
           </div>
 
-          <!-- Multi-Actor Role Switcher (Karyawan | Atasan | Satpam) -->
-          <div class="role-switcher-container" title="Beralih peran untuk menguji alur terintegrasi">
-            <button class="role-switch-btn active" id="btnSwitchKaryawan">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span>Karyawan</span>
-            </button>
-            <button class="role-switch-btn" id="btnSwitchKaryawan2" title="Karyawan 2 (Arthur Morgan, S.Tr.T.)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span>Karyawan 2</span>
-            </button>
-            <button class="role-switch-btn" id="btnSwitchApprover" title="Atasan 1 (Manager)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <polyline points="16 11 18 13 22 9"></polyline>
-              </svg>
-              <span>Atasan 1</span>
-            </button>
-            <button class="role-switch-btn" id="btnSwitchApprover2" title="Atasan 2 (Supervisor / Plt)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <circle cx="19" cy="11" r="2"></circle>
-              </svg>
-              <span>Atasan 2</span>
-            </button>
-            <button class="role-switch-btn" id="btnSwitchSecurity" title="Pos Jaga (Satpam)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span>Pos Jaga</span>
-            </button>
-            <button class="role-switch-btn" id="btnSwitchAdmin" title="Administrator Pengamanan & K3">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path
-                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                </path>
-              </svg>
-              <span>Admin K3</span>
-            </button>
+          <!-- Multi-Actor Role Switcher (4 Role Ringkas: Karyawan, Atasan, Pos Jaga, Admin K3) -->
+          <div class="role-switcher-container" id="roleSwitcherContainer" title="Beralih peran untuk menguji alur terintegrasi">
+            <!-- 1. Karyawan Dropdown -->
+            <div class="role-dropdown-wrap" id="wrapRoleKaryawan">
+              <button type="button" class="role-switch-btn active" id="btnRoleKaryawan" onclick="window.toggleRoleDropdown('karyawan')" title="Beralih Akun Karyawan">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span id="labelRoleKaryawan">Karyawan</span>
+              </button>
+              <div class="role-switch-menu" id="menuRoleKaryawan" style="display: none;"></div>
+            </div>
+
+            <!-- 2. Atasan Dropdown -->
+            <div class="role-dropdown-wrap" id="wrapRoleApprover">
+              <button type="button" class="role-switch-btn" id="btnRoleApprover" onclick="window.toggleRoleDropdown('approver')" title="Beralih Akun Atasan (Approver)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <polyline points="16 11 18 13 22 9"></polyline>
+                </svg>
+                <span id="labelRoleApprover">Atasan</span>
+              </button>
+              <div class="role-switch-menu" id="menuRoleApprover" style="display: none;"></div>
+            </div>
+
+            <!-- 3. Pos Jaga Dropdown -->
+            <div class="role-dropdown-wrap" id="wrapRoleSecurity">
+              <button type="button" class="role-switch-btn" id="btnRoleSecurity" onclick="window.toggleRoleDropdown('security')" title="Beralih Petugas / Pos Jaga">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span id="labelRoleSecurity">Pos Jaga</span>
+              </button>
+              <div class="role-switch-menu" id="menuRoleSecurity" style="display: none;"></div>
+            </div>
+
+            <!-- 4. Admin K3 Direct Button -->
+            <div class="role-dropdown-wrap" id="wrapRoleAdmin">
+              <button type="button" class="role-switch-btn" id="btnRoleAdmin" onclick="window.switchRole('admin')" title="Administrator Pengamanan & K3">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Admin K3</span>
+              </button>
+            </div>
+
+            <!-- Tombol Reset Simulasi -->
             <button class="role-switch-btn btn-reset-simulation" id="btnResetSimulation"
               onclick="window.resetAllTicketsToDefault()" title="Hapus semua tiket aktif & reset simulasi ke 0">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -868,11 +871,6 @@
                         <form id="formNewRequest" novalidate>
                           <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 0;">
                             <!-- Notice Atasan Langsung -->
-                            <div id="approverDirectNotice" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid #dbeafe; background: #eff6ff; color: #1d4ed8; font-size: 0.775rem; line-height: 1.45;">
-                              <span style="font-size: 0.95rem;">ℹ️</span>
-                              <span>Pengajuan diteruskan kepada atasan langsung atau pilih atasan peninjau aktif di bawah. QR terbit setelah izin disetujui.</span>
-                            </div>
-
                             <!-- Pilih Atasan Langsung (Searchable Autocomplete Combobox Asli) -->
                             <div class="form-group approver-search-group" id="groupSelectApprover" style="margin-bottom: 0;">
                               <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
@@ -1346,7 +1344,7 @@
                 <select id="filterEmpStatus" class="figma-filter-select">
                   <option value="all">Semua Status</option>
                   <option value="Selesai">Selesai</option>
-                  <option value="Terlambat">Terlambat</option>
+                  <option value="Terlambat">Selesai (Terlambat)</option>
                   <option value="Ditolak">Ditolak</option>
                   <option value="Kedaluwarsa">Kedaluwarsa</option>
                   <option value="Dibatalkan">Dibatalkan</option>
@@ -2788,13 +2786,13 @@
                 <table class="report-data-table">
                   <thead>
                     <tr>
-                      <th style="width: 140px; white-space: nowrap;">Waktu & Tanggal</th>
-                      <th style="width: 130px; white-space: nowrap;">No. Tiket</th>
-                      <th>Karyawan</th>
-                      <th>Peristiwa</th>
-                      <th>Eksekutor</th>
-                      <th>Keterangan</th>
-                      <th style="text-align: right; width: 170px; white-space: nowrap;">Aksi</th>
+                      <th style="width: 140px; min-width: 140px; white-space: nowrap;">Waktu & Tanggal</th>
+                      <th style="width: 130px; min-width: 130px; white-space: nowrap;">No. Tiket</th>
+                      <th style="min-width: 180px;">Karyawan</th>
+                      <th style="width: 190px; min-width: 190px;">Peristiwa</th>
+                      <th style="min-width: 170px;">Eksekutor</th>
+                      <th style="min-width: 200px;">Keterangan</th>
+                      <th style="text-align: right; width: 160px; min-width: 160px; white-space: nowrap;">Aksi</th>
                     </tr>
                   </thead>
                   <tbody id="adminAuditTableBody">
@@ -3005,7 +3003,7 @@
                   placeholder="Cari nama, NIP, KUJANG ID, atau divisi...">
                 <select id="adminUserRoleFilter" class="admin-select-filter">
                   <option value="all">Semua Peran</option>
-                  <option value="karyawan">Karyawan Pemohon</option>
+                  <option value="karyawan">Karyawan</option>
                   <option value="approver">Atasan (Approver)</option>
                   <option value="security">Petugas Pengamanan</option>
                   <option value="admin">Administrator K3</option>
@@ -3269,6 +3267,36 @@
         <button type="button" class="btn-emergency" id="btnConfirmReject" onclick="window.confirmRejectDecision()">
           ✕ Konfirmasi Tolak
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PILIH AKUN DARI DIREKTORI (PINTASAN CEPAT TOPBAR) ================= -->
+  <div class="modal-overlay" id="modalSelectDirectoryUser" style="display: none;" onclick="if(event.target === this) window.closeSelectDirectoryUserModal();">
+    <div class="modal-card" style="max-width: 520px; width: 95%;">
+      <div class="modal-header" style="padding: 1.25rem 1.5rem 1rem; border-bottom: 1px solid var(--border-color, #e2e8f0); display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h3 id="modalSelectUserHeading" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 0;">Pilih Akun dari Direktori</h3>
+          <p id="modalSelectUserSub" style="font-size: 0.775rem; color: var(--text-secondary, #64748b); margin: 3px 0 0 0;">Pilih akun aktif untuk ditambahkan ke pintasan cepat.</p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="window.closeSelectDirectoryUserModal()" title="Tutup">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.15rem 1.5rem;">
+        <!-- Search filter input -->
+        <div style="position: relative; margin-bottom: 1rem;">
+          <input type="text" id="inputSearchDirectoryUser" class="form-input" placeholder="Cari nama, NIP, atau departemen..." style="width: 100%; padding: 0.6rem 0.85rem 0.6rem 2.2rem; font-size: 0.825rem; border-radius: 8px;" oninput="window.filterDirectoryUsersList()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+
+        <!-- Directory User List Container -->
+        <div id="directoryUserListContainer" style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 0.85rem 1.5rem; background: var(--bg-subtle, #f8fafc); border-top: 1px solid var(--border-color, #e2e8f0); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.725rem; color: var(--text-secondary, #64748b);">Sumber data: Direktori Pengguna Sistem</span>
+        <button type="button" class="btn-secondary" onclick="window.closeSelectDirectoryUserModal()" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Batal</button>
       </div>
     </div>
   </div>
@@ -4421,7 +4449,7 @@
               Pilih Hak Akses & Jabatan Struktural <span style="color: var(--rose-danger);">*</span>
             </label>
             <input type="hidden" id="adminInputRoleKey" name="roleKey" value="karyawan" required>
-            <input type="hidden" id="adminInputRoleTitle" name="roleTitle" value="Karyawan Pemohon">
+            <input type="hidden" id="adminInputRoleTitle" name="roleTitle" value="Karyawan">
 
             <div class="searchable-dropdown" id="adminRoleSearchableDropdown">
               <div class="searchable-dropdown-control">

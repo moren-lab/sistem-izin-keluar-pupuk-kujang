@@ -1342,21 +1342,49 @@ function openDigitalPassModal(ticketId) {
     elApprover.textContent = `${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}${appTitle}`;
   }
 
-  // Button actions
-  const btnDownload = document.getElementById('btnDownloadDigitalQRPng');
+  // Button actions - Direct file download via Blob (Mencegah pop-up Save As yang mengganggu)
+  const btnDownload = document.getElementById('btnDownloadDigitalQRPng') || document.getElementById('btnDownloadQRPng');
   if (btnDownload) {
     btnDownload.onclick = () => {
-      const img = qrContainer ? qrContainer.querySelector('img') : null;
-      if (img && img.src) {
+      const targetContainer = qrContainer || document.getElementById('digitalPassQrContainer') || document.getElementById('qrCodeContainer');
+      const canvas = targetContainer ? targetContainer.querySelector('canvas') : null;
+      const img = targetContainer ? targetContainer.querySelector('img') : null;
+      const ticketId = ticket.id || (document.getElementById('digitalPassTicketId') || document.getElementById('passTicketId') || {}).textContent || 'KUJANG';
+
+      const triggerBlobDownload = (blob) => {
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = img.src;
-        a.download = `Tiket-QR-${ticket.id}.png`;
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Tiket-QR-${ticketId}.png`;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
-        if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh!', 'success');
+        setTimeout(() => {
+          if (document.body.contains(a)) document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 150);
+        if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh ke folder Downloads!', 'success');
+      };
+
+      if (canvas && typeof canvas.toBlob === 'function') {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            triggerBlobDownload(blob);
+          } else if (img && img.src) {
+            fetch(img.src).then(r => r.blob()).then(triggerBlobDownload);
+          }
+        }, 'image/png');
+      } else if (img && img.src) {
+        fetch(img.src).then(r => r.blob()).then(triggerBlobDownload).catch(() => {
+          const a = document.createElement('a');
+          a.href = img.src;
+          a.download = `Tiket-QR-${ticketId}.png`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 150);
+        });
       } else {
-        if (typeof window.showToast === 'function') window.showToast('Menyiapkan gambar QR...', 'info');
+        if (typeof window.showToast === 'function') window.showToast('Menyiapkan gambar QR Code...', 'info');
       }
     };
   }
@@ -2141,6 +2169,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 }
 
 function closeTicketDetailModal() {
+  const wasFromNotif = Boolean(window._openedFromNotification);
+  const notifSource = window._openedFromNotificationSource || 'dropdown';
+  const notifTab = window._openedFromNotificationTab || 'all';
+
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) {
     modalTicketDetail.classList.remove('open');
@@ -2154,7 +2186,34 @@ function closeTicketDetailModal() {
   }
   window._openedFromScannerTerminal = false;
   window._openedFromNotification = false;
+  window._openedFromNotificationSource = null;
+  window._openedFromNotificationTab = null;
   document.body.classList.remove('modal-open');
+
+  // JIKA DIBUKA DARI NOTIFIKASI: Kembalikan pengguna ke daftar notifikasi agar tidak perlu klik ikon notifikasi lagi
+  if (wasFromNotif) {
+    if (notifSource === 'dropdown') {
+      setTimeout(() => {
+        const dropdown = document.getElementById('desktopNotifDropdown');
+        if (dropdown) {
+          if (typeof window.renderDesktopNotifDropdownContent === 'function') {
+            window.renderDesktopNotifDropdownContent();
+          }
+          dropdown.style.display = 'block';
+        }
+      }, 50);
+    } else if (notifSource === 'mobile') {
+      setTimeout(() => {
+        if (typeof window.openMobileNotificationSheet === 'function') {
+          window.openMobileNotificationSheet(notifTab);
+        }
+      }, 50);
+    } else if (notifSource === 'fullpage') {
+      if (typeof window.renderDesktopFullNotifikasiPage === 'function') {
+        window.renderDesktopFullNotifikasiPage(notifTab);
+      }
+    }
+  }
 }
 window.closeTicketDetailModal = closeTicketDetailModal;
 
@@ -2941,13 +3000,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
       const activeEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : ((window.currentActor === 'karyawan2' && ACTORS.karyawan2) ? ACTORS.karyawan2 : ACTORS.karyawan);
-      const empAccount = (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (activeEmp ? activeEmp.nip : 'PK-2024-8841'));
-      const directSup = (empAccount && empAccount.directSupervisor) || (activeEmp ? activeEmp.approverName : 'Ir. Hendra Gunawan, M.T.');
+      const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+      const empAccount = allUsers.find(acc => acc.nip === (activeEmp ? activeEmp.nip : 'PK-2024-8841')) || (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (activeEmp ? activeEmp.nip : 'PK-2024-8841'));
+      const directSup = (empAccount && (empAccount.directSupervisor || empAccount.supervisor)) || (activeEmp ? (activeEmp.directSupervisor || activeEmp.supervisor || activeEmp.approverName) : 'Ir. Hendra Gunawan, M.T.');
+      const directSupUser = allUsers.find(u => u.name && directSup && (u.name.toLowerCase() === directSup.toLowerCase() || u.name.toLowerCase().includes(directSup.toLowerCase()) || directSup.toLowerCase().includes(u.name.toLowerCase())));
+      const directSupNip = (directSupUser && directSupUser.nip) || (directSup.includes('Subagja') ? 'PK-2012-0543' : (directSup.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002'));
+
+      const chosenApproverName = (window.pendingFormData && window.pendingFormData.approverName) || directSup;
+      const apprUser = allUsers.find(u => u.name && chosenApproverName && (u.name.toLowerCase() === chosenApproverName.toLowerCase() || u.name.toLowerCase().includes(chosenApproverName.toLowerCase()) || chosenApproverName.toLowerCase().includes(u.name.toLowerCase())));
+      const approverNip = (apprUser && apprUser.nip) || (chosenApproverName.includes('Subagja') ? 'PK-2012-0543' : (chosenApproverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002'));
 
       const newTicket = {
         id: ticketId,
         applicantName: activeEmp ? activeEmp.name : 'Budi Pratama, S.T.',
         directSupervisor: directSup,
+        directSupervisorNip: directSupNip,
         applicantNip: activeEmp ? activeEmp.nip : 'PK-2024-8841',
         department: activeEmp ? (activeEmp.department || 'Departemen Rekayasa & Pemeliharaan') : 'Departemen Rekayasa & Pemeliharaan',
         category: window.pendingFormData.category,
@@ -2958,7 +3025,8 @@ document.addEventListener('DOMContentLoaded', () => {
         estimatedReturn: window.pendingFormData.estimatedReturn,
         status: 'Menunggu Persetujuan',
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
-        approverName: window.pendingFormData.approverName || (ACTORS.karyawan ? ACTORS.karyawan.approverName : 'Ir. Hendra Gunawan, M.T.'),
+        approverName: chosenApproverName,
+        approverNip: approverNip,
         approverNote: null,
         scanOutTime: null,
         scanInTime: null,
@@ -2977,12 +3045,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof window.createNotification === 'function') {
         window.createNotification({
           recipientRole: 'approver',
-          recipientNip: (() => {
-            const allUsers = window.MOCK_USERS || [];
-            const found = allUsers.find(u => u.name && newTicket.approverName && (u.name.toLowerCase() === newTicket.approverName.toLowerCase() || newTicket.approverName.toLowerCase().includes(u.name.toLowerCase())));
-            return (found && found.nip) || (newTicket.approverName && newTicket.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
-          })(),
-          recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
+          recipientNip: approverNip,
+          recipientName: chosenApproverName,
           actorSource: 'karyawan',
           type: 'pengajuan_baru',
           title: 'Pengajuan Izin Baru',
@@ -3049,20 +3113,51 @@ document.addEventListener('DOMContentLoaded', () => {
     window._openedFromScannerTerminal = false;
   });
 
-  const btnDownloadQRPng = document.getElementById('btnDownloadQRPng');
-  const qrCodeContainer = document.getElementById('qrCodeContainer');
+  const btnDownloadQRPng = document.getElementById('btnDownloadDigitalQRPng') || document.getElementById('btnDownloadQRPng');
+  const qrCodeContainer = document.getElementById('digitalPassQrContainer') || document.getElementById('qrCodeContainer');
   if (btnDownloadQRPng) {
     btnDownloadQRPng.addEventListener('click', () => {
-      const canvas = qrCodeContainer ? qrCodeContainer.querySelector('canvas') : null;
-      if (!canvas) {
+      const targetContainer = qrCodeContainer || document.getElementById('digitalPassQrContainer') || document.getElementById('qrCodeContainer');
+      const canvas = targetContainer ? targetContainer.querySelector('canvas') : null;
+      const img = targetContainer ? targetContainer.querySelector('img') : null;
+      const passTicketEl = document.getElementById('digitalPassTicketId') || document.getElementById('passTicketId');
+      const ticketId = passTicketEl ? passTicketEl.textContent : 'KUJANG';
+
+      const triggerBlobDownload = (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Tiket-QR-${ticketId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (document.body.contains(a)) document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 150);
+        if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh ke folder Downloads!', 'success');
+      };
+
+      if (canvas && typeof canvas.toBlob === 'function') {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            triggerBlobDownload(blob);
+          } else if (img && img.src) {
+            fetch(img.src).then(r => r.blob()).then(triggerBlobDownload);
+          }
+        }, 'image/png');
+      } else if (img && img.src) {
+        fetch(img.src).then(r => r.blob()).then(triggerBlobDownload).catch(() => {
+          const a = document.createElement('a');
+          a.href = img.src;
+          a.download = `Tiket-QR-${ticketId}.png`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 150);
+        });
+      } else {
         if (typeof window.showToast === 'function') window.showToast('QR Code belum aktif untuk tiket ini.', 'danger');
-        return;
       }
-      const link = document.createElement('a');
-      link.download = `Tiket-QR-${document.getElementById('passTicketId').textContent}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      if (typeof window.showToast === 'function') window.showToast('Gambar QR Code berhasil diunduh!', 'success');
     });
   }
 
@@ -3376,10 +3471,22 @@ document.addEventListener('DOMContentLoaded', () => {
         : String(Math.floor(100000 + Math.random() * 900000));
 
       const activeEmergEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : ((window.currentActor === 'karyawan2' && ACTORS.karyawan2) ? ACTORS.karyawan2 : ACTORS.karyawan);
+      const allUsersEmerg = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+      const emergEmpAccount = allUsersEmerg.find(acc => acc.nip === (activeEmergEmp ? activeEmergEmp.nip : 'PK-2024-8841')) || (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === (activeEmergEmp ? activeEmergEmp.nip : 'PK-2024-8841'));
+      const emergDirectSup = (emergEmpAccount && (emergEmpAccount.directSupervisor || emergEmpAccount.supervisor)) || (activeEmergEmp ? (activeEmergEmp.directSupervisor || activeEmergEmp.supervisor || activeEmergEmp.approverName) : 'Ir. Hendra Gunawan, M.T.');
+      const emergDirectSupUser = allUsersEmerg.find(u => u.name && emergDirectSup && (u.name.toLowerCase() === emergDirectSup.toLowerCase() || u.name.toLowerCase().includes(emergDirectSup.toLowerCase()) || emergDirectSup.toLowerCase().includes(u.name.toLowerCase())));
+      const emergDirectSupNip = (emergDirectSupUser && emergDirectSupUser.nip) || (emergDirectSup.includes('Subagja') ? 'PK-2012-0543' : (emergDirectSup.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002'));
+
+      const chosenEmergApprover = approverVal || emergDirectSup;
+      const emergApprUser = allUsersEmerg.find(u => u.name && chosenEmergApprover && (u.name.toLowerCase() === chosenEmergApprover.toLowerCase() || u.name.toLowerCase().includes(chosenEmergApprover.toLowerCase()) || chosenEmergApprover.toLowerCase().includes(u.name.toLowerCase())));
+      const emergApproverNip = (emergApprUser && emergApprUser.nip) || (chosenEmergApprover.includes('Subagja') ? 'PK-2012-0543' : (chosenEmergApprover.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002'));
+
       const emergencyTicket = {
         id: ticketId,
         applicantName: activeEmergEmp ? activeEmergEmp.name : 'Budi Pratama, S.T.',
         applicantNip: activeEmergEmp ? activeEmergEmp.nip : 'PK-2024-8841',
+        directSupervisor: emergDirectSup,
+        directSupervisorNip: emergDirectSupNip,
         department: activeEmergEmp ? (activeEmergEmp.department || 'Departemen Rekayasa & Pemeliharaan') : 'Departemen Rekayasa & Pemeliharaan',
         category: categoryVal,
         type: typeVal,
@@ -3396,13 +3503,9 @@ document.addEventListener('DOMContentLoaded', () => {
         emergencyUnlockMethod: null,
         emergencyUnlockedBy: null,
         createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
-        approverName: approverVal,
-        directSupervisor: (() => {
-          const actEmp = getActiveEmployeeActorInfo();
-          const acct = (window.KUJANG_ACCOUNTS || []).find(acc => acc.nip === actEmp.nip);
-          return (acct && acct.directSupervisor) || actEmp.directSupervisor || actEmp.supervisor || actEmp.approverName || 'Ir. Hendra Gunawan, M.T.';
-        })(),
-        approverNote: `[Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${approverVal}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`,
+        approverName: chosenEmergApprover,
+        approverNip: emergApproverNip,
+        approverNote: `[Izin Darurat - QR Terkunci]: Menunggu otorisasi Atasan (${chosenEmergApprover}) melalui 3 metode: (1) Persetujuan di App, (2) Kode Sandi, atau (3) Scan Wajah.`,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
@@ -3416,7 +3519,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event: 'Kode Sandi Darurat Diterbitkan',
             time: nowFormatted,
             by: 'Sistem Kedaruratan K3',
-            desc: `Sandi Otorisasi Darurat telah digenerate untuk Atasan: ${approverVal}.`
+            desc: `Sandi Otorisasi Darurat telah digenerate untuk Atasan: ${chosenEmergApprover}.`
           }
         ]
       };
@@ -3426,9 +3529,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // SEDANG-01: Notifikasi Prioritas Tinggi K3 Kedaruratan
       if (typeof window.createNotification === 'function') {
-        const allUsers = window.MOCK_USERS || [];
-        const apprUser = allUsers.find(u => u.name && emergencyTicket.approverName && (u.name.toLowerCase() === emergencyTicket.approverName.toLowerCase() || emergencyTicket.approverName.toLowerCase().includes(u.name.toLowerCase())));
-        const targetApprNip = (apprUser && apprUser.nip) || (emergencyTicket.approverName && emergencyTicket.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+        const targetApprNip = emergApproverNip;
 
         // Notifikasi ke Atasan
         window.createNotification({

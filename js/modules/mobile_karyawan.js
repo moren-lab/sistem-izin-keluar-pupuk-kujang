@@ -239,7 +239,6 @@
           <div class="mobile-active-strip" style="background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.45);">
             <div class="mobile-active-strip-head">
               <span class="mobile-active-strip-title" style="color: #fef08a;">
-                <span class="pulsing-dot" style="display:inline-block; width:7px; height:7px; background:#f59e0b; border-radius:50%;"></span>
                 Status: Izin Diajukan — ${activeTicket.id}
               </span>
               <span class="mobile-active-strip-badge" style="background: #f59e0b; color: #78350f;">Menunggu Persetujuan</span>
@@ -254,7 +253,6 @@
           <div class="mobile-active-strip" style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45);">
             <div class="mobile-active-strip-head">
               <span class="mobile-active-strip-title" style="color: #a7f3d0;">
-                <span class="pulsing-dot" style="display:inline-block; width:7px; height:7px; background:#34d399; border-radius:50%;"></span>
                 Status: Izin Disetujui — ${activeTicket.id}
               </span>
               <span class="mobile-active-strip-badge" style="background: #10b981; color: #064e3b;">Disetujui</span>
@@ -269,7 +267,6 @@
           <div class="mobile-active-strip" style="background: rgba(2, 132, 199, 0.18); border: 1px solid rgba(2, 132, 199, 0.45);">
             <div class="mobile-active-strip-head">
               <span class="mobile-active-strip-title" style="color: #bae6fd;">
-                <span class="pulsing-dot" style="display:inline-block; width:7px; height:7px; background:#38bdf8; border-radius:50%;"></span>
                 Status: Izin Aktif — ${activeTicket.id}
               </span>
               <span class="mobile-active-strip-badge" style="background: #0284c7; color: #ffffff;">Sedang di Luar</span>

@@ -35,7 +35,7 @@ const ACTORS = {
     name: 'Budi Pratama, S.T.',
     title: 'Staf Rekayasa Mesin',
     department: 'Departemen Rekayasa & Pemeliharaan',
-    roleLabel: 'Karyawan Pemohon',
+    roleLabel: 'Karyawan',
     approverName: 'Ir. Hendra Gunawan, M.T.'
   },
   karyawan2: {
@@ -43,7 +43,7 @@ const ACTORS = {
     name: 'Arthur Morgan, S.Tr.T.',
     title: 'Staf Instrumentasi & Otomasi Pabrik',
     department: 'Departemen Rekayasa & Pemeliharaan',
-    roleLabel: 'Karyawan Pemohon 2',
+    roleLabel: 'Karyawan 2',
     approverName: 'Ir. Hendra Gunawan, M.T.'
   },
   approver: {
@@ -448,6 +448,39 @@ function loadTickets() {
           }
         }
       }
+      // Pastikan tiket memiliki metadata NIP approver & supervisor yang presisi
+      if (t.approverName && !t.approverNip) {
+        if (t.approverName.includes('Subagja')) {
+          t.approverNip = 'PK-2012-0543';
+          changed = true;
+        } else if (t.approverName.includes('Dewi')) {
+          t.approverNip = 'PK-2012-0845';
+          changed = true;
+        } else if (t.approverName.includes('Hendra')) {
+          t.approverNip = 'PK-2015-1002';
+          changed = true;
+        }
+      }
+      if (t.directSupervisor && !t.directSupervisorNip) {
+        if (t.directSupervisor.includes('Subagja')) {
+          t.directSupervisorNip = 'PK-2012-0543';
+          changed = true;
+        } else if (t.directSupervisor.includes('Dewi')) {
+          t.directSupervisorNip = 'PK-2012-0845';
+          changed = true;
+        } else if (t.directSupervisor.includes('Hendra')) {
+          t.directSupervisorNip = 'PK-2015-1002';
+          changed = true;
+        }
+      }
+      if (t.applicantName && t.applicantName.includes('Siti Rahmawati') && t.approverName && t.approverName.includes('Subagja')) {
+        t.approverName = 'Dr. Ahmad Subagja, M.M.';
+        t.approverNip = 'PK-2012-0543';
+        t.directSupervisor = 'Dr. Ahmad Subagja, M.M.';
+        t.directSupervisorNip = 'PK-2012-0543';
+        changed = true;
+      }
+
       // Pastikan tiket memiliki metadata gerbang pos
       if (!t.scanOutGate) {
         if (t.id === 'IZ-20261014-003' || t.id === 'IZ-20261002-001') {
@@ -512,6 +545,9 @@ const DEFAULT_USERS = [
     department: 'Departemen Rekayasa & Pemeliharaan',
     role: 'Karyawan',
     roleKey: 'karyawan',
+    title: 'Staf Rekayasa Mesin',
+    directSupervisor: 'Ir. Hendra Gunawan, M.T.',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
     status: 'Aktif',
     lastLogin: 'Hari ini, 08:12 WIB'
   },
@@ -600,9 +636,13 @@ const DEFAULT_USERS = [
     nip: 'PK-2022-7719',
     name: 'Siti Rahmawati, S.Tr.',
     email: 'siti.rahmawati@pupuk-kujang.co.id',
+    titleCustom: 'Operator Lapangan Amonia-1A',
     department: 'Departemen Produksi Amonia-1A',
     role: 'Karyawan',
     roleKey: 'karyawan',
+    title: 'Operator Lapangan Amonia-1A',
+    directSupervisor: 'Dr. Ahmad Subagja, M.M.',
+    supervisor: 'Dr. Ahmad Subagja, M.M.',
     status: 'Aktif',
     lastLogin: 'Kemarin, 14:15 WIB'
   },
@@ -611,10 +651,10 @@ const DEFAULT_USERS = [
     nip: 'PK-2012-0543',
     name: 'Dr. Ahmad Subagja, M.M.',
     email: 'ahmad.subagja@pupuk-kujang.co.id',
-    department: 'Departemen SDM & Organisasi',
+    department: 'Departemen Produksi Amonia-1A',
     role: 'Atasan 1 (Manager)',
     roleKey: 'approver',
-    status: 'Dicabut',
+    status: 'Aktif',
     lastLogin: 'Hari ini, 08:30 WIB'
   }
 ];
@@ -648,6 +688,38 @@ function loadUsers() {
     users = users.filter(u => !isUserDeleted(u));
 
     let changed = false;
+    users.forEach(u => {
+      if (u.role && u.role.toLowerCase().includes('pemohon')) {
+        u.role = 'Karyawan';
+        changed = true;
+      }
+      const defU = DEFAULT_USERS.find(d => d.kujangId === u.kujangId || d.nip === u.nip);
+      if (defU) {
+        if (!u.directSupervisor && defU.directSupervisor) {
+          u.directSupervisor = defU.directSupervisor;
+          u.supervisor = defU.supervisor || defU.directSupervisor;
+          changed = true;
+        }
+        if (defU.nip === 'PK-2012-0543') {
+          if (u.status !== 'Aktif' || u.department !== defU.department || u.roleKey !== 'approver') {
+            u.status = 'Aktif';
+            u.department = defU.department;
+            u.roleKey = 'approver';
+            u.role = 'Atasan 1 (Manager)';
+            changed = true;
+          }
+        }
+        if (defU.nip === 'PK-2022-7719') {
+          if (u.directSupervisor !== 'Dr. Ahmad Subagja, M.M.' || u.department !== 'Departemen Produksi Amonia-1A') {
+            u.directSupervisor = 'Dr. Ahmad Subagja, M.M.';
+            u.supervisor = 'Dr. Ahmad Subagja, M.M.';
+            u.department = 'Departemen Produksi Amonia-1A';
+            changed = true;
+          }
+        }
+      }
+    });
+
     DEFAULT_USERS.forEach(defU => {
       if (!isUserDeleted(defU)) {
         if (!users.some(u => u.nip === defU.nip || u.kujangId === defU.kujangId)) {
@@ -659,6 +731,29 @@ function loadUsers() {
     if (changed || users.length !== JSON.parse(saved).length) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
     }
+
+    // Pulihkan activeEmployeeUser dari localStorage jika tersimpan
+    try {
+      const savedEmpNip = localStorage.getItem('KUJANG_ACTIVE_EMP_NIP');
+      if (savedEmpNip) {
+        const found = users.find(u => u.nip === savedEmpNip && u.status === 'Aktif');
+        if (found) {
+          window.activeEmployeeUser = found;
+        }
+      }
+    } catch (e) {}
+
+    // Pulihkan activeApproverUser dari localStorage jika tersimpan
+    try {
+      const savedApprNip = localStorage.getItem('KUJANG_ACTIVE_APPR_NIP');
+      if (savedApprNip) {
+        const found = users.find(u => u.nip === savedApprNip && u.status === 'Aktif');
+        if (found) {
+          window.activeApproverUser = found;
+        }
+      }
+    } catch (e) {}
+
     return users;
   } catch (e) {
     return JSON.parse(JSON.stringify(DEFAULT_USERS.filter(u => !isUserDeleted(u))));
@@ -706,16 +801,20 @@ try {
 function syncActorsFromUsers(data) {
   const users = data || (typeof loadUsers === 'function' ? loadUsers() : window.MOCK_USERS) || [];
 
-  // 1. Sinkronisasi Karyawan Pemohon (Budi Pratama)
-  const budiEmpSync = users.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
-                      users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
-  if (budiEmpSync && window.ACTORS && window.ACTORS.karyawan) {
-    window.ACTORS.karyawan.name = budiEmpSync.name;
-    window.ACTORS.karyawan.nip = budiEmpSync.nip;
-    if (budiEmpSync.department) window.ACTORS.karyawan.department = budiEmpSync.department;
-    if (budiEmpSync.role) window.ACTORS.karyawan.title = budiEmpSync.role;
-    if (budiEmpSync.directSupervisor || budiEmpSync.supervisor) {
-      window.ACTORS.karyawan.approverName = budiEmpSync.directSupervisor || budiEmpSync.supervisor;
+  // 1. Sinkronisasi Karyawan (sesuai akun aktif atau fallback ke Budi Pratama)
+  const activeEmpNip = (window.activeEmployeeUser && window.activeEmployeeUser.nip) ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('KUJANG_ACTIVE_EMP_NIP') : null);
+  const activeEmpTarget = (activeEmpNip ? users.find(u => u.nip === activeEmpNip && u.status === 'Aktif') : null) ||
+                          window.activeEmployeeUser ||
+                          users.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
+                          users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+  if (activeEmpTarget && window.ACTORS && window.ACTORS.karyawan) {
+    window.ACTORS.karyawan.name = activeEmpTarget.name;
+    window.ACTORS.karyawan.nip = activeEmpTarget.nip;
+    if (activeEmpTarget.department) window.ACTORS.karyawan.department = activeEmpTarget.department;
+    if (activeEmpTarget.role) window.ACTORS.karyawan.title = activeEmpTarget.role;
+    if (activeEmpTarget.directSupervisor || activeEmpTarget.supervisor) {
+      window.ACTORS.karyawan.approverName = activeEmpTarget.directSupervisor || activeEmpTarget.supervisor;
     }
   }
 
@@ -731,7 +830,7 @@ function syncActorsFromUsers(data) {
         name: activeEmp2Sync.name,
         title: activeEmp2Sync.role || 'Staf Instrumentasi & Otomasi Pabrik',
         department: activeEmp2Sync.department || 'Departemen Rekayasa & Pemeliharaan',
-        roleLabel: 'Karyawan Pemohon 2',
+        roleLabel: 'Karyawan 2',
         approverName: (activeEmp2Sync.directSupervisor || activeEmp2Sync.supervisor) || (primaryApprover ? primaryApprover.name : 'Ir. Hendra Gunawan, M.T.')
       };
     } else if (!window.ACTORS.karyawan2) {
@@ -740,7 +839,7 @@ function syncActorsFromUsers(data) {
         name: 'Arthur Morgan, S.Tr.T.',
         title: 'Staf Instrumentasi & Otomasi Pabrik',
         department: 'Departemen Rekayasa & Pemeliharaan',
-        roleLabel: 'Karyawan Pemohon 2',
+        roleLabel: 'Karyawan 2',
         approverName: 'Ir. Hendra Gunawan, M.T.'
       };
     }

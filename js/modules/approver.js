@@ -3,7 +3,29 @@
  * Approver (Atasan) Module: Dashboard, Antrian Persetujuan, Pelacakan Izin, Approve & Reject Decision Flow
  */
 
+function cleanPersonName(str) {
+  if (!str) return '';
+  return str.toLowerCase()
+    .replace(/^(ir\.|drs\.|dra\.|dr\.|sertu|kopda|praka|kopral)\s*/gi, '')
+    .replace(/,\s*(s\.t\.|m\.t\.|m\.m\.|s\.tr\.|s\.tr\.t\.|s\.si\.|s\.e\.|s\.kom\.|a\.md\.)/gi, '')
+    .trim();
+}
+
 function getCurrentApproverActor() {
+  if (window.activeApproverUser && (window.currentActor === 'approver' || window.currentActor === 'approver2')) {
+    return window.activeApproverUser;
+  }
+  try {
+    const savedApprNip = localStorage.getItem('KUJANG_ACTIVE_APPR_NIP');
+    if (savedApprNip) {
+      const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+      const found = users.find(u => u.nip === savedApprNip);
+      if (found) {
+        window.activeApproverUser = found;
+        return found;
+      }
+    }
+  } catch(e) {}
   const ACTORS = window.ACTORS || {};
   const isApprover2 = (window.currentActor === 'approver2');
   return isApprover2 
@@ -14,76 +36,79 @@ function getCurrentApproverActor() {
 function isTicketAssignedToCurrentApprover(ticket) {
   if (!ticket) return false;
   const currentActor = getCurrentApproverActor();
-  const aName = (currentActor.name || '').trim().toLowerCase();
+  const aName = (currentActor.name || '').trim();
   const aNip = (currentActor.nip || '').trim();
-  const tApprover = (ticket.approverName || '').trim().toLowerCase();
-  
-  // 1. Direct name match on approverName
-  if (tApprover && aName && (tApprover.includes(aName) || aName.includes(tApprover))) {
-    return true;
+  const cActorName = cleanPersonName(aName);
+
+  // Jika tiket telah dialihkan/dilimpahkan persetujuannya (reassignedTo):
+  // HANYA atasan yang dituju pelimpahan (reassignedTo) yang berhak menyetujui di Antrian Persetujuan.
+  // Atasan langsung pemohon TIDAK BISA memutuskan izin jika sudah dialihkan, melainkan hanya memantau status di menu Pelacakan.
+  if (ticket.reassignedTo) {
+    if (ticket.reassignedToNip && aNip && ticket.reassignedToNip === aNip) return true;
+    const cReassignedTo = cleanPersonName(ticket.reassignedTo);
+    if (cReassignedTo && cActorName && (cReassignedTo === cActorName || cReassignedTo.includes(cActorName) || cActorName.includes(cReassignedTo))) {
+      return true;
+    }
+    return false;
   }
 
-  // 2. Direct approver NIP match
-  if (ticket.approverNip && aNip && ticket.approverNip === aNip) {
-    return true;
+  // Jika tidak dialihkan, cek apakah tiket ditujukan ke Atasan ini:
+  // 1. Direct NIP match (Paling presisi & terisolasi singular)
+  if (ticket.approverNip && aNip) {
+    return ticket.approverNip === aNip;
   }
 
-  // 3. Fallback for role keys
-  const isApprover2 = (window.currentActor === 'approver2');
-  if (isApprover2) {
-    return tApprover.includes('dewi') || tApprover.includes('subagja');
-  } else {
-    return tApprover.includes('hendra');
+  // 2. Direct name match (hanya untuk tiket legacy tanpa approverNip)
+  const cTargetApprover = cleanPersonName(ticket.approverName);
+  if (cTargetApprover && cActorName) {
+    if (cTargetApprover === cActorName || cTargetApprover.includes(cActorName) || cActorName.includes(cTargetApprover)) {
+      return true;
+    }
   }
+
+  // Akun terisolasi presisi: tidak ada fallback lintas akun (misal Ahmad Subagja tidak boleh masuk ke Dewi Sartika)
+  return false;
 }
 
 function isTicketReassignedFromCurrentApprover(ticket) {
   if (!ticket || !ticket.reassignedFrom) return false;
   const currentActor = getCurrentApproverActor();
-  const aName = (currentActor.name || '').trim().toLowerCase();
-  const fromName = (ticket.reassignedFrom || '').trim().toLowerCase();
-  
-  if (fromName && aName && (fromName.includes(aName) || aName.includes(fromName))) {
+  const aName = (currentActor.name || '').trim();
+  const aNip = (currentActor.nip || '').trim();
+  const cActorName = cleanPersonName(aName);
+  const cFromName = cleanPersonName(ticket.reassignedFrom);
+
+  if (ticket.reassignedFromNip && aNip && ticket.reassignedFromNip === aNip) return true;
+  if (cFromName && cActorName && (cFromName === cActorName || cFromName.includes(cActorName) || cActorName.includes(cFromName))) {
     return true;
   }
-  const isApprover2 = (window.currentActor === 'approver2');
-  if (isApprover2) {
-    return fromName.includes('dewi') || fromName.includes('subagja');
-  } else {
-    return fromName.includes('hendra');
-  }
+  return false;
 }
 
-// Cek apakah tiket ini berada di bawah naungan atasan aktif saat ini
-// Memisahkan pelacakan Atasan 1 vs Atasan 2 secara presisi tanpa kebocoran antar-atasan
+// Cek apakah tiket ini berada di bawah naungan atasan aktif saat ini (Menu Pelacakan & Riwayat)
+// Setiap akun tunggal terisolasi presisi: Atasan Langsung HANYA bisa memantau status bawahannya
 function isTicketUnderMySupervision(ticket) {
   if (!ticket) return false;
   const currentActor = getCurrentApproverActor();
-  const aName = (currentActor.name || '').trim().toLowerCase();
+  const aName = (currentActor.name || '').trim();
   const aNip = (currentActor.nip || '').trim();
-  
-  // 1. Jika tiket memang ditugaskan langsung ke atasan ini
+  const cActorName = cleanPersonName(aName);
+
+  // 1. Jika tiket memang ditugaskan langsung untuk diputuskan atasan ini
   if (isTicketAssignedToCurrentApprover(ticket)) return true;
 
   // 2. Karyawan bawahan langsung berdasarkan ticket.directSupervisor
-  const supervisor = (ticket.directSupervisor || '').trim().toLowerCase();
-  if (supervisor && aName && (supervisor.includes(aName) || aName.includes(supervisor))) {
-    return true;
-  }
+  // Jika dialihkan ke atasan lain, Atasan Langsung tetap berhak memantau perjalanan status bawahannya di Pelacakan/Riwayat
   if (ticket.directSupervisorNip && aNip && ticket.directSupervisorNip === aNip) {
     return true;
   }
-
-  // 3. Jika permohonan dialihkan ke / dari atasan ini
-  if (ticket.reassignedTo && (ticket.reassignedTo.toLowerCase().includes(aName) || aName.includes(ticket.reassignedTo.toLowerCase()))) {
+  const cSupervisor = cleanPersonName(ticket.directSupervisor);
+  if (cSupervisor && cActorName && (cSupervisor === cActorName || cSupervisor.includes(cActorName) || cActorName.includes(cSupervisor))) {
     return true;
   }
+
+  // 3. Jika permohonan pernah dialihkan dari atasan ini
   if (isTicketReassignedFromCurrentApprover(ticket)) {
-    return true;
-  }
-
-  // Fallback default: Karyawan Budi Pratama binaan Hendra Gunawan jika data supervisor kosong
-  if (!supervisor && aName.includes('hendra') && ticket.applicantNip === 'PK-2024-8841') {
     return true;
   }
 
@@ -836,18 +861,6 @@ function renderApproverView() {
     );
     reassignedAwayListAll.sort(priorityEmergencyComparator);
 
-    // 3. Pengajuan bawahan naungan atasan aktif yang saat diajukan, karyawan memilih atasan lain
-    const supervisedOtherListAll = ticketsList.filter(t =>
-      t.status !== 'Dibatalkan' &&
-      t.status !== 'Ditolak' &&
-      t.status !== 'Selesai' &&
-      !isTicketAssignedToCurrentApprover(t) &&
-      !isTicketReassignedFromCurrentApprover(t) &&
-      isTicketUnderMySupervision(t) &&
-      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
-    );
-    supervisedOtherListAll.sort(priorityEmergencyComparator);
-
     // Hitung counter untuk badge filter antrean
     const totalCount = pendingListAll.length;
     const emgCount = pendingListAll.filter(isEmgTicket).length;
@@ -876,19 +889,16 @@ function renderApproverView() {
 
     let pendingList = pendingListAll;
     let reassignedAwayList = reassignedAwayListAll;
-    let supervisedOtherList = supervisedOtherListAll;
 
     if (activeNature === 'emergency') {
       pendingList = pendingListAll.filter(isEmgTicket);
       reassignedAwayList = reassignedAwayListAll.filter(isEmgTicket);
-      supervisedOtherList = supervisedOtherListAll.filter(isEmgTicket);
     } else if (activeNature === 'regular') {
       pendingList = pendingListAll.filter(t => !isEmgTicket(t));
       reassignedAwayList = reassignedAwayListAll.filter(t => !isEmgTicket(t));
-      supervisedOtherList = supervisedOtherListAll.filter(t => !isEmgTicket(t));
     }
 
-    if (pendingList.length === 0 && reassignedAwayList.length === 0 && supervisedOtherList.length === 0) {
+    if (pendingList.length === 0 && reassignedAwayList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
       if (emptyApproverPendingBox) {
         emptyApproverPendingBox.style.display = 'flex';
@@ -934,24 +944,6 @@ function renderApproverView() {
               ${tempDivReassigned.innerHTML}
             </div>
           `;
-        }
-
-        if (supervisedOtherList.length > 0) {
-          queueHtml += `
-            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 2px dashed #cbd5e1;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
-                <div style="font-size: 0.9rem; font-weight: 800; color: #0369a1; display: inline-flex; align-items: center; gap: 6px;">
-                  <span>👥 Pengajuan Karyawan Naungan Anda (Menunggu Persetujuan Atasan Lain)</span>
-                </div>
-                <span style="font-size: 0.725rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 99px;">${supervisedOtherList.length} Pengajuan</span>
-              </div>
-              <div style="font-size: 0.775rem; color: #64748b; margin-bottom: 0.75rem;">
-                Karyawan di bawah naungan divisi Anda mengajukan izin ke pejabat atasan lain. Anda tetap dapat memantau perkembangan statusnya secara real-time.
-              </div>
-          `;
-          const tempDivSup = document.createElement('div');
-          renderApproverCards(supervisedOtherList, tempDivSup);
-          queueHtml += tempDivSup.innerHTML + `</div>`;
         }
 
         containerApproverPendingQueue.innerHTML = queueHtml;

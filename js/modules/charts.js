@@ -144,11 +144,18 @@ function renderKaryawanDonutChart() {
   const selPeriod = filterSelect ? filterSelect.value : 'month';
 
   const ticketsList = window.ticketsList || [];
-  const ACTORS = window.ACTORS || {};
-  const myNip = ACTORS.karyawan ? ACTORS.karyawan.nip : 'PK-2024-8841';
+  const activeEmp = (typeof window.getCurrentEmployeeActor === 'function')
+    ? window.getCurrentEmployeeActor()
+    : (window.activeEmployeeUser || (window.ACTORS && window.ACTORS.karyawan) || { nip: 'PK-2024-8841' });
+  const myNip = activeEmp ? activeEmp.nip : 'PK-2024-8841';
 
   // Single Source of Truth: Filter only tickets belonging to this employee
-  const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
+  const myTickets = ticketsList.filter(t => 
+    t.applicantNip === myNip || 
+    t.createdForNip === myNip ||
+    t.createdByNip === myNip ||
+    (!t.applicantNip && myNip === 'PK-2024-8841')
+  );
 
   // Period filtering: Month, Year, All
   let filteredTickets = myTickets;
@@ -477,16 +484,22 @@ function getApproverWeeklyData(period) {
 function getApproverWeeklyRealtimeData(isMobile = false) {
   const tickets = (typeof window !== 'undefined' && window.ticketsList) ? window.ticketsList : [];
   const currentActor = (typeof window !== 'undefined' && window.currentActor) ? window.currentActor : 'approver';
-  const isApprover2 = (currentActor === 'approver2');
-  const approverLabel = isApprover2 ? 'Dewi Sartika, S.T., M.M.' : 'Ir. Hendra Gunawan, M.T.';
+  const activeApprover = (typeof window.getCurrentApproverActor === 'function')
+    ? window.getCurrentApproverActor()
+    : (window.activeApproverUser || (window.ACTORS && window.ACTORS.approver) || { name: 'Ir. Hendra Gunawan, M.T.', nip: 'PK-2015-1002' });
+  const aName = (activeApprover.name || '').toLowerCase();
+  const aNip = (activeApprover.nip || '').trim();
+  const approverLabel = activeApprover.name || 'Ir. Hendra Gunawan, M.T.';
 
   let myTeamTickets = [];
   if (typeof window !== 'undefined' && typeof window.getTeamTickets === 'function') {
     myTeamTickets = window.getTeamTickets();
   } else {
     myTeamTickets = tickets.filter(t => {
+      if (typeof window.isTicketAssignedToCurrentApprover === 'function' && window.isTicketAssignedToCurrentApprover(t)) return true;
+      if (typeof window.isTicketUnderMySupervision === 'function' && window.isTicketUnderMySupervision(t)) return true;
       const tApp = (t.approverName || '').toLowerCase();
-      return isApprover2 ? tApp.includes('dewi') : (tApp.includes('hendra') || !tApp.includes('dewi'));
+      return aName ? (tApp.includes(aName) || aName.includes(tApp)) : tApp.includes('hendra');
     });
   }
 

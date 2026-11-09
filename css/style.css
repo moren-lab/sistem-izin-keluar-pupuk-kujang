@@ -2677,6 +2677,168 @@ body {
   background: #1e293b;
 }
 
+/* ROLE SWITCHER DROPDOWN (COMPACT EDITORIAL STYLE) */
+.role-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.role-switcher-container {
+  overflow: visible !important;
+}
+
+.role-switch-btn .role-caret {
+  transition: transform 0.2s ease;
+  margin-left: 1px;
+  opacity: 0.7;
+}
+
+.role-dropdown-wrap.open .role-switch-btn .role-caret {
+  transform: rotate(180deg);
+}
+
+.role-switch-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 215px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  z-index: 1050;
+  overflow: hidden;
+  animation: roleDropdownFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes roleDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.role-dropdown-list {
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.role-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: 1px solid transparent;
+  gap: 8px;
+}
+
+.role-dropdown-item:hover {
+  background: var(--bg-subtle, #f8fafc);
+}
+
+.role-dropdown-item.active {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+body.theme-dark .role-dropdown-item.active {
+  background: rgba(5, 150, 105, 0.2);
+  border-color: rgba(5, 150, 105, 0.4);
+}
+
+.role-dropdown-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.role-dropdown-item-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-dropdown-item-sub {
+  font-size: 0.685rem;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-dropdown-check {
+  color: #059669;
+  font-weight: 800;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.role-dropdown-footer {
+  border-top: 1px solid var(--border-color, #f1f5f9);
+  padding: 6px;
+  background: var(--bg-subtle, #f8fafc);
+}
+
+.btn-role-add-account {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--border-color, #cbd5e1);
+  background: transparent;
+  color: #059669;
+  font-size: 0.735rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-role-add-account:hover {
+  background: #ffffff;
+  border-color: #059669;
+  border-style: solid;
+}
+
+/* User directory list items in modal */
+.directory-user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  background: var(--bg-card, #ffffff);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.directory-user-card:hover {
+  border-color: #059669;
+  background: #f0fdf4;
+}
+
+.directory-user-card.already-added {
+  border-left: 3px solid #059669;
+}
+
 /* PAGE BODY */
 .page-container {
   padding: 1.5rem 2rem;
@@ -5044,6 +5206,46 @@ body.modal-open {
 
 .audit-pill.event-expire {
   color: #64748b !important;
+}
+
+/* ADMIN AUDIT TRAIL TABLE SPECIFIC LAYOUT & SPACING FIX */
+#adminAuditPage .report-data-table {
+  min-width: 1120px;
+}
+
+#adminAuditPage .report-data-table th:nth-child(4),
+#adminAuditPage .report-data-table td:nth-child(4) {
+  width: 200px;
+  min-width: 200px;
+  max-width: 220px;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+#adminAuditPage .report-data-table th:nth-child(5),
+#adminAuditPage .report-data-table td:nth-child(5) {
+  min-width: 180px;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+#adminAuditPage .report-data-table td:nth-child(4) > *,
+#adminAuditPage .report-data-table td:nth-child(5) > * {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+}
+
+#adminAuditPage .audit-pill {
+  white-space: normal !important;
+  display: inline-block;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+#adminAuditPage .report-data-table td:last-child .action-pills-row {
+  justify-content: flex-end !important;
 }
 
 /* Filter Toolbar */
@@ -11766,17 +11968,34 @@ body.theme-dark #modalTicketDetail #btnDetailRejectTicket {
 }
 
 /* Override modal styling when placed inside the full-form Bento page */
-#karyawanFullFormContainer .modal-overlay {
+#karyawanFullFormContainer .modal-overlay,
+#karyawanFullFormContainer .modal-overlay.open {
   position: static !important;
+  inset: auto !important;
   width: 100% !important;
   height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
   background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   display: block !important;
   z-index: auto !important;
   padding: 0 !important;
   margin: 0 !important;
   opacity: 1 !important;
   visibility: visible !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overscroll-behavior: auto !important;
+  pointer-events: auto !important;
+}
+
+body.theme-dark #karyawanFullFormContainer .modal-overlay,
+body.theme-dark #karyawanFullFormContainer .modal-overlay.open {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 #karyawanFullFormContainer .modal-card {
@@ -11789,6 +12008,13 @@ body.theme-dark #modalTicketDetail #btnDetailRejectTicket {
   margin: 0 !important;
   max-height: none !important;
   overflow: visible !important;
+  transform: none !important;
+}
+
+body.theme-dark #karyawanFullFormContainer .modal-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 #karyawanFullFormContainer .modal-header {
@@ -11799,6 +12025,7 @@ body.theme-dark #modalTicketDetail #btnDetailRejectTicket {
   padding: 0 !important;
   max-height: none !important;
   overflow: visible !important;
+  overflow-y: visible !important;
 }
 
 #karyawanFullFormContainer .modal-footer {

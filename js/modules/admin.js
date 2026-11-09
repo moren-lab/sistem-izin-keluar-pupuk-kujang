@@ -1030,6 +1030,15 @@ const AVAILABLE_SUPERVISORS = [
     avatarBg: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
   },
   {
+    name: 'Dr. Ahmad Subagja, M.M.',
+    nip: 'PK-2012-0543',
+    title: 'Atasan 1 (Manager)',
+    department: 'Departemen Produksi Amonia-1A',
+    roleLabel: 'Atasan 1 (Manager)',
+    isDirectSupervisor: false,
+    avatarBg: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)'
+  },
+  {
     name: 'Bambang Sutrisno, S.T.',
     nip: 'PK-2010-0012',
     title: 'Manager K3 & Keselamatan Kerja',
@@ -1278,7 +1287,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Ir. Hendra Gunawan, M.T.',
     title: 'Staf Rekayasa Mesin',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Rekayasa & Pemeliharaan'
   },
   {
@@ -1289,7 +1298,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Ir. Hendra Gunawan, M.T.',
     title: 'Staf Instrumentasi & Otomasi Pabrik',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Rekayasa & Pemeliharaan'
   },
   {
@@ -1297,10 +1306,10 @@ const MASTER_EMPLOYEES = [
     name: 'Siti Rahmawati, S.Tr.',
     email: 'siti.rahmawati@pupuk-kujang.co.id',
     department: 'Departemen Produksi Amonia-1A',
-    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    supervisor: 'Dr. Ahmad Subagja, M.M.',
     title: 'Operator Lapangan Amonia-1A',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Operasional Pabrik'
   },
   {
@@ -1373,12 +1382,12 @@ const MASTER_EMPLOYEES = [
     nip: 'PK-2012-0543',
     name: 'Dr. Ahmad Subagja, M.M.',
     email: 'ahmad.subagja@pupuk-kujang.co.id',
-    department: 'Departemen SDM & Organisasi',
-    supervisor: 'Ir. Hendra Gunawan, M.T.',
-    title: 'Manager SDM & Organisasi',
-    roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
-    jabatan: 'Staf Administrasi & K3'
+    department: 'Departemen Produksi Amonia-1A',
+    supervisor: 'Direktur Operasi & Produksi',
+    title: 'Manager Produksi Amonia-1A',
+    roleKey: 'approver',
+    roleTitle: 'Atasan 1 (Manager)',
+    jabatan: 'Manajer Produksi Amonia-1A'
   },
   {
     nip: 'PK-2023-9102',
@@ -1388,7 +1397,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Ir. Hendra Gunawan, M.T.',
     title: 'Perekayasa Proses Kimia',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Operasional Pabrik'
   },
   {
@@ -1399,7 +1408,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Dewi Sartika, S.T., M.M.',
     title: 'Analis Mutu Produk Pupuk',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Administrasi & K3'
   },
   {
@@ -1410,7 +1419,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Ir. Hendra Gunawan, M.T.',
     title: 'Teknisi Listrik Gardu Induk',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Rekayasa & Pemeliharaan'
   },
   {
@@ -1421,7 +1430,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Ir. Hendra Gunawan, M.T.',
     title: 'Supervisor Produksi Granulasi NPK',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Operasional Pabrik'
   },
   {
@@ -1432,7 +1441,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Dr. Ahmad Subagja, M.M.',
     title: 'Staf Pengadaan Bahan Baku',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Administrasi & K3'
   },
   {
@@ -1443,7 +1452,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Ir. Hendra Gunawan, M.T.',
     title: 'Pengawas Sintesis Urea',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Operasional Pabrik'
   },
   {
@@ -1454,7 +1463,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Bambang Sutrisno, S.T.',
     title: 'Spesialis Keamanan Siber & Jaringan',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Rekayasa & Pemeliharaan'
   },
   {
@@ -1465,7 +1474,7 @@ const MASTER_EMPLOYEES = [
     supervisor: 'Dewi Sartika, S.T., M.M.',
     title: 'Staf Perencanaan Distribusi Pupuk',
     roleKey: 'karyawan',
-    roleTitle: 'Karyawan Pemohon',
+    roleTitle: 'Karyawan',
     jabatan: 'Staf Operasional Pabrik'
   }
 ];
@@ -1481,9 +1490,9 @@ function getAdminAllEmployees() {
         email: u.email || '',
         department: u.department || 'Departemen Rekayasa & Pemeliharaan',
         supervisor: u.directSupervisor || u.supervisor || 'Ir. Hendra Gunawan, M.T.',
-        title: u.role || 'Karyawan Pemohon',
+        title: u.role || 'Karyawan',
         roleKey: u.roleKey || 'karyawan',
-        roleTitle: u.role || 'Karyawan Pemohon',
+        roleTitle: u.role || 'Karyawan',
         jabatan: u.jabatan || u.role || 'Staf Operasional Pabrik'
       });
     }
@@ -1690,7 +1699,7 @@ function selectAdminEmployee(emp) {
       emp.title && emp.title.includes('Supervisor Operasional') ? 'approver2' :
       'karyawan'
     );
-    const targetRoleTitle = emp.roleTitle || emp.title || 'Karyawan Pemohon';
+    const targetRoleTitle = emp.roleTitle || emp.title || 'Karyawan';
     setAdminSelectedRole(targetRoleKey, targetRoleTitle);
   }
 
@@ -2034,7 +2043,7 @@ function saveAdminUserAccess(event) {
     }
   }
 
-  let roleLabel = roleTitleInput || 'Karyawan Pemohon';
+  let roleLabel = (roleKey === 'karyawan' || roleKey === 'karyawan2') ? 'Karyawan' : (roleTitleInput || 'Karyawan');
   if (roleKey === 'approver') roleLabel = 'Atasan 1 (Manager)';
   else if (roleKey === 'approver2') roleLabel = 'Atasan 2 (Supervisor / Plt)';
   else if (roleKey === 'security') roleLabel = 'Petugas Pos Jaga (Satpam)';
@@ -2086,6 +2095,11 @@ function saveAdminUserAccess(event) {
         if (window.ACTORS && window.ACTORS.karyawan2) {
           window.ACTORS.karyawan2.approverName = directSupervisor;
         }
+      }
+      if (window.activeEmployeeUser && (window.activeEmployeeUser.nip === nip || window.activeEmployeeUser.kujangId === kujangId)) {
+        window.activeEmployeeUser.directSupervisor = directSupervisor;
+        window.activeEmployeeUser.supervisor = directSupervisor;
+        window.activeEmployeeUser.approverName = directSupervisor;
       }
     }
   }
@@ -2453,8 +2467,8 @@ function renderAdminUsers() {
         <td style="font-size: 0.8rem; color: var(--text-secondary); max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(u.email || '').replace(/"/g, '&quot;')}">${u.email || '-'}</td>
         <td style="font-size: 0.825rem; color: var(--text-primary); max-width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(u.department || '').replace(/"/g, '&quot;')}">${u.department}</td>
         <td style="white-space: nowrap;">
-          <span class="user-role-badge ${roleClass}">${u.role}</span>
-          ${(!u.roleKey || u.roleKey.startsWith('karyawan')) ? `<div style="font-size: 0.685rem; color: var(--sky-text, #0284c7); font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong style="color: var(--sky-text, #0284c7);">${u.directSupervisor || u.supervisor || 'Dr. Ahmad Subagja, M.M.'}</strong></div>` : ''}
+          <span class="user-role-badge ${roleClass}">${(roleClass === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan')) || (u.roleKey && u.roleKey.startsWith('karyawan'))) ? 'Karyawan' : (u.role || '').replace(/\s*pemohon/gi, '')}</span>
+          ${(!u.roleKey || u.roleKey.startsWith('karyawan')) ? `<div style="font-size: 0.685rem; color: var(--sky-text, #0284c7); font-weight: 600; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;"><span style="color:#64748b;">Atasan:</span> <strong style="color: var(--sky-text, #0284c7);">${u.directSupervisor || u.supervisor || (typeof window.getPrimaryApprover === 'function' ? window.getPrimaryApprover(u.name)?.name : 'Ir. Hendra Gunawan, M.T.')}</strong></div>` : ''}
         </td>
         <td>
           ${statusBadge}
@@ -2951,7 +2965,7 @@ const AVAILABLE_ROLES_JABATAN = [
     roleKey: 'karyawan',
     hakAkses: 'Karyawan',
     jabatan: 'Staf Rekayasa & Pemeliharaan',
-    fullTitle: 'Karyawan Pemohon',
+    fullTitle: 'Karyawan',
     isSingleSeat: false,
     description: 'Pengajuan izin dinas kantor atau pribadi serta izin darurat K3.'
   },
@@ -2959,7 +2973,7 @@ const AVAILABLE_ROLES_JABATAN = [
     roleKey: 'karyawan',
     hakAkses: 'Karyawan',
     jabatan: 'Staf Operasional Pabrik',
-    fullTitle: 'Karyawan Pemohon',
+    fullTitle: 'Karyawan',
     isSingleSeat: false,
     description: 'Pengajuan izin operasional shift dan tugas luar area pabrik.'
   },
@@ -2967,7 +2981,7 @@ const AVAILABLE_ROLES_JABATAN = [
     roleKey: 'karyawan',
     hakAkses: 'Karyawan',
     jabatan: 'Staf Administrasi & K3',
-    fullTitle: 'Karyawan Pemohon',
+    fullTitle: 'Karyawan',
     isSingleSeat: false,
     description: 'Pengajuan izin urusan personal dan operasional kantor pusat.'
   },

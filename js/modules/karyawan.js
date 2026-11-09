@@ -16,6 +16,30 @@ window.currentEmpViewMode = window.currentEmpViewMode || 'card';
  * Menyelesaikan bug sinkronisasi akun baru/pergantian pengguna (Moreno dsb.)
  */
 function getCurrentEmployeeActor() {
+  if (!window.activeEmployeeUser) {
+    try {
+      const savedNip = localStorage.getItem('KUJANG_ACTIVE_EMP_NIP');
+      if (savedNip && savedNip !== 'PK-2024-8841' && savedNip !== 'PK-2024-8842') {
+        const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+        const found = users.find(u => u.nip === savedNip && u.status === 'Aktif');
+        if (found) window.activeEmployeeUser = found;
+      }
+    } catch(e) {}
+  }
+  if (window.activeEmployeeUser && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2')) {
+    if (window.ACTORS && window.ACTORS.karyawan) {
+      window.ACTORS.karyawan.name = window.activeEmployeeUser.name;
+      window.ACTORS.karyawan.nip = window.activeEmployeeUser.nip;
+      if (window.activeEmployeeUser.department) window.ACTORS.karyawan.department = window.activeEmployeeUser.department;
+      if (window.activeEmployeeUser.role || window.activeEmployeeUser.title) {
+        window.ACTORS.karyawan.title = window.activeEmployeeUser.role || window.activeEmployeeUser.title;
+      }
+      if (window.activeEmployeeUser.directSupervisor || window.activeEmployeeUser.supervisor) {
+        window.ACTORS.karyawan.approverName = window.activeEmployeeUser.directSupervisor || window.activeEmployeeUser.supervisor;
+      }
+    }
+    return window.activeEmployeeUser;
+  }
   const users = window.MOCK_USERS || [];
   const isK2 = (window.currentActor === 'karyawan2');
 
@@ -79,7 +103,12 @@ function updateKaryawanMetrics() {
   const myNip = empActor.nip || 'PK-2024-8841';
 
   // Batasi hanya tiket milik akun yang sedang aktif
-  const myTickets = ticketsList.filter(t => t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')));
+  const myTickets = ticketsList.filter(t => 
+    t.applicantNip === myNip || 
+    t.createdForNip === myNip || 
+    t.createdByNip === myNip || 
+    (!t.applicantNip && myNip === 'PK-2024-8841')
+  );
   const totalMonth = myTickets.length;
 
   const completedTickets = myTickets.filter(t => t.status === 'Selesai');
@@ -416,7 +445,7 @@ function renderKaryawanDashboard() {
     empHeroGreeting.innerHTML = `Selamat ${timeGreeting}, ${window.renderUserPhoto(empActor.name, 32)} <span>${empActor.name}</span>`;
   }
   const primaryApprover = (typeof window.getPrimaryApprover === 'function') 
-    ? window.getPrimaryApprover() 
+    ? window.getPrimaryApprover(empActor.name || empActor.nip) 
     : (window.ACTORS && window.ACTORS.karyawan && window.ACTORS.karyawan.approverName ? { name: window.ACTORS.karyawan.approverName } : null);
 
   if (empHeroSub) {
@@ -744,10 +773,14 @@ window.switchFullPermitTab = function(tab) {
       window.handleOpenNewRequest();
     }
   }
+
+  // Formulir penuh inline di halaman, jangan sampai scroll body terkunci
+  document.body.classList.remove('modal-open');
 };
 
 window.handleCancelFullForm = function() {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
+  document.body.classList.remove('modal-open');
   if (activeTicket) {
     if (typeof renderPengajuanSayaView === 'function') {
       renderPengajuanSayaView();
@@ -770,6 +803,9 @@ function renderPengajuanSayaView() {
   const colPengajuanRight = document.getElementById('colPengajuanRight');
   const emptyEmpActiveBox = document.getElementById('emptyEmpActiveBox');
 
+  // Pastikan body tidak terkunci saat berada di halaman Pengajuan Saya
+  document.body.classList.remove('modal-open');
+
   // Skenario 1: Belum Ada Izin Aktif -> Langsung Tampilkan Formulir Penuh (Full Page Bento Grid)
   if (!activeTicket) {
     if (karyawanActiveTicketWrapper) karyawanActiveTicketWrapper.style.display = 'none';
@@ -780,6 +816,7 @@ function renderPengajuanSayaView() {
       karyawanFullFormContainer.style.display = 'block';
       window.switchFullPermitTab('regular');
     }
+    document.body.classList.remove('modal-open');
     return;
   }
 
@@ -789,6 +826,7 @@ function renderPengajuanSayaView() {
   if (karyawanActiveTicketWrapper) karyawanActiveTicketWrapper.style.display = 'block';
   if (colPengajuanLeft) colPengajuanLeft.style.display = 'flex';
   if (colPengajuanRight) colPengajuanRight.style.display = 'flex';
+  document.body.classList.remove('modal-open');
 
   // Left Column
   if (colPengajuanLeft) {
@@ -1171,9 +1209,12 @@ function getCleanEmpStatus(status, ticket) {
     color = '#0284c7';
     statusKey = 'outside';
   } else if (status === 'Terlambat') {
-    label = 'Terlambat';
-    color = '#dc2626';
-    statusKey = 'late';
+    const lateStr = (ticket && ticket.lateMinutes) 
+      ? ` (${typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes) : ticket.lateMinutes + ' mnt'})` 
+      : '';
+    label = `Selesai (Terlambat${lateStr})`;
+    color = '#b45309';
+    statusKey = 'selesai-late';
   } else if (status === 'Disetujui') {
     label = 'Disetujui';
     color = '#059669';
@@ -1228,7 +1269,7 @@ function getCleanEmpStatus(status, ticket) {
   const currentBg = bgMap[statusKey] || 'rgba(100, 116, 139, 0.1)';
   const currentBorder = borderMap[statusKey] || 'rgba(100, 116, 139, 0.25)';
 
-  return `<span class="figma-clean-status status-${statusKey}" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; border-radius: 9999px; font-weight: 700; font-size: 0.775rem; background: ${currentBg}; color: ${color}; border: 1px solid ${currentBorder}; line-height: 1.3;" title="${(label || '').replace(/"/g, '&quot;')}"><span style="width: 6px; height: 6px; border-radius: 50%; background: ${color}; display: inline-block;"></span><span>${label}</span></span>`;
+  return `<span class="figma-clean-status status-${statusKey}" style="display: inline-flex; align-items: center; padding: 0.2rem 0.65rem; border-radius: 9999px; font-weight: 700; font-size: 0.775rem; background: ${currentBg}; color: ${color}; border: 1px solid ${currentBorder}; line-height: 1.3;" title="${(label || '').replace(/"/g, '&quot;')}"><span>${label}</span></span>`;
 }
 
 /**
@@ -1687,8 +1728,7 @@ function renderKaryawanMobileDashboard() {
 
       heroActiveStripWrap.innerHTML = `
         <div class="mobile-hero-active-box">
-          <div style="font-weight: 700; color: #a7f3d0; display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34d399;"></span>
+          <div style="font-weight: 700; color: #a7f3d0; display: flex; align-items: center;">
             <span>Izin Aktif · ${activeTicket.id}</span>
           </div>
           <div style="color: #ffffff; font-size: 0.775rem; margin-top: 3px; font-weight: 600;">

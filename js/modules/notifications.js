@@ -432,28 +432,28 @@
   }
 
   // 6. Navigasi Buka Tiket dari Notifikasi (C1: Navigasi Kembali dari Notifikasi)
-  function openTicketFromNotification(ticketId, notifId, fromTab = 'all') {
+  function openTicketFromNotification(ticketId, notifId, fromTab = 'dropdown') {
     if (notifId) {
       markNotificationAsRead(notifId);
     }
 
-    // Set flag context C1 agar tombol kembali di detail tiket mengarahkan kembali ke notifikasi
+    const isMobile = (window.innerWidth <= 768);
+    const source = isMobile ? 'mobile' : (fromTab || 'dropdown');
+
+    // Set flag context agar tombol kembali / tutup di detail tiket mengarahkan kembali ke notifikasi
     window._openedFromNotification = true;
     window._openedFromScannerTerminal = false;
     window._openedFromNotificationTab = fromTab;
+    window._openedFromNotificationSource = source;
 
-    // Tutup dropdown notifikasi desktop jika terbuka
-    closeDesktopNotifDropdown();
-    if (typeof window.mobileCloseSheet === 'function') {
-      window.mobileCloseSheet();
+    // Tutup dropdown notifikasi desktop jika terbuka (hanya pada mode desktop)
+    if (!isMobile) {
+      closeDesktopNotifDropdown();
     }
 
     // Tetap berada di halaman notifikasi desktop (jangan tutup viewNotifikasi)
 
     if (!ticketId) return;
-
-    const user = getActiveUserInfo();
-    const isMobile = (window.innerWidth <= 768) || Boolean(document.getElementById('mobileAppShell')) || Boolean(window.currentMobileRole);
 
     // NOTE PENTING: Pada Tampilan Mobile, gunakan action sheet native mobile (Image 2)
     if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
@@ -522,7 +522,7 @@
           const isHigh = n.priority === 'high';
           const isUnread = !n.isRead;
           return `
-            <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: background 0.15s ease;" onclick="window.mobileCloseSheet(); window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+            <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}', 'mobile')">
               <div class="dropdown-notif-icon-box ${isHigh ? 'priority-high' : (isUnread ? 'unread' : 'read')} ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 36px; height: 36px; min-width: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 ${getNotifIconSvg(n.type, n.priority)}
               </div>
@@ -629,7 +629,7 @@
       const isHigh = n.priority === 'high';
       const isUnread = !n.isRead;
       return `
-        <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 10px 14px; border-bottom: 1px solid var(--border-color, #f1f5f9); display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+        <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 10px 14px; border-bottom: 1px solid var(--border-color, #f1f5f9); display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}', 'dropdown')">
           <div class="dropdown-notif-icon-box ${isHigh ? 'priority-high' : (isUnread ? 'unread' : 'read')} ${getNotifIconTypeClass(n.type, n.priority)}">
             ${getNotifIconSvg(n.type, n.priority)}
           </div>
@@ -698,7 +698,7 @@
             const isHigh = n.priority === 'high';
             const isUnread = !n.isRead;
             return `
-              <div class="card notif-card-full ${isUnread ? 'unread' : ''}" style="position: relative; padding: 16px; border-radius: 12px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}')">
+              <div class="card notif-card-full ${isUnread ? 'unread' : ''}" style="position: relative; padding: 16px; border-radius: 12px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: all 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}', 'fullpage')">
                 <div class="notif-icon-box ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 42px; height: 42px;">
                   ${getNotifIconSvg(n.type, n.priority)}
                 </div>
@@ -741,6 +741,10 @@
   // Close desktop dropdown on outside click or Esc
   document.addEventListener('click', function (e) {
     const container = document.getElementById('desktopNotifContainer');
+    const modalDetail = document.getElementById('modalTicketDetail');
+    if (modalDetail && (modalDetail.contains(e.target) || modalDetail === e.target)) {
+      return;
+    }
     if (container && !container.contains(e.target)) {
       closeDesktopNotifDropdown();
     }
@@ -832,6 +836,13 @@
   window.updateNotificationBadges = updateNotificationBadges;
   window.openTicketFromNotification = openTicketFromNotification;
   window.closeDesktopNotifDropdown = closeDesktopNotifDropdown;
+  window.renderDesktopNotifDropdownContent = renderDesktopNotifDropdownContent;
+  window.openDesktopNotifDropdown = function () {
+    const dropdown = document.getElementById('desktopNotifDropdown');
+    if (!dropdown) return;
+    renderDesktopNotifDropdownContent();
+    dropdown.style.display = 'block';
+  };
 
   function resetAllNotifications() {
     notificationsList = [];

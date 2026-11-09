@@ -485,7 +485,27 @@
     if (backdrop) backdrop.classList.remove('open');
   };
 
-    window.mobileCloseSheet = function () {
+  window.mobileCloseSheet = function () {
+    const wasFromNotif = Boolean(window._openedFromNotification);
+    const notifTab = window._openedFromNotificationTab || 'all';
+    const notifSource = window._openedFromNotificationSource;
+    const isMobileEnv = (window.innerWidth <= 768);
+
+    // Jika sedang melihat detail tiket yang dibuka dari notifikasi mobile, kembalikan ke daftar notifikasi
+    if (wasFromNotif && (notifSource === 'mobile' || (!notifSource && isMobileEnv))) {
+      window._openedFromNotification = false;
+      window._openedFromNotificationSource = null;
+      window._openedFromNotificationTab = null;
+      if (typeof window.openMobileNotificationSheet === 'function') {
+        window.openMobileNotificationSheet(notifTab);
+        return;
+      }
+    }
+
+    window._openedFromNotification = false;
+    window._openedFromNotificationSource = null;
+    window._openedFromNotificationTab = null;
+
     const sheet = document.getElementById('mobileActionSheet');
     const roleSheet = document.getElementById('mobileRoleSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
@@ -502,7 +522,7 @@
   // Interceptor: jika openTicketDetail dipanggil pada mode mobile, selalu arahkan ke mobile sheet asli (Image 2)
   const _origOpenTicketDetail = window.openTicketDetail;
   window.openTicketDetail = function (ticketId, mode, options) {
-    const isMobile = (window.innerWidth <= 768) || Boolean(document.getElementById('mobileAppShell')) || Boolean(window.currentMobileRole);
+    const isMobile = (window.innerWidth <= 768);
     if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
       window.mobileOpenTicketDetail(ticketId);
       return;
