@@ -3102,3 +3102,20 @@ body.theme-dark .mobile-sheet .dropdown-notif-meta,
 .theme-dark .mobile-sheet .dropdown-notif-meta {
   color: #64748b !important;
 }
+
+/* Delete button on mobile notification row */
+.mobile-notif-row-delete-btn {
+  transition: all 0.15s ease;
+}
+.mobile-notif-row-delete-btn:hover,
+.mobile-notif-row-delete-btn:active {
+  color: #ef4444 !important;
+  background: #fee2e2 !important;
+}
+body.theme-dark .mobile-notif-row-delete-btn:hover,
+.theme-dark .mobile-notif-row-delete-btn:hover,
+body.theme-dark .mobile-notif-row-delete-btn:active,
+.theme-dark .mobile-notif-row-delete-btn:active {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.2) !important;
+}
