@@ -1142,7 +1142,7 @@ function renderSecurityLogTable(list, containerElement) {
 }
 
 // VERIFICATION ENGINE
-function executeVerification(inputQuery, directScanOut = false) {
+function executeVerification(inputQuery) {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   const ticketsList = window.ticketsList || [];
 
@@ -1185,18 +1185,18 @@ function executeVerification(inputQuery, directScanOut = false) {
   } else if (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sedang di luar kawasan. Tap In Masuk dilakukan oleh Karyawan bersangkutan.`, 'info');
   } else if (ticket.status === 'Disetujui') {
-    // Alur 1-Klik: Jika tiket sah & disetujui, langsung eksekusi Scan Out tanpa perantara modal ganda
-    if (directScanOut || !ticket.emergencyLocked) {
-      if (typeof window.playScannerBeep === 'function') window.playScannerBeep();
-      executeScanOut(ticket.id);
-      if (inputScanTicketCode) inputScanTicketCode.value = '';
-      return;
+    if (ticket.isEmergency) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`PERINGATAN POS JAGA: Tiket Izin Darurat #${ticket.id} SAH (Diotorisasi: ${ticket.emergencyUnlockedBy || 'Resmi'}). Pastikan periksa kondisi fisik/kendaraan darurat sebelum Scan Out!`, 'warning');
+      }
+    } else {
+      if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} valid dan disetujui. Siap diproses Scan Out!`, 'success');
     }
   } else if (ticket.status === 'Selesai') {
     if (typeof window.showToast === 'function') window.showToast(`Tiket #${ticket.id} sudah selesai diproses.`, 'info');
   }
 
-  // Jika tiket bermasalah / belum disetujui, buka Rincian Tiket agar petugas dapat melihat alasan penolakan
+  // Tampilkan Formulir Rincian Tiket agar petugas dapat memeriksa identitas dan data perizinan sebelum Scan Out
   if (typeof window.openTicketDetail === 'function') {
     window._openedFromScannerTerminal = true;
     window.openTicketDetail(ticket.id, 'detail');
@@ -1617,7 +1617,7 @@ function handleCameraQrSuccess(decodedText) {
   if (cameraScanStatus) cameraScanStatus.textContent = `QR Terbaca: ${searchId}`;
   if (typeof window.showToast === 'function') window.showToast(`QR Code Terbaca: ${searchId}!`, 'success');
 
-  executeVerification(searchId, true);
+  executeVerification(searchId);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1773,12 +1773,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (btnExecuteScanSearch) btnExecuteScanSearch.addEventListener('click', () => executeVerification(null, true));
+  if (btnExecuteScanSearch) btnExecuteScanSearch.addEventListener('click', () => executeVerification());
   if (inputScanTicketCode) {
     inputScanTicketCode.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        executeVerification(null, true);
+        executeVerification();
       }
     });
   }
