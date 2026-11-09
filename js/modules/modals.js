@@ -1,6 +1,6 @@
 
 // Collapsible Detail Content Toggle (Identik Gambar 1 Pengguna)
-window.toggleDetailExpand = function(targetId, btn) {
+window.toggleDetailExpand = function (targetId, btn) {
   const el = document.getElementById(targetId);
   if (!el) return;
   const isExpanded = el.getAttribute('data-expanded') === 'true';
@@ -1324,8 +1324,8 @@ function openDigitalPassModal(ticketId) {
     digitalPassStatusBadge.className = ticket.status === 'Terlambat'
       ? 'status-pill-red'
       : (ticket.status === 'Sedang di Luar'
-          ? 'status-pill-purple'
-          : (ticket.status === 'Disetujui' ? 'status-pill-blue' : 'status-pill-green'));
+        ? 'status-pill-purple'
+        : (ticket.status === 'Disetujui' ? 'status-pill-blue' : 'status-pill-green'));
     digitalPassStatusBadge.style.background = 'transparent';
     digitalPassStatusBadge.style.border = 'none';
     digitalPassStatusBadge.style.padding = '0';
@@ -1602,16 +1602,16 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const infoTableActualReturn = document.getElementById('infoTableActualReturn');
   if (infoTableActualReturn) {
     const isLateTicket = ticket.isLate || ticket.status === 'Terlambat' || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]'));
-    let scanInStr = ticket.scanInTime 
+    let scanInStr = ticket.scanInTime
       ? (ticket.scanInTime.includes('WIB') ? ticket.scanInTime : `${ticket.scanInTime} WIB`)
       : '';
     scanInStr = scanInStr.replace(/\s*\[Terlambat\]/gi, '').trim();
     const lateFormatted = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes) : `${ticket.lateMinutes} mnt`;
-    infoTableActualReturn.textContent = scanInStr 
-      ? `${scanInStr} — ${isLateTicket ? `Terlambat${ticket.lateMinutes ? ` (+${lateFormatted})` : ''}` : 'Tepat Waktu'}` 
-      : (ticket.status === 'Selesai' 
-          ? (ticket.isLate ? '10.52 WIB — Terlambat' : '10.52 WIB — Tepat Waktu') 
-          : (ticket.status === 'Terlambat' ? '⚠️ Belum Tap In (Terlambat)' : '-'));
+    infoTableActualReturn.textContent = scanInStr
+      ? `${scanInStr} — ${isLateTicket ? `Terlambat${ticket.lateMinutes ? ` (+${lateFormatted})` : ''}` : 'Tepat Waktu'}`
+      : (ticket.status === 'Selesai'
+        ? (ticket.isLate ? '10.52 WIB — Terlambat' : '10.52 WIB — Tepat Waktu')
+        : (ticket.status === 'Terlambat' ? '⚠️ Belum Tap In (Terlambat)' : '-'));
     infoTableActualReturn.style.fontWeight = '700';
   }
 
@@ -1874,7 +1874,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   // Robust check: any emergency ticket waiting for authorization
   const isEmergencyTicket = Boolean(
-    ticket.isEmergency === true || 
+    ticket.isEmergency === true ||
     ticket.status === 'Menunggu Otorisasi Darurat' ||
     (ticket.id && (ticket.id.includes('-EMG-') || ticket.id.startsWith('TK-EMG-')))
   );
@@ -2007,7 +2007,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     }
   }
 
-  // Security Action Buttons (Scan Out / Scan In) directly inside detail modal
+  // Security Action Buttons (Scan Out / Tap In) directly inside detail modal
   const btnDetailScanOut = document.getElementById('btnDetailScanOut');
   const btnDetailScanIn = document.getElementById('btnDetailScanIn');
   const activeRole = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || '';
@@ -2016,10 +2016,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   // Scan Out HANYA DAN MUTLAK di Pos Jaga, HANYA saat melalui terminal pemindaian (kamera scan, input tiket manual, atau upload QR scan)
   // TIDAK BOLEH muncul di atasan, notifikasi, karyawan, admin, atau riwayat
   const fromScanner = Boolean(window._openedFromScannerTerminal) && !window._openedFromNotification;
-  const canScanOut = isSecurity && 
-    fromScanner && 
-    (ticket.status === 'Disetujui') && 
-    !ticket.scanOutTime && 
+  const canScanOut = isSecurity &&
+    fromScanner &&
+    (ticket.status === 'Disetujui') &&
+    !ticket.scanOutTime &&
     !(ticket.isEmergency && ticket.emergencyLocked);
 
   // Selalu reset flag scanner segera setelah evaluasi
@@ -2266,7 +2266,7 @@ function openCancelModal(ticketId, callback) {
 
   if (!canCancel) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Scan In di Pos 1 untuk menyelesaikan izin.', 'danger');
+      window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Tap In di Pos 1 untuk menyelesaikan izin.', 'danger');
     }
     return;
   }
@@ -2338,7 +2338,7 @@ function confirmCancelTicket() {
     });
 
     window.saveTickets(ticketsList);
-    
+
     const modalCancelRequest = document.getElementById('modalCancelRequest');
     if (modalCancelRequest) modalCancelRequest.classList.remove('open');
     const modalTicketDetail = document.getElementById('modalTicketDetail');
@@ -3527,8 +3527,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const ticketId = `TK-EMG-${dateCode}-${randomSuffix}`;
       const nowFormatted = `${now.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
-      const emergencyPasscode = (typeof window.generateEmergencyPasscode === 'function') 
-        ? window.generateEmergencyPasscode() 
+      const emergencyPasscode = (typeof window.generateEmergencyPasscode === 'function')
+        ? window.generateEmergencyPasscode()
         : String(Math.floor(100000 + Math.random() * 900000));
 
       const activeEmergEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : ((window.currentActor === 'karyawan2' && ACTORS.karyawan2) ? ACTORS.karyawan2 : ACTORS.karyawan);
@@ -3694,135 +3694,135 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-      if (!newReturnVal) {
-        if (typeof window.showToast === 'function') window.showToast('Harap pilih perkiraan waktu kembali baru!', 'danger');
-        return;
-      }
+        if (!newReturnVal) {
+          if (typeof window.showToast === 'function') window.showToast('Harap pilih perkiraan waktu kembali baru!', 'danger');
+          return;
+        }
 
-      const newReturnDate = new Date(newReturnVal);
-      const now = new Date();
+        const newReturnDate = new Date(newReturnVal);
+        const now = new Date();
 
-      // 1. Validasi Jam Operasional Kantor (Hanya bisa diajukan sebelum jam pulang saat pengajuan perpanjangan dibuat)
-      const workHoursCheck = isWithinOperationalHours(now);
-      if (!workHoursCheck.allowed) {
+        // 1. Validasi Jam Operasional Kantor (Hanya bisa diajukan sebelum jam pulang saat pengajuan perpanjangan dibuat)
+        const workHoursCheck = isWithinOperationalHours(now);
+        if (!workHoursCheck.allowed) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`, 'danger');
+          }
+          return;
+        }
+
+        const isDinas = isDinasCategory(ticket.category);
+
+        if (!isDinas) {
+          // 2. Validasi Tanggal untuk Urusan Pribadi: Hanya boleh HARI INI
+          const returnDay = newReturnDate.getDate();
+          const returnMonth = newReturnDate.getMonth();
+          const returnYear = newReturnDate.getFullYear();
+          if (returnDay !== now.getDate() || returnMonth !== now.getMonth() || returnYear !== now.getFullYear()) {
+            if (typeof window.showToast === 'function') {
+              window.showToast('Perpanjangan waktu Urusan Pribadi hanya dapat diajukan untuk hari ini!', 'danger');
+            }
+            return;
+          }
+
+          // 3. Validasi Jam Kembali: Tidak boleh melewati batas jam pulang kantor hari ini
+          const dayOfWeek = now.getDay();
+          const returnHours = newReturnDate.getHours();
+          const returnMins = newReturnDate.getMinutes();
+          const returnTotalMins = returnHours * 60 + returnMins;
+          const maxAllowedMins = (dayOfWeek === 5) ? (16 * 60 + 30) : (16 * 60);
+          const closingStr = (dayOfWeek === 5) ? '16:30 WIB' : '16:00 WIB';
+
+          if (returnTotalMins > maxAllowedMins) {
+            if (typeof window.showToast === 'function') {
+              window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
+            }
+            return;
+          }
+        } else {
+          // Dinas Kantor: Boleh memilih hari besok dan hari-hari kerja selanjutnya sesuai rencana
+          const extendWorkCheck = validateWorkingHours(newReturnVal, 'Perkiraan waktu kembali perpanjangan');
+          if (!extendWorkCheck.valid) {
+            if (typeof window.showToast === 'function') {
+              window.showToast(extendWorkCheck.message, 'danger');
+            }
+            return;
+          }
+        }
+
+        if (isNaN(newReturnDate.getTime()) || newReturnDate.getTime() <= now.getTime()) {
+          if (typeof window.showToast === 'function') window.showToast('Perkiraan waktu kembali baru harus lebih lambat dari waktu saat ini!', 'danger');
+          return;
+        }
+
+        if (ticket.estimatedReturn) {
+          const oldReturnDate = new Date(ticket.estimatedReturn);
+          if (!isNaN(oldReturnDate.getTime()) && newReturnDate.getTime() <= oldReturnDate.getTime()) {
+            if (typeof window.showToast === 'function') window.showToast('Waktu kembali baru harus lebih lama dari estimasi kembali semula!', 'danger');
+            return;
+          }
+        }
+
+        if (!reasonVal || reasonVal.length < 5) {
+          if (typeof window.showToast === 'function') window.showToast('Alasan perpanjangan waktu wajib diisi (minimal 5 karakter)!', 'danger');
+          return;
+        }
+
+        const pad = (n) => String(n).padStart(2, '0');
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+        ticket.pendingExtension = {
+          requestedAt: nowFormatted,
+          requestedAtIso: now.toISOString(),
+          oldEstimatedReturn: ticket.estimatedReturn,
+          newEstimatedReturn: newReturnVal,
+          reason: reasonVal,
+          status: 'Menunggu Persetujuan'
+        };
+
+        if (!ticket.timeline) ticket.timeline = [];
+        ticket.timeline.push({
+          event: 'Pengajuan Perpanjangan Waktu',
+          time: nowFormatted,
+          by: `${ticket.applicantName || 'Budi Pratama'} (Karyawan)`,
+          desc: `Mengajukan perpanjangan waktu kembali hingga ${window.formatDisplayDate ? window.formatDisplayDate(newReturnVal) : newReturnVal}. Alasan: "${reasonVal}". Grace Period aktif.`
+        });
+
+        if (typeof window.createNotification === 'function') {
+          const ticketForExt = ticket;
+          if (ticketForExt) {
+            window.createNotification({
+              recipientRole: 'approver',
+              recipientNip: (() => {
+                const allUsers = window.MOCK_USERS || [];
+                const found = allUsers.find(u => u.name && ticketForExt.approverName && (u.name.toLowerCase() === ticketForExt.approverName.toLowerCase() || ticketForExt.approverName.toLowerCase().includes(u.name.toLowerCase())));
+                return (found && found.nip) || (ticketForExt.approverName && ticketForExt.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
+              })(),
+              recipientName: ticketForExt.approverName || 'Ir. Hendra Gunawan, M.T.',
+              actorSource: 'karyawan',
+              type: 'permohonan_perpanjangan',
+              title: 'Permohonan Perpanjangan Waktu',
+              message: `${ticketForExt.applicantName} (${ticketForExt.applicantNip}) mengajukan perpanjangan waktu untuk tiket #${ticketForExt.id}. Menunggu persetujuan Anda.`,
+              ticketId: ticketForExt.id,
+              priority: 'normal',
+              eventId: `ext_req_${ticketForExt.id}_${ticketForExt.pendingExtension ? ticketForExt.pendingExtension.newEstimatedReturn : Date.now()}`
+            });
+          }
+        }
+        window.saveTickets(ticketsList);
+        if (modalExtendDuration) modalExtendDuration.classList.remove('open');
+
         if (typeof window.showToast === 'function') {
-          window.showToast(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`, 'danger');
-        }
-        return;
-      }
-
-      const isDinas = isDinasCategory(ticket.category);
-
-      if (!isDinas) {
-        // 2. Validasi Tanggal untuk Urusan Pribadi: Hanya boleh HARI INI
-        const returnDay = newReturnDate.getDate();
-        const returnMonth = newReturnDate.getMonth();
-        const returnYear = newReturnDate.getFullYear();
-        if (returnDay !== now.getDate() || returnMonth !== now.getMonth() || returnYear !== now.getFullYear()) {
-          if (typeof window.showToast === 'function') {
-            window.showToast('Perpanjangan waktu Urusan Pribadi hanya dapat diajukan untuk hari ini!', 'danger');
-          }
-          return;
+          window.showToast(`Pengajuan perpanjangan waktu tiket #${ticket.id} berhasil dikirim ke Atasan. Grace Period aktif!`, 'success');
         }
 
-        // 3. Validasi Jam Kembali: Tidak boleh melewati batas jam pulang kantor hari ini
-        const dayOfWeek = now.getDay();
-        const returnHours = newReturnDate.getHours();
-        const returnMins = newReturnDate.getMinutes();
-        const returnTotalMins = returnHours * 60 + returnMins;
-        const maxAllowedMins = (dayOfWeek === 5) ? (16 * 60 + 30) : (16 * 60);
-        const closingStr = (dayOfWeek === 5) ? '16:30 WIB' : '16:00 WIB';
-
-        if (returnTotalMins > maxAllowedMins) {
-          if (typeof window.showToast === 'function') {
-            window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
-          }
-          return;
+        if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+        if (typeof window.renderApproverView === 'function') window.renderApproverView();
+        const modalTicketDetail = document.getElementById('modalTicketDetail');
+        if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+          window.openTicketDetail(ticket.id, 'detail');
         }
-      } else {
-        // Dinas Kantor: Boleh memilih hari besok dan hari-hari kerja selanjutnya sesuai rencana
-        const extendWorkCheck = validateWorkingHours(newReturnVal, 'Perkiraan waktu kembali perpanjangan');
-        if (!extendWorkCheck.valid) {
-          if (typeof window.showToast === 'function') {
-            window.showToast(extendWorkCheck.message, 'danger');
-          }
-          return;
-        }
-      }
-
-      if (isNaN(newReturnDate.getTime()) || newReturnDate.getTime() <= now.getTime()) {
-        if (typeof window.showToast === 'function') window.showToast('Perkiraan waktu kembali baru harus lebih lambat dari waktu saat ini!', 'danger');
-        return;
-      }
-
-      if (ticket.estimatedReturn) {
-        const oldReturnDate = new Date(ticket.estimatedReturn);
-        if (!isNaN(oldReturnDate.getTime()) && newReturnDate.getTime() <= oldReturnDate.getTime()) {
-          if (typeof window.showToast === 'function') window.showToast('Waktu kembali baru harus lebih lama dari estimasi kembali semula!', 'danger');
-          return;
-        }
-      }
-
-      if (!reasonVal || reasonVal.length < 5) {
-        if (typeof window.showToast === 'function') window.showToast('Alasan perpanjangan waktu wajib diisi (minimal 5 karakter)!', 'danger');
-        return;
-      }
-
-      const pad = (n) => String(n).padStart(2, '0');
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
-
-      ticket.pendingExtension = {
-        requestedAt: nowFormatted,
-        requestedAtIso: now.toISOString(),
-        oldEstimatedReturn: ticket.estimatedReturn,
-        newEstimatedReturn: newReturnVal,
-        reason: reasonVal,
-        status: 'Menunggu Persetujuan'
-      };
-
-      if (!ticket.timeline) ticket.timeline = [];
-      ticket.timeline.push({
-        event: 'Pengajuan Perpanjangan Waktu',
-        time: nowFormatted,
-        by: `${ticket.applicantName || 'Budi Pratama'} (Karyawan)`,
-        desc: `Mengajukan perpanjangan waktu kembali hingga ${window.formatDisplayDate ? window.formatDisplayDate(newReturnVal) : newReturnVal}. Alasan: "${reasonVal}". Grace Period aktif.`
-      });
-
-      if (typeof window.createNotification === 'function') {
-        const ticketForExt = ticket;
-        if (ticketForExt) {
-          window.createNotification({
-            recipientRole: 'approver',
-            recipientNip: (() => {
-            const allUsers = window.MOCK_USERS || [];
-            const found = allUsers.find(u => u.name && ticketForExt.approverName && (u.name.toLowerCase() === ticketForExt.approverName.toLowerCase() || ticketForExt.approverName.toLowerCase().includes(u.name.toLowerCase())));
-            return (found && found.nip) || (ticketForExt.approverName && ticketForExt.approverName.includes('Dewi') ? 'PK-2012-0845' : 'PK-2015-1002');
-          })(),
-            recipientName: ticketForExt.approverName || 'Ir. Hendra Gunawan, M.T.',
-            actorSource: 'karyawan',
-            type: 'permohonan_perpanjangan',
-            title: 'Permohonan Perpanjangan Waktu',
-            message: `${ticketForExt.applicantName} (${ticketForExt.applicantNip}) mengajukan perpanjangan waktu untuk tiket #${ticketForExt.id}. Menunggu persetujuan Anda.`,
-            ticketId: ticketForExt.id,
-            priority: 'normal',
-            eventId: `ext_req_${ticketForExt.id}_${ticketForExt.pendingExtension ? ticketForExt.pendingExtension.newEstimatedReturn : Date.now()}`
-          });
-        }
-      }
-      window.saveTickets(ticketsList);
-      if (modalExtendDuration) modalExtendDuration.classList.remove('open');
-
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Pengajuan perpanjangan waktu tiket #${ticket.id} berhasil dikirim ke Atasan. Grace Period aktif!`, 'success');
-      }
-
-      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-      if (typeof window.renderApproverView === 'function') window.renderApproverView();
-      const modalTicketDetail = document.getElementById('modalTicketDetail');
-      if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
-        window.openTicketDetail(ticket.id, 'detail');
-      }
       } finally {
         window._isSubmittingExtension = false;
       }
@@ -4031,13 +4031,13 @@ function openPendingExtensionDetailModal(ticketId) {
   if (pendingExtTicketId) pendingExtTicketId.textContent = ticket.id;
   if (pendingExtOldReturn) {
     const rawOld = ext.oldEstimatedReturn || ticket.estimatedReturn;
-    pendingExtOldReturn.textContent = rawOld 
+    pendingExtOldReturn.textContent = rawOld
       ? (window.formatDisplayDate ? window.formatDisplayDate(rawOld) : rawOld.replace('T', ' '))
       : '-';
   }
   if (pendingExtNewReturn) {
     const rawNew = ext.newEstimatedReturn;
-    pendingExtNewReturn.textContent = rawNew 
+    pendingExtNewReturn.textContent = rawNew
       ? (window.formatDisplayDate ? window.formatDisplayDate(rawNew) : rawNew.replace('T', ' '))
       : '-';
   }
@@ -4147,7 +4147,7 @@ if (typeof document !== 'undefined') {
 }
 
 
-window.openDeleteConfirmModal = function(options) {
+window.openDeleteConfirmModal = function (options) {
   const { title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus data ini?', confirmText = 'Hapus', onConfirm = null } = options || {};
   const modal = document.getElementById('modalDeleteConfirm');
   const titleEl = document.getElementById('deleteModalTitle');
@@ -4158,7 +4158,7 @@ window.openDeleteConfirmModal = function(options) {
     if (msgEl) msgEl.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
     if (btnExecute) {
       btnExecute.textContent = confirmText;
-      btnExecute.onclick = function() {
+      btnExecute.onclick = function () {
         modal.classList.remove('open');
         modal.style.display = 'none';
         if (typeof onConfirm === 'function') onConfirm();
@@ -4171,7 +4171,7 @@ window.openDeleteConfirmModal = function(options) {
   }
 };
 
-window.closeDeleteConfirmModal = function() {
+window.closeDeleteConfirmModal = function () {
   const modal = document.getElementById('modalDeleteConfirm');
   if (modal) {
     modal.classList.remove('open');
@@ -4179,7 +4179,7 @@ window.closeDeleteConfirmModal = function() {
   }
 };
 
-window.openNoticeModal = function(options) {
+window.openNoticeModal = function (options) {
   const { title = 'Pemberitahuan', message = '', buttonText = 'Batal', onConfirm = null } = options || {};
   const modal = document.getElementById('modalNoticeAlert');
   const titleEl = document.getElementById('noticeModalTitle');
@@ -4190,7 +4190,7 @@ window.openNoticeModal = function(options) {
     if (msgEl) msgEl.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
     if (btnDismiss) {
       btnDismiss.textContent = buttonText;
-      btnDismiss.onclick = function() {
+      btnDismiss.onclick = function () {
         modal.classList.remove('open');
         if (typeof onConfirm === 'function') onConfirm();
       };

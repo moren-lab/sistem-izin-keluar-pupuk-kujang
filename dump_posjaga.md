@@ -16,7 +16,7 @@ Buka Kamera Scan
 SENIN, 19 OKTOBER 2026 • 11.00 WIB
 1 karyawan terlambat kembali
 Fajar Hidayat terlambat 30 menit. Batas kembali 
-10.30 WIB; belum Scan In. Segera konfirmasi 
+10.30 WIB; belum Tap In. Segera konfirmasi 
 keberadaan atau tindak lanjuti di Pos 1.
 Lihat Headcount Terlambat →
 Sedang di luar
@@ -31,7 +31,7 @@ Scan Out hari ini
 4
 3 kembali ke area\n1 
 pulang
-Scan In hari ini
+Tap In hari ini
 1
 Telah kembali
 Akses cepat
@@ -51,7 +51,7 @@ DE M O-100 5  • Teknologi Informasi
 Scan Out 0 9 .4 5  WIB • Kembali 10.30 WIB
 Terlambat 30 menit
 Headcount hanya izin Kembali ke Area yang sudah Scan Out 
-dan belum Scan In. Izin siap keluar tidak dihitung.
+dan belum Tap In. Izin siap keluar tidak dihitung.
 Lihat pelacakan
 Akti v itas transaksi terbaru
 Budi Pratama, S.T.
@@ -64,7 +64,7 @@ Scan Out • 0 9 .4 5  WIB
 Petugas :  Joko Santoso
 Sari Wulandari
 I Z -202 6 101 9 -00 6  • Pos 1 G erbang Utama ( Utara )
-Scan In • 0 9 .40 WIB
+Tap In • 0 9 .40 WIB
 Petugas :  Sertu Agus
 Ari f  M aulana
 I Z -202 6 101 9 -008 • Pos 1 G erbang Utama ( Utara )
@@ -150,7 +150,7 @@ P T  R eka y asa I n d ustri ,  C ika m pek
 Rencana :  1 9  Okt 202 6  • 10.00 – 1 3 .00 W IB
 Scan Out 10.0 5  W IB
 Pos 1 G erbang U tama ( U tara)
-Scan In Belum Scan In
+Tap In Belum Tap In
 Belum ada catatan pos
 D isetujui Ir. Hendra G unawan, M .T. • Batas kembali 1 3 .00 
 W IB
@@ -165,7 +165,7 @@ B ank M an d iri ,  C ika m pek
 Rencana :  1 9  Okt 202 6  • 0 9 .40 – 10. 3 0 W IB
 Scan Out 09. 4 5  W IB
 Pos 1 G erbang U tama ( U tara)
-Scan In Belum Scan In
+Tap In Belum Tap In
 Belum ada catatan pos
 Terlambat 3 0 menit • Batas kembali 10. 3 0 W IB. Belum 
 kembali pada 11.00 W IB.
@@ -202,7 +202,7 @@ G u d an g  Log istik C ia m pel
 R encana :  1 9  Okt 202 6  • 11.10 – 12.00 W IB
 Scan Out B elu m  Scan O ut
 Belum ada catatan pos
-Scan In B elu m  Scan In
+Tap In B elu m  Tap In
 Belum ada catatan pos
 R incian Li h at T iket
 D as hbo ar d Pin d ai Pelacakan R i w a y at
@@ -214,7 +214,7 @@ PUPUK KUJANG
 Perizinan Keluar Area
 Riwayat pemindaian
 Telusuri tiket, identitas karyawan, dan catatan Scan Out 
-/ Scan In lintas status.
+/ Tap In lintas status.
 Pencarian
 Cari tiket, nama, NIP, atau tujuan…
 Waktu pemindaian
@@ -232,7 +232,7 @@ P T  R eka y asa I ndustri ,  C ikampek
 Rencana: 19 Okt 2026 • 10.00 – 1 3 .00 WI B
 Scan Out 10.0 5  W IB
 Pos 1 G erbang U tama (U tara )
-Scan In Be l um S c an In
+Tap In Be l um S c an In
 B elum ada catatan pos
 Disetujui Ir. H endra G unawan, M .T. • B atas kembali 1 3 .00 
 WI B
@@ -246,7 +246,7 @@ G udang L ogistik C iampe l
 Rencana: 19 Okt 2026 • 11.10 – 12.00 WI B
 Scan Out Be l um S c an O ut
 B elum ada catatan pos
-Scan In Be l um S c an In
+Tap In Be l um S c an In
 B elum ada catatan pos
 Disetujui atasan • 10.40 WI B . B elum meninggalkan area ;  
 bukan headcount.
@@ -260,7 +260,7 @@ R S UD  Kara w ang
 Rencana: 19 Okt 2026 • 09.15 WI B  • Tidak kembali
 Scan Out 09.20 W IB
 Pos 1 G erbang U tama (U tara )
-Scan In Tida k  diper l u k an
+Tap In Tida k  diper l u k an
 Pulang M endahului
 Contoh alur darurat B RD • Peninjauan susulan perlu 
 kon f irmasi.
@@ -273,7 +273,7 @@ B ank M andiri ,  C ikampek
 Rencana: 19 Okt 2026 • 09.40 – 10. 3 0 WI B
 Scan Out 09. 4 5  W IB
 Pos 1 G erbang U tama (U tara )
-Scan In Be l um S c an In
+Tap In Be l um S c an In
 B elum ada catatan pos
 Terlambat 3 0 menit • B atas kembali 10. 3 0 WI B . B elum 
 kembali pada 11.00 WI B .
@@ -286,7 +286,7 @@ V endor j aringan ,  C ikampek
 Rencana: 19 Okt 2026 • 08.05 – 10.00 WI B
 Scan Out 0 8 .10 W IB
 Pos 1 G erbang U tama (U tara )
-Scan In 09. 4 0 W IB
+Tap In 09. 4 0 W IB
 Pos 1 G erbang U tama (U tara )
 Selesai tepat waktu • Q R tidak lagi akti f .
 Rin c ian
@@ -300,7 +300,7 @@ PUPUK KUJANG
 Perizinan Keluar Area
 Riwayat pemindaian
 Telusuri tiket, identitas karyawan, dan catatan Scan Out 
-/ Scan In lintas status.
+/ Tap In lintas status.
 Pencarian
 Cari tiket, nama, NIP, atau tujuan…
 Waktu pemindaian
@@ -319,7 +319,7 @@ PT Rekayasa Industri, Cikam p ek
 Rencana :  1 9  Okt 202 6  • 10.00 – 1 3 .00 WI B
 Scan Out 10.0 5  WIB
 Pos 1 G erbang U tama (U tara )
-Scan In Belum S c an In
+Tap In Belum S c an In
 B elum ada catatan p os
 Disetujui Ir. H endra G unawan, M .T. • B atas kembali 1 3 .00 WI B
 Rin c ian
@@ -331,7 +331,7 @@ G udang L ogistik Ciam p el
 Rencana :  1 9  Okt 202 6  • 11.10 – 12.00 WI B
 Scan Out Belum S c an Out
 B elum ada catatan p os
-Scan In Belum S c an In
+Tap In Belum S c an In
 B elum ada catatan p os
 Disetujui atasan • 10.40 WI B . B elum meninggalkan area ;  bukan 
 headcount.
@@ -345,7 +345,7 @@ D arurat
 Rencana :  1 9  Okt 202 6  • 0 9 .15 WI B  • Tidak kembali
 Scan Out 09.20 WIB
 Pos 1 G erbang U tama (U tara )
-Scan In Tidak diperlukan
+Tap In Tidak diperlukan
 Pulang M endahului
 Contoh alur darurat B RD • Peninjauan susulan p erlu kon f irmasi.
 Rin c ian
@@ -357,7 +357,7 @@ B ank M andiri, Cikam p ek
 Rencana :  1 9  Okt 202 6  • 0 9 .40 – 10. 3 0 WI B
 Scan Out 09. 4 5  WIB
 Pos 1 G erbang U tama (U tara )
-Scan In Belum S c an In
+Tap In Belum S c an In
 B elum ada catatan p os
 Terlambat 3 0 menit • B atas kembali 10. 3 0 WI B . B elum kembali 
 p ada 11.00 WI B .
@@ -370,7 +370,7 @@ V endor jaringan, Cikam p ek
 Rencana :  1 9  Okt 202 6  • 08.05 – 10.00 WI B
 Scan Out 0 8 .10 WIB
 Pos 1 G erbang U tama (U tara )
-Scan In 09. 4 0 WIB
+Tap In 09. 4 0 WIB
 Pos 1 G erbang U tama (U tara )
 Selesai te p at waktu • Q R tidak lagi akti f .
 Rin c ian

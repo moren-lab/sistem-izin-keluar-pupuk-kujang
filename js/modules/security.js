@@ -31,7 +31,7 @@ const GATE_OFFICERS = {
 function getActiveGateOfficer(gateKey) {
   const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
   const gateShort = gateKey && gateKey.includes('Pos 2') ? 'Pos 2' : (gateKey && gateKey.includes('Pos 3') ? 'Pos 3' : 'Pos 1');
-  const matchedUser = users.find(u => 
+  const matchedUser = users.find(u =>
     (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) &&
     (u.role && u.role.includes(gateShort)) &&
     u.status === 'Aktif'
@@ -101,7 +101,7 @@ function getCurrentSecurityActor() {
         return officer;
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 
   const currentGate = localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama';
   const officer = getActiveGateOfficer(currentGate);
@@ -120,7 +120,7 @@ function updateActiveSecurityGate(gateValue, notify = false) {
   localStorage.setItem('KUJANG_ACTIVE_GATE', gateValue);
 
   if (officer && officer.nip) {
-    try { localStorage.setItem('KUJANG_ACTIVE_SEC_NIP', officer.nip); } catch (e) {}
+    try { localStorage.setItem('KUJANG_ACTIVE_SEC_NIP', officer.nip); } catch (e) { }
     const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
     const found = users.find(u => u.nip === officer.nip);
     if (found) window.activeSecurityUser = found;
@@ -256,7 +256,7 @@ window.setSecurityGateFilter = setSecurityGateFilter;
 
 /**
  * SISTEM PERIZINAN KELUAR AREA KARYAWAN - PT Pupuk Kujang Cikampek
- * Security (Pos Jaga Satpam) Module: Dashboard, Scanner Engine, Headcount Pelacakan, Riwayat, Scan In / Scan Out
+ * Security (Pos Jaga Satpam) Module: Dashboard, Scanner Engine, Headcount Pelacakan, Riwayat, Tap In / Scan Out
  */
 
 let html5QrScannerInstance = null;
@@ -389,7 +389,7 @@ function renderSecurityDashboard() {
                 PERINGATAN GERBANG: Ada ${overdueTickets.length} Karyawan Terlambat Kembali ke Pabrik!
               </div>
               <div class="security-overdue-sub" style="font-size: 0.775rem;">
-                Karyawan telah melewati batas estimasi jam kembali. Pastikan segera memindai (Scan In) begitu tiba di Pos Jaga.
+                Karyawan telah melewati batas estimasi jam kembali. Pastikan segera memindai (Tap In) begitu tiba di Pos Jaga.
               </div>
             </div>
           </div>
@@ -403,7 +403,7 @@ function renderSecurityDashboard() {
     }
   }
 
-  // Outside headcount list with 1-click Scan In
+  // Outside headcount list with 1-click Tap In
   if (securityDashboardOutsideList) {
     if (outsideTickets.length === 0) {
       securityDashboardOutsideList.innerHTML = `
@@ -456,12 +456,12 @@ function renderSecurityDashboard() {
               <div>
                 <div class="feed-item-title">${t.applicantName || 'Budi Pratama'} (${t.id})</div>
                 <div class="feed-item-sub">
-                  ${isScanIn ? `Scan In: ${t.scanInTime}` : `Scan Out: ${t.scanOutTime}`}
+                  ${isScanIn ? `Tap In: ${t.scanInTime}` : `Scan Out: ${t.scanOutTime}`}
                 </div>
               </div>
             </div>
             <span class="status-pill ${isScanIn ? 'completed' : 'outside'}" style="font-size: 0.7rem;">
-              ${isScanIn ? 'Scan In Sukses' : 'Scan Out Sukses'}
+              ${isScanIn ? 'Tap In Sukses' : 'Scan Out Sukses'}
             </span>
           </div>
         `;
@@ -478,30 +478,30 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
   target.innerHTML = `
     <div class="cards-grid">
       ${list.filter(t => !t.deletedBySecurity).map(t => {
-        const isReadyExit = t.status === 'Disetujui';
-        const isOutside = t.status === 'Sedang di Luar';
-        const isOverdue = t.status === 'Terlambat';
-        const isLateCompleted = (t.status === 'Selesai') && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0));
-        const isExpired = t.status === 'Kedaluwarsa';
-        const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
-        let displayCategory = t.category;
-        if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
-          displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
-        }
-        const isDinas = displayCategory === 'Dinas Kantor';
+    const isReadyExit = t.status === 'Disetujui';
+    const isOutside = t.status === 'Sedang di Luar';
+    const isOverdue = t.status === 'Terlambat';
+    const isLateCompleted = (t.status === 'Selesai') && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0));
+    const isExpired = t.status === 'Kedaluwarsa';
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+    let displayCategory = t.category;
+    if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+      displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+    }
+    const isDinas = displayCategory === 'Dinas Kantor';
 
-        // Hanya izin darurat yang memiliki aksen border samping (sesuai permintaan user: Hapus semua warna di samping card kecuali izin darurat)
-        const borderColor = isEmergency ? 'var(--rose-danger)' : '';
+    // Hanya izin darurat yang memiliki aksen border samping (sesuai permintaan user: Hapus semua warna di samping card kecuali izin darurat)
+    const borderColor = isEmergency ? 'var(--rose-danger)' : '';
 
-        const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
-        const gateBadgeHtml = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
-        const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function' 
-          ? window.formatTicketScheduleWithDay(t) 
-          : `<div style="font-weight: 600; color: var(--text-primary); font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+    const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+    const gateBadgeHtml = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
+    const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
+      ? window.formatTicketScheduleWithDay(t)
+      : `<div style="font-weight: 600; color: var(--text-primary); font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
 
-        // A. SPECIAL AIRY LAYOUT FOR RIWAYAT MODE (isHistoryMode === true)
-        if (isHistoryMode) {
-          return `
+    // A. SPECIAL AIRY LAYOUT FOR RIWAYAT MODE (isHistoryMode === true)
+    if (isHistoryMode) {
+      return `
             <div class="card-item card-history-item" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''} display: flex; flex-direction: column;">
               <div class="card-top" style="margin-bottom: 0.65rem;">
                 <div>
@@ -544,10 +544,10 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
 
 
-              <!-- Realization Summary Row (Scan Out & Scan In) -->
+              <!-- Realization Summary Row (Scan Out & Tap In) -->
               <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem;">
                 ${t.scanOutTime ? `<div style="color: #065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-                ${t.scanInTime ? `<div style="color: ${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight: ${isLateCompleted ? '700' : 'normal'};"><strong>Scan In:</strong> ${t.scanInTime}</div>` : ''}
+                ${t.scanInTime ? `<div style="color: ${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight: ${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${t.scanInTime}</div>` : ''}
                 ${(!t.scanOutTime && !t.scanInTime) ? `<div style="color: var(--text-muted);">Belum ada catatan pemindaian gerbang</div>` : ''}
               </div>
 
@@ -570,10 +570,10 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             </div>
           `;
-        }
+    }
 
-        // B. STANDARD LAYOUT FOR PELACAKAN / HEADCOUNT QUEUE
-        return `
+    // B. STANDARD LAYOUT FOR PELACAKAN / HEADCOUNT QUEUE
+    return `
           <div class="card-item" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''}">
             <div class="card-top">
               <div>
@@ -639,7 +639,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             ` : ''}
 
             ${t.scanOutTime ? `<div style="font-size:0.75rem; color:#065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-            ${t.scanInTime ? `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Scan In:</strong> ${t.scanInTime}</div>` : ''}
+            ${t.scanInTime ? `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${t.scanInTime}</div>` : ''}
 
             <!-- Quick Action Buttons for Satpam (Single Symmetrical Row) -->
             <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
@@ -654,7 +654,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 }
@@ -662,7 +662,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
 window.currentSecurityPelacakanViewMode = window.currentSecurityPelacakanViewMode || 'card';
 
-window.setSecurityPelacakanViewMode = function(mode) {
+window.setSecurityPelacakanViewMode = function (mode) {
   window.currentSecurityPelacakanViewMode = mode;
   const btnSecurityViewCard = document.getElementById('btnSecurityViewCard');
   const btnSecurityViewTable = document.getElementById('btnSecurityViewTable');
@@ -694,30 +694,30 @@ function renderSecurityTable(list, containerElement) {
         </thead>
         <tbody>
           ${list.map(t => {
-            const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
-            const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
-            const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
-            
-            let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
-            if (t.scanInTime && t.scanOutTime) {
-              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
-              const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
-              catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Scan In: ${inSimple}</span>`;
-            } else if (t.scanOutTime) {
-              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
-              catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
-            } else if (t.status === 'Terlambat') {
-              catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
-            } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-              const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
-              catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
-            }
+    const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
+    const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+    const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
 
-            const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function' 
-              ? window.formatTicketScheduleWithDay(t) 
-              : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+    let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
+    if (t.scanInTime && t.scanOutTime) {
+      const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+      const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
+      catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Tap In: ${inSimple}</span>`;
+    } else if (t.scanOutTime) {
+      const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+      catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+    } else if (t.status === 'Terlambat') {
+      catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
+    } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
+      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
+      catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
+    }
 
-            let tindakanHtml = `
+    const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
+      ? window.formatTicketScheduleWithDay(t)
+      : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+
+    let tindakanHtml = `
               <div class="action-pills-row">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
@@ -730,15 +730,15 @@ function renderSecurityTable(list, containerElement) {
               </div>
             `;
 
-            const cleanDest = (t.destination || '-').replace(/\r?\n+/g, ' ');
-            const cleanReason = (t.reason || '-').replace(/\r?\n+/g, ' ');
-            const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
-            let displayCategory = t.category;
-            if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
-              displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
-            }
+    const cleanDest = (t.destination || '-').replace(/\r?\n+/g, ' ');
+    const cleanReason = (t.reason || '-').replace(/\r?\n+/g, ' ');
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+    let displayCategory = t.category;
+    if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+      displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+    }
 
-            return `
+    return `
               <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
                 <td style="vertical-align: middle;">
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
@@ -764,7 +764,7 @@ function renderSecurityTable(list, containerElement) {
                 <td style="vertical-align: middle; white-space: nowrap;">${tindakanHtml}</td>
               </tr>
             `;
-          }).join('')}
+  }).join('')}
         </tbody>
       </table>
     </div>
@@ -805,9 +805,9 @@ function renderSecurityView() {
   if (currentSecurityNav === 'pelacakan') {
     const queueMode = filterSecurityQueueTab ? filterSecurityQueueTab.value : 'all';
 
-    const outsideTickets = ticketsList.filter(t => 
+    const outsideTickets = ticketsList.filter(t =>
       !t.deletedBySecurity &&
-      Boolean(t.scanOutTime) && 
+      Boolean(t.scanOutTime) &&
       (t.status === 'Sedang di Luar' || t.status === 'Terlambat')
     );
 
@@ -1063,36 +1063,36 @@ function renderSecurityLogTable(list, containerElement) {
         </thead>
         <tbody>
           ${list.map(t => {
-            const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
-            const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
-            const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
-            
-            let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
-            if (t.scanInTime && t.scanOutTime) {
-              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
-              const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
-              catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Scan In: ${inSimple}</span>`;
-            } else if (t.scanOutTime) {
-              const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
-              catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
-            } else if (t.status === 'Terlambat') {
-              catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
-            } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-              const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
-              catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
-            } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
-              catatanHtml = `<span style="color: #b91c1c; font-size: 0.725rem;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
-            } else if (t.status === 'Kedaluwarsa') {
-              catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Kedaluwarsa sebelum scan keluar</span>`;
-            } else if (t.status === 'Dibatalkan') {
-              catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Pengajuan dibatalkan oleh pemohon</span>`;
-            }
+    const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
+    const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
+    const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
 
-            const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function' 
-              ? window.formatTicketScheduleWithDay(t) 
-              : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+    let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
+    if (t.scanInTime && t.scanOutTime) {
+      const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+      const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
+      catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Tap In: ${inSimple}</span>`;
+    } else if (t.scanOutTime) {
+      const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
+      catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+    } else if (t.status === 'Terlambat') {
+      catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
+    } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
+      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
+      catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
+    } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
+      catatanHtml = `<span style="color: #b91c1c; font-size: 0.725rem;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
+    } else if (t.status === 'Kedaluwarsa') {
+      catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Kedaluwarsa sebelum scan keluar</span>`;
+    } else if (t.status === 'Dibatalkan') {
+      catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Pengajuan dibatalkan oleh pemohon</span>`;
+    }
 
-            let tindakanHtml = `
+    const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
+      ? window.formatTicketScheduleWithDay(t)
+      : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
+
+    let tindakanHtml = `
               <div class="action-pills-row">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
@@ -1105,7 +1105,7 @@ function renderSecurityLogTable(list, containerElement) {
               </div>
             `;
 
-            return `
+    return `
               <tr>
                 <td style="vertical-align: middle;">
                   <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
@@ -1129,7 +1129,7 @@ function renderSecurityLogTable(list, containerElement) {
                 <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
               </tr>
             `;
-          }).join('')}
+  }).join('')}
         </tbody>
       </table>
     </div>
@@ -1162,8 +1162,8 @@ function executeVerification(inputQuery) {
   const cleanSearchId = (searchId || '').trim().toUpperCase();
   const cleanQuery = (query || '').trim().toUpperCase();
 
-  const ticket = ticketsList.find(t => 
-    (t.id && t.id.trim().toUpperCase() === cleanSearchId) || 
+  const ticket = ticketsList.find(t =>
+    (t.id && t.id.trim().toUpperCase() === cleanSearchId) ||
     (t.applicantNip && t.applicantNip.trim().toUpperCase() === cleanQuery) ||
     (t.id && t.id.trim().toUpperCase() === cleanQuery)
   );
@@ -1238,8 +1238,8 @@ function executeScanOut(ticketId) {
   }
 
   const selectGateLocation = document.getElementById('selectGateLocation');
-  let gate = (selectGateLocation && selectGateLocation.value && selectGateLocation.value !== 'all') 
-    ? selectGateLocation.value 
+  let gate = (selectGateLocation && selectGateLocation.value && selectGateLocation.value !== 'all')
+    ? selectGateLocation.value
     : (localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama');
   if (gate === 'all') gate = 'Pos 1 Gerbang Utama';
   const officer = typeof getActiveGateOfficer === 'function' ? getActiveGateOfficer(gate) : { name: 'Sertu Agus', nip: 'SEC-2018-042', gateShort: 'Pos 1' };
@@ -1346,7 +1346,7 @@ function executeScanOut(ticketId) {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   if (inputScanTicketCode) inputScanTicketCode.value = '';
 
-  // Tutup modal rincian tiket agar kartu langsung hilang dan tidak bisa langsung di-scan in
+  // Tutup modal rincian tiket agar kartu langsung hilang dan tidak bisa langsung di-Tap In
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
 
@@ -1358,7 +1358,7 @@ function executeScanOut(ticketId) {
   if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
 }
 
-// EXECUTE SCAN IN
+// EXECUTE Tap In
 function executeScanIn(ticketId) {
   if (window._isProcessingScanIn) return;
   window._isProcessingScanIn = true;
@@ -1376,8 +1376,8 @@ function executeScanIn(ticketId) {
   }
 
   const selectGateLocation = document.getElementById('selectGateLocation');
-  let gate = (selectGateLocation && selectGateLocation.value && selectGateLocation.value !== 'all') 
-    ? selectGateLocation.value 
+  let gate = (selectGateLocation && selectGateLocation.value && selectGateLocation.value !== 'all')
+    ? selectGateLocation.value
     : (localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama');
   if (gate === 'all') gate = 'Pos 1 Gerbang Utama';
   const officer = typeof getActiveGateOfficer === 'function' ? getActiveGateOfficer(gate) : { name: 'Sertu Agus', nip: 'SEC-2018-042', gateShort: 'Pos 1' };
@@ -1421,9 +1421,9 @@ function executeScanIn(ticketId) {
     gate: gate,
     desc: wasOverdue
       ? `Karyawan tiba kembali di kawasan pabrik melalui ${gate} MELEWATI estimasi waktu kembali (Terlambat). Petugas: ${officer.name}. QR code dinonaktifkan permanen.`
-      : (isCoveredByExtension 
-          ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu di ${gate}. Tap In Kartu Akses berhasil, QR code dinonaktifkan.`
-          : `Karyawan kembali tiba di kawasan pabrik melalui ${gate}. Diverifikasi oleh ${officer.name}. QR code dinonaktifkan permanen.`)
+      : (isCoveredByExtension
+        ? `Karyawan kembali tepat waktu sesuai permohonan perpanjangan waktu di ${gate}. Tap In Kartu Akses berhasil, QR code dinonaktifkan.`
+        : `Karyawan kembali tiba di kawasan pabrik melalui ${gate}. Diverifikasi oleh ${officer.name}. QR code dinonaktifkan permanen.`)
   });
 
   if (ticket.pendingExtension) {
@@ -1432,7 +1432,7 @@ function executeScanIn(ticketId) {
       time: nowFormatted,
       by: `${securityName} (${gate})`,
       gate: gate,
-      desc: `Karyawan telah kembali ke pabrik dan melakukan Scan In di ${gate} saat permohonan perpanjangan waktu masih berjalan. Tiket resmi selesai.`
+      desc: `Karyawan telah kembali ke pabrik dan melakukan Tap In di ${gate} saat permohonan perpanjangan waktu masih berjalan. Tiket resmi selesai.`
     });
     ticket.pendingExtension = null;
   }
@@ -1450,8 +1450,8 @@ function executeScanIn(ticketId) {
 
   if (typeof window.showToast === 'function') {
     window.showToast(
-      wasOverdue 
-        ? `Tap In Kartu Akses berhasil di ${gate}! Tiket #${ticket.id} selesai dicatat (Catatan: Kembali Terlambat).` 
+      wasOverdue
+        ? `Tap In Kartu Akses berhasil di ${gate}! Tiket #${ticket.id} selesai dicatat (Catatan: Kembali Terlambat).`
         : `Tap In Kartu Akses berhasil di ${gate}! Karyawan telah tiba kembali. Petugas (${officer.name}) mencatat tiket #${ticket.id} selesai.`,
       wasOverdue ? 'warning' : 'success'
     );
@@ -1521,7 +1521,7 @@ async function startCameraScanner(selectedCameraId = null) {
       (decodedText) => {
         handleCameraQrSuccess(decodedText);
       },
-      () => {}
+      () => { }
     );
 
     // Kamera berhasil aktif
@@ -1854,7 +1854,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let csv = "data:text/csv;charset=utf-8,";
-      csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Waktu Scan Out,Waktu Scan In,Status\n";
+      csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Waktu Scan Out,Waktu Tap In,Status\n";
 
       filtered.forEach(t => {
         csv += [
@@ -1873,7 +1873,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const uri = encodeURI(csv);
       const a = document.createElement('a');
       a.href = uri;
-      a.download = `Riwayat-Pemindaian-Pos-Jaga-${new Date().toISOString().slice(0,10)}.csv`;
+      a.download = `Riwayat-Pemindaian-Pos-Jaga-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

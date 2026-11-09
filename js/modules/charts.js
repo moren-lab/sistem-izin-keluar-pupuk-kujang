@@ -16,8 +16,8 @@
 function isThemeDark() {
   try {
     return document.documentElement.classList.contains('theme-dark') ||
-           document.body.classList.contains('theme-dark') ||
-           localStorage.getItem('kujang_theme') === 'dark';
+      document.body.classList.contains('theme-dark') ||
+      localStorage.getItem('kujang_theme') === 'dark';
   } catch (e) {
     return false;
   }
@@ -150,8 +150,8 @@ function renderKaryawanDonutChart() {
   const myNip = activeEmp ? activeEmp.nip : 'PK-2024-8841';
 
   // Single Source of Truth: Filter only tickets belonging to this employee
-  const myTickets = ticketsList.filter(t => 
-    t.applicantNip === myNip || 
+  const myTickets = ticketsList.filter(t =>
+    t.applicantNip === myNip ||
     t.createdForNip === myNip ||
     t.createdByNip === myNip ||
     (!t.applicantNip && myNip === 'PK-2024-8841')
@@ -391,11 +391,11 @@ function attachDonutFilterListener() {
 // Global exposure & backward compatibility
 window.hoverKaryawanDonut = hoverKaryawanDonut;
 window.unhoverKaryawanDonut = unhoverKaryawanDonut;
-window.hoverDonutSegment = function(idx, label, count, total, pct, color) {
+window.hoverDonutSegment = function (idx, label, count, total, pct, color) {
   const key = (label && label.toLowerCase().includes('darurat')) ? 'darurat' : 'selesai';
   hoverKaryawanDonut(key, count, total, pct, color);
 };
-window.unhoverDonutSegment = function() {
+window.unhoverDonutSegment = function () {
   unhoverKaryawanDonut();
 };
 window.renderKaryawanDonutChart = renderKaryawanDonutChart;
@@ -441,7 +441,7 @@ function getApproverWeeklyData(period) {
       // Prioritaskan tanggal rencana waktu keluar, waktu pengajuan, atau nomor ID tiket
       let matchedDay = null;
       const combined = `${t.id || ''} ${t.plannedExit || ''} ${t.createdAt || ''}`;
-      
+
       if (combined.includes('2026-10-26') || combined.includes('26 Okt') || combined.includes('20261026')) {
         matchedDay = 'Sen';
       } else if (combined.includes('2026-10-27') || combined.includes('27 Okt') || combined.includes('20261027')) {
@@ -471,7 +471,7 @@ function getApproverWeeklyData(period) {
   const totalVal = daysData.reduce((acc, d) => acc + d.count, 0);
   const maxVal = Math.max(...daysData.map(d => d.count), 1);
   const validDaysWithCount = daysData.filter(d => d.count > 0);
-  const peakDayObj = validDaysWithCount.length > 0 
+  const peakDayObj = validDaysWithCount.length > 0
     ? validDaysWithCount.reduce((max, d) => d.count > max.count ? d : max, validDaysWithCount[0])
     : null;
   const peakDay = peakDayObj ? peakDayObj.full : 'Belum Ada';
@@ -747,7 +747,7 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
 window.getGambar2AestheticBarChartHtml = getGambar2AestheticBarChartHtml;
 
 // Hover & Animation handlers for Approver Bar Chart (seperti efek donat)
-window.hoverApproverBar = function(event, idx, dayName, dateStr, count, pct, color, prefix = 'web_') {
+window.hoverApproverBar = function (event, idx, dayName, dateStr, count, pct, color, prefix = 'web_') {
   // Show popover tooltip
   window.showApproverChartTooltip(event, dayName, dateStr, count, pct, color, prefix);
 
@@ -774,7 +774,7 @@ window.hoverApproverBar = function(event, idx, dayName, dateStr, count, pct, col
   }
 };
 
-window.unhoverApproverBar = function(idx, prefix = 'web_') {
+window.unhoverApproverBar = function (idx, prefix = 'web_') {
   window.hideApproverChartTooltip(prefix);
 
   const bar = document.getElementById(`${prefix}approverBarRect_${idx}`);
@@ -799,7 +799,7 @@ window.unhoverApproverBar = function(idx, prefix = 'web_') {
   }
 };
 
-window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, color, prefix = 'web_') {
+window.showApproverChartTooltip = function (event, dayName, dateStr, count, pct, color, prefix = 'web_') {
   const tt = document.getElementById(`${prefix}approverChartTooltip`) || document.getElementById('approverChartTooltip');
   if (!tt) return;
 
@@ -817,7 +817,7 @@ window.showApproverChartTooltip = function(event, dayName, dateStr, count, pct, 
   window.moveApproverChartTooltip(event, prefix);
 };
 
-window.moveApproverChartTooltip = function(event, prefix = 'web_') {
+window.moveApproverChartTooltip = function (event, prefix = 'web_') {
   const tt = document.getElementById(`${prefix}approverChartTooltip`) || document.getElementById('approverChartTooltip');
   if (!tt || tt.style.display === 'none') return;
 
@@ -829,7 +829,7 @@ window.moveApproverChartTooltip = function(event, prefix = 'web_') {
   tt.style.top = `${mouseY}px`;
 };
 
-window.hideApproverChartTooltip = function(prefix = 'web_') {
+window.hideApproverChartTooltip = function (prefix = 'web_') {
   const tt = document.getElementById(`${prefix}approverChartTooltip`) || document.getElementById('approverChartTooltip');
   if (!tt) return;
   tt.style.opacity = '0';
@@ -843,8 +843,8 @@ function renderApproverBarChart() {
   const subtitle = document.getElementById('approverChartSubtitle');
   if (subtitle) {
     const isApprover2 = (window.currentActor === 'approver2');
-    subtitle.textContent = isApprover2 
-      ? 'Oktober 2026 — Volume Pengajuan Tim Dewi Sartika' 
+    subtitle.textContent = isApprover2
+      ? 'Oktober 2026 — Volume Pengajuan Tim Dewi Sartika'
       : 'Oktober 2026 — Volume Pengajuan Tim Ir. Hendra Gunawan';
   }
 
@@ -922,7 +922,7 @@ function getAdminTrafficData() {
           }
         }
       }
-      // Scan In (Kembali Masuk Gerbang)
+      // Tap In (Kembali Masuk Gerbang)
       const inTime = t.scanInTime || t.estimatedReturn;
       if (inTime) {
         const match = inTime.match(/(\d{1,2}):\d{2}/);
@@ -1053,7 +1053,7 @@ function renderAdminTrafficChart() {
         </span>
         <span style="display: inline-flex; align-items: center; gap: 5px; color: #059669;">
           <span style="width: 10px; height: 10px; border-radius: 2px; background: #10b981; display: inline-block;"></span>
-          <span>Scan In (Masuk)</span>
+          <span>Tap In (Masuk)</span>
         </span>
       </div>
       <div class="admin-traffic-live-badge" style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; padding: 2px 7px; border-radius: 6px;">
@@ -1105,10 +1105,10 @@ function renderAdminTrafficChart() {
 
         <!-- Interactive Vertical Hit Areas -->
         ${data.map((d, i) => {
-          const ptOut = pointsOut[i];
-          const ptIn = pointsIn[i];
-          const isCurrentSlot = d.hour === currentSlotStr;
-          return `
+    const ptOut = pointsOut[i];
+    const ptIn = pointsIn[i];
+    const isCurrentSlot = d.hour === currentSlotStr;
+    return `
             <g id="trafficCol_${i}" style="cursor: pointer; pointer-events: all;"
                onmouseenter="window.hoverTrafficPoint('${d.hour}', ${d.out}, ${d.in}, ${ptOut.x}, ${ptOut.y}, ${ptIn.y}, ${i});"
                onmousemove="window.moveChartTooltip(event)"
@@ -1122,13 +1122,13 @@ function renderAdminTrafficChart() {
               ${(i % 2 === 0 || i === data.length - 1) ? `<text x="${ptOut.x}" y="${height - 4}" font-size="9" font-weight="${isCurrentSlot ? '800' : '700'}" fill="${isCurrentSlot ? '#0f172a' : '#64748b'}" text-anchor="middle">${d.hour}</text>` : ''}
             </g>
           `;
-        }).join('')}
+  }).join('')}
       </svg>
     </div>
 
     <!-- Admin Traffic Badge Summary (Realtime & Dual Metrics) -->
     <div id="adminTrafficBadge" style="margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; color: #0369a1; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; flex-wrap: wrap; gap: 0.4rem;">
-      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Scan In</strong> (Puncak: ${peakHour} WIB)</span>
+      <span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span>
       <span style="display: inline-flex; gap: 0.6rem; font-weight: 700;">
         <span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span>
         <span style="color: #059669;">↘️ Total In: ${totalIn}</span>
@@ -1144,7 +1144,7 @@ function hoverTrafficPoint(hour, out, inVal, x, yOut, yIn, activeIdx) {
     badge.style.background = 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
     badge.style.color = '#ffffff';
     badge.style.borderColor = '#0284c7';
-    badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Scan In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
+    badge.innerHTML = `<span><strong>Pukul ${hour} WIB:</strong> ↗️ <strong>${out} Scan Out</strong> • ↘️ <strong>${inVal} Tap In</strong></span><span style="background: rgba(255,255,255,0.22); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">Total ${sum} Personel</span>`;
   }
 
   for (let i = 0; i < 15; i++) {
@@ -1186,7 +1186,7 @@ function unhoverTrafficPoint() {
     badge.style.background = '#f0f9ff';
     badge.style.color = '#0369a1';
     badge.style.borderColor = '#bae6fd';
-    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Scan In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total In: ${totalIn}</span></span>`;
+    badge.innerHTML = `<span>🕒 Gerbang Realtime (Pukul ${timeNowStr}): <strong>${curSlotData.out} Scan Out</strong> • <strong>${curSlotData.in} Tap In</strong> (Puncak: ${peakHour} WIB)</span><span style="display: inline-flex; gap: 0.6rem; font-weight: 700;"><span style="color: #0284c7;">↗️ Total Out: ${totalOut}</span><span style="color: #059669;">↘️ Total In: ${totalIn}</span></span>`;
   }
 
   for (let i = 0; i < 11; i++) {
@@ -1279,11 +1279,11 @@ function renderAdminDeptChart() {
   container.innerHTML = `
     <div style="display: flex; flex-direction: column; gap: 0.45rem;" onmouseleave="window.unhoverDeptRow()">
       ${depts.map((d, index) => {
-        const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
-        const barWidthPct = Math.round((d.count / max) * 100);
-        const styleInfo = colors[index % colors.length];
+    const pct = ((d.count / total) * 100).toFixed(1).replace('.0', '');
+    const barWidthPct = Math.round((d.count / max) * 100);
+    const styleInfo = colors[index % colors.length];
 
-        return `
+    return `
           <div id="deptRow_${index}" class="dept-rank-row"
                onmouseenter="window.hoverDeptRow('${d.name}', ${d.count}, '${pct}', '${styleInfo.text}', ${index})"
                onmouseleave="window.unhoverDeptRow()">
@@ -1303,7 +1303,7 @@ function renderAdminDeptChart() {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
 
     <!-- Admin Dept Summary Badge (Single Source of Info) -->
@@ -1374,7 +1374,7 @@ window.unhoverDeptRow = unhoverDeptRow;
 window.renderAdminDeptChart = renderAdminDeptChart;
 
 // Stub for retired "Komposisi Status Izin" chart (Revisi 2)
-window.renderAdminStatusChart = function() {
+window.renderAdminStatusChart = function () {
   // Chart "Komposisi Status Izin" intentionally retired per Revisi 2
 };
 

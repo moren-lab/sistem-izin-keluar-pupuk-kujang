@@ -79,7 +79,7 @@
 
   function getTName(t) { return t.applicantName || t.employeeName || 'Budi Pratama, S.T.'; }
   function getTNip(t) { return t.applicantNip || t.employeeNip || 'PK-2024-8841'; }
-  
+
   function formatTipeKepulanganDisplay(type) {
     if (!type) return 'Kembali ke Area';
     const s = String(type).trim();
@@ -118,7 +118,7 @@
         const pad = n => String(n).padStart(2, '0');
         return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
       }
-    } catch (e) {}
+    } catch (e) { }
     return raw.replace(/(\d{1,2}):(\d{2})/g, '$1.$2 WIB');
   }
 
@@ -238,7 +238,7 @@
       try {
         const parsed = JSON.parse(str);
         if (parsed.id || parsed.ticketId) return parsed.id || parsed.ticketId;
-      } catch (e) {}
+      } catch (e) { }
     }
     // Match ticket ID pattern TK-xxx or IZ-xxx
     const match = str.match(/(TK-[A-Za-z0-9-]+|IZ-[A-Za-z0-9-]+)/i);
@@ -287,7 +287,7 @@
     const officer = getActiveOfficer();
     const tickets = getTickets();
 
-    // Headcount logic: Hanya izin Kembali ke Area yang sudah Scan Out dan belum Scan In
+    // Headcount logic: Hanya izin Kembali ke Area yang sudah Scan Out dan belum Tap In
     const outsideTickets = tickets.filter(t =>
       (t.status === 'Sedang di Luar' || t.status === 'Terlambat') &&
       t.type !== 'Pulang Mendahului' && t.returnType !== 'Pulang Mendahului'
@@ -615,7 +615,7 @@
           </div>
         `;
       } else {
-        
+
       }
 
       return `
@@ -790,12 +790,12 @@
         const gateOutStr = (t.scanOutGate || '').toLowerCase();
         const gateInStr = (t.scanInGate || '').toLowerCase();
         return idStr.includes(q) || nameStr.includes(q) || nipStr.includes(q) ||
-               destStr.includes(q) || deptStr.includes(q) || reasonStr.includes(q) ||
-               catStr.includes(q) || typeStr.includes(q) || gateOutStr.includes(q) || gateInStr.includes(q);
+          destStr.includes(q) || deptStr.includes(q) || reasonStr.includes(q) ||
+          catStr.includes(q) || typeStr.includes(q) || gateOutStr.includes(q) || gateInStr.includes(q);
       });
     }
 
-    // 6. Urutan: Terbaru lebih dulu (berdasarkan waktu scan in, scan out, atau created)
+    // 6. Urutan: Terbaru lebih dulu (berdasarkan waktu Tap In, scan out, atau created)
     eligible.sort((a, b) => {
       const parseTime = (item) => {
         const raw = item.scanInTime || item.scanOutTime || item.createdAt || item.plannedExit || 0;
@@ -869,9 +869,9 @@
           <!-- Baris 5: Rencana Waktu -->
           <div style="font-size: 0.725rem; color: #475569; font-weight: 600; margin-bottom: 8px;">
             ${isPulang
-              ? `<span style="color: #0f172a; font-weight: 700;">Rencana Keluar:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'}`
-              : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
-            }
+          ? `<span style="color: #0f172a; font-weight: 700;">Rencana Keluar:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'}`
+          : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
+        }
           </div>
 
           <!-- Baris 6: Kotak Kecil Scan Out & Masuk Kembali -->
@@ -896,15 +896,15 @@
           <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.7rem; font-weight: 600; color: ${isCompleted ? '#047857' : (isLate ? '#b91c1c' : '#475569')};">
               ${isCompleted
-                ? `✓ Selesai ${isLate ? 'terlambat' : 'tepat waktu'}`
-                : (isLate
-                    ? `⚠️ Terlambat ${t.lateMinutes || 30} menit`
-                    : (t.status === 'Sedang di Luar'
-                        ? '• Sedang di luar kawasan'
-                        : '• Siap verifikasi keluar gerbang'
-                      )
-                  )
-              }
+          ? `✓ Selesai ${isLate ? 'terlambat' : 'tepat waktu'}`
+          : (isLate
+            ? `⚠️ Terlambat ${t.lateMinutes || 30} menit`
+            : (t.status === 'Sedang di Luar'
+              ? '• Sedang di luar kawasan'
+              : '• Siap verifikasi keluar gerbang'
+            )
+          )
+        }
             </div>
             <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
@@ -1105,7 +1105,7 @@
   }
 
   // -------------------------------------------------------------------
-  // 6. POS JAGA ACTION HANDLERS & MODAL (Scan Out / Scan In & Detail)
+  // 6. POS JAGA ACTION HANDLERS & MODAL (Scan Out / Tap In & Detail)
   // -------------------------------------------------------------------
   window.mobileSecurityInspectTicket = function (ticketId) {
     const sheet = document.getElementById('mobileActionSheet');
@@ -1125,7 +1125,7 @@
     const isCompleted = (t.status === 'Selesai');
     const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal');
     const isEmergencyTicket = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
-    const isLate = isTicketLate(t);    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');    sheet.innerHTML = `
+    const isLate = isTicketLate(t); const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa'); sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;">
         <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">

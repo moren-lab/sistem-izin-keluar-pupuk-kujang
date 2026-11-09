@@ -73,7 +73,7 @@
   }
   function getTExitTime(t) { return t.plannedExit || ''; }
 
-    function getAllEmpTickets() {
+  function getAllEmpTickets() {
     const emp = getActiveEmp();
     const tickets = window.ticketsList || [];
     const myNip = emp.nip || 'PK-2024-8841';
@@ -142,7 +142,7 @@
         const pad = n => String(n).padStart(2, '0');
         return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
       }
-    } catch (e) {}
+    } catch (e) { }
     return raw.replace(/(\d{1,2}):(\d{2})/g, '$1.$2 WIB');
   }
 
@@ -643,9 +643,9 @@
           <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.75rem; color: #334155; font-weight: 600;">
               ${isPulang
-                ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
-                : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
-              }
+          ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
+          : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
+        }
             </div>
             <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
@@ -689,9 +689,9 @@
           <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.725rem; color: #334155; font-weight: 600;">
               ${isPulang
-                ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
-                : `${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
-              }
+          ? `<span style="color: #0f172a; font-weight: 700;">Keluar:</span> ${formatTimeOnly(getTExitTime(t))}`
+          : `${formatTimeOnly(getTExitTime(t))} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
+        }
             </div>
             <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
@@ -1098,7 +1098,7 @@
         </div>
         <div class="mobile-timeline-content">
           <div class="mobile-timeline-time">${t.scanInTime ? formatTimeOnly(t.scanInTime) : 'Menunggu Kembali'}</div>
-          <div class="mobile-timeline-title">${isScanIn ? 'Scan In Tercatat' : 'Verifikasi Gerbang Kembali'}</div>
+          <div class="mobile-timeline-title">${isScanIn ? 'Tap In Tercatat' : 'Verifikasi Gerbang Kembali'}</div>
           <div class="mobile-timeline-desc">${isScanIn ? (t.scanInGate || 'Pos 1') + ' • Karyawan telah kembali. Tiket Selesai.' : 'Belum kembali ke area pabrik'}</div>
         </div>
       </div>
@@ -1325,11 +1325,11 @@
           <div class="mobile-form-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px;">
             <div class="mobile-form-group" style="margin: 0;">
               <label class="mobile-form-label">Rencana Waktu Keluar <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${isEditing ? '' : formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultExit}" required oninput="window.mobileHandleExitChange(this.value)" onchange="window.mobileHandleExitChange(this.value)">
+              <input type="datetime-local" class="mobile-input" id="mFormPlannedExit" min="${isEditing ? '' : formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T23:59"` : ''} value="${defaultExit}" required oninput="window.mobileHandleExitChange(this.value)" onchange="window.mobileHandleExitChange(this.value)">
             </div>
             <div class="mobile-form-group" id="mFormWrapReturn" style="margin: 0; display: ${initialType === 'Pulang Mendahului' ? 'none' : 'block'};">
               <label class="mobile-form-label">Perkiraan Waktu Kembali <span class="req">*</span></label>
-              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${isEditing ? '' : formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'} oninput="window.mobileHandleReturnChange(this.value)" onchange="window.mobileHandleReturnChange(this.value)">
+              <input type="datetime-local" class="mobile-input" id="mFormEstimatedReturn" min="${isEditing ? '' : formatDateTimeLocal(now)}" ${initialCat === 'Urusan Pribadi' ? `max="${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T23:59"` : ''} value="${defaultReturn}" ${initialType === 'Pulang Mendahului' ? '' : 'required'} oninput="window.mobileHandleReturnChange(this.value)" onchange="window.mobileHandleReturnChange(this.value)">
             </div>
           </div>
 
@@ -1640,15 +1640,15 @@
 
     const approvers = getMobileApprovers();
     const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
-    const filtered = matcher 
+    const filtered = matcher
       ? approvers.filter(a => matcher(query, a.name, a.title, a.department, a.nip, a.role))
       : approvers.filter(a => {
-          const q = (query || '').toLowerCase().trim();
-          return a.name.toLowerCase().includes(q) ||
-            (a.title && a.title.toLowerCase().includes(q)) ||
-            (a.department && a.department.toLowerCase().includes(q)) ||
-            (a.nip && a.nip.toLowerCase().includes(q));
-        });
+        const q = (query || '').toLowerCase().trim();
+        return a.name.toLowerCase().includes(q) ||
+          (a.title && a.title.toLowerCase().includes(q)) ||
+          (a.department && a.department.toLowerCase().includes(q)) ||
+          (a.nip && a.nip.toLowerCase().includes(q));
+      });
 
     if (filtered.length === 0) {
       dd.innerHTML = `<div style="padding: 14px; text-align: center; color: #64748b; font-size: 0.775rem;">Atasan "${query}" tidak ditemukan</div>`;
@@ -2072,226 +2072,226 @@
 
     try {
       const data = pendingMobileFormData || window.pendingMobileFormData;
-    const emp = getActiveEmp();
-    const tickets = window.ticketsList || [];
+      const emp = getActiveEmp();
+      const tickets = window.ticketsList || [];
 
-    const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const dateCode = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const dateCode = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
-    // CASE 1: UPDATE EXISTING TICKET (EDIT MODE)
-    if (data.isEditing && data.editingTicketId) {
-      const ticketId = data.editingTicketId;
-      const t = tickets.find(x => x.id === ticketId);
-      if (t) {
-        const oldApprover = t.approverName;
-        const newApprover = data.approverName;
-        const isApproverChanged = Boolean(oldApprover && newApprover && oldApprover !== newApprover);
+      // CASE 1: UPDATE EXISTING TICKET (EDIT MODE)
+      if (data.isEditing && data.editingTicketId) {
+        const ticketId = data.editingTicketId;
+        const t = tickets.find(x => x.id === ticketId);
+        if (t) {
+          const oldApprover = t.approverName;
+          const newApprover = data.approverName;
+          const isApproverChanged = Boolean(oldApprover && newApprover && oldApprover !== newApprover);
 
-        t.approverName = data.approverName;
-        t.category = data.category;
-        t.type = data.returnType;
-        t.returnType = data.returnType;
-        t.destination = data.destination;
-        t.reason = data.reason;
-        t.plannedExit = data.plannedExit;
-        t.estimatedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
-        t.plannedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
+          t.approverName = data.approverName;
+          t.category = data.category;
+          t.type = data.returnType;
+          t.returnType = data.returnType;
+          t.destination = data.destination;
+          t.reason = data.reason;
+          t.plannedExit = data.plannedExit;
+          t.estimatedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
+          t.plannedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
 
-        if (!t.timeline) t.timeline = [];
+          if (!t.timeline) t.timeline = [];
 
-        if (isApproverChanged) {
-          t.reassignedFrom = oldApprover;
-          t.reassignedTo = newApprover;
-          t.reassignedAt = nowFormatted;
-          t.reassignedBy = `${emp.name} (Karyawan)`;
-
-          t.timeline.unshift({
-            event: 'Persetujuan Dialihkan',
-            time: nowFormatted,
-            by: `${emp.name} (Karyawan)`,
-            desc: `Peninjauan persetujuan izin dialihkan dari ${oldApprover} ke ${newApprover}.`
-          });
-
-          // Notifikasi lonceng untuk kedua atasan jika sistem notifikasi aktif
-          if (typeof window.createNotification === 'function') {
-            // Untuk atasan baru yang menerima pengalihan
-            window.createNotification({
-              recipientRole: 'approver',
-              recipientName: newApprover,
-              actorSource: 'karyawan',
-              type: 'pengajuan_dialihkan',
-              title: 'Pengajuan Dialihkan ke Anda',
-              message: `Pengajuan #${ticketId} (${emp.name}) dialihkan dari ${oldApprover} ke Anda.`,
-              ticketId: ticketId,
-              priority: 'urgent'
-            });
-
-            // Untuk atasan lama yang dialihkan keluar
-            window.createNotification({
-              recipientRole: 'approver',
-              recipientName: oldApprover,
-              actorSource: 'karyawan',
-              type: 'pengajuan_dialihkan_keluar',
-              title: 'Pengajuan Dialihkan ke Atasan Lain',
-              message: `Pengajuan #${ticketId} (${emp.name}) dialihkan oleh pemohon ke ${newApprover}.`,
-              ticketId: ticketId,
-              priority: 'normal'
-            });
-          }
-        } else {
-          t.timeline.unshift({
-            event: 'Pengajuan Diperbarui (Diedit)',
-            time: nowFormatted,
-            by: `${emp.name} (Karyawan)`,
-            desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${t.approverName}).`
-          });
-        }
-
-        window.editingTicketId = null;
-        pendingMobileFormData = null;
-
-        if (typeof window.saveTickets === 'function') {
-          window.saveTickets(tickets);
-        } else {
-          localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
-          window.ticketsList = tickets;
-        }
-
-        window.mobileCloseSheet();
-
-        if (typeof window.showToast === 'function') {
           if (isApproverChanged) {
-            window.showToast(`Pengajuan #${ticketId} berhasil dialihkan ke ${newApprover}!`, 'success');
-          } else {
-            window.showToast(`Pengajuan #${ticketId} berhasil diperbarui!`, 'success');
-          }
-        }
+            t.reassignedFrom = oldApprover;
+            t.reassignedTo = newApprover;
+            t.reassignedAt = nowFormatted;
+            t.reassignedBy = `${emp.name} (Karyawan)`;
 
-        renderMobileKaryawan(null, currentKaryawanTab);
-        if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-        if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-        if (typeof window.renderApproverView === 'function') window.renderApproverView();
-        if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+            t.timeline.unshift({
+              event: 'Persetujuan Dialihkan',
+              time: nowFormatted,
+              by: `${emp.name} (Karyawan)`,
+              desc: `Peninjauan persetujuan izin dialihkan dari ${oldApprover} ke ${newApprover}.`
+            });
+
+            // Notifikasi lonceng untuk kedua atasan jika sistem notifikasi aktif
+            if (typeof window.createNotification === 'function') {
+              // Untuk atasan baru yang menerima pengalihan
+              window.createNotification({
+                recipientRole: 'approver',
+                recipientName: newApprover,
+                actorSource: 'karyawan',
+                type: 'pengajuan_dialihkan',
+                title: 'Pengajuan Dialihkan ke Anda',
+                message: `Pengajuan #${ticketId} (${emp.name}) dialihkan dari ${oldApprover} ke Anda.`,
+                ticketId: ticketId,
+                priority: 'urgent'
+              });
+
+              // Untuk atasan lama yang dialihkan keluar
+              window.createNotification({
+                recipientRole: 'approver',
+                recipientName: oldApprover,
+                actorSource: 'karyawan',
+                type: 'pengajuan_dialihkan_keluar',
+                title: 'Pengajuan Dialihkan ke Atasan Lain',
+                message: `Pengajuan #${ticketId} (${emp.name}) dialihkan oleh pemohon ke ${newApprover}.`,
+                ticketId: ticketId,
+                priority: 'normal'
+              });
+            }
+          } else {
+            t.timeline.unshift({
+              event: 'Pengajuan Diperbarui (Diedit)',
+              time: nowFormatted,
+              by: `${emp.name} (Karyawan)`,
+              desc: `Data pengajuan izin diperbarui sebelum persetujuan Atasan (${t.approverName}).`
+            });
+          }
+
+          window.editingTicketId = null;
+          pendingMobileFormData = null;
+
+          if (typeof window.saveTickets === 'function') {
+            window.saveTickets(tickets);
+          } else {
+            localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+            window.ticketsList = tickets;
+          }
+
+          window.mobileCloseSheet();
+
+          if (typeof window.showToast === 'function') {
+            if (isApproverChanged) {
+              window.showToast(`Pengajuan #${ticketId} berhasil dialihkan ke ${newApprover}!`, 'success');
+            } else {
+              window.showToast(`Pengajuan #${ticketId} berhasil diperbarui!`, 'success');
+            }
+          }
+
+          renderMobileKaryawan(null, currentKaryawanTab);
+          if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+          if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+          if (typeof window.renderApproverView === 'function') window.renderApproverView();
+          if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+          return;
+        }
+      }
+
+      // CASE 2: CREATE NEW TICKET (PARITY DENGAN PC MODAL 1 & 2)
+      // BRULE-22 Enforcement: Maksimal 1 tiket aktif
+      const existingActive = getActiveTicket();
+      if (existingActive) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Gagal: Anda masih memiliki tiket aktif! Sesuai aturan BRULE-22, Anda hanya dapat memiliki maksimal 1 izin aktif.', 'danger');
+        }
+        window.mobileCloseSheet();
+        renderMobileKaryawan(null, 'pengajuan');
+        isSubmittingMobilePermit = false;
         return;
       }
-    }
 
-    // CASE 2: CREATE NEW TICKET (PARITY DENGAN PC MODAL 1 & 2)
-    // BRULE-22 Enforcement: Maksimal 1 tiket aktif
-    const existingActive = getActiveTicket();
-    if (existingActive) {
-      if (typeof window.showToast === 'function') {
-        window.showToast('Gagal: Anda masih memiliki tiket aktif! Sesuai aturan BRULE-22, Anda hanya dapat memiliki maksimal 1 izin aktif.', 'danger');
-      }
-      window.mobileCloseSheet();
-      renderMobileKaryawan(null, 'pengajuan');
-      isSubmittingMobilePermit = false;
-      return;
-    }
+      const randomSuffix = Math.floor(100 + Math.random() * 900);
+      const newId = (data.isEmergency ? 'TK-EMG-' : 'TK-') + dateCode + '-' + randomSuffix;
 
-    const randomSuffix = Math.floor(100 + Math.random() * 900);
-    const newId = (data.isEmergency ? 'TK-EMG-' : 'TK-') + dateCode + '-' + randomSuffix;
+      const newTicket = {
+        id: newId,
+        applicantName: emp.name,
+        applicantNip: emp.nip,
+        employeeId: 'EMP-001',
+        employeeName: emp.name,
+        employeeNip: emp.nip,
+        department: emp.dept || 'Departemen Rekayasa & Pemeliharaan',
+        category: data.category,
+        type: data.returnType,
+        returnType: data.returnType,
+        destination: data.destination,
+        reason: data.reason,
+        transportMode: 'Kendaraan dinas',
+        transportation: 'Kendaraan dinas',
+        plannedExit: data.plannedExit,
+        estimatedReturn: data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn,
+        plannedReturn: data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn,
+        approverName: data.approverName,
+        status: data.isEmergency ? 'Menunggu Otorisasi Darurat' : 'Menunggu Persetujuan',
+        isEmergency: !!data.isEmergency,
+        emergencyLocked: !!data.isEmergency,
+        qrLocked: !!data.isEmergency,
+        emergencyPasscode: data.isEmergency ? String(Math.floor(100000 + Math.random() * 900000)) : undefined,
+        emergencyMethod: data.emergencyMethod || 'app',
+        createdAt: nowFormatted,
+        timeline: [
+          {
+            event: data.isEmergency ? 'Pengajuan Izin Darurat Dibuat' : 'Pengajuan Dibuat',
+            time: nowFormatted,
+            by: `${emp.name} (Karyawan)`,
+            desc: data.isEmergency
+              ? 'Izin darurat dibuat via sistem bypass, menunggu otorisasi aplikasi Atasan atau scan wajah.'
+              : `Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan (${data.approverName}).`
+          }
+        ]
+      };
 
-    const newTicket = {
-      id: newId,
-      applicantName: emp.name,
-      applicantNip: emp.nip,
-      employeeId: 'EMP-001',
-      employeeName: emp.name,
-      employeeNip: emp.nip,
-      department: emp.dept || 'Departemen Rekayasa & Pemeliharaan',
-      category: data.category,
-      type: data.returnType,
-      returnType: data.returnType,
-      destination: data.destination,
-      reason: data.reason,
-      transportMode: 'Kendaraan dinas',
-      transportation: 'Kendaraan dinas',
-      plannedExit: data.plannedExit,
-      estimatedReturn: data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn,
-      plannedReturn: data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn,
-      approverName: data.approverName,
-      status: data.isEmergency ? 'Menunggu Otorisasi Darurat' : 'Menunggu Persetujuan',
-      isEmergency: !!data.isEmergency,
-      emergencyLocked: !!data.isEmergency,
-      qrLocked: !!data.isEmergency,
-      emergencyPasscode: data.isEmergency ? String(Math.floor(100000 + Math.random() * 900000)) : undefined,
-      emergencyMethod: data.emergencyMethod || 'app',
-      createdAt: nowFormatted,
-      timeline: [
-        {
-          event: data.isEmergency ? 'Pengajuan Izin Darurat Dibuat' : 'Pengajuan Dibuat',
-          time: nowFormatted,
-          by: `${emp.name} (Karyawan)`,
-          desc: data.isEmergency
-            ? 'Izin darurat dibuat via sistem bypass, menunggu otorisasi aplikasi Atasan atau scan wajah.'
-            : `Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan (${data.approverName}).`
+      tickets.unshift(newTicket);
+
+      if (typeof window.createNotification === 'function') {
+        if (data.isEmergency) {
+          window.createNotification({
+            recipientRole: 'approver',
+            recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
+            actorSource: 'karyawan',
+            type: 'darurat_baru',
+            title: 'IZIN DARURAT BARU',
+            message: `PERINGATAN: ${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin kedaruratan #${newTicket.id}. Memerlukan otorisasi segera.`,
+            ticketId: newTicket.id,
+            priority: 'high',
+            eventId: `emg_alert_${newTicket.id}`
+          });
+        } else {
+          window.createNotification({
+            recipientRole: 'approver',
+            recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
+            actorSource: 'karyawan',
+            type: 'pengajuan_baru',
+            title: 'Pengajuan Izin Baru',
+            message: `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category}. Menunggu persetujuan Anda.`,
+            ticketId: newTicket.id,
+            priority: 'normal',
+            eventId: `new_sub_${newTicket.id}`
+          });
         }
-      ]
-    };
+      }
 
-    tickets.unshift(newTicket);
-
-    if (typeof window.createNotification === 'function') {
-      if (data.isEmergency) {
-        window.createNotification({
-          recipientRole: 'approver',
-          recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
-          actorSource: 'karyawan',
-          type: 'darurat_baru',
-          title: 'IZIN DARURAT BARU',
-          message: `PERINGATAN: ${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin kedaruratan #${newTicket.id}. Memerlukan otorisasi segera.`,
-          ticketId: newTicket.id,
-          priority: 'high',
-          eventId: `emg_alert_${newTicket.id}`
-        });
+      if (typeof window.saveTickets === 'function') {
+        window.saveTickets(tickets);
       } else {
-        window.createNotification({
-          recipientRole: 'approver',
-          recipientName: newTicket.approverName || 'Ir. Hendra Gunawan, M.T.',
-          actorSource: 'karyawan',
-          type: 'pengajuan_baru',
-          title: 'Pengajuan Izin Baru',
-          message: `${newTicket.applicantName} (${newTicket.applicantNip}) mengajukan izin ${newTicket.category}. Menunggu persetujuan Anda.`,
-          ticketId: newTicket.id,
-          priority: 'normal',
-          eventId: `new_sub_${newTicket.id}`
-        });
+        localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+        window.ticketsList = tickets;
       }
-    }
 
-    if (typeof window.saveTickets === 'function') {
-      window.saveTickets(tickets);
-    } else {
-      localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
-      window.ticketsList = tickets;
-    }
+      pendingMobileFormData = null;
+      window.editingTicketId = null;
 
-    pendingMobileFormData = null;
-    window.editingTicketId = null;
+      window.mobileCloseSheet();
 
-    window.mobileCloseSheet();
-
-    if (data.isEmergency) {
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Izin Darurat #${newId} dibuat! QR Code terkunci sampai diotorisasi Atasan.`, 'warning');
+      if (data.isEmergency) {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Izin Darurat #${newId} dibuat! QR Code terkunci sampai diotorisasi Atasan.`, 'warning');
+        }
+        setTimeout(() => {
+          window.mobileOpenEmergencyUnlockSheet(newId);
+        }, 250);
+      } else {
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Tiket #${newId} berhasil diajukan! Sistem kini mengunci pengajuan baru hingga tiket ini diproses.`, 'success');
+        }
       }
-      setTimeout(() => {
-        window.mobileOpenEmergencyUnlockSheet(newId);
-      }, 250);
-    } else {
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Tiket #${newId} berhasil diajukan! Sistem kini mengunci pengajuan baru hingga tiket ini diproses.`, 'success');
-      }
-    }
 
-    renderMobileKaryawan(null, currentKaryawanTab);
-    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-    if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+      renderMobileKaryawan(null, currentKaryawanTab);
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+      if (typeof window.renderApproverView === 'function') window.renderApproverView();
     } finally {
       isSubmittingMobilePermit = false;
     }
@@ -2603,13 +2603,13 @@
     // BRULE-08 & BRULE-12: Hanya Karyawan pemilik tiket yang melihat tombol aksi pemilik
     const emp = getActiveEmp();
     const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
-    const isOwner = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor) && 
+    const isOwner = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor) &&
       (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841'));
 
     // Push state for Android / hardware back gesture
     try {
       window.history.pushState({ modalOpen: true, modalType: 'karyawanDetail', ticketId: t.id }, '');
-    } catch (e) {}
+    } catch (e) { }
 
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
@@ -3032,7 +3032,7 @@
     }
   };
 
-    window.mobileDownloadQr = function (ticketId) {
+  window.mobileDownloadQr = function (ticketId) {
     const list = window.ticketsList || [];
     const t = list.find(x => x.id === ticketId) || {};
     const safeId = t.id || ticketId || 'IZ-TIKET';
@@ -3041,7 +3041,7 @@
     const safeCategory = t.category || 'Dinas Kantor';
     const safeDestination = t.destination || 'Area Industri Cikampek';
     const safeReturn = t.estimatedReturn || t.plannedReturn || t.plannedExit || '-';
-    
+
     // Standarisasi payload QR (Diakui penuh oleh scanner kamera & pos jaga)
     const qrPayload = `KUJANG-PASS|${safeId}|${safeNip}|${safeCategory}|${safeReturn}`;
 
@@ -3091,7 +3091,7 @@
         ctx.strokeRect(24, infoY, finalCanvas.width - 48, 148);
 
         ctx.textAlign = 'left';
-        
+
         // No. Tiket
         ctx.fillStyle = '#64748b';
         ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
@@ -3181,7 +3181,7 @@
     pendingMobileFormData = null;
   };
 
-    window.mobileSwitchDonutPeriod = function (period) {
+  window.mobileSwitchDonutPeriod = function (period) {
     mobileDonutPeriod = period || 'month';
     currentSegment = 'donut';
     renderMobileKaryawan(null, 'dashboard');

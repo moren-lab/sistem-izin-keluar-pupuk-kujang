@@ -203,7 +203,7 @@ Disetujui
 Belum keluar • Izin masih berlaku
 Rencana keluar Scan Out aktual
 11.05 WIB —
-Estimasi kembali Scan In aktual
+Estimasi kembali Tap In aktual
 12.30 WIB —
 Rincian
 Dimas Saputra
@@ -213,7 +213,7 @@ Sedan g  di Luar
 Menunggu ke p utusan p er p an j angan
 Rencana keluar Scan Out aktual
 0 9 . 4 5 WIB 0 9 .50 WIB
-Estimasi kembali Scan In aktual
+Estimasi kembali Tap In aktual
 11.15 WIB (semula) —
 Estimasi yang diminta *
 12.00 WIB (belum  disetujui)
@@ -226,7 +226,7 @@ Terlambat 30 menit • Sistem mencatat Terlambat
 10.31 W IB
 Rencana keluar Scan Out aktual
 0 9 . 4 0 WIB 0 9 . 4 5 WIB
-Estimasi kembali Scan In aktual
+Estimasi kembali Tap In aktual
 10.30 WIB —
 Rincian
 Sari Wulandari
@@ -236,7 +236,7 @@ Selesai
 Te p at W aktu
 Rencana keluar Scan Out aktual
 0 8 .05 WIB 0 8 .10 WIB
-Estimasi kembali Scan In aktual
+Estimasi kembali Tap In aktual
 10.00 WIB 0 9 . 4 0 WIB
 Rincian
 Linimasa terpili h
@@ -248,12 +248,12 @@ Pos J aga • Sedang di L uar
 Perpanjan g an diajukan
 Dimas • 11.1 5  →  12.00 W IB
 Belum tercatat
-Scan In
+Tap In
 Sumber p encatatan :  Pos J aga
 Perpanjan g an masi h  menun gg u
 Selama p ermohonan menunggu ke p utusan, 
 p enandaan terlambat ditangguhkan hingga 12.00 
-W IB. Scan In lebih awal menutu p  p ermohonan 
+W IB. Tap In lebih awal menutu p  p ermohonan 
 otomatis.
 Dashboard Antrean Tim Riwayat
 
@@ -365,12 +365,12 @@ Tinjau Perpanjangan BS
 Perizinan Keluar Area • Atasan
 Tinjau Perpanjangan
 Permohonan pertama dan satu-satunya untuk tiket ini.
-Scan In lebih awal akan menutup permohonan 
+Tap In lebih awal akan menutup permohonan 
 otomatis
 Jika Dimas sudah kembali sebelum keputusan 
 disimpan, tiket menjadi Selesai dan permohonan 
 tidak lagi dapat diputuskan. Atasan tidak 
-melakukan Scan In.
+melakukan Tap In.
 Dimas Saputra
 DEMO-1004 • Teknologi Informasi
 IZ-20261019-004
@@ -400,7 +400,7 @@ Waktu rencana, bukan w aktu aktual
 Scan O ut •  Pos J aga
 Sedang di L uar
 B elum tercatat
-Scan In •  Pos J aga
+Tap In •  Pos J aga
 Pencatatan oleh Pos Jaga
 K eputusan perpanjangan
 Pengajuan dikirim saat Sedang di L uar, sebelum 

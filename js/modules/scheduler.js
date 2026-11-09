@@ -211,7 +211,7 @@ function _executeCheckOverdueAndExpiredTickets(silent = true) {
             ticket.status = 'Terlambat';
             ticket.isLate = true;
             ticket.lateMinutes = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
-            
+
             if (!ticket.notifiedLate) {
               ticket.notifiedLate = true;
               if (typeof window.createNotification === 'function') {
@@ -266,7 +266,7 @@ function _executeCheckOverdueAndExpiredTickets(silent = true) {
               event: 'Status Terlambat',
               time: nowFormatted,
               by: 'Sistem Otomatis (Scheduler)',
-              desc: `Karyawan belum melakukan Scan In kembali setelah batas waktu estimasi kembali (${window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn}). Terlambat ${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(ticket.lateMinutes) : `${ticket.lateMinutes} menit`}.`
+              desc: `Karyawan belum melakukan Tap In kembali setelah batas waktu estimasi kembali (${window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn}). Terlambat ${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(ticket.lateMinutes) : `${ticket.lateMinutes} menit`}.`
             });
             hasChanges = true;
             newlyOverdue++;

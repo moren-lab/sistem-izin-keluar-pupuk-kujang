@@ -269,7 +269,7 @@ function buildActivePermitTimeline(activeTicket) {
   const eventDibuat = timelineList.find(e => e.event && (e.event.toLowerCase().includes('diajukan') || e.event.toLowerCase().includes('dibuat')));
   const eventDisetujui = timelineList.find(e => e.event && (e.event.toLowerCase().includes('disetujui') || e.event.toLowerCase().includes('otorisasi')));
   const eventScanOut = timelineList.find(e => e.event && e.event.toLowerCase().includes('scan out'));
-  const eventScanIn = timelineList.find(e => e.event && e.event.toLowerCase().includes('scan in'));
+  const eventScanIn = timelineList.find(e => e.event && e.event.toLowerCase().includes('Tap In'));
 
   const timeCreated = eventDibuat ? eventDibuat.time : (activeTicket.createdAt || 'Baru saja diajukan');
   const timeApproved = eventDisetujui ? eventDisetujui.time : (activeTicket.approvedAt || 'Menunggu verifikasi');
@@ -1296,7 +1296,7 @@ function renderEmpCards(list, containerElement) {
         let noteType = 'success';
 
         if (t.status === 'Terlambat') {
-          catatanText = '⚠️ Melewati batas estimasi kembali — Belum Scan In di Pos 1';
+          catatanText = '⚠️ Melewati batas estimasi kembali — Belum Tap In di Pos 1';
           catatanColor = '#b91c1c';
           catatanBg = '#fef2f2';
           catatanBorder = '#fecaca';

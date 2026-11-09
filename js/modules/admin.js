@@ -11,9 +11,9 @@ function autoCancelTicketsForRevokedUser(user) {
     const tNip = t.applicantNip || t.karyawanNip || (t.pemohon && t.pemohon.nip) || t.nip;
     const tName = t.applicantName || (t.pemohon && t.pemohon.nama) || t.nama;
     const isMatch = (tNip && userNip && tNip === userNip) ||
-                    (tName && userName && tName.toLowerCase() === userName.toLowerCase()) ||
-                    (t.kujangId && userKujangId && t.kujangId === userKujangId);
-    
+      (tName && userName && tName.toLowerCase() === userName.toLowerCase()) ||
+      (t.kujangId && userKujangId && t.kujangId === userKujangId);
+
     const isFinished = (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak');
     if (isMatch && !isFinished) {
       t.status = 'Dibatalkan';
@@ -347,7 +347,7 @@ function renderAdminRecentFeed() {
     if (evt.event.includes('Disetujui')) pillClass = 'event-approve';
     else if (evt.event.includes('Ditolak')) pillClass = 'event-reject';
     else if (evt.event.includes('Scan Out')) pillClass = 'event-out';
-    else if (evt.event.includes('Scan In')) pillClass = 'event-in';
+    else if (evt.event.includes('Tap In')) pillClass = 'event-in';
     else if (evt.event.includes('Terlambat')) pillClass = 'event-overdue';
     else if (evt.event.includes('Kedaluwarsa')) pillClass = 'event-expire';
 
@@ -497,13 +497,13 @@ function renderAdminAudit() {
   // Filter
   const filtered = allLogs.filter(item => {
     const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
-    const matchesSearch = !adminAuditSearchTerm || (matcher 
+    const matchesSearch = !adminAuditSearchTerm || (matcher
       ? matcher(adminAuditSearchTerm, item.ticketId, item.applicantName, item.applicantNip, item.by, item.desc, item.event)
       : (item.ticketId.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
-         item.applicantName.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
-         item.applicantNip.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
-         item.by.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
-         item.desc.toLowerCase().includes(adminAuditSearchTerm.toLowerCase())));
+        item.applicantName.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+        item.applicantNip.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+        item.by.toLowerCase().includes(adminAuditSearchTerm.toLowerCase()) ||
+        item.desc.toLowerCase().includes(adminAuditSearchTerm.toLowerCase())));
 
     let matchesEvent = true;
     if (adminAuditEventFilter !== 'all') {
@@ -566,7 +566,7 @@ function renderAdminAudit() {
     if (log.event.includes('Disetujui')) pillClass = 'event-approve';
     else if (log.event.includes('Ditolak')) pillClass = 'event-reject';
     else if (log.event.includes('Scan Out')) pillClass = 'event-out';
-    else if (log.event.includes('Scan In')) pillClass = 'event-in';
+    else if (log.event.includes('Tap In')) pillClass = 'event-in';
     else if (log.event.includes('Terlambat')) pillClass = 'event-overdue';
     else if (log.event.includes('Kedaluwarsa')) pillClass = 'event-expire';
 
@@ -600,9 +600,9 @@ function renderAdminAudit() {
       return false;
     };
 
-    const applicantTicketsToday = (window.ticketsList || []).filter(t => 
+    const applicantTicketsToday = (window.ticketsList || []).filter(t =>
       ((log.applicantNip && t.applicantNip === log.applicantNip) ||
-       (log.applicantName && t.applicantName === log.applicantName)) &&
+        (log.applicantName && t.applicantName === log.applicantName)) &&
       isTodayTicket(t)
     );
     const submissionCount = applicantTicketsToday.length > 0 ? applicantTicketsToday.length : 1;
@@ -869,8 +869,8 @@ function renderAdminReports(isPrinting = false) {
 
 // Clean Export to CSV / Excel
 function exportAdminExcel() {
-  const tickets = (typeof filterAdminReportTickets === 'function') 
-    ? filterAdminReportTickets() 
+  const tickets = (typeof filterAdminReportTickets === 'function')
+    ? filterAdminReportTickets()
     : (window.ticketsList || []);
   if (tickets.length === 0) {
     if (typeof window.showToast === 'function') window.showToast('Tidak ada data tiket sesuai filter untuk diexport', 'warning');
@@ -908,7 +908,7 @@ function exportAdminExcel() {
       }
     }
 
-    // Clean scan in string
+    // Clean Tap In string
     let inTime = '-';
     let inGate = t.gateIn || '-';
     if (t.scanInTime) {
@@ -969,7 +969,7 @@ function exportAdminExcel() {
   link.click();
   document.body.removeChild(link);
   setTimeout(() => {
-    try { URL.revokeObjectURL(url); } catch (e) {}
+    try { URL.revokeObjectURL(url); } catch (e) { }
   }, 1000);
 
   if (typeof window.showToast === 'function') {
@@ -1689,10 +1689,10 @@ function selectAdminEmployee(emp) {
   if (typeof setAdminSelectedRole === 'function') {
     const targetRoleKey = emp.roleKey || (
       emp.nip && emp.nip.startsWith('SEC') ? 'security' :
-      emp.nip && emp.nip.startsWith('ADM') ? 'admin' :
-      emp.title && emp.title.includes('Manager Rekayasa') ? 'approver' :
-      emp.title && emp.title.includes('Supervisor Operasional') ? 'approver2' :
-      'karyawan'
+        emp.nip && emp.nip.startsWith('ADM') ? 'admin' :
+          emp.title && emp.title.includes('Manager Rekayasa') ? 'approver' :
+            emp.title && emp.title.includes('Supervisor Operasional') ? 'approver2' :
+              'karyawan'
     );
     const targetRoleTitle = emp.roleTitle || emp.title || 'Karyawan';
     setAdminSelectedRole(targetRoleKey, targetRoleTitle);
@@ -1836,10 +1836,10 @@ function initAdminEmpSearchCombobox() {
   // 5. Click outside to close
   document.addEventListener('click', (e) => {
     if (!inputName.contains(e.target) &&
-        !inputNip.contains(e.target) &&
-        (!dropdown || !dropdown.contains(e.target)) &&
-        (!btnClearName || !btnClearName.contains(e.target)) &&
-        (!btnClearNip || !btnClearNip.contains(e.target))) {
+      !inputNip.contains(e.target) &&
+      (!dropdown || !dropdown.contains(e.target)) &&
+      (!btnClearName || !btnClearName.contains(e.target)) &&
+      (!btnClearNip || !btnClearNip.contains(e.target))) {
       closeAdminEmpDropdown();
     }
   });
@@ -1894,7 +1894,7 @@ function openAdminUserModal(mode, kujangId) {
     if (inputName) inputName.value = '';
     const inputEmail = document.getElementById('adminInputEmail');
     if (inputEmail) inputEmail.value = '';
-    
+
     // Kosongkan pilihan awal untuk penambahan hak akses baru
     if (typeof setAdminSelectedDept === 'function') {
       setAdminSelectedDept('');
@@ -1924,7 +1924,7 @@ function openAdminUserModal(mode, kujangId) {
       if (inputName) inputName.value = user.name;
       const inputEmail = document.getElementById('adminInputEmail');
       if (inputEmail) inputEmail.value = user.email || '';
-      
+
       // Set user department via searchable dropdown
       if (typeof setAdminSelectedDept === 'function') {
         setAdminSelectedDept(user.department || 'Departemen Rekayasa & Pemeliharaan');
@@ -1932,7 +1932,7 @@ function openAdminUserModal(mode, kujangId) {
         const inputDept = document.getElementById('adminInputDept');
         if (inputDept) inputDept.value = user.department;
       }
-      
+
       // Set user role via searchable dropdown
       if (typeof setAdminSelectedRole === 'function') {
         setAdminSelectedRole(user.roleKey, user.role);
@@ -2019,10 +2019,10 @@ function saveAdminUserAccess(event) {
       // Per aturan organisasi: Tiap departemen berhak memiliki Manajer / Supervisor sendiri.
       // Pencabutan otomatis hanya berlaku jika ada pejabat aktif di peran yang sama DALAM DEPARTEMEN YANG SAMA.
       // (Untuk role 'admin', single-seat berlaku global).
-      const existingOccupant = users.find(u => 
-        u.kujangId !== targetId && 
-        u.status === 'Aktif' && 
-        u.roleKey === roleKey && 
+      const existingOccupant = users.find(u =>
+        u.kujangId !== targetId &&
+        u.status === 'Aktif' &&
+        u.roleKey === roleKey &&
         (roleKey === 'admin' || (u.department && department && u.department.trim().toLowerCase() === department.trim().toLowerCase()))
       );
       if (existingOccupant) {
@@ -2099,8 +2099,8 @@ function saveAdminUserAccess(event) {
     }
   }
 
-  if (status === 'Dicabut') { 
-    autoCancelTicketsForRevokedUser((idx >= 0 ? users[idx] : null) || { name, nip, kujangId }); 
+  if (status === 'Dicabut') {
+    autoCancelTicketsForRevokedUser((idx >= 0 ? users[idx] : null) || { name, nip, kujangId });
   }
   if (typeof window.saveUsers === 'function') {
     window.saveUsers(users);
@@ -2157,10 +2157,10 @@ function toggleUserAccess(kujangId) {
       // Jika diaktifkan kembali: periksa apakah ada pejabat lain di DEPARTEMEN YANG SAMA yang sedang aktif
       const roleDef = AVAILABLE_ROLES_JABATAN.find(r => r.roleKey === user.roleKey && r.isSingleSeat);
       if (roleDef) {
-        const existingOccupant = users.find(u => 
-          u.kujangId !== user.kujangId && 
-          u.status === 'Aktif' && 
-          u.roleKey === user.roleKey && 
+        const existingOccupant = users.find(u =>
+          u.kujangId !== user.kujangId &&
+          u.status === 'Aktif' &&
+          u.roleKey === user.roleKey &&
           (user.roleKey === 'admin' || (u.department && user.department && u.department.trim().toLowerCase() === user.department.trim().toLowerCase()))
         );
         if (existingOccupant) {
@@ -2224,7 +2224,7 @@ function deleteAdminUser(kujangId) {
     let deletedList = [];
     try {
       deletedList = JSON.parse(localStorage.getItem('KUJANG_DELETED_USERS') || '[]');
-    } catch(e) {}
+    } catch (e) { }
     deletedList.push({
       kujangId: user.kujangId,
       name: user.name,
@@ -2374,10 +2374,10 @@ function renderAdminUsers() {
       const match = matcher
         ? matcher(adminUserSearchTerm, user.kujangId, user.nip, user.name, user.department, user.role, user.email)
         : ((user.kujangId || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
-           (user.nip || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
-           (user.name || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
-           (user.department || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
-           (user.role || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()));
+          (user.nip || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+          (user.name || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+          (user.department || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()) ||
+          (user.role || '').toLowerCase().includes(adminUserSearchTerm.toLowerCase()));
       if (!match) return false;
     }
     return true;
@@ -2585,11 +2585,11 @@ function renderAdminStatusTracking() {
       const match = matcher
         ? matcher(adminTrackingSearchTerm, t.id, t.applicantName, t.applicantNip, t.department, t.destination, t.reason, t.approverName, t.category, t.type)
         : ((t.id || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
-           (t.applicantName || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
-           (t.applicantNip || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
-           (t.department || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
-           (t.destination || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
-           (t.reason || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()));
+          (t.applicantName || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+          (t.applicantNip || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+          (t.department || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+          (t.destination || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()) ||
+          (t.reason || '').toLowerCase().includes(adminTrackingSearchTerm.toLowerCase()));
       if (!match) return false;
     }
     return true;
@@ -3006,7 +3006,7 @@ const AVAILABLE_ROLES_JABATAN = [
     jabatan: 'Komandan Regu Pos Jaga',
     fullTitle: 'Petugas Pos Jaga (Satpam)',
     isSingleSeat: false,
-    description: 'Verifikasi barcode QR Scan Out dan Scan In di Pos 1 Gerbang Utama.'
+    description: 'Verifikasi barcode QR Scan Out dan Tap In di Pos 1 Gerbang Utama.'
   },
   {
     roleKey: 'security',
@@ -3043,8 +3043,8 @@ function setAdminSelectedRole(roleKey, jabatanOrTitle) {
   // Normalisasi: roleKey karyawan2 tetap dianggap karyawan dalam pilihan peran
   const normalizedKey = (roleKey === 'karyawan2' || (roleKey && roleKey.startsWith('karyawan'))) ? 'karyawan' : roleKey;
 
-  let match = AVAILABLE_ROLES_JABATAN.find(r => 
-    (r.roleKey === roleKey || r.roleKey === normalizedKey) && 
+  let match = AVAILABLE_ROLES_JABATAN.find(r =>
+    (r.roleKey === roleKey || r.roleKey === normalizedKey) &&
     (r.jabatan === jabatanOrTitle || r.fullTitle === jabatanOrTitle)
   );
   if (!match) {
@@ -3075,12 +3075,12 @@ function renderAdminRoleDropdownItems(query = '') {
   const q = (query || '').toLowerCase().trim();
 
   const filtered = q
-    ? AVAILABLE_ROLES_JABATAN.filter(r => 
-        r.hakAkses.toLowerCase().includes(q) ||
-        r.jabatan.toLowerCase().includes(q) ||
-        r.fullTitle.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q)
-      )
+    ? AVAILABLE_ROLES_JABATAN.filter(r =>
+      r.hakAkses.toLowerCase().includes(q) ||
+      r.jabatan.toLowerCase().includes(q) ||
+      r.fullTitle.toLowerCase().includes(q) ||
+      r.description.toLowerCase().includes(q)
+    )
     : AVAILABLE_ROLES_JABATAN;
 
   if (filtered.length === 0) {
@@ -3105,9 +3105,9 @@ function renderAdminRoleDropdownItems(query = '') {
       if (item.roleKey === 'admin') {
         occupant = users.find(u => u.roleKey === 'admin' && u.status === 'Aktif');
       } else {
-        occupant = users.find(u => 
-          u.roleKey === item.roleKey && 
-          u.status === 'Aktif' && 
+        occupant = users.find(u =>
+          u.roleKey === item.roleKey &&
+          u.status === 'Aktif' &&
           (!currentDept || (u.department && u.department.trim().toLowerCase() === currentDept.trim().toLowerCase()))
         );
       }

@@ -95,9 +95,9 @@ M anajer Reka y asa &  Pemeli h araan
 Scan Out tercatat
 Pos 1 • Kar y awan meninggalkan area
 Batas kembali 1 3 .00 WI B
-Scan In
+Tap In
 Belum kembali ke area
-ME NUNGGU SCAN IN
+ME NUNGGU Tap In
 Dashboard Pengajuan Riwayat
 
 ## Page 3
@@ -540,7 +540,7 @@ Scan Out Pos Jaga
 Pos 1 • Ag us Setiawa n
 Identitas dan QR  sesuai. Kar y awan keluar area.
 16 Okt 2026 • 10.52 WIB
-Scan In Pos Jaga
+Tap In Pos Jaga
 Pos 1 • Ag us Setiawa n
 Tepat Waktu • 8 menit sebelum batas kembali 
 pukul 11.00 WIB.

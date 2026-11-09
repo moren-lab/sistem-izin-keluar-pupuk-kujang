@@ -13,7 +13,7 @@ function matchSearchTokens(query, ...fields) {
   if (!query) return true;
   const clean = String(query).trim().toLowerCase();
   if (!clean) return true;
-  
+
   // Split query into individual token words (splitting by whitespace and commas)
   const tokens = clean.split(/[\s,]+/).filter(Boolean);
   if (tokens.length === 0) return true;
@@ -199,7 +199,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan diajukan', time: '19 Okt 2026, 09.20 WIB', by: 'Budi Pratama, S.T.', desc: 'Dinas Kantor — Kembali ke Area' },
       { event: 'Disetujui oleh atasan', time: '19 Okt 2026, 09.35 WIB', by: 'Ir. Hendra Gunawan, M.T. — Manajer Rekayasa & Pemeliharaan', desc: 'Disetujui. Koordinasikan hasil pemeriksaan setelah kembali.' },
       { event: 'Scan Out tercatat', time: '19 Okt 2026, 10.05 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 — Karyawan meninggalkan area' },
-      { event: 'Scan In tercatat', time: '19 Okt 2026, 12.50 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 — Karyawan kembali ke area pabrik' }
+      { event: 'Tap In tercatat', time: '19 Okt 2026, 12.50 WIB', by: 'Sertu Agus (Pos 1)', desc: 'Pos 1 — Karyawan kembali ke area pabrik' }
     ]
   },
   {
@@ -225,7 +225,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan Dibuat', time: '16 Okt 2026, 08.15 WIB', by: 'Budi Pratama', desc: 'Pengajuan izin dinas.' },
       { event: 'Disetujui', time: '16 Okt 2026, 08.30 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
       { event: 'Scan Out', time: '16 Okt 2026, 09.05 WIB', by: 'Pos 1', desc: 'Karyawan keluar.' },
-      { event: 'Scan In', time: '16 Okt 2026, 10.55 WIB', by: 'Pos 1', desc: 'Kembali ke area tepat waktu.' }
+      { event: 'Tap In', time: '16 Okt 2026, 10.55 WIB', by: 'Pos 1', desc: 'Kembali ke area tepat waktu.' }
     ]
   },
   {
@@ -252,7 +252,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan Dibuat', time: '14 Okt 2026, 11.30 WIB', by: 'Budi Pratama', desc: 'Izin urusan pribadi.' },
       { event: 'Disetujui', time: '14 Okt 2026, 11.45 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
       { event: 'Scan Out', time: '14 Okt 2026, 13.02 WIB', by: 'Kopral Dani (Pos 2)', gate: 'Pos 2 Gerbang Barat', desc: 'Keluar gerbang barat.' },
-      { event: 'Scan In', time: '14 Okt 2026, 14.25 WIB', by: 'Kopral Dani (Pos 2)', gate: 'Pos 2 Gerbang Barat', desc: 'Kembali tepat waktu.' }
+      { event: 'Tap In', time: '14 Okt 2026, 14.25 WIB', by: 'Kopral Dani (Pos 2)', gate: 'Pos 2 Gerbang Barat', desc: 'Kembali tepat waktu.' }
     ]
   },
   {
@@ -279,7 +279,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan Dibuat', time: '12 Okt 2026, 09.00 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
       { event: 'Disetujui', time: '12 Okt 2026, 09.20 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
       { event: 'Scan Out', time: '12 Okt 2026, 10.04 WIB', by: 'Pos 1', desc: 'Keluar area.' },
-      { event: 'Scan In Terlambat', time: '12 Okt 2026, 12.10 WIB', by: 'Pos 1', desc: 'Karyawan kembali 10 menit melewati estimasi 12.00 WIB.' }
+      { event: 'Tap In Terlambat', time: '12 Okt 2026, 12.10 WIB', by: 'Pos 1', desc: 'Karyawan kembali 10 menit melewati estimasi 12.00 WIB.' }
     ]
   },
   {
@@ -329,7 +329,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan Dibuat', time: '07 Okt 2026, 08.20 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
       { event: 'Disetujui', time: '07 Okt 2026, 08.40 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
       { event: 'Scan Out', time: '07 Okt 2026, 09.00 WIB', by: 'Praka Ilham (Pos 3)', gate: 'Pos 3 Gerbang Timur', desc: 'Keluar gerbang timur.' },
-      { event: 'Scan In', time: '07 Okt 2026, 11.50 WIB', by: 'Praka Ilham (Pos 3)', gate: 'Pos 3 Gerbang Timur', desc: 'Kembali tepat waktu.' }
+      { event: 'Tap In', time: '07 Okt 2026, 11.50 WIB', by: 'Praka Ilham (Pos 3)', gate: 'Pos 3 Gerbang Timur', desc: 'Kembali tepat waktu.' }
     ]
   },
   {
@@ -354,7 +354,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan Dibuat', time: '05 Okt 2026, 07.15 WIB', by: 'Budi Pratama', desc: 'Izin dinas.' },
       { event: 'Disetujui', time: '05 Okt 2026, 07.30 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui.' },
       { event: 'Scan Out', time: '05 Okt 2026, 08.10 WIB', by: 'Pos 1', desc: 'Keluar area.' },
-      { event: 'Scan In', time: '05 Okt 2026, 15.45 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
+      { event: 'Tap In', time: '05 Okt 2026, 15.45 WIB', by: 'Pos 1', desc: 'Kembali tepat waktu.' }
     ]
   },
   {
@@ -380,7 +380,7 @@ const DEFAULT_TICKETS = [
       { event: 'Pengajuan Darurat', time: '02 Okt 2026, 09.50 WIB', by: 'Budi Pratama', desc: 'Pengajuan darurat poliklinik.' },
       { event: 'Otorisasi Atasan', time: '02 Okt 2026, 09.52 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Otorisasi darurat.' },
       { event: 'Scan Out', time: '02 Okt 2026, 09.55 WIB', by: 'Pos 1', desc: 'Keluar area.' },
-      { event: 'Scan In', time: '02 Okt 2026, 11.40 WIB', by: 'Pos 1', desc: 'Kembali ke area.' }
+      { event: 'Tap In', time: '02 Okt 2026, 11.40 WIB', by: 'Pos 1', desc: 'Kembali ke area.' }
     ]
   }
 ];
@@ -739,7 +739,7 @@ function loadUsers() {
           window.activeEmployeeUser = found;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Pulihkan activeApproverUser dari localStorage jika tersimpan
     try {
@@ -750,7 +750,7 @@ function loadUsers() {
           window.activeApproverUser = found;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Pulihkan activeSecurityUser dari localStorage jika tersimpan
     try {
@@ -761,7 +761,7 @@ function loadUsers() {
           window.activeSecurityUser = found;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     return users;
   } catch (e) {
@@ -812,11 +812,11 @@ function syncActorsFromUsers(data) {
 
   // 1. Sinkronisasi Karyawan (sesuai akun aktif atau fallback ke Budi Pratama)
   const activeEmpNip = (window.activeEmployeeUser && window.activeEmployeeUser.nip) ||
-                       (typeof localStorage !== 'undefined' ? localStorage.getItem('KUJANG_ACTIVE_EMP_NIP') : null);
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('KUJANG_ACTIVE_EMP_NIP') : null);
   const activeEmpTarget = (activeEmpNip ? users.find(u => u.nip === activeEmpNip && u.status === 'Aktif') : null) ||
-                          window.activeEmployeeUser ||
-                          users.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
-                          users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
+    window.activeEmployeeUser ||
+    users.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
+    users.find(u => (u.roleKey === 'karyawan' || (u.role && u.role.toLowerCase().includes('karyawan'))) && u.status === 'Aktif');
   if (activeEmpTarget && window.ACTORS && window.ACTORS.karyawan) {
     window.ACTORS.karyawan.name = activeEmpTarget.name;
     window.ACTORS.karyawan.nip = activeEmpTarget.nip;
@@ -893,10 +893,10 @@ function syncActorsFromUsers(data) {
 
   // 4. Sinkronisasi Petugas Pengamanan / Security
   const activeSecNip = (window.activeSecurityUser && window.activeSecurityUser.nip) ||
-                       (typeof localStorage !== 'undefined' ? localStorage.getItem('KUJANG_ACTIVE_SEC_NIP') : null);
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('KUJANG_ACTIVE_SEC_NIP') : null);
   const activeSecSync = (activeSecNip ? users.find(u => u.nip === activeSecNip && u.status === 'Aktif') : null) ||
-                        window.activeSecurityUser ||
-                        users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
+    window.activeSecurityUser ||
+    users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
   if (activeSecSync && window.ACTORS && window.ACTORS.security) {
     window.ACTORS.security.name = activeSecSync.name;
     window.ACTORS.security.nip = activeSecSync.nip;
@@ -963,8 +963,8 @@ function getActiveApprovers() {
   ];
 
   // Ambil atasan langsung dari profil karyawan aktif saat ini
-  const activeEmpCur = (typeof window.getCurrentEmployeeActor === 'function') 
-    ? window.getCurrentEmployeeActor() 
+  const activeEmpCur = (typeof window.getCurrentEmployeeActor === 'function')
+    ? window.getCurrentEmployeeActor()
     : ((window.ACTORS && window.ACTORS.karyawan) ? window.ACTORS.karyawan : null);
   const currentEmpApprover = (activeEmpCur && (activeEmpCur.directSupervisor || activeEmpCur.supervisor || activeEmpCur.approverName))
     ? (activeEmpCur.directSupervisor || activeEmpCur.supervisor || activeEmpCur.approverName)
@@ -1063,7 +1063,7 @@ try {
 // ==========================================
 // CENTRAL PROFILE PHOTO HELPERS (PT PUPUK KUJANG)
 // ==========================================
-window.getEmployeePhotoUrl = function(nameOrNip) {
+window.getEmployeePhotoUrl = function (nameOrNip) {
   if (!nameOrNip) return 'img/avatars/default.svg';
   const str = String(nameOrNip).toLowerCase();
   if (str.includes('budi') || str.includes('8841')) return 'img/avatars/budi.svg';
@@ -1075,7 +1075,7 @@ window.getEmployeePhotoUrl = function(nameOrNip) {
   return 'img/avatars/default.svg';
 };
 
-window.renderUserPhoto = function(nameOrNip, size = 24, extraStyle = '') {
+window.renderUserPhoto = function (nameOrNip, size = 24, extraStyle = '') {
   const url = window.getEmployeePhotoUrl(nameOrNip);
   return `<img src="${url}" alt="Foto ${nameOrNip || 'Karyawan'}" class="user-profile-photo-inline" style="width:${size}px; height:${size}px; min-width:${size}px; min-height:${size}px; border-radius:50%; object-fit:cover; vertical-align:middle; display:inline-block; margin-right:6px; border:1px solid rgba(0,0,0,0.12); box-shadow:0 1px 3px rgba(0,0,0,0.08); flex-shrink:0; ${extraStyle}">`;
 };

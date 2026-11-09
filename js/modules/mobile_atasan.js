@@ -56,20 +56,20 @@
   function getActiveApprover() {
     let app = null;
     if (window.currentActor === 'approver2' || window.currentMobileRole === 'approver2') {
-      app = { 
-        name: 'Dewi Sartika, S.T., M.M.', 
-        nip: 'PK-2012-0845', 
-        title: 'Supervisor Operasional Lapangan (Plt. Manager)', 
+      app = {
+        name: 'Dewi Sartika, S.T., M.M.',
+        nip: 'PK-2012-0845',
+        title: 'Supervisor Operasional Lapangan (Plt. Manager)',
         dept: 'Departemen Rekayasa & Pemeliharaan',
         department: 'Departemen Rekayasa & Pemeliharaan'
       };
     } else {
       app = (typeof window.getPrimaryApprover === 'function')
         ? window.getPrimaryApprover()
-        : { 
-          name: 'Ir. Hendra Gunawan, M.T.', 
-          nip: 'PK-2016-3392', 
-          title: 'Manajer Rekayasa & Pemeliharaan', 
+        : {
+          name: 'Ir. Hendra Gunawan, M.T.',
+          nip: 'PK-2016-3392',
+          title: 'Manajer Rekayasa & Pemeliharaan',
           dept: 'Departemen Rekayasa & Pemeliharaan',
           department: 'Departemen Rekayasa & Pemeliharaan'
         };
@@ -155,7 +155,7 @@
   function getTName(t) { return t.applicantName || t.employeeName || 'Bawahan'; }
   function getTNip(t) { return t.applicantNip || t.employeeNip || 'PK-2024'; }
   function getTDept(t) { return t.department || 'Departemen Rekayasa & Pemeliharaan'; }
-  
+
   function formatTipeKepulanganDisplay(type) {
     if (!type) return 'Kembali ke Area';
     const s = String(type).trim();
@@ -206,7 +206,7 @@
         const pad = n => String(n).padStart(2, '0');
         return `${days[dt.getDay()]}, ${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}, ${pad(dt.getHours())}.${pad(dt.getMinutes())} WIB`;
       }
-    } catch (e) {}
+    } catch (e) { }
     return raw.replace(/(\d{1,2}):(\d{2})/g, '$1.$2 WIB');
   }
 
@@ -247,9 +247,9 @@
     const approver = getActiveApprover();
     const tickets = getTeamTickets();
 
-    const pendingNew = tickets.filter(t => 
-      !t.isEmergency && 
-      !t.id.includes('-EMG-') && 
+    const pendingNew = tickets.filter(t =>
+      !t.isEmergency &&
+      !t.id.includes('-EMG-') &&
       t.status === 'Menunggu Persetujuan'
     );
     const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa');
@@ -257,10 +257,10 @@
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const processedTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak');
 
-    const reassignedAwayTickets = tickets.filter(t => 
-      isTicketReassignedFromMobileApprover(t) && 
-      t.status !== 'Selesai' && 
-      t.status !== 'Ditolak' && 
+    const reassignedAwayTickets = tickets.filter(t =>
+      isTicketReassignedFromMobileApprover(t) &&
+      t.status !== 'Selesai' &&
+      t.status !== 'Ditolak' &&
       t.status !== 'Dibatalkan'
     );
 
@@ -320,7 +320,7 @@
           allActivities.push({
             ticketId: ticketId,
             empName: empName,
-            title: `${empName} Scan In (Kembali)`,
+            title: `${empName} Tap In (Kembali)`,
             actor: t.scanInBy || 'Petugas Pos Jaga',
             desc: `Kembali melalui ${t.scanInGate || 'Pos 1'}`,
             rawTime: t.scanInTime,
@@ -370,11 +370,11 @@
 
     // Priority Cards: Emergency Tickets if exist (supports concurrent submissions)
     let priorityHtml = '';
-    const pendingEmergTickets = tickets.filter(t => 
-      (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && 
+    const pendingEmergTickets = tickets.filter(t =>
+      (t.isEmergency || (t.id && t.id.includes('-EMG-'))) &&
       (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
-      t.status !== 'Ditolak' && 
-      t.status !== 'Selesai' && 
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
       t.status !== 'Dibatalkan'
     );
     const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
@@ -620,9 +620,9 @@
           </span>
         </div>
         <div class="mobile-chart-live-wrapper" style="margin-top: 6px;">
-          ${(typeof window.getGambar2AestheticBarChartHtml === 'function') 
-            ? window.getGambar2AestheticBarChartHtml(true) 
-            : '<div style="text-align:center; padding: 12px; color: #64748b;">Memuat grafik...</div>'}
+          ${(typeof window.getGambar2AestheticBarChartHtml === 'function')
+        ? window.getGambar2AestheticBarChartHtml(true)
+        : '<div style="text-align:center; padding: 12px; color: #64748b;">Memuat grafik...</div>'}
         </div>
       </section>
 
@@ -671,9 +671,9 @@
 
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
           ${recentActivities.length > 0 ? recentActivities.map(act => {
-            const isLate = (act.title.toLowerCase().includes('terlambat') || act.status === 'Terlambat');
-            const timeDisplay = formatTimeOnly(act.rawTime) || 'Hari ini';
-            return `
+          const isLate = (act.title.toLowerCase().includes('terlambat') || act.status === 'Terlambat');
+          const timeDisplay = formatTimeOnly(act.rawTime) || 'Hari ini';
+          return `
               <div style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${act.ticketId}')">
                 <div style="font-size: 0.7rem; font-weight: 800; color: ${isLate ? '#b91c1c' : '#64748b'}; min-width: 60px; flex-shrink: 0;">
                   ${timeDisplay}
@@ -690,7 +690,7 @@
                 </div>
               </div>
             `;
-          }).join('') : `
+        }).join('') : `
             <div style="text-align: center; color: #64748b; font-size: 0.75rem; padding: 14px;">
               Belum ada aktivitas audit bawahan hari ini.
             </div>
@@ -707,17 +707,17 @@
     const approver = getActiveApprover();
     const tickets = getTeamTickets();
 
-    const pendingEmergTickets = tickets.filter(t => 
-      (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && 
+    const pendingEmergTickets = tickets.filter(t =>
+      (t.isEmergency || (t.id && t.id.includes('-EMG-'))) &&
       (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
-      t.status !== 'Ditolak' && 
-      t.status !== 'Selesai' && 
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
       t.status !== 'Dibatalkan'
     );
 
-    const pendingRegular = tickets.filter(t => 
-      !t.isEmergency && 
-      !t.id.includes('-EMG-') && 
+    const pendingRegular = tickets.filter(t =>
+      !t.isEmergency &&
+      !t.id.includes('-EMG-') &&
       t.status === 'Menunggu Persetujuan'
     );
 
@@ -734,7 +734,7 @@
         activeList = activeList.filter(t => matcher(atasanSearchQuery, t.id, getTName(t), getTNip(t), t.destination, t.reason, t.category, t.type));
       } else {
         const q = atasanSearchQuery.toLowerCase();
-        activeList = activeList.filter(t => 
+        activeList = activeList.filter(t =>
           (getTName(t).toLowerCase().includes(q)) ||
           (getTNip(t).toLowerCase().includes(q)) ||
           (t.id && t.id.toLowerCase().includes(q))
@@ -1012,7 +1012,7 @@
           </div>
           <div class="mobile-timeline-content">
             <div class="mobile-timeline-time">${t.scanInTime ? formatTimeOnly(t.scanInTime) : 'Tercatat'}</div>
-            <div class="mobile-timeline-title">Scan In (Kembali)</div>
+            <div class="mobile-timeline-title">Tap In (Kembali)</div>
             <div class="mobile-timeline-desc">${t.scanInGate || 'Pos 1'} • Kembali ke area pabrik</div>
           </div>
         </div>
@@ -1231,16 +1231,16 @@
       return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
     };
 
-    const hasDeletableTickets = tickets.some(t => 
-      !isDeletedByCurrentMobileApprover(t) && 
+    const hasDeletableTickets = tickets.some(t =>
+      !isDeletedByCurrentMobileApprover(t) &&
       (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
     );
 
     // HANYA perizinan yang sedang berjalan/aktif (Mirip Pelacakan Pos Jaga)
-    const activeRunningTickets = tickets.filter(t => 
-      t.status === 'Sedang di Luar' || 
-      t.status === 'Terlambat' || 
-      t.status === 'Disetujui' || 
+    const activeRunningTickets = tickets.filter(t =>
+      t.status === 'Sedang di Luar' ||
+      t.status === 'Terlambat' ||
+      t.status === 'Disetujui' ||
       (t.isEmergency && (t.emergencyLocked || t.status === 'Menunggu Otorisasi Darurat'))
     );
 
@@ -1301,7 +1301,7 @@
             if (dt && !isNaN(dt.getTime())) {
               dPart = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
             }
-          } catch(e) {}
+          } catch (e) { }
         }
 
         if (!dPart && (atasanTimDateFilter === 'today' || atasanTimDateFilter === '7days')) {
@@ -1348,7 +1348,7 @@
     }
     const selectedTicket = tickets.find(x => x.id === selectedTimTicketId) || teamCardsList[0];
 
-// Helper function to render a team ticket card item
+    // Helper function to render a team ticket card item
     function renderTeamCardItem(t) {
       const isLate = (t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
       const isOutside = (t.status === 'Sedang di Luar');
@@ -1418,7 +1418,7 @@
               </div>
             </div>
             <div>
-              <div class="mobile-meta-sub">Scan In aktual</div>
+              <div class="mobile-meta-sub">Tap In aktual</div>
               <div class="mobile-meta-val">${t.scanInTime ? formatTimeOnly(t.scanInTime) : '—'}</div>
             </div>
           </div>
@@ -1704,7 +1704,7 @@
     let filtered = tickets;
     if (atasanRiwayatSearch) {
       const q = atasanRiwayatSearch.toLowerCase();
-      filtered = filtered.filter(t => 
+      filtered = filtered.filter(t =>
         (getTName(t).toLowerCase().includes(q)) ||
         (getTNip(t).toLowerCase().includes(q)) ||
         (t.id && t.id.toLowerCase().includes(q))
@@ -1796,7 +1796,7 @@
               </div>
             </div>
             <div>
-              <div class="mobile-meta-sub">Scan In aktual</div>
+              <div class="mobile-meta-sub">Tap In aktual</div>
               <div class="mobile-meta-val">${t.scanInTime ? formatTimeOnly(t.scanInTime) : '—'}</div>
             </div>
           </div>
@@ -2579,8 +2579,8 @@
     if (!sheet || !backdrop) return;
     if (!t) return;
 
-    const defaultReason = (t.isEmergency || (t.id && t.id.includes('-EMG-'))) 
-      ? 'Kondisi kedaruratan belum memenuhi kriteria evakuasi mendesak.' 
+    const defaultReason = (t.isEmergency || (t.id && t.id.includes('-EMG-')))
+      ? 'Kondisi kedaruratan belum memenuhi kriteria evakuasi mendesak.'
       : 'Alasan keperluan dinas/operasional belum memadai.';
 
     sheet.innerHTML = `
@@ -2619,7 +2619,7 @@
     sheet.classList.add('open');
   };
 
-  window.mobileCheckRejectInput = function(val) {
+  window.mobileCheckRejectInput = function (val) {
     const btn = document.getElementById('mBtnConfirmReject');
     const hint = document.getElementById('mRejectCharHint');
     const len = (val || '').trim().length;
@@ -2638,7 +2638,7 @@
     }
   };
 
-  window.mobileConfirmRejectSubmit = function(ticketId) {
+  window.mobileConfirmRejectSubmit = function (ticketId) {
     const input = document.getElementById('mRejectReasonInput');
     let reason = (input ? input.value : '').trim();
     if (!reason || reason.length < 5) {
