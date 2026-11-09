@@ -1357,6 +1357,13 @@ function openDigitalPassModal(ticketId) {
   const qrContainer = document.getElementById('digitalPassQrContainer');
   if (qrContainer) {
     qrContainer.innerHTML = '';
+    qrContainer.style.background = '#ffffff';
+    qrContainer.style.padding = '14px';
+    qrContainer.style.borderRadius = '12px';
+    qrContainer.style.display = 'inline-flex';
+    qrContainer.style.alignItems = 'center';
+    qrContainer.style.justifyContent = 'center';
+
     const qrPayload = `KUJANG-PASS|${ticket.id}|${ticket.applicantNip || 'PK-2024-8841'}|${ticket.category}|${ticket.plannedExit}`;
     if (typeof QRCode !== 'undefined') {
       new QRCode(qrContainer, {
@@ -1365,7 +1372,7 @@ function openDigitalPassModal(ticketId) {
         height: 170,
         colorDark: ticket.status === 'Terlambat' ? '#b91c1c' : '#0f2b48',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.M
       });
     } else {
       qrContainer.innerHTML = `<strong>QR: ${ticket.id}</strong>`;
@@ -1421,23 +1428,37 @@ function openDigitalPassModal(ticketId) {
         if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh ke folder Downloads!', 'success');
       };
 
-      if (canvas && typeof canvas.toBlob === 'function') {
-        canvas.toBlob((blob) => {
+      const makePaddedBlob = (sourceEl, cb) => {
+        try {
+          const pad = 24;
+          const pc = document.createElement('canvas');
+          const w = sourceEl.width || 170;
+          const h = sourceEl.height || 170;
+          pc.width = w + pad * 2;
+          pc.height = h + pad * 2;
+          const ctx = pc.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, pc.width, pc.height);
+          ctx.drawImage(sourceEl, pad, pad, w, h);
+          pc.toBlob(cb, 'image/png');
+        } catch (e) {
+          if (typeof sourceEl.toBlob === 'function') sourceEl.toBlob(cb, 'image/png');
+        }
+      };
+
+      if (canvas) {
+        makePaddedBlob(canvas, (blob) => {
           if (blob) {
             triggerBlobDownload(blob);
-          } else if (img && img.src) {
-            fetch(img.src).then(r => r.blob()).then(triggerBlobDownload);
+          } else if (typeof canvas.toBlob === 'function') {
+            canvas.toBlob(triggerBlobDownload, 'image/png');
           }
-        }, 'image/png');
-      } else if (img && img.src) {
-        fetch(img.src).then(r => r.blob()).then(triggerBlobDownload).catch(() => {
-          const a = document.createElement('a');
-          a.href = img.src;
-          a.download = `Tiket-QR-${ticketId}.png`;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 150);
         });
+      } else if (img && img.src) {
+        const tempImg = new Image();
+        tempImg.onload = () => makePaddedBlob(tempImg, triggerBlobDownload);
+        tempImg.onerror = () => fetch(img.src).then(r => r.blob()).then(triggerBlobDownload);
+        tempImg.src = img.src;
       } else {
         if (typeof window.showToast === 'function') window.showToast('Menyiapkan gambar QR Code...', 'info');
       }

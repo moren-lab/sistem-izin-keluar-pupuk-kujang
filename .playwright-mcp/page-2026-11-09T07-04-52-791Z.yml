@@ -1,0 +1,131 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area • Pos Jaga
+      - generic [ref=f1e86]:
+        - button "Pos Jaga ▼" [ref=f1e1240] [cursor=pointer]:
+          - generic [ref=f1e91]: Pos Jaga
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "SA" [ref=f1e1241]
+    - main [ref=f1e99]:
+      - generic [ref=f1e1336]:
+        - heading "Riwayat Pemindaian" [level=2] [ref=f1e1337]
+        - textbox "Cari nomor tiket, nama, NIP, tujuan..." [ref=f1e1342]
+        - generic [ref=f1e1343]:
+          - generic [ref=f1e1344]: 8 log pemindaian
+          - generic [ref=f1e1345]:
+            - button "Unduh Log Gerbang (CSV)" [ref=f1e1346] [cursor=pointer]
+            - button "Filter Riwayat Pemindaian" [ref=f1e1350] [cursor=pointer]
+            - button "Hapus Riwayat Selesai" [ref=f1e1353] [cursor=pointer]
+        - generic [ref=f1e1356]:
+          - generic [ref=f1e1357]:
+            - generic [ref=f1e1358]:
+              - generic [ref=f1e1359]: TK-20261106-901
+              - generic [ref=f1e1361]: Terlambat
+            - generic [ref=f1e1362]: Budi Pratama, S.T.
+            - generic [ref=f1e1363]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f1e1364]: Dinas Kantor • Kembali ke Area
+            - generic "PT Rekayasa Industri, Cikampek" [ref=f1e1365]: 📍 PT Rekayasa Industri, Cikampek
+            - generic [ref=f1e1366]:
+              - generic [ref=f1e1367]:
+                - text: "Scan Out:"
+                - strong [ref=f1e1368]: 09.05 WIB
+                - text: "• Masuk:"
+                - strong [ref=f1e1369]: Belum
+              - button "Detail Pengajuan" [ref=f1e1370] [cursor=pointer]
+          - generic [ref=f1e1375]:
+            - generic [ref=f1e1376]:
+              - generic [ref=f1e1377]: IZ-20261019-013
+              - generic [ref=f1e1379]: Selesai
+            - generic [ref=f1e1380]: Budi Pratama, S.T.
+            - generic [ref=f1e1381]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f1e1382]: Dinas Kantor • Kembali ke Area
+            - generic "PT Rekayasa Industri, Cikampek" [ref=f1e1383]: 📍 PT Rekayasa Industri, Cikampek
+            - generic [ref=f1e1384]:
+              - generic [ref=f1e1385]:
+                - text: "Scan Out:"
+                - strong [ref=f1e1386]: 10.05 WIB
+                - text: "• Masuk:"
+                - strong [ref=f1e1387]: 12.50 WIB
+              - button "Detail Pengajuan" [ref=f1e1388] [cursor=pointer]
+          - generic [ref=f1e1393]:
+            - generic [ref=f1e1394]:
+              - generic [ref=f1e1395]:
+                - generic [ref=f1e1396]: IZ-20261016-006
+                - generic [ref=f1e1397]: Izin Darurat
+              - generic [ref=f1e1398]: Selesai
+            - generic [ref=f1e1399]: Budi Pratama, S.T.
+            - generic [ref=f1e1400]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f1e1401]: Dinas Kantor • Kembali ke Area
+            - generic "Pelabuhan Cirebon" [ref=f1e1402]: 📍 Pelabuhan Cirebon
+            - generic [ref=f1e1403]:
+              - generic [ref=f1e1404]:
+                - text: "Scan Out:"
+                - strong [ref=f1e1405]: 09.05 WIB
+                - text: "• Masuk:"
+                - strong [ref=f1e1406]: 10.55 WIB
+              - button "Detail Pengajuan" [ref=f1e1407] [cursor=pointer]
+          - generic [ref=f1e1412]:
+            - generic [ref=f1e1413]:
+              - generic [ref=f1e1414]: IZ-20261014-003
+              - generic [ref=f1e1416]: Selesai
+            - generic [ref=f1e1417]: Budi Pratama, S.T.
+            - generic [ref=f1e1418]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f1e1419]: Urusan Pribadi • Kembali ke Area
+            - generic "RSUD Karawang" [ref=f1e1420]: 📍 RSUD Karawang
+            - generic [ref=f1e1421]:
+              - generic [ref=f1e1422]:
+                - text: "Scan Out:"
+                - strong [ref=f1e1423]: 13.02 WIB
+                - text: "• Masuk:"
+                - strong [ref=f1e1424]: 14.25 WIB
+              - button "Detail Pengajuan" [ref=f1e1425] [cursor=pointer]
+          - generic [ref=f1e1430]:
+            - generic [ref=f1e1431]:
+              - generic [ref=f1e1432]: IZ-20261012-005
+              - generic [ref=f1e1434]: Selesai
+            - generic [ref=f1e1435]: Budi Pratama, S.T.
+            - generic [ref=f1e1436]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f1e1437]: Dinas Kantor • Kembali ke Area
+            - generic "Kantor Distributor Bekasi" [ref=f1e1438]: 📍 Kantor Distributor Bekasi
+            - generic [ref=f1e1439]:
+              - generic [ref=f1e1440]:
+                - text: "Scan Out:"
+                - strong [ref=f1e1441]: 10.04 WIB
+                - text: "• Masuk:"
+                - strong [ref=f1e1442]: 12.10 WIB
+              - button "Detail Pengajuan" [ref=f1e1443] [cursor=pointer]
+          - generic [ref=f1e1448]:
+            - generic [ref=f1e1449]:
+              - generic [ref=f1e1450]: IZ-20261007-004
+              - generic [ref=f1e1452]: Selesai
+            - generic [ref=f1e1453]: Budi Pratama, S.T.
+            - generic [ref=f1e1454]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f1e1455]: Dinas Kantor • Kembali ke Area
+            - generic "Gudang Logistik Ciampei" [ref=f1e1456]: 📍 Gudang Logistik Ciampei
+            - generic [ref=f1e1457]:
+              - generic [ref=f1e1458]:
+                - text: "Scan Out:"
+                - strong [ref=f1e1459]: 09.00 WIB
+                - text: "• Masuk:"
+                - strong [ref=f1e1460]: 11.50 WIB
+              - button "Detail Pengajuan" [ref=f1e1461] [cursor=pointer]
+        - generic [ref=f1e1466]:
+          - generic [ref=f1e1467]: Menampilkan 1–6 dari 8 catatan
+          - generic [ref=f1e1468]:
+            - button "1" [ref=f1e1469] [cursor=pointer]
+            - button "2" [ref=f1e1470] [cursor=pointer]
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e1471] [cursor=pointer]: Dashboard
+      - generic [ref=f1e1478] [cursor=pointer]: Pindai
+      - generic [ref=f1e1482] [cursor=pointer]: Pelacakan
+      - generic [ref=f1e1486] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

@@ -12,6 +12,8 @@
   let mobileDonutPeriod = 'month'; // 'month' | 'today' | 'all' // 'ringkasan' | 'donut'
   let riwayatSearchQuery = '';
   let riwayatStatusFilter = 'all';
+  let riwayatStartDate = '';
+  let riwayatEndDate = '';
   let currentRiwayatView = 'card';
   let isRiwayatFilterOpen = false;
   let currentRiwayatPage = 1;
@@ -588,6 +590,26 @@
       });
     }
 
+    // 2b. Filter by Date Range (Rentang Tanggal)
+    if (riwayatStartDate) {
+      filtered = filtered.filter(t => {
+        const raw = t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        if (!d || isNaN(d.getTime())) return true;
+        const dStr = d.toISOString().slice(0, 10);
+        return dStr >= riwayatStartDate;
+      });
+    }
+    if (riwayatEndDate) {
+      filtered = filtered.filter(t => {
+        const raw = t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        if (!d || isNaN(d.getTime())) return true;
+        const dStr = d.toISOString().slice(0, 10);
+        return dStr <= riwayatEndDate;
+      });
+    }
+
     // Urutkan riwayat: Tiket terbaru selalu di paling atas
     filtered.sort((a, b) => {
       const parseTime = (t) => {
@@ -762,7 +784,7 @@
           <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px) -->
           <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isRiwayatFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleRiwayatFilter()" title="Filter Status Riwayat" aria-label="Filter Status Riwayat">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            ${(riwayatStatusFilter !== 'all') ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
+            ${(riwayatStatusFilter !== 'all' || riwayatStartDate || riwayatEndDate) ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
           </button>
           <!-- Tombol Merah Solid Sampah (36x36px visual, Hit Area >= 44x44px) -->
           <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('karyawan')">
@@ -772,12 +794,17 @@
       </div>
 
       <!-- 3. Collapsible Filter Panel -->
-      <div id="mRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isRiwayatFilterOpen ? 'block' : 'none'}; margin-bottom: 12px;">
+      <div id="mRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isRiwayatFilterOpen ? 'block' : 'none'};">
         <div class="mobile-filter-panel-title">
-          <span>Filter Status Pengajuan</span>
-          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleRiwayatFilter()">✕</button>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>Filter Status & Tanggal</span>
+          </div>
+          <button type="button" class="mobile-filter-close-btn" onclick="window.mobileToggleRiwayatFilter()" aria-label="Tutup Filter">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
           <div>
             <label class="mobile-filter-label">Status Tiket</label>
             <select class="mobile-filter-select" id="mRiwayatSelectStatus" onchange="window.mobileHandleRiwayatStatusChange(this.value)">
@@ -790,9 +817,20 @@
               <option value="Dibatalkan" ${riwayatStatusFilter === 'Dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
             </select>
           </div>
-          <div style="margin-top: 4px;">
-            <button type="button" class="mobile-btn-secondary" style="width: 100%; padding: 8px 12px; font-size: 0.75rem; font-weight: 700;" onclick="window.mobileResetRiwayatFilterKaryawan()">
-              Reset Filter
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label class="mobile-filter-label">Dari Tanggal</label>
+              <input type="date" class="mobile-filter-date" id="mRiwayatDateStart" value="${riwayatStartDate || ''}" onchange="window.mobileHandleRiwayatDateStartChange(this.value)">
+            </div>
+            <div>
+              <label class="mobile-filter-label">Sampai Tanggal</label>
+              <input type="date" class="mobile-filter-date" id="mRiwayatDateEnd" value="${riwayatEndDate || ''}" onchange="window.mobileHandleRiwayatDateEndChange(this.value)">
+            </div>
+          </div>
+          <div style="margin-top: 4px; padding-top: 8px; border-top: 1px solid #f1f5f9;">
+            <button type="button" class="mobile-filter-reset-btn" onclick="window.mobileResetRiwayatFilterKaryawan()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+              <span>Reset Filter</span>
             </button>
           </div>
         </div>
@@ -851,9 +889,82 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  window.mobileHandleRiwayatDateStartChange = function (val) {
+    riwayatStartDate = val;
+    currentRiwayatPage = 1;
+    renderMobileKaryawan(null, 'riwayat');
+  };
+
+  window.mobileHandleRiwayatDateEndChange = function (val) {
+    riwayatEndDate = val;
+    currentRiwayatPage = 1;
+    renderMobileKaryawan(null, 'riwayat');
+  };
+
+  window.mobileExportKaryawanRiwayatCsv = function () {
+    const emp = getActiveEmp();
+    let tickets = getEmpTickets().filter(t => {
+      const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
+      if (isEmergency) return true;
+      return t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa';
+    });
+
+    if (riwayatStatusFilter !== 'all') {
+      tickets = tickets.filter(t => t.status === riwayatStatusFilter);
+    }
+    if (riwayatStartDate) {
+      tickets = tickets.filter(t => {
+        const raw = t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return d && !isNaN(d.getTime()) && d.toISOString().slice(0, 10) >= riwayatStartDate;
+      });
+    }
+    if (riwayatEndDate) {
+      tickets = tickets.filter(t => {
+        const raw = t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return d && !isNaN(d.getTime()) && d.toISOString().slice(0, 10) <= riwayatEndDate;
+      });
+    }
+
+    if (tickets.length === 0) {
+      if (typeof window.showToast === 'function') window.showToast('Tidak ada data riwayat perizinan untuk diekspor.', 'warning');
+      return;
+    }
+
+    let csv = "data:text/csv;charset=utf-8,";
+    csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Alasan,Rencana Keluar,Estimasi Kembali,Status\n";
+
+    tickets.forEach(t => {
+      csv += [
+        `"${t.id}"`,
+        `"${t.applicantName || (emp ? emp.name : 'Budi Pratama')}"`,
+        `"${t.applicantNip || (emp ? emp.nip : 'PK-2024-8841')}"`,
+        `"${t.category || 'Dinas Kantor'}"`,
+        `"${t.type || t.returnType || 'Keluar Sementara'}"`,
+        `"${(t.destination || '').replace(/"/g, '""')}"`,
+        `"${(t.reason || '').replace(/"/g, '""')}"`,
+        `"${t.plannedExit || t.createdAt || '-'}"`,
+        `"${t.estimatedReturn || '-'}"`,
+        `"${t.status}"`
+      ].join(',') + "\n";
+    });
+
+    const uri = encodeURI(csv);
+    const a = document.createElement('a');
+    a.href = uri;
+    a.download = `Riwayat-Izin-Karyawan-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (typeof window.showToast === 'function') window.showToast('Riwayat berhasil diekspor ke file CSV!', 'success');
+  };
+
   window.mobileResetRiwayatFilterKaryawan = function () {
     riwayatSearchQuery = '';
     riwayatStatusFilter = 'all';
+    riwayatStartDate = '';
+    riwayatEndDate = '';
     currentRiwayatPage = 1;
     isRiwayatFilterOpen = false;
     renderMobileKaryawan(null, 'riwayat');
@@ -2588,8 +2699,14 @@
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (!sheet || !backdrop) return;
 
+    const cleanId = (typeof window.extractTicketId === 'function')
+      ? window.extractTicketId(ticketId)
+      : String(ticketId || '').replace(/^#/, '').trim();
+
     const tickets = window.ticketsList || [];
-    const t = tickets.find(x => x.id === ticketId) || getActiveTicket();
+    const t = tickets.find(x => x.id === cleanId || x.id.toUpperCase() === cleanId.toUpperCase()) ||
+      (ticketId ? tickets.find(x => x.id === ticketId) : null) ||
+      getActiveTicket();
     if (!t) return;
     const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
     const isApproved = (t.status === 'Disetujui');

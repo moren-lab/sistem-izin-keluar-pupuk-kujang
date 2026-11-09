@@ -1,0 +1,101 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area • Atasan 1
+      - generic [ref=f1e86]:
+        - button "Atasan 1 ▼" [ref=f1e491] [cursor=pointer]:
+          - generic [ref=f1e91]: Atasan 1
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "HG" [ref=f1e492]
+    - main [ref=f1e99]:
+      - generic [ref=f1e493]:
+        - generic [ref=f1e494]: Pusat Persetujuan & Monitoring Bawahan
+        - generic [ref=f1e495]: Ir. Hendra Gunawan, M.T.
+        - generic [ref=f1e496]: Atasan
+      - generic [ref=f1e498]:
+        - button "Ringkasan perizinan" [ref=f1e499] [cursor=pointer]
+        - button "Volume pengajuan tim" [ref=f1e506] [cursor=pointer]
+      - generic [ref=f1e510]:
+        - generic [ref=f1e511] [cursor=pointer]:
+          - generic [ref=f1e512]: Perlu Keputusan Segera
+          - generic [ref=f1e513]: "0"
+        - generic [ref=f1e514] [cursor=pointer]:
+          - generic [ref=f1e515]: Telah Disetujui
+          - generic [ref=f1e516]: "0"
+        - generic [ref=f1e517] [cursor=pointer]:
+          - generic [ref=f1e518]: Ditolak
+          - generic [ref=f1e519]: "0"
+        - generic [ref=f1e520] [cursor=pointer]:
+          - generic [ref=f1e521]: Total Permohonan
+          - generic [ref=f1e522]: "10"
+      - generic [ref=f1e523]:
+        - generic [ref=f1e524]:
+          - generic [ref=f1e525]:
+            - heading "Pengajuan Menunggu Persetujuan" [level=3] [ref=f1e526]
+            - generic [ref=f1e527]: Daftar permohonan bawahan yang memerlukan keputusan
+          - generic [ref=f1e528]: 0 item
+        - generic [ref=f1e529]:
+          - generic [ref=f1e533]: Tidak Ada Pengajuan Menunggu
+          - generic [ref=f1e534]: Semua izin permohonan tim bawahan telah diproses.
+        - link "Lihat Semua Antrean" [ref=f1e536] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f1e540]:
+        - heading "Aktivitas terbaru" [level=3] [ref=f1e543]
+        - generic [ref=f1e544]:
+          - generic [ref=f1e545] [cursor=pointer]:
+            - generic [ref=f1e546]: 08.31 WIB
+            - generic [ref=f1e547]:
+              - generic [ref=f1e548]: Status Terlambat
+              - generic [ref=f1e549]:
+                - generic [ref=f1e550]: Sistem Otomatis (Scheduler)
+                - generic [ref=f1e551]: •
+                - generic [ref=f1e552]: TK-20261106-901
+          - generic [ref=f1e553] [cursor=pointer]:
+            - generic [ref=f1e554]: 08.31 WIB
+            - generic [ref=f1e555]:
+              - generic [ref=f1e556]: Tiket Kedaluwarsa
+              - generic [ref=f1e557]:
+                - generic [ref=f1e558]: Sistem Otomatis (Scheduler)
+                - generic [ref=f1e559]: •
+                - generic [ref=f1e560]: TK-20261106-902
+          - generic [ref=f1e561] [cursor=pointer]:
+            - generic [ref=f1e562]: 09.10 WIB
+            - generic [ref=f1e563]:
+              - generic [ref=f1e564]: Disetujui oleh atasan
+              - generic [ref=f1e565]:
+                - generic [ref=f1e566]: Ir. Hendra Gunawan, M.T.
+                - generic [ref=f1e567]: •
+                - generic [ref=f1e568]: TK-20261106-902
+          - generic [ref=f1e569] [cursor=pointer]:
+            - generic [ref=f1e570]: 09.05 WIB
+            - generic [ref=f1e571]:
+              - generic [ref=f1e572]: Scan Out tercatat
+              - generic [ref=f1e573]:
+                - generic [ref=f1e574]: Sertu Agus (Pos 1)
+                - generic [ref=f1e575]: •
+                - generic [ref=f1e576]: TK-20261106-901
+          - generic [ref=f1e577] [cursor=pointer]:
+            - generic [ref=f1e578]: 08.45 WIB
+            - generic [ref=f1e579]:
+              - generic [ref=f1e580]: Disetujui oleh atasan
+              - generic [ref=f1e581]:
+                - generic [ref=f1e582]: Ir. Hendra Gunawan, M.T.
+                - generic [ref=f1e583]: •
+                - generic [ref=f1e584]: TK-20261106-901
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e585] [cursor=pointer]: Dashboard
+      - generic [ref=f1e592] [cursor=pointer]: Antrean
+      - generic [ref=f1e597] [cursor=pointer]: Pelacakan
+      - generic [ref=f1e602] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic: Beralih ke mode Atasan (Ir. Hendra Gunawan, M.T.)
+    - generic [ref=f1e606]: "Beralih ke tampilan simulasi: Atasan 1 (Ir. Hendra Gunawan, M.T.)"

@@ -1,0 +1,245 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area • Atasan 1
+      - generic [ref=f1e86]:
+        - button "Atasan 1 ▼" [ref=f1e491] [cursor=pointer]:
+          - generic [ref=f1e91]: Atasan 1
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "HG" [ref=f1e492]
+    - main [ref=f1e99]:
+      - heading "Riwayat Persetujuan" [level=1] [ref=f1e609]
+      - generic [ref=f1e610]:
+        - generic [ref=f1e611]: 9 riwayat tim
+        - button "Filter" [ref=f1e613] [cursor=pointer]
+      - generic [ref=f1e617]:
+        - generic [ref=f1e618]:
+          - generic [ref=f1e619]:
+            - generic [ref=f1e620]: Budi Pratama, S.T.
+            - generic [ref=f1e621]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e622]: Selesai
+        - generic [ref=f1e623]: IZ-20261019-013
+        - generic [ref=f1e624]: Tepat Waktu • Selesai
+        - generic [ref=f1e625]:
+          - generic [ref=f1e626]:
+            - generic [ref=f1e627]: Rencana keluar
+            - generic [ref=f1e628]: 10.00 WIB
+          - generic [ref=f1e629]:
+            - generic [ref=f1e630]: Scan Out aktual
+            - generic [ref=f1e631]: 10.05 WIB
+          - generic [ref=f1e632]:
+            - generic [ref=f1e633]: Estimasi kembali
+            - generic [ref=f1e634]: 13.00 WIB
+          - generic [ref=f1e635]:
+            - generic [ref=f1e636]: Tap In aktual
+            - generic [ref=f1e637]: 12.50 WIB
+        - generic [ref=f1e638]:
+          - button "Detail pengajuan" [ref=f1e639] [cursor=pointer]
+          - button "Hapus" [ref=f1e644] [cursor=pointer]
+      - generic [ref=f1e648]:
+        - generic [ref=f1e649]:
+          - generic [ref=f1e650]:
+            - generic [ref=f1e651]: Budi Pratama, S.T.
+            - generic [ref=f1e652]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e653]: Selesai
+        - generic [ref=f1e654]: IZ-20261016-006
+        - generic [ref=f1e655]: Tepat Waktu • Selesai
+        - generic [ref=f1e656]:
+          - generic [ref=f1e657]:
+            - generic [ref=f1e658]: Rencana keluar
+            - generic [ref=f1e659]: 08.30 WIB
+          - generic [ref=f1e660]:
+            - generic [ref=f1e661]: Scan Out aktual
+            - generic [ref=f1e662]: 09.05 WIB
+          - generic [ref=f1e663]:
+            - generic [ref=f1e664]: Estimasi kembali
+            - generic [ref=f1e665]: 10.45 WIB
+          - generic [ref=f1e666]:
+            - generic [ref=f1e667]: Tap In aktual
+            - generic [ref=f1e668]: 10.55 WIB
+        - generic [ref=f1e669]:
+          - button "Detail pengajuan" [ref=f1e670] [cursor=pointer]
+          - button "Hapus" [ref=f1e675] [cursor=pointer]
+      - generic [ref=f1e679]:
+        - generic [ref=f1e680]:
+          - generic [ref=f1e681]:
+            - generic [ref=f1e682]: Budi Pratama, S.T.
+            - generic [ref=f1e683]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e684]: Selesai
+        - generic [ref=f1e685]: IZ-20261014-003
+        - generic [ref=f1e686]: Tepat Waktu • Selesai
+        - generic [ref=f1e687]:
+          - generic [ref=f1e688]:
+            - generic [ref=f1e689]: Rencana keluar
+            - generic [ref=f1e690]: 09.00 WIB
+          - generic [ref=f1e691]:
+            - generic [ref=f1e692]: Scan Out aktual
+            - generic [ref=f1e693]: 13.02 WIB
+          - generic [ref=f1e694]:
+            - generic [ref=f1e695]: Estimasi kembali
+            - generic [ref=f1e696]: 11.00 WIB
+          - generic [ref=f1e697]:
+            - generic [ref=f1e698]: Tap In aktual
+            - generic [ref=f1e699]: 14.25 WIB
+        - generic [ref=f1e700]:
+          - button "Detail pengajuan" [ref=f1e701] [cursor=pointer]
+          - button "Hapus" [ref=f1e706] [cursor=pointer]
+      - generic [ref=f1e710]:
+        - generic [ref=f1e711]:
+          - generic [ref=f1e712]:
+            - generic [ref=f1e713]: Budi Pratama, S.T.
+            - generic [ref=f1e714]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e715]: Selesai
+        - generic [ref=f1e716]: IZ-20261012-005
+        - generic [ref=f1e717]: Selesai • Kembali Terlambat
+        - generic [ref=f1e718]:
+          - generic [ref=f1e719]:
+            - generic [ref=f1e720]: Rencana keluar
+            - generic [ref=f1e721]: 13.00 WIB
+          - generic [ref=f1e722]:
+            - generic [ref=f1e723]: Scan Out aktual
+            - generic [ref=f1e724]: 10.04 WIB
+          - generic [ref=f1e725]:
+            - generic [ref=f1e726]: Estimasi kembali
+            - generic [ref=f1e727]: 15.30 WIB
+          - generic [ref=f1e728]:
+            - generic [ref=f1e729]: Tap In aktual
+            - generic [ref=f1e730]: 12.10 WIB
+        - generic [ref=f1e731]:
+          - button "Detail pengajuan" [ref=f1e732] [cursor=pointer]
+          - button "Hapus" [ref=f1e737] [cursor=pointer]
+      - generic [ref=f1e741]:
+        - generic [ref=f1e742]:
+          - generic [ref=f1e743]:
+            - generic [ref=f1e744]: Arthur Morgan, S.Tr.T.
+            - generic [ref=f1e745]: PK-2024-8842 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e746]: Kedaluwarsa
+        - generic [ref=f1e747]: TK-20261106-902
+        - generic [ref=f1e748]: Belum keluar • Izin masih berlaku
+        - generic [ref=f1e749]:
+          - generic [ref=f1e750]:
+            - generic [ref=f1e751]: Rencana keluar
+            - generic [ref=f1e752]: 10.30 WIB
+          - generic [ref=f1e753]:
+            - generic [ref=f1e754]: Scan Out aktual
+            - generic [ref=f1e755]: —
+          - generic [ref=f1e756]:
+            - generic [ref=f1e757]: Estimasi kembali
+            - generic [ref=f1e758]: 15.00 WIB
+          - generic [ref=f1e759]:
+            - generic [ref=f1e760]: Tap In aktual
+            - generic [ref=f1e761]: —
+        - generic [ref=f1e762]:
+          - button "Detail pengajuan" [ref=f1e763] [cursor=pointer]
+          - button "Hapus" [ref=f1e768] [cursor=pointer]
+      - generic [ref=f1e772]:
+        - generic [ref=f1e773]:
+          - generic [ref=f1e774]:
+            - generic [ref=f1e775]: Budi Pratama, S.T.
+            - generic [ref=f1e776]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e777]: Selesai
+        - generic [ref=f1e778]: IZ-20261009-002
+        - generic [ref=f1e779]: Tepat Waktu • Selesai
+        - generic [ref=f1e780]:
+          - generic [ref=f1e781]:
+            - generic [ref=f1e782]: Rencana keluar
+            - generic [ref=f1e783]: 10.00 WIB
+          - generic [ref=f1e784]:
+            - generic [ref=f1e785]: Scan Out aktual
+            - generic [ref=f1e786]: —
+          - generic [ref=f1e787]:
+            - generic [ref=f1e788]: Estimasi kembali
+            - generic [ref=f1e789]: 12.00 WIB
+          - generic [ref=f1e790]:
+            - generic [ref=f1e791]: Tap In aktual
+            - generic [ref=f1e792]: —
+        - generic [ref=f1e793]:
+          - button "Detail pengajuan" [ref=f1e794] [cursor=pointer]
+          - button "Hapus" [ref=f1e799] [cursor=pointer]
+      - generic [ref=f1e803]:
+        - generic [ref=f1e804]:
+          - generic [ref=f1e805]:
+            - generic [ref=f1e806]: Budi Pratama, S.T.
+            - generic [ref=f1e807]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e808]: Selesai
+        - generic [ref=f1e809]: IZ-20261007-004
+        - generic [ref=f1e810]: Tepat Waktu • Selesai
+        - generic [ref=f1e811]:
+          - generic [ref=f1e812]:
+            - generic [ref=f1e813]: Rencana keluar
+            - generic [ref=f1e814]: 09.00 WIB
+          - generic [ref=f1e815]:
+            - generic [ref=f1e816]: Scan Out aktual
+            - generic [ref=f1e817]: 09.00 WIB
+          - generic [ref=f1e818]:
+            - generic [ref=f1e819]: Estimasi kembali
+            - generic [ref=f1e820]: 11.30 WIB
+          - generic [ref=f1e821]:
+            - generic [ref=f1e822]: Tap In aktual
+            - generic [ref=f1e823]: 11.50 WIB
+        - generic [ref=f1e824]:
+          - button "Detail pengajuan" [ref=f1e825] [cursor=pointer]
+          - button "Hapus" [ref=f1e830] [cursor=pointer]
+      - generic [ref=f1e834]:
+        - generic [ref=f1e835]:
+          - generic [ref=f1e836]:
+            - generic [ref=f1e837]: Budi Pratama, S.T.
+            - generic [ref=f1e838]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e839]: Selesai
+        - generic [ref=f1e840]: IZ-20261005-001
+        - generic [ref=f1e841]: Tepat Waktu • Selesai
+        - generic [ref=f1e842]:
+          - generic [ref=f1e843]:
+            - generic [ref=f1e844]: Rencana keluar
+            - generic [ref=f1e845]: 08.00 WIB
+          - generic [ref=f1e846]:
+            - generic [ref=f1e847]: Scan Out aktual
+            - generic [ref=f1e848]: 08.10 WIB
+          - generic [ref=f1e849]:
+            - generic [ref=f1e850]: Estimasi kembali
+            - generic [ref=f1e851]: 10.30 WIB
+          - generic [ref=f1e852]:
+            - generic [ref=f1e853]: Tap In aktual
+            - generic [ref=f1e854]: 15.45 WIB
+        - generic [ref=f1e855]:
+          - button "Detail pengajuan" [ref=f1e856] [cursor=pointer]
+          - button "Hapus" [ref=f1e861] [cursor=pointer]
+      - generic [ref=f1e865]:
+        - generic [ref=f1e866]:
+          - generic [ref=f1e867]:
+            - generic [ref=f1e868]: Budi Pratama, S.T.
+            - generic [ref=f1e869]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f1e870]: Selesai
+        - generic [ref=f1e871]: IZ-20261002-001
+        - generic [ref=f1e872]: Tepat Waktu • Selesai
+        - generic [ref=f1e873]:
+          - generic [ref=f1e874]:
+            - generic [ref=f1e875]: Rencana keluar
+            - generic [ref=f1e876]: 09.00 WIB
+          - generic [ref=f1e877]:
+            - generic [ref=f1e878]: Scan Out aktual
+            - generic [ref=f1e879]: 09.55 WIB
+          - generic [ref=f1e880]:
+            - generic [ref=f1e881]: Estimasi kembali
+            - generic [ref=f1e882]: 11.40 WIB
+          - generic [ref=f1e883]:
+            - generic [ref=f1e884]: Tap In aktual
+            - generic [ref=f1e885]: 11.40 WIB
+        - generic [ref=f1e886]:
+          - button "Detail pengajuan" [ref=f1e887] [cursor=pointer]
+          - button "Hapus" [ref=f1e892] [cursor=pointer]
+      - generic [ref=f1e896]: "1"
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e898] [cursor=pointer]: Dashboard
+      - generic [ref=f1e905] [cursor=pointer]: Antrean
+      - generic [ref=f1e910] [cursor=pointer]: Pelacakan
+      - generic [ref=f1e915] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

@@ -1148,7 +1148,7 @@ body.theme-dark .mobile-top-role-pill {
 .mobile-scanner-box {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #0f172a;
+  background: transparent;
   border-radius: 16px;
   position: relative;
   overflow: hidden;
@@ -1854,20 +1854,16 @@ body.theme-dark .mobile-summary-value {
   min-height: 260px;
 }
 
-.mobile-scanner-viewfinder {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+.mobile-scanner-viewfinder,
+.mobile-scanner-corner,
+.mobile-scanner-laser {
+  display: none !important;
 }
 
 .mobile-scanner-box {
   width: 200px;
   height: 200px;
+  background: transparent !important;
   border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 16px;
   position: relative;
@@ -1942,11 +1938,11 @@ body.theme-dark .mobile-summary-value {
 
 #mobileAppContainer .mobile-filter-panel {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  padding: 12px 14px !important;
-  margin-bottom: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 14px !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04) !important;
   animation: mobileFilterSlide 0.18s ease-out !important;
 }
 
@@ -1963,10 +1959,12 @@ body.theme-dark .mobile-summary-value {
 }
 
 #mobileAppContainer .mobile-filter-panel-title {
-  font-size: 0.775rem !important;
+  font-size: 0.8125rem !important;
   font-weight: 800 !important;
   color: #0f172a !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -1974,49 +1972,107 @@ body.theme-dark .mobile-summary-value {
 
 #mobileAppContainer .mobile-filter-label {
   display: block !important;
-  font-size: 0.685rem !important;
+  font-size: 0.7rem !important;
   font-weight: 700 !important;
   color: #475569 !important;
-  margin-bottom: 4px !important;
+  margin-bottom: 5px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
 }
 
 #mobileAppContainer .mobile-filter-input,
 #mobileAppContainer .mobile-filter-select,
+#mobileAppContainer .mobile-filter-date,
 #mobileAppContainer input.mobile-input,
 #mobileAppContainer select.mobile-select {
   width: 100% !important;
-  font-size: 0.775rem !important;
+  font-size: 0.8rem !important;
   line-height: 1.35 !important;
-  padding: 7px 10px !important;
+  padding: 0 10px !important;
   border-radius: 8px !important;
-  border: 1px solid #cbd5e1 !important;
+  border: 1.5px solid #cbd5e1 !important;
   background-color: #ffffff !important;
   color: #0f172a !important;
   box-sizing: border-box !important;
   font-family: inherit !important;
   outline: none !important;
-  height: 36px !important;
+  height: 38px !important;
   transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
 #mobileAppContainer .mobile-filter-input:focus,
 #mobileAppContainer .mobile-filter-select:focus,
+#mobileAppContainer .mobile-filter-date:focus,
 #mobileAppContainer input.mobile-input:focus,
 #mobileAppContainer select.mobile-select:focus {
   border-color: #059669 !important;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12) !important;
 }
 
-/* Custom dropdown arrow for mobile select */
+/* Custom dropdown arrow for mobile select ONLY (not date) */
 #mobileAppContainer select.mobile-select,
 #mobileAppContainer .mobile-filter-select {
   appearance: none !important;
   -webkit-appearance: none !important;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%226%22%20viewBox%3D%220%200%2010%206%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M1%201L5%205L9%201%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: right 10px center !important;
-  background-size: 10px 6px !important;
-  padding-right: 28px !important;
+  background-size: 12px 12px !important;
+  padding-right: 30px !important;
+}
+
+/* Dedicated clean date input for mobile filter (no fake chevron arrow) */
+#mobileAppContainer .mobile-filter-date {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  background-image: none !important;
+  padding: 0 8px !important;
+  font-weight: 600 !important;
+}
+
+/* Mobile Filter Close Button */
+#mobileAppContainer .mobile-filter-close-btn {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 6px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+  color: #64748b !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+}
+
+#mobileAppContainer .mobile-filter-close-btn:active {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Mobile Filter Reset Button */
+#mobileAppContainer .mobile-filter-reset-btn {
+  width: 100% !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  color: #475569 !important;
+  font-size: 0.775rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease !important;
+}
+
+#mobileAppContainer .mobile-filter-reset-btn:active {
+  background: #e2e8f0 !important;
+  transform: scale(0.99) !important;
 }
 
 body.theme-dark #mobileAppContainer .mobile-filter-toggle-btn {
@@ -2032,12 +2088,14 @@ body.theme-dark #mobileAppContainer .mobile-filter-toggle-btn.active {
 }
 
 body.theme-dark #mobileAppContainer .mobile-filter-panel {
-  background: #131b2a !important;
-  border-color: #1e293b !important;
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
 body.theme-dark #mobileAppContainer .mobile-filter-panel-title {
   color: #f8fafc !important;
+  border-bottom-color: #334155 !important;
 }
 
 body.theme-dark #mobileAppContainer .mobile-filter-label {
@@ -2046,11 +2104,24 @@ body.theme-dark #mobileAppContainer .mobile-filter-label {
 
 body.theme-dark #mobileAppContainer .mobile-filter-input,
 body.theme-dark #mobileAppContainer .mobile-filter-select,
+body.theme-dark #mobileAppContainer .mobile-filter-date,
 body.theme-dark #mobileAppContainer input.mobile-input,
 body.theme-dark #mobileAppContainer select.mobile-select {
-  background-color: #1e293b !important;
+  background-color: #0f172a !important;
   border-color: #334155 !important;
   color: #f8fafc !important;
+}
+
+body.theme-dark #mobileAppContainer .mobile-filter-close-btn {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #cbd5e1 !important;
+}
+
+body.theme-dark #mobileAppContainer .mobile-filter-reset-btn {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
 }
 
 
@@ -3118,4 +3189,62 @@ body.theme-dark .mobile-notif-row-delete-btn:active,
 .theme-dark .mobile-notif-row-delete-btn:active {
   color: #f87171 !important;
   background: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* -------------------------------------------------------------------
+   20. MOBILE NOTIFICATION DROPDOWN (Identik dengan Gambar 1 Web)
+   ------------------------------------------------------------------- */
+.mobile-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -44px;
+  width: min(340px, calc(100vw - 20px));
+  max-height: 75vh;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  z-index: 2500;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: dropdown-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theme-dark .mobile-notif-dropdown,
+.theme-dark .mobile-notif-dropdown {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.theme-dark .mobile-notif-dropdown > div:first-child {
+  background: #1e293b !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.theme-dark .mobile-notif-dropdown > div:first-child span {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .mobile-notif-dropdown > div:last-child {
+  background: #0f172a !important;
+  border-top-color: #334155 !important;
+}
+
+/* Export CSV Mobile Button */
+.mobile-btn-export-csv {
+  transition: transform 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.mobile-btn-export-csv:active {
+  transform: scale(0.94);
+  background-color: #e0f2fe !important;
+}
+
+body.theme-dark .mobile-btn-export-csv,
+.theme-dark .mobile-btn-export-csv {
+  background: #0c4a6e !important;
+  border-color: #0284c7 !important;
+  color: #38bdf8 !important;
 }

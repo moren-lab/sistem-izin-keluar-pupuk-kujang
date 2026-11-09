@@ -3078,11 +3078,28 @@
           <span id="mobileRoleHeaderLabel">Karyawan</span>
           <span style="font-size: 0.65rem; opacity: 0.7;">▼</span>
         </button>
-        <!-- Mobile Notification Bell Button (Min 44x44px, disamping Icon User) -->
-        <button type="button" class="mobile-top-notif-btn" id="mBtnTopNotif" aria-label="Notifikasi" onclick="window.openMobileNotificationSheet()" title="Notifikasi">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span class="mobile-notif-badge" id="mNotifBadge" style="display: none;">0</span>
-        </button>
+        <!-- Mobile Notification Bell & Dropdown Panel (Identik Persis Versi Web Gambar 1) -->
+        <div class="mobile-top-notif-wrap" id="mobileNotifWrap" style="position: relative;">
+          <button type="button" class="mobile-top-notif-btn" id="mBtnTopNotif" aria-label="Notifikasi" onclick="window.toggleMobileNotifDropdown()" title="Notifikasi">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="mobile-notif-badge" id="mNotifBadge" style="display: none;">0</span>
+          </button>
+          
+          <div class="mobile-notif-dropdown" id="mobileNotifDropdown" style="display: none; position: absolute; top: calc(100% + 8px); right: -44px; width: min(340px, calc(100vw - 20px)); background: #ffffff; border-radius: 14px; border: 1.5px solid #cbd5e1; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16); z-index: 2500; overflow: hidden; animation: dropdown-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">Notifikasi</span>
+                <span id="mobileNotifUnreadPill" style="font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #e2e8f0; color: #334155;">0 baru</span>
+              </div>
+              <button type="button" style="border: none; background: none; color: #2563eb; font-size: 0.725rem; font-weight: 700; cursor: pointer; padding: 4px;" onclick="window.markAllMobileNotifsAsRead()">Tandai semua dibaca</button>
+            </div>
+            <div id="mobileNotifDropdownList" style="max-height: 360px; overflow-y: auto;">
+            </div>
+            <div style="padding: 10px 14px; border-top: 1px solid #f1f5f9; text-align: center; background: #f8fafc;">
+              <a href="#" style="font-size: 0.775rem; font-weight: 700; color: #059669; text-decoration: none;" onclick="window.closeMobileNotifDropdown(); window.openMobileFullNotificationSheet('all'); return false;">Lihat semua notifikasi →</a>
+            </div>
+          </div>
+        </div>
         <div class="mobile-user-avatar mobile-touch-hit-44" id="mobileUserAvatar" onclick="window.openMobileAvatarMenu()" aria-label="Menu Akun & Keluar SAKTI" role="button" tabindex="0" title="Akun Pengguna & Keluar SAKTI">
           BP
         </div>
@@ -4596,7 +4613,7 @@
   <script src="js/data/mockData.js?v=20261103_0940"></script>
   <script src="js/data/authData.js?v=20261103_0940"></script>
   <script src="js/modules/auth.js?v=20261103_0940"></script>
-  <script src="js/modules/notifications.js?v=20261109_0730"></script>
+  <script src="js/modules/notifications.js?v=20261109_0930"></script>
   <script src="js/modules/ui.js?v=20261103_0940"></script>
   <script src="js/modules/scheduler.js?v=20261103_0940"></script>
   <script src="js/modules/navigation.js?v=20261103_0940"></script>

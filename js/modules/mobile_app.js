@@ -491,17 +491,6 @@
     const notifSource = window._openedFromNotificationSource;
     const isMobileEnv = (window.innerWidth <= 768);
 
-    // Jika sedang melihat detail tiket yang dibuka dari notifikasi mobile, kembalikan ke daftar notifikasi
-    if (wasFromNotif && (notifSource === 'mobile' || (!notifSource && isMobileEnv))) {
-      window._openedFromNotification = false;
-      window._openedFromNotificationSource = null;
-      window._openedFromNotificationTab = null;
-      if (typeof window.openMobileNotificationSheet === 'function') {
-        window.openMobileNotificationSheet(notifTab);
-        return;
-      }
-    }
-
     window._openedFromNotification = false;
     window._openedFromNotificationSource = null;
     window._openedFromNotificationTab = null;
@@ -517,15 +506,39 @@
         history.back();
       }
     } catch (e) {}
+
+    // Jika sedang melihat detail tiket yang dibuka dari action sheet notifikasi mobile lengkap, kembalikan ke daftar
+    if (wasFromNotif && (notifSource === 'mobile' || (!notifSource && isMobileEnv))) {
+      if (notifTab !== 'dropdown' && typeof window.openMobileFullNotificationSheet === 'function') {
+        setTimeout(() => {
+          window.openMobileFullNotificationSheet(notifTab);
+        }, 50);
+      }
+    }
   };
 
-  // Interceptor: jika openTicketDetail dipanggil pada mode mobile, selalu arahkan ke mobile sheet asli (Image 2)
+  // Interceptor: jika openTicketDetail dipanggil pada mode mobile, selalu arahkan ke detail per-aktor native mobile
   const _origOpenTicketDetail = window.openTicketDetail;
   window.openTicketDetail = function (ticketId, mode, options) {
     const isMobile = (window.innerWidth <= 768);
-    if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
-      window.mobileOpenTicketDetail(ticketId);
-      return;
+    if (isMobile) {
+      const activeRole = window.currentMobileRole || window.currentActor;
+      if (activeRole === 'approver' || activeRole === 'approver2') {
+        if (typeof window.mobileOpenAtasanDetailModal === 'function') {
+          window.mobileOpenAtasanDetailModal(ticketId);
+          return;
+        }
+      } else if (activeRole === 'security') {
+        if (typeof window.mobileSecurityInspectTicket === 'function') {
+          window.mobileSecurityInspectTicket(ticketId);
+          return;
+        }
+      } else {
+        if (typeof window.mobileOpenTicketDetail === 'function') {
+          window.mobileOpenTicketDetail(ticketId);
+          return;
+        }
+      }
     }
     if (typeof _origOpenTicketDetail === 'function') {
       return _origOpenTicketDetail.apply(this, arguments);

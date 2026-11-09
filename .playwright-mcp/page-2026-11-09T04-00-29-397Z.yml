@@ -1,0 +1,91 @@
+- generic [active] [ref=f10e1]:
+  - text: – – – – – – –
+  - generic [ref=f10e2]:
+    - banner [ref=f10e3]:
+      - generic [ref=f10e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f10e6]
+        - generic [ref=f10e7]:
+          - generic [ref=f10e8]: PUPUK KUJANG
+          - generic [ref=f10e9]: Perizinan Keluar Area • Pos Jaga
+      - generic [ref=f10e10]:
+        - button "Pos Jaga ▼" [ref=f10e11] [cursor=pointer]:
+          - generic [ref=f10e15]: Pos Jaga
+          - generic [ref=f10e16]: ▼
+        - button "Notifikasi" [ref=f10e18] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f10e22] [cursor=pointer]:
+          - img "SA" [ref=f10e23]
+    - main [ref=f10e24]:
+      - generic [ref=f10e25]:
+        - generic [ref=f10e26]: Selamat pagi, petugas Pos Jaga
+        - heading "Sertu Agus" [level=2] [ref=f10e27]
+        - generic [ref=f10e28]: NIP SEC-2018-042 • Departemen Pengamanan & K3
+        - button "Buka Kamera Scan" [ref=f10e30] [cursor=pointer]
+      - generic [ref=f10e32]:
+        - generic [ref=f10e33]: 1 Karyawan Terlambat Kembali
+        - generic [ref=f10e34]:
+          - strong [ref=f10e35]: Budi Pratama, S.T.
+          - text: terlambat 4110 menit. Batas kembali 14.30 WIB; belum Tap In. Tindak lanjuti di Pos 1.
+        - button "Lihat Headcount Terlambat →" [ref=f10e36] [cursor=pointer]
+      - generic [ref=f10e37]:
+        - generic [ref=f10e38] [cursor=pointer]:
+          - generic [ref=f10e39]: Sedang di luar
+          - generic [ref=f10e40]: "1"
+        - generic [ref=f10e41] [cursor=pointer]:
+          - generic [ref=f10e42]: Siap keluar
+          - generic [ref=f10e43]: "0"
+        - generic [ref=f10e44] [cursor=pointer]:
+          - generic [ref=f10e45]: Scan Out hari ini
+          - generic [ref=f10e46]: "9"
+        - generic [ref=f10e47]:
+          - generic [ref=f10e48]: Tap In hari ini
+          - generic [ref=f10e49]: "7"
+      - generic [ref=f10e50]:
+        - generic [ref=f10e51]:
+          - heading "Karyawan sedang di luar" [level=3] [ref=f10e52]
+          - generic [ref=f10e53]: Sedang di luar
+        - generic [ref=f10e54]:
+          - generic [ref=f10e55]:
+            - generic [ref=f10e56]:
+              - text: Budi Pratama, S.T.
+              - generic [ref=f10e57]: Terlambat
+            - generic [ref=f10e58]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f10e59]: Scan Out 09.05 WIB • Kembali 14.30 WIB
+            - generic [ref=f10e60]: Terlambat 4110 menit
+          - button "Detail Pengajuan" [ref=f10e61] [cursor=pointer]
+        - link "Lihat pelacakan →" [ref=f10e67] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f10e68]:
+        - heading "Aktivitas transaksi terbaru" [level=3] [ref=f10e70]
+        - generic [ref=f10e72]:
+          - generic [ref=f10e73]: Budi Pratama, S.T.
+          - generic [ref=f10e74]: TK-20261106-901 • Pos 1 Gerbang Utama
+          - generic [ref=f10e75]: Scan Out • 09.05 WIB
+          - generic [ref=f10e76]: "Petugas: Sertu Agus"
+        - generic [ref=f10e78]:
+          - generic [ref=f10e79]: Budi Pratama, S.T.
+          - generic [ref=f10e80]: IZ-20261019-013 • Pos 1 Gerbang Utama (Utara)
+          - generic [ref=f10e81]: Tap In • 12.50 WIB
+          - generic [ref=f10e82]: "Petugas: Sertu Agus"
+        - generic [ref=f10e84]:
+          - generic [ref=f10e85]: Budi Pratama, S.T.
+          - generic [ref=f10e86]: IZ-20261016-006 • Pos 1 Gerbang Utama (Utara)
+          - generic [ref=f10e87]: Tap In • 10.55 WIB
+          - generic [ref=f10e88]: "Petugas: Sertu Agus"
+        - generic [ref=f10e90]:
+          - generic [ref=f10e91]: Budi Pratama, S.T.
+          - generic [ref=f10e92]: IZ-20261014-003 • Pos 1 Gerbang Utama (Utara)
+          - generic [ref=f10e93]: Tap In • 14.25 WIB
+          - generic [ref=f10e94]: "Petugas: Sertu Agus"
+        - link "Semua riwayat →" [ref=f10e96] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f10e97]:
+      - generic [ref=f10e98] [cursor=pointer]: Dashboard
+      - generic [ref=f10e105] [cursor=pointer]: Pindai
+      - generic [ref=f10e109] [cursor=pointer]: Pelacakan
+      - generic [ref=f10e113] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic: Beralih ke mode Pos Jaga Pengamanan (Sertu Agus)
+    - generic [ref=f10e118]: Selamat datang, Sertu Agus (undefined)
+    - generic: Beralih ke mode Pos Jaga Pengamanan (Sertu Agus)

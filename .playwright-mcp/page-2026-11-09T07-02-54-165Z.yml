@@ -1,0 +1,147 @@
+- generic [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area
+      - generic [ref=f1e86]:
+        - button "Karyawan ▼" [active] [ref=f1e87] [cursor=pointer]:
+          - generic [ref=f1e91]: Karyawan
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "BP" [ref=f1e101]
+    - main [ref=f1e99]:
+      - textbox "Cari nomor tiket, tujuan, alasan, kategori..." [ref=f1e333]
+      - generic [ref=f1e334]:
+        - generic [ref=f1e335]: 9 tiket riwayat
+        - generic [ref=f1e336]:
+          - button "Unduh Riwayat CSV" [ref=f1e337] [cursor=pointer]
+          - button "Filter Status Riwayat" [ref=f1e341] [cursor=pointer]
+          - button "Hapus Riwayat Selesai" [ref=f1e344] [cursor=pointer]
+      - generic [ref=f1e347]:
+        - generic [ref=f1e348]:
+          - generic [ref=f1e349]: Filter Status & Tanggal
+          - button "✕" [ref=f1e350] [cursor=pointer]
+        - generic [ref=f1e351]:
+          - generic [ref=f1e352]:
+            - generic [ref=f1e353]: Status Tiket
+            - combobox [ref=f1e354]:
+              - option "Semua Status" [selected]
+              - option "Sedang di Luar"
+              - option "Disetujui"
+              - option "Selesai"
+              - option "Terlambat"
+              - option "Ditolak"
+              - option "Dibatalkan"
+          - generic [ref=f1e355]:
+            - generic [ref=f1e356]:
+              - generic [ref=f1e357]: Dari Tanggal
+              - textbox [ref=f1e358]
+            - generic [ref=f1e359]:
+              - generic [ref=f1e360]: Sampai Tanggal
+              - textbox [ref=f1e361]
+          - button "Reset Filter" [ref=f1e363] [cursor=pointer]
+      - generic [ref=f1e364]:
+        - generic [ref=f1e365]:
+          - generic [ref=f1e366]:
+            - generic [ref=f1e367]:
+              - generic [ref=f1e368]: IZ-20261019-013
+              - generic [ref=f1e370]: Diajukan Senin
+            - generic [ref=f1e371]: Selesai
+          - generic "PT Rekayasa Industri, Cikampek" [ref=f1e372]
+          - generic [ref=f1e373]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e374]:
+            - generic [ref=f1e375]: 10.00 WIB – 13.00 WIB
+            - button "Detail Pengajuan" [ref=f1e376] [cursor=pointer]
+        - generic [ref=f1e381]:
+          - generic [ref=f1e382]:
+            - generic [ref=f1e383]:
+              - generic [ref=f1e384]:
+                - generic [ref=f1e385]: IZ-20261016-006
+                - generic [ref=f1e386]: Izin Darurat
+              - generic [ref=f1e387]: Diajukan Senin
+            - generic [ref=f1e388]: Selesai
+          - generic "Pelabuhan Cirebon" [ref=f1e389]
+          - generic [ref=f1e390]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e391]:
+            - generic [ref=f1e392]: 08.30 WIB – 10.45 WIB
+            - button "Detail Pengajuan" [ref=f1e393] [cursor=pointer]
+        - generic [ref=f1e398]:
+          - generic [ref=f1e399]:
+            - generic [ref=f1e400]:
+              - generic [ref=f1e401]: IZ-20261014-003
+              - generic [ref=f1e403]: Diajukan Sabtu
+            - generic [ref=f1e404]: Selesai
+          - generic "RSUD Karawang" [ref=f1e405]
+          - generic [ref=f1e406]: Urusan Pribadi • Kembali ke Area
+          - generic [ref=f1e407]:
+            - generic [ref=f1e408]: 09.00 WIB – 11.00 WIB
+            - button "Detail Pengajuan" [ref=f1e409] [cursor=pointer]
+        - generic [ref=f1e414]:
+          - generic [ref=f1e415]:
+            - generic [ref=f1e416]:
+              - generic [ref=f1e417]: IZ-20261012-005
+              - generic [ref=f1e419]: Diajukan Jumat
+            - generic [ref=f1e420]: Selesai
+          - generic "Kantor Distributor Bekasi" [ref=f1e421]
+          - generic [ref=f1e422]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e423]:
+            - generic [ref=f1e424]: 13.00 WIB – 15.30 WIB
+            - button "Detail Pengajuan" [ref=f1e425] [cursor=pointer]
+        - generic [ref=f1e430]:
+          - generic [ref=f1e431]:
+            - generic [ref=f1e432]:
+              - generic [ref=f1e433]: TK-20261106-901
+              - generic [ref=f1e435]: Diajukan Jumat
+            - generic [ref=f1e436]: Terlambat
+          - generic "PT Rekayasa Industri, Cikampek" [ref=f1e437]
+          - generic [ref=f1e438]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e439]:
+            - generic [ref=f1e440]: 09.00 WIB – 14.30 WIB
+            - button "Detail Pengajuan" [ref=f1e441] [cursor=pointer]
+        - generic [ref=f1e446]:
+          - generic [ref=f1e447]:
+            - generic [ref=f1e448]:
+              - generic [ref=f1e449]: IZ-20261009-002
+              - generic [ref=f1e451]: Diajukan Kamis
+            - generic [ref=f1e452]: Selesai
+          - generic "Rumah (keperluan keluarga)" [ref=f1e453]
+          - generic [ref=f1e454]: Urusan Pribadi • Pulang Lebih Awal
+          - generic [ref=f1e455]:
+            - generic [ref=f1e456]: "Keluar: 10.00 WIB"
+            - button "Detail Pengajuan" [ref=f1e457] [cursor=pointer]
+      - generic [ref=f1e462]:
+        - generic [ref=f1e463]: Menampilkan 1–6 dari 9 tiket
+        - generic [ref=f1e464]:
+          - button "1" [ref=f1e465] [cursor=pointer]
+          - button "2" [ref=f1e466] [cursor=pointer]
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e312] [cursor=pointer]: Dashboard
+      - generic [ref=f1e319] [cursor=pointer]: Pengajuan
+      - generic [ref=f1e324] [cursor=pointer]: Riwayat
+    - generic [ref=f1e468]:
+      - generic [ref=f1e470]:
+        - heading "Simulasi Beralih Peran" [level=3] [ref=f1e471]
+        - button "✕" [ref=f1e472] [cursor=pointer]
+      - generic [ref=f1e473]:
+        - button "Karyawan Budi Pratama, S.T." [ref=f1e474] [cursor=pointer]:
+          - generic [ref=f1e475]: Karyawan
+          - generic [ref=f1e476]: Budi Pratama, S.T.
+        - button "Karyawan 2 Arthur Morgan, S.Tr.T." [ref=f1e477] [cursor=pointer]:
+          - generic [ref=f1e478]: Karyawan 2
+          - generic [ref=f1e479]: Arthur Morgan, S.Tr.T.
+        - button "Atasan 1 Ir. Hendra Gunawan, M.T. (Manager)" [ref=f1e480] [cursor=pointer]:
+          - generic [ref=f1e481]: Atasan 1
+          - generic [ref=f1e482]: Ir. Hendra Gunawan, M.T. (Manager)
+        - button "Atasan 2 Dewi Sartika, S.T., M.M. (VP/Plt)" [ref=f1e483] [cursor=pointer]:
+          - generic [ref=f1e484]: Atasan 2
+          - generic [ref=f1e485]: Dewi Sartika, S.T., M.M. (VP/Plt)
+        - button "Pos Jaga Sertu Agus (Pos 1 Gerbang Utama)" [ref=f1e486] [cursor=pointer]:
+          - generic [ref=f1e487]: Pos Jaga
+          - generic [ref=f1e488]: Sertu Agus (Pos 1 Gerbang Utama)
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

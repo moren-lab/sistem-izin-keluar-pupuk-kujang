@@ -1,0 +1,104 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area
+      - generic [ref=f1e86]:
+        - button "Karyawan ▼" [ref=f1e87] [cursor=pointer]:
+          - generic [ref=f1e91]: Karyawan
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "BP" [ref=f1e101]
+    - main [ref=f1e99]:
+      - textbox "Cari nomor tiket, tujuan, alasan, kategori..." [ref=f1e195]
+      - generic [ref=f1e196]:
+        - generic [ref=f1e197]: 9 tiket riwayat
+        - generic [ref=f1e198]:
+          - button "Unduh Riwayat CSV" [ref=f1e199] [cursor=pointer]
+          - button "Filter Status Riwayat" [ref=f1e203] [cursor=pointer]
+          - button "Hapus Riwayat Selesai" [ref=f1e206] [cursor=pointer]
+      - generic [ref=f1e209]:
+        - generic [ref=f1e210]:
+          - generic [ref=f1e211]:
+            - generic [ref=f1e212]:
+              - generic [ref=f1e213]: IZ-20261019-013
+              - generic [ref=f1e215]: Diajukan Senin
+            - generic [ref=f1e216]: Selesai
+          - generic "PT Rekayasa Industri, Cikampek" [ref=f1e217]
+          - generic [ref=f1e218]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e219]:
+            - generic [ref=f1e220]: 10.00 WIB – 13.00 WIB
+            - button "Detail Pengajuan" [ref=f1e221] [cursor=pointer]
+        - generic [ref=f1e226]:
+          - generic [ref=f1e227]:
+            - generic [ref=f1e228]:
+              - generic [ref=f1e229]:
+                - generic [ref=f1e230]: IZ-20261016-006
+                - generic [ref=f1e231]: Izin Darurat
+              - generic [ref=f1e232]: Diajukan Senin
+            - generic [ref=f1e233]: Selesai
+          - generic "Pelabuhan Cirebon" [ref=f1e234]
+          - generic [ref=f1e235]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e236]:
+            - generic [ref=f1e237]: 08.30 WIB – 10.45 WIB
+            - button "Detail Pengajuan" [ref=f1e238] [cursor=pointer]
+        - generic [ref=f1e243]:
+          - generic [ref=f1e244]:
+            - generic [ref=f1e245]:
+              - generic [ref=f1e246]: IZ-20261014-003
+              - generic [ref=f1e248]: Diajukan Sabtu
+            - generic [ref=f1e249]: Selesai
+          - generic "RSUD Karawang" [ref=f1e250]
+          - generic [ref=f1e251]: Urusan Pribadi • Kembali ke Area
+          - generic [ref=f1e252]:
+            - generic [ref=f1e253]: 09.00 WIB – 11.00 WIB
+            - button "Detail Pengajuan" [ref=f1e254] [cursor=pointer]
+        - generic [ref=f1e259]:
+          - generic [ref=f1e260]:
+            - generic [ref=f1e261]:
+              - generic [ref=f1e262]: IZ-20261012-005
+              - generic [ref=f1e264]: Diajukan Jumat
+            - generic [ref=f1e265]: Selesai
+          - generic "Kantor Distributor Bekasi" [ref=f1e266]
+          - generic [ref=f1e267]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e268]:
+            - generic [ref=f1e269]: 13.00 WIB – 15.30 WIB
+            - button "Detail Pengajuan" [ref=f1e270] [cursor=pointer]
+        - generic [ref=f1e275]:
+          - generic [ref=f1e276]:
+            - generic [ref=f1e277]:
+              - generic [ref=f1e278]: TK-20261106-901
+              - generic [ref=f1e280]: Diajukan Jumat
+            - generic [ref=f1e281]: Terlambat
+          - generic "PT Rekayasa Industri, Cikampek" [ref=f1e282]
+          - generic [ref=f1e283]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f1e284]:
+            - generic [ref=f1e285]: 09.00 WIB – 14.30 WIB
+            - button "Detail Pengajuan" [ref=f1e286] [cursor=pointer]
+        - generic [ref=f1e291]:
+          - generic [ref=f1e292]:
+            - generic [ref=f1e293]:
+              - generic [ref=f1e294]: IZ-20261009-002
+              - generic [ref=f1e296]: Diajukan Kamis
+            - generic [ref=f1e297]: Selesai
+          - generic "Rumah (keperluan keluarga)" [ref=f1e298]
+          - generic [ref=f1e299]: Urusan Pribadi • Pulang Lebih Awal
+          - generic [ref=f1e300]:
+            - generic [ref=f1e301]: "Keluar: 10.00 WIB"
+            - button "Detail Pengajuan" [ref=f1e302] [cursor=pointer]
+      - generic [ref=f1e307]:
+        - generic [ref=f1e308]: Menampilkan 1–6 dari 9 tiket
+        - generic [ref=f1e309]:
+          - button "1" [ref=f1e310] [cursor=pointer]
+          - button "2" [ref=f1e311] [cursor=pointer]
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e312] [cursor=pointer]: Dashboard
+      - generic [ref=f1e319] [cursor=pointer]: Pengajuan
+      - generic [ref=f1e324] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

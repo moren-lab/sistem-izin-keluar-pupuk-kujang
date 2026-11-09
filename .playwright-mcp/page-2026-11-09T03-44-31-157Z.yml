@@ -1,0 +1,87 @@
+- generic [active] [ref=f8e1]:
+  - text: – – – – – – –
+  - generic [ref=f8e2]:
+    - banner [ref=f8e3]:
+      - generic [ref=f8e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f8e6]
+        - generic [ref=f8e7]:
+          - generic [ref=f8e8]: PUPUK KUJANG
+          - generic [ref=f8e9]: Perizinan Keluar Area
+      - generic [ref=f8e10]:
+        - button "Karyawan ▼" [ref=f8e11] [cursor=pointer]:
+          - generic [ref=f8e15]: Karyawan
+          - generic [ref=f8e16]: ▼
+        - button "Notifikasi" [ref=f8e18] [cursor=pointer]:
+          - generic [ref=f8e22]: "3"
+        - button "Menu Akun & Keluar SAKTI" [ref=f8e23] [cursor=pointer]:
+          - img "BP" [ref=f8e24]
+    - main [ref=f8e25]:
+      - generic [ref=f8e26]:
+        - generic [ref=f8e27]: Selamat pagi,
+        - heading "Budi Pratama, S.T." [level=2] [ref=f8e28]
+        - generic [ref=f8e29]: Karyawan
+        - generic [ref=f8e30]: Departemen Rekayasa & Pemeliharaan
+        - generic [ref=f8e31]: "Atasan: Ir. Hendra Gunawan, M.T."
+        - button "Pengajuan Saya" [ref=f8e32] [cursor=pointer]
+      - generic [ref=f8e34]:
+        - button "Ringkasan Perizinan" [ref=f8e35] [cursor=pointer]
+        - button "Total Pengajuan Izin" [ref=f8e36] [cursor=pointer]
+      - generic [ref=f8e37]:
+        - generic [ref=f8e38]:
+          - generic [ref=f8e39]: Total pengajuan
+          - generic [ref=f8e40]: "9"
+        - generic [ref=f8e41]:
+          - generic [ref=f8e42]: Izin selesai
+          - generic [ref=f8e43]: "8"
+        - generic [ref=f8e44]:
+          - generic [ref=f8e45]: Izin aktif
+          - generic [ref=f8e46]: "1"
+      - generic [ref=f8e47]:
+        - generic [ref=f8e48]:
+          - generic [ref=f8e49]:
+            - generic [ref=f8e50]: IZIN AKTIF SAYA
+            - heading "TK-20261106-901" [level=3] [ref=f8e51]
+          - generic [ref=f8e52]: Terlambat
+        - generic [ref=f8e53]: Dinas Kantor • Kembali ke Area
+        - generic "PT Rekayasa Industri, Cikampek" [ref=f8e54]
+        - generic "Koordinasi perbaikan instalasi pipa amonia unit 2" [ref=f8e55]: "\"Koordinasi perbaikan instalasi pipa amonia unit 2\""
+        - generic [ref=f8e56]:
+          - generic [ref=f8e57]:
+            - generic [ref=f8e58]: Scan Out • Pos 1
+            - generic [ref=f8e59]: Jumat, 6 Nov 2026, 09.05 WIB
+          - generic [ref=f8e60]:
+            - generic [ref=f8e61]: Batas Jam Kembali
+            - generic [ref=f8e62]: Jumat, 6 Nov 2026, 14.30 WIB
+        - generic [ref=f8e63]:
+          - button "✓ Tap In Kartu Akses (Masuk)" [ref=f8e64] [cursor=pointer]
+          - generic [ref=f8e66]: ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
+        - link "Detail Pengajuan" [ref=f8e68] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f8e69]:
+        - heading "Pengajuan Terbaru" [level=3] [ref=f8e71]
+        - generic [ref=f8e72]:
+          - generic [ref=f8e73]:
+            - generic [ref=f8e74]:
+              - text: IZ-20261019-013
+              - generic [ref=f8e75]: Selesai
+            - generic [ref=f8e76]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f8e77] [cursor=pointer]
+        - generic [ref=f8e82]:
+          - generic [ref=f8e83]:
+            - generic [ref=f8e84]:
+              - text: IZ-20261016-006
+              - generic [ref=f8e85]: Selesai
+            - generic [ref=f8e86]: Dinas Kantor • Pelabuhan Cirebon
+          - button "Detail Pengajuan" [ref=f8e87] [cursor=pointer]
+        - link "Semua riwayat" [ref=f8e93] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f8e94]:
+      - generic [ref=f8e95] [cursor=pointer]: Dashboard
+      - generic [ref=f8e102] [cursor=pointer]: Pengajuan
+      - generic [ref=f8e107] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic [ref=f8e112]: Beralih ke akun Budi Pratama, S.T.
+    - generic [ref=f8e114]: Selamat datang, Budi Pratama, S.T. (undefined)
+    - generic [ref=f8e116]: Beralih ke akun Budi Pratama, S.T.

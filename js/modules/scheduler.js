@@ -324,6 +324,11 @@ function _executeCheckOverdueAndExpiredTickets(silent = true) {
       if (viewAdmin && viewAdmin.style.display !== 'none' && typeof window.renderAdminView === 'function') {
         window.renderAdminView();
       }
+
+      // Auto-refresh tampilan Mobile secara real-time saat status tiket berganti di latar belakang
+      if (typeof window.renderActiveView === 'function' && window.innerWidth <= 768) {
+        window.renderActiveView();
+      }
     }
   }
 }

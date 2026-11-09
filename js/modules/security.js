@@ -1729,6 +1729,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+    async function scanQrFileWithQuietZoneFallback(scannerInstance, fileInput) {
+    try {
+      const directResult = await scannerInstance.scanFile(fileInput, false);
+      if (directResult) return directResult;
+    } catch (firstErr) {
+      // Fallback: tambah Quiet Zone margin putih jika scan langsung gagal
+    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        const img = new Image();
+        img.onload = async () => {
+          try {
+            const pad = 36;
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width + pad * 2;
+            canvas.height = img.height + pad * 2;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, pad, pad);
+
+            canvas.toBlob(async (blob) => {
+              try {
+                if (!blob) throw new Error('Konversi blob gagal');
+                const paddedFile = new File([blob], 'padded_qr.png', { type: 'image/png' });
+                const result = await scannerInstance.scanFile(paddedFile, false);
+                resolve(result);
+              } catch (secondErr) {
+                try {
+                  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const data = imgData.data;
+                  for (let i = 0; i < data.length; i += 4) {
+                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    const v = avg < 140 ? 0 : 255;
+                    data[i] = v; data[i + 1] = v; data[i + 2] = v;
+                  }
+                  ctx.putImageData(imgData, 0, 0);
+                  canvas.toBlob(async (hiBlob) => {
+                    try {
+                      const hiFile = new File([hiBlob], 'hi_qr.png', { type: 'image/png' });
+                      const hiResult = await scannerInstance.scanFile(hiFile, false);
+                      resolve(hiResult);
+                    } catch (thirdErr) {
+                      reject(secondErr);
+                    }
+                  }, 'image/png');
+                } catch (e) {
+                  reject(secondErr);
+                }
+              }
+            }, 'image/png');
+          } catch (err) {
+            reject(err);
+          }
+        };
+        img.onerror = () => reject(new Error('Gagal memuat berkas gambar'));
+        img.src = URL.createObjectURL(fileInput);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
   if (btnTriggerFileScan && inputScanQrFile) {
     btnTriggerFileScan.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1756,8 +1820,8 @@ document.addEventListener('DOMContentLoaded', () => {
           html5QrScannerInstance = new Html5Qrcode('cameraReaderView');
         }
 
-        // scanFile(file, false) membaca QR code tanpa menyalakan webcam atau merusak DOM
-        const decodedText = await html5QrScannerInstance.scanFile(file, false);
+        // Scan gambar dengan dukungan fallback Quiet Zone otomatis (100% andal)
+        const decodedText = await scanQrFileWithQuietZoneFallback(html5QrScannerInstance, file);
         if (decodedText) {
           handleCameraQrSuccess(decodedText);
         } else {

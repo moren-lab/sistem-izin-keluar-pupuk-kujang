@@ -39,6 +39,8 @@
   let atasanRiwayatSearch = '';
   let atasanRiwayatFilterDecision = 'all';
   let atasanRiwayatSortOrder = 'desc'; // 'desc' | 'asc'
+  let atasanRiwayatDateStart = '';
+  let atasanRiwayatDateEnd = '';
   let isAntreanFilterOpen = false;
   let isAtasanRiwayatFilterOpen = false;
   let isAtasanTimFilterOpen = false;
@@ -1722,6 +1724,21 @@
       else if (atasanRiwayatFilterDecision === 'emergency') filtered = filtered.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-'))));
     }
 
+    if (atasanRiwayatDateStart) {
+      filtered = filtered.filter(t => {
+        const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return d && !isNaN(d.getTime()) && d.toISOString().slice(0, 10) >= atasanRiwayatDateStart;
+      });
+    }
+    if (atasanRiwayatDateEnd) {
+      filtered = filtered.filter(t => {
+        const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return d && !isNaN(d.getTime()) && d.toISOString().slice(0, 10) <= atasanRiwayatDateEnd;
+      });
+    }
+
     filtered.sort((a, b) => {
       const parseTime = (t) => {
         const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
@@ -1828,26 +1845,36 @@
       </div>
 
       <!-- Result Bar & Filter Button -->
-      <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
-        <button type="button" class="mobile-filter-toggle-btn ${isAtasanRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleAtasanRiwayatFilter()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-          <span>${isAtasanRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
-          ${(atasanRiwayatSearch || atasanRiwayatFilterDecision !== 'all') ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
-        </button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: #475569;">
+          ${filtered.length} riwayat tim
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="mobile-filter-toggle-btn ${isAtasanRiwayatFilterOpen ? 'active' : ''}" onclick="window.mobileToggleAtasanRiwayatFilter()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>${isAtasanRiwayatFilterOpen ? 'Tutup Filter' : 'Filter'}</span>
+            ${(atasanRiwayatSearch || atasanRiwayatFilterDecision !== 'all' || atasanRiwayatDateStart || atasanRiwayatDateEnd) ? '<span style="width: 6px; height: 6px; border-radius: 50%; background: #059669; display: inline-block;"></span>' : ''}
+          </button>
+        </div>
       </div>
 
       <!-- Collapsible Filter Card -->
       <div id="mAtasanRiwayatFilterCard" class="mobile-filter-panel" style="display: ${isAtasanRiwayatFilterOpen ? 'block' : 'none'};">
         <div class="mobile-filter-panel-title">
-          <span>Cari & filter riwayat</span>
-          <button type="button" style="border:none; background:none; font-size:0.75rem; color:#64748b; cursor:pointer;" onclick="window.mobileToggleAtasanRiwayatFilter()">✕</button>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div>
-            <label class="mobile-filter-label">Cari nama / NIP / tiket</label>
-            <input type="text" class="mobile-filter-input" id="mRiwayatSearch" placeholder="Semua bawahan langsung" value="${atasanRiwayatSearch}">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>Cari & Filter Riwayat Tim</span>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button type="button" class="mobile-filter-close-btn" onclick="window.mobileToggleAtasanRiwayatFilter()" aria-label="Tutup Filter">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <label class="mobile-filter-label">Cari Nama / NIP / Nomor Tiket</label>
+            <input type="text" class="mobile-filter-input" id="mRiwayatSearch" placeholder="Ketik kata kunci pencarian..." value="${atasanRiwayatSearch}">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
               <label class="mobile-filter-label">Keputusan</label>
               <select class="mobile-filter-select" id="mRiwayatDecision" onchange="window.mobileFilterRiwayatDecision(this.value)">
@@ -1865,12 +1892,23 @@
               </select>
             </div>
           </div>
-          <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" class="mobile-btn-primary" style="flex: 2; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileApplyRiwayatFilter()">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label class="mobile-filter-label">Dari Tanggal</label>
+              <input type="date" class="mobile-filter-date" id="mAtasanRiwayatDateStart" value="${atasanRiwayatDateStart || ''}" onchange="window.mobileHandleAtasanDateStart(this.value)">
+            </div>
+            <div>
+              <label class="mobile-filter-label">Sampai Tanggal</label>
+              <input type="date" class="mobile-filter-date" id="mAtasanRiwayatDateEnd" value="${atasanRiwayatDateEnd || ''}" onchange="window.mobileHandleAtasanDateEnd(this.value)">
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 4px; padding-top: 8px; border-top: 1px solid #f1f5f9;">
+            <button type="button" class="mobile-btn-primary" style="flex: 2; height: 38px; font-size: 0.775rem; font-weight: 700; border-radius: 8px;" onclick="window.mobileApplyRiwayatFilter()">
               Terapkan Filter
             </button>
-            <button type="button" class="mobile-btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 0.75rem;" onclick="window.mobileResetAtasanRiwayatFilter()">
-              Reset
+            <button type="button" class="mobile-filter-reset-btn" style="flex: 1; height: 38px; font-size: 0.775rem; font-weight: 700; border-radius: 8px;" onclick="window.mobileResetAtasanRiwayatFilter()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+              <span>Reset</span>
             </button>
           </div>
         </div>
@@ -2243,11 +2281,92 @@
     renderMobileAtasan(null, 'riwayat');
   };
 
+  window.mobileHandleAtasanDateStart = function (val) {
+    atasanRiwayatDateStart = val;
+    renderMobileAtasan(null, 'riwayat');
+  };
+
+  window.mobileHandleAtasanDateEnd = function (val) {
+    atasanRiwayatDateEnd = val;
+    renderMobileAtasan(null, 'riwayat');
+  };
+
   window.mobileResetAtasanRiwayatFilter = function () {
     atasanRiwayatSearch = '';
     atasanRiwayatFilterDecision = 'all';
     atasanRiwayatSortOrder = 'desc';
+    atasanRiwayatDateStart = '';
+    atasanRiwayatDateEnd = '';
     renderMobileAtasan(null, 'riwayat');
+  };
+
+  window.mobileAtasanExportCsv = function () {
+    const approver = getActiveApprover();
+    let tickets = getTeamTickets().filter(t => {
+      return t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa';
+    });
+
+    if (atasanRiwayatSearch) {
+      const q = atasanRiwayatSearch.toLowerCase();
+      tickets = tickets.filter(t =>
+        (getTName(t).toLowerCase().includes(q)) ||
+        (getTNip(t).toLowerCase().includes(q)) ||
+        (t.id && t.id.toLowerCase().includes(q))
+      );
+    }
+    if (atasanRiwayatFilterDecision !== 'all') {
+      if (atasanRiwayatFilterDecision === 'approved') tickets = tickets.filter(t => t.status === 'Disetujui' || (t.status === 'Selesai' && !t.rejectionReason));
+      else if (atasanRiwayatFilterDecision === 'rejected') tickets = tickets.filter(t => t.status === 'Ditolak');
+      else if (atasanRiwayatFilterDecision === 'emergency') tickets = tickets.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-'))));
+    }
+    if (atasanRiwayatDateStart) {
+      tickets = tickets.filter(t => {
+        const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return d && !isNaN(d.getTime()) && d.toISOString().slice(0, 10) >= atasanRiwayatDateStart;
+      });
+    }
+    if (atasanRiwayatDateEnd) {
+      tickets = tickets.filter(t => {
+        const raw = t.approvedAt || t.rejectedAt || t.createdAt || t.plannedExit || 0;
+        const d = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(raw) : new Date(raw);
+        return d && !isNaN(d.getTime()) && d.toISOString().slice(0, 10) <= atasanRiwayatDateEnd;
+      });
+    }
+
+    if (tickets.length === 0) {
+      if (typeof window.showToast === 'function') window.showToast('Tidak ada data riwayat persetujuan untuk diekspor.', 'warning');
+      return;
+    }
+
+    let csv = 'data:text/csv;charset=utf-8,';
+    csv += 'Nomor Tiket,Pemohon,NIP,Departemen,Kategori,Tipe,Rencana Keluar,Estimasi Kembali,Waktu Scan Out,Waktu Tap In,Status,Catatan Atasan\n';
+
+    tickets.forEach(t => {
+      csv += [
+        `"${t.id}"`,
+        `"${getTName(t)}"`,
+        `"${getTNip(t)}"`,
+        `"${getTDept(t)}"`,
+        `"${t.category || 'Dinas Kantor'}"`,
+        `"${t.type || t.returnType || 'Keluar Sementara'}"`,
+        `"${t.plannedExit || '-'}"`,
+        `"${t.estimatedReturn || '-'}"`,
+        `"${t.scanOutTime || '-'}"`,
+        `"${t.scanInTime || '-'}"`,
+        `"${t.status}"`,
+        `"${(t.approverNote || t.rejectionReason || '').replace(/"/g, '""')}"`
+      ].join(',') + '\n';
+    });
+
+    const uri = encodeURI(csv);
+    const a = document.createElement('a');
+    a.href = uri;
+    a.download = `Rekap-Persetujuan-Atasan-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (typeof window.showToast === 'function') window.showToast('Rekapitulasi persetujuan berhasil diekspor ke CSV!', 'success');
   };
 
   window.mobileFilterRiwayatDecision = function (val) {

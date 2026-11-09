@@ -429,6 +429,10 @@
 
     // Perbarui dropdown jika sedang terbuka di layar
     renderDesktopNotifDropdownContent();
+    const mDropdown = document.getElementById('mobileNotifDropdown');
+    if (mDropdown && mDropdown.style.display === 'block' && typeof window.renderMobileNotifDropdownContent === 'function') {
+      window.renderMobileNotifDropdownContent();
+    }
   }
 
   // 6. Navigasi Buka Tiket dari Notifikasi (C1: Navigasi Kembali dari Notifikasi)
@@ -449,23 +453,47 @@
     // Tutup dropdown notifikasi desktop jika terbuka (hanya pada mode desktop)
     if (!isMobile) {
       closeDesktopNotifDropdown();
+    } else {
+      if (typeof window.closeMobileNotifDropdown === 'function') {
+        window.closeMobileNotifDropdown();
+      }
     }
 
     // Tetap berada di halaman notifikasi desktop (jangan tutup viewNotifikasi)
 
-    if (!ticketId) return;
+    const cleanId = extractTicketId(ticketId);
+    if (!cleanId) return;
 
-    // NOTE PENTING: Pada Tampilan Mobile, gunakan action sheet native mobile (Image 2)
-    if (isMobile && typeof window.mobileOpenTicketDetail === 'function') {
-      setTimeout(() => {
-        window.mobileOpenTicketDetail(ticketId);
-      }, 50);
-      return;
+    // NOTE PENTING: Pada Tampilan Mobile, gunakan action sheet native mobile / modal per-aktor
+    if (isMobile) {
+      const activeRole = window.currentMobileRole || window.currentActor;
+      if (activeRole === 'approver' || activeRole === 'approver2') {
+        if (typeof window.mobileOpenAtasanDetailModal === 'function') {
+          setTimeout(() => {
+            window.mobileOpenAtasanDetailModal(cleanId);
+          }, 50);
+          return;
+        }
+      } else if (activeRole === 'security') {
+        if (typeof window.mobileSecurityInspectTicket === 'function') {
+          setTimeout(() => {
+            window.mobileSecurityInspectTicket(cleanId);
+          }, 50);
+          return;
+        }
+      } else {
+        if (typeof window.mobileOpenTicketDetail === 'function') {
+          setTimeout(() => {
+            window.mobileOpenTicketDetail(cleanId);
+          }, 50);
+          return;
+        }
+      }
     }
 
     // Tampilan Desktop (Web/PC)
     if (typeof window.openTicketDetail === 'function') {
-      window.openTicketDetail(ticketId, 'readonly', { readOnlyFromNotif: true });
+      window.openTicketDetail(cleanId, 'readonly', { readOnlyFromNotif: true });
     }
   }
 
@@ -500,38 +528,70 @@
     return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`;
   }
 
-  // 8. TAMPILAN MOBILE: SHEET NOTIFIKASI SESUAI FORMAT WEB/LAPTOP (Gambar 1)
-  window.openMobileNotificationSheet = function (filterTab = 'all') {
-    const sheet = document.getElementById('mobileActionSheet');
-    const backdrop = document.getElementById('mobileModalBackdrop');
-    if (!sheet || !backdrop) return;
+  // 8. TAMPILAN MOBILE: DROPDOWN FLOATING POPUP NOTIFIKASI IDENTIK DENGAN VERSI WEB (GAMBAR 1)
+  window.openMobileNotifDropdown = function () {
+    const dropdown = document.getElementById('mobileNotifDropdown');
+    if (!dropdown) return;
+    renderMobileNotifDropdownContent();
+    dropdown.style.display = 'block';
+  };
 
-    const user = getActiveUserInfo();
-    let notifs = getNotificationsForActiveActor();
+  window.closeMobileNotifDropdown = function () {
+    const dropdown = document.getElementById('mobileNotifDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+  };
 
-    if (filterTab === 'unread') {
-      notifs = notifs.filter(n => !n.isRead);
+  window.toggleMobileNotifDropdown = function () {
+    const dropdown = document.getElementById('mobileNotifDropdown');
+    if (!dropdown) return;
+    const isShowing = dropdown.style.display === 'block';
+    if (isShowing) {
+      window.closeMobileNotifDropdown();
+    } else {
+      window.openMobileNotifDropdown();
+    }
+  };
+
+  function renderMobileNotifDropdownContent() {
+    const container = document.getElementById('mobileNotifDropdownList');
+    const badgePill = document.getElementById('mobileNotifUnreadPill');
+    if (!container) return;
+
+    // Filter HANYA notifikasi yang BELUM DIBACA (Unread) untuk popover cepat
+    const notifs = getNotificationsForActiveActor().filter(n => !n.isRead).slice(0, 10);
+    const unreadCount = getUnreadCountForActiveActor();
+
+    if (badgePill) {
+      badgePill.textContent = unreadCount > 0 ? `${unreadCount} baru` : 'Semua dibaca';
     }
 
-    const allNotifsCount = getNotificationsForActiveActor().length;
-    const unreadTotal = getUnreadCountForActiveActor();
+    if (notifs.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 30px 16px; text-align: center; color: #64748b; background: #ffffff;">
+          <div style="font-size: 1.8rem; margin-bottom: 6px;">🔔</div>
+          <div style="font-weight: 800; color: #0f172a; font-size: 0.875rem;">Tidak ada notifikasi baru</div>
+          <div style="font-size: 0.735rem; color: #64748b; margin-top: 3px; line-height: 1.4;">Semua notifikasi telah dibaca. Buka halaman notifikasi untuk melihat riwayat lengkap.</div>
+        </div>
+      `;
+      return;
+    }
 
-    const itemsHtml = notifs.length > 0 ? `
+    container.innerHTML = `
       <div class="mobile-notif-webstyle-list" style="display: flex; flex-direction: column;">
         ${notifs.map(n => {
           const isHigh = n.priority === 'high';
-          const isUnread = !n.isRead;
           return `
-            <div class="dropdown-notif-item ${isUnread ? 'unread' : ''}" style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: background 0.15s ease;" onclick="window.openTicketFromNotification('${n.ticketId || ''}', '${n.id}', 'mobile')">
-              <div class="dropdown-notif-icon-box ${isHigh ? 'priority-high' : (isUnread ? 'unread' : 'read')} ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 36px; height: 36px; min-width: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div class="dropdown-notif-item unread" style="padding: 11px 14px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: background 0.15s ease;" onclick="window.handleMobileNotifClick('${n.ticketId || ''}', '${n.id}')">
+              <div class="dropdown-notif-icon-box ${isHigh ? 'priority-high' : 'unread'} ${getNotifIconTypeClass(n.type, n.priority)}" style="width: 36px; height: 36px; min-width: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 ${getNotifIconSvg(n.type, n.priority)}
               </div>
               <div style="flex: 1; min-width: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                   <span class="dropdown-notif-title" style="font-size: 0.825rem; font-weight: 800; color: #0f172a; line-height: 1.3;">
                     ${n.title}
                     ${isHigh ? '<span style="background: #dc2626; color: #fff; font-size: 0.6rem; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle;">DARURAT</span>' : ''}
                   </span>
+                  <span class="notif-unread-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #059669; flex-shrink: 0;"></span>
                 </div>
                 <div class="dropdown-notif-msg" style="font-size: 0.735rem; color: #475569; line-height: 1.35; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
                   ${n.message}
@@ -541,56 +601,88 @@
                   <span>${formatRelativeTime(n.createdAt)}</span>
                 </div>
               </div>
-              <button type="button" aria-label="Hapus Notifikasi" class="mobile-notif-row-delete-btn" style="border: none; background: transparent; color: #94a3b8; width: 32px; height: 32px; min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; margin-left: 2px; padding: 0; flex-shrink: 0;" onclick="event.stopPropagation(); window.confirmDeleteMobileNotification('${n.id}', '${filterTab}', false)" title="Hapus notifikasi ini">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
             </div>
           `;
         }).join('')}
       </div>
-    ` : `
-      <div style="text-align: center; padding: 36px 16px; color: #64748b; background: #ffffff;">
-        <div style="font-size: 1.6rem; margin-bottom: 6px;">🔔</div>
-        <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Tidak ada notifikasi baru</div>
-        <div style="font-size: 0.735rem; color: #64748b;">${filterTab === 'unread' ? 'Semua notifikasi telah Anda baca.' : 'Pemberitahuan aktivitas perizinan Anda akan muncul di sini.'}</div>
-      </div>
     `;
+  }
+  window.renderMobileNotifDropdownContent = renderMobileNotifDropdownContent;
 
-    sheet.innerHTML = `
-      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; background: #ffffff; border-top-left-radius: 20px; border-top-right-radius: 20px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <h3 class="mobile-sheet-title" style="font-size: 0.95rem; margin: 0; font-weight: 800; color: #0f172a;">Notifikasi</h3>
-          <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #e2e8f0; color: #334155;">
-            ${unreadTotal > 0 ? `${unreadTotal} baru` : 'Semua dibaca'}
-          </span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          ${allNotifsCount > 0 ? `
-            <button type="button" aria-label="Hapus Semua Notifikasi" style="border: none; background: transparent; color: #ef4444; font-size: 0.725rem; font-weight: 700; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; gap: 3px;" onclick="window.confirmClearAllMobileNotifications('${filterTab}', false)" title="Hapus semua riwayat notifikasi">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              <span>Hapus</span>
-            </button>
-          ` : ''}
-          ${unreadTotal > 0 ? `
-            <button type="button" style="border: none; background: none; color: #2563eb; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 4px;" onclick="window.markAllNotificationsAsRead(); window.openMobileNotificationSheet('${filterTab}')">
-              Tandai dibaca
-            </button>
-          ` : ''}
-          <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 0.9rem; color: #64748b; cursor: pointer;" onclick="window.mobileCloseSheet()">✕</button>
-        </div>
-      </div>
+  // Helper pembersih nomor tiket agar universal lintas format (#TK-xxx, KUJANG-PASS|xxx, JSON)
+  function extractTicketId(raw) {
+    if (!raw) return '';
+    let str = String(raw).trim();
+    if (str.startsWith('#')) str = str.substring(1).trim();
+    if (str.startsWith('KUJANG-PERMIT:')) {
+      const parts = str.split(':');
+      return (parts[1] || str).trim();
+    }
+    if (str.startsWith('KUJANG-PASS|') || str.includes('|')) {
+      const parts = str.split('|');
+      return (parts[1] || parts[0]).trim();
+    }
+    if (str.startsWith('{') && str.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(str);
+        if (parsed.id || parsed.ticketId) return (parsed.id || parsed.ticketId).trim();
+      } catch (e) { }
+    }
+    const match = str.match(/(TK-[A-Za-z0-9-]+|IZ-[A-Za-z0-9-]+)/i);
+    if (match) return match[1].trim();
+    return str;
+  }
+  window.extractTicketId = extractTicketId;
 
-      <div class="mobile-sheet-body" style="padding: 0; max-height: calc(80vh - 105px); overflow-y: auto; background: #ffffff;">
-        ${itemsHtml}
-      </div>
+  window.handleMobileNotifClick = function (ticketId, notifId) {
+    if (notifId) {
+      markNotificationAsRead(notifId);
+    }
+    // Re-render isi dropdown popup: notifikasi otomatis hilang dari daftar unread
+    renderMobileNotifDropdownContent();
+    updateNotificationBadges();
 
-      <div style="padding: 11px 16px; border-top: 1px solid #f1f5f9; text-align: center; background: #f8fafc; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
-        <a href="#" style="font-size: 0.775rem; font-weight: 700; color: #059669; text-decoration: none;" onclick="window.openMobileFullNotificationSheet('all'); return false;">Lihat semua notifikasi →</a>
-      </div>
-    `;
+    // Tutup dropdown popup saat membuka detail agar tampilan detail bersih & tidak terhalang (semua aktor)
+    window.closeMobileNotifDropdown();
 
-    backdrop.classList.add('open');
-    sheet.classList.add('open');
+    // Set context flag
+    window._openedFromNotification = true;
+    window._openedFromNotificationSource = 'mobile';
+    window._openedFromNotificationTab = 'dropdown';
+
+    // Navigasi ke tiket detail sesuai aktor aktif (Karyawan, Atasan, Pos Jaga)
+    const cleanId = extractTicketId(ticketId);
+    if (cleanId) {
+      const activeRole = window.currentMobileRole || window.currentActor;
+      if (activeRole === 'approver' || activeRole === 'approver2') {
+        if (typeof window.mobileOpenAtasanDetailModal === 'function') {
+          window.mobileOpenAtasanDetailModal(cleanId);
+        }
+      } else if (activeRole === 'security') {
+        if (typeof window.mobileSecurityInspectTicket === 'function') {
+          window.mobileSecurityInspectTicket(cleanId);
+        }
+      } else {
+        if (typeof window.mobileOpenTicketDetail === 'function') {
+          window.mobileOpenTicketDetail(cleanId);
+        }
+      }
+    }
+  };
+
+  window.markAllMobileNotifsAsRead = function () {
+    markAllNotificationsAsRead();
+    renderMobileNotifDropdownContent();
+    updateNotificationBadges();
+  };
+
+  // Kompatibilitas mundur jika ada panggilan ke openMobileNotificationSheet
+  window.openMobileNotificationSheet = function (filterTab = 'all') {
+    if (filterTab === 'dropdown') {
+      window.openMobileNotifDropdown();
+    } else {
+      window.openMobileFullNotificationSheet(filterTab);
+    }
   };
 
   // 8b. TAMPILAN MOBILE: SHEET LENGKAP "LIHAT SEMUA NOTIFIKASI" (Dedicated Full View)
@@ -650,7 +742,7 @@
     sheet.innerHTML = `
       <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; background: #ffffff; border-top-left-radius: 20px; border-top-right-radius: 20px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" aria-label="Kembali" style="border: none; background: none; color: #059669; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px;" onclick="window.openMobileNotificationSheet('all')">
+          <button type="button" aria-label="Kembali" style="border: none; background: none; color: #059669; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px;" onclick="window.mobileCloseSheet()">
             <span>← Kembali</span>
           </button>
         </div>
@@ -848,7 +940,7 @@
     `;
   };
 
-  // Close desktop dropdown on outside click or Esc
+  // Close desktop and mobile dropdowns on outside click or Esc
   document.addEventListener('click', function (e) {
     const container = document.getElementById('desktopNotifContainer');
     const modalDetail = document.getElementById('modalTicketDetail');
@@ -858,11 +950,30 @@
     if (container && !container.contains(e.target)) {
       closeDesktopNotifDropdown();
     }
+
+    const mWrap = document.getElementById('mobileNotifWrap');
+    const mSheet = document.getElementById('mobileActionSheet');
+    if (mWrap) {
+      const eventPath = (typeof e.composedPath === 'function') ? e.composedPath() : [];
+      const isInsideWrap = mWrap.contains(e.target) || eventPath.includes(mWrap) || (e.target && !e.target.isConnected);
+      if (!isInsideWrap) {
+        // Jika klik berada di dalam action sheet tiket detail, jangan tutup dropdown
+        if (mSheet && mSheet.contains(e.target)) {
+          return;
+        }
+        if (typeof window.closeMobileNotifDropdown === 'function') {
+          window.closeMobileNotifDropdown();
+        }
+      }
+    }
   });
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       closeDesktopNotifDropdown();
+      if (typeof window.closeMobileNotifDropdown === 'function') {
+        window.closeMobileNotifDropdown();
+      }
     }
   });
 

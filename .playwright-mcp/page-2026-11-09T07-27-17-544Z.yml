@@ -1,0 +1,85 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area
+      - generic [ref=f1e86]:
+        - button "Karyawan ▼" [ref=f1e87] [cursor=pointer]:
+          - generic [ref=f1e91]: Karyawan
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "BP" [ref=f1e101]
+    - main [ref=f1e99]:
+      - generic [ref=f1e102]:
+        - generic [ref=f1e103]: Selamat siang,
+        - heading "Budi Pratama, S.T." [level=2] [ref=f1e104]
+        - generic [ref=f1e105]: Karyawan
+        - generic [ref=f1e106]: Departemen Rekayasa & Pemeliharaan
+        - generic [ref=f1e107]: "Atasan: Ir. Hendra Gunawan, M.T."
+        - button "Pengajuan Saya" [ref=f1e108] [cursor=pointer]
+      - generic [ref=f1e110]:
+        - button "Ringkasan Perizinan" [ref=f1e111] [cursor=pointer]
+        - button "Total Pengajuan Izin" [ref=f1e112] [cursor=pointer]
+      - generic [ref=f1e113]:
+        - generic [ref=f1e114]:
+          - generic [ref=f1e115]: Total pengajuan
+          - generic [ref=f1e116]: "9"
+        - generic [ref=f1e117]:
+          - generic [ref=f1e118]: Izin selesai
+          - generic [ref=f1e119]: "8"
+        - generic [ref=f1e120]:
+          - generic [ref=f1e121]: Izin aktif
+          - generic [ref=f1e122]: "1"
+      - generic [ref=f1e123]:
+        - generic [ref=f1e124]:
+          - generic [ref=f1e125]:
+            - generic [ref=f1e126]: IZIN AKTIF SAYA
+            - heading "TK-20261106-901" [level=3] [ref=f1e127]
+          - generic [ref=f1e128]: Terlambat
+        - generic [ref=f1e129]: Dinas Kantor • Kembali ke Area
+        - generic "PT Rekayasa Industri, Cikampek" [ref=f1e130]
+        - generic "Koordinasi perbaikan instalasi pipa amonia unit 2" [ref=f1e131]: "\"Koordinasi perbaikan instalasi pipa amonia unit 2\""
+        - generic [ref=f1e132]:
+          - generic [ref=f1e133]:
+            - generic [ref=f1e134]: Scan Out • Pos 1
+            - generic [ref=f1e135]: Jumat, 6 Nov 2026, 09.05 WIB
+          - generic [ref=f1e136]:
+            - generic [ref=f1e137]: Batas Jam Kembali
+            - generic [ref=f1e138]: Jumat, 6 Nov 2026, 14.30 WIB
+        - generic [ref=f1e139]:
+          - button "✓ Tap In Kartu Akses (Masuk)" [ref=f1e140] [cursor=pointer]
+          - generic [ref=f1e142]: ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
+        - link "Detail Pengajuan" [ref=f1e144] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f1e145]:
+        - heading "Pengajuan Terbaru" [level=3] [ref=f1e147]
+        - generic [ref=f1e148]:
+          - generic [ref=f1e149]:
+            - generic [ref=f1e150]:
+              - text: IZ-20261019-013
+              - generic [ref=f1e151]: Selesai
+            - generic [ref=f1e152]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f1e153] [cursor=pointer]
+        - generic [ref=f1e158]:
+          - generic [ref=f1e159]:
+            - generic [ref=f1e160]:
+              - text: IZ-20261016-006
+              - generic [ref=f1e161]: Selesai
+            - generic [ref=f1e162]: Dinas Kantor • Pelabuhan Cirebon
+          - button "Detail Pengajuan" [ref=f1e163] [cursor=pointer]
+        - link "Semua riwayat" [ref=f1e169] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e170] [cursor=pointer]: Dashboard
+      - generic [ref=f1e177] [cursor=pointer]: Pengajuan
+      - generic [ref=f1e182] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic [ref=f1e187]: Beralih ke akun Budi Pratama, S.T.
+    - generic [ref=f1e189]: Selamat datang, Budi Pratama, S.T. (Karyawan Pemohon)

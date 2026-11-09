@@ -1,0 +1,53 @@
+- generic [active] [ref=f1e1]:
+  - text: – – – – – – –
+  - generic [ref=f1e78]:
+    - banner [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - img "Logo PT Pupuk Kujang" [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]: PUPUK KUJANG
+          - generic [ref=f1e85]: Perizinan Keluar Area • Pos Jaga
+      - generic [ref=f1e86]:
+        - button "Pos Jaga ▼" [ref=f1e1240] [cursor=pointer]:
+          - generic [ref=f1e91]: Pos Jaga
+          - generic [ref=f1e92]: ▼
+        - button "Notifikasi" [ref=f1e94] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f1e98] [cursor=pointer]:
+          - img "SA" [ref=f1e1241]
+    - main [ref=f1e99]:
+      - generic [ref=f1e1650]:
+        - generic [ref=f1e1651]: Terminal verifikasi tiket
+        - generic [ref=f1e1652]:
+          - generic [ref=f1e1653]: Pos bertugas
+          - combobox [ref=f1e1654]:
+            - option "Pos 1 Gerbang Utama (Utara)" [selected]
+            - option "Pos 2 Gerbang Darurat"
+            - option "Pos 3 Logistik"
+        - generic [ref=f1e1655]:
+          - button "Kamera" [ref=f1e1656] [cursor=pointer]
+          - button "Manual / Barcode" [ref=f1e1657] [cursor=pointer]
+      - generic [ref=f1e1658]:
+        - generic [ref=f1e1659]:
+          - heading "Kamera pemindai siap digunakan" [level=4] [ref=f1e1664]
+          - paragraph [ref=f1e1665]: Aktifkan kamera untuk memindai QR Code tiket karyawan saat Scan Out gerbang.
+          - generic [ref=f1e1666]:
+            - button "Aktifkan Kamera Pemindai" [ref=f1e1667] [cursor=pointer]
+            - button "Unggah Gambar QR Tiket" [ref=f1e1672] [cursor=pointer]
+        - generic [ref=f1e1678]:
+          - generic [ref=f1e1679]: Kamera & unggah QR
+          - list [ref=f1e1680]:
+            - listitem [ref=f1e1681]: Aktifkan Kamera dan izinkan akses di browser.
+            - listitem [ref=f1e1682]: Posisikan QR dengan jelas dan cahaya cukup.
+            - listitem [ref=f1e1683]: Atau pilih Unggah Gambar QR dari tiket.
+          - generic [ref=f1e1684]:
+            - text: Kamera tidak tersedia? Gunakan
+            - link "Input Manual / Barcode" [ref=f1e1685] [cursor=pointer]:
+              - /url: "#"
+            - text: .
+    - navigation [ref=f1e100]:
+      - generic [ref=f1e1686] [cursor=pointer]: Dashboard
+      - generic [ref=f1e1693] [cursor=pointer]: Pindai
+      - generic [ref=f1e1697] [cursor=pointer]: Pelacakan
+      - generic [ref=f1e1701] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
