@@ -53,6 +53,56 @@ function getActiveGateOfficer(gateKey) {
 window.getActiveGateOfficer = getActiveGateOfficer;
 
 function getCurrentSecurityActor() {
+  const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+
+  if (window.activeSecurityUser && window.currentActor === 'security') {
+    const curUser = window.activeSecurityUser;
+    const gateShort = (curUser.role && curUser.role.includes('Pos 3')) ? 'Pos 3' : ((curUser.role && curUser.role.includes('Pos 2')) ? 'Pos 2' : 'Pos 1');
+    const gateFull = gateShort === 'Pos 3' ? 'Pos 3 Gerbang Timur' : (gateShort === 'Pos 2' ? 'Pos 2 Gerbang Barat' : 'Pos 1 Gerbang Utama');
+    const officer = {
+      nip: curUser.nip,
+      name: curUser.name,
+      title: curUser.role || `Petugas Pengamanan (${gateShort})`,
+      gateName: gateFull,
+      gateShort: gateShort,
+      gateFull: gateFull
+    };
+    if (window.ACTORS && window.ACTORS.security) {
+      window.ACTORS.security.name = officer.name;
+      window.ACTORS.security.nip = officer.nip;
+      window.ACTORS.security.gateName = officer.gateName;
+      window.ACTORS.security.title = officer.title;
+    }
+    return officer;
+  }
+
+  try {
+    const savedSecNip = localStorage.getItem('KUJANG_ACTIVE_SEC_NIP');
+    if (savedSecNip) {
+      const found = users.find(u => u.nip === savedSecNip && u.status === 'Aktif');
+      if (found) {
+        window.activeSecurityUser = found;
+        const gateShort = (found.role && found.role.includes('Pos 3')) ? 'Pos 3' : ((found.role && found.role.includes('Pos 2')) ? 'Pos 2' : 'Pos 1');
+        const gateFull = gateShort === 'Pos 3' ? 'Pos 3 Gerbang Timur' : (gateShort === 'Pos 2' ? 'Pos 2 Gerbang Barat' : 'Pos 1 Gerbang Utama');
+        const officer = {
+          nip: found.nip,
+          name: found.name,
+          title: found.role || `Petugas Pengamanan (${gateShort})`,
+          gateName: gateFull,
+          gateShort: gateShort,
+          gateFull: gateFull
+        };
+        if (window.ACTORS && window.ACTORS.security) {
+          window.ACTORS.security.name = officer.name;
+          window.ACTORS.security.nip = officer.nip;
+          window.ACTORS.security.gateName = officer.gateName;
+          window.ACTORS.security.title = officer.title;
+        }
+        return officer;
+      }
+    }
+  } catch (e) {}
+
   const currentGate = localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1 Gerbang Utama';
   const officer = getActiveGateOfficer(currentGate);
   if (window.ACTORS && window.ACTORS.security) {
@@ -68,6 +118,13 @@ window.getCurrentSecurityActor = getCurrentSecurityActor;
 function updateActiveSecurityGate(gateValue, notify = false) {
   const officer = getActiveGateOfficer(gateValue);
   localStorage.setItem('KUJANG_ACTIVE_GATE', gateValue);
+
+  if (officer && officer.nip) {
+    try { localStorage.setItem('KUJANG_ACTIVE_SEC_NIP', officer.nip); } catch (e) {}
+    const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+    const found = users.find(u => u.nip === officer.nip);
+    if (found) window.activeSecurityUser = found;
+  }
 
   if (window.ACTORS && window.ACTORS.security) {
     window.ACTORS.security.name = officer.name;

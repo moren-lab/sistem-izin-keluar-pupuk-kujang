@@ -317,7 +317,22 @@ function findUserByRoleOrId(roleOrId, maybeId) {
     return allUsers.find(u => u.roleKey === 'approver2' || u.kujangId === 'KJG-881202' || u.nip === 'PK-2016-1044' || (u.name && u.name.includes('Dewi Sartika')));
   }
   if (roleOrId === 'security') {
-    return allUsers.find(u => u.roleKey === 'security' || u.kujangId === 'KJG-771101' || (u.name && u.name.includes('Agus')));
+    if (window.activeSecurityUser) return window.activeSecurityUser;
+    try {
+      const savedSecNip = localStorage.getItem('KUJANG_ACTIVE_SEC_NIP');
+      if (savedSecNip) {
+        const found = allUsers.find(u => u.nip === savedSecNip && u.status === 'Aktif');
+        if (found) {
+          window.activeSecurityUser = found;
+          return found;
+        }
+      }
+    } catch (e) {}
+    const activeGate = (typeof localStorage !== 'undefined') ? (localStorage.getItem('KUJANG_ACTIVE_GATE') || 'Pos 1') : 'Pos 1';
+    const gateShort = activeGate.includes('Pos 2') ? 'Pos 2' : (activeGate.includes('Pos 3') ? 'Pos 3' : 'Pos 1');
+    return allUsers.find(u => (u.roleKey === 'security' || (u.role && u.role.includes('Pengamanan'))) && u.role && u.role.includes(gateShort) && u.status === 'Aktif') ||
+           allUsers.find(u => u.roleKey === 'security' && u.status === 'Aktif') ||
+           allUsers.find(u => u.nip === 'SEC-2018-042');
   }
   if (roleOrId === 'admin') {
     return allUsers.find(u => u.roleKey === 'admin' || u.kujangId === 'KJG-101001' || (u.name && u.name.includes('Bambang')));
@@ -477,6 +492,19 @@ function switchRole(role, kujangId) {
       ACTORS.approver.name = matchedUser.name;
       ACTORS.approver.nip = matchedUser.nip;
       if (matchedUser.department) ACTORS.approver.department = matchedUser.department;
+    }
+  } else if (role === 'security') {
+    if (matchedUser && matchedUser.nip !== 'SEC-2018-042') {
+      window.activeSecurityUser = matchedUser;
+      try { localStorage.setItem('KUJANG_ACTIVE_SEC_NIP', matchedUser.nip); } catch (e) {}
+    } else if (matchedUser && matchedUser.nip === 'SEC-2018-042') {
+      window.activeSecurityUser = matchedUser;
+      try { localStorage.setItem('KUJANG_ACTIVE_SEC_NIP', 'SEC-2018-042'); } catch (e) {}
+    }
+    if (matchedUser && ACTORS && ACTORS.security) {
+      ACTORS.security.name = matchedUser.name;
+      ACTORS.security.nip = matchedUser.nip;
+      if (matchedUser.role) ACTORS.security.title = matchedUser.role;
     }
   }
 
@@ -857,7 +885,8 @@ function getQuickSwitchAccounts() {
     ],
     security: [
       { nip: 'SEC-2018-042', name: 'Sertu Agus', fullTitle: 'Pos 1 (Gerbang Utama)', roleKey: 'security', gateName: 'Pos 1 Gerbang Utama' },
-      { nip: 'SEC-2019-088', name: 'Kopda Bambang', fullTitle: 'Pos 2 (Logistik)', roleKey: 'security', gateName: 'Pos 2 Gerbang Logistik' }
+      { nip: 'SEC-2019-088', name: 'Kopda Bambang', fullTitle: 'Pos 2 (Logistik)', roleKey: 'security', gateName: 'Pos 2 Gerbang Logistik' },
+      { nip: 'SEC-2020-105', name: 'Praka Ilham', fullTitle: 'Pos 3 (Gerbang Timur)', roleKey: 'security', gateName: 'Pos 3 Gerbang Timur' }
     ]
   };
 
@@ -865,6 +894,17 @@ function getQuickSwitchAccounts() {
     const saved = localStorage.getItem(QUICK_SWITCH_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+      if (parsed.security && Array.isArray(parsed.security)) {
+        parsed.security.forEach(s => {
+          if (s.nip === 'SEC-2020-105' || (s.name && s.name.includes('Ilham')) || (s.fullTitle && s.fullTitle.includes('Pos 3'))) {
+            s.gateName = 'Pos 3 Gerbang Timur';
+          } else if (s.nip === 'SEC-2019-088' || (s.name && s.name.includes('Dani')) || (s.name && s.name.includes('Bambang')) || (s.fullTitle && s.fullTitle.includes('Pos 2'))) {
+            s.gateName = 'Pos 2 Gerbang Logistik';
+          } else if (s.nip === 'SEC-2018-042' || (s.name && s.name.includes('Agus')) || (s.fullTitle && s.fullTitle.includes('Pos 1'))) {
+            s.gateName = 'Pos 1 Gerbang Utama';
+          }
+        });
+      }
       return {
         karyawan: (parsed.karyawan && parsed.karyawan.length) ? parsed.karyawan : defaults.karyawan,
         approver: (parsed.approver && parsed.approver.length) ? parsed.approver : defaults.approver,
@@ -953,11 +993,20 @@ function renderRoleDropdownContent(category) {
       }
       isActive = (acc.nip === activeApprNip);
     } else if (category === 'security') {
-      isActive = (currentRole === 'security') && (
-        (acc.gateName && acc.gateName === activeGate) ||
-        (!acc.gateName && acc.nip === 'SEC-2018-042' && activeGate.includes('Pos 1')) ||
-        (!acc.gateName && acc.nip === 'SEC-2019-088' && activeGate.includes('Pos 2'))
-      );
+      let activeSecNip = '';
+      if (window.activeSecurityUser && window.activeSecurityUser.nip) {
+        activeSecNip = window.activeSecurityUser.nip;
+      } else {
+        try {
+          activeSecNip = localStorage.getItem('KUJANG_ACTIVE_SEC_NIP') || '';
+        } catch(e) {}
+      }
+      if (!activeSecNip) {
+        if (activeGate.includes('Pos 3')) activeSecNip = 'SEC-2020-105';
+        else if (activeGate.includes('Pos 2')) activeSecNip = 'SEC-2019-088';
+        else activeSecNip = 'SEC-2018-042';
+      }
+      isActive = (currentRole === 'security') && (acc.nip === activeSecNip);
     }
 
     return `
@@ -1078,12 +1127,33 @@ function selectQuickSwitchAccount(category, nip) {
       switchRole('approver', matchedUser);
     }
   } else if (category === 'security') {
-    const gate = (acc && acc.gateName) ? acc.gateName : (nip === 'SEC-2019-088' ? 'Pos 2 Gerbang Logistik' : 'Pos 1 Gerbang Utama');
+    const secUser = matchedUser || users.find(u => u.nip === nip) || (acc ? { name: acc.name, nip: acc.nip, role: acc.fullTitle, roleKey: 'security' } : null);
+    window.activeSecurityUser = secUser;
+    try { localStorage.setItem('KUJANG_ACTIVE_SEC_NIP', nip); } catch (e) {}
+
+    let gate = (acc && acc.gateName) ? acc.gateName : '';
+    if (!gate) {
+      if (nip === 'SEC-2020-105' || (secUser && secUser.role && secUser.role.includes('Pos 3'))) {
+        gate = 'Pos 3 Gerbang Timur';
+      } else if (nip === 'SEC-2019-088' || (secUser && secUser.role && secUser.role.includes('Pos 2'))) {
+        gate = 'Pos 2 Gerbang Logistik';
+      } else {
+        gate = 'Pos 1 Gerbang Utama';
+      }
+    }
     try { localStorage.setItem('KUJANG_ACTIVE_GATE', gate); } catch (e) {}
+
+    if (secUser && window.ACTORS && window.ACTORS.security) {
+      window.ACTORS.security.name = secUser.name;
+      window.ACTORS.security.nip = secUser.nip;
+      window.ACTORS.security.gateName = gate;
+      window.ACTORS.security.title = secUser.role || 'Petugas Pengamanan';
+    }
+
     if (typeof window.updateActiveSecurityGate === 'function') {
       window.updateActiveSecurityGate(gate, false);
     }
-    switchRole('security', matchedUser);
+    switchRole('security', secUser);
   }
   updateTopbarRoleLabels();
 }
@@ -1231,13 +1301,19 @@ function selectDirectoryUser(nip) {
   const existing = store[category] || [];
   if (!existing.some(a => a.nip === user.nip)) {
     const shortName = getRoleItemShortName(user.name);
+    let defaultGate = 'Pos 1 Gerbang Utama';
+    if (user.role && user.role.includes('Pos 3')) defaultGate = 'Pos 3 Gerbang Timur';
+    else if (user.role && user.role.includes('Pos 2')) defaultGate = 'Pos 2 Gerbang Logistik';
+    else if (user.nip === 'SEC-2020-105') defaultGate = 'Pos 3 Gerbang Timur';
+    else if (user.nip === 'SEC-2019-088') defaultGate = 'Pos 2 Gerbang Logistik';
+
     existing.push({
       nip: user.nip,
       name: shortName,
       fullTitle: user.role || (category === 'karyawan' ? 'Karyawan' : (category === 'approver' ? 'Atasan Peninjau' : 'Petugas Pos Jaga')),
       roleKey: user.roleKey || (category === 'karyawan' ? 'karyawan' : (category === 'approver' ? 'approver' : 'security')),
       department: user.department || '',
-      gateName: user.gateName || 'Pos 1 Gerbang Utama'
+      gateName: user.gateName || defaultGate
     });
     store[category] = existing;
     saveQuickSwitchAccounts(store);

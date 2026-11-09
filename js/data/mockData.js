@@ -754,6 +754,17 @@ function loadUsers() {
       }
     } catch (e) {}
 
+    // Pulihkan activeSecurityUser dari localStorage jika tersimpan
+    try {
+      const savedSecNip = localStorage.getItem('KUJANG_ACTIVE_SEC_NIP');
+      if (savedSecNip) {
+        const found = users.find(u => u.nip === savedSecNip && u.status === 'Aktif');
+        if (found) {
+          window.activeSecurityUser = found;
+        }
+      }
+    } catch (e) {}
+
     return users;
   } catch (e) {
     return JSON.parse(JSON.stringify(DEFAULT_USERS.filter(u => !isUserDeleted(u))));
@@ -883,11 +894,16 @@ function syncActorsFromUsers(data) {
   }
 
   // 4. Sinkronisasi Petugas Pengamanan / Security
-  const activeSecSync = users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
+  const activeSecNip = (window.activeSecurityUser && window.activeSecurityUser.nip) ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('KUJANG_ACTIVE_SEC_NIP') : null);
+  const activeSecSync = (activeSecNip ? users.find(u => u.nip === activeSecNip && u.status === 'Aktif') : null) ||
+                        window.activeSecurityUser ||
+                        users.find(u => (u.roleKey === 'security' || (u.role && u.role.toLowerCase().includes('pengamanan'))) && u.status === 'Aktif');
   if (activeSecSync && window.ACTORS && window.ACTORS.security) {
     window.ACTORS.security.name = activeSecSync.name;
     window.ACTORS.security.nip = activeSecSync.nip;
     if (activeSecSync.department) window.ACTORS.security.department = activeSecSync.department;
+    if (activeSecSync.role) window.ACTORS.security.title = activeSecSync.role;
   }
 }
 window.syncActorsFromUsers = syncActorsFromUsers;
