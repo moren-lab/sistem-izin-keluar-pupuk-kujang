@@ -81,6 +81,17 @@ window.getActiveEmployeeActorInfo = getActiveEmployeeActorInfo;
  * Digital Pass & QR Code Generator, Ticket Detail Modal, Cancel Request, Emergency Pass
  */
 
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+window.escapeHtml = escapeHtml;
+
 // OPTION C: INTERCEPT NEW REQUEST IF EMPLOYEE ALREADY HAS AN ACTIVE TICKET
 function handleOpenNewRequest() {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
@@ -220,9 +231,9 @@ function handleOpenNewRequest() {
   const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
   const groupDinasWrapper = document.getElementById('groupDinasMembersWrapper');
   if (groupDinasWrapper) groupDinasWrapper.style.display = 'none';
-  window._selectedGroupMembers = [];
-  const containerGroupSelected = document.getElementById('selectedGroupMembersContainer');
-  if (containerGroupSelected) containerGroupSelected.innerHTML = '';
+  if (typeof window.resetAllDinasUploadState === 'function') {
+    window.resetAllDinasUploadState();
+  }
   if (selectReqCategory) selectReqCategory.value = '';
   if (selectReqType) selectReqType.value = '';
   if (inputDestination) { inputDestination.value = ''; const c = document.getElementById('countInputDestination'); if (c) c.textContent = '0'; }
@@ -391,6 +402,22 @@ function openEditNormalModal(ticket) {
     inputEstimatedReturn.value = ticket.estimatedReturn;
   }
 
+  // 7. Anggota Rombongan & Surat Perintah (Khusus Dinas Kantor)
+  window._selectedGroupMembers = (ticket.isGroupDinas && Array.isArray(ticket.members))
+    ? ticket.members.filter(m => m.status !== 'batal').map(m => ({ ...m }))
+    : [];
+  window._currentSuratPerintah = ticket.suratPerintah ? { ...ticket.suratPerintah } : null;
+
+  if (typeof window.initGroupDinasMembersForm === 'function') {
+    window.initGroupDinasMembersForm();
+  }
+  if (typeof window.renderSelectedGroupMembers === 'function') {
+    window.renderSelectedGroupMembers();
+  }
+  if (typeof window.renderSuratPerintahPreview === 'function') {
+    window.renderSuratPerintahPreview();
+  }
+
   if (modalNewRequest) modalNewRequest.classList.add('open');
 }
 
@@ -533,6 +560,26 @@ function setupRadioToggles() {
       const isDinas = isDinasCategory(selectEmergCategory.value);
       const emergPlannedExit = document.getElementById('emergPlannedExit');
       const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
+      const emergGroupDinasWrapper = document.getElementById('emergGroupDinasMembersWrapper');
+
+      if (selectEmergCategory.value === 'Dinas Kantor') {
+        if (emergGroupDinasWrapper) emergGroupDinasWrapper.style.display = 'block';
+        if (typeof window.initEmergGroupDinasMembersForm === 'function') {
+          window.initEmergGroupDinasMembersForm();
+        }
+      } else {
+        if (emergGroupDinasWrapper) emergGroupDinasWrapper.style.display = 'none';
+        window._selectedEmergGroupMembers = [];
+        window._currentEmergSuratPerintah = null;
+        if (typeof window.removeEmergSuratPerintahFile === 'function') {
+          window.removeEmergSuratPerintahFile();
+        }
+        const containerGroupSelected = document.getElementById('listSelectedEmergGroupMembers');
+        if (containerGroupSelected) {
+          containerGroupSelected.innerHTML = '<span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>';
+        }
+      }
+
       if (isDinas) {
         // Izin Darurat Dinas: Bebaskan pemilihan tanggal besok dan selanjutnya
         if (emergPlannedExit) emergPlannedExit.removeAttribute('max');
@@ -1548,6 +1595,9 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     return;
   }
 
+  window.currentDetailTicketId = ticket.id;
+  window.currentModalTicketId = ticket.id;
+
   const ACTORS = window.ACTORS || {};
   const modalTicketDetail = document.getElementById('modalTicketDetail');
 
@@ -1682,6 +1732,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       }
       if (detailSuratIcon) {
         detailSuratIcon.textContent = (ticket.suratPerintah.type && ticket.suratPerintah.type.includes('image')) ? '🖼️' : '📑';
+      }
+      const btnViewSurat = document.getElementById('btnViewSuratPerintah');
+      if (btnViewSurat) {
+        btnViewSurat.onclick = (e) => {
+          if (e) e.stopPropagation();
+          window.viewSuratPerintahDetail(ticket.id);
+        };
       }
     } else {
       secSurat.style.display = 'none';
@@ -2154,9 +2211,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const btnDetailReportArrival = document.getElementById('btnDetailReportArrival');
 
   if (btnDetailConfirmArrival && btnDetailRejectArrival) {
-    if (isApproverActor && (ticket.status === 'Menunggu Verifikasi Atasan' || ticket.status === 'Sedang di Luar')) {
+    const isPrimaryApprover = (typeof isTicketAssignedToCurrentApprover === 'function')
+      ? isTicketAssignedToCurrentApprover(ticket)
+      : Boolean(ticket.approverName && (ACTORS.approver?.name?.includes(ticket.approverName) || ACTORS.approver2?.name?.includes(ticket.approverName)));
+
+    if (isApproverActor && isPrimaryApprover && ticket.status === 'Menunggu Verifikasi Atasan') {
       btnDetailConfirmArrival.style.display = 'inline-flex';
-      btnDetailConfirmArrival.textContent = ticket.status === 'Menunggu Verifikasi Atasan' ? '✓ Ya, Sudah Tiba (Selesai)' : '✓ Tap In Atasan (Selesai)';
+      btnDetailConfirmArrival.textContent = '✓ Ya, Sudah Tiba (Selesai)';
       btnDetailConfirmArrival.onclick = () => {
         if (modalTicketDetail) modalTicketDetail.classList.remove('open');
         if (typeof window.confirmArrivalByApprover === 'function') {
@@ -2164,19 +2225,14 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
         }
       };
 
-      if (ticket.status === 'Menunggu Verifikasi Atasan') {
-        btnDetailRejectArrival.style.display = 'inline-flex';
-        btnDetailRejectArrival.textContent = '✕ Belum Tiba';
-        btnDetailRejectArrival.onclick = () => {
-          if (modalTicketDetail) modalTicketDetail.classList.remove('open');
-          if (typeof window.rejectArrivalByApprover === 'function') {
-            window.rejectArrivalByApprover(ticket.id);
-          }
-        };
-      } else {
-        btnDetailRejectArrival.style.display = 'none';
-        btnDetailRejectArrival.onclick = null;
-      }
+      btnDetailRejectArrival.style.display = 'inline-flex';
+      btnDetailRejectArrival.textContent = '✕ Belum Tiba';
+      btnDetailRejectArrival.onclick = () => {
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+        if (typeof window.rejectArrivalByApprover === 'function') {
+          window.rejectArrivalByApprover(ticket.id);
+        }
+      };
     } else {
       btnDetailConfirmArrival.style.display = 'none';
       btnDetailRejectArrival.style.display = 'none';
@@ -2746,6 +2802,11 @@ function handleOpenEmergency() {
   if (selectEmergCategory) selectEmergCategory.value = '';
   if (selectEmergType) selectEmergType.value = '';
   if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
+  const emergGroupDinasWrapper = document.getElementById('emergGroupDinasMembersWrapper');
+  if (emergGroupDinasWrapper) emergGroupDinasWrapper.style.display = 'none';
+  if (typeof window.resetAllDinasUploadState === 'function') {
+    window.resetAllDinasUploadState();
+  }
 
   // Reset emergency authorization method to default (app)
   const optEmergMethodApp = document.getElementById('optEmergMethodApp');
@@ -3126,13 +3187,33 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const approverName = selectApprover.value;
       const members = (category === 'Dinas Kantor' && Array.isArray(window._selectedGroupMembers)) ? [...window._selectedGroupMembers] : [];
+
+      // Validasi Anggota: pastikan tidak ada anggota yang memiliki izin aktif
+      if (category === 'Dinas Kantor' && members.length > 0) {
+        for (const m of members) {
+          const actTik = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(m.nip) : null;
+          if (actTik && (!window.editingTicketId || actTik.id !== window.editingTicketId)) {
+            if (typeof window.showToast === 'function') {
+              window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari rombongan terlebih dahulu.`, 'warning');
+            }
+            return;
+          }
+        }
+      }
+
       if (category === 'Dinas Kantor' && !window._currentSuratPerintah) {
-        window._currentSuratPerintah = {
-          name: 'Surat_Perintah_Tugas_Dinas.pdf',
-          size: 142500,
-          type: 'application/pdf',
-          uploadedAt: new Date().toISOString()
-        };
+        if (typeof window.showToast === 'function') {
+          window.showToast('Surat Perintah / Tugas Dinas wajib diunggah untuk kategori Dinas Kantor!', 'danger');
+        }
+        const dropzone = document.getElementById('dropzoneSuratPerintah');
+        if (dropzone) {
+          dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          dropzone.style.borderColor = '#e11d48';
+          setTimeout(() => {
+            if (dropzone) dropzone.style.borderColor = '';
+          }, 3500);
+        }
+        return;
       }
       const suratPerintah = (category === 'Dinas Kantor' && window._currentSuratPerintah) ? { ...window._currentSuratPerintah } : null;
 
@@ -3161,7 +3242,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sumMembersRow && sumMembersVal) {
         if (members && members.length > 0) {
           sumMembersRow.style.display = 'flex';
-          sumMembersVal.textContent = members.map(m => m.name).join(', ') + ` (${members.length} Orang)`;
+          sumMembersRow.style.alignItems = 'flex-start';
+          sumMembersVal.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 3px; font-weight: 600; color: #2563eb; line-height: 1.45;">
+              ${members.map(m => `<div>- ${escapeHtml(m.name)}</div>`).join('')}
+              <div style="font-size: 0.72rem; color: #64748b; font-weight: 500; margin-top: 3px;">(${members.length} Orang)</div>
+            </div>
+          `;
         } else {
           sumMembersRow.style.display = 'none';
         }
@@ -3238,6 +3325,23 @@ document.addEventListener('DOMContentLoaded', () => {
           ticket.plannedExit = window.pendingFormData.plannedExit;
           ticket.estimatedReturn = window.pendingFormData.estimatedReturn;
           ticket.approverName = newApprover;
+
+          if (ticket.category === 'Dinas Kantor' && Array.isArray(window.pendingFormData.members)) {
+            ticket.members = window.pendingFormData.members.map(m => ({
+              nip: m.nip,
+              name: m.name,
+              department: m.department || ticket.department,
+              supervisor: m.supervisor || ticket.approverName,
+              supervisorNip: m.supervisorNip || null,
+              status: m.status || 'aktif'
+            }));
+            ticket.isGroupDinas = ticket.members.length > 0;
+            ticket.suratPerintah = window.pendingFormData.suratPerintah || null;
+          } else {
+            ticket.members = [];
+            ticket.isGroupDinas = false;
+            ticket.suratPerintah = null;
+          }
 
           const ACTORS = window.ACTORS || {};
           const isDewi = Boolean(newApprover && newApprover.toLowerCase().includes('dewi'));
@@ -3381,17 +3485,35 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
       };
 
+      if (window.pendingFormData && window.pendingFormData.category === 'Dinas Kantor' && !window.pendingFormData.suratPerintah) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Surat Perintah / Tugas Dinas wajib diunggah untuk kategori Dinas Kantor!', 'danger');
+        }
+        return;
+      }
+
       const isGroupDinas = window.pendingFormData.category === 'Dinas Kantor' && Array.isArray(window.pendingFormData.members) && window.pendingFormData.members.length > 0;
       if (isGroupDinas) {
         newTicket.isGroupDinas = true;
         newTicket.initiatorNip = activeEmp ? activeEmp.nip : 'PK-2024-8841';
         newTicket.initiatorName = activeEmp ? activeEmp.name : 'Budi Pratama, S.T.';
-        newTicket.members = window.pendingFormData.members.map(m => ({
-          nip: m.nip,
-          name: m.name,
-          department: m.department || newTicket.department,
-          status: 'aktif'
-        }));
+        newTicket.members = window.pendingFormData.members.map(m => {
+          const u = allUsers.find(x => x.nip === m.nip);
+          const supName = (u && (u.directSupervisor || u.supervisor)) || m.supervisor || null;
+          let supNip = m.supervisorNip || (u && (u.directSupervisorNip || u.supervisorNip)) || null;
+          if (!supNip && supName) {
+            const supUser = allUsers.find(x => x.name === supName || (supName.includes('Dewi') && x.nip === 'PK-2012-0845') || (supName.includes('Subagja') && x.nip === 'PK-2012-0543') || (supName.includes('Hendra') && x.nip === 'PK-2015-1002'));
+            if (supUser) supNip = supUser.nip;
+          }
+          return {
+            nip: m.nip,
+            name: m.name,
+            department: m.department || (u ? u.department : newTicket.department),
+            supervisor: supName,
+            supervisorNip: supNip,
+            status: 'aktif'
+          };
+        });
         const memberNames = newTicket.members.map(m => m.name).join(', ');
         newTicket.timeline[0].desc += ` (Izin Dinas Bersama: ${newTicket.applicantName} mengikutsertakan ${memberNames}).`;
       }
@@ -3431,6 +3553,35 @@ document.addEventListener('DOMContentLoaded', () => {
               ticketId: newTicket.id,
               priority: 'normal',
               eventId: `grp_notif_${newTicket.id}_${m.nip}`
+            });
+          });
+
+          // Kirim notifikasi tembusan pengajuan awal ke atasan langsung masing-masing anggota (jika berbeda dari atasan peninjau)
+          const supGroupMap = {};
+          newTicket.members.forEach(m => {
+            const supNip = m.supervisorNip;
+            const supName = m.supervisor;
+            if (supNip && supNip !== approverNip) {
+              if (!supGroupMap[supNip]) {
+                supGroupMap[supNip] = { nip: supNip, name: supName, members: [] };
+              }
+              supGroupMap[supNip].members.push(m.name.split(',')[0].trim());
+            }
+          });
+
+          Object.values(supGroupMap).forEach(supObj => {
+            const formattedMembers = supObj.members.join(' dan ');
+            window.createNotification({
+              recipientRole: 'approver',
+              recipientNip: supObj.nip,
+              recipientName: supObj.name,
+              actorSource: 'karyawan',
+              type: 'info_tembusan',
+              title: 'Tembusan Pengajuan Dinas Staf',
+              message: `Staf Anda (${formattedMembers}) terdaftar dalam pengajuan Dinas Kantor bersama tim (Inisiator: ${newTicket.applicantName}) ke ${newTicket.destination}. Menunggu persetujuan ${chosenApproverName}.`,
+              ticketId: newTicket.id,
+              priority: 'normal',
+              eventId: `fyi_submitted_${newTicket.id}_${supObj.nip}`
             });
           });
         }
@@ -3749,6 +3900,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      // Validasi Khusus Dinas Kantor (Surat Perintah Wajib & Anggota Tanpa Izin Aktif)
+      if (categoryVal === 'Dinas Kantor' && !window._currentEmergSuratPerintah) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Surat Perintah / Tugas Dinas wajib diunggah untuk kategori Dinas Kantor!', 'danger');
+        }
+        const dropzone = document.getElementById('dropzoneEmergSuratPerintah');
+        if (dropzone) {
+          dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          dropzone.style.borderColor = '#e11d48';
+          setTimeout(() => { if (dropzone) dropzone.style.borderColor = ''; }, 3500);
+        }
+        return;
+      }
+
+      const emergMembers = (categoryVal === 'Dinas Kantor' && Array.isArray(window._selectedEmergGroupMembers)) ? [...window._selectedEmergGroupMembers] : [];
+      if (categoryVal === 'Dinas Kantor' && emergMembers.length > 0) {
+        for (const m of emergMembers) {
+          const actTik = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(m.nip) : null;
+          if (actTik && (!window.editingEmergencyTicketId || actTik.id !== window.editingEmergencyTicketId)) {
+            if (typeof window.showToast === 'function') {
+              window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari rombongan terlebih dahulu.`, 'warning');
+            }
+            return;
+          }
+        }
+      }
+
       // FITUR EDIT PENGAJUAN DARURAT
       if (window.editingEmergencyTicketId) {
         const ticketsList = window.ticketsList || [];
@@ -3930,8 +4108,72 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
       };
 
+      const isEmergGroup = categoryVal === 'Dinas Kantor' && emergMembers.length > 0;
+      if (isEmergGroup) {
+        emergencyTicket.isGroupDinas = true;
+        emergencyTicket.initiatorNip = activeEmergEmp ? activeEmergEmp.nip : 'PK-2024-8841';
+        emergencyTicket.initiatorName = activeEmergEmp ? activeEmergEmp.name : 'Budi Pratama, S.T.';
+        const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+        emergencyTicket.members = emergMembers.map(m => {
+          const u = allUsers.find(x => x.nip === m.nip);
+          const supName = (u && (u.directSupervisor || u.supervisor)) || m.supervisor || null;
+          let supNip = m.supervisorNip || (u && (u.directSupervisorNip || u.supervisorNip)) || null;
+          if (!supNip && supName) {
+            const supUser = allUsers.find(x => x.name === supName || (supName.includes('Dewi') && x.nip === 'PK-2012-0845') || (supName.includes('Subagja') && x.nip === 'PK-2012-0543') || (supName.includes('Hendra') && x.nip === 'PK-2015-1002'));
+            if (supUser) supNip = supUser.nip;
+          }
+          return {
+            nip: m.nip,
+            name: m.name,
+            department: m.department || emergencyTicket.department,
+            supervisor: supName,
+            supervisorNip: supNip,
+            status: 'aktif'
+          };
+        });
+        emergencyTicket.suratPerintah = { ...window._currentEmergSuratPerintah };
+      } else if (categoryVal === 'Dinas Kantor' && window._currentEmergSuratPerintah) {
+        emergencyTicket.suratPerintah = { ...window._currentEmergSuratPerintah };
+        emergencyTicket.isGroupDinas = false;
+        emergencyTicket.members = [];
+      }
+
       const ticketsList = window.ticketsList || [];
       ticketsList.unshift(emergencyTicket);
+
+      // Notifikasi tembusan FYI ke atasan masing-masing anggota rombongan darurat
+      if (isEmergGroup && typeof window.createNotification === 'function') {
+        const supervisorMap = {};
+        emergencyTicket.members.forEach(m => {
+          const supName = m.supervisor || emergencyTicket.approverName;
+          const supNip = m.supervisorNip;
+          if (supName && supName !== emergencyTicket.approverName) {
+            if (!supervisorMap[supName]) {
+              supervisorMap[supName] = { supNip, members: [] };
+            }
+            supervisorMap[supName].members.push(m.name);
+          }
+        });
+        Object.keys(supervisorMap).forEach(supName => {
+          const supObj = supervisorMap[supName];
+          const memberNames = supObj.members.join(', ');
+          window.createNotification({
+            recipientRole: 'approver',
+            recipientNip: supObj.supNip,
+            recipientName: supName,
+            actorSource: 'karyawan',
+            type: 'tembusan_dinas_rombongan',
+            title: 'ℹ️ Informasi Izin Darurat Staf Dinas',
+            message: `Staf Anda (${memberNames}) terdaftar dalam Izin Darurat Dinas bersama tim (Inisiator: ${emergencyTicket.applicantName}) ke ${emergencyTicket.destination}. Menunggu otorisasi ${emergencyTicket.approverName}.`,
+            ticketId: emergencyTicket.id,
+            priority: 'urgent',
+            eventId: `fyi_emg_${emergencyTicket.id}_${Date.now()}`
+          });
+        });
+      }
+
+      window._selectedEmergGroupMembers = [];
+      window._currentEmergSuratPerintah = null;
 
       // SEDANG-01: Notifikasi Prioritas Tinggi K3 Kedaruratan
       if (typeof window.createNotification === 'function') {

@@ -98,6 +98,25 @@ function isTicketReassignedFromCurrentApprover(ticket) {
   return false;
 }
 
+// Helper check: apakah anggota rombongan dinas merupakan bawahan atasan aktif saat ini
+function isMemberMySubordinate(m, aNip, cActorName) {
+  if (!m || m.status === 'batal') return false;
+  if (m.supervisorNip && aNip && m.supervisorNip === aNip) return true;
+  if (m.supervisor) {
+    const cSup = cleanPersonName(m.supervisor);
+    if (cSup && cActorName && (cSup === cActorName || cSup.includes(cActorName) || cActorName.includes(cSup))) return true;
+  }
+  const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+  const u = allUsers.find(x => x.nip === m.nip);
+  if (u) {
+    if (u.directSupervisorNip && aNip && u.directSupervisorNip === aNip) return true;
+    const uSup = cleanPersonName(u.directSupervisor || u.supervisor || '');
+    if (uSup && cActorName && (uSup === cActorName || uSup.includes(cActorName) || cActorName.includes(uSup))) return true;
+  }
+  return false;
+}
+window.isMemberMySubordinate = isMemberMySubordinate;
+
 // Cek apakah tiket ini berada di bawah naungan atasan aktif saat ini (Menu Pelacakan & Riwayat)
 // Setiap akun tunggal terisolasi presisi: Atasan Langsung HANYA bisa memantau status bawahannya
 function isTicketUnderMySupervision(ticket) {
@@ -123,6 +142,12 @@ function isTicketUnderMySupervision(ticket) {
   // 3. Jika permohonan pernah dialihkan dari atasan ini
   if (isTicketReassignedFromCurrentApprover(ticket)) {
     return true;
+  }
+
+  // 4. Jika salah satu anggota rombongan dinas aktif adalah bawahan langsung atasan ini (Tembusan Pengawasan)
+  if (ticket.isGroupDinas && Array.isArray(ticket.members) && ticket.members.length > 0) {
+    const hasMySubordinateMember = ticket.members.some(m => isMemberMySubordinate(m, aNip, cActorName));
+    if (hasMySubordinateMember) return true;
   }
 
   return false;
@@ -168,8 +193,24 @@ function updateApproverMetrics() {
     (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat')
   ).length;
 
+  const aNip = (currentApprover.nip || '').trim();
+  const cActorName = cleanPersonName(currentApprover.name || '');
+
+  // Tiket dinas kantor bersama di mana salah satu anggota aktif adalah bawahan langsung atasan ini (tembusan pengawasan)
+  const memberDinasPendingCount = ticketsList.filter(t =>
+    t.status !== 'Dibatalkan' &&
+    t.status !== 'Ditolak' &&
+    t.status !== 'Selesai' &&
+    !isTicketAssignedToCurrentApprover(t) &&
+    !isTicketReassignedFromCurrentApprover(t) &&
+    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') &&
+    t.isGroupDinas &&
+    Array.isArray(t.members) &&
+    t.members.some(m => isMemberMySubordinate(m, aNip, cActorName))
+  ).length;
+
   const directPending = pendingInitial + pendingExtensions;
-  const totalQueue = directPending + reassignedAwayCount;
+  const totalQueue = directPending + reassignedAwayCount + memberDinasPendingCount;
 
   const approved = ticketsList.filter(t => t.status === 'Disetujui' && isTicketAssignedToCurrentApprover(t)).length;
   const rejected = ticketsList.filter(t => t.status === 'Ditolak' && isTicketAssignedToCurrentApprover(t)).length;
@@ -289,6 +330,52 @@ function renderApproverDashboard() {
             </div>
             <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem;" onclick="setApproverNav('pelacakan')">
               Lihat di Pelacakan →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // 0b. INFORMASI TEMBUSAN PENGAJUAN DINAS STAF (JIKA ADA)
+    const currentAct = getCurrentApproverActor();
+    const currNip = (currentAct.nip || '').trim();
+    const currActorName = cleanPersonName(currentAct.name || '');
+
+    const memberDinasPendingTickets = ticketsList.filter(t =>
+      t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      !isTicketAssignedToCurrentApprover(t) &&
+      !isTicketReassignedFromCurrentApprover(t) &&
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') &&
+      t.isGroupDinas &&
+      Array.isArray(t.members) &&
+      t.members.some(m => isMemberMySubordinate(m, currNip, currActorName))
+    );
+
+    if (memberDinasPendingTickets.length > 0) {
+      bannerHtml += `
+        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 0.95rem 1.25rem; margin-bottom: 0.85rem; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+              <div style="font-size: 1.5rem;">📋</div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <span style="font-weight: 800; font-size: 0.9rem; color: #1e40af;">
+                    ${memberDinasPendingTickets.length} TEMBUSAN PENGAJUAN DINAS STAF ANDA
+                  </span>
+                  <span class="tag-badge" style="background: #dbeafe; color: #1e40af; font-weight: 700; border: 1px solid #bfdbfe;">Tembusan</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #1e3a8a; margin-top: 3px;">
+                  Staf Anda terdaftar dalam rombongan tugas dinas kantor bersama tim (Menunggu persetujuan Atasan Utama).
+                </div>
+                <div style="font-size: 0.75rem; color: #2563eb; margin-top: 2px;">
+                  Anda dapat memantau rincian penugasan, jadwal, dan lampiran surat tugas di menu Antrean.
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem; background: #ffffff; border-color: #bfdbfe; color: #1e40af;" onclick="setApproverNav('antrian')">
+              Lihat di Antrean →
             </button>
           </div>
         </div>
@@ -616,7 +703,24 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 <span>↳ <strong>Status:</strong> Pengajuan ini dialihkan dari <strong>${t.reassignedFrom}</strong> ke Anda</span>
                 <span style="font-size: 0.7rem; opacity: 0.85;">${t.reassignedAt || ''}</span>
               </div>
-            ` : '')}
+            ` : (() => {
+              if (t.isGroupDinas && Array.isArray(t.members)) {
+                const currentActor = getCurrentApproverActor();
+                const aNip = (currentActor.nip || '').trim();
+                const cActorName = cleanPersonName(currentActor.name || '');
+                const myMembers = t.members.filter(m => isMemberMySubordinate(m, aNip, cActorName));
+                if (myMembers.length > 0 && !isTicketAssignedToCurrentApprover(t)) {
+                  const names = myMembers.map(m => m.name.split(',')[0]).join(', ');
+                  return `
+                    <div class="approver-alert-banner" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                      <span>📋 <strong>Tembusan Pengawasan:</strong> Staf Anda (<strong>${names}</strong>) terdaftar dalam rombongan dinas ini</span>
+                      <span style="font-size: 0.7rem; color: #1e40af; font-weight: 700;">Peninjau: ${t.approverName}</span>
+                    </div>
+                  `;
+                }
+              }
+              return '';
+            })())}
 
             <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
             <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.4rem 0;">
@@ -634,11 +738,23 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             </div>
 
+            ${t.suratPerintah ? `
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.35rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
+                <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
+                  <span style="font-size: 0.85rem;">📄</span>
+                  <span style="color: #166534; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.suratPerintah.name || 'Surat Perintah Dinas').replace(/"/g, '&quot;')}">${t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf'}</span>
+                </div>
+                <button type="button" onclick="event.stopPropagation(); window.viewSuratPerintahDetail('${t.id}')" style="background: #ffffff; color: #15803d; border: 1px solid #86efac; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
+                  👁️ Lihat Dokumen
+                </button>
+              </div>
+            ` : ''}
+
             ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
               <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.4rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
                 <div style="font-weight: 700; color: #1e40af; margin-bottom: 3px;">👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif):</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                  <span style="background: #dbeafe; color: #1e40af; font-weight: 700; padding: 1px 6px; border-radius: 4px;">${t.applicantName} (Inisiator)</span>
+                  <span style="background: #d1fae5; color: #065f46; font-weight: 700; padding: 1px 6px; border-radius: 4px;">👑 ${t.applicantName} (Inisiator)</span>
                   ${t.members.map(m => `<span style="background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${m.name}${m.status === 'batal' ? ' (Batal)' : ''}</span>`).join('')}
                 </div>
               </div>
@@ -750,6 +866,16 @@ function renderApproverCards(list, containerElement, isTracking = false) {
 
               // Standard Tracking View (Pelacakan) & Antrean
               if (t.status === 'Menunggu Verifikasi Atasan') {
+                const isPrimary = isTicketAssignedToCurrentApprover(t);
+                if (!isPrimary) {
+                  return `
+                  <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); width: 100%;">
+                    <span style="font-size: 0.72rem; color: #1e40af; font-weight: 600;">🏢 Tap In gerbang tercatat (Menunggu konfirmasi ${t.approverName})</span>
+                    <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                      <span>Detail Pengajuan</span>
+                    </button>
+                  </div>`;
+                }
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="padding: 0.45rem 0.65rem; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.725rem; color: #1e40af; line-height: 1.4;">
@@ -769,30 +895,20 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   </button>
                 </div>`;
               }
-              if (t.status === 'Sedang di Luar') {
-                return `
-                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
-                  <div style="display: flex; gap: 0.45rem; width: 100%;">
-                    <button type="button" class="btn-approve" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.confirmArrivalByApprover('${t.id}')" title="Tap In langsung oleh Atasan jika karyawan sudah kembali">
-                      ✓ Tap In Atasan (Selesai)
-                    </button>
-                    <button type="button" class="btn-pill-action btn-pill-detail" style="min-height: 34px; padding: 0 0.75rem;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
-                      <span>Detail</span>
-                    </button>
-                  </div>
-                </div>`;
-              }
 
+              const isRiwayatView = (window.currentApproverNav === 'riwayat');
               return `
               <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                ${isRiwayatView ? `
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus Riwayat #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
                 </button>
+                ` : ''}
               </div>`;
             })()}
           </div>
@@ -846,16 +962,19 @@ function renderApproverTable(list, containerElement) {
               catatanHtml = `<span style="color: #f59e0b; font-size: 0.725rem;">Dialihkan ke ${t.reassignedTo}</span>`;
             }
 
+            const isRiwayatView = (window.currentApproverNav === 'riwayat');
             let tindakanHtml = `
               <div class="action-pills-row">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus dari Pelacakan #${t.id}">
+                ${isRiwayatView ? `
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus Riwayat #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
                 </button>
+                ` : ''}
               </div>
             `;
 
@@ -964,6 +1083,24 @@ function renderApproverView() {
     );
     reassignedAwayListAll.sort(priorityEmergencyComparator);
 
+    // 3. Pengajuan dinas kantor bersama di mana salah satu anggota aktif adalah bawahan langsung atasan ini (tembusan pengawasan)
+    const currentApproverForQueue = getCurrentApproverActor();
+    const currApproverNip = (currentApproverForQueue.nip || '').trim();
+    const currApproverName = cleanPersonName(currentApproverForQueue.name || '');
+
+    const memberDinasListAll = ticketsList.filter(t =>
+      t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      !isTicketAssignedToCurrentApprover(t) &&
+      !isTicketReassignedFromCurrentApprover(t) &&
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') &&
+      t.isGroupDinas &&
+      Array.isArray(t.members) &&
+      t.members.some(m => isMemberMySubordinate(m, currApproverNip, currApproverName))
+    );
+    memberDinasListAll.sort(priorityEmergencyComparator);
+
     // Hitung counter untuk badge filter antrean
     const totalCount = pendingListAll.length;
     const emgCount = pendingListAll.filter(isEmgTicket).length;
@@ -992,16 +1129,19 @@ function renderApproverView() {
 
     let pendingList = pendingListAll;
     let reassignedAwayList = reassignedAwayListAll;
+    let memberDinasList = memberDinasListAll;
 
     if (activeNature === 'emergency') {
       pendingList = pendingListAll.filter(isEmgTicket);
       reassignedAwayList = reassignedAwayListAll.filter(isEmgTicket);
+      memberDinasList = memberDinasListAll.filter(isEmgTicket);
     } else if (activeNature === 'regular') {
       pendingList = pendingListAll.filter(t => !isEmgTicket(t));
       reassignedAwayList = reassignedAwayListAll.filter(t => !isEmgTicket(t));
+      memberDinasList = memberDinasListAll.filter(t => !isEmgTicket(t));
     }
 
-    if (pendingList.length === 0 && reassignedAwayList.length === 0) {
+    if (pendingList.length === 0 && reassignedAwayList.length === 0 && memberDinasList.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
       if (emptyApproverPendingBox) {
         emptyApproverPendingBox.style.display = 'flex';
@@ -1049,6 +1189,23 @@ function renderApproverView() {
           `;
         }
 
+        if (memberDinasList.length > 0) {
+          const tempDivMemberDinas = document.createElement('div');
+          renderApproverCards(memberDinasList, tempDivMemberDinas, true);
+          queueHtml += `
+            <div class="approver-reassigned-section" style="margin-top: 1.5rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h4 class="approver-reassigned-heading" style="color: #1e40af;">
+                  <span>📋 Tembusan Pengajuan Dinas Staf Anda</span>
+                  <span class="approver-reassigned-badge" style="background: #dbeafe; color: #1e40af;">${memberDinasList.length}</span>
+                </h4>
+                <span class="approver-reassigned-sub">Staf Anda terdaftar dalam rombongan dinas kantor</span>
+              </div>
+              ${tempDivMemberDinas.innerHTML}
+            </div>
+          `;
+        }
+
         containerApproverPendingQueue.innerHTML = queueHtml;
       }
     }
@@ -1057,7 +1214,7 @@ function renderApproverView() {
 
   // 3. PELACAKAN IZIN KARYAWAN (HANYA IZIN AKTIF / BERJALAN)
   if (currentApproverNav === 'pelacakan' || currentApproverNav === 'tim') {
-    const activeStatuses = ['Sedang di Luar', 'Terlambat', 'Disetujui'];
+    const activeStatuses = ['Sedang di Luar', 'Terlambat', 'Disetujui', 'Menunggu Verifikasi Atasan'];
     let list = ticketsList.filter(t => 
       !isDeletedByCurrentApprover(t) && 
       isTicketUnderMySupervision(t) &&
@@ -2106,13 +2263,17 @@ window.confirmArrivalByApprover = function(ticketId) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
-  const arrivalTime = t.arrivalReportedAt || t.reportedReturnTime || nowFormatted;
+  const arrivalTime = t.tapInTime || t.arrivalReportedTime || t.arrivalReportedAt || t.reportedReturnTime || nowFormatted;
 
   let wasOverdue = false;
   if (t.estimatedReturn) {
     try {
-      const estD = new Date(t.estimatedReturn);
-      if (now > estD) wasOverdue = true;
+      const estD = (typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(t.estimatedReturn) : new Date(t.estimatedReturn);
+      // Validasi keterlambatan membandingkan waktu tap in yang terkunci di gerbang, BUKAN waktu atasan membuka aplikasi
+      const tapInD = (t.tapInTime && typeof window.parseTicketDateTime === 'function') ? window.parseTicketDateTime(t.tapInTime) : now;
+      if (tapInD && estD && !isNaN(tapInD.getTime()) && !isNaN(estD.getTime())) {
+        if (tapInD.getTime() > estD.getTime()) wasOverdue = true;
+      }
     } catch(e) {}
   }
 
@@ -2163,7 +2324,7 @@ window.confirmArrivalByApprover = function(ticketId) {
   }
 
   if (typeof window.showToast === 'function') {
-    window.showToast(`Kehadiran ${t.applicantName} berhasil diverifikasi! Tiket #${t.id} resmi Selesai.`, 'success');
+    window.showToast(`Kehadiran ${t.applicantName} & tim berhasil diverifikasi! Tiket #${t.id} resmi Selesai.`, 'success');
   }
 
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
@@ -2173,6 +2334,27 @@ window.confirmArrivalByApprover = function(ticketId) {
 };
 
 window.rejectArrivalByApprover = function(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+
+  const confirmMsg = `Apakah Anda yakin bahwa personel rombongan dinas #${t.id} belum tiba di area kerja?\n\nKunci waktu kepulangan akan dibatalkan dan durasi izin dilanjutkan berjalan secara real-time.`;
+  if (typeof window.openConfirmDialog === 'function') {
+    window.openConfirmDialog({
+      title: 'Konfirmasi: Personel Belum Tiba',
+      message: `Apakah Anda yakin bahwa personel rombongan dinas <strong>#${t.id}</strong> belum tiba di area kerja?<br><br><span style="color:#dc2626; font-size:0.75rem;">Kunci waktu kepulangan akan dibatalkan dan status kembali ke 'Sedang di Luar'.</span>`,
+      confirmText: 'Ya, Belum Tiba',
+      cancelText: 'Batal',
+      isDanger: true,
+      onConfirm: () => executeRejectArrivalByApprover(ticketId)
+    });
+    return;
+  }
+  if (!confirm(confirmMsg)) return;
+  executeRejectArrivalByApprover(ticketId);
+};
+
+function executeRejectArrivalByApprover(ticketId) {
   const ticketsList = window.ticketsList || [];
   const t = ticketsList.find(x => x.id === ticketId);
   if (!t) return;
@@ -2188,6 +2370,7 @@ window.rejectArrivalByApprover = function(ticketId) {
   t.reportedReturnTime = null;
   t.tapInTime = null;
   t.arrivalReportedTime = null;
+  t.employeeReportedReturnTime = null;
   t.timeFrozen = false;
 
   if (!t.timeline) t.timeline = [];
@@ -2195,7 +2378,7 @@ window.rejectArrivalByApprover = function(ticketId) {
     event: 'Laporan Tiba Ditolak Atasan',
     time: nowFormatted,
     by: `${currentApprover.name} (Atasan)`,
-    desc: `Laporan tiba ditolak oleh ${currentApprover.name}: Karyawan belum berada di area kantor/ruangan. Kunci waktu dibatalkan dan status kembali ke 'Sedang di Luar'.`
+    desc: `Laporan tiba ditolak oleh ${currentApprover.name}: Personel belum berada di area kantor/ruangan. Kunci waktu dibatalkan dan status kembali ke 'Sedang di Luar'.`
   });
 
   if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
@@ -2213,6 +2396,23 @@ window.rejectArrivalByApprover = function(ticketId) {
       priority: 'urgent',
       eventId: `arr_rej_${t.id}_${Date.now()}`
     });
+
+    if (t.isGroupDinas && Array.isArray(t.members)) {
+      t.members.filter(m => m.status !== 'batal').forEach(m => {
+        window.createNotification({
+          recipientRole: 'karyawan',
+          recipientNip: m.nip,
+          recipientName: m.name,
+          actorSource: 'approver',
+          type: 'peringatan',
+          title: 'Laporan Tiba Ditolak',
+          message: `Atasan (${currentApprover.name}) menolak laporan tiba rombongan: Personel belum berada di ruangan. Status izin #${t.id} kembali 'Sedang di Luar'.`,
+          ticketId: t.id,
+          priority: 'urgent',
+          eventId: `arr_rej_${t.id}_${m.nip}_${Date.now()}`
+        });
+      });
+    }
   }
 
   if (typeof window.showToast === 'function') {
@@ -2223,4 +2423,4 @@ window.rejectArrivalByApprover = function(ticketId) {
   if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
   if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-};
+}

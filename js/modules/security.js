@@ -657,10 +657,12 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                 <span>Detail Pengajuan</span>
               </button>
-              <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', '${isHistoryMode ? 'riwayat' : 'pelacakan'}')" title="Hapus Data #${t.id}">
+              ${isHistoryMode ? `
+              <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Data #${t.id}">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 <span>Hapus</span>
               </button>
+              ` : ''}
             </div>
           </div>
         `;
@@ -732,10 +734,6 @@ function renderSecurityTable(list, containerElement) {
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
-                </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'pelacakan')" title="Hapus Data #${t.id}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Hapus</span>
                 </button>
               </div>
             `;
@@ -1445,6 +1443,75 @@ function executeScanIn(ticketId) {
     if (returnTime && !isNaN(returnTime.getTime())) {
       ticket.lateMinutes = Math.max(1, Math.round((now.getTime() - returnTime.getTime()) / 60000));
     }
+  }
+
+  // KHUSUS DINAS ROMBONGAN: Tap In di Gerbang Mengunci Jam & Menunggu Verifikasi Atasan
+  const isGroupDinasActive = Boolean(ticket.isGroupDinas && Array.isArray(ticket.members) && ticket.members.filter(m => m.status !== 'batal').length > 0);
+  if (isGroupDinasActive) {
+    ticket.status = 'Menunggu Verifikasi Atasan';
+    ticket.tapInTime = nowFormatted;
+    ticket.tapInGate = gate;
+    ticket.arrivalReportedTime = nowFormatted;
+    ticket.arrivalReportedAt = nowFormatted;
+    ticket.reportedReturnTime = nowFormatted;
+    ticket.employeeReportedReturnTime = nowFormatted;
+    ticket.timeFrozen = true;
+    ticket.scanInGate = gate;
+    ticket.securityOfficerIn = officer ? officer.name : 'Sertu Agus';
+    ticket.securityNipIn = officer ? officer.nip : 'SEC-2018-042';
+    if (wasOverdue) ticket.isLate = true;
+
+    if (!ticket.timeline) ticket.timeline = [];
+    ticket.timeline.push({
+      event: 'Tap In Gerbang Masuk',
+      time: nowFormatted,
+      by: `${securityName} (${gate})`,
+      gate: gate,
+      desc: `Tap In kartu di ${gate} oleh Petugas (${officer.name}). Jam kepulangan terkunci pada ${nowFormatted}. Menunggu verifikasi fisik oleh Atasan (${ticket.approverName}).`
+    });
+
+    if (ticket.pendingExtension) {
+      ticket.pendingExtension = null;
+    }
+    ticket.hasExtensionPending = false;
+
+    window.saveTickets(ticketsList);
+    const inputScanTicketCode = document.getElementById('inputScanTicketCode');
+    const scanResultContainer = document.getElementById('scanResultContainer');
+    if (inputScanTicketCode) inputScanTicketCode.value = '';
+    if (scanResultContainer) scanResultContainer.style.display = 'none';
+
+    const modalTicketDetail = document.getElementById('modalTicketDetail');
+    if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+
+    // Kirim notifikasi ke Atasan Peninjau
+    if (typeof window.createNotification === 'function') {
+      window.createNotification({
+        recipientRole: 'approver',
+        recipientNip: ticket.approverNip || 'PK-2015-1002',
+        recipientName: ticket.approverName || 'Ir. Hendra Gunawan, M.T.',
+        actorSource: 'security',
+        type: 'tap_in_arrival',
+        title: 'Dinas Kantor Melakukan Tap In',
+        message: `Dinas kantor (#${ticket.id} - ${ticket.applicantName} & tim) telah Tap In di gerbang masuk (${gate}). Periksa kehadiran fisik dan konfirmasi kedatangan di ruangan kerja.`,
+        ticketId: ticket.id,
+        priority: 'urgent',
+        eventId: `tap_sec_${ticket.id}`
+      });
+    }
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Tap In berhasil di ${gate}! Jam kepulangan terkunci. Menunggu verifikasi fisik oleh Atasan.`, 'success');
+    }
+
+    renderSecurityView();
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+    if (typeof window.renderAdminView === 'function') window.renderAdminView();
+    if (typeof window.renderMobileSecurity === 'function') window.renderMobileSecurity();
+    if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+    if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+    return;
   }
 
   ticket.scanInGate = gate;

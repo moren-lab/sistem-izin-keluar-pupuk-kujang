@@ -976,12 +976,12 @@
                               <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
                                 <label class="form-label" style="font-weight: 700; color: #0f172a; font-size: 0.825rem; margin: 0; display: flex; align-items: center; gap: 6px;">
                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                  <span>👥 Tambah Anggota Rombongan Dinas (Opsional)</span>
+                                  <span>Tambah Anggota Rombongan Dinas (Opsional)</span>
                                 </label>
                                 <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Maks. 5 rekan</span>
                               </div>
                               <p style="font-size: 0.725rem; color: #475569; margin: 0 0 0.65rem 0; line-height: 1.4;">
-                                Cari dan pilih rekan kerja yang bertugas bersama. Sistem otomatis mengenali staf dari departemen dan atasan mana pun.
+                               
                               </p>
 
                               <!-- Search Box Anggota Tim -->
@@ -1022,7 +1022,7 @@
                                   <span style="font-size: 0.72rem; color: #64748b;">PDF, PNG, JPG (Maks. 5 MB)</span>
                                 </div>
                                 <p style="font-size: 0.725rem; color: #475569; margin: 0 0 0.5rem 0; line-height: 1.4;">
-                                  Lampirkan dokumen Surat Perintah Kerja (SPK) atau Surat Tugas dari unit kerja sebagai dasar legalitas perjalanan dinas.
+                                 
                                 </p>
 
                                 <input type="file" id="fileSuratPerintah" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" onchange="window.handleSuratPerintahUpload(this)">
@@ -1221,6 +1221,79 @@
                                 <option value="Kembali ke Area">Kembali ke Area</option>
                                 <option value="Pulang Mendahului">Pulang Lebih Awal (Tidak Kembali)</option>
                               </select>
+                            </div>
+                          </div>
+
+                          <!-- Anggota Rombongan Dinas & Upload Dokumen SPK Darurat (Tampil dinamis jika kategori Dinas Kantor) -->
+                          <div class="form-group" id="emergGroupDinasMembersWrapper" style="display: none; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 1rem; margin-bottom: 0;">
+                            <!-- 1. Tambah Anggota Rombongan Darurat -->
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+                              <label class="form-label" style="font-weight: 700; color: #0f172a; font-size: 0.825rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                <span>Tambah Anggota Rombongan Dinas (Opsional)</span>
+                              </label>
+                              <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Maks. 5 rekan</span>
+                            </div>
+
+                            <!-- Search Box Anggota Tim Darurat -->
+                            <div class="member-search-wrap" id="wrapSearchEmergMember" style="position: relative; margin-bottom: 0.65rem;">
+                              <div style="position: relative; display: flex; align-items: center;">
+                                <input type="text" id="inputSearchEmergGroupMember" class="form-input" placeholder="🔍 Ketik nama, NIP, atau departemen rekan kerja..." autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.825rem;">
+                              </div>
+
+                              <!-- Floating Dropdown Rekan Karyawan Darurat -->
+                              <div class="approver-floating-dropdown" id="emergMemberFloatingDropdown" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 100; max-height: 250px; overflow-y: auto; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);">
+                                <div id="emergMemberItemsList" style="padding: 4px;"></div>
+                                <div class="approver-empty-state" id="emergMemberEmptyState" style="display: none; padding: 1rem; text-align: center; color: var(--text-muted);">
+                                  <div style="font-size: 1.25rem;">🔎</div>
+                                  <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">Karyawan Tidak Ditemukan</div>
+                                  <div style="font-size: 0.72rem; color: #64748b;">Tidak ada rekan aktif yang sesuai atau rekan sedang memiliki izin aktif.</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- List Anggota Terpilih Darurat -->
+                            <div style="margin-bottom: 0.95rem;">
+                              <div style="font-size: 0.72rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Daftar Rekan Tim Terpilih:</div>
+                              <div id="listSelectedEmergGroupMembers" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px;">
+                                <span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>
+                              </div>
+                            </div>
+
+                            <!-- 2. Upload Dokumen Surat Tugas / Perintah Dinas Darurat -->
+                            <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.85rem;">
+                              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+                                <label class="form-label" style="font-weight: 700; color: #0f172a; font-size: 0.825rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                  <span>Upload Surat Perintah / Surat Tugas Dinas</span>
+                                  <span style="color: var(--rose-danger, #dc2626);">*</span>
+                                </label>
+                                <span style="font-size: 0.72rem; color: #64748b;">PDF, PNG, JPG (Maks. 5 MB)</span>
+                              </div>
+
+                              <input type="file" id="fileEmergSuratPerintah" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" onchange="window.handleEmergSuratPerintahUpload(this)">
+
+                              <!-- Upload Dropzone -->
+                              <div id="dropzoneEmergSuratPerintah" onclick="document.getElementById('fileEmergSuratPerintah').click()" style="border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 0.85rem; text-align: center; background: #ffffff; cursor: pointer; transition: all 0.2s ease;">
+                                <div style="font-size: 1.35rem; margin-bottom: 4px;">📑</div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">Klik untuk memilih file Surat Perintah / Tugas</div>
+                                <div style="font-size: 0.72rem; color: #64748b;">Format berkas: .PDF, .JPG, atau .PNG (Maks 5 MB)</div>
+                              </div>
+
+                              <!-- Uploaded File Preview Card -->
+                              <div id="previewEmergSuratPerintahCard" style="display: none; background: #ffffff; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 0.65rem 0.85rem; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                  <div style="font-size: 1.5rem;" id="previewEmergSuratPerintahIcon">📄</div>
+                                  <div>
+                                    <div id="previewEmergSuratPerintahName" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">surat_tugas.pdf</div>
+                                    <div id="previewEmergSuratPerintahSize" style="font-size: 0.7rem; color: #16a34a; font-weight: 600;">145 KB • Berkas Terlampir</div>
+                                  </div>
+                                </div>
+                                <button type="button" onclick="window.removeEmergSuratPerintahFile()" style="background: none; border: none; color: #dc2626; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                  <span>Hapus</span>
+                                </button>
+                              </div>
                             </div>
                           </div>
 
@@ -1707,17 +1780,6 @@
             <div class="page-title-row">
               <div class="page-title-wrap">
                 <h1>Pelacakan Izin Karyawan</h1>
-              </div>
-              <div class="filters-group" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearApproverTracking" onclick="window.clearApproverTrackingHistory()" title="Hapus seluruh riwayat pengajuan yang sudah berstatus selesai atau dibatalkan">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                  </svg>
-                  <span>Hapus Semua</span>
-                </button>
               </div>
             </div>
 
@@ -3282,8 +3344,8 @@
             <span class="summary-key">Estimasi Kembali</span>
             <span class="summary-val" id="sumReturnTime">-</span>
           </div>
-          <div class="summary-row" id="sumMembersRow" style="display: none;">
-            <span class="summary-key">Rekan Dinas</span>
+          <div class="summary-row" id="sumMembersRow" style="display: none; align-items: flex-start;">
+            <span class="summary-key" style="padding-top: 1px;">Rekan Dinas</span>
             <span class="summary-val" id="sumMembersVal" style="font-weight: 700; color: #2563eb;">-</span>
           </div>
           <div class="summary-row" id="sumSuratRow" style="display: none;">
@@ -3767,6 +3829,35 @@
             Hapus Riwayat
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 4C: VIEWER PRATINJAU DOKUMEN SURAT PERINTAH ================= -->
+  <div class="modal-overlay" id="modalDocViewer" style="z-index: 1050; display: none;" onclick="if(event.target === this) window.closeDocViewerModal();">
+    <div class="modal-card" style="max-width: 720px; width: 95%;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, #e2e8f0); padding: 0.85rem 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.3rem;" id="docViewerIcon">📄</span>
+          <div>
+            <h3 id="docViewerTitle" style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 0;">Dokumen Surat Perintah</h3>
+            <p id="docViewerSubtitle" style="font-size: 0.72rem; color: #64748b; margin: 2px 0 0 0;">Berkas Tugas Resmi Unit Kerja</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" id="btnDownloadDocViewer" onclick="window.downloadCurrentDocViewerFile()" class="btn-figma-secondary" style="font-size: 0.75rem; padding: 0.4rem 0.75rem; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; background: #ffffff; border: 1px solid #cbd5e1; cursor: pointer;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Unduh Berkas</span>
+          </button>
+          <button type="button" class="btn-close-modal" onclick="window.closeDocViewerModal()" style="border: none; background: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">✕</button>
+        </div>
+      </div>
+      <div class="modal-body" id="docViewerBody" style="padding: 1.25rem; min-height: 250px; max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc;">
+        <!-- Dynamic Document View (iframe, image, or placeholder card) -->
+      </div>
+      <div class="modal-footer" style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border-color, #e2e8f0); display: flex; justify-content: space-between; align-items: center;">
+        <span id="docViewerMeta" style="font-size: 0.72rem; color: #64748b;">Format Berkas: PDF / Gambar</span>
+        <button type="button" class="btn-figma-secondary" onclick="window.closeDocViewerModal()" style="padding: 0.4rem 1rem; font-size: 0.775rem; font-weight: 700; border-radius: 6px;">Tutup</button>
       </div>
     </div>
   </div>

@@ -404,6 +404,7 @@
 
     if (tab === 'beranda') tab = 'dashboard';
     currentMobileTab = tab;
+    window.currentMobileTab = tab;
     renderActiveView();
 
     if (subParam) {
@@ -416,6 +417,9 @@
   };
 
   window.mobileSwitchRole = function (role) {
+    if (typeof window.resetAllDinasUploadState === 'function') {
+      window.resetAllDinasUploadState();
+    }
     // TINGGI-05 FIX: Cegah pergantian ke akun yang telah dicabut atau dinonaktifkan
     let deletedUsers = [];
     try {

@@ -377,6 +377,11 @@ window.guardActiveFeatureAccess = guardActiveFeatureAccess;
 
 
 function switchRole(role, kujangId) {
+  // Reset seluruh state upload file & rombongan agar tidak bocor antar akun (Multi-Aktor Clean State)
+  if (typeof window.resetAllDinasUploadState === 'function') {
+    window.resetAllDinasUploadState();
+  }
+
   // Normalisasi parameter role ke roleKey standar sistem ('karyawan', 'karyawan2', 'approver', 'approver2', 'security', 'admin')
   if (typeof role === 'object' && role) {
     if (!kujangId) kujangId = role;

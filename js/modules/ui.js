@@ -233,12 +233,13 @@ function matchesPeriodFilter(ticket, period) {
   return true;
 }
 
-// UNIVERSAL DELETE CONFIRMATION MODAL
-function openDeleteConfirmModal({ title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.', onConfirm }) {
+// UNIVERSAL CONFIRMATION DIALOG MODAL
+function openConfirmDialog({ title = 'Konfirmasi', message = '', confirmText = 'Ya', cancelText = 'Batal', isDanger = false, onConfirm }) {
   const modal = document.getElementById('modalDeleteConfirm');
   const titleEl = document.getElementById('deleteModalTitle');
   const msgEl = document.getElementById('deleteModalMessage');
   const btnExec = document.getElementById('btnExecuteDeleteConfirm');
+  const btnCancel = document.getElementById('btnCancelDeleteConfirm');
   if (!modal) {
     if (confirm(message.replace(/<[^>]+>/g, ''))) {
       if (typeof onConfirm === 'function') onConfirm();
@@ -247,13 +248,29 @@ function openDeleteConfirmModal({ title = 'Konfirmasi Hapus', message = 'Apakah 
   }
   if (titleEl) titleEl.textContent = title;
   if (msgEl) msgEl.innerHTML = message;
+  if (btnCancel) btnCancel.textContent = cancelText;
   if (btnExec) {
+    btnExec.textContent = confirmText;
+    btnExec.style.background = isDanger ? '#dc2626' : '#059669';
+    btnExec.style.borderColor = isDanger ? '#dc2626' : '#059669';
     btnExec.onclick = () => {
       closeDeleteConfirmModal();
       if (typeof onConfirm === 'function') onConfirm();
     };
   }
   modal.classList.add('open');
+}
+
+// UNIVERSAL DELETE CONFIRMATION MODAL
+function openDeleteConfirmModal({ title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus pengajuan ini dari riwayat? Tindakan ini tidak dapat dibatalkan.', onConfirm }) {
+  openConfirmDialog({
+    title,
+    message,
+    confirmText: 'Ya, Hapus',
+    cancelText: 'Batal',
+    isDanger: true,
+    onConfirm
+  });
 }
 
 function closeDeleteConfirmModal() {
@@ -269,6 +286,7 @@ window.showToast = showToast;
 window.matchesPeriodFilter = matchesPeriodFilter;
 window.openDeleteConfirmModal = openDeleteConfirmModal;
 window.closeDeleteConfirmModal = closeDeleteConfirmModal;
+window.openConfirmDialog = openConfirmDialog;
 
 
 // UNIVERSAL NOTICE MODAL (GANTI BROWSER ALERT DENGAN TAMPILAN KARTU FIGMA & TOMBOL BATAL)

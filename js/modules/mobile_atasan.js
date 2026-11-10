@@ -56,6 +56,29 @@
   let currentAtasanDetailTab = 'info'; // 'info' | 'jejak'
 
   function getActiveApprover() {
+    if (window.activeApproverUser && (window.currentActor === 'approver' || window.currentActor === 'approver2' || window.currentMobileRole === 'approver' || window.currentMobileRole === 'approver2')) {
+      return {
+        ...window.activeApproverUser,
+        dept: window.activeApproverUser.department || 'Departemen Rekayasa & Pemeliharaan',
+        department: window.activeApproverUser.department || 'Departemen Rekayasa & Pemeliharaan'
+      };
+    }
+    try {
+      const savedApprNip = localStorage.getItem('KUJANG_ACTIVE_APPR_NIP');
+      if (savedApprNip) {
+        const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+        const found = users.find(u => u.nip === savedApprNip);
+        if (found) {
+          window.activeApproverUser = found;
+          return {
+            ...found,
+            dept: found.department || 'Departemen Rekayasa & Pemeliharaan',
+            department: found.department || 'Departemen Rekayasa & Pemeliharaan'
+          };
+        }
+      }
+    } catch(e) {}
+
     let app = null;
     if (window.currentActor === 'approver2' || window.currentMobileRole === 'approver2') {
       app = {
@@ -70,7 +93,7 @@
         ? window.getPrimaryApprover()
         : {
           name: 'Ir. Hendra Gunawan, M.T.',
-          nip: 'PK-2016-3392',
+          nip: 'PK-2015-1002',
           title: 'Manajer Rekayasa & Pemeliharaan',
           dept: 'Departemen Rekayasa & Pemeliharaan',
           department: 'Departemen Rekayasa & Pemeliharaan'
@@ -84,13 +107,20 @@
   function isTicketAssignedToMobileApprover(ticket) {
     if (!ticket) return false;
     const app = getActiveApprover();
+    const aNip = (app.nip || '').trim();
     const aName = (app.name || '').toLowerCase();
-    const tApprover = (ticket.approverName || '').toLowerCase();
 
+    if (ticket.approverNip && aNip) {
+      return ticket.approverNip === aNip;
+    }
+
+    const tApprover = (ticket.approverName || '').toLowerCase();
     if (aName.includes('dewi')) {
       return tApprover.includes('dewi');
+    } else if (aName.includes('subagja')) {
+      return tApprover.includes('subagja');
     } else {
-      return tApprover.includes('hendra') || (!tApprover.includes('dewi'));
+      return tApprover.includes('hendra') || (!tApprover.includes('dewi') && !tApprover.includes('subagja'));
     }
   }
 
@@ -115,17 +145,42 @@
     if (!ticket) return false;
     const app = getActiveApprover();
     const aName = (app.name || '').toLowerCase();
+    const aNip = (app.nip || '').trim();
 
     if (isTicketAssignedToMobileApprover(ticket)) return true;
     if (isTicketReassignedFromMobileApprover(ticket)) return true;
 
     let empSupervisor = ticket.directSupervisor || '';
+    let empSupervisorNip = ticket.directSupervisorNip || '';
     if (!empSupervisor && window.KUJANG_ACCOUNTS && ticket.applicantNip) {
       const acc = window.KUJANG_ACCOUNTS.find(a => a.nip === ticket.applicantNip);
       if (acc && acc.directSupervisor) empSupervisor = acc.directSupervisor;
+      if (acc && acc.directSupervisorNip) empSupervisorNip = acc.directSupervisorNip;
     }
-    if (!empSupervisor && (ticket.applicantNip === 'PK-2024-8841' || (ticket.applicantName || '').toLowerCase().includes('budi') || ticket.applicantNip === 'PK-2024-8842' || (ticket.applicantName || '').toLowerCase().includes('arthur'))) {
-      empSupervisor = 'Ir. Hendra Gunawan, M.T.';
+    if (aNip && empSupervisorNip && aNip === empSupervisorNip) return true;
+    if (empSupervisor) {
+      const sName = empSupervisor.toLowerCase();
+      if (aName.includes('dewi') && sName.includes('dewi')) return true;
+      if (aName.includes('subagja') && sName.includes('subagja')) return true;
+      if (aName.includes('hendra') && sName.includes('hendra')) return true;
+    }
+
+    // Check if any active group dinas member is under this approver
+    if (ticket.isGroupDinas && Array.isArray(ticket.members) && ticket.members.length > 0) {
+      const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+      const hasMember = ticket.members.some(m => {
+        if (m.status === 'batal') return false;
+        if (m.supervisorNip && aNip && m.supervisorNip === aNip) return true;
+        const u = allUsers.find(x => x.nip === m.nip);
+        const supName = (u && (u.directSupervisor || u.supervisor)) || m.supervisor;
+        if (!supName) return false;
+        const sName = supName.toLowerCase();
+        if (aName.includes('dewi') && sName.includes('dewi')) return true;
+        if (aName.includes('subagja') && sName.includes('subagja')) return true;
+        if (aName.includes('hendra') && sName.includes('hendra')) return true;
+        return false;
+      });
+      if (hasMember) return true;
     }
 
     if (aName.includes('hendra')) {
@@ -843,20 +898,30 @@
                     Setujui
                   </button>
                 </div>
-              `) : (t.isGroupDinas && !isReassignedAway ? `
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                  <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                    <span>Detail</span>
+              `) : (t.isGroupDinas && !isReassignedAway ? (
+                isTicketAssignedToMobileApprover(t) ? `
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                      <span>Detail</span>
+                    </button>
+                    <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+                      Tolak Tim
+                    </button>
+                    <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
+                      Setujui Tim
+                    </button>
+                  </div>
+                ` : `
+                  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 10px; font-size: 0.72rem; color: #1e40af; margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>📋 <strong>Tembusan:</strong> Staf Anda ikut dinas</span>
+                    <span style="font-weight: 700;">Peninjau: ${t.approverName ? t.approverName.split(',')[0] : 'Atasan Utama'}</span>
+                  </div>
+                  <button type="button" class="mobile-btn-primary" style="margin-top: 6px; background: #2563eb; border-color: #2563eb;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                    Detail Pengajuan
                   </button>
-                  <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
-                    Tolak Tim
-                  </button>
-                  <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
-                    Setujui Tim
-                  </button>
-                </div>
-              ` : `
+                `
+              ) : `
                 <button type="button" class="mobile-btn-primary" style="margin-top: 4px; ${isReassignedAway ? 'background: #475569; border-color: #475569;' : ''}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                   ${isReassignedAway ? 'Pantau Rincian' : 'Tinjau'}
                 </button>
@@ -1264,13 +1329,27 @@
               </button>
             </div>
           </div>
-        `) : (t.status === 'Menunggu Verifikasi Atasan' ? `
+        `) : (t.status === 'Menunggu Verifikasi Atasan' ? (() => {
+          const isAssignedToMe = Boolean(t.approverName && approver.name && (t.approverName.toLowerCase().includes(approver.name.toLowerCase()) || approver.name.toLowerCase().includes(t.approverName.toLowerCase())));
+          if (!isAssignedToMe) {
+            return `
+              <div class="mobile-card" style="padding: 12px; margin-bottom: 14px; background: #eff6ff; border: 1.5px solid #93c5fd; text-align: center;">
+                <div style="font-size: 0.775rem; font-weight: 700; color: #1e40af;">
+                  🏢 Staf Telah Tap In di Gerbang Masuk
+                </div>
+                <div style="font-size: 0.7rem; color: #3b82f6; margin-top: 4px;">
+                  Menunggu verifikasi fisik & konfirmasi kedatangan oleh Atasan Peninjau (<strong>${t.approverName}</strong>).
+                </div>
+              </div>
+            `;
+          }
+          return `
           <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #eff6ff; border: 1.5px solid #93c5fd;">
             <div style="font-size: 0.825rem; font-weight: 800; color: #1e40af; margin-bottom: 4px;">
-              🏢 Karyawan Melaporkan Tiba di Kantor
+              🏢 Rombongan Dinas Melaporkan Tiba di Kantor
             </div>
             <div style="font-size: 0.725rem; color: #3b82f6; margin-bottom: 10px;">
-              Karyawan telah mengunci kedatangan pada <strong>${t.arrivalReportedAt ? formatTimeOnly(t.arrivalReportedAt) : 'baru saja'}</strong>. Mohon verifikasi kehadiran fisik karyawan di ruangan Anda.
+              Personel telah tap in di gerbang (${t.tapInTime || t.arrivalReportedAt || 'Terkunci'}). Mohon verifikasi kehadiran fisik personel di ruangan kerja Anda.
             </div>
             <div style="display: flex; gap: 8px;">
               <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; color: #dc2626; border-color: #fca5a5;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
@@ -1281,19 +1360,8 @@
               </button>
             </div>
           </div>
-        ` : (t.status === 'Sedang di Luar' || t.status === 'Terlambat' ? `
-          <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #f0fdf4; border: 1.5px solid #86efac;">
-            <div style="font-size: 0.825rem; font-weight: 800; color: #166534; margin-bottom: 4px;">
-              🟢 Hak Akses Kembali / Tap In Atasan
-            </div>
-            <div style="font-size: 0.725rem; color: #15803d; margin-bottom: 10px;">
-              Karyawan sedang di luar. Jika karyawan sudah tiba di hadapan Anda, Anda dapat melakukan Tap In langsung.
-            </div>
-            <button type="button" class="mobile-btn-primary" style="width: 100%; min-height: 44px; font-weight: 800; background: #059669; border-color: #059669; font-size: 0.8rem;" onclick="window.mobileAtasanTapIn('${t.id}')">
-              ✓ Tap In Atasan (Tandai Selesai)
-            </button>
-          </div>
-        ` : (t.status === 'Ditolak' ? `
+          `;
+        })() : (t.status === 'Ditolak' ? `
           <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5; margin-bottom: 14px;">
             <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
               ✕ Pengajuan Ditolak
@@ -1317,7 +1385,7 @@
               Kembali ke Antrean
             </button>
           </div>
-        `)))}
+        `))}
       </div>
 
       <!-- Tab Content 2: Riwayat Aktivitas (Timeline murni tanpa tombol aksi persetujuan) -->
@@ -1577,13 +1645,7 @@
                 </button>
               </div>
             </div>
-          ` : (t.status === 'Sedang di Luar' || t.status === 'Terlambat' ? `
-            <div style="margin: 6px 0;">
-              <button type="button" class="mobile-btn-primary" style="width: 100%; min-height: 36px; padding: 4px 8px; font-size: 0.725rem; font-weight: 700; background: #059669; border-color: #059669; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.mobileAtasanTapIn('${t.id}')">
-                <span>✓ Tap In Atasan</span>
-              </button>
-            </div>
-          ` : '')}
+          ` : ''}
           </div>
 
           ${t.hasExtensionPending ? `

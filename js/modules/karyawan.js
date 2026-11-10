@@ -110,12 +110,17 @@ window.initGroupDinasMembersForm = function() {
   const currentEmp = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841', department: 'Departemen Rekayasa & Pemeliharaan' };
   const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
 
-  // Filter kandidat: SEMUA karyawan aktif selain akun inisiator sendiri (bisa lintas departemen & atasan)
-  const candidates = allUsers.filter(u => 
-    u.status === 'Aktif' && 
-    u.nip !== currentEmp.nip && 
-    (u.roleKey === 'karyawan' || u.roleKey === 'karyawan2' || (u.role && u.role.toLowerCase().includes('karyawan')) || (u.department && !u.roleKey?.includes('approver') && !u.roleKey?.includes('admin') && !u.roleKey?.includes('security')))
-  );
+  // Filter kandidat: SEMUA karyawan aktif selain akun inisiator sendiri DAN tidak sedang memiliki izin aktif
+  const candidates = allUsers.filter(u => {
+    if (u.status !== 'Aktif') return false;
+    if (u.nip === currentEmp.nip) return false;
+    const isEmp = (u.roleKey === 'karyawan' || u.roleKey === 'karyawan2' || (u.role && u.role.toLowerCase().includes('karyawan')) || (u.department && !u.roleKey?.includes('approver') && !u.roleKey?.includes('admin') && !u.roleKey?.includes('security')));
+    if (!isEmp) return false;
+    // CEK TIKET AKTIF: Karyawan yang sedang memiliki izin aktif (belum selesai/final) dilarang dipilih
+    const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(u.nip) : null;
+    if (activeTicket) return false;
+    return true;
+  });
 
   window._groupMemberCandidates = candidates;
 
@@ -221,7 +226,16 @@ window.addGroupMemberByNip = function(nip) {
   const user = allUsers.find(u => u.nip === nip);
   if (!user) return;
 
-  if (window._selectedGroupMembers.some(m => m.nip === nip)) return;
+  // Validasi izin aktif
+  const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(user.nip) : null;
+  if (activeTicket) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke rombongan dinas.`, 'warning');
+    }
+    return;
+  }
+
+  if (window._selectedGroupMembers.some(m => String(m.nip).trim() === String(nip).trim())) return;
 
   window._selectedGroupMembers.push({
     nip: user.nip,
@@ -239,9 +253,23 @@ window.addGroupMemberByNip = function(nip) {
   window.initGroupDinasMembersForm();
 };
 
-window.removeGroupMemberByNip = function(nip) {
-  window._selectedGroupMembers = window._selectedGroupMembers.filter(m => m.nip !== nip);
-  window.initGroupDinasMembersForm();
+window.removeGroupMemberByNip = function(nip, event) {
+  if (event) {
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+  }
+  window._selectedGroupMembers = (window._selectedGroupMembers || []).filter(m => String(m.nip).trim() !== String(nip).trim());
+  window.renderSelectedGroupMembers();
+  
+  // Perbarui dropdown Mobile jika ada
+  const mSelectAdd = document.getElementById('mSelectAddGroupMember');
+  if (mSelectAdd && window._groupMemberCandidates) {
+    mSelectAdd.innerHTML = '<option value="">-- Pilih rekan satu tim --</option>' +
+      window._groupMemberCandidates
+        .filter(c => !window._selectedGroupMembers.some(m => m.nip === c.nip))
+        .map(c => `<option value="${c.nip}">${c.name} (${c.nip}) — Atasan: ${(c.directSupervisor || c.supervisor || 'Atasan').split(',')[0]}</option>`)
+        .join('');
+  }
 };
 
 window.renderSelectedGroupMembers = function() {
@@ -252,7 +280,7 @@ window.renderSelectedGroupMembers = function() {
     <span style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
       <span>👤 ${m.name}</span>
       <span style="font-size: 0.68rem; color: #3b82f6; font-weight: 600;">(${(m.supervisor || '').split(',')[0]})</span>
-      <button type="button" onclick="window.removeGroupMemberByNip('${m.nip}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 11px; padding: 0 2px; line-height: 1; font-weight: 800;" title="Hapus ${m.name}">✕</button>
+      <button type="button" onclick="window.removeGroupMemberByNip('${m.nip}', event)" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 11px; padding: 0 2px; line-height: 1; font-weight: 800;" title="Hapus ${m.name}">✕</button>
     </span>
   `).join('');
 
@@ -389,6 +417,9 @@ window.executeTapInGate = function(ticketId, memberNip, memberName) {
   t.tapInMember = memberName;
   t.tapInNip = memberNip;
   t.arrivalReportedTime = nowFormatted;
+  t.arrivalReportedAt = nowFormatted;
+  t.reportedReturnTime = nowFormatted;
+  t.employeeReportedReturnTime = nowFormatted;
   t.timeFrozen = true;
 
   if (!t.timeline) t.timeline = [];
@@ -433,27 +464,157 @@ window.reportArrivalAtOffice = function(ticketId) {
   window.openSimulasiTapInModal(ticketId);
 };
 
-window.viewSuratPerintahDetail = function() {
-  const ticketId = window.currentDetailTicketId;
+window.viewSuratPerintahDetail = function(ticketIdParam) {
+  const ticketId = ticketIdParam || window.currentDetailTicketId || window.currentModalTicketId;
   const ticketsList = window.ticketsList || [];
-  const t = ticketsList.find(x => x.id === ticketId);
-  if (!t || !t.suratPerintah) {
-    if (typeof window.showToast === 'function') window.showToast('Dokumen surat perintah tidak ditemukan.', 'warning');
+  let t = ticketsList.find(x => x.id === ticketId);
+  if (!t && typeof window.loadTickets === 'function') {
+    t = (window.loadTickets() || []).find(x => x.id === ticketId);
+  }
+
+  let doc = (t && t.suratPerintah) ? t.suratPerintah : window._currentSuratPerintah;
+  if (!doc) {
+    if (typeof window.showToast === 'function') window.showToast('Dokumen surat perintah tugas dinas belum dilampirkan.', 'warning');
     return;
   }
-  if (t.suratPerintah.dataUrl) {
-    const w = window.open('');
-    if (w) {
-      if (t.suratPerintah.type.includes('image')) {
-        w.document.write(`<title>${t.suratPerintah.name}</title><body style="margin:0; background:#0f172a; display:flex; justify-content:center; align-items:center; min-height:100vh;"><img src="${t.suratPerintah.dataUrl}" style="max-width:90%; max-height:90vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5);"></body>`);
-      } else {
-        w.document.write(`<title>${t.suratPerintah.name}</title><body style="margin:0;"><iframe src="${t.suratPerintah.dataUrl}" frameborder="0" style="width:100%; height:100vh;"></iframe></body>`);
-      }
+
+  window._activeViewingDoc = doc;
+
+  const modal = document.getElementById('modalDocViewer');
+  const titleEl = document.getElementById('docViewerTitle');
+  const subEl = document.getElementById('docViewerSubtitle');
+  const metaEl = document.getElementById('docViewerMeta');
+  const iconEl = document.getElementById('docViewerIcon');
+  const bodyEl = document.getElementById('docViewerBody');
+
+  if (titleEl) titleEl.textContent = doc.name || 'Dokumen Surat Perintah Dinas';
+  if (subEl) subEl.textContent = t ? `Tiket #${t.id} • Pemohon: ${t.applicantName || 'Inisiator'}` : 'Surat Perintah Resmi Unit Kerja';
+  const sizeKb = Math.round((doc.size || 145000) / 1024);
+  if (metaEl) metaEl.textContent = `Ukuran: ${sizeKb} KB • Format: ${doc.name && doc.name.endsWith('.pdf') ? 'Berkas PDF' : 'Gambar Berkas'}`;
+  if (iconEl) iconEl.textContent = (doc.name && doc.name.endsWith('.pdf')) ? '📄' : '🖼️';
+
+  if (bodyEl) {
+    const isImage = (doc.type && doc.type.includes('image')) || (doc.name && /\.(png|jpe?g|webp)$/i.test(doc.name));
+    if (doc.dataUrl && isImage) {
+      bodyEl.innerHTML = `
+        <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+          <img src="${doc.dataUrl}" alt="${doc.name}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: contain;">
+        </div>
+      `;
+    } else if (doc.dataUrl) {
+      bodyEl.innerHTML = `
+        <iframe src="${doc.dataUrl}" style="width: 100%; height: 65vh; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;"></iframe>
+      `;
     } else {
-      if (typeof window.showToast === 'function') window.showToast(`Membuka dokumen ${t.suratPerintah.name}...`, 'info');
+      bodyEl.innerHTML = `
+        <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 2rem 1.5rem; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+          <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📄</div>
+          <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; word-break: break-all;">${doc.name || 'Surat_Perintah_Dinas.pdf'}</div>
+          <div style="font-size: 0.775rem; color: #64748b; margin-bottom: 1.25rem;">${sizeKb} KB • Surat Perintah Penugasan Luar Kawasan</div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 999px; font-size: 0.75rem; font-weight: 700; margin-bottom: 1rem;">
+            ✓ Dokumen Sah & Terverifikasi
+          </div>
+          <p style="font-size: 0.8rem; color: #475569; line-height: 1.5; margin: 0 0 1.25rem 0;">
+            Berkas ini dilampirkan sebagai dokumen legalitas penugasan dinas keluar area kerja pabrik PT Pupuk Kujang.
+          </p>
+          <button type="button" class="btn-figma-primary" onclick="window.downloadCurrentDocViewerFile()" style="padding: 0.5rem 1.25rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: #0f3a68; color: #ffffff; border: none; cursor: pointer;">
+            ⬇️ Unduh Salinan Berkas
+          </button>
+        </div>
+      `;
     }
+  }
+
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
+  }
+};
+
+window.closeDocViewerModal = function() {
+  const modal = document.getElementById('modalDocViewer');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  }
+  window._activeViewingDoc = null;
+};
+
+window.downloadCurrentDocViewerFile = function() {
+  const doc = window._activeViewingDoc;
+  if (!doc) return;
+  const fileName = doc.name || 'Surat_Perintah_Dinas.pdf';
+
+  if (doc.dataUrl) {
+    const a = document.createElement('a');
+    a.href = doc.dataUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   } else {
-    if (typeof window.showToast === 'function') window.showToast(`Dokumen: ${t.suratPerintah.name}`, 'info');
+    // Generate sample PDF/text blob download
+    const blobContent = `%PDF-1.4\n% Pupuk Kujang Surat Perintah: ${fileName}\nTanggal: ${new Date().toLocaleDateString('id-ID')}\nStatus: Sah Terlampir\n`;
+    const blob = new Blob([blobContent], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 500);
+  }
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Mengunduh berkas: ${fileName}`, 'success');
+  }
+};
+
+/**
+ * Reset total seluruh status upload Surat Perintah & Anggota Tim (Multi-Aktor Clean State)
+ */
+window.resetAllDinasUploadState = function() {
+  // 1. Regular Desktop
+  window._selectedGroupMembers = [];
+  window._currentSuratPerintah = null;
+  const fileInput = document.getElementById('fileSuratPerintah');
+  if (fileInput) fileInput.value = '';
+  const dropzone = document.getElementById('dropzoneSuratPerintah');
+  if (dropzone) dropzone.style.display = 'block';
+  const preview = document.getElementById('previewSuratPerintahCard');
+  if (preview) preview.style.display = 'none';
+  const listMembers = document.getElementById('listSelectedGroupMembers');
+  if (listMembers) {
+    listMembers.innerHTML = '<span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>';
+  }
+
+  // 2. Emergency Desktop
+  window._selectedEmergGroupMembers = [];
+  window._currentEmergSuratPerintah = null;
+  const emergFileInput = document.getElementById('fileEmergSuratPerintah');
+  if (emergFileInput) emergFileInput.value = '';
+  const emergDropzone = document.getElementById('dropzoneEmergSuratPerintah');
+  if (emergDropzone) emergDropzone.style.display = 'block';
+  const emergPreview = document.getElementById('previewEmergSuratPerintahCard');
+  if (emergPreview) emergPreview.style.display = 'none';
+  const emergListMembers = document.getElementById('listSelectedEmergGroupMembers');
+  if (emergListMembers) {
+    emergListMembers.innerHTML = '<span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>';
+  }
+
+  // 3. Mobile
+  window._selectedGroupMembersMobile = [];
+  window._currentSuratPerintahMobile = null;
+  const mFileInput = document.getElementById('mFileSuratPerintah');
+  if (mFileInput) mFileInput.value = '';
+  const mDropzone = document.getElementById('mDropzoneSuratPerintah');
+  if (mDropzone) mDropzone.style.display = 'block';
+  const mPreview = document.getElementById('mPreviewSuratPerintahCard');
+  if (mPreview) mPreview.style.display = 'none';
+  const mListMembers = document.getElementById('mListSelectedGroupMembers');
+  if (mListMembers) {
+    mListMembers.innerHTML = '<span style="font-size: 0.7rem; color: #94a3b8; font-style: italic;">Belum ada rekan tim yang ditambahkan.</span>';
   }
 };
 
@@ -983,9 +1144,11 @@ function renderKaryawanDashboard() {
       const currentEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841' };
       const myNip = currentEmpActor.nip || 'PK-2024-8841';
       const isMemberOnly = activeTicket.isGroupDinas && activeTicket.applicantNip !== myNip;
+    const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
-      const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
-      const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+      const isOutsideOrWaiting = isOutside || isWaitingVerify;
+      const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
+      const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
@@ -1000,6 +1163,7 @@ function renderKaryawanDashboard() {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         const isKembali = activeTicket.type !== 'Pulang Mendahului';
+        const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
         actionButtonsHtml = `
           ${(isKembali) ? (
@@ -1017,12 +1181,15 @@ function renderKaryawanDashboard() {
               </button>
             `)
           ) : ''}
-          <button class="btn-figma-secondary" style="background:#047857; color:#ffffff; border-color:#047857; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" onclick="window.reportArrivalAtOffice('${activeTicket.id}')" title="Kunci jam kedatangan Anda dan kirim konfirmasi ke Atasan">
-            <span>🏢 Lapor Tiba di Kantor</span>
-          </button>
-          <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
-            <span>✓ Tap In Kartu Akses (Masuk)</span>
-          </button>
+          ${isGroupDinasActive ? `
+            <button class="btn-figma-secondary" style="background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
+              <span>💳 Simulasi Tap In Gerbang</span>
+            </button>
+          ` : `
+            <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')" title="Tap in kartu akses gerbang masuk">
+              <span>✓ Tap In Kartu Akses (Masuk)</span>
+            </button>
+          `}
         `;
       } else if (isEmergLocked) {
         const isFaceScan = (activeTicket.selectedMethod === 'facescan');
@@ -1103,7 +1270,7 @@ function renderKaryawanDashboard() {
 
         ${isWaitingVerify ? `
           <div style="margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
-            <strong>🏢 Laporan Tiba Telah Dikirim:</strong> Kedatangan Anda pada <strong>${activeTicket.reportedReturnTime || '-'}</strong> telah dikunci. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan.
+            <strong>🏢 Tap In Gerbang Tercatat:</strong> Jam kepulangan telah dikunci pada <strong>${activeTicket.tapInTime || activeTicket.arrivalReportedTime || activeTicket.reportedReturnTime || '-'}</strong>${activeTicket.tapInMember ? ` (oleh ${activeTicket.tapInMember})` : ''}. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan kerja.
           </div>
         ` : ''}
 
@@ -1342,9 +1509,11 @@ function renderPengajuanSayaView() {
     const currentEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841' };
     const myNip = currentEmpActor.nip || 'PK-2024-8841';
     const isMemberOnly = activeTicket.isGroupDinas && activeTicket.applicantNip !== myNip;
+    const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
-    const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
-    const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+    const isOutsideOrWaiting = isOutside || isWaitingVerify;
+    const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
+    const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
     const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
@@ -1377,9 +1546,15 @@ function renderPengajuanSayaView() {
             </button>
           `)
         ) : ''}
+        ${isGroupDinasActive ? `
         <button class="btn-figma-secondary" style="background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
           <span>💳 Simulasi Tap In Gerbang</span>
         </button>
+        ` : `
+        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')" title="Tap in kartu akses gerbang masuk">
+          <span>✓ Tap In Kartu Akses (Masuk)</span>
+        </button>
+        `}
       `;
     } else if (isEmergLocked) {
       const isFaceScan = (activeTicket.selectedMethod === 'facescan');
@@ -1462,7 +1637,7 @@ function renderPengajuanSayaView() {
 
         ${isWaitingVerify ? `
           <div style="margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
-            <strong>🏢 Laporan Tiba Telah Dikirim:</strong> Kedatangan Anda pada <strong>${activeTicket.reportedReturnTime || '-'}</strong> telah dikunci. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan.
+            <strong>🏢 Tap In Gerbang Tercatat:</strong> Jam kepulangan telah dikunci pada <strong>${activeTicket.tapInTime || activeTicket.arrivalReportedTime || activeTicket.reportedReturnTime || '-'}</strong>${activeTicket.tapInMember ? ` (oleh ${activeTicket.tapInMember})` : ''}. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan kerja.
           </div>
         ` : ''}
         </div>
@@ -2356,7 +2531,13 @@ function renderKaryawanMobileDashboard() {
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let mobileBtnsHtml = '';
-      if (isApproved) {
+      if (activeTicket.status === 'Menunggu Verifikasi Atasan') {
+        mobileBtnsHtml = `
+          <button type="button" class="btn-mobile-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; width: 100%;">
+            <span>⏳ Menunggu Verifikasi Atasan</span>
+          </button>
+        `;
+      } else if (isApproved) {
         mobileBtnsHtml = `
           <button type="button" class="btn-mobile-primary" onclick="openTicketDetail('${activeTicket.id}', 'qr')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -2369,6 +2550,7 @@ function renderKaryawanMobileDashboard() {
       } else if (isOutside) {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
+        const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
         const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
         mobileBtnsHtml = `
@@ -2385,9 +2567,15 @@ function renderKaryawanMobileDashboard() {
               <span>Ajukan Perpanjangan</span>
             </button>
           `)) : ''}
-          <button type="button" class="btn-mobile-primary" style="background: #047857;" onclick="executeScanIn('${activeTicket.id}')">
-            <span>✓ Tap In Kartu Akses (Masuk)</span>
-          </button>
+          ${isGroupDinasActive ? `
+            <button type="button" class="btn-mobile-primary" style="background: #2563eb; width: 100%;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')">
+              <span>💳 Simulasi Tap In Gerbang</span>
+            </button>
+          ` : `
+            <button type="button" class="btn-mobile-primary" style="background: #047857;" onclick="executeScanIn('${activeTicket.id}')">
+              <span>✓ Tap In Kartu Akses (Masuk)</span>
+            </button>
+          `}
         `;
       } else if (isPending) {
         mobileBtnsHtml = `
@@ -2609,3 +2797,210 @@ window.renderKaryawanMobileDashboard = renderKaryawanMobileDashboard;
 window.switchKaryawanMobileSegment = switchKaryawanMobileSegment;
 window.renderKaryawanMobileDonutChart = renderKaryawanMobileDonutChart;
 window.switchMobileRole = switchMobileRole;
+
+// ========================================================
+// FITUR ROMBONGAN DINAS & SURAT PERINTAH DI FORM DARURAT
+// ========================================================
+window._selectedEmergGroupMembers = [];
+window._currentEmergSuratPerintah = null;
+
+window.initEmergGroupDinasMembersForm = function() {
+  const currentEmp = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841', department: 'Departemen Rekayasa & Pemeliharaan' };
+  const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+
+  const candidates = allUsers.filter(u => {
+    if (u.status !== 'Aktif') return false;
+    if (u.nip === currentEmp.nip) return false;
+    const isEmp = (u.roleKey === 'karyawan' || u.roleKey === 'karyawan2' || (u.role && u.role.toLowerCase().includes('karyawan')) || (u.department && !u.roleKey?.includes('approver') && !u.roleKey?.includes('admin') && !u.roleKey?.includes('security')));
+    if (!isEmp) return false;
+    const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(u.nip) : null;
+    if (activeTicket) return false;
+    return true;
+  });
+
+  window._emergGroupMemberCandidates = candidates;
+
+  const inputSearch = document.getElementById('inputSearchEmergGroupMember');
+  if (inputSearch && !inputSearch._hasSearchListener) {
+    inputSearch._hasSearchListener = true;
+    inputSearch.addEventListener('input', (e) => {
+      window.filterEmergGroupMemberSearch(e.target.value);
+    });
+    inputSearch.addEventListener('focus', () => {
+      window.filterEmergGroupMemberSearch(inputSearch.value || '');
+    });
+  }
+
+  window.renderSelectedEmergGroupMembers();
+};
+
+window.filterEmergGroupMemberSearch = function(query) {
+  const dropdown = document.getElementById('emergMemberFloatingDropdown');
+  const listEl = document.getElementById('emergMemberItemsList');
+  const emptyEl = document.getElementById('emergMemberEmptyState');
+  if (!dropdown || !listEl) return;
+
+  const candidates = (window._emergGroupMemberCandidates || []).filter(c => 
+    !window._selectedEmergGroupMembers.some(m => m.nip === c.nip)
+  );
+
+  const cleanQuery = String(query || '').trim();
+  const filtered = candidates.filter(c => {
+    if (!cleanQuery) return true;
+    return (typeof window.matchSearchTokens === 'function')
+      ? window.matchSearchTokens(cleanQuery, c.name, c.nip, c.department, c.title, c.directSupervisor || c.supervisor)
+      : (c.name.toLowerCase().includes(cleanQuery.toLowerCase()) || c.nip.toLowerCase().includes(cleanQuery.toLowerCase()) || (c.department && c.department.toLowerCase().includes(cleanQuery.toLowerCase())));
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+  } else {
+    if (emptyEl) emptyEl.style.display = 'none';
+    listEl.innerHTML = filtered.map(c => {
+      const initials = (c.name || 'KY').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+      const sup = (c.directSupervisor || c.supervisor || 'Atasan Langsung');
+      return `
+        <div class="member-search-item" onclick="window.addEmergGroupMemberByNip('${c.nip}')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; border: 1px solid #bae6fd;">
+              ${initials}
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a;">${c.name} <span style="font-weight: 500; color: #64748b; font-size: 0.72rem;">(${c.nip})</span></div>
+              <div style="font-size: 0.7rem; color: #64748b;">${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 0.68rem; font-weight: 700; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 999px; display: inline-block;">
+              Atasan: ${sup.split(',')[0]}
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  dropdown.style.display = 'block';
+};
+
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('wrapSearchEmergMember');
+  const dropdown = document.getElementById('emergMemberFloatingDropdown');
+  if (dropdown && wrap && !wrap.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
+
+window.addEmergGroupMemberByNip = function(nip) {
+  if (!nip) return;
+  if (!window._selectedEmergGroupMembers) window._selectedEmergGroupMembers = [];
+  if (window._selectedEmergGroupMembers.length >= 5) {
+    if (typeof window.showToast === 'function') window.showToast('Maksimal anggota rombongan dinas adalah 5 orang.', 'warning');
+    return;
+  }
+  const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+  const user = allUsers.find(u => u.nip === nip);
+  if (!user) return;
+
+  const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(user.nip) : null;
+  if (activeTicket) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke rombongan dinas.`, 'warning');
+    }
+    return;
+  }
+
+  if (window._selectedEmergGroupMembers.some(m => String(m.nip).trim() === String(nip).trim())) return;
+
+  window._selectedEmergGroupMembers.push({
+    nip: user.nip,
+    name: user.name,
+    title: user.title || user.role || 'Karyawan',
+    department: user.department || 'Departemen Rekayasa & Pemeliharaan',
+    supervisor: user.directSupervisor || user.supervisor || 'Ir. Hendra Gunawan, M.T.'
+  });
+
+  const inputSearch = document.getElementById('inputSearchEmergGroupMember');
+  if (inputSearch) inputSearch.value = '';
+  const dropdown = document.getElementById('emergMemberFloatingDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+
+  window.renderSelectedEmergGroupMembers();
+};
+
+window.removeEmergGroupMemberByNip = function(nip, event) {
+  if (event) {
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+  }
+  window._selectedEmergGroupMembers = (window._selectedEmergGroupMembers || []).filter(m => String(m.nip).trim() !== String(nip).trim());
+  window.renderSelectedEmergGroupMembers();
+};
+
+window.renderSelectedEmergGroupMembers = function() {
+  const container = document.getElementById('listSelectedEmergGroupMembers');
+  if (!container) return;
+  const html = (window._selectedEmergGroupMembers || []).map(m => `
+    <span style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
+      <span>👤 ${m.name}</span>
+      <span style="font-size: 0.68rem; color: #3b82f6; font-weight: 600;">(${(m.supervisor || '').split(',')[0]})</span>
+      <button type="button" onclick="window.removeEmergGroupMemberByNip('${m.nip}', event)" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 11px; padding: 0 2px; line-height: 1; font-weight: 800;" title="Hapus ${m.name}">✕</button>
+    </span>
+  `).join('');
+
+  container.innerHTML = html || '<span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>';
+};
+
+window.handleEmergSuratPerintahUpload = function(inputEl) {
+  if (!inputEl || !inputEl.files || inputEl.files.length === 0) return;
+  const file = inputEl.files[0];
+  if (file.size > 5 * 1024 * 1024) {
+    if (typeof window.showToast === 'function') window.showToast('Ukuran berkas melebihi batas 5 MB.', 'error');
+    inputEl.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    window._currentEmergSuratPerintah = {
+      name: file.name,
+      size: file.size,
+      type: file.type || 'application/pdf',
+      dataUrl: e.target.result,
+      uploadedAt: new Date().toISOString()
+    };
+
+    const dropzone = document.getElementById('dropzoneEmergSuratPerintah');
+    const preview = document.getElementById('previewEmergSuratPerintahCard');
+    const nameEl = document.getElementById('previewEmergSuratPerintahName');
+    const sizeEl = document.getElementById('previewEmergSuratPerintahSize');
+    const iconEl = document.getElementById('previewEmergSuratPerintahIcon');
+
+    if (dropzone) dropzone.style.display = 'none';
+    if (preview) preview.style.display = 'flex';
+    if (nameEl) nameEl.textContent = file.name;
+    if (sizeEl) sizeEl.textContent = `${Math.round(file.size / 1024)} KB • Berkas Terlampir`;
+    if (iconEl) iconEl.textContent = file.name.endsWith('.pdf') ? '📄' : '🖼️';
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Surat Perintah berhasil diunggah: ${file.name}`, 'success');
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+window.removeEmergSuratPerintahFile = function() {
+  window._currentEmergSuratPerintah = null;
+  const fileInput = document.getElementById('fileEmergSuratPerintah');
+  if (fileInput) fileInput.value = '';
+
+  const dropzone = document.getElementById('dropzoneEmergSuratPerintah');
+  const preview = document.getElementById('previewEmergSuratPerintahCard');
+  if (dropzone) dropzone.style.display = 'block';
+  if (preview) preview.style.display = 'none';
+
+  if (typeof window.showToast === 'function') {
+    window.showToast('Berkas Surat Perintah dihapus.', 'info');
+  }
+};

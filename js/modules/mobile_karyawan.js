@@ -1079,7 +1079,7 @@
             <span>Menunggu Verifikasi Kehadiran Atasan</span>
           </div>
           <div style="font-size: 0.725rem; color: #1e3a8a; margin-top: 3px; line-height: 1.35;">
-            Laporan tiba di kantor telah dicatat pada jam <strong>${t.employeeReportedReturnTime || 'terkunci'}</strong>. Waktu kembali aman selagi menunggu verifikasi fisik oleh Atasan.
+            Laporan tiba di kantor telah dicatat pada <strong>${t.employeeReportedReturnTime || 'terkunci'}</strong>. Waktu kembali aman selagi menunggu verifikasi Atasan.
           </div>
         </div>
         <div style="text-align: center; margin-top: 8px;">
@@ -1112,8 +1112,8 @@
         `;
       }
 
-      const isDinas = (t.category === 'Dinas Kantor');
-      const laporTibaBtn = isDinas ? `
+      const isGroupDinasActive = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.filter(m => m.status !== 'batal').length > 0);
+      const laporTibaBtn = isGroupDinasActive ? `
         <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; width: 100%; margin-bottom: 6px;" onclick="if(typeof window.openSimulasiTapInModal==='function'){window.openSimulasiTapInModal('${t.id}');}else if(typeof window.reportArrivalAtOffice==='function'){window.reportArrivalAtOffice('${t.id}');}">
           <span>💳 Simulasi Tap In Gerbang</span>
         </button>
@@ -1122,10 +1122,11 @@
       if (isLateStatus) {
         actionButtonsHtml = `
           <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-            ${laporTibaBtn}
-            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 800; min-height: 44px; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; width: 100%; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);" onclick="window.mobileExecuteTapIn('${t.id}')">
-              <span>✓ Tap In Kartu Akses (Masuk)</span>
-            </button>
+            ${isGroupDinasActive ? laporTibaBtn : `
+              <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 800; min-height: 44px; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; width: 100%; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);" onclick="window.mobileExecuteTapIn('${t.id}')">
+                <span>✓ Tap In Kartu Akses (Masuk)</span>
+              </button>
+            `}
             <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 6px 10px; font-size: 0.72rem; color: #b91c1c; font-weight: 700; text-align: center; line-height: 1.35;">
               ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
             </div>
@@ -1137,13 +1138,14 @@
       } else {
         actionButtonsHtml = `
           <div style="margin-top: 12px;">
-            ${laporTibaBtn}
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              ${extButtonHtml}
-              <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
-                <span>✓ Tap In Masuk</span>
-              </button>
-            </div>
+            ${isGroupDinasActive ? laporTibaBtn : `
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                ${extButtonHtml}
+                <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
+                  <span>✓ Tap In Masuk</span>
+                </button>
+              </div>
+            `}
           </div>
           <div style="text-align: center; margin-top: 8px;">
             <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
@@ -1302,13 +1304,13 @@
         <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body">
-        ${(t.status === 'Ditolak') ? `
+        ${(activeTicket && activeTicket.status === 'Ditolak') ? `
           <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px; margin-bottom: 12px; text-align: left;">
             <div style="font-size: 0.775rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 5px;">
               <span>⚠️ Pengajuan Ditolak oleh Atasan</span>
             </div>
             <div style="font-size: 0.75rem; color: #7f1d1d; margin-top: 4px; line-height: 1.45;">
-              <strong>Alasan Penolakan:</strong> "${t.rejectionReason || t.rejectReason || t.approverNote || 'Alasan dinas belum memenuhi ketentuan operasional.'}"
+              <strong>Alasan Penolakan:</strong> "${activeTicket.rejectionReason || activeTicket.rejectReason || activeTicket.approverNote || 'Alasan dinas belum memenuhi ketentuan operasional.'}"
             </div>
           </div>
         ` : ''}
@@ -1371,6 +1373,12 @@
         alert('Anda masih memiliki izin aktif. Selesaikan atau batalkan terlebih dahulu.');
       }
       return;
+    }
+
+    if (!prefillData && !window.editingTicketId) {
+      if (typeof window.resetAllDinasUploadState === 'function') {
+        window.resetAllDinasUploadState();
+      }
     }
 
     const isEditing = Boolean(window.editingTicketId);
@@ -2097,6 +2105,12 @@
       if (selectedNips.includes(u.nip)) return false;
       if (u.roleKey && u.roleKey.includes('admin')) return false;
       if (u.role && u.role.includes('Administrator')) return false;
+      if (u.status !== 'Aktif') return false;
+
+      // CEK TIKET AKTIF: Karyawan yang sedang memiliki izin aktif dilarang ditambahkan
+      const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(u.nip) : null;
+      if (activeTicket) return false;
+
       const name = (u.name || '').toLowerCase();
       const nip = (u.nip || '').toLowerCase();
       const dept = (u.department || '').toLowerCase();
@@ -2106,7 +2120,7 @@
     });
 
     if (candidates.length === 0) {
-      listContainer.innerHTML = `<div style="padding: 10px; font-size: 0.75rem; color: #64748b; text-align: center;">Karyawan "${query}" tidak ditemukan</div>`;
+      listContainer.innerHTML = `<div style="padding: 10px; font-size: 0.75rem; color: #64748b; text-align: center;">Karyawan "${escapeHtml(query)}" tidak ditemukan atau sedang memiliki izin aktif</div>`;
       dropdown.style.display = 'block';
       return;
     }
@@ -2134,7 +2148,17 @@
     const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
     const user = allUsers.find(u => u.nip === nip);
     if (!user) return;
-    if (window._selectedGroupMembersMobile.some(m => m.nip === nip)) return;
+
+    // Validasi izin aktif
+    const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(user.nip) : null;
+    if (activeTicket) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke rombongan dinas.`, 'warning');
+      }
+      return;
+    }
+
+    if (window._selectedGroupMembersMobile.some(m => String(m.nip).trim() === String(nip).trim())) return;
 
     window._selectedGroupMembersMobile.push({
       nip: user.nip,
@@ -2152,9 +2176,13 @@
     window.mobileRenderSelectedGroupMembers();
   };
 
-  window.mobileRemoveGroupMemberByNip = function(nip) {
+  window.mobileRemoveGroupMemberByNip = function(nip, event) {
+    if (event) {
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+    }
     if (!window._selectedGroupMembersMobile) return;
-    window._selectedGroupMembersMobile = window._selectedGroupMembersMobile.filter(m => m.nip !== nip);
+    window._selectedGroupMembersMobile = window._selectedGroupMembersMobile.filter(m => String(m.nip).trim() !== String(nip).trim());
     window.mobileRenderSelectedGroupMembers();
   };
 
@@ -2168,8 +2196,8 @@
     }
     container.innerHTML = members.map(m => `
       <div style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 10px; font-size: 0.725rem; color: #1e40af;">
-        <span>👤 <strong>${m.name.split(',')[0]}</strong> (${m.nip})</span>
-        <span onclick="window.mobileRemoveGroupMemberByNip('${m.nip}')" style="cursor: pointer; font-weight: 800; color: #dc2626; margin-left: 2px;">✕</span>
+        <span>👤 <strong>${escapeHtml(m.name.split(',')[0])}</strong> (${m.nip})</span>
+        <span onclick="window.mobileRemoveGroupMemberByNip('${m.nip}', event)" style="cursor: pointer; font-weight: 800; color: #dc2626; margin-left: 2px; padding: 0 4px;" title="Hapus">✕</span>
       </div>
     `).join('');
   };
@@ -2387,6 +2415,35 @@
       }
     }
 
+    if (category === 'Dinas Kantor' && !window._currentSuratPerintahMobile) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Surat Perintah / Tugas Dinas wajib diunggah untuk kategori Dinas Kantor!', 'danger');
+      }
+      const dropzone = document.getElementById('mDropzoneSuratPerintah');
+      if (dropzone) {
+        dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        dropzone.style.borderColor = '#e11d48';
+        setTimeout(() => {
+          if (dropzone) dropzone.style.borderColor = '';
+        }, 3500);
+      }
+      return;
+    }
+
+    // Validasi Anggota: pastikan tidak ada anggota rombongan yang sedang memiliki izin aktif
+    const mobileMembers = (category === 'Dinas Kantor' && Array.isArray(window._selectedGroupMembersMobile)) ? [...window._selectedGroupMembersMobile] : [];
+    if (category === 'Dinas Kantor' && mobileMembers.length > 0) {
+      for (const m of mobileMembers) {
+        const actTik = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(m.nip) : null;
+        if (actTik && (!window.editingTicketId || actTik.id !== window.editingTicketId)) {
+          if (typeof window.showToast === 'function') {
+            window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari rombongan terlebih dahulu.`, 'warning');
+          }
+          return;
+        }
+      }
+    }
+
     // Save pending form data for Step 2 Confirmation
     pendingMobileFormData = {
       approverName,
@@ -2404,12 +2461,7 @@
       members: (category === 'Dinas Kantor' && Array.isArray(window._selectedGroupMembersMobile)) ? [...window._selectedGroupMembersMobile] : [],
       suratPerintah: (category === 'Dinas Kantor' && window._currentSuratPerintahMobile)
         ? { ...window._currentSuratPerintahMobile }
-        : (category === 'Dinas Kantor' ? {
-            name: 'Surat_Perintah_Tugas_Dinas.pdf',
-            size: 142500,
-            type: 'application/pdf',
-            uploadedAt: new Date().toISOString()
-          } : null)
+        : null
     };
 
     // Open Step 2: Konfirmasi Ringkasan Pengajuan
@@ -2457,9 +2509,12 @@
             <span class="mobile-summary-value">${data.category}</span>
           </div>
           ${(data.members && data.members.length > 0) ? `
-            <div class="mobile-summary-row">
-              <span class="mobile-summary-label">Rekan Rombongan</span>
-              <span class="mobile-summary-value" style="color: #2563eb; font-weight: 700;">${data.members.map(m => escapeHtml(m.name)).join(', ')} (${data.members.length} Orang)</span>
+            <div class="mobile-summary-row" style="align-items: flex-start;">
+              <span class="mobile-summary-label">Rekan Dinas</span>
+              <div class="mobile-summary-value" style="display: flex; flex-direction: column; gap: 3px; font-weight: 600; color: #2563eb; text-align: right; line-height: 1.4;">
+                ${data.members.map(m => `<div>- ${escapeHtml(m.name)}</div>`).join('')}
+                <div style="font-size: 0.7rem; color: #64748b; font-weight: 500; margin-top: 2px;">(${data.members.length} Orang)</div>
+              </div>
             </div>
           ` : ''}
           ${data.suratPerintah ? `
@@ -2577,6 +2632,23 @@
           t.plannedExit = data.plannedExit;
           t.estimatedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
           t.plannedReturn = data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn;
+
+          if (t.category === 'Dinas Kantor' && Array.isArray(data.members)) {
+            t.members = data.members.map(m => ({
+              nip: m.nip,
+              name: m.name,
+              department: m.department || t.department,
+              supervisor: m.supervisor || t.approverName,
+              supervisorNip: m.supervisorNip || null,
+              status: m.status || 'aktif'
+            }));
+            t.isGroupDinas = t.members.length > 0;
+            t.suratPerintah = data.suratPerintah || null;
+          } else {
+            t.members = [];
+            t.isGroupDinas = false;
+            t.suratPerintah = null;
+          }
 
           if (!t.timeline) t.timeline = [];
 
@@ -2711,17 +2783,36 @@
         ]
       };
 
+      if (data.category === 'Dinas Kantor' && !data.suratPerintah) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Surat Perintah / Tugas Dinas wajib diunggah untuk kategori Dinas Kantor!', 'danger');
+        }
+        return;
+      }
+
       const isGroupDinas = data.category === 'Dinas Kantor' && Array.isArray(data.members) && data.members.length > 0;
       if (isGroupDinas) {
         newTicket.isGroupDinas = true;
         newTicket.initiatorNip = emp.nip;
         newTicket.initiatorName = emp.name;
-        newTicket.members = data.members.map(m => ({
-          nip: m.nip,
-          name: m.name,
-          department: m.department || newTicket.department,
-          status: 'aktif'
-        }));
+        const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+        newTicket.members = data.members.map(m => {
+          const u = allUsers.find(x => x.nip === m.nip);
+          const supName = (u && (u.directSupervisor || u.supervisor)) || m.supervisor || null;
+          let supNip = m.supervisorNip || (u && (u.directSupervisorNip || u.supervisorNip)) || null;
+          if (!supNip && supName) {
+            const supUser = allUsers.find(x => x.name === supName || (supName.includes('Dewi') && x.nip === 'PK-2012-0845') || (supName.includes('Subagja') && x.nip === 'PK-2012-0543') || (supName.includes('Hendra') && x.nip === 'PK-2015-1002'));
+            if (supUser) supNip = supUser.nip;
+          }
+          return {
+            nip: m.nip,
+            name: m.name,
+            department: m.department || (u ? u.department : newTicket.department),
+            supervisor: supName,
+            supervisorNip: supNip,
+            status: 'aktif'
+          };
+        });
         const memberNames = newTicket.members.map(m => m.name).join(', ');
         newTicket.timeline[0].desc += ` (Izin Dinas Bersama: ${newTicket.applicantName} mengikutsertakan ${memberNames}).`;
       }
@@ -2771,6 +2862,35 @@
                 ticketId: newTicket.id,
                 priority: 'normal',
                 eventId: `grp_notif_m_${newTicket.id}_${m.nip}`
+              });
+            });
+
+            // Kirim notifikasi tembusan ke atasan langsung anggota jika berbeda dari peninjau utama
+            const supGroupMap = {};
+            newTicket.members.forEach(m => {
+              const supNip = m.supervisorNip;
+              const supName = m.supervisor;
+              if (supNip && supNip !== newTicket.approverNip) {
+                if (!supGroupMap[supNip]) {
+                  supGroupMap[supNip] = { nip: supNip, name: supName, members: [] };
+                }
+                supGroupMap[supNip].members.push(m.name.split(',')[0].trim());
+              }
+            });
+
+            Object.values(supGroupMap).forEach(supObj => {
+              const formattedMembers = supObj.members.join(' dan ');
+              window.createNotification({
+                recipientRole: 'approver',
+                recipientNip: supObj.nip,
+                recipientName: supObj.name,
+                actorSource: 'karyawan',
+                type: 'info_tembusan',
+                title: 'Tembusan Pengajuan Dinas Staf',
+                message: `Staf Anda (${formattedMembers}) terdaftar dalam pengajuan Dinas Kantor bersama tim (Inisiator: ${newTicket.applicantName}) ke ${newTicket.destination}. Menunggu persetujuan ${newTicket.approverName}.`,
+                ticketId: newTicket.id,
+                priority: 'normal',
+                eventId: `fyi_submitted_m_${newTicket.id}_${supObj.nip}`
               });
             });
           }
@@ -3128,6 +3248,7 @@
     const isOwner = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor) &&
       (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841'));
     const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === myActorNip && m.status !== 'batal'));
+    const isGroupDinasActive = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.filter(m => m.status !== 'batal').length > 0);
 
     // Push state for Android / hardware back gesture
     try {
@@ -3294,9 +3415,15 @@
                 Ajukan Perpanjangan Waktu
               </button>
             `}
-            <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
-              💳 Simulasi Tap In Gerbang Masuk
-            </button>
+            ${isGroupDinasActive ? `
+              <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
+                💳 Simulasi Tap In Gerbang Masuk
+              </button>
+            ` : `
+              <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}');">
+                ✓ Tap In Kartu Akses (Masuk)
+              </button>
+            `}
           ` : ''}
           ${isFinished ? `
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.75rem; color: #64748b; text-align: center; font-weight: 600;">
@@ -3326,9 +3453,15 @@
             </button>
           ` : ''}
           ${isOutside ? `
-            <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
-              💳 Simulasi Tap In Gerbang Masuk
-            </button>
+            ${isGroupDinasActive ? `
+              <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
+                💳 Simulasi Tap In Gerbang Masuk
+              </button>
+            ` : `
+              <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}');">
+                ✓ Tap In Kartu Akses (Masuk)
+              </button>
+            `}
           ` : ''}
         </div>
         ` : ''}

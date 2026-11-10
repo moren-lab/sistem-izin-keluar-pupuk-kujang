@@ -1400,7 +1400,39 @@
     if (!t.timeline) t.timeline = [];
 
     if (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului') {
-      t.status = 'Selesai';
+      const isGroupDinasActive = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.filter(m => m.status !== 'batal').length > 0);
+      if (isGroupDinasActive) {
+      t.status = 'Menunggu Verifikasi Atasan';
+      t.tapInGate = activeGate;
+      t.tapInTime = nowFormatted;
+      t.arrivalReportedTime = nowFormatted;
+      t.arrivalReportedAt = nowFormatted;
+      t.reportedReturnTime = nowFormatted;
+      t.timeFrozen = true;
+      t.scanInGate = activeGate;
+      t.securityOfficerIn = officer.name;
+      t.securityNipIn = officer.nip;
+      t.hasExtensionPending = false;
+      t.pendingExtension = null;
+      if (!t.timeline) t.timeline = [];
+      t.timeline.push({
+        event: 'Tap In Gerbang Masuk',
+        time: nowFormatted,
+        by: `${officer.name} (${activeGate})`,
+        gate: activeGate,
+        desc: `Tap In di ${activeGate} oleh Petugas (${officer.name}). Jam kepulangan terkunci. Menunggu verifikasi kehadiran fisik oleh Atasan.`
+      });
+      saveTicketsToStorage(tickets);
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Tap In berhasil di ${activeGate}! Jam kepulangan terkunci. Menunggu verifikasi Atasan.`, 'success');
+      }
+      closeMobileSheet();
+      renderMobileSecurity(null, currentSecurityTab);
+      if (typeof window.renderActiveView === 'function') window.renderActiveView();
+      return;
+    }
+
+    t.status = 'Selesai';
       if (typeof window.createNotification === 'function') {
         const applicantInfo = resolveDynamicApplicantInfo(t);
         window.createNotification({
@@ -1508,6 +1540,38 @@
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     const nowFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+    const isGroupDinasActive = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.filter(m => m.status !== 'batal').length > 0);
+    if (isGroupDinasActive) {
+      t.status = 'Menunggu Verifikasi Atasan';
+      t.tapInGate = activeGate;
+      t.tapInTime = nowFormatted;
+      t.arrivalReportedTime = nowFormatted;
+      t.arrivalReportedAt = nowFormatted;
+      t.reportedReturnTime = nowFormatted;
+      t.timeFrozen = true;
+      t.scanInGate = activeGate;
+      t.securityOfficerIn = officer.name;
+      t.securityNipIn = officer.nip;
+      t.hasExtensionPending = false;
+      t.pendingExtension = null;
+      if (!t.timeline) t.timeline = [];
+      t.timeline.push({
+        event: 'Tap In Gerbang Masuk',
+        time: nowFormatted,
+        by: `${officer.name} (${activeGate})`,
+        gate: activeGate,
+        desc: `Tap In di ${activeGate} oleh Petugas (${officer.name}). Jam kepulangan terkunci. Menunggu verifikasi kehadiran fisik oleh Atasan.`
+      });
+      saveTicketsToStorage(tickets);
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Tap In berhasil di ${activeGate}! Jam kepulangan terkunci. Menunggu verifikasi Atasan.`, 'success');
+      }
+      closeMobileSheet();
+      renderMobileSecurity(null, currentSecurityTab);
+      if (typeof window.renderActiveView === 'function') window.renderActiveView();
+      return;
+    }
 
     t.status = 'Selesai';
     t.scanInGate = activeGate;
