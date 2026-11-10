@@ -12241,3 +12241,239 @@ body.theme-dark .sop-num {
   color: var(--text-primary, #0f172a);
 }
 
+/* ========================================================
+   FULLSCREEN MEDIA & DOCUMENT LIGHTBOX (WHATSAPP STYLE)
+   ======================================================== */
+.doc-lightbox-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+  background: rgba(11, 15, 25, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  display: none;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s ease;
+  user-select: none;
+}
+
+.doc-lightbox-overlay.open {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Floating Top Bar (WhatsApp Style Header) */
+.doc-lightbox-header {
+  height: 60px;
+  min-height: 60px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  z-index: 10;
+  gap: 1rem;
+}
+
+.doc-lightbox-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.doc-lightbox-btn-icon {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.doc-lightbox-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.doc-lightbox-file-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.doc-lightbox-titles {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-lightbox-filename {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+
+.doc-lightbox-meta {
+  margin: 2px 0 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.doc-lightbox-btn-action {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.doc-lightbox-btn-action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.doc-lightbox-btn-action.primary {
+  background: #059669;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.doc-lightbox-btn-action.primary:hover {
+  background: #047857;
+}
+
+/* Center Media Stage */
+.doc-lightbox-stage {
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 105px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  overflow: auto;
+  position: relative;
+  cursor: default;
+}
+
+.doc-lightbox-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.doc-lightbox-img {
+  max-width: 95vw;
+  max-height: 84vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: zoom-in;
+}
+
+.doc-lightbox-img.zoomed {
+  transform: scale(1.6);
+  cursor: zoom-out;
+}
+
+.doc-lightbox-iframe {
+  width: 92vw;
+  height: 84vh;
+  border: none;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+}
+
+/* Official A4 Letterhead Preview when dataUrl is not an actual raw binary */
+.doc-lightbox-a4-paper {
+  background: #ffffff;
+  color: #0f172a;
+  max-width: 680px;
+  width: 95%;
+  max-height: 84vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  padding: 2.25rem 2.5rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  text-align: left;
+}
+
+/* Bottom Hint Footer */
+.doc-lightbox-footer {
+  height: 45px;
+  min-height: 45px;
+  background: linear-gradient(0deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  z-index: 10;
+}
+
+@media (max-width: 640px) {
+  .doc-lightbox-header {
+    padding: 0 0.85rem;
+  }
+  .doc-lightbox-btn-action .btn-text-desktop {
+    display: none;
+  }
+  .doc-lightbox-btn-action {
+    padding: 0.4rem 0.55rem;
+  }
+  .doc-lightbox-footer .lightbox-hint {
+    display: none;
+  }
+  .doc-lightbox-a4-paper {
+    padding: 1.25rem 1rem;
+  }
+}
+

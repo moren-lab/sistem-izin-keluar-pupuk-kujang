@@ -464,6 +464,47 @@ window.reportArrivalAtOffice = function(ticketId) {
   window.openSimulasiTapInModal(ticketId);
 };
 
+window._docViewerZoomed = false;
+
+window.handleDocViewerBackdropClick = function(e) {
+  // Tutup jika klik terjadi pada backdrop stage di luar kertas A4 atau gambar dokumen
+  if (e.target.id === 'modalDocViewer' || e.target.id === 'docViewerStage' || e.target.id === 'docViewerBody') {
+    window.closeDocViewerModal();
+  }
+};
+
+window.toggleDocViewerZoom = function() {
+  window._docViewerZoomed = !window._docViewerZoomed;
+  const img = document.getElementById('docViewerMainImg');
+  const paper = document.getElementById('docViewerA4Paper');
+  const btn = document.getElementById('btnZoomDocViewer');
+  
+  if (img) {
+    img.classList.toggle('zoomed', window._docViewerZoomed);
+  }
+  if (paper) {
+    paper.style.transform = window._docViewerZoomed ? 'scale(1.15)' : 'scale(1)';
+    paper.style.transformOrigin = 'top center';
+    paper.style.transition = 'transform 0.2s ease';
+  }
+  if (btn) {
+    btn.style.background = window._docViewerZoomed ? 'rgba(5, 150, 105, 0.4)' : 'rgba(255, 255, 255, 0.1)';
+  }
+};
+
+// Listener tombol ESC global untuk keluar dari Lightbox
+if (!window._docLightboxEscBound) {
+  window._docLightboxEscBound = true;
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      const modal = document.getElementById('modalDocViewer');
+      if (modal && modal.classList.contains('open')) {
+        window.closeDocViewerModal();
+      }
+    }
+  });
+}
+
 window.viewSuratPerintahDetail = function(ticketIdParam) {
   const ticketId = ticketIdParam || window.currentDetailTicketId || window.currentModalTicketId;
   const ticketsList = window.ticketsList || [];
@@ -479,6 +520,7 @@ window.viewSuratPerintahDetail = function(ticketIdParam) {
   }
 
   window._activeViewingDoc = doc;
+  window._docViewerZoomed = false;
 
   const modal = document.getElementById('modalDocViewer');
   const titleEl = document.getElementById('docViewerTitle');
@@ -486,40 +528,146 @@ window.viewSuratPerintahDetail = function(ticketIdParam) {
   const metaEl = document.getElementById('docViewerMeta');
   const iconEl = document.getElementById('docViewerIcon');
   const bodyEl = document.getElementById('docViewerBody');
+  const btnZoom = document.getElementById('btnZoomDocViewer');
 
   if (titleEl) titleEl.textContent = doc.name || 'Dokumen Surat Perintah Dinas';
   if (subEl) subEl.textContent = t ? `Tiket #${t.id} • Pemohon: ${t.applicantName || 'Inisiator'}` : 'Surat Perintah Resmi Unit Kerja';
   const sizeKb = Math.round((doc.size || 145000) / 1024);
-  if (metaEl) metaEl.textContent = `Ukuran: ${sizeKb} KB • Format: ${doc.name && doc.name.endsWith('.pdf') ? 'Berkas PDF' : 'Gambar Berkas'}`;
-  if (iconEl) iconEl.textContent = (doc.name && doc.name.endsWith('.pdf')) ? '📄' : '🖼️';
+  const isImage = (doc.type && doc.type.includes('image')) || (doc.name && /\.(png|jpe?g|webp)$/i.test(doc.name));
+  
+  if (metaEl) metaEl.textContent = `Ukuran: ${sizeKb} KB • Format: ${isImage ? 'Gambar Berkas Asli (PNG/JPG)' : 'Dokumen PDF Resmi'}`;
+  if (iconEl) iconEl.textContent = isImage ? '🖼️' : '📄';
+  if (btnZoom) btnZoom.style.display = 'inline-flex';
 
   if (bodyEl) {
-    const isImage = (doc.type && doc.type.includes('image')) || (doc.name && /\.(png|jpe?g|webp)$/i.test(doc.name));
     if (doc.dataUrl && isImage) {
+      // Fullscreen Image Lightbox ala WhatsApp
       bodyEl.innerHTML = `
-        <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
-          <img src="${doc.dataUrl}" alt="${doc.name}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: contain;">
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img id="docViewerMainImg" class="doc-lightbox-img" src="${doc.dataUrl}" alt="${doc.name}" onclick="window.toggleDocViewerZoom()" title="Klik untuk Zoom (Perbesar)">
         </div>
       `;
-    } else if (doc.dataUrl) {
+    } else if (doc.dataUrl && doc.dataUrl.startsWith('data:application/pdf') && doc.dataUrl.length > 500) {
+      // PDF Iframe Viewer
       bodyEl.innerHTML = `
-        <iframe src="${doc.dataUrl}" style="width: 100%; height: 65vh; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff;"></iframe>
+        <iframe class="doc-lightbox-iframe" src="${doc.dataUrl}" title="Pratinjau PDF"></iframe>
       `;
     } else {
+      // High-Fidelity Official A4 Letterhead ala Surat Perintah PT Pupuk Kujang
+      const todayFormatted = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      const applicantName = (t && t.applicantName) ? t.applicantName : 'Bima Arya Nugraha, S.T.';
+      const applicantNip = (t && t.applicantNip) ? t.applicantNip : 'PK-2024-8847';
+      const department = (t && t.department) ? t.department : 'Departemen Rekayasa & Pemeliharaan';
+      const approverName = (t && t.approverName) ? t.approverName : 'Ir. Hendra Gunawan, M.T.';
+      const approverTitle = (t && t.approverTitle) ? t.approverTitle : 'Manager Rekayasa & Pemeliharaan';
+      const destination = (t && t.destination) ? t.destination : 'Kantor Pusat Pupuk Indonesia, Jakarta';
+      const reason = (t && t.reason) ? t.reason : 'Koordinasi Teknis & Penugasan Luar Kawasan Pabrik';
+      const plannedExit = (t && t.plannedExit) ? t.plannedExit.replace('T', ' ') : '10 Nov 2026 08:00';
+      const estimatedReturn = (t && t.estimatedReturn) ? t.estimatedReturn.replace('T', ' ') : '10 Nov 2026 17:00';
+      const membersList = (t && Array.isArray(t.members)) ? t.members.filter(m => m.status !== 'batal') : [];
+
       bodyEl.innerHTML = `
-        <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 2rem 1.5rem; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-          <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📄</div>
-          <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; word-break: break-all;">${doc.name || 'Surat_Perintah_Dinas.pdf'}</div>
-          <div style="font-size: 0.775rem; color: #64748b; margin-bottom: 1.25rem;">${sizeKb} KB • Surat Perintah Penugasan Luar Kawasan</div>
-          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 999px; font-size: 0.75rem; font-weight: 700; margin-bottom: 1rem;">
-            ✓ Dokumen Sah & Terverifikasi
+        <div id="docViewerA4Paper" class="doc-lightbox-a4-paper">
+          <!-- Kop Surat Resmi Pupuk Kujang -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2.5px solid #0f2b48; padding-bottom: 12px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 48px; height: 48px; background: #00875a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.4rem;">
+                PK
+              </div>
+              <div>
+                <div style="font-weight: 900; font-size: 1.05rem; letter-spacing: 0.5px; color: #0f2b48; text-transform: uppercase;">PT PUPUK KUJANG</div>
+                <div style="font-size: 0.72rem; color: #475569; line-height: 1.3;">Member of PT Pupuk Indonesia (Persero)</div>
+                <div style="font-size: 0.68rem; color: #64748b; line-height: 1.2;">Jl. Jend. A. Yani No. 39 Cikampek 41373, Karawang - Jawa Barat</div>
+              </div>
+            </div>
+            <div style="text-align: right; border-left: 1px solid #cbd5e1; padding-left: 12px;">
+              <span style="display: inline-block; padding: 2px 8px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; color: #047857; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.3px;">
+                DOKUMEN RESMI
+              </span>
+              <div style="font-size: 0.68rem; color: #64748b; margin-top: 3px; font-family: monospace;">KODE: PK-SP-DIR-OPS</div>
+            </div>
           </div>
-          <p style="font-size: 0.8rem; color: #475569; line-height: 1.5; margin: 0 0 1.25rem 0;">
-            Berkas ini dilampirkan sebagai dokumen legalitas penugasan dinas keluar area kerja pabrik PT Pupuk Kujang.
-          </p>
-          <button type="button" class="btn-figma-primary" onclick="window.downloadCurrentDocViewerFile()" style="padding: 0.5rem 1.25rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: #0f3a68; color: #ffffff; border: none; cursor: pointer;">
-            ⬇️ Unduh Salinan Berkas
-          </button>
+
+          <!-- Judul Surat -->
+          <div style="text-align: center; margin-bottom: 18px;">
+            <h2 style="font-size: 1.1rem; font-weight: 900; color: #0f172a; margin: 0; text-transform: uppercase; text-decoration: underline; letter-spacing: 0.5px;">SURAT PERINTAH TUGAS DINAS</h2>
+            <div style="font-size: 0.775rem; color: #334155; font-weight: 600; margin-top: 4px;">Nomor: SP-${t ? t.id.replace('TK-', '') : '20261110-888'}/KUJANG/REK-PEL/${new Date().getFullYear()}</div>
+          </div>
+
+          <!-- Dasar Penugasan -->
+          <div style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
+            Yang bertanda tangan di bawah ini menerangkan dan menugaskan karyawan yang tercantum di bawah ini untuk melaksanakan tugas dinas perusahaan ke luar kawasan operasional:
+          </div>
+
+          <!-- Tabel Personel Yang Ditugaskan -->
+          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-bottom: 14px;">
+            <div style="background: #f1f5f9; padding: 6px 10px; font-size: 0.75rem; font-weight: 800; color: #0f172a; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between;">
+              <span>DAFTAR PERSONEL PENUGASAN DINAS</span>
+              <span style="color: #059669;">${membersList.length + 1} Orang</span>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+              <thead>
+                <tr style="background: #f8fafc; color: #64748b; text-align: left; border-bottom: 1px solid #e2e8f0;">
+                  <th style="padding: 6px 10px; width: 35px;">No</th>
+                  <th style="padding: 6px 10px;">Nama Karyawan</th>
+                  <th style="padding: 6px 10px; width: 120px;">NIP</th>
+                  <th style="padding: 6px 10px; width: 130px;">Peran Tim</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                  <td style="padding: 6px 10px; font-weight: 700;">1</td>
+                  <td style="padding: 6px 10px; font-weight: 700; color: #0f172a;">${applicantName}</td>
+                  <td style="padding: 6px 10px; font-family: monospace;">${applicantNip}</td>
+                  <td style="padding: 6px 10px;"><span style="background: #d1fae5; color: #065f46; font-weight: 700; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem;">👑 Inisiator / PJ</span></td>
+                </tr>
+                ${membersList.map((m, idx) => `
+                  <tr style="border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                    <td style="padding: 6px 10px; font-weight: 600;">${idx + 2}</td>
+                    <td style="padding: 6px 10px; font-weight: 600; color: #1e293b;">${m.name}</td>
+                    <td style="padding: 6px 10px; font-family: monospace;">${m.nip || '-'}</td>
+                    <td style="padding: 6px 10px;"><span style="background: #e0f2fe; color: #0369a1; font-weight: 600; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem;">👤 Anggota</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Rincian Agenda & Lokasi -->
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; font-size: 0.775rem; margin-bottom: 16px; line-height: 1.5;">
+            <div style="display: grid; grid-template-columns: 120px 1fr; gap: 4px 8px;">
+              <div style="font-weight: 700; color: #64748b;">Lokasi / Tujuan:</div>
+              <div style="font-weight: 700; color: #0f172a;">${destination}</div>
+
+              <div style="font-weight: 700; color: #64748b;">Keperluan / Agenda:</div>
+              <div style="color: #1e293b;">${reason}</div>
+
+              <div style="font-weight: 700; color: #64748b;">Jadwal Penugasan:</div>
+              <div style="font-weight: 700; color: #059669;">${plannedExit} WIB s/d ${estimatedReturn} WIB</div>
+
+              <div style="font-weight: 700; color: #64748b;">Unit Kerja:</div>
+              <div style="color: #334155;">${department}</div>
+            </div>
+          </div>
+
+          <!-- Tanda Tangan & Cap Sah -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 18px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+            <div>
+              <div style="font-size: 0.68rem; color: #64748b; font-family: monospace;">KODE TIKET: #${t ? t.id : 'TK-20261110-888'}</div>
+              <div style="margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #ecfdf5; border: 1px solid #86efac; border-radius: 4px; font-size: 0.68rem; color: #166534; font-weight: 700;">
+                ✓ Terverifikasi Digital di Sistem Kujang Gate
+              </div>
+            </div>
+            <div style="text-align: right; min-width: 200px;">
+              <div style="font-size: 0.72rem; color: #475569;">Cikampek, ${todayFormatted}</div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a; margin-top: 2px;">Pejabat Pemberi Perintah:</div>
+              <div style="height: 38px; display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                <span style="color: #059669; font-size: 0.72rem; font-weight: 800; font-family: cursive; border: 1.5px solid #059669; border-radius: 4px; padding: 2px 6px;">[ SIGNED DIGITALLY ]</span>
+              </div>
+              <div style="font-weight: 800; font-size: 0.8rem; color: #0f172a; text-decoration: underline;">${approverName}</div>
+              <div style="font-size: 0.7rem; color: #64748b;">${approverTitle}</div>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -534,10 +682,15 @@ window.viewSuratPerintahDetail = function(ticketIdParam) {
 window.closeDocViewerModal = function() {
   const modal = document.getElementById('modalDocViewer');
   if (modal) {
-    modal.style.display = 'none';
     modal.classList.remove('open');
+    setTimeout(() => {
+      if (!modal.classList.contains('open')) {
+        modal.style.display = 'none';
+      }
+    }, 200);
   }
   window._activeViewingDoc = null;
+  window._docViewerZoomed = false;
 };
 
 window.downloadCurrentDocViewerFile = function() {
