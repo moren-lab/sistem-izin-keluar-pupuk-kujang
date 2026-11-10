@@ -349,7 +349,7 @@
           <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail Pengajuan</span>
+              <span>Lihat Detail Pengajuan</span>
             </button>
         </div>
       `;
@@ -658,7 +658,7 @@
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail Pengajuan</span>
+              <span>Lihat Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -885,7 +885,7 @@
           </div>
 
           <!-- Baris 4: Tujuan / Lokasi Keluar -->
-          <div class="mobile-clamp-2" style="font-size: 0.825rem; font-weight: 400; color: #334155; margin-bottom: 4px; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;" title="${destText.replace(/"/g, '&quot;')}">
+          <div class="mobile-clamp-1" style="font-size: 0.825rem; font-weight: 400; color: #334155; margin-bottom: 4px; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;" title="${destText.replace(/"/g, '&quot;')}">
             📍 ${destText}
           </div>
 
@@ -932,7 +932,7 @@
             <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail Pengajuan</span>
+              <span>Lihat Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -972,7 +972,7 @@
           <div style="font-size: 0.725rem; font-weight: 700; color: #047857; margin-bottom: 2px;">
             ${t.category || 'Dinas Kantor'} • ${typeDisplay}
           </div>
-          <div class="mobile-clamp-2" style="font-size: 0.8rem; font-weight: 400; color: #334155; margin-bottom: 6px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${destText.replace(/"/g, '&quot;')}">
+          <div class="mobile-clamp-1" style="font-size: 0.8rem; font-weight: 400; color: #334155; margin-bottom: 6px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${destText.replace(/"/g, '&quot;')}">
             📍 ${destText}
           </div>
 
@@ -984,7 +984,7 @@
             <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
             <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail Pengajuan</span>
+              <span>Lihat Detail Pengajuan</span>
             </button>
           </div>
         </div>

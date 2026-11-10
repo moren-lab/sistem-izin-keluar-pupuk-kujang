@@ -463,14 +463,14 @@
                 </div>
               </div>
 
-              <div class="mobile-clamp-2" style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;">
+              <div class="mobile-clamp-1" style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;">
                 <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'} • Wewenang berada pada atasan yang ditunjuk
               </div>
               
               <div style="margin-top: 8px;">
                 <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span>Detail Pengajuan</span>
+                  <span>Lihat Detail Pengajuan</span>
                 </button>
               </div>
             </div>
@@ -493,10 +493,10 @@
               </div>
             </div>
 
-            <div class="mobile-clamp-2" style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(pendingEmergTicket.destination || '').replace(/"/g, '&quot;')}">
+            <div class="mobile-clamp-1" style="font-size: 0.75rem; color: #7f1d1d; margin: 4px 0 2px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(pendingEmergTicket.destination || '').replace(/"/g, '&quot;')}">
               <strong>Tujuan:</strong> ${pendingEmergTicket.destination || 'RS Pupuk Kujang'}
             </div>
-            <div class="mobile-clamp-2" style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(pendingEmergTicket.reason || '').replace(/"/g, '&quot;')}">
+            <div class="mobile-clamp-1" style="font-size: 0.75rem; color: #7f1d1d; margin-bottom: 8px; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(pendingEmergTicket.reason || '').replace(/"/g, '&quot;')}">
               "${pendingEmergTicket.reason || 'Kondisi darurat mendadak'}"
             </div>
             
@@ -513,7 +513,7 @@
             <div style="margin-top: 8px;">
               <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${pendingEmergTicket.id}')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                <span>Detail Pengajuan</span>
+                <span>Lihat Detail Pengajuan</span>
               </button>
             </div>
           </div>
@@ -546,7 +546,7 @@
             </div>
           </div>
 
-          <div class="mobile-clamp-2" style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.destination || '').replace(/"/g, '&quot;')}">
+          <div class="mobile-clamp-1" style="font-size: 0.725rem; color: #475569; margin: 4px 0 8px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.destination || '').replace(/"/g, '&quot;')}">
             Rencana Keluar: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'}</strong>
             ${t.destination ? ` • Keperluan: <strong>${escapeHtml(t.destination)}</strong>` : ''}
           </div>
@@ -555,7 +555,7 @@
             <div style="margin-top: 8px;">
               <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                <span>Detail Pengajuan</span>
+                <span>Lihat Detail Pengajuan</span>
               </button>
             </div>
           ` : `
@@ -571,7 +571,7 @@
             <div style="margin-top: 8px;">
               <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                <span>Detail Pengajuan</span>
+                <span>Lihat Detail Pengajuan</span>
               </button>
             </div>
           `}
@@ -1657,7 +1657,7 @@
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
             <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail pengajuan</span>
+              <span>Lihat Detail Pengajuan</span>
             </button>
             ${(t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa') ? `
               <button type="button" class="mobile-btn-danger" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
@@ -2044,7 +2044,7 @@
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
             <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Detail pengajuan</span>
+              <span>Lihat Detail Pengajuan</span>
             </button>
             <button type="button" class="mobile-btn-danger" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
