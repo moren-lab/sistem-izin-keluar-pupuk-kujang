@@ -184,18 +184,18 @@ window.filterGroupMemberSearch = function(query) {
       const initials = (c.name || 'KY').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
       const sup = (c.directSupervisor || c.supervisor || 'Atasan Langsung');
       return `
-        <div class="member-search-item" onclick="window.addGroupMemberByNip('${c.nip}')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
-          <div style="display: flex; align-items: center; gap: 9px;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; border: 1px solid #bae6fd;">
+        <div class="member-search-item" onclick="window.addGroupMemberByNip('${c.nip}')" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; border: 1px solid #bae6fd; flex-shrink: 0;">
               ${initials}
             </div>
-            <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a;">${c.name} <span style="font-weight: 500; color: #64748b; font-size: 0.72rem;">(${c.nip})</span></div>
-              <div style="font-size: 0.7rem; color: #64748b;">${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}</div>
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.name} <span style="font-weight: 500; color: #64748b; font-size: 0.72rem;">(${c.nip})</span></div>
+              <div style="font-size: 0.7rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}">${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}</div>
             </div>
           </div>
-          <div style="text-align: right;">
-            <span style="font-size: 0.68rem; font-weight: 700; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 999px; display: inline-block;">
+          <div style="text-align: right; flex-shrink: 0;">
+            <span style="font-size: 0.68rem; font-weight: 700; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; white-space: nowrap; line-height: 1.2;">
               Atasan: ${sup.split(',')[0]}
             </span>
           </div>
@@ -3014,18 +3014,18 @@ window.filterEmergGroupMemberSearch = function(query) {
       const initials = (c.name || 'KY').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
       const sup = (c.directSupervisor || c.supervisor || 'Atasan Langsung');
       return `
-        <div class="member-search-item" onclick="window.addEmergGroupMemberByNip('${c.nip}')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
-          <div style="display: flex; align-items: center; gap: 9px;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; border: 1px solid #bae6fd;">
+        <div class="member-search-item" onclick="window.addEmergGroupMemberByNip('${c.nip}')" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; border: 1px solid #bae6fd; flex-shrink: 0;">
               ${initials}
             </div>
-            <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a;">${c.name} <span style="font-weight: 500; color: #64748b; font-size: 0.72rem;">(${c.nip})</span></div>
-              <div style="font-size: 0.7rem; color: #64748b;">${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}</div>
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.name} <span style="font-weight: 500; color: #64748b; font-size: 0.72rem;">(${c.nip})</span></div>
+              <div style="font-size: 0.7rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}">${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}</div>
             </div>
           </div>
-          <div style="text-align: right;">
-            <span style="font-size: 0.68rem; font-weight: 700; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 999px; display: inline-block;">
+          <div style="text-align: right; flex-shrink: 0;">
+            <span style="font-size: 0.68rem; font-weight: 700; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; white-space: nowrap; line-height: 1.2;">
               Atasan: ${sup.split(',')[0]}
             </span>
           </div>
