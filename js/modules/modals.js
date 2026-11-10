@@ -218,6 +218,11 @@ function handleOpenNewRequest() {
   const inputDestination = document.getElementById('inputDestination');
   const inputReason = document.getElementById('inputReason');
   const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
+  const groupDinasWrapper = document.getElementById('groupDinasMembersWrapper');
+  if (groupDinasWrapper) groupDinasWrapper.style.display = 'none';
+  window._selectedGroupMembers = [];
+  const containerGroupSelected = document.getElementById('selectedGroupMembersContainer');
+  if (containerGroupSelected) containerGroupSelected.innerHTML = '';
   if (selectReqCategory) selectReqCategory.value = '';
   if (selectReqType) selectReqType.value = '';
   if (inputDestination) { inputDestination.value = ''; const c = document.getElementById('countInputDestination'); if (c) c.textContent = '0'; }
@@ -275,6 +280,16 @@ function openEditTicketModal(ticketId) {
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket) {
     if (typeof window.showToast === 'function') window.showToast('Data tiket tidak ditemukan.', 'danger');
+    return;
+  }
+
+  // Jika izin dinas bersama, hanya inisiator utama yang berhak mengubah rincian pengajuan
+  const activeEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : null;
+  const myEmpNip = activeEmpActor ? activeEmpActor.nip : 'PK-2024-8841';
+  if (ticket.isGroupDinas && ticket.applicantNip !== myEmpNip && (ticket.initiatorNip && ticket.initiatorNip !== myEmpNip)) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Hanya inisiator pengajuan yang berhak mengubah rincian izin dinas rombongan.', 'warning');
+    }
     return;
   }
 
@@ -474,6 +489,20 @@ function setupRadioToggles() {
       const isDinas = isDinasCategory(selectReqCategory.value);
       const inputPlannedExit = document.getElementById('inputPlannedExit');
       const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
+      const groupDinasWrapper = document.getElementById('groupDinasMembersWrapper');
+
+      if (selectReqCategory.value === 'Dinas Kantor') {
+        if (groupDinasWrapper) groupDinasWrapper.style.display = 'block';
+        if (typeof window.initGroupDinasMembersForm === 'function') {
+          window.initGroupDinasMembersForm();
+        }
+      } else {
+        if (groupDinasWrapper) groupDinasWrapper.style.display = 'none';
+        window._selectedGroupMembers = [];
+        const containerGroupSelected = document.getElementById('selectedGroupMembersContainer');
+        if (containerGroupSelected) containerGroupSelected.innerHTML = '';
+      }
+
       if (isDinas) {
         // Dinas Kantor: Bebaskan pemilihan tanggal hari ini, besok, atau hari kerja selanjutnya
         if (inputPlannedExit) inputPlannedExit.removeAttribute('max');
@@ -1174,6 +1203,9 @@ function setInputMaxByDate(inputEl, baseDate = new Date()) {
 }
 
 function isWithinOperationalHours(date = new Date()) {
+  if (typeof window !== 'undefined' && window.isWithinOperationalHours && window.isWithinOperationalHours !== isWithinOperationalHours) {
+    return window.isWithinOperationalHours(date);
+  }
   const d = (typeof date === 'string') ? new Date(date) : date;
   if (!d || isNaN(d.getTime())) return { allowed: false, message: 'Format waktu tidak valid!' };
 
@@ -1572,6 +1604,90 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const infoEmployeeDept = document.getElementById('infoEmployeeDept');
   if (infoEmployeeDept) infoEmployeeDept.textContent = ticket.department || 'Rekayasa & Pemeliharaan';
 
+  // Section 1b: Rombongan Dinas (Tampil jika Izin Dinas Bersama)
+  const secGroup = document.getElementById('sectionGroupMembersDetail');
+  const badgeGroupCount = document.getElementById('badgeGroupMembersCount');
+  const containerGroupList = document.getElementById('containerGroupMembersDetailList');
+  if (secGroup && containerGroupList) {
+    if (ticket.isGroupDinas && Array.isArray(ticket.members) && ticket.members.length > 0) {
+      secGroup.style.display = 'block';
+      const activeMembers = ticket.members.filter(m => m.status !== 'batal');
+      const totalActive = (ticket.initiatorCancelled ? 0 : 1) + activeMembers.length;
+      if (badgeGroupCount) badgeGroupCount.textContent = `${totalActive} Karyawan Aktif`;
+
+      let membersHtml = '';
+      const initiatorCancelled = Boolean(ticket.initiatorCancelled);
+      membersHtml += `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: ${initiatorCancelled ? '#f1f5f9' : '#ffffff'}; border: 1px solid ${initiatorCancelled ? '#e2e8f0' : '#bfdbfe'}; border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
+              ${(ticket.applicantName || 'I').charAt(0)}
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: ${initiatorCancelled ? '#94a3b8' : '#0f172a'}; ${initiatorCancelled ? 'text-decoration: line-through;' : ''}">
+                ${ticket.applicantName || 'Pemohon'} <span style="font-size: 0.675rem; font-weight: 800; background: #dbeafe; color: #1d4ed8; padding: 1px 6px; border-radius: 4px;">Inisiator</span>
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b;">NIP: ${ticket.applicantNip || '-'}</div>
+            </div>
+          </div>
+          <div>
+            ${initiatorCancelled
+              ? '<span style="font-size: 0.7rem; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Batal Ikut</span>'
+              : '<span style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">Aktif Ikut</span>'}
+          </div>
+        </div>
+      `;
+
+      ticket.members.forEach(m => {
+        const isBatal = m.status === 'batal';
+        membersHtml += `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: ${isBatal ? '#f8fafc' : '#ffffff'}; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
+                ${(m.name || 'M').charAt(0)}
+              </div>
+              <div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: ${isBatal ? '#94a3b8' : '#0f172a'}; ${isBatal ? 'text-decoration: line-through;' : ''}">
+                  ${m.name}
+                </div>
+                <div style="font-size: 0.7rem; color: #64748b;">NIP: ${m.nip} • ${m.department || ''}</div>
+              </div>
+            </div>
+            <div>
+              ${isBatal
+                ? '<span style="font-size: 0.7rem; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Batal Ikut</span>'
+                : '<span style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">Aktif Ikut</span>'}
+            </div>
+          </div>
+        `;
+      });
+      containerGroupList.innerHTML = membersHtml;
+    } else {
+      secGroup.style.display = 'none';
+    }
+  }
+
+  // Section 4B: Surat Perintah / Tugas Dinas
+  const secSurat = document.getElementById('sectionSuratPerintahDetail');
+  const detailSuratName = document.getElementById('detailSuratName');
+  const detailSuratMeta = document.getElementById('detailSuratMeta');
+  const detailSuratIcon = document.getElementById('detailSuratIcon');
+  if (secSurat) {
+    if (ticket.suratPerintah) {
+      secSurat.style.display = 'block';
+      if (detailSuratName) detailSuratName.textContent = ticket.suratPerintah.name || 'Surat_Perintah_Dinas.pdf';
+      if (detailSuratMeta) {
+        const kbSize = Math.round((ticket.suratPerintah.size || 142000) / 1024);
+        detailSuratMeta.textContent = `${kbSize} KB • Dokumen Perintah Resmi Unit Kerja`;
+      }
+      if (detailSuratIcon) {
+        detailSuratIcon.textContent = (ticket.suratPerintah.type && ticket.suratPerintah.type.includes('image')) ? '🖼️' : '📑';
+      }
+    } else {
+      secSurat.style.display = 'none';
+    }
+  }
+
   const infoCategory = document.getElementById('infoCategory');
   if (infoCategory) infoCategory.textContent = ticket.category;
 
@@ -1959,9 +2075,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   // 3. Footer Button (⚡ Otorisasi Darurat)
   if (btnDetailEmergencyUnlock) { btnDetailEmergencyUnlock.style.display = "none"; btnDetailEmergencyUnlock.onclick = null; }
 
-  // Edit Action Button directly inside detail modal (STRICTLY DISABLED IF IN RIWAYAT / FINISHED STATUS)
+  // Edit Action Button directly inside detail modal (STRICTLY DISABLED IF IN RIWAYAT / FINISHED STATUS, OR IF TAGGED MEMBER IN GROUP DINAS)
   const btnDetailEditTicket = document.getElementById('btnDetailEditTicket');
-  const canEditTicketInDetail = !isFinished && (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || isEmergLockedInDetail) && !ticket.scanOutTime && ticket.status !== 'Disetujui';
+  const activeEmpInfo = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : null;
+  const myNipInfo = activeEmpInfo ? activeEmpInfo.nip : 'PK-2024-8841';
+  const isInitiatorOfGroup = !ticket.isGroupDinas || (ticket.applicantNip === myNipInfo || (ticket.initiatorNip && ticket.initiatorNip === myNipInfo));
+
+  const canEditTicketInDetail = !isFinished && (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat' || isEmergLockedInDetail) && !ticket.scanOutTime && ticket.status !== 'Disetujui' && isInitiatorOfGroup;
   if (btnDetailEditTicket) {
     if (canEditTicketInDetail && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor)) {
       btnDetailEditTicket.style.display = 'inline-flex';
@@ -2025,6 +2145,62 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       btnDetailApproveTicket.style.display = 'none';
       btnDetailRejectTicket.onclick = null;
       btnDetailApproveTicket.onclick = null;
+    }
+  }
+
+  // Approver Return Actions: Konfirmasi Tiba / Belum Tiba / Tap In Atasan
+  const btnDetailConfirmArrival = document.getElementById('btnDetailConfirmArrival');
+  const btnDetailRejectArrival = document.getElementById('btnDetailRejectArrival');
+  const btnDetailReportArrival = document.getElementById('btnDetailReportArrival');
+
+  if (btnDetailConfirmArrival && btnDetailRejectArrival) {
+    if (isApproverActor && (ticket.status === 'Menunggu Verifikasi Atasan' || ticket.status === 'Sedang di Luar')) {
+      btnDetailConfirmArrival.style.display = 'inline-flex';
+      btnDetailConfirmArrival.textContent = ticket.status === 'Menunggu Verifikasi Atasan' ? '✓ Ya, Sudah Tiba (Selesai)' : '✓ Tap In Atasan (Selesai)';
+      btnDetailConfirmArrival.onclick = () => {
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+        if (typeof window.confirmArrivalByApprover === 'function') {
+          window.confirmArrivalByApprover(ticket.id);
+        }
+      };
+
+      if (ticket.status === 'Menunggu Verifikasi Atasan') {
+        btnDetailRejectArrival.style.display = 'inline-flex';
+        btnDetailRejectArrival.textContent = '✕ Belum Tiba';
+        btnDetailRejectArrival.onclick = () => {
+          if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+          if (typeof window.rejectArrivalByApprover === 'function') {
+            window.rejectArrivalByApprover(ticket.id);
+          }
+        };
+      } else {
+        btnDetailRejectArrival.style.display = 'none';
+        btnDetailRejectArrival.onclick = null;
+      }
+    } else {
+      btnDetailConfirmArrival.style.display = 'none';
+      btnDetailRejectArrival.style.display = 'none';
+      btnDetailConfirmArrival.onclick = null;
+      btnDetailRejectArrival.onclick = null;
+    }
+  }
+
+  if (btnDetailReportArrival) {
+    const isMyActiveDinas = isKaryawanActor && ticket.category === 'Dinas Kantor' && ticket.status === 'Sedang di Luar';
+    if (isMyActiveDinas) {
+      btnDetailReportArrival.style.display = 'inline-flex';
+      btnDetailReportArrival.textContent = '💳 Simulasi Tap In Gerbang';
+      btnDetailReportArrival.onclick = () => {
+        if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+        if (typeof window.openSimulasiTapInModal === 'function') {
+          window.openSimulasiTapInModal(ticket.id);
+        } else if (typeof window.reportArrivalAtOffice === 'function') {
+          window.reportArrivalAtOffice(ticket.id);
+        }
+      };
+    } else {
+      btnDetailReportArrival.style.display = 'none';
+      btnDetailReportArrival.onclick = null;
     }
   }
 
@@ -2300,7 +2476,10 @@ function openCancelModal(ticketId, callback) {
   }
 
   const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
-  if (ticket.applicantNip && ticket.applicantNip !== myNip && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor)) {
+  const isInitiator = ticket.applicantNip === myNip || (!ticket.applicantNip && myNip === 'PK-2024-8841');
+  const isTaggedMember = Boolean(ticket.isGroupDinas && Array.isArray(ticket.members) && ticket.members.some(m => m.nip === myNip && m.status !== 'batal'));
+
+  if (!isInitiator && !isTaggedMember && (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor)) {
     if (typeof window.showToast === 'function') {
       window.showToast('Anda tidak berhak membatalkan izin milik karyawan lain.', 'danger');
     }
@@ -2318,9 +2497,60 @@ function openCancelModal(ticketId, callback) {
   const cancelTicketId = document.getElementById('cancelTicketId');
   const cancelReasonInput = document.getElementById('cancelReasonInput');
   const modalCancelRequest = document.getElementById('modalCancelRequest');
+  const cancelPromptText = document.getElementById('cancelPromptText');
+  const cancelGroupDinasNotice = document.getElementById('cancelGroupDinasNotice');
+  const btnCancelOnlyMe = document.getElementById('btnCancelOnlyMe');
+  const btnConfirmCancelTicket = document.getElementById('btnConfirmCancelTicket');
 
   if (cancelTicketId) cancelTicketId.textContent = ticketId;
   if (cancelReasonInput) cancelReasonInput.value = '';
+
+  if (ticket.isGroupDinas) {
+    if (cancelGroupDinasNotice) cancelGroupDinasNotice.style.display = 'block';
+    if (isTaggedMember) {
+      if (cancelPromptText) {
+        cancelPromptText.innerHTML = `Batalkan keikutsertaan Anda dalam izin rombongan dinas tiket <strong id="cancelTicketId">${ticketId}</strong>? Rekan tim lain dan inisiator tetap dapat melanjutkan dinas.`;
+      }
+      if (btnCancelOnlyMe) btnCancelOnlyMe.style.display = 'none';
+      if (btnConfirmCancelTicket) {
+        btnConfirmCancelTicket.textContent = 'Ya, Batalkan Keikutsertaan Saya';
+      }
+    } else if (isInitiator) {
+      const activeMembers = (ticket.members || []).filter(m => m.status !== 'batal');
+      if (cancelPromptText) {
+        cancelPromptText.innerHTML = `Anda adalah <strong>Inisiator Pengajuan</strong> rombongan dinas <strong id="cancelTicketId">${ticketId}</strong>. Silakan tentukan tindakan pembatalan:`;
+      }
+      if (activeMembers.length > 0) {
+        if (btnCancelOnlyMe) {
+          btnCancelOnlyMe.style.display = 'inline-flex';
+          btnCancelOnlyMe.onclick = () => {
+            if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+            if (typeof window.cancelGroupForInitiatorOnly === 'function') {
+              window.cancelGroupForInitiatorOnly(ticketId);
+            }
+          };
+        }
+        if (btnConfirmCancelTicket) {
+          btnConfirmCancelTicket.textContent = 'Batalkan Seluruh Pengajuan Tim';
+        }
+      } else {
+        if (btnCancelOnlyMe) btnCancelOnlyMe.style.display = 'none';
+        if (btnConfirmCancelTicket) {
+          btnConfirmCancelTicket.textContent = 'Ya, Batalkan Izin';
+        }
+      }
+    }
+  } else {
+    if (cancelGroupDinasNotice) cancelGroupDinasNotice.style.display = 'none';
+    if (btnCancelOnlyMe) btnCancelOnlyMe.style.display = 'none';
+    if (cancelPromptText) {
+      cancelPromptText.innerHTML = `Apakah Anda yakin ingin membatalkan tiket izin <strong id="cancelTicketId">${ticketId}</strong>?`;
+    }
+    if (btnConfirmCancelTicket) {
+      btnConfirmCancelTicket.textContent = 'Ya, Batalkan Izin';
+    }
+  }
+
   if (modalCancelRequest) modalCancelRequest.classList.add('open');
 }
 
@@ -2332,6 +2562,20 @@ function confirmCancelTicket() {
   const ticketId = window.currentCancelTicketId;
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (ticket) {
+    const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+    const isInitiator = ticket.applicantNip === myNip || (!ticket.applicantNip && myNip === 'PK-2024-8841');
+    const memberObj = (ticket.isGroupDinas && Array.isArray(ticket.members)) ? ticket.members.find(m => m.nip === myNip) : null;
+
+    // Jika yang membatalkan adalah anggota rombongan (bukan inisiator), hanya batalkan keikutsertaan anggota tersebut
+    if (memberObj && !isInitiator) {
+      if (typeof window.cancelMemberParticipation === 'function') {
+        window.cancelMemberParticipation(ticketId, myNip);
+      }
+      const modalCancelRequest = document.getElementById('modalCancelRequest');
+      if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+      return;
+    }
+
     if (ticket.scanOutTime || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai') {
       if (typeof window.showToast === 'function') {
         window.showToast(`Akses Ditolak: Tiket #${ticketId} tidak dapat dibatalkan karena sudah aktif di luar area atau telah selesai.`, 'danger');
@@ -2881,8 +3125,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const approverName = selectApprover.value;
+      const members = (category === 'Dinas Kantor' && Array.isArray(window._selectedGroupMembers)) ? [...window._selectedGroupMembers] : [];
+      if (category === 'Dinas Kantor' && !window._currentSuratPerintah) {
+        window._currentSuratPerintah = {
+          name: 'Surat_Perintah_Tugas_Dinas.pdf',
+          size: 142500,
+          type: 'application/pdf',
+          uploadedAt: new Date().toISOString()
+        };
+      }
+      const suratPerintah = (category === 'Dinas Kantor' && window._currentSuratPerintah) ? { ...window._currentSuratPerintah } : null;
 
-      window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn, approverName };
+      window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn, approverName, members, suratPerintah };
 
       const sumApprover = document.getElementById('sumApprover');
       const sumCategory = document.getElementById('sumCategory');
@@ -2892,6 +3146,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const sumExitTime = document.getElementById('sumExitTime');
       const sumReturnRow = document.getElementById('sumReturnRow');
       const sumReturnTime = document.getElementById('sumReturnTime');
+      const sumMembersRow = document.getElementById('sumMembersRow');
+      const sumMembersVal = document.getElementById('sumMembersVal');
+      const sumSuratRow = document.getElementById('sumSuratRow');
+      const sumSuratVal = document.getElementById('sumSuratVal');
 
       if (sumApprover) sumApprover.textContent = approverName;
       if (sumCategory) sumCategory.textContent = category;
@@ -2899,6 +3157,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sumDestination) sumDestination.textContent = destination;
       if (sumReason) sumReason.textContent = reason;
       if (sumExitTime) sumExitTime.textContent = window.formatDisplayDate(plannedExit);
+
+      if (sumMembersRow && sumMembersVal) {
+        if (members && members.length > 0) {
+          sumMembersRow.style.display = 'flex';
+          sumMembersVal.textContent = members.map(m => m.name).join(', ') + ` (${members.length} Orang)`;
+        } else {
+          sumMembersRow.style.display = 'none';
+        }
+      }
+
+      if (sumSuratRow && sumSuratVal) {
+        if (suratPerintah) {
+          sumSuratRow.style.display = 'flex';
+          sumSuratVal.textContent = suratPerintah.name;
+        } else {
+          sumSuratRow.style.display = 'none';
+        }
+      }
 
       if (sumReturnRow) {
         if (type === 'Kembali ke Area') {
@@ -3105,6 +3381,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
       };
 
+      const isGroupDinas = window.pendingFormData.category === 'Dinas Kantor' && Array.isArray(window.pendingFormData.members) && window.pendingFormData.members.length > 0;
+      if (isGroupDinas) {
+        newTicket.isGroupDinas = true;
+        newTicket.initiatorNip = activeEmp ? activeEmp.nip : 'PK-2024-8841';
+        newTicket.initiatorName = activeEmp ? activeEmp.name : 'Budi Pratama, S.T.';
+        newTicket.members = window.pendingFormData.members.map(m => ({
+          nip: m.nip,
+          name: m.name,
+          department: m.department || newTicket.department,
+          status: 'aktif'
+        }));
+        const memberNames = newTicket.members.map(m => m.name).join(', ');
+        newTicket.timeline[0].desc += ` (Izin Dinas Bersama: ${newTicket.applicantName} mengikutsertakan ${memberNames}).`;
+      }
+
+      if (window.pendingFormData.suratPerintah) {
+        newTicket.suratPerintah = window.pendingFormData.suratPerintah;
+      }
+
       const ticketsList = window.ticketsList || [];
       ticketsList.unshift(newTicket);
       if (typeof window.createNotification === 'function') {
@@ -3122,6 +3417,23 @@ document.addEventListener('DOMContentLoaded', () => {
           priority: 'normal',
           eventId: `new_sub_${newTicket.id}`
         });
+
+        if (isGroupDinas && Array.isArray(newTicket.members)) {
+          newTicket.members.forEach(m => {
+            window.createNotification({
+              recipientRole: 'karyawan',
+              recipientNip: m.nip,
+              recipientName: m.name,
+              actorSource: 'karyawan',
+              type: 'pengajuan_dinas_bersama',
+              title: 'Izin Dinas Kantor Bersama',
+              message: `Anda ditambahkan oleh ${newTicket.applicantName} ke pengajuan izin Dinas Kantor (${newTicket.destination}). Izin ini aktif bersama rombongan tim.`,
+              ticketId: newTicket.id,
+              priority: 'normal',
+              eventId: `grp_notif_${newTicket.id}_${m.nip}`
+            });
+          });
+        }
 
         if (isReassignedFromStart && directSupNip) {
           window.createNotification({
@@ -3142,6 +3454,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       modalConfirmSummary.classList.remove('open');
       if (formNewRequest) formNewRequest.reset();
+      window._selectedGroupMembers = [];
+      const containerGroupSelected = document.getElementById('selectedGroupMembersContainer');
+      if (containerGroupSelected) containerGroupSelected.innerHTML = '';
       if (typeof window.resetApproverSearch === 'function') {
         window.resetApproverSearch();
       }

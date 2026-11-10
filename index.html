@@ -970,6 +970,87 @@
                               </div>
                             </div>
 
+                            <!-- Anggota Rombongan Dinas & Upload Dokumen SPK (Tampil dinamis jika kategori Dinas Kantor) -->
+                            <div class="form-group" id="groupDinasMembersWrapper" style="display: none; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 1rem; margin-bottom: 0;">
+                              <!-- 1. Tambah Anggota Rombongan -->
+                              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+                                <label class="form-label" style="font-weight: 700; color: #0f172a; font-size: 0.825rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                  <span>👥 Tambah Anggota Rombongan Dinas (Opsional)</span>
+                                </label>
+                                <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Maks. 5 rekan</span>
+                              </div>
+                              <p style="font-size: 0.725rem; color: #475569; margin: 0 0 0.65rem 0; line-height: 1.4;">
+                                Cari dan pilih rekan kerja yang bertugas bersama. Sistem otomatis mengenali staf dari departemen dan atasan mana pun.
+                              </p>
+
+                              <!-- Search Box Anggota Tim -->
+                              <div class="member-search-wrap" id="wrapSearchMember" style="position: relative; margin-bottom: 0.65rem;">
+                                <div style="position: relative; display: flex; align-items: center;">
+                                  <input type="text" id="inputSearchGroupMember" class="form-input" placeholder="🔍 Ketik nama, NIP, atau departemen rekan kerja..." autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 0.6rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.825rem;">
+                                </div>
+
+                                <!-- Floating Dropdown Rekan Karyawan -->
+                                <div class="approver-floating-dropdown" id="memberFloatingDropdown" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 100; max-height: 250px; overflow-y: auto; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);">
+                                  <div id="memberItemsList" style="padding: 4px;">
+                                    <!-- Rendered dynamically via JS -->
+                                  </div>
+                                  <div class="approver-empty-state" id="memberEmptyState" style="display: none; padding: 1rem; text-align: center; color: var(--text-muted);">
+                                    <div style="font-size: 1.25rem;">🔎</div>
+                                    <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">Karyawan Tidak Ditemukan</div>
+                                    <div style="font-size: 0.72rem; color: #64748b;">Tidak ada rekan aktif yang sesuai dengan kata kunci "<span id="emptyMemberSearchTerm"></span>".</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- List Anggota Terpilih -->
+                              <div style="margin-bottom: 0.95rem;">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Daftar Rekan Tim Terpilih:</div>
+                                <div id="listSelectedGroupMembers" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px;">
+                                  <span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>
+                                </div>
+                              </div>
+
+                              <!-- 2. Upload Dokumen Surat Tugas / Perintah Dinas -->
+                              <div style="border-top: 1px dashed #cbd5e1; padding-top: 0.85rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+                                  <label class="form-label" style="font-weight: 700; color: #0f172a; font-size: 0.825rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    <span>Upload Surat Perintah / Surat Tugas Dinas</span>
+                                    <span style="color: var(--rose-danger, #dc2626);">*</span>
+                                  </label>
+                                  <span style="font-size: 0.72rem; color: #64748b;">PDF, PNG, JPG (Maks. 5 MB)</span>
+                                </div>
+                                <p style="font-size: 0.725rem; color: #475569; margin: 0 0 0.5rem 0; line-height: 1.4;">
+                                  Lampirkan dokumen Surat Perintah Kerja (SPK) atau Surat Tugas dari unit kerja sebagai dasar legalitas perjalanan dinas.
+                                </p>
+
+                                <input type="file" id="fileSuratPerintah" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" onchange="window.handleSuratPerintahUpload(this)">
+
+                                <!-- Upload Dropzone -->
+                                <div id="dropzoneSuratPerintah" onclick="document.getElementById('fileSuratPerintah').click()" style="border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 0.85rem; text-align: center; background: #ffffff; cursor: pointer; transition: all 0.2s ease;">
+                                  <div style="font-size: 1.35rem; margin-bottom: 4px;">📑</div>
+                                  <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">Klik untuk memilih file Surat Perintah / Tugas</div>
+                                  <div style="font-size: 0.72rem; color: #64748b;">Format berkas: .PDF, .JPG, atau .PNG (Maks 5 MB)</div>
+                                </div>
+
+                                <!-- Uploaded File Preview Card -->
+                                <div id="previewSuratPerintahCard" style="display: none; background: #ffffff; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 0.65rem 0.85rem; align-items: center; justify-content: space-between;">
+                                  <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="font-size: 1.5rem;" id="previewSuratPerintahIcon">📄</div>
+                                    <div>
+                                      <div id="previewSuratPerintahName" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">surat_tugas.pdf</div>
+                                      <div id="previewSuratPerintahSize" style="font-size: 0.7rem; color: #16a34a; font-weight: 600;">145 KB • Berkas Terlampir</div>
+                                    </div>
+                                  </div>
+                                  <button type="button" onclick="window.removeSuratPerintahFile()" style="background: none; border: none; color: #dc2626; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    <span>Hapus</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
                             <!-- Lokasi / Tujuan Keluar -->
                             <div class="form-group" style="margin-bottom: 0;">
                               <div style="display: flex; justify-content: space-between; align-items: baseline;">
@@ -3201,6 +3282,14 @@
             <span class="summary-key">Estimasi Kembali</span>
             <span class="summary-val" id="sumReturnTime">-</span>
           </div>
+          <div class="summary-row" id="sumMembersRow" style="display: none;">
+            <span class="summary-key">Rekan Dinas</span>
+            <span class="summary-val" id="sumMembersVal" style="font-weight: 700; color: #2563eb;">-</span>
+          </div>
+          <div class="summary-row" id="sumSuratRow" style="display: none;">
+            <span class="summary-key">Surat Perintah</span>
+            <span class="summary-val" id="sumSuratVal" style="font-weight: 700; color: #059669;">-</span>
+          </div>
         </div>
 
         <p style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.5;">
@@ -3396,6 +3485,22 @@
             </div>
           </div>
 
+          <!-- Section 1b: Anggota Rombongan Dinas (Tampil jika Izin Dinas Bersama) -->
+          <div id="sectionGroupMembersDetail" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+              <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a); display: flex; align-items: center; gap: 6px;">
+                <span>👥</span>
+                <span>Rombongan Dinas Bersama</span>
+              </div>
+              <span id="badgeGroupMembersCount" style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;">
+                3 Karyawan
+              </span>
+            </div>
+            <div id="containerGroupMembersDetailList" style="display: flex; flex-direction: column; gap: 0.45rem;">
+              <!-- Dynamic members list -->
+            </div>
+          </div>
+
           <!-- Section 2: Informasi Izin (3 Columns Bento Box Identik Gambar 1) -->
           <div>
             <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-bottom: 0.65rem;">
@@ -3442,6 +3547,30 @@
             <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
               <div id="infoReason" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.</div>
               <button type="button" id="btnToggleReasonExpand" onclick="window.toggleDetailExpand('infoReason', this)" style="display: none; background: none; border: none; padding: 4px 0 0 0; color: #2563eb; font-size: 0.775rem; font-weight: 700; cursor: pointer;">Lihat selengkapnya ∨</button>
+            </div>
+          </div>
+
+          <!-- Section 4B: Dokumen Surat Perintah / Tugas Dinas (Tampil jika ada) -->
+          <div id="sectionSuratPerintahDetail" style="display: none;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary, #0f172a); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>📄</span>
+                <span>Dokumen Surat Perintah / Tugas Dinas</span>
+              </div>
+              <span style="font-size: 0.72rem; color: #059669; font-weight: 700; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 999px;">Terlampir</span>
+            </div>
+            <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.6rem;" id="detailSuratIcon">📑</span>
+                <div>
+                  <div id="detailSuratName" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary, #0f172a); max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">surat_tugas.pdf</div>
+                  <div id="detailSuratMeta" style="font-size: 0.72rem; color: #64748b;">145 KB • Dokumen Perintah Resmi Unit Kerja</div>
+                </div>
+              </div>
+              <button type="button" id="btnViewSuratPerintah" onclick="window.viewSuratPerintahDetail()" class="btn-figma-secondary" style="font-size: 0.775rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; background: #ffffff; border: 1px solid #cbd5e1; cursor: pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Lihat Dokumen</span>
+              </button>
             </div>
           </div>
 
@@ -3601,6 +3730,18 @@
             style="display: none; padding: 0.55rem 1.6rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; background: #0f3a68; border: 1.5px solid #0f3a68; color: #ffffff; cursor: pointer; box-shadow: 0 1px 3px rgba(15, 58, 104, 0.2);">
             Setujui
           </button>
+          <button type="button" class="btn-reject" id="btnDetailRejectArrival"
+            style="display: none; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: #ffffff; border: 1.5px solid #dc2626; color: #dc2626; cursor: pointer;">
+            ✕ Belum Tiba
+          </button>
+          <button type="button" class="btn-approve" id="btnDetailConfirmArrival"
+            style="display: none; padding: 0.5rem 1.25rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: #059669; border: 1.5px solid #059669; color: #ffffff; cursor: pointer; box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);">
+            ✓ Konfirmasi Tiba (Selesai)
+          </button>
+          <button type="button" class="btn-primary-action" id="btnDetailReportArrival"
+            style="display: none; background: #2563eb; border-color: #2563eb; font-size: 0.8rem; padding: 0.45rem 0.85rem; color: #ffffff;">
+            🏢 Lapor Tiba di Kantor
+          </button>
           <button type="button" class="btn-figma-primary" id="btnDetailOpenQR"
             style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
             Buka Tiket QR
@@ -3748,22 +3889,84 @@
         <button class="btn-close-modal" id="btnCloseCancelModal">✕</button>
       </div>
 
-      <div class="modal-body">
-        <p style="font-size: 0.9rem; color: var(--text-primary); margin: 0; line-height: 1.5;">
+      <div class="modal-body" id="modalCancelBody">
+        <p style="font-size: 0.9rem; color: var(--text-primary); margin: 0; line-height: 1.5;" id="cancelPromptText">
           Apakah Anda yakin ingin membatalkan tiket izin <strong id="cancelTicketId">-</strong>?
         </p>
+        <div id="cancelGroupDinasNotice" style="display: none; margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 0.85rem; font-size: 0.8rem; color: #1e40af; line-height: 1.45;">
+          <strong>Pengajuan Dinas Rombongan:</strong> Anda memiliki hak membatalkan keikutsertaan Anda saja, atau membatalkan seluruh izin rombongan jika Anda inisiator utama.
+        </div>
       </div>
 
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff;">
+      <div class="modal-footer" id="modalCancelFooter" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; flex-wrap: wrap;">
         <button type="button" class="btn-figma-secondary" id="btnAbortCancel"
           style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155;"
           onclick="document.getElementById('modalCancelRequest').classList.remove('open')">
           Tidak, Kembali
         </button>
+        <button type="button" class="btn-figma-secondary" id="btnCancelOnlyMe"
+          style="display: none; padding: 0.5rem 1.15rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: 1.5px solid #2563eb; background: #eff6ff; color: #1d4ed8;">
+          Batalkan untuk Saya Saja
+        </button>
         <button type="button" class="btn-emergency" id="btnConfirmCancelTicket"
-          style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700;"
-          onclick="window.confirmCancelTicket()">
+          style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700;">
           Ya, Batalkan Izin
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL 7: SIMULASI TAP IN KARTU AKSES GERBANG (PALANG OTOMATIS) ================= -->
+  <div class="modal-overlay" id="modalSimulasiTapIn" onclick="if(event.target === this) window.closeSimulasiTapInModal()">
+    <div class="modal-card" style="max-width: 540px; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.25);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 1.25rem 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59, 130, 246, 0.2); border: 1.5px solid rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            💳
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+              <span>Simulasi Tap In Gerbang Masuk</span>
+            </h3>
+            <p style="margin: 2px 0 0; font-size: 0.775rem; color: #94a3b8;">
+              Pos 1 Gerbang Utama • Sensor RFID Palang Otomatis
+            </p>
+          </div>
+        </div>
+        <button class="btn-close-modal" onclick="window.closeSimulasiTapInModal()" style="color: #94a3b8; font-size: 1.25rem; background: none; border: none; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem 1.5rem; background: #f8fafc;">
+        <!-- RFID Sensor Terminal Visual -->
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 1rem; text-align: center; margin-bottom: 1.15rem; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: #eff6ff; border: 2px solid #3b82f6; margin-bottom: 0.5rem; font-size: 1.75rem;">
+            📶
+          </div>
+          <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">Tempelkan Kartu Akses Anggota Rombongan</div>
+          <p style="font-size: 0.75rem; color: #64748b; margin: 4px auto 0; max-width: 420px; line-height: 1.45;">
+            Salah satu anggota rombongan dinas cukup menempelkan kartu aksesnya pada sensor gerbang untuk membuka palang dan <strong>mengunci tanggal & jam kepulangan secara instan</strong>.
+          </p>
+        </div>
+
+        <!-- Info Tiket Terkait -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase;">Pilih Kartu Akses Anggota:</span>
+          <span id="tapInTicketIdBadge" style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 6px;">TK-...</span>
+        </div>
+
+        <!-- List Kartu Akses Anggota Rombongan -->
+        <div id="tapInMembersCardList" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 250px; overflow-y: auto;">
+          <!-- Generated dynamically via JS -->
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 0.85rem 1.5rem; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.72rem; color: #64748b;">
+          💡 Jam kepulangan akan terkunci untuk mencegah keterlambatan
+        </span>
+        <button type="button" class="btn-figma-secondary" onclick="window.closeSimulasiTapInModal()" style="padding: 0.5rem 1.15rem; font-size: 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155;">
+          Batal
         </button>
       </div>
     </div>

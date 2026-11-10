@@ -80,7 +80,8 @@
     const tickets = window.ticketsList || [];
     const myNip = emp.nip || 'PK-2024-8841';
     return tickets.filter(t => (
-      t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841'))
+      t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')) ||
+      (Array.isArray(t.members) && t.members.some(m => m.nip === myNip))
     ));
   }
 
@@ -89,7 +90,8 @@
     const tickets = window.ticketsList || [];
     const myNip = emp.nip || 'PK-2024-8841';
     return tickets.filter(t => !t.deletedByKaryawan && (
-      t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841'))
+      t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')) ||
+      (Array.isArray(t.members) && t.members.some(m => m.nip === myNip))
     ));
   }
 
@@ -986,6 +988,10 @@
     const isEmergency = Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')) || t.status === 'Menunggu Otorisasi Darurat');
     const isEmergencyLocked = Boolean(isEmergency && (t.emergencyLocked || t.qrLocked || t.status === 'Menunggu Otorisasi Darurat'));
 
+    const myEmp = getActiveEmp();
+    const myNip = myEmp ? myEmp.nip : 'PK-2024-8841';
+    const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === myNip && m.status !== 'batal'));
+
     const col1Label = (isOutside && t.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && t.scanOutTime)
       ? formatDisplayDate(t.scanOutTime)
@@ -1023,6 +1029,17 @@
             </div>
           </div>
         `;
+      } else if (isTaggedMember) {
+        actionButtonsHtml = `
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; padding: 10px; font-size: 0.8rem; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenCancelSheet('${t.id}')">
+              <span>Batalkan Keikutsertaan Saya</span>
+            </button>
+          </div>
+          <div style="text-align: center; margin-top: 8px;">
+            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
+          </div>
+        `;
       } else {
         actionButtonsHtml = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
@@ -1049,9 +1066,24 @@
               <span>Detail Pengajuan</span>
             </button>
             <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenCancelSheet('${t.id}')">
-              <span>Batalkan Izin</span>
+              <span>${isTaggedMember ? 'Batal Ikut' : 'Batalkan Izin'}</span>
             </button>
           </div>
+        </div>
+      `;
+    } else if (t.status === 'Menunggu Verifikasi Atasan') {
+      actionButtonsHtml = `
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; margin-top: 12px; text-align: left;">
+          <div style="font-size: 0.775rem; font-weight: 800; color: #1e40af; display: flex; align-items: center; gap: 6px;">
+            <span>🏢</span>
+            <span>Menunggu Verifikasi Kehadiran Atasan</span>
+          </div>
+          <div style="font-size: 0.725rem; color: #1e3a8a; margin-top: 3px; line-height: 1.35;">
+            Laporan tiba di kantor telah dicatat pada jam <strong>${t.employeeReportedReturnTime || 'terkunci'}</strong>. Waktu kembali aman selagi menunggu verifikasi fisik oleh Atasan.
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 8px;">
+          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
         </div>
       `;
     } else if (isOutside) {
@@ -1080,9 +1112,17 @@
         `;
       }
 
+      const isDinas = (t.category === 'Dinas Kantor');
+      const laporTibaBtn = isDinas ? `
+        <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; width: 100%; margin-bottom: 6px;" onclick="if(typeof window.openSimulasiTapInModal==='function'){window.openSimulasiTapInModal('${t.id}');}else if(typeof window.reportArrivalAtOffice==='function'){window.reportArrivalAtOffice('${t.id}');}">
+          <span>💳 Simulasi Tap In Gerbang</span>
+        </button>
+      ` : '';
+
       if (isLateStatus) {
         actionButtonsHtml = `
           <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            ${laporTibaBtn}
             <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 800; min-height: 44px; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; width: 100%; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);" onclick="window.mobileExecuteTapIn('${t.id}')">
               <span>✓ Tap In Kartu Akses (Masuk)</span>
             </button>
@@ -1096,17 +1136,43 @@
         `;
       } else {
         actionButtonsHtml = `
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-            ${extButtonHtml}
-            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
-              <span>✓ Tap In Kartu Akses</span>
-            </button>
+          <div style="margin-top: 12px;">
+            ${laporTibaBtn}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              ${extButtonHtml}
+              <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center;" onclick="window.mobileExecuteTapIn('${t.id}')">
+                <span>✓ Tap In Masuk</span>
+              </button>
+            </div>
           </div>
           <div style="text-align: center; margin-top: 8px;">
             <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Detail Pengajuan</a>
           </div>
         `;
       }
+    }
+
+    let groupMembersHtml = '';
+    if (t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) {
+      const activeCount = (t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length;
+      groupMembersHtml = `
+        <div style="margin: 8px 0; padding: 8px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 0.7rem; font-weight: 700; color: #475569;">👥 Rombongan Dinas (${activeCount} Karyawan Aktif)</span>
+            <span style="font-size: 0.65rem; color: #2563eb; font-weight: 700;">QR Bersama</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${t.initiatorCancelled ? '#fee2e2' : '#dbeafe'}; color: ${t.initiatorCancelled ? '#dc2626' : '#1e40af'}; font-weight: 700; ${t.initiatorCancelled ? 'text-decoration: line-through;' : ''}">
+              ${escapeHtml(t.applicantName)} (Inisiator)
+            </span>
+            ${t.members.map(m => `
+              <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${m.status === 'batal' ? '#fee2e2' : '#f1f5f9'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; font-weight: 600; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
+                ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `;
     }
 
     return `
@@ -1124,6 +1190,8 @@
         <div style="font-size: 0.775rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
         <div class="mobile-clamp-2" style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 3px 0 2px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.destination || 'Area Cikampek').replace(/"/g, '&quot;')}">${t.destination || 'Area Cikampek'}</div>
         <div class="mobile-clamp-2" style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-style: normal; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.reason || 'Keperluan dinas kantor').replace(/"/g, '&quot;')}">"${t.reason || 'Keperluan dinas kantor'}"</div>
+
+        ${groupMembersHtml}
 
         <div class="mobile-ticket-grid-meta">
           <div>
@@ -1328,6 +1396,9 @@
       selectedApproverData = null; // Kosongkan saat membuat pengajuan baru
     }
 
+    window._selectedGroupMembersMobile = (prefillData && Array.isArray(prefillData.members)) ? [...prefillData.members] : [];
+    window._currentSuratPerintahMobile = (prefillData && prefillData.suratPerintah) ? { ...prefillData.suratPerintah } : null;
+
     const initialCat = prefillData?.category || '';
     const initialType = prefillData?.type || prefillData?.returnType || '';
     const initialDest = prefillData?.destination || '';
@@ -1420,6 +1491,53 @@
             </div>
           </div>
 
+          <!-- 2B. Anggota Rombongan Tim (Khusus Dinas Kantor) -->
+          <div class="mobile-form-group" id="mGroupDinasWrapper" style="display: ${initialCat === 'Dinas Kantor' || !initialCat ? 'block' : 'none'}; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="mobile-form-label" style="margin: 0; color: #0f172a; font-weight: 700;">Tambahkan Anggota Tim (Dinas Bersama)</label>
+              <span style="font-size: 0.675rem; color: #64748b;">Opsional (Maks. 5 Orang)</span>
+            </div>
+            <p style="font-size: 0.7rem; color: #64748b; margin: 0 0 8px 0; line-height: 1.35;">
+              Dapat menambahkan rekan kerja lintas departemen maupun lintas atasan.
+            </p>
+            <div style="position: relative;">
+              <div style="display: flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 4px 10px; gap: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="mInputSearchGroupMember" style="flex: 1; border: none; outline: none; font-size: 0.775rem; padding: 4px 0; background: transparent;" placeholder="Cari nama karyawan, NIP, jabatan..." autocomplete="off" oninput="window.mobileFilterGroupMembers(this.value)">
+              </div>
+              <div id="mMemberFloatingDropdown" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; z-index: 1000; padding: 4px;">
+                <div id="mMemberItemsList" style="display: flex; flex-direction: column; gap: 2px;"></div>
+              </div>
+            </div>
+            <div id="mListSelectedGroupMembers" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;"></div>
+          </div>
+
+          <!-- 2C. Unggah Surat Perintah / Surat Tugas (Khusus Dinas Kantor) -->
+          <div class="mobile-form-group" id="mSuratPerintahWrapper" style="display: ${initialCat === 'Dinas Kantor' || !initialCat ? 'block' : 'none'}; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px;">
+            <label class="mobile-form-label" style="margin: 0 0 4px 0; color: #0f172a; font-weight: 700;">
+              Unggah Surat Perintah / Surat Tugas Dinas
+            </label>
+            <p style="font-size: 0.7rem; color: #64748b; margin: 0 0 8px 0; line-height: 1.35;">
+              Lampirkan surat tugas resmi (PDF, JPG, PNG, maks 5 MB).
+            </p>
+            <div id="mDropzoneSuratPerintah" onclick="document.getElementById('mFileSuratPerintah').click()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px; border: 1.5px dashed #94a3b8; border-radius: 8px; background: #ffffff; cursor: pointer; text-align: center;">
+              <span style="font-size: 1.3rem; margin-bottom: 4px;">📎</span>
+              <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a;">Klik untuk Pilih Dokumen / Foto</span>
+              <span style="font-size: 0.675rem; color: #64748b;">PDF, JPG, PNG hingga 5 MB</span>
+              <input type="file" id="mFileSuratPerintah" accept=".pdf,image/png,image/jpeg" style="display: none;" onchange="window.mobileHandleSuratPerintahUpload(event)">
+            </div>
+            <div id="mPreviewSuratPerintahCard" style="display: none; align-items: center; justify-content: space-between; padding: 10px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; margin-top: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                <span style="font-size: 1.1rem;">📄</span>
+                <div style="min-width: 0;">
+                  <div id="mPreviewSuratPerintahName" style="font-size: 0.775rem; font-weight: 700; color: #065f46; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">Surat_Tugas.pdf</div>
+                  <div id="mPreviewSuratPerintahMeta" style="font-size: 0.675rem; color: #047857;">142 KB • Siap dikirim</div>
+                </div>
+              </div>
+              <button type="button" onclick="window.mobileRemoveSuratPerintahFile()" style="background: none; border: none; color: #dc2626; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 4px 6px;">Hapus</button>
+            </div>
+          </div>
+
           <!-- 3. Lokasi / Tujuan Keluar -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
             <label class="mobile-form-label">Lokasi / Tujuan Keluar <span class="req">*</span></label>
@@ -1488,6 +1606,9 @@
 
     backdrop.classList.add('open');
     sheet.classList.add('open');
+
+    if (typeof window.mobileRenderSelectedGroupMembers === 'function') window.mobileRenderSelectedGroupMembers();
+    if (typeof window.mobileRenderSuratPerintahPreview === 'function') window.mobileRenderSuratPerintahPreview();
   };
 
   // Open Edit Sheet
@@ -1525,7 +1646,9 @@
       destination: t.destination,
       reason: t.reason,
       plannedExit: t.plannedExit,
-      estimatedReturn: t.estimatedReturn
+      estimatedReturn: t.estimatedReturn,
+      members: t.members,
+      suratPerintah: t.suratPerintah
     });
   };
 
@@ -1540,9 +1663,11 @@
     if (!t) return;
 
     const emp = getActiveEmp();
+    const isInitiator = t.applicantNip === emp.nip || (!t.applicantNip && emp.nip === 'PK-2024-8841');
+    const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === emp.nip && m.status !== 'batal'));
 
-    // Guard: Validasi Kepemilikan Tiket (Hanya pemohon yang berhak membatalkan)
-    if (t.applicantNip && emp.nip && t.applicantNip !== emp.nip) {
+    // Guard: Validasi Kepemilikan Tiket (Hanya pemohon atau anggota rombongan yang berhak membatalkan)
+    if (!isInitiator && !isTaggedMember) {
       if (typeof window.showToast === 'function') {
         window.showToast('Gagal: Anda tidak berhak membatalkan permohonan izin karyawan lain!', 'danger');
       }
@@ -1564,6 +1689,87 @@
       return;
     }
 
+    let promptHtml = '';
+    let buttonsHtml = '';
+
+    if (t.isGroupDinas) {
+      if (isTaggedMember) {
+        promptHtml = `
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Batalkan Keikutsertaan Dinas Bersama</div>
+            <div style="font-size: 0.825rem; color: #475569; line-height: 1.45;">
+              Apakah Anda yakin ingin membatalkan keikutsertaan Anda dalam tiket rombongan dinas <strong>${escapeHtml(t.id)}</strong>? Anggota tim lain dan inisiator tetap dapat melanjutkan dinas.
+            </div>
+          </div>
+        `;
+        buttonsHtml = `
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
+              <span>Tidak, Kembali</span>
+            </button>
+            <button type="button" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet(); if(typeof window.cancelMemberParticipation==='function') window.cancelMemberParticipation('${escapeHtml(t.id)}', '${emp.nip}')">
+              <span>Batal Ikut Saja</span>
+            </button>
+          </div>
+        `;
+      } else if (isInitiator) {
+        const activeMembers = (t.members || []).filter(m => m.status !== 'batal');
+        promptHtml = `
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af; margin-bottom: 4px;">Inisiator Dinas Rombongan</div>
+            <div style="font-size: 0.825rem; color: #1e3a8a; line-height: 1.45;">
+              Anda adalah <strong>Inisiator Pengajuan</strong> rombongan dinas tiket <strong>${escapeHtml(t.id)}</strong>. Pilih opsi pembatalan di bawah:
+            </div>
+          </div>
+        `;
+        if (activeMembers.length > 0) {
+          buttonsHtml = `
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
+              <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #2563eb; background: #eff6ff; color: #1d4ed8; border-radius: 8px; cursor: pointer; text-align: center;" onclick="window.mobileCloseSheet(); if(typeof window.cancelGroupForInitiatorOnly==='function') window.cancelGroupForInitiatorOnly('${escapeHtml(t.id)}')">
+                <span>Batalkan untuk Saya Saja</span>
+              </button>
+              <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer; text-align: center;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
+                <span>Batalkan Seluruh Pengajuan Tim</span>
+              </button>
+              <button type="button" class="mobile-btn-secondary" style="padding: 9px; font-weight: 600; border: 1px solid #cbd5e1; background: #ffffff; color: #64748b; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
+                <span>Kembali</span>
+              </button>
+            </div>
+          `;
+        } else {
+          buttonsHtml = `
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
+                <span>Tidak, Kembali</span>
+              </button>
+              <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
+                <span>Ya, Batalkan Izin</span>
+              </button>
+            </div>
+          `;
+        }
+      }
+    } else {
+      promptHtml = `
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Konfirmasi Pembatalan</div>
+          <div style="font-size: 0.825rem; color: #475569; line-height: 1.45;">
+            Apakah Anda yakin ingin membatalkan permohonan tiket izin <strong>${escapeHtml(t.id)}</strong> (${escapeHtml(t.category || 'Izin')} ke ${escapeHtml(t.destination || '-')})?
+          </div>
+        </div>
+      `;
+      buttonsHtml = `
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
+            <span>Tidak, Kembali</span>
+          </button>
+          <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
+            <span>Ya, Batalkan Izin</span>
+          </button>
+        </div>
+      `;
+    }
+
     sheet.innerHTML = `
       <div class="mobile-sheet-handle-bar"></div>
       <div class="mobile-sheet-header" style="border-bottom: 1px solid #fee2e2;">
@@ -1575,21 +1781,8 @@
       </div>
 
       <div class="mobile-sheet-body">
-        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
-          <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Konfirmasi Pembatalan</div>
-          <div style="font-size: 0.825rem; color: #475569; line-height: 1.45;">
-            Apakah Anda yakin ingin membatalkan permohonan tiket izin <strong>${escapeHtml(t.id)}</strong> (${escapeHtml(t.category || 'Izin')} ke ${escapeHtml(t.destination || '-')})?
-          </div>
-        </div>
-
-        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
-            <span>Tidak, Kembali</span>
-          </button>
-          <button type="button" id="mBtnConfirmCancel" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer;" onclick="window.mobileConfirmCancelTicket('${escapeHtml(t.id)}')">
-            <span>Ya, Batalkan Izin</span>
-          </button>
-        </div>
+        ${promptHtml}
+        ${buttonsHtml}
       </div>
     `;
 
@@ -1862,12 +2055,168 @@
     const maxHourStr = (now.getDay() === 5) ? '16:30' : '16:00';
     const todayEnd = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${maxHourStr}`;
 
+    const groupWrap = document.getElementById('mGroupDinasWrapper');
+    const suratWrap = document.getElementById('mSuratPerintahWrapper');
+
     if (val === 'Urusan Pribadi') {
       if (exitInput) exitInput.max = todayEnd;
       if (retInput) retInput.max = todayEnd;
+      if (groupWrap) groupWrap.style.display = 'none';
+      if (suratWrap) suratWrap.style.display = 'none';
+      window._selectedGroupMembersMobile = [];
+      window._currentSuratPerintahMobile = null;
     } else {
       if (exitInput) exitInput.removeAttribute('max');
       if (retInput) retInput.removeAttribute('max');
+      if (groupWrap) groupWrap.style.display = 'block';
+      if (suratWrap) suratWrap.style.display = 'block';
+    }
+    if (typeof window.mobileRenderSelectedGroupMembers === 'function') window.mobileRenderSelectedGroupMembers();
+    if (typeof window.mobileRenderSuratPerintahPreview === 'function') window.mobileRenderSuratPerintahPreview();
+  };
+
+  window.mobileFilterGroupMembers = function(query) {
+    const dropdown = document.getElementById('mMemberFloatingDropdown');
+    const listContainer = document.getElementById('mMemberItemsList');
+    if (!dropdown || !listContainer) return;
+
+    const q = (query || '').toLowerCase().trim();
+    if (!q) {
+      dropdown.style.display = 'none';
+      return;
+    }
+
+    const currentEmp = getActiveEmp();
+    const myNip = currentEmp ? currentEmp.nip : 'PK-2024-8841';
+    const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+
+    const selectedNips = (window._selectedGroupMembersMobile || []).map(m => m.nip);
+    selectedNips.push(myNip);
+
+    const candidates = allUsers.filter(u => {
+      if (selectedNips.includes(u.nip)) return false;
+      if (u.roleKey && u.roleKey.includes('admin')) return false;
+      if (u.role && u.role.includes('Administrator')) return false;
+      const name = (u.name || '').toLowerCase();
+      const nip = (u.nip || '').toLowerCase();
+      const dept = (u.department || '').toLowerCase();
+      const title = (u.title || u.role || '').toLowerCase();
+      const sup = (u.directSupervisor || u.supervisor || '').toLowerCase();
+      return name.includes(q) || nip.includes(q) || dept.includes(q) || title.includes(q) || sup.includes(q);
+    });
+
+    if (candidates.length === 0) {
+      listContainer.innerHTML = `<div style="padding: 10px; font-size: 0.75rem; color: #64748b; text-align: center;">Karyawan "${query}" tidak ditemukan</div>`;
+      dropdown.style.display = 'block';
+      return;
+    }
+
+    listContainer.innerHTML = candidates.slice(0, 8).map(c => `
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;" onclick="window.mobileAddGroupMemberByNip('${c.nip}')">
+        <div style="min-width: 0;">
+          <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.name}</div>
+          <div style="font-size: 0.675rem; color: #64748b;">${c.nip} • ${c.department}</div>
+          <div style="font-size: 0.65rem; color: #2563eb;">Atasan Langsung: ${c.directSupervisor || c.supervisor || 'Ir. Hendra Gunawan, M.T.'}</div>
+        </div>
+        <span style="font-size: 0.7rem; font-weight: 700; color: #059669; padding: 4px 8px; background: #ecfdf5; border-radius: 6px; white-space: nowrap;">+ Tambah</span>
+      </div>
+    `).join('');
+    dropdown.style.display = 'block';
+  };
+
+  window.mobileAddGroupMemberByNip = function(nip) {
+    if (!nip) return;
+    if (!window._selectedGroupMembersMobile) window._selectedGroupMembersMobile = [];
+    if (window._selectedGroupMembersMobile.length >= 5) {
+      if (typeof window.showToast === 'function') window.showToast('Maksimal anggota rombongan dinas adalah 5 orang.', 'warning');
+      return;
+    }
+    const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+    const user = allUsers.find(u => u.nip === nip);
+    if (!user) return;
+    if (window._selectedGroupMembersMobile.some(m => m.nip === nip)) return;
+
+    window._selectedGroupMembersMobile.push({
+      nip: user.nip,
+      name: user.name,
+      title: user.title || user.role || 'Karyawan',
+      department: user.department || 'Departemen Rekayasa & Pemeliharaan',
+      supervisor: user.directSupervisor || user.supervisor || 'Ir. Hendra Gunawan, M.T.'
+    });
+
+    const inputSearch = document.getElementById('mInputSearchGroupMember');
+    if (inputSearch) inputSearch.value = '';
+    const dropdown = document.getElementById('mMemberFloatingDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+
+    window.mobileRenderSelectedGroupMembers();
+  };
+
+  window.mobileRemoveGroupMemberByNip = function(nip) {
+    if (!window._selectedGroupMembersMobile) return;
+    window._selectedGroupMembersMobile = window._selectedGroupMembersMobile.filter(m => m.nip !== nip);
+    window.mobileRenderSelectedGroupMembers();
+  };
+
+  window.mobileRenderSelectedGroupMembers = function() {
+    const container = document.getElementById('mListSelectedGroupMembers');
+    if (!container) return;
+    const members = window._selectedGroupMembersMobile || [];
+    if (members.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = members.map(m => `
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 10px; font-size: 0.725rem; color: #1e40af;">
+        <span>👤 <strong>${m.name.split(',')[0]}</strong> (${m.nip})</span>
+        <span onclick="window.mobileRemoveGroupMemberByNip('${m.nip}')" style="cursor: pointer; font-weight: 800; color: #dc2626; margin-left: 2px;">✕</span>
+      </div>
+    `).join('');
+  };
+
+  window.mobileHandleSuratPerintahUpload = function(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      if (typeof window.showToast === 'function') window.showToast('Ukuran file maksimal adalah 5 MB.', 'danger');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      window._currentSuratPerintahMobile = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        dataUrl: evt.target.result,
+        uploadedAt: new Date().toISOString()
+      };
+      window.mobileRenderSuratPerintahPreview();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.mobileRemoveSuratPerintahFile = function() {
+    window._currentSuratPerintahMobile = null;
+    const input = document.getElementById('mFileSuratPerintah');
+    if (input) input.value = '';
+    window.mobileRenderSuratPerintahPreview();
+  };
+
+  window.mobileRenderSuratPerintahPreview = function() {
+    const dropzone = document.getElementById('mDropzoneSuratPerintah');
+    const preview = document.getElementById('mPreviewSuratPerintahCard');
+    const nameEl = document.getElementById('mPreviewSuratPerintahName');
+    const metaEl = document.getElementById('mPreviewSuratPerintahMeta');
+    const data = window._currentSuratPerintahMobile;
+    if (!dropzone || !preview) return;
+    if (data) {
+      dropzone.style.display = 'none';
+      preview.style.display = 'flex';
+      if (nameEl) nameEl.textContent = data.name;
+      if (metaEl) metaEl.textContent = `${Math.round(data.size / 1024)} KB • Siap dikirim`;
+    } else {
+      dropzone.style.display = 'flex';
+      preview.style.display = 'none';
     }
   };
 
@@ -2051,7 +2400,16 @@
       emergencyMethod,
       isEmergency: !!isEmergency,
       isEditing: Boolean(window.editingTicketId),
-      editingTicketId: window.editingTicketId
+      editingTicketId: window.editingTicketId,
+      members: (category === 'Dinas Kantor' && Array.isArray(window._selectedGroupMembersMobile)) ? [...window._selectedGroupMembersMobile] : [],
+      suratPerintah: (category === 'Dinas Kantor' && window._currentSuratPerintahMobile)
+        ? { ...window._currentSuratPerintahMobile }
+        : (category === 'Dinas Kantor' ? {
+            name: 'Surat_Perintah_Tugas_Dinas.pdf',
+            size: 142500,
+            type: 'application/pdf',
+            uploadedAt: new Date().toISOString()
+          } : null)
     };
 
     // Open Step 2: Konfirmasi Ringkasan Pengajuan
@@ -2098,6 +2456,18 @@
             <span class="mobile-summary-label">Kategori Keperluan</span>
             <span class="mobile-summary-value">${data.category}</span>
           </div>
+          ${(data.members && data.members.length > 0) ? `
+            <div class="mobile-summary-row">
+              <span class="mobile-summary-label">Rekan Rombongan</span>
+              <span class="mobile-summary-value" style="color: #2563eb; font-weight: 700;">${data.members.map(m => escapeHtml(m.name)).join(', ')} (${data.members.length} Orang)</span>
+            </div>
+          ` : ''}
+          ${data.suratPerintah ? `
+            <div class="mobile-summary-row">
+              <span class="mobile-summary-label">Surat Perintah</span>
+              <span class="mobile-summary-value" style="color: #059669; font-weight: 700;">📄 ${escapeHtml(data.suratPerintah.name)}</span>
+            </div>
+          ` : ''}
           <div class="mobile-summary-row">
             <span class="mobile-summary-label">Tipe Kepulangan</span>
             <span class="mobile-summary-value">${data.returnType}</span>
@@ -2341,6 +2711,25 @@
         ]
       };
 
+      const isGroupDinas = data.category === 'Dinas Kantor' && Array.isArray(data.members) && data.members.length > 0;
+      if (isGroupDinas) {
+        newTicket.isGroupDinas = true;
+        newTicket.initiatorNip = emp.nip;
+        newTicket.initiatorName = emp.name;
+        newTicket.members = data.members.map(m => ({
+          nip: m.nip,
+          name: m.name,
+          department: m.department || newTicket.department,
+          status: 'aktif'
+        }));
+        const memberNames = newTicket.members.map(m => m.name).join(', ');
+        newTicket.timeline[0].desc += ` (Izin Dinas Bersama: ${newTicket.applicantName} mengikutsertakan ${memberNames}).`;
+      }
+
+      if (data.suratPerintah) {
+        newTicket.suratPerintah = data.suratPerintah;
+      }
+
       tickets.unshift(newTicket);
 
       if (typeof window.createNotification === 'function') {
@@ -2368,8 +2757,27 @@
             priority: 'normal',
             eventId: `new_sub_${newTicket.id}`
           });
+
+          if (isGroupDinas && Array.isArray(newTicket.members)) {
+            newTicket.members.forEach(m => {
+              window.createNotification({
+                recipientRole: 'karyawan',
+                recipientNip: m.nip,
+                recipientName: m.name,
+                actorSource: 'karyawan',
+                type: 'pengajuan_dinas_bersama',
+                title: 'Izin Dinas Kantor Bersama',
+                message: `Anda ditambahkan oleh ${newTicket.applicantName} ke pengajuan izin Dinas Kantor (${newTicket.destination}). Izin ini aktif bersama rombongan tim.`,
+                ticketId: newTicket.id,
+                priority: 'normal',
+                eventId: `grp_notif_m_${newTicket.id}_${m.nip}`
+              });
+            });
+          }
         }
       }
+
+      window._selectedGroupMembersMobile = [];
 
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(tickets);
@@ -2719,6 +3127,7 @@
     const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
     const isOwner = (window.currentActor === 'karyawan' || window.currentActor === 'karyawan2' || !window.currentActor) &&
       (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841'));
+    const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === myActorNip && m.status !== 'batal'));
 
     // Push state for Android / hardware back gesture
     try {
@@ -2787,6 +3196,51 @@
             </div>
           </div>
 
+          ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+            <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;">
+                👥 Rombongan Tim Dinas (${(t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length} Orang)
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+                  <div style="font-size: 0.75rem; color: #0f172a;">
+                    <strong>${escapeHtml(t.applicantName || 'Inisiator')}</strong> (${t.applicantNip || 'Inisiator'})
+                  </div>
+                  <span style="font-size: 0.65rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Inisiator</span>
+                </div>
+                ${t.members.map(m => `
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: ${m.status === 'batal' ? '#fef2f2' : '#f8fafc'}; border: 1px solid ${m.status === 'batal' ? '#fecaca' : '#e2e8f0'}; border-radius: 6px;">
+                    <div style="font-size: 0.75rem; color: ${m.status === 'batal' ? '#991b1b' : '#0f172a'};">
+                      <strong>${escapeHtml(m.name)}</strong> (${m.nip})
+                    </div>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: ${m.status === 'batal' ? '#dc2626' : '#059669'}; background: ${m.status === 'batal' ? '#fee2e2' : '#ecfdf5'}; padding: 2px 6px; border-radius: 4px;">${m.status === 'batal' ? 'Batal' : 'Aktif'}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${t.suratPerintah ? `
+            <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #f0fdf4; border: 1px solid #bbf7d0;">
+              <div style="font-size: 0.7rem; color: #166534; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;">
+                📄 Surat Perintah / Surat Tugas
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="min-width: 0;">
+                  <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+                    ${escapeHtml(t.suratPerintah.name || 'Surat_Perintah.pdf')}
+                  </div>
+                  <div style="font-size: 0.675rem; color: #15803d;">
+                    ${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi
+                  </div>
+                </div>
+                <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #86efac; color: #166534; font-weight: 700; cursor: pointer;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
+                  Lihat File
+                </button>
+              </div>
+            </div>
+          ` : ''}
+
           ${t.approverNote ? `
            
           ` : ''}
@@ -2840,8 +3294,8 @@
                 Ajukan Perpanjangan Waktu
               </button>
             `}
-            <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}')">
-              ✓ Tap In Kartu Akses (Masuk)
+            <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
+              💳 Simulasi Tap In Gerbang Masuk
             </button>
           ` : ''}
           ${isFinished ? `
@@ -2851,6 +3305,29 @@
             <button type="button" class="mobile-btn-danger" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; font-weight: 700; min-height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.825rem; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25); width: 100%; margin-top: 4px;" onclick="window.mobileDeleteTicketItem('${t.id}', 'karyawan')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
               <span>Hapus Riwayat</span>
+            </button>
+          ` : ''}
+        </div>
+        ` : ''}
+
+        ${(!isOwner && isTaggedMember) ? `
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
+          ${(isPending || (isApproved && !isOutside)) ? `
+            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #9f1239; line-height: 1.4;">
+              💡 Anda terdaftar sebagai anggota rombongan dinas. Anda dapat membatalkan keikutsertaan Anda secara mandiri tanpa membatalkan izin rekan tim lainnya.
+            </div>
+            <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
+              Batalkan Keikutsertaan Saya
+            </button>
+          ` : ''}
+          ${isApproved && !isOutside ? `
+            <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
+              Tampilkan QR Code Rombongan
+            </button>
+          ` : ''}
+          ${isOutside ? `
+            <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
+              💳 Simulasi Tap In Gerbang Masuk
             </button>
           ` : ''}
         </div>

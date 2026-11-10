@@ -94,6 +94,457 @@ function getCurrentEmployeeActor() {
     approverName: 'Ir. Hendra Gunawan, M.T.'
   };
 }
+
+/**
+ * ===================================================================
+ * LOGIKA DINAS KANTOR BERSAMA (MULTI-ANGGOTA) & LAPOR TIBA DI KANTOR
+ * ===================================================================
+ */
+window._selectedGroupMembers = [];
+window._currentSuratPerintah = null;
+
+/**
+ * Inisialisasi Pencarian Anggota Rombongan Dinas (Searchable Combobox)
+ */
+window.initGroupDinasMembersForm = function() {
+  const currentEmp = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841', department: 'Departemen Rekayasa & Pemeliharaan' };
+  const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+
+  // Filter kandidat: SEMUA karyawan aktif selain akun inisiator sendiri (bisa lintas departemen & atasan)
+  const candidates = allUsers.filter(u => 
+    u.status === 'Aktif' && 
+    u.nip !== currentEmp.nip && 
+    (u.roleKey === 'karyawan' || u.roleKey === 'karyawan2' || (u.role && u.role.toLowerCase().includes('karyawan')) || (u.department && !u.roleKey?.includes('approver') && !u.roleKey?.includes('admin') && !u.roleKey?.includes('security')))
+  );
+
+  window._groupMemberCandidates = candidates;
+
+  // Pasang event listener untuk search input Desktop
+  const inputSearch = document.getElementById('inputSearchGroupMember');
+  const dropdown = document.getElementById('memberFloatingDropdown');
+  if (inputSearch && !inputSearch._hasSearchListener) {
+    inputSearch._hasSearchListener = true;
+    inputSearch.addEventListener('input', (e) => {
+      window.filterGroupMemberSearch(e.target.value);
+    });
+    inputSearch.addEventListener('focus', () => {
+      window.filterGroupMemberSearch(inputSearch.value || '');
+    });
+  }
+
+  // 2. Dropdown Mobile (jika menggunakan select)
+  const mSelectAdd = document.getElementById('mSelectAddGroupMember');
+  if (mSelectAdd) {
+    mSelectAdd.innerHTML = '<option value="">-- Pilih rekan satu tim --</option>' +
+      candidates
+        .filter(c => !window._selectedGroupMembers.some(m => m.nip === c.nip))
+        .map(c => `<option value="${c.nip}">${c.name} (${c.nip}) — Atasan: ${(c.directSupervisor || c.supervisor || 'Atasan').split(',')[0]}</option>`)
+        .join('');
+  }
+
+  window.renderSelectedGroupMembers();
+};
+
+/**
+ * Filter dan Render Dropdown Hasil Pencarian Anggota Karyawan
+ */
+window.filterGroupMemberSearch = function(query) {
+  const dropdown = document.getElementById('memberFloatingDropdown');
+  const listEl = document.getElementById('memberItemsList');
+  const emptyEl = document.getElementById('memberEmptyState');
+  const emptyTerm = document.getElementById('emptyMemberSearchTerm');
+  if (!dropdown || !listEl) return;
+
+  const candidates = (window._groupMemberCandidates || []).filter(c => 
+    !window._selectedGroupMembers.some(m => m.nip === c.nip)
+  );
+
+  const cleanQuery = String(query || '').trim();
+  const filtered = candidates.filter(c => {
+    if (!cleanQuery) return true; // Tampilkan semua saran jika query kosong
+    return (typeof window.matchSearchTokens === 'function')
+      ? window.matchSearchTokens(cleanQuery, c.name, c.nip, c.department, c.title, c.directSupervisor || c.supervisor)
+      : (c.name.toLowerCase().includes(cleanQuery.toLowerCase()) || c.nip.toLowerCase().includes(cleanQuery.toLowerCase()) || (c.department && c.department.toLowerCase().includes(cleanQuery.toLowerCase())));
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '';
+    if (emptyEl) {
+      emptyEl.style.display = 'block';
+      if (emptyTerm) emptyTerm.textContent = cleanQuery;
+    }
+  } else {
+    if (emptyEl) emptyEl.style.display = 'none';
+    listEl.innerHTML = filtered.map(c => {
+      const initials = (c.name || 'KY').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+      const sup = (c.directSupervisor || c.supervisor || 'Atasan Langsung');
+      return `
+        <div class="member-search-item" onclick="window.addGroupMemberByNip('${c.nip}')" style="display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; border: 1px solid #bae6fd;">
+              ${initials}
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a;">${c.name} <span style="font-weight: 500; color: #64748b; font-size: 0.72rem;">(${c.nip})</span></div>
+              <div style="font-size: 0.7rem; color: #64748b;">${c.department || 'Departemen Rekayasa & Pemeliharaan'} • ${c.title || 'Karyawan'}</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 0.68rem; font-weight: 700; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 999px; display: inline-block;">
+              Atasan: ${sup.split(',')[0]}
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  dropdown.style.display = 'block';
+};
+
+// Tutup floating dropdown jika user klik di luar area combobox
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('wrapSearchMember');
+  const dropdown = document.getElementById('memberFloatingDropdown');
+  if (dropdown && wrap && !wrap.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
+
+window.addGroupMemberByNip = function(nip) {
+  if (!nip) return;
+  if (window._selectedGroupMembers.length >= 5) {
+    if (typeof window.showToast === 'function') window.showToast('Maksimal anggota rombongan dinas adalah 5 orang.', 'warning');
+    return;
+  }
+  const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+  const user = allUsers.find(u => u.nip === nip);
+  if (!user) return;
+
+  if (window._selectedGroupMembers.some(m => m.nip === nip)) return;
+
+  window._selectedGroupMembers.push({
+    nip: user.nip,
+    name: user.name,
+    title: user.title || user.role || 'Karyawan',
+    department: user.department || 'Departemen Rekayasa & Pemeliharaan',
+    supervisor: user.directSupervisor || user.supervisor || 'Ir. Hendra Gunawan, M.T.'
+  });
+
+  const inputSearch = document.getElementById('inputSearchGroupMember');
+  if (inputSearch) inputSearch.value = '';
+  const dropdown = document.getElementById('memberFloatingDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+
+  window.initGroupDinasMembersForm();
+};
+
+window.removeGroupMemberByNip = function(nip) {
+  window._selectedGroupMembers = window._selectedGroupMembers.filter(m => m.nip !== nip);
+  window.initGroupDinasMembersForm();
+};
+
+window.renderSelectedGroupMembers = function() {
+  const container = document.getElementById('listSelectedGroupMembers');
+  const mContainer = document.getElementById('mListSelectedGroupMembers');
+
+  const html = window._selectedGroupMembers.map(m => `
+    <span style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
+      <span>👤 ${m.name}</span>
+      <span style="font-size: 0.68rem; color: #3b82f6; font-weight: 600;">(${(m.supervisor || '').split(',')[0]})</span>
+      <button type="button" onclick="window.removeGroupMemberByNip('${m.nip}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 11px; padding: 0 2px; line-height: 1; font-weight: 800;" title="Hapus ${m.name}">✕</button>
+    </span>
+  `).join('');
+
+  if (container) {
+    container.innerHTML = html || '<span style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">Belum ada anggota tim yang ditambahkan. Pengajuan ini bersifat perorangan jika kosong.</span>';
+  }
+  if (mContainer) {
+    mContainer.innerHTML = html || '<span style="font-size: 0.7rem; color: #94a3b8; font-style: italic;">Belum ada rekan tim yang ditambahkan.</span>';
+  }
+};
+
+/**
+ * Handler Upload Dokumen Surat Tugas / Perintah Dinas
+ */
+window.handleSuratPerintahUpload = function(inputEl) {
+  if (!inputEl || !inputEl.files || inputEl.files.length === 0) return;
+  const file = inputEl.files[0];
+  if (file.size > 5 * 1024 * 1024) {
+    if (typeof window.showToast === 'function') window.showToast('Ukuran berkas melebihi batas 5 MB.', 'error');
+    inputEl.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    window._currentSuratPerintah = {
+      name: file.name,
+      size: file.size,
+      type: file.type || 'application/pdf',
+      dataUrl: e.target.result,
+      uploadedAt: new Date().toISOString()
+    };
+
+    const dropzone = document.getElementById('dropzoneSuratPerintah');
+    const preview = document.getElementById('previewSuratPerintahCard');
+    const nameEl = document.getElementById('previewSuratPerintahName');
+    const sizeEl = document.getElementById('previewSuratPerintahSize');
+    const iconEl = document.getElementById('previewSuratPerintahIcon');
+
+    if (dropzone) dropzone.style.display = 'none';
+    if (preview) preview.style.display = 'flex';
+    if (nameEl) nameEl.textContent = file.name;
+    if (sizeEl) sizeEl.textContent = `${Math.round(file.size / 1024)} KB • Berkas Terlampir`;
+    if (iconEl) iconEl.textContent = file.type.includes('image') ? '🖼️' : '📄';
+
+    if (typeof window.showToast === 'function') window.showToast('✅ Berkas Surat Perintah berhasil dilampirkan.', 'success');
+  };
+  reader.readAsDataURL(file);
+};
+
+window.removeSuratPerintahFile = function() {
+  window._currentSuratPerintah = null;
+  const inputEl = document.getElementById('fileSuratPerintah');
+  if (inputEl) inputEl.value = '';
+  const dropzone = document.getElementById('dropzoneSuratPerintah');
+  const preview = document.getElementById('previewSuratPerintahCard');
+  if (dropzone) dropzone.style.display = 'block';
+  if (preview) preview.style.display = 'none';
+};
+
+/**
+ * Modal Simulasi Tap In Kartu Akses Gerbang (Palang Otomatis)
+ */
+window.openSimulasiTapInModal = function(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+  window.currentTapInTicketId = ticketId;
+
+  const modal = document.getElementById('modalSimulasiTapIn');
+  const badge = document.getElementById('tapInTicketIdBadge');
+  const listEl = document.getElementById('tapInMembersCardList');
+  if (badge) badge.textContent = t.id;
+
+  if (listEl) {
+    const eligibleMembers = [];
+    if (!t.initiatorCancelled) {
+      eligibleMembers.push({
+        name: t.applicantName,
+        nip: t.applicantNip || 'PK-2024-8841',
+        role: 'Inisiator / Pemohon Utama'
+      });
+    }
+    if (t.isGroupDinas && Array.isArray(t.members)) {
+      t.members.filter(m => m.status !== 'batal').forEach(m => {
+        eligibleMembers.push({
+          name: m.name,
+          nip: m.nip,
+          role: 'Anggota Rombongan'
+        });
+      });
+    }
+
+    listEl.innerHTML = eligibleMembers.map(m => `
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 10px; transition: border-color 0.2s;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+            💳
+          </div>
+          <div>
+            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a;">${m.name}</div>
+            <div style="font-size: 0.72rem; color: #64748b;">NIP: ${m.nip} • <span style="color: #0369a1; font-weight: 700;">${m.role}</span></div>
+          </div>
+        </div>
+        <button type="button" class="btn-figma-primary" onclick="window.executeTapInGate('${t.id}', '${m.nip}', '${m.name.replace(/'/g, "\\'")}')" style="padding: 0.45rem 0.95rem; font-size: 0.775rem; font-weight: 700; background: #2563eb; border-color: #2563eb; color: #ffffff; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <span>📶 Tap Kartu</span>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  if (modal) modal.classList.add('open');
+};
+
+window.closeSimulasiTapInModal = function() {
+  const modal = document.getElementById('modalSimulasiTapIn');
+  if (modal) modal.classList.remove('open');
+  window.currentTapInTicketId = null;
+};
+
+window.executeTapInGate = function(ticketId, memberNip, memberName) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+  // KUNCI TANGGAL & JAM KEPULANGAN
+  t.status = 'Menunggu Verifikasi Atasan';
+  t.tapInTime = nowFormatted;
+  t.tapInMember = memberName;
+  t.tapInNip = memberNip;
+  t.arrivalReportedTime = nowFormatted;
+  t.timeFrozen = true;
+
+  if (!t.timeline) t.timeline = [];
+  t.timeline.push({
+    event: 'Tap In Gerbang Masuk',
+    time: nowFormatted,
+    by: `${memberName} (${memberNip})`,
+    desc: `Tap In kartu akses di Pos 1 Gerbang Utama oleh ${memberName}. Jam kepulangan terkunci pada ${nowFormatted}. Menunggu verifikasi kehadiran fisik oleh Atasan.`
+  });
+
+  window.saveTickets(ticketsList);
+
+  // Kirim Notifikasi ke Atasan Peninjau
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'approver',
+      recipientNip: t.approverNip || 'PK-2015-1002',
+      recipientName: t.approverName || 'Ir. Hendra Gunawan, M.T.',
+      actorSource: 'karyawan',
+      type: 'tap_in_arrival',
+      title: 'Dinas Kantor Melakukan Tap In',
+      message: `Dinas kantor (#${t.id} - ${t.applicantName} & tim) baru saja melakukan Tap In di gerbang masuk. Periksa anggota dan tekan [ Konfirmasi Kepulangan ] jika mereka benar-benar sudah kembali di ruangan.`,
+      ticketId: t.id,
+      priority: 'urgent',
+      eventId: `tap_in_${t.id}`
+    });
+  }
+
+  window.closeSimulasiTapInModal();
+  if (typeof window.showToast === 'function') {
+    window.showToast(`✅ Akses Diterima! Kartu ${memberName} terverifikasi. Jam kepulangan terkunci.`, 'success');
+  }
+
+  // Render ulang views
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+};
+
+window.reportArrivalAtOffice = function(ticketId) {
+  window.openSimulasiTapInModal(ticketId);
+};
+
+window.viewSuratPerintahDetail = function() {
+  const ticketId = window.currentDetailTicketId;
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t || !t.suratPerintah) {
+    if (typeof window.showToast === 'function') window.showToast('Dokumen surat perintah tidak ditemukan.', 'warning');
+    return;
+  }
+  if (t.suratPerintah.dataUrl) {
+    const w = window.open('');
+    if (w) {
+      if (t.suratPerintah.type.includes('image')) {
+        w.document.write(`<title>${t.suratPerintah.name}</title><body style="margin:0; background:#0f172a; display:flex; justify-content:center; align-items:center; min-height:100vh;"><img src="${t.suratPerintah.dataUrl}" style="max-width:90%; max-height:90vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5);"></body>`);
+      } else {
+        w.document.write(`<title>${t.suratPerintah.name}</title><body style="margin:0;"><iframe src="${t.suratPerintah.dataUrl}" frameborder="0" style="width:100%; height:100vh;"></iframe></body>`);
+      }
+    } else {
+      if (typeof window.showToast === 'function') window.showToast(`Membuka dokumen ${t.suratPerintah.name}...`, 'info');
+    }
+  } else {
+    if (typeof window.showToast === 'function') window.showToast(`Dokumen: ${t.suratPerintah.name}`, 'info');
+  }
+};
+
+/**
+ * Fitur Pembatalan Keikutsertaan Mandiri bagi Anggota Tim
+ */
+window.cancelMemberParticipation = function(ticketId, memberNip) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t || !Array.isArray(t.members)) return;
+
+  const currentEmp = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: memberNip, name: 'Anggota' };
+  const targetNip = memberNip || currentEmp.nip;
+  const memberObj = t.members.find(m => m.nip === targetNip);
+  if (!memberObj) return;
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+  memberObj.status = 'batal';
+  memberObj.cancelledAt = nowFormatted;
+  memberObj.cancelledBy = currentEmp.name;
+
+  if (!t.timeline) t.timeline = [];
+  t.timeline.push({
+    event: 'Anggota Mundur dari Tim',
+    time: nowFormatted,
+    by: `${currentEmp.name} (Anggota Tim)`,
+    desc: `${currentEmp.name} membatalkan keikutsertaan dalam dinas bersama ini. Pengajuan tetap berjalan untuk anggota lainnya.`
+  });
+
+  if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
+
+  // Tutup modal cancel jika terbuka
+  const modalCancelRequest = document.getElementById('modalCancelRequest');
+  if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+  if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Keikutsertaan Anda pada tiket #${t.id} berhasil dibatalkan. Anggota tim lainnya tetap berjalan.`, 'info');
+  }
+
+  // Refresh
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+};
+
+/**
+ * Fitur Pembatalan untuk Inisiator Saja (Anggota Tetap Jalan)
+ */
+window.cancelGroupForInitiatorOnly = function(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+
+  const currentEmp = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { name: t.applicantName };
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+  t.initiatorCancelled = true;
+  t.initiatorCancelledAt = nowFormatted;
+
+  if (!t.timeline) t.timeline = [];
+  t.timeline.push({
+    event: 'Inisiator Mundur dari Dinas',
+    time: nowFormatted,
+    by: `${currentEmp.name} (Inisiator)`,
+    desc: `Inisiator (${currentEmp.name}) membatalkan keikutsertaannya sendiri. Izin dinas bersama tetap dilanjutkan untuk anggota tim lainnya.`
+  });
+
+  if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
+
+  const modalCancelRequest = document.getElementById('modalCancelRequest');
+  if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+  if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Keikutsertaan Anda pada tiket #${t.id} telah dibatalkan. Pengajuan tetap aktif untuk rekan tim Anda.`, 'info');
+  }
+
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+};
 window.getCurrentEmployeeActor = getCurrentEmployeeActor;
 window.getCurrentEmployeeUser = getCurrentEmployeeActor;
 
@@ -102,11 +553,12 @@ function updateKaryawanMetrics() {
   const empActor = getCurrentEmployeeActor();
   const myNip = empActor.nip || 'PK-2024-8841';
 
-  // Batasi hanya tiket milik akun yang sedang aktif
+  // Batasi hanya tiket milik akun yang sedang aktif (termasuk tiket dinas bersama sebagai anggota)
   const myTickets = ticketsList.filter(t => 
     t.applicantNip === myNip || 
     t.createdForNip === myNip || 
     t.createdByNip === myNip || 
+    (Array.isArray(t.members) && t.members.some(m => m.nip === myNip)) ||
     (!t.applicantNip && myNip === 'PK-2024-8841')
   );
   const totalMonth = myTickets.length;
@@ -180,8 +632,8 @@ function filterEmpTickets() {
     // Check if deleted by employee
     if (t.deletedByKaryawan) return false;
 
-    // 0. Batasi ke akun yang sedang aktif
-    const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841'));
+    // 0. Batasi ke akun yang sedang aktif (sebagai inisiator maupun anggota tim)
+    const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')) || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip));
     if (!isMyTicket) return false;
 
     // HANYA tiket berstatus riwayat yang diizinkan (mengecualikan status aktif seperti Menunggu Persetujuan, Menunggu Otorisasi Darurat, Disetujui, Sedang di Luar)
@@ -512,20 +964,25 @@ function renderKaryawanDashboard() {
   if (cardActivePermitSummary) {
     if (activeTicket) {
       const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
+      const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
       const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
       const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
-      const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
+      const isApproved = !isOutside && !isWaitingVerify && (activeTicket.status === 'Disetujui');
       const isEmergTicket = Boolean(
         activeTicket.isEmergency ||
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
       );
-      const isEmergLocked = !isOutside && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
+      const isEmergLocked = !isOutside && !isWaitingVerify && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         (activeTicket.emergencyLocked === true && activeTicket.status !== 'Disetujui') ||
         (activeTicket.qrLocked === true && activeTicket.status !== 'Disetujui')
       );
-      const isPending = !isOutside && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
+      const isPending = !isOutside && !isWaitingVerify && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
+
+      const currentEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841' };
+      const myNip = currentEmpActor.nip || 'PK-2024-8841';
+      const isMemberOnly = activeTicket.isGroupDinas && activeTicket.applicantNip !== myNip;
 
       const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
       const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
@@ -533,12 +990,17 @@ function renderKaryawanDashboard() {
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let actionButtonsHtml = '';
-      if (isOutside) {
+      if (isWaitingVerify) {
+        actionButtonsHtml = `
+          <button class="btn-figma-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
+            <span>⏳ Menunggu Verifikasi Atasan</span>
+          </button>
+        `;
+      } else if (isOutside) {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
         const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
         const isKembali = activeTicket.type !== 'Pulang Mendahului';
 
-        const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
         actionButtonsHtml = `
           ${(isKembali) ? (
             hasPendingExt ? `
@@ -555,6 +1017,9 @@ function renderKaryawanDashboard() {
               </button>
             `)
           ) : ''}
+          <button class="btn-figma-secondary" style="background:#047857; color:#ffffff; border-color:#047857; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" onclick="window.reportArrivalAtOffice('${activeTicket.id}')" title="Kunci jam kedatangan Anda dan kirim konfirmasi ke Atasan">
+            <span>🏢 Lapor Tiba di Kantor</span>
+          </button>
           <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
             <span>✓ Tap In Kartu Akses (Masuk)</span>
           </button>
@@ -567,21 +1032,29 @@ function renderKaryawanDashboard() {
               <span>🤳 Scan Wajah Atasan</span>
             </button>
           ` : ''}
-          <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
-            <span>Edit Pengajuan</span>
-          </button>
+          ${!isMemberOnly ? `
+            <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
+              <span>Edit Pengajuan</span>
+            </button>
+          ` : ''}
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
-            <span>Batalkan Izin</span>
+            <span>${isMemberOnly ? 'Batalkan Keikutsertaan' : 'Batalkan Izin'}</span>
           </button>
         `;
       } else if (isPending) {
         actionButtonsHtml = `
-          <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
-            <span>Edit Pengajuan</span>
-          </button>
-          <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
-            <span>Batalkan Izin</span>
-          </button>
+          ${!isMemberOnly ? `
+            <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
+              <span>Edit Pengajuan</span>
+            </button>
+            <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+              <span>Batalkan Izin</span>
+            </button>
+          ` : `
+            <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+              <span>Batalkan Keikutsertaan</span>
+            </button>
+          `}
         `;
       } else if (isApproved) {
         actionButtonsHtml = `
@@ -589,12 +1062,13 @@ function renderKaryawanDashboard() {
             <span>Buka QR Izin</span>
           </button>
           <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
-            <span>Batalkan</span>
+            <span>${isMemberOnly ? 'Batalkan Keikutsertaan' : 'Batalkan'}</span>
           </button>
         `;
       }
 
       const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
+      const activeMembers = Array.isArray(activeTicket.members) ? activeTicket.members.filter(m => m.status !== 'batal' && m.status !== 'cancelled') : [];
 
       cardActivePermitSummary.innerHTML = `
         <div class="figma-card-header">
@@ -605,6 +1079,7 @@ function renderKaryawanDashboard() {
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
             ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
+            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.72rem; color: #047857; font-weight: 800; background: #ecfdf5; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.3px;">👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
@@ -612,6 +1087,25 @@ function renderKaryawanDashboard() {
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
+
+        ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
+          <div style="margin-top: 8px; background: rgba(5, 150, 105, 0.05); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem;">
+            <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; justify-content: space-between;">
+              <span>👥 Rombongan Dinas:</span>
+              <span style="font-size: 0.7rem; font-weight: 600; color: #047857;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+              ${!activeTicket.initiatorCancelled ? `<span style="background: #d1fae5; color: #065f46; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👑 ${activeTicket.applicantName} (Inisiator)</span>` : `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${activeTicket.applicantName} (Batal)</span>`}
+              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${m.name} (Batal)</span>` : `<span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👤 ${m.name}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${isWaitingVerify ? `
+          <div style="margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
+            <strong>🏢 Laporan Tiba Telah Dikirim:</strong> Kedatangan Anda pada <strong>${activeTicket.reportedReturnTime || '-'}</strong> telah dikunci. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan.
+          </div>
+        ` : ''}
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
@@ -829,20 +1323,25 @@ function renderPengajuanSayaView() {
   // Left Column
   if (colPengajuanLeft) {
     const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
+    const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
     const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
     const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
-    const isApproved = !isOutside && (activeTicket.status === 'Disetujui');
+    const isApproved = !isOutside && !isWaitingVerify && (activeTicket.status === 'Disetujui');
     const isEmergTicket = Boolean(
       activeTicket.isEmergency ||
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
     );
-    const isEmergLocked = !isOutside && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
+    const isEmergLocked = !isOutside && !isWaitingVerify && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       (activeTicket.emergencyLocked === true && activeTicket.status !== 'Disetujui') ||
       (activeTicket.qrLocked === true && activeTicket.status !== 'Disetujui')
     );
-    const isPending = !isOutside && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
+    const isPending = !isOutside && !isWaitingVerify && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
+
+    const currentEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841' };
+    const myNip = currentEmpActor.nip || 'PK-2024-8841';
+    const isMemberOnly = activeTicket.isGroupDinas && activeTicket.applicantNip !== myNip;
 
     const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
@@ -850,7 +1349,13 @@ function renderPengajuanSayaView() {
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
     let actionButtonsHtml = '';
-    if (isOutside) {
+    if (isWaitingVerify) {
+      actionButtonsHtml = `
+        <button class="btn-figma-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
+          <span>⏳ Menunggu Verifikasi Atasan</span>
+        </button>
+      `;
+    } else if (isOutside) {
       const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
       const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
       const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
@@ -872,8 +1377,8 @@ function renderPengajuanSayaView() {
             </button>
           `)
         ) : ''}
-        <button class="btn-figma-secondary" style="background:#059669; color:#ffffff; border-color:#059669; font-weight: 700;" onclick="executeScanIn('${activeTicket.id}')">
-          <span>✓ Tap In Kartu Akses (Masuk)</span>
+        <button class="btn-figma-secondary" style="background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
+          <span>💳 Simulasi Tap In Gerbang</span>
         </button>
       `;
     } else if (isEmergLocked) {
@@ -884,21 +1389,29 @@ function renderPengajuanSayaView() {
             <span>🤳 Scan Wajah Atasan</span>
           </button>
         ` : ''}
-        <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
-          <span>Edit Pengajuan</span>
-        </button>
+        ${!isMemberOnly ? `
+          <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>Edit Pengajuan</span>
+          </button>
+        ` : ''}
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
-          <span>Batalkan Izin</span>
+          <span>${isMemberOnly ? 'Batalkan Keikutsertaan' : 'Batalkan Izin'}</span>
         </button>
       `;
     } else if (isPending) {
       actionButtonsHtml = `
-        <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
-          <span>Edit Pengajuan</span>
-        </button>
-        <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
-          <span>Batalkan Izin</span>
-        </button>
+        ${!isMemberOnly ? `
+          <button class="btn-figma-blue" onclick="window.openEditTicketModal('${activeTicket.id}')">
+            <span>Edit Pengajuan</span>
+          </button>
+          <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan Izin</span>
+          </button>
+        ` : `
+          <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
+            <span>Batalkan Keikutsertaan</span>
+          </button>
+        `}
       `;
     } else if (isApproved) {
       actionButtonsHtml = `
@@ -906,12 +1419,13 @@ function renderPengajuanSayaView() {
           <span>Buka QR Izin</span>
         </button>
         <button class="btn-figma-danger" onclick="openCancelModal('${activeTicket.id}')">
-          <span>Batalkan</span>
+          <span>${isMemberOnly ? 'Batalkan Keikutsertaan' : 'Batalkan'}</span>
         </button>
       `;
     }
 
     const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
+    const activeMembers = Array.isArray(activeTicket.members) ? activeTicket.members.filter(m => m.status !== 'batal' && m.status !== 'cancelled') : [];
 
     colPengajuanLeft.innerHTML = `
       <!-- Card 1: Izin aktif saya -->
@@ -924,12 +1438,33 @@ function renderPengajuanSayaView() {
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
             ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
+            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.72rem; color: #047857; font-weight: 800; background: #ecfdf5; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.3px;">👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
           <div style="margin-top: 8px; display: inline-flex; align-items: center;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
+        </div>
+
+        ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
+          <div style="margin-top: 8px; background: rgba(5, 150, 105, 0.05); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem;">
+            <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; justify-content: space-between;">
+              <span>👥 Rombongan Dinas:</span>
+              <span style="font-size: 0.7rem; font-weight: 600; color: #047857;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+              ${!activeTicket.initiatorCancelled ? `<span style="background: #d1fae5; color: #065f46; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👑 ${activeTicket.applicantName} (Inisiator)</span>` : `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${activeTicket.applicantName} (Batal)</span>`}
+              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${m.name} (Batal)</span>` : `<span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👤 ${m.name}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${isWaitingVerify ? `
+          <div style="margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
+            <strong>🏢 Laporan Tiba Telah Dikirim:</strong> Kedatangan Anda pada <strong>${activeTicket.reportedReturnTime || '-'}</strong> telah dikunci. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan.
+          </div>
+        ` : ''}
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
@@ -1219,6 +1754,10 @@ function getCleanEmpStatus(status, ticket) {
     label = 'Menunggu Persetujuan';
     color = '#d97706';
     statusKey = 'pending';
+  } else if (status === 'Menunggu Verifikasi Atasan') {
+    label = 'Menunggu Verifikasi Atasan';
+    color = '#2563eb';
+    statusKey = 'waiting-verify';
   } else if (status === 'Menunggu Otorisasi Darurat' || status === 'Darurat Terkunci') {
     label = 'Menunggu Otorisasi Darurat';
     color = '#be123c';
@@ -1244,6 +1783,7 @@ function getCleanEmpStatus(status, ticket) {
     'late': 'rgba(220, 38, 38, 0.1)',
     'approved': 'rgba(16, 185, 129, 0.1)',
     'pending': 'rgba(245, 158, 11, 0.12)',
+    'waiting-verify': 'rgba(37, 99, 235, 0.12)',
     'emergency': 'rgba(190, 18, 60, 0.1)',
     'rejected': 'rgba(220, 38, 38, 0.1)',
     'expired': 'rgba(100, 116, 139, 0.1)',
@@ -1256,6 +1796,7 @@ function getCleanEmpStatus(status, ticket) {
     'late': 'rgba(220, 38, 38, 0.25)',
     'approved': 'rgba(16, 185, 129, 0.25)',
     'pending': 'rgba(245, 158, 11, 0.3)',
+    'waiting-verify': 'rgba(37, 99, 235, 0.3)',
     'emergency': 'rgba(190, 18, 60, 0.25)',
     'rejected': 'rgba(220, 38, 38, 0.25)',
     'expired': 'rgba(100, 116, 139, 0.25)',

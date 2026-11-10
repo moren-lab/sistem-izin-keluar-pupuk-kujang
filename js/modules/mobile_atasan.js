@@ -805,6 +805,24 @@
                 </div>
               </div>
 
+              ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+                <div style="margin: 6px 0 8px 0; padding: 6px 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                  <div style="font-size: 0.675rem; font-weight: 700; color: #1e40af; margin-bottom: 3px;">
+                    👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang):
+                  </div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                    <span style="font-size: 0.675rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 1px 6px; border-radius: 4px;">
+                      ${escapeHtml(t.applicantName)} (Inisiator)
+                    </span>
+                    ${t.members.map(m => `
+                      <span style="font-size: 0.675rem; background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
+                        ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
+                      </span>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
               ${isEmg ? (isReassignedAway ? `
                 <div style="margin-top: 8px;">
                   <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
@@ -825,11 +843,24 @@
                     Setujui
                   </button>
                 </div>
-              `) : `
+              `) : (t.isGroupDinas && !isReassignedAway ? `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                  <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Detail</span>
+                  </button>
+                  <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+                    Tolak Tim
+                  </button>
+                  <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
+                    Setujui Tim
+                  </button>
+                </div>
+              ` : `
                 <button type="button" class="mobile-btn-primary" style="margin-top: 4px; ${isReassignedAway ? 'background: #475569; border-color: #475569;' : ''}" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
                   ${isReassignedAway ? 'Pantau Rincian' : 'Tinjau'}
                 </button>
-              `}
+              `)}
             </div>
           `;
         }).join('');
@@ -1120,6 +1151,58 @@
           </div>
         </div>
 
+        ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+          <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #f0fdf4; border: 1.5px solid #bbf7d0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.7rem; color: #15803d; font-weight: 800; text-transform: uppercase;">👥 ANGGOTA ROMBONGAN DINAS</span>
+              <span style="font-size: 0.675rem; font-weight: 700; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 999px;">
+                ${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif
+              </span>
+            </div>
+            <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #ffffff; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div>
+                  <div style="font-weight: 700; color: #0f172a;">${escapeHtml(t.applicantName)}</div>
+                  <div style="font-size: 0.65rem; color: #64748b;">${t.nip || '-'} • Inisiator Pengajuan</div>
+                </div>
+                <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${t.initiatorCancelled ? 'background: #fee2e2; color: #dc2626;' : 'background: #dbeafe; color: #1e40af;'}">
+                  ${t.initiatorCancelled ? 'Batal Ikut' : 'Inisiator (Aktif)'}
+                </span>
+              </div>
+              ${t.members.map(m => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #ffffff; border-radius: 6px; border: 1px solid #e2e8f0;">
+                  <div>
+                    <div style="font-weight: 700; color: ${m.status === 'batal' ? '#94a3b8' : '#0f172a'}; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${escapeHtml(m.name)}</div>
+                    <div style="font-size: 0.65rem; color: #64748b;">${m.nip || '-'} • ${m.department || 'Anggota Tim'}</div>
+                  </div>
+                  <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${m.status === 'batal' ? 'background: #fee2e2; color: #dc2626;' : 'background: #dcfce7; color: #166534;'}">
+                    ${m.status === 'batal' ? 'Batal' : 'Ikut Serta'}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${t.suratPerintah ? `
+          <!-- Card Dokumen Surat Perintah Dinas -->
+          <div class="mobile-card" style="margin-bottom: 8px; padding: 10px 14px; background: #f0fdf4; border: 1.5px solid #86efac;">
+            <div style="font-size: 0.7rem; color: #166534; font-weight: 800; margin-bottom: 4px; text-transform: uppercase;">DOKUMEN SURAT PERINTAH DINAS</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.25rem;">📄</span>
+                <div>
+                  <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a;">${escapeHtml(t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf')}</div>
+                  <div style="font-size: 0.675rem; color: #15803d;">${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi</div>
+                </div>
+              </div>
+              <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #86efac; color: #166534; font-weight: 700;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
+                Lihat Berkas
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
         <!-- Card 2: Keperluan Izin -->
         <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">KEPERLUAN IZIN</div>
@@ -1181,7 +1264,36 @@
               </button>
             </div>
           </div>
-        `) : (t.status === 'Ditolak' ? `
+        `) : (t.status === 'Menunggu Verifikasi Atasan' ? `
+          <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #eff6ff; border: 1.5px solid #93c5fd;">
+            <div style="font-size: 0.825rem; font-weight: 800; color: #1e40af; margin-bottom: 4px;">
+              🏢 Karyawan Melaporkan Tiba di Kantor
+            </div>
+            <div style="font-size: 0.725rem; color: #3b82f6; margin-bottom: 10px;">
+              Karyawan telah mengunci kedatangan pada <strong>${t.arrivalReportedAt ? formatTimeOnly(t.arrivalReportedAt) : 'baru saja'}</strong>. Mohon verifikasi kehadiran fisik karyawan di ruangan Anda.
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; color: #dc2626; border-color: #fca5a5;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+                ✕ Belum Tiba
+              </button>
+              <button type="button" class="mobile-btn-primary" style="flex: 1.3; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+                ✓ Ya, Sudah Tiba
+              </button>
+            </div>
+          </div>
+        ` : (t.status === 'Sedang di Luar' || t.status === 'Terlambat' ? `
+          <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #f0fdf4; border: 1.5px solid #86efac;">
+            <div style="font-size: 0.825rem; font-weight: 800; color: #166534; margin-bottom: 4px;">
+              🟢 Hak Akses Kembali / Tap In Atasan
+            </div>
+            <div style="font-size: 0.725rem; color: #15803d; margin-bottom: 10px;">
+              Karyawan sedang di luar. Jika karyawan sudah tiba di hadapan Anda, Anda dapat melakukan Tap In langsung.
+            </div>
+            <button type="button" class="mobile-btn-primary" style="width: 100%; min-height: 44px; font-weight: 800; background: #059669; border-color: #059669; font-size: 0.8rem;" onclick="window.mobileAtasanTapIn('${t.id}')">
+              ✓ Tap In Atasan (Tandai Selesai)
+            </button>
+          </div>
+        ` : (t.status === 'Ditolak' ? `
           <div class="mobile-card" style="text-align: center; padding: 14px; background: #fef2f2; border: 1.5px solid #fca5a5; margin-bottom: 14px;">
             <div style="font-size: 0.85rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
               ✕ Pengajuan Ditolak
@@ -1205,7 +1317,7 @@
               Kembali ke Antrean
             </button>
           </div>
-        `)}
+        `)))}
       </div>
 
       <!-- Tab Content 2: Riwayat Aktivitas (Timeline murni tanpa tombol aksi persetujuan) -->
@@ -1372,6 +1484,9 @@
       if (isLate) {
         statusBadgeClass = 'terlambat';
         statusSubtitle = 'Terlambat • Melebihi batas jam kembali';
+      } else if (t.status === 'Menunggu Verifikasi Atasan') {
+        statusBadgeClass = 'disetujui';
+        statusSubtitle = 'Karyawan lapor tiba • Menunggu verifikasi fisik atasan';
       } else if (isOutside) {
         statusBadgeClass = 'sedang-di-luar';
         statusSubtitle = t.hasExtensionPending ? 'Menunggu keputusan perpanjangan' : 'Sedang berada di luar area pabrik';
@@ -1429,6 +1544,46 @@
               <div class="mobile-meta-sub">Tap In aktual</div>
               <div class="mobile-meta-val">${t.scanInTime ? formatTimeOnly(t.scanInTime) : '—'}</div>
             </div>
+
+          ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+            <div style="margin: 6px 0; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+              <div style="font-size: 0.65rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
+                👥 Rombongan Dinas:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 3px;">
+                <span style="font-size: 0.65rem; background: #e0f2fe; color: #0369a1; padding: 1px 5px; border-radius: 4px; font-weight: 700;">
+                  ${escapeHtml(t.applicantName)} (Inisiator)
+                </span>
+                ${t.members.map(m => `
+                  <span style="font-size: 0.65rem; background: ${m.status === 'batal' ? '#fee2e2' : '#f1f5f9'}; color: ${m.status === 'batal' ? '#dc2626' : '#475569'}; padding: 1px 5px; border-radius: 4px; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
+                    ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${t.status === 'Menunggu Verifikasi Atasan' ? `
+            <div style="margin: 6px 0; padding: 8px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px;">
+              <div style="font-size: 0.7rem; font-weight: 700; color: #1e40af; margin-bottom: 6px;">
+                🏢 Karyawan lapor tiba (${t.arrivalReportedAt ? formatTimeOnly(t.arrivalReportedAt) : 'Baru saja'})
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 36px; padding: 4px; font-size: 0.7rem; font-weight: 600; color: #dc2626; border-color: #fca5a5;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+                  ✕ Belum Tiba
+                </button>
+                <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 36px; padding: 4px; font-size: 0.725rem; font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+                  ✓ Ya, Sudah Tiba
+                </button>
+              </div>
+            </div>
+          ` : (t.status === 'Sedang di Luar' || t.status === 'Terlambat' ? `
+            <div style="margin: 6px 0;">
+              <button type="button" class="mobile-btn-primary" style="width: 100%; min-height: 36px; padding: 4px 8px; font-size: 0.725rem; font-weight: 700; background: #059669; border-color: #059669; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.mobileAtasanTapIn('${t.id}')">
+                <span>✓ Tap In Atasan</span>
+              </button>
+            </div>
+          ` : '')}
           </div>
 
           ${t.hasExtensionPending ? `
@@ -2470,6 +2625,88 @@
             priority: 'normal',
             eventId: `approved_${t.id}`
           });
+
+          if (t.isGroupDinas && Array.isArray(t.members)) {
+            const activeMembers = t.members.filter(m => m.status !== 'batal');
+            activeMembers.forEach(m => {
+              window.createNotification({
+                recipientRole: 'karyawan',
+                recipientNip: m.nip,
+                recipientName: m.name,
+                actorSource: 'approver',
+                type: 'disetujui',
+                title: 'Pengajuan Dinas Disetujui',
+                message: `Pengajuan dinas bersama (#${t.id}) telah disetujui oleh ${approver.name}. Siap scan out bersama di Pos Jaga.`,
+                ticketId: t.id,
+                priority: 'normal',
+                eventId: `approved_${t.id}_${m.nip}`
+              });
+            });
+
+            // Poin 4: Tembusan Otomatis (FYI) ke Atasan Masing-Masing Anggota
+            const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+            const currentApproverNip = approver.nip || t.approverNip;
+            const supGroupMap = {};
+
+            activeMembers.forEach(m => {
+              const u = allUsers.find(x => x.nip === m.nip);
+              const supName = (u && (u.directSupervisor || u.supervisor)) || m.supervisor;
+              if (!supName) return;
+
+              const supUser = allUsers.find(x => x.name === supName || (supName.includes('Dewi') && x.nip === 'PK-2012-0845') || (supName.includes('Subagja') && x.nip === 'PK-2012-0543') || (supName.includes('Hendra') && x.nip === 'PK-2015-1002'));
+              const supNip = supUser ? supUser.nip : null;
+
+              if (supNip && supNip !== currentApproverNip) {
+                if (!supGroupMap[supNip]) {
+                  supGroupMap[supNip] = {
+                    nip: supNip,
+                    name: (supUser && supUser.name) || supName,
+                    members: []
+                  };
+                }
+                const shortName = m.name.split(',')[0].trim();
+                supGroupMap[supNip].members.push(shortName);
+              }
+            });
+
+            const exitSchedule = t.plannedExit ? (typeof formatDisplayDate === 'function' ? formatDisplayDate(t.plannedExit) : t.plannedExit.replace('T', ' ')) : '08.30';
+            const returnSchedule = t.estimatedReturn ? (typeof formatDisplayDate === 'function' ? formatDisplayDate(t.estimatedReturn) : t.estimatedReturn.replace('T', ' ')) : '13.00';
+            const destStr = t.destination || 'Lokasi Dinas';
+
+            Object.values(supGroupMap).forEach(supObj => {
+              let formattedMembers = '';
+              if (supObj.members.length === 1) {
+                formattedMembers = supObj.members[0];
+              } else if (supObj.members.length === 2) {
+                formattedMembers = `${supObj.members[0]} dan ${supObj.members[1]}`;
+              } else {
+                formattedMembers = supObj.members.slice(0, -1).join(', ') + ' dan ' + supObj.members[supObj.members.length - 1];
+              }
+
+              const initiatorShort = (t.applicantName || 'Inisiator').split(',')[0].trim();
+              const fyiMessage = `ℹ️ Informasi Tugas Dinas Staf: Staf Anda (${formattedMembers}) terdaftar dalam Perjalanan Dinas Luar bersama tim (Inisiator: ${initiatorShort}) ke ${destStr}, jadwal ${exitSchedule} - ${returnSchedule}. Izin telah disahkan oleh ${approver.name}.`;
+
+              window.createNotification({
+                recipientRole: 'approver',
+                recipientNip: supObj.nip,
+                recipientName: supObj.name,
+                actorSource: 'approver',
+                type: 'info_tembusan',
+                title: 'Informasi Tugas Dinas Staf (Tembusan)',
+                message: fyiMessage,
+                ticketId: t.id,
+                priority: 'normal',
+                eventId: `fyi_dinas_${t.id}_${supObj.nip}`
+              });
+
+              t.timeline.push({
+                event: 'Tembusan Notifikasi Atasan',
+                time: nowFormatted,
+                by: 'Sistem Gatepass Otomatis',
+                desc: `Tembusan informasi tugas dinas staf dikirim ke ${supObj.name} untuk: ${formattedMembers}.`
+              });
+            });
+          }
         } else {
           const appInfoRej = resolveDynamicApplicantInfo(t);
           window.createNotification({
@@ -2856,3 +3093,80 @@
   window.getActiveApprover = getActiveApprover;
 
 })();
+
+  // Mobile Atasan Return / Arrival verification handlers
+  window.mobileAtasanConfirmArrival = function (ticketId) {
+    if (typeof window.confirmArrivalByApprover === 'function') {
+      window.confirmArrivalByApprover(ticketId);
+    } else {
+      const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
+      const t = tickets.find(x => x.id === ticketId);
+      if (!t) return;
+      const approver = getActiveApprover();
+      const arrivalTime = t.arrivalReportedAt || (typeof formatNow === 'function' ? formatNow() : new Date().toISOString());
+      t.status = 'Selesai';
+      t.scanInTime = arrivalTime;
+      if (!Array.isArray(t.timeline)) t.timeline = [];
+      t.timeline.push({
+        status: 'Selesai',
+        time: (typeof formatNow === 'function') ? formatNow() : new Date().toISOString(),
+        actor: approver.name,
+        actorRole: approver.role || 'Atasan Peninjau',
+        desc: 'Atasan telah mengonfirmasi kedatangan fisik karyawan di kantor/ruangan. Izin selesai resmi.'
+      });
+      if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
+    }
+    if (typeof showMobileToast === 'function') {
+      showMobileToast('Kedatangan karyawan berhasil dikonfirmasi. Status: Selesai.', 'success');
+    }
+    renderMobileAtasan(null);
+  };
+
+  window.mobileAtasanRejectArrival = function (ticketId) {
+    if (typeof window.rejectArrivalByApprover === 'function') {
+      window.rejectArrivalByApprover(ticketId);
+    } else {
+      const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
+      const t = tickets.find(x => x.id === ticketId);
+      if (!t) return;
+      const approver = getActiveApprover();
+      t.status = 'Sedang di Luar';
+      t.arrivalReportedAt = null;
+      if (!Array.isArray(t.timeline)) t.timeline = [];
+      t.timeline.push({
+        status: 'Sedang di Luar',
+        time: (typeof formatNow === 'function') ? formatNow() : new Date().toISOString(),
+        actor: approver.name,
+        actorRole: approver.role || 'Atasan Peninjau',
+        desc: 'Verifikasi kedatangan ditolak oleh atasan: Karyawan belum berada secara fisik di ruangan kerja.'
+      });
+      if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
+    }
+    if (typeof showMobileToast === 'function') {
+      showMobileToast('Laporan kedatangan dibatalkan. Karyawan tetap berstatus Sedang di Luar.', 'info');
+    }
+    renderMobileAtasan(null);
+  };
+
+  window.mobileAtasanTapIn = function (ticketId) {
+    const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const approver = getActiveApprover();
+    const nowTime = (typeof formatNow === 'function') ? formatNow() : new Date().toISOString();
+    t.status = 'Selesai';
+    t.scanInTime = nowTime;
+    if (!Array.isArray(t.timeline)) t.timeline = [];
+    t.timeline.push({
+      status: 'Selesai',
+      time: nowTime,
+      actor: approver.name,
+      actorRole: approver.role || 'Atasan Peninjau',
+      desc: 'Atasan melakukan Tap In / konfirmasi kepulangan langsung di kantor. Izin selesai resmi.'
+    });
+    if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
+    if (typeof showMobileToast === 'function') {
+      showMobileToast('Tap In atasan berhasil. Tiket resmi Selesai.', 'success');
+    }
+    renderMobileAtasan(null);
+  };

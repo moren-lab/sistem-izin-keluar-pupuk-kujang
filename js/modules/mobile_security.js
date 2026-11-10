@@ -1205,6 +1205,45 @@
             </div>
           </div>
 
+          ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+            <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #eff6ff; border: 1.5px solid #bfdbfe;">
+              <div style="font-size: 0.7rem; color: #1e40af; font-weight: 800; text-transform: uppercase; margin-bottom: 6px;">
+                👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif)
+              </div>
+              <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #ffffff; border-radius: 4px; border: 1px solid #e2e8f0;">
+                  <span><strong>${escapeHtml(t.applicantName)}</strong> (Inisiator)</span>
+                  <span style="font-size: 0.65rem; font-weight: 700; color: ${t.initiatorCancelled ? '#dc2626' : '#1e40af'};">${t.initiatorCancelled ? 'Batal' : 'Aktif'}</span>
+                </div>
+                ${t.members.map(m => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #ffffff; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <span style="${m.status === 'batal' ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${escapeHtml(m.name)}</span>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: ${m.status === 'batal' ? '#dc2626' : '#15803d'};">${m.status === 'batal' ? 'Batal' : 'Aktif'}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${t.suratPerintah ? `
+            <!-- Card Dokumen Surat Perintah Dinas -->
+            <div class="mobile-card" style="margin-bottom: 8px; padding: 10px 14px; background: #f0fdf4; border: 1.5px solid #86efac;">
+              <div style="font-size: 0.7rem; color: #166534; font-weight: 800; margin-bottom: 4px; text-transform: uppercase;">DOKUMEN SURAT PERINTAH DINAS</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 1.25rem;">📄</span>
+                  <div>
+                    <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a;">${escapeHtml(t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf')}</div>
+                    <div style="font-size: 0.675rem; color: #15803d;">${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi</div>
+                  </div>
+                </div>
+                <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #86efac; color: #166534; font-weight: 700;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
+                  Lihat Berkas
+                </button>
+              </div>
+            </div>
+          ` : ''}
+
           <!-- Card 2: Keperluan Izin -->
           <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
             <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">KEPERLUAN IZIN</div>
@@ -1389,13 +1428,37 @@
       }
     } else {
       t.status = 'Sedang di Luar';
+      const activePassengers = (t.isGroupDinas && Array.isArray(t.members))
+        ? [t.initiatorCancelled ? null : `${t.applicantName} (Inisiator)`, ...t.members.filter(m => m.status !== 'batal').map(m => m.name)].filter(Boolean)
+        : [];
+      const descGroup = activePassengers.length > 0
+        ? `Petugas Pos Jaga memvalidasi keberangkatan rombongan dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}). Status: Sedang di Luar.`
+        : `Karyawan diverifikasi keluar gerbang pabrik melalui ${activeGate}. Status: Sedang di Luar.`;
       t.timeline.push({
         event: 'Scan Out Pos Jaga',
         time: nowFormatted,
         by: `${officer.name} (${activeGate})`,
         gate: activeGate,
-        desc: `Karyawan diverifikasi keluar gerbang pabrik melalui ${activeGate}. Status: Sedang di Luar.`
+        desc: descGroup
       });
+      if (t.isGroupDinas && Array.isArray(t.members)) {
+        t.members.filter(m => m.status !== 'batal').forEach(m => {
+          if (typeof window.createNotification === 'function') {
+            window.createNotification({
+              recipientRole: 'karyawan',
+              recipientNip: m.nip,
+              recipientName: m.name,
+              actorSource: 'security',
+              type: 'info',
+              title: 'Verifikasi Keluar Kawasan (Rombongan Dinas)',
+              message: `Keberangkatan rombongan dinas (#${t.id}) telah diverifikasi oleh Petugas di ${activeGate}.`,
+              ticketId: t.id,
+              priority: 'normal',
+              eventId: `scanout_${t.id}_${m.nip}`
+            });
+          }
+        });
+      }
       if (typeof window.showToast === 'function') {
         window.showToast(`Scan Out berhasil! ${getTName(t)} meninggalkan area pada ${nowFormatted} (${activeGate}).`, 'success');
       }

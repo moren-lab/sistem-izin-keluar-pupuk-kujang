@@ -122,7 +122,12 @@
       posjaga: 'security'
     };
     const targetRole = roleMap[roleKey] || roleKey;
-    const acc = (window.KUJANG_ACCOUNTS || []).find(a => a.role === targetRole || a.role === roleKey || a.username === roleKey);
+    const acc = (window.KUJANG_ACCOUNTS || []).find(a => 
+      a.role === targetRole || 
+      a.role === roleKey || 
+      a.username === roleKey || 
+      a.nip === roleKey
+    );
     if (!acc) return;
 
     window.setKujangCurrentUser(acc);
@@ -327,8 +332,17 @@
     const overlay = document.getElementById('kujangAuthOverlay');
     if (overlay) overlay.style.display = 'none';
 
+    // Simpan referensi aktor aktif dinamis untuk multi-aktor
+    if (account.roleKey === 'karyawan' || account.role === 'karyawan' || account.roleKey === 'karyawan2' || account.role === 'karyawan2') {
+      window.activeEmployeeUser = account;
+      try { localStorage.setItem('KUJANG_ACTIVE_EMP_NIP', account.nip); } catch(e) {}
+    } else if (account.roleKey === 'approver' || account.role === 'approver' || account.roleKey === 'approver2' || account.role === 'approver2') {
+      window.activeApproverUser = account;
+      try { localStorage.setItem('KUJANG_ACTIVE_APPROVER_NIP', account.nip); } catch(e) {}
+    }
+
     // Set role bawaan aplikasi (karyawan, approver, approver2, security, admin)
-    activateAppRole(account.roleKey || account.role);
+    activateAppRole(account.roleKey || account.role, account.nip || account.kujangId);
 
     // Update profil akun di topbar/sidebar aplikasi
     updateAppUserBadge(account);

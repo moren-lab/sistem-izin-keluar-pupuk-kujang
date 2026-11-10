@@ -564,6 +564,48 @@ const DEFAULT_USERS = [
     lastLogin: 'Hari ini, 08:30 WIB'
   },
   {
+    kujangId: 'KJG-991026',
+    nip: 'PK-2024-8845',
+    name: 'Moreno Ardiansyah, S.T.',
+    email: 'moreno.ardiansyah@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    role: 'Karyawan',
+    roleKey: 'karyawan',
+    title: 'Staf Rekayasa Pemeliharaan',
+    directSupervisor: 'Ir. Hendra Gunawan, M.T.',
+    supervisor: 'Ir. Hendra Gunawan, M.T.',
+    status: 'Aktif',
+    lastLogin: 'Hari ini, 08:15 WIB'
+  },
+  {
+    kujangId: 'KJG-991027',
+    nip: 'PK-2024-8846',
+    name: 'Gusti Pratama, S.Tr.T.',
+    email: 'gusti.pratama@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    role: 'Karyawan',
+    roleKey: 'karyawan',
+    title: 'Staf Instrumentasi Lapangan',
+    directSupervisor: 'Dewi Sartika, S.T., M.M.',
+    supervisor: 'Dewi Sartika, S.T., M.M.',
+    status: 'Aktif',
+    lastLogin: 'Hari ini, 08:20 WIB'
+  },
+  {
+    kujangId: 'KJG-991028',
+    nip: 'PK-2024-8847',
+    name: 'Bima Arya Nugraha, S.T.',
+    email: 'bima.arya@pupuk-kujang.co.id',
+    department: 'Departemen Rekayasa & Pemeliharaan',
+    role: 'Karyawan',
+    roleKey: 'karyawan',
+    title: 'Staf Sistem Kontrol Pabrik',
+    directSupervisor: 'Dewi Sartika, S.T., M.M.',
+    supervisor: 'Dewi Sartika, S.T., M.M.',
+    status: 'Aktif',
+    lastLogin: 'Hari ini, 08:25 WIB'
+  },
+  {
     kujangId: 'KJG-881201',
     nip: 'PK-2015-1002',
     name: 'Ir. Hendra Gunawan, M.T.',

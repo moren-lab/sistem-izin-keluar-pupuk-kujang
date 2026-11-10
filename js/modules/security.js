@@ -615,6 +615,16 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             </div>
 
+            ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.35rem 0.6rem; margin: 0.35rem 0; font-size: 0.725rem;">
+                <div style="font-weight: 700; color: #1e40af; margin-bottom: 2px;">👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                  <span style="background: #dbeafe; color: #1e40af; font-weight: 700; padding: 1px 5px; border-radius: 4px;">${t.applicantName} (Inisiator)</span>
+                  ${t.members.map(m => `<span style="background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 1px 5px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${m.name}${m.status === 'batal' ? ' (Batal)' : ''}</span>`).join('')}
+                </div>
+              </div>
+            ` : ''}
+
             <!-- Pos Gate Badge -->
             <div style="display: flex; justify-content: flex-end; margin-bottom: 0.4rem;">
               ${gateBadgeHtml}
@@ -1303,13 +1313,37 @@ function executeScanOut(ticketId) {
     if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil di ${gate}! Tiket #${ticket.id} selesai diproses oleh Petugas ${officer.name} (Pulang Mendahului).`, 'success');
   } else {
     ticket.status = 'Sedang di Luar';
+    const activePassengers = (ticket.isGroupDinas && Array.isArray(ticket.members))
+      ? [ticket.initiatorCancelled ? null : `${ticket.applicantName} (Inisiator)`, ...ticket.members.filter(m => m.status !== 'batal').map(m => m.name)].filter(Boolean)
+      : [];
+    const descGroup = activePassengers.length > 0
+      ? `Petugas Pos Jaga memvalidasi keberangkatan rombongan dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}). Status: Sedang di Luar.`
+      : `Karyawan berhasil diverifikasi keluar kawasan melalui ${gate}. Status: Sedang di Luar.`;
     ticket.timeline.push({
       event: 'Scan Out Pos Jaga',
       time: nowFormatted,
       by: `${securityName} (${gate})`,
       gate: gate,
-      desc: `Karyawan berhasil diverifikasi keluar kawasan melalui ${gate}. Status: Sedang di Luar.`
+      desc: descGroup
     });
+    if (ticket.isGroupDinas && Array.isArray(ticket.members)) {
+      ticket.members.filter(m => m.status !== 'batal').forEach(m => {
+        if (typeof window.createNotification === 'function') {
+          window.createNotification({
+            recipientRole: 'karyawan',
+            recipientNip: m.nip,
+            recipientName: m.name,
+            actorSource: 'security',
+            type: 'info',
+            title: 'Verifikasi Keluar Kawasan (Rombongan Dinas)',
+            message: `Keberangkatan rombongan dinas (#${ticket.id}) telah diverifikasi oleh Petugas di ${gate}.`,
+            ticketId: ticket.id,
+            priority: 'normal',
+            eventId: `scanout_${ticket.id}_${m.nip}`
+          });
+        }
+      });
+    }
     if (typeof window.showToast === 'function') window.showToast(`Scan Out berhasil di ${gate}! Petugas (${officer.name}) memverifikasi keberangkatan tiket #${ticket.id}.`, 'success');
   }
 

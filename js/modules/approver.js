@@ -149,7 +149,7 @@ function updateApproverMetrics() {
   const pendingInitial = ticketsList.filter(t => 
     t.status !== 'Dibatalkan' && 
     t.status !== 'Ditolak' && 
-    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') &&
+    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Verifikasi Atasan') &&
     isTicketAssignedToCurrentApprover(t)
   ).length;
 
@@ -634,6 +634,16 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             </div>
 
+            ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.4rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
+                <div style="font-weight: 700; color: #1e40af; margin-bottom: 3px;">👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                  <span style="background: #dbeafe; color: #1e40af; font-weight: 700; padding: 1px 6px; border-radius: 4px;">${t.applicantName} (Inisiator)</span>
+                  ${t.members.map(m => `<span style="background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${m.name}${m.status === 'batal' ? ' (Batal)' : ''}</span>`).join('')}
+                </div>
+              </div>
+            ` : ''}
+
             ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
               <div class="approver-alert-banner extension" style="border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; margin: 0.5rem 0;">
                 <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
@@ -738,7 +748,41 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 </div>`;
               }
 
-              // Standard Tracking View (Pelacakan)
+              // Standard Tracking View (Pelacakan) & Antrean
+              if (t.status === 'Menunggu Verifikasi Atasan') {
+                return `
+                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
+                  <div style="padding: 0.45rem 0.65rem; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.725rem; color: #1e40af; line-height: 1.4;">
+                    <strong>🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}):</strong><br>
+                    Personel rombongan dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+                  </div>
+                  <div style="display: flex; gap: 0.45rem; width: 100%;">
+                    <button type="button" class="btn-reject" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.rejectArrivalByApprover('${t.id}')">
+                      ✕ Belum Tiba
+                    </button>
+                    <button type="button" class="btn-approve" style="flex: 1.3; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.confirmArrivalByApprover('${t.id}')">
+                      ✓ Ya, Sudah Tiba
+                    </button>
+                  </div>
+                  <button class="btn-card-detail" style="width: 100%; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600; min-height: 32px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
+                    <span>Detail Pengajuan</span>
+                  </button>
+                </div>`;
+              }
+              if (t.status === 'Sedang di Luar') {
+                return `
+                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
+                  <div style="display: flex; gap: 0.45rem; width: 100%;">
+                    <button type="button" class="btn-approve" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.confirmArrivalByApprover('${t.id}')" title="Tap In langsung oleh Atasan jika karyawan sudah kembali">
+                      ✓ Tap In Atasan (Selesai)
+                    </button>
+                    <button type="button" class="btn-pill-action btn-pill-detail" style="min-height: 34px; padding: 0 0.75rem;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                      <span>Detail</span>
+                    </button>
+                  </div>
+                </div>`;
+              }
+
               return `
               <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
@@ -905,6 +949,7 @@ function renderApproverView() {
       isTicketAssignedToCurrentApprover(t) &&
       (t.status === 'Menunggu Persetujuan' || 
        t.status === 'Menunggu Otorisasi Darurat' || 
+       t.status === 'Menunggu Verifikasi Atasan' || 
        (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))
     );
     pendingListAll.sort(priorityEmergencyComparator);
@@ -1380,6 +1425,94 @@ function confirmApproveDecision() {
       priority: 'normal',
       eventId: `approved_${ticket.id}`
     });
+
+    if (ticket.isGroupDinas && Array.isArray(ticket.members)) {
+      const activeMembers = ticket.members.filter(m => m.status !== 'batal');
+      
+      // 1. Notifikasi ke masing-masing anggota aktif
+      activeMembers.forEach(m => {
+        window.createNotification({
+          recipientRole: 'karyawan',
+          recipientNip: m.nip,
+          recipientName: m.name,
+          actorSource: 'approver',
+          type: 'disetujui',
+          title: 'Pengajuan Dinas Disetujui',
+          message: `Pengajuan dinas bersama (#${ticket.id}) telah disetujui oleh ${approverName}. Siap scan out bersama di Pos Jaga.`,
+          ticketId: ticket.id,
+          priority: 'normal',
+          eventId: `approved_${ticket.id}_${m.nip}`
+        });
+      });
+
+      // 2. Poin 4: Tembusan Otomatis (FYI) ke Atasan Masing-Masing Anggota
+      const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
+      const currentApproverNip = approverActor.nip || ticket.approverNip;
+      const supGroupMap = {}; // { [supNip]: { nip, name, members: [] } }
+
+      activeMembers.forEach(m => {
+        const u = allUsers.find(x => x.nip === m.nip);
+        const supName = (u && (u.directSupervisor || u.supervisor)) || m.supervisor;
+        if (!supName) return;
+
+        // Cari profil atasan dari master data
+        const supUser = allUsers.find(x => x.name === supName || (supName.includes('Dewi') && x.nip === 'PK-2012-0845') || (supName.includes('Subagja') && x.nip === 'PK-2012-0543') || (supName.includes('Hendra') && x.nip === 'PK-2015-1002'));
+        const supNip = supUser ? supUser.nip : null;
+
+        // Jika atasan anggota berbeda dengan atasan yang menyetujui tiket ini
+        if (supNip && supNip !== currentApproverNip) {
+          if (!supGroupMap[supNip]) {
+            supGroupMap[supNip] = {
+              nip: supNip,
+              name: (supUser && supUser.name) || supName,
+              members: []
+            };
+          }
+          // Ambil nama untuk notifikasi (misal "Bima" atau "Bima Arya")
+          const shortName = m.name.split(',')[0].trim();
+          supGroupMap[supNip].members.push(shortName);
+        }
+      });
+
+      // Kirim notifikasi tembusan terkelompok per atasan
+      const exitSchedule = ticket.plannedExit ? (typeof window.formatDisplayDate === 'function' ? window.formatDisplayDate(ticket.plannedExit) : ticket.plannedExit.replace('T', ' ')) : '08.30';
+      const returnSchedule = ticket.estimatedReturn ? (typeof window.formatDisplayDate === 'function' ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn.replace('T', ' ')) : '13.00';
+      const destStr = ticket.destination || 'Lokasi Dinas';
+
+      Object.values(supGroupMap).forEach(supObj => {
+        let formattedMembers = '';
+        if (supObj.members.length === 1) {
+          formattedMembers = supObj.members[0];
+        } else if (supObj.members.length === 2) {
+          formattedMembers = `${supObj.members[0]} dan ${supObj.members[1]}`;
+        } else {
+          formattedMembers = supObj.members.slice(0, -1).join(', ') + ' dan ' + supObj.members[supObj.members.length - 1];
+        }
+
+        const initiatorShort = (ticket.applicantName || 'Inisiator').split(',')[0].trim();
+        const fyiMessage = `ℹ️ Informasi Tugas Dinas Staf: Staf Anda (${formattedMembers}) terdaftar dalam Perjalanan Dinas Luar bersama tim (Inisiator: ${initiatorShort}) ke ${destStr}, jadwal ${exitSchedule} - ${returnSchedule}. Izin telah disahkan oleh ${approverName}.`;
+
+        window.createNotification({
+          recipientRole: 'approver',
+          recipientNip: supObj.nip,
+          recipientName: supObj.name,
+          actorSource: 'approver',
+          type: 'info_tembusan',
+          title: 'Informasi Tugas Dinas Staf (Tembusan)',
+          message: fyiMessage,
+          ticketId: ticket.id,
+          priority: 'normal',
+          eventId: `fyi_dinas_${ticket.id}_${supObj.nip}`
+        });
+
+        ticket.timeline.push({
+          event: 'Tembusan Notifikasi Atasan',
+          time: nowFormatted,
+          by: 'Sistem Gatepass Otomatis',
+          desc: `Tembusan informasi tugas dinas staf dikirim ke ${supObj.name} untuk: ${formattedMembers}.`
+        });
+      });
+    }
   }
   
   const modalApproveDecision = document.getElementById('modalApproveDecision');
@@ -1958,3 +2091,136 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ==========================================
+// ATASAN RETURN / ARRIVAL VERIFICATION
+// ==========================================
+window.confirmArrivalByApprover = function(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+
+  const currentApprover = (typeof getCurrentApproverActor === 'function' ? getCurrentApproverActor() : null) || { name: 'Ir. Hendra Gunawan, M.T.' };
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+  const arrivalTime = t.arrivalReportedAt || t.reportedReturnTime || nowFormatted;
+
+  let wasOverdue = false;
+  if (t.estimatedReturn) {
+    try {
+      const estD = new Date(t.estimatedReturn);
+      if (now > estD) wasOverdue = true;
+    } catch(e) {}
+  }
+
+  t.status = 'Selesai';
+  t.scanInTime = `${arrivalTime} (Dikonfirmasi Atasan: ${currentApprover.name})${wasOverdue ? ' [Terlambat]' : ''}`;
+  if (wasOverdue) t.isLate = true;
+
+  if (!t.timeline) t.timeline = [];
+  t.timeline.push({
+    event: 'Kedatangan Dikonfirmasi Atasan (Selesai)',
+    time: nowFormatted,
+    by: `${currentApprover.name} (Atasan)`,
+    desc: `Kehadiran fisik karyawan di area kerja telah diverifikasi langsung oleh Atasan (${currentApprover.name}). Izin resmi selesai.`
+  });
+
+  if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
+
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: t.applicantNip || 'PK-2024-8841',
+      recipientName: t.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'approver',
+      type: 'selesai',
+      title: 'Izin Resmi Selesai',
+      message: `Atasan (${currentApprover.name}) telah memverifikasi kehadiran Anda di ruangan. Tiket #${t.id} resmi selesai.`,
+      ticketId: t.id,
+      priority: 'normal',
+      eventId: `arr_conf_${t.id}_${Date.now()}`
+    });
+
+    if (t.isGroupDinas && Array.isArray(t.members)) {
+      t.members.filter(m => m.status !== 'batal').forEach(m => {
+        window.createNotification({
+          recipientRole: 'karyawan',
+          recipientNip: m.nip,
+          recipientName: m.name,
+          actorSource: 'approver',
+          type: 'selesai',
+          title: 'Izin Dinas Selesai',
+          message: `Atasan (${currentApprover.name}) telah memverifikasi kepulangan rombongan Anda. Tiket #${t.id} resmi selesai.`,
+          ticketId: t.id,
+          priority: 'normal',
+          eventId: `arr_conf_${t.id}_${m.nip}_${Date.now()}`
+        });
+      });
+    }
+  }
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Kehadiran ${t.applicantName} berhasil diverifikasi! Tiket #${t.id} resmi Selesai.`, 'success');
+  }
+
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+};
+
+window.rejectArrivalByApprover = function(ticketId) {
+  const ticketsList = window.ticketsList || [];
+  const t = ticketsList.find(x => x.id === ticketId);
+  if (!t) return;
+
+  const currentApprover = (typeof getCurrentApproverActor === 'function' ? getCurrentApproverActor() : null) || { name: 'Ir. Hendra Gunawan, M.T.' };
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+
+  t.status = 'Sedang di Luar';
+  t.arrivalReportedAt = null;
+  t.reportedReturnTime = null;
+  t.tapInTime = null;
+  t.arrivalReportedTime = null;
+  t.timeFrozen = false;
+
+  if (!t.timeline) t.timeline = [];
+  t.timeline.push({
+    event: 'Laporan Tiba Ditolak Atasan',
+    time: nowFormatted,
+    by: `${currentApprover.name} (Atasan)`,
+    desc: `Laporan tiba ditolak oleh ${currentApprover.name}: Karyawan belum berada di area kantor/ruangan. Kunci waktu dibatalkan dan status kembali ke 'Sedang di Luar'.`
+  });
+
+  if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
+
+  if (typeof window.createNotification === 'function') {
+    window.createNotification({
+      recipientRole: 'karyawan',
+      recipientNip: t.applicantNip || 'PK-2024-8841',
+      recipientName: t.applicantName || 'Budi Pratama, S.T.',
+      actorSource: 'approver',
+      type: 'peringatan',
+      title: 'Laporan Tiba Ditolak',
+      message: `Atasan (${currentApprover.name}) menolak laporan tiba Anda: Anda belum terlihat berada di ruangan. Status izin tetap 'Sedang di Luar'.`,
+      ticketId: t.id,
+      priority: 'urgent',
+      eventId: `arr_rej_${t.id}_${Date.now()}`
+    });
+  }
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Laporan tiba ditolak. Status tiket #${t.id} dikembalikan ke 'Sedang di Luar'.`, 'warning');
+  }
+
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+};

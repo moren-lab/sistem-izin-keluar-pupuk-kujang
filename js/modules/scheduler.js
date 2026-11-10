@@ -92,14 +92,30 @@ function parseTicketDateTime(val) {
 function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841'))) {
   // Ambil tiket terbaru dari window.ticketsList atau localStorage
   const list = window.ticketsList || (typeof window.loadTickets === 'function' ? window.loadTickets() : []);
-  return list.find(t =>
-    (t.applicantNip === nip || (!t.applicantNip && nip === 'PK-2024-8841')) &&
-    t.status !== 'Dibatalkan' &&
-    t.status !== 'Ditolak' &&
-    t.status !== 'Selesai' &&
-    t.status !== 'Kedaluwarsa' &&
-    (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat')
-  );
+  return list.find(t => {
+    // 1. Cek apakah user adalah inisiator (pembuat) tiket
+    const isInitiator = (t.applicantNip === nip || (!t.applicantNip && nip === 'PK-2024-8841'));
+    // 2. Cek apakah user adalah anggota tim dinas bersama
+    const isMember = Array.isArray(t.members) && t.members.some(m => m.nip === nip && m.status !== 'cancelled' && m.status !== 'batal');
+    
+    // Jika bukan inisiator dan bukan anggota aktif, abaikan
+    if (!isInitiator && !isMember) return false;
+
+    // Jika inisiator sudah membatalkan dirinya sendiri, inisiator tidak melihat tiket aktif lagi
+    if (isInitiator && t.initiatorCancelled) return false;
+
+    // Jika anggota sudah membatalkan keikutsertaannya, anggota tidak melihat tiket aktif lagi
+    if (isMember && !isInitiator) {
+      const myMember = t.members.find(m => m.nip === nip);
+      if (myMember && (myMember.status === 'cancelled' || myMember.status === 'batal')) return false;
+    }
+
+    return t.status !== 'Dibatalkan' &&
+      t.status !== 'Ditolak' &&
+      t.status !== 'Selesai' &&
+      t.status !== 'Kedaluwarsa' &&
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Menunggu Verifikasi Atasan');
+  });
 }
 
 /**
