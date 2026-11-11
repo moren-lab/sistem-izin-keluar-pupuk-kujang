@@ -1486,13 +1486,28 @@ function openDigitalPassModal(ticketId) {
   // Button actions - Direct file download via Blob (Mencegah pop-up Save As yang mengganggu)
   const btnDownload = document.getElementById('btnDownloadDigitalQRPng') || document.getElementById('btnDownloadQRPng');
   if (btnDownload) {
-    btnDownload.onclick = () => {
+    btnDownload.onclick = (e) => {
+      if (e) e.stopImmediatePropagation();
+      if (btnDownload.dataset.downloading === '1') return;
+      btnDownload.dataset.downloading = '1';
+      const resetLock = () => {
+        setTimeout(() => {
+          delete btnDownload.dataset.downloading;
+        }, 800);
+      };
+
       const targetContainer = qrContainer || document.getElementById('digitalPassQrContainer') || document.getElementById('qrCodeContainer');
       const canvas = targetContainer ? targetContainer.querySelector('canvas') : null;
       const img = targetContainer ? targetContainer.querySelector('img') : null;
       const ticketId = ticket.id || (document.getElementById('digitalPassTicketId') || document.getElementById('passTicketId') || {}).textContent || 'KUJANG';
 
+      let downloaded = false;
       const triggerBlobDownload = (blob) => {
+        if (downloaded || !blob) {
+          resetLock();
+          return;
+        }
+        downloaded = true;
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
@@ -1505,6 +1520,7 @@ function openDigitalPassModal(ticketId) {
           URL.revokeObjectURL(url);
         }, 150);
         if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh ke folder Downloads!', 'success');
+        resetLock();
       };
 
       const makePaddedBlob = (sourceEl, cb) => {
@@ -1520,8 +1536,9 @@ function openDigitalPassModal(ticketId) {
           ctx.fillRect(0, 0, pc.width, pc.height);
           ctx.drawImage(sourceEl, pad, pad, w, h);
           pc.toBlob(cb, 'image/png');
-        } catch (e) {
+        } catch (err) {
           if (typeof sourceEl.toBlob === 'function') sourceEl.toBlob(cb, 'image/png');
+          else resetLock();
         }
       };
 
@@ -1531,15 +1548,18 @@ function openDigitalPassModal(ticketId) {
             triggerBlobDownload(blob);
           } else if (typeof canvas.toBlob === 'function') {
             canvas.toBlob(triggerBlobDownload, 'image/png');
+          } else {
+            resetLock();
           }
         });
       } else if (img && img.src) {
         const tempImg = new Image();
         tempImg.onload = () => makePaddedBlob(tempImg, triggerBlobDownload);
-        tempImg.onerror = () => fetch(img.src).then(r => r.blob()).then(triggerBlobDownload);
+        tempImg.onerror = () => fetch(img.src).then(r => r.blob()).then(triggerBlobDownload).catch(resetLock);
         tempImg.src = img.src;
       } else {
         if (typeof window.showToast === 'function') window.showToast('Menyiapkan gambar QR Code...', 'info');
+        resetLock();
       }
     };
   }
@@ -3682,53 +3702,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window._openedFromScannerTerminal = false;
   });
 
-  const btnDownloadQRPng = document.getElementById('btnDownloadDigitalQRPng') || document.getElementById('btnDownloadQRPng');
-  const qrCodeContainer = document.getElementById('digitalPassQrContainer') || document.getElementById('qrCodeContainer');
-  if (btnDownloadQRPng) {
-    btnDownloadQRPng.addEventListener('click', () => {
-      const targetContainer = qrCodeContainer || document.getElementById('digitalPassQrContainer') || document.getElementById('qrCodeContainer');
-      const canvas = targetContainer ? targetContainer.querySelector('canvas') : null;
-      const img = targetContainer ? targetContainer.querySelector('img') : null;
-      const passTicketEl = document.getElementById('digitalPassTicketId') || document.getElementById('passTicketId');
-      const ticketId = passTicketEl ? passTicketEl.textContent : 'KUJANG';
-
-      const triggerBlobDownload = (blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `Tiket-QR-${ticketId}.png`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          if (document.body.contains(a)) document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 150);
-        if (typeof window.showToast === 'function') window.showToast('QR Code berhasil diunduh ke folder Downloads!', 'success');
-      };
-
-      if (canvas && typeof canvas.toBlob === 'function') {
-        canvas.toBlob((blob) => {
-          if (blob) {
-            triggerBlobDownload(blob);
-          } else if (img && img.src) {
-            fetch(img.src).then(r => r.blob()).then(triggerBlobDownload);
-          }
-        }, 'image/png');
-      } else if (img && img.src) {
-        fetch(img.src).then(r => r.blob()).then(triggerBlobDownload).catch(() => {
-          const a = document.createElement('a');
-          a.href = img.src;
-          a.download = `Tiket-QR-${ticketId}.png`;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 150);
-        });
-      } else {
-        if (typeof window.showToast === 'function') window.showToast('QR Code belum aktif untuk tiket ini.', 'danger');
-      }
-    });
-  }
+  // Handler Unduh QR (.png) ditangani secara tunggal di openDigitalPassModal via btnDownload.onclick untuk mencegah double download
 
   const btnPrintPassPdf = document.getElementById('btnPrintPassPdf');
   if (btnPrintPassPdf) btnPrintPassPdf.addEventListener('click', () => window.print());
