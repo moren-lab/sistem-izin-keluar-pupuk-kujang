@@ -275,6 +275,7 @@ function renderApproverDashboard() {
   }
 
   const ticketsList = window.ticketsList || [];
+  const waitingVerificationTickets = ticketsList.filter(t => t.status === 'Menunggu Verifikasi Atasan' && isTicketAssignedToCurrentApprover(t));
   const pendingTickets = ticketsList.filter(t => !t.isEmergency && !(t.id && t.id.startsWith('TK-EMG-')) && t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
   const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' && isTicketAssignedToCurrentApprover(t));
   const outsideTickets = ticketsList.filter(t => !isDeletedByCurrentApprover(t) && (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketUnderMySupervision(t));
@@ -286,7 +287,7 @@ function renderApproverDashboard() {
   const appHeroStripStatus = document.getElementById('appHeroStripStatus');
   const appHeroStripSub = document.getElementById('appHeroStripSub');
   if (appHeroStripStatus && appHeroStripSub) {
-    const pendingCount = pendingTickets.length + pendingExtensions.length + lockedEmergencyTickets.length;
+    const pendingCount = pendingTickets.length + pendingExtensions.length + lockedEmergencyTickets.length + waitingVerificationTickets.length;
     if (pendingCount > 0) {
       appHeroStripStatus.textContent = `Status Antrean: ${pendingCount} Pengajuan Menunggu Keputusan`;
       appHeroStripSub.textContent = `Tinjau dan berikan keputusan perizinan karyawan bawahan.`;
@@ -461,9 +462,9 @@ function renderApproverDashboard() {
     approverUrgentBanner.innerHTML = bannerHtml;
   }
 
-  // Pending queue quick inline list (Permohonan Darurat + Initial approvals + Extension requests)
+  // Pending queue quick inline list (Verifikasi Tiba + Permohonan Darurat + Initial approvals + Extension requests)
   if (approverDashboardPendingList) {
-    if (lockedEmergencyTickets.length === 0 && pendingTickets.length === 0 && pendingExtensions.length === 0 && reassignedAwayTickets.length === 0) {
+    if (waitingVerificationTickets.length === 0 && lockedEmergencyTickets.length === 0 && pendingTickets.length === 0 && pendingExtensions.length === 0 && reassignedAwayTickets.length === 0) {
       approverDashboardPendingList.innerHTML = `
         <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
           Tidak ada antrian izin yang menunggu keputusan. Semua beres!
@@ -471,6 +472,45 @@ function renderApproverDashboard() {
       `;
     } else {
       let html = '';
+
+      // Render Verifikasi Kedatangan (Tap In Gerbang / Bukti Foto Karyawan)
+      waitingVerificationTickets.forEach(t => {
+        const hasProofPhoto = Boolean(t.arrivalProofPhoto);
+        html += `
+          <div class="feed-item" style="border-left: 4px solid #2563eb; background: #eff6ff; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
+                ${window.getStatusPill(t.status, t)}
+              </div>
+              <span style="font-size: 0.72rem; color: #1e40af; font-weight: 700;">🔒 Tap In: ${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}</span>
+            </div>
+            <div style="font-size: 0.825rem; color: var(--text-primary);">
+              <strong>${t.applicantName || 'Pemohon'}</strong> (${t.applicantNip || '-'}) — Tujuan: <strong>${t.destination || '-'}</strong>
+            </div>
+            <div style="font-size: 0.775rem; color: #1e40af; line-height: 1.4;">
+              ${hasProofPhoto
+                ? `📸 Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi kembali:`
+                : `🏢 Personel telah melakukan Tap In di gerbang. Periksa kehadiran fisik di ruangan kerja:`}
+            </div>
+            ${hasProofPhoto ? `
+              <div class="proof-photo-review-card" style="display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.65rem; border-radius: 8px;">
+                <img src="${t.arrivalProofPhoto}" alt="Foto Bukti Kedatangan" class="proof-photo-thumb" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')" title="Klik untuk perbesar foto bukti">
+                <div style="flex: 1; min-width: 0; font-size: 0.72rem; line-height: 1.4;">
+                  <div style="font-weight: 800; color: var(--text-primary, #0f172a);">📸 Foto Bukti Real-Time</div>
+                  <div style="color: #64748b;">Oleh: <strong>${t.arrivalProofBy || t.applicantName || 'Karyawan'}</strong></div>
+                  <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                </div>
+              </div>
+            ` : ''}
+            <div style="display: flex; justify-content: flex-end; gap: 0.45rem; flex-wrap: wrap; padding-top: 0.45rem; border-top: 1px solid rgba(59, 130, 246, 0.25);">
+              <button type="button" class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'detail')">Detail Pengajuan</button>
+              <button type="button" class="btn-reject" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 700;" onclick="window.rejectArrivalByApprover('${t.id}')">✕ Belum Tiba</button>
+              <button type="button" class="btn-approve" style="padding: 0.35rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="window.confirmArrivalByApprover('${t.id}')">✓ Ya, Sudah Tiba</button>
+            </div>
+          </div>
+        `;
+      });
 
       // Render Permohonan Izin Darurat di paling atas Antrean Persetujuan Cepat (Priority 1)
       lockedEmergencyTickets.forEach(emg => {

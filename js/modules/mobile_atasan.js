@@ -3392,26 +3392,27 @@
 
   // Mobile Atasan Return / Arrival verification handlers
   window.mobileAtasanConfirmArrival = function (ticketId) {
+    if (typeof closeMobileSheet === 'function') closeMobileSheet();
     if (typeof window.confirmArrivalByApprover === 'function') {
       window.confirmArrivalByApprover(ticketId);
-    } else {
-      const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
-      const t = tickets.find(x => x.id === ticketId);
-      if (!t) return;
-      const approver = getActiveApprover();
-      const arrivalTime = t.arrivalReportedAt || (typeof formatNow === 'function' ? formatNow() : new Date().toISOString());
-      t.status = 'Selesai';
-      t.scanInTime = arrivalTime;
-      if (!Array.isArray(t.timeline)) t.timeline = [];
-      t.timeline.push({
-        status: 'Selesai',
-        time: (typeof formatNow === 'function') ? formatNow() : new Date().toISOString(),
-        actor: approver.name,
-        actorRole: approver.role || 'Atasan Peninjau',
-        desc: 'Atasan telah mengonfirmasi kedatangan fisik karyawan di kantor/ruangan. Izin selesai resmi.'
-      });
-      if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
+      return;
     }
+    const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const approver = getActiveApprover();
+    const arrivalTime = t.arrivalReportedAt || (typeof formatNow === 'function' ? formatNow() : new Date().toISOString());
+    t.status = 'Selesai';
+    t.scanInTime = arrivalTime;
+    if (!Array.isArray(t.timeline)) t.timeline = [];
+    t.timeline.push({
+      status: 'Selesai',
+      time: (typeof formatNow === 'function') ? formatNow() : new Date().toISOString(),
+      actor: approver.name,
+      actorRole: approver.role || 'Atasan Peninjau',
+      desc: 'Atasan telah mengonfirmasi kedatangan fisik karyawan di kantor/ruangan. Izin selesai resmi.'
+    });
+    if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
     if (typeof showMobileToast === 'function') {
       showMobileToast('Kedatangan karyawan berhasil dikonfirmasi. Status: Selesai.', 'success');
     }
@@ -3419,28 +3420,25 @@
   };
 
   window.mobileAtasanRejectArrival = function (ticketId) {
+    if (typeof closeMobileSheet === 'function') closeMobileSheet();
     if (typeof window.rejectArrivalByApprover === 'function') {
       window.rejectArrivalByApprover(ticketId);
-    } else {
-      const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
-      const t = tickets.find(x => x.id === ticketId);
-      if (!t) return;
-      const approver = getActiveApprover();
-      t.status = 'Sedang di Luar';
-      t.arrivalReportedAt = null;
-      if (!Array.isArray(t.timeline)) t.timeline = [];
-      t.timeline.push({
-        status: 'Sedang di Luar',
-        time: (typeof formatNow === 'function') ? formatNow() : new Date().toISOString(),
-        actor: approver.name,
-        actorRole: approver.role || 'Atasan Peninjau',
-        desc: 'Verifikasi kedatangan ditolak oleh atasan: Karyawan belum berada secara fisik di ruangan kerja.'
-      });
-      if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
+      return;
     }
-    if (typeof showMobileToast === 'function') {
-      showMobileToast('Laporan kedatangan dibatalkan. Karyawan tetap berstatus Sedang di Luar.', 'info');
-    }
+    const tickets = (typeof MOCK_TICKETS !== 'undefined') ? MOCK_TICKETS : [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+    const approver = getActiveApprover();
+    t.status = 'Menunggu Bukti Kedatangan';
+    t.timeFrozen = true;
+    if (!Array.isArray(t.timeline)) t.timeline = [];
+    t.timeline.push({
+      event: 'Konfirmasi Belum Tiba',
+      time: (typeof formatNow === 'function') ? formatNow() : new Date().toISOString(),
+      by: approver.name,
+      desc: 'Atasan menandai personel belum tiba & meminta foto bukti kedatangan real-time.'
+    });
+    if (typeof saveTicketsToStorage === 'function') saveTicketsToStorage(tickets);
     renderMobileAtasan(null);
   };
 

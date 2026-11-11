@@ -20,8 +20,10 @@ def get_local_ip():
 
 class CustomHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
-        # Header agar mobile dan desktop selalu memuat aset terbaru tanpa delay
-        self.send_header('Cache-Control', 'no-cache')
+        # Header agar mobile dan desktop selalu memuat aset terbaru tanpa cache usang
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
         self.send_header('Access-Control-Allow-Origin', '*')
         super().end_headers()
 

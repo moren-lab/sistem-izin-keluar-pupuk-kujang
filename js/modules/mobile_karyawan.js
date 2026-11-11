@@ -3420,6 +3420,26 @@
           ${t.approverNote ? `
            
           ` : ''}
+
+          ${(t.arrivalRejectReason || t.arrivalProofPhoto) ? `
+            <div class="proof-reason-alert-box" style="border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
+              ${t.arrivalRejectReason ? `
+                <div style="font-size: 0.75rem; font-weight: 800;">⚠️ Alasan Belum Tiba (${escapeHtml(t.arrivalRejectBy || 'Atasan')} • Putaran #${t.arrivalRejectionRound || 1}):</div>
+                <div style="font-size: 0.75rem; margin-top: 2px; line-height: 1.4;">"${escapeHtml(t.arrivalRejectReason)}"</div>
+                <div style="font-size: 0.68rem; margin-top: 4px; opacity: 0.9;">🔒 Tap In Gerbang (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) tetap terkunci.</div>
+              ` : ''}
+              ${t.arrivalProofPhoto ? `
+                <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px; border-radius: 8px;">
+                  <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 80px; height: 56px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
+                  <div style="flex: 1; min-width: 0; font-size: 0.68rem; line-height: 1.35;">
+                    <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                    <div>Oleh: <strong>${escapeHtml(t.arrivalProofBy || '-')}</strong></div>
+                    <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
         </div>
 
         <div id="mDetailSecJejak" style="display: none;">
@@ -3431,6 +3451,11 @@
         <!-- Action buttons according to ticket status & role (Perubahan 5: Hanya Pemilik Karyawan yang melihat tombol aksi) -->
         ${isOwner ? `
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
+          ${t.status === 'Menunggu Bukti Kedatangan' ? `
+            <button type="button" class="mobile-btn-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; min-height: 44px; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileCloseSheet(); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${t.id}')">
+              <span>📷 Upload Foto</span>
+            </button>
+          ` : ''}
           ${isPending ? `
             <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${t.id}')">
               Edit Pengajuan Ini

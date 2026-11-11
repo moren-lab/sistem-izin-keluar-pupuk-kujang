@@ -12939,4 +12939,11 @@ body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #vi
   color: #ffffff !important;
 }
 
+/* Guarantee Arrival Proof & Reason Modals Layer Above Mobile Action Sheets */
+#modalRejectArrivalReason,
+#modalUploadArrivalProof,
+#modalDocViewer {
+  z-index: 10080 !important;
+}
+
 
