@@ -1,0 +1,94 @@
+- generic [active] [ref=f7e1]:
+  - text: – – – – – – –
+  - generic [ref=f7e2]:
+    - banner [ref=f7e3]:
+      - generic [ref=f7e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f7e6]
+        - generic [ref=f7e7]:
+          - generic [ref=f7e8]: PUPUK KUJANG
+          - generic [ref=f7e9]: Perizinan Keluar Area
+      - generic [ref=f7e10]:
+        - button "Karyawan ▼" [ref=f7e11] [cursor=pointer]:
+          - generic [ref=f7e15]: Karyawan
+          - generic [ref=f7e16]: ▼
+        - button "Notifikasi" [ref=f7e18] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f7e22] [cursor=pointer]:
+          - img "BP" [ref=f7e23]
+    - main [ref=f7e24]:
+      - generic [ref=f7e25]:
+        - generic [ref=f7e26]: Selamat siang,
+        - heading "Budi Pratama, S.T." [level=2] [ref=f7e27]
+        - generic [ref=f7e28]: Karyawan
+        - generic [ref=f7e29]: Departemen Rekayasa & Pemeliharaan
+        - generic [ref=f7e30]: "Atasan: Ir. Hendra Gunawan, M.T."
+        - button "Pengajuan Saya" [ref=f7e31] [cursor=pointer]
+      - generic [ref=f7e33]:
+        - button "Ringkasan Perizinan" [ref=f7e34] [cursor=pointer]
+        - button "Total Pengajuan Izin" [ref=f7e35] [cursor=pointer]
+      - generic [ref=f7e36]:
+        - generic [ref=f7e37]:
+          - generic [ref=f7e38]: Total pengajuan
+          - generic [ref=f7e39]: "10"
+        - generic [ref=f7e40]:
+          - generic [ref=f7e41]: Izin selesai
+          - generic [ref=f7e42]: "8"
+        - generic [ref=f7e43]:
+          - generic [ref=f7e44]: Izin aktif
+          - generic [ref=f7e45]: "1"
+      - generic [ref=f7e46]:
+        - generic [ref=f7e47]:
+          - generic [ref=f7e48]:
+            - generic [ref=f7e49]: IZIN AKTIF SAYA
+            - heading "TK-20261111-723" [level=3] [ref=f7e50]
+          - generic [ref=f7e51]: Menunggu Verifikasi Atasan
+        - generic [ref=f7e52]: Dinas Kantor • Kembali ke Area
+        - generic "Pelabuhan Cirebon" [ref=f7e53]
+        - generic "Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor." [ref=f7e54]: "\"Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.\""
+        - generic [ref=f7e55]:
+          - generic [ref=f7e56]:
+            - generic [ref=f7e57]: "Tim Dinas: 2 Personel Aktif"
+            - generic [ref=f7e58]: QR Bersama
+          - generic [ref=f7e59]:
+            - generic [ref=f7e60]:
+              - strong [ref=f7e61]: Budi Pratama, S.T.
+              - text: (Inisiator)
+            - generic [ref=f7e62]:
+              - strong [ref=f7e63]: Arthur Morgan, S.Tr.T.
+              - text: (Aktif Ikut)
+        - generic [ref=f7e64]:
+          - generic [ref=f7e65]:
+            - generic [ref=f7e66]: Jadwal Keluar
+            - generic [ref=f7e67]: "-"
+          - generic [ref=f7e68]:
+            - generic [ref=f7e69]: Batas Jam Kembali
+            - generic [ref=f7e70]: Rabu, 11 Nov 2026, 12.38 WIB
+        - link "Lihat Detail Pengajuan" [ref=f7e72] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f7e73]:
+        - heading "Pengajuan Terbaru" [level=3] [ref=f7e75]
+        - generic [ref=f7e76]:
+          - generic [ref=f7e77]:
+            - generic [ref=f7e78]:
+              - text: TK-20261106-901
+              - generic [ref=f7e79]: Terlambat
+            - generic [ref=f7e80]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f7e81] [cursor=pointer]
+        - generic [ref=f7e86]:
+          - generic [ref=f7e87]:
+            - generic [ref=f7e88]:
+              - text: IZ-20261019-013
+              - generic [ref=f7e89]: Selesai
+            - generic [ref=f7e90]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f7e91] [cursor=pointer]
+        - link "Semua riwayat" [ref=f7e97] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f7e98]:
+      - generic [ref=f7e99] [cursor=pointer]: Dashboard
+      - generic [ref=f7e106] [cursor=pointer]: Pengajuan
+      - generic [ref=f7e111] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic [ref=f7e116]: Beralih ke akun Budi Pratama, S.T.
+    - generic [ref=f7e118]: Selamat datang, Budi Pratama, S.T. (undefined)
+    - generic [ref=f7e120]: Beralih ke akun Budi Pratama, S.T.

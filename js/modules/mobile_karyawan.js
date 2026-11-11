@@ -1220,20 +1220,22 @@
     if (t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) {
       const activeCount = (t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length;
       groupMembersHtml = `
-        <div style="margin: 8px 0; padding: 8px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div style="margin: 8px 0; padding: 6px 0; font-size: 0.75rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 0.7rem; font-weight: 700; color: #475569;">Tim Dinas (${activeCount} Karyawan Aktif)</span>
-            <span style="font-size: 0.65rem; color: #2563eb; font-weight: 700;">QR Bersama</span>
+            <span style="font-size: 0.725rem; font-weight: 700; color: #1e293b;">Tim Dinas: <span style="color: #2563eb; font-weight: 700; margin-left: 2px;">${activeCount} Personel Aktif</span></span>
+            <span style="font-size: 0.675rem; color: #2563eb; font-weight: 700;">QR Bersama</span>
           </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-            <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${t.initiatorCancelled ? '#fee2e2' : '#ffffff'}; border: 1px solid ${t.initiatorCancelled ? '#fca5a5' : '#cbd5e1'}; color: ${t.initiatorCancelled ? '#dc2626' : '#334155'}; font-weight: 700; ${t.initiatorCancelled ? 'text-decoration: line-through;' : ''}">
-              ${escapeHtml(t.applicantName)} (Inisiator)
-            </span>
-            ${t.members.map(m => `
-              <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; border: 1px solid ${m.status === 'batal' ? '#fca5a5' : '#cbd5e1'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; font-weight: 600; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
-                ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
-              </span>
-            `).join('')}
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; line-height: 1.4; color: #334155;">
+            ${!t.initiatorCancelled ? `
+              <span><strong>${escapeHtml(t.applicantName)}</strong> <span style="color: #d97706; font-weight: 700;">(Inisiator)</span></span>
+            ` : `
+              <span style="color: #94a3b8; text-decoration: line-through;">${escapeHtml(t.applicantName)} (Batal)</span>
+            `}
+            ${t.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `
+              <span style="color: #94a3b8; text-decoration: line-through;">${escapeHtml(m.name)} (Batal)</span>
+            ` : `
+              <span><strong>${escapeHtml(m.name)}</strong> <span style="color: #16a34a; font-weight: 700;">(Aktif Ikut)</span></span>
+            `).join(', ')}
           </div>
         </div>
       `;
@@ -3433,9 +3435,9 @@
           </div>
 
           ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
-            <div style="margin-bottom: 12px; padding: 4px 2px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                <span style="font-size: 0.75rem; color: #0f172a; font-weight: 800; text-transform: uppercase;">
+            <div style="margin-bottom: 14px; padding: 4px 2px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 0.75rem; color: #0f172a; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">
                   Tim Dinas Bersama
                 </span>
                 <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">
@@ -3443,18 +3445,37 @@
                 </span>
               </div>
               <div style="display: flex; flex-direction: column;">
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9;">
-                  <div style="font-size: 0.775rem; color: #0f172a;">
-                    <strong>${escapeHtml(t.applicantName || 'Inisiator')}</strong> (${t.applicantNip || 'Inisiator'}) <span style="font-size: 0.72rem; font-weight: 700; color: #d97706; margin-left: 4px;">(Inisiator)</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; gap: 12px;">
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 0.8rem; color: #0f172a; line-height: 1.35; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                      <strong>${escapeHtml(t.applicantName || 'Inisiator')}</strong>
+                      <span style="font-size: 0.7rem; font-weight: 700; color: #d97706;">(Inisiator)</span>
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
+                      NIP: ${t.applicantNip || 'PK-2024-8841'}
+                    </div>
                   </div>
-                  <span style="font-size: 0.75rem; font-weight: 700; color: #16a34a;">Aktif Ikut</span>
+                  <div style="flex-shrink: 0; text-align: right;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: ${t.initiatorCancelled ? '#dc2626' : '#16a34a'}; white-space: nowrap;">
+                      ${t.initiatorCancelled ? 'Batal' : 'Aktif Ikut'}
+                    </span>
+                  </div>
                 </div>
                 ${t.members.map(m => `
-                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9;">
-                    <div style="font-size: 0.775rem; color: ${m.status === 'batal' ? '#991b1b' : '#0f172a'};">
-                      <strong>${escapeHtml(m.name)}</strong> (${m.nip})
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; gap: 12px;">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 0.8rem; color: ${(m.status === 'batal' || m.status === 'cancelled') ? '#94a3b8' : '#0f172a'}; line-height: 1.35; ${(m.status === 'batal' || m.status === 'cancelled') ? 'text-decoration: line-through;' : ''}">
+                        <strong>${escapeHtml(m.name)}</strong>
+                      </div>
+                      <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
+                        NIP: ${m.nip}
+                      </div>
                     </div>
-                    <span style="font-size: 0.75rem; font-weight: 700; color: ${m.status === 'batal' ? '#dc2626' : '#16a34a'};">${m.status === 'batal' ? 'Batal' : 'Aktif Ikut'}</span>
+                    <div style="flex-shrink: 0; text-align: right;">
+                      <span style="font-size: 0.75rem; font-weight: 700; color: ${(m.status === 'batal' || m.status === 'cancelled') ? '#dc2626' : '#16a34a'}; white-space: nowrap;">
+                        ${(m.status === 'batal' || m.status === 'cancelled') ? 'Batal' : 'Aktif Ikut'}
+                      </span>
+                    </div>
                   </div>
                 `).join('')}
               </div>

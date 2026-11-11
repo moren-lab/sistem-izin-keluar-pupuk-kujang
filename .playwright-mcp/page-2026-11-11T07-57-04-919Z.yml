@@ -1,0 +1,173 @@
+- generic [active] [ref=f7e1]:
+  - text: – – – – – – –
+  - generic [ref=f7e2]:
+    - banner [ref=f7e3]:
+      - generic [ref=f7e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f7e6]
+        - generic [ref=f7e7]:
+          - generic [ref=f7e8]: PUPUK KUJANG
+          - generic [ref=f7e9]: Perizinan Keluar Area
+      - generic [ref=f7e10]:
+        - button "Karyawan ▼" [ref=f7e11] [cursor=pointer]:
+          - generic [ref=f7e15]: Karyawan
+          - generic [ref=f7e16]: ▼
+        - button "Notifikasi" [ref=f7e18] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f7e22] [cursor=pointer]:
+          - img "BP" [ref=f7e122]
+    - main [ref=f7e24]:
+      - generic [ref=f7e213]:
+        - generic [ref=f7e214]: Selamat siang,
+        - heading "Budi Pratama, S.T." [level=2] [ref=f7e215]
+        - generic [ref=f7e216]: Karyawan
+        - generic [ref=f7e217]: Departemen Rekayasa & Pemeliharaan
+        - generic [ref=f7e218]: "Atasan: Ir. Hendra Gunawan, M.T."
+        - button "Pengajuan Saya" [ref=f7e219] [cursor=pointer]
+      - generic [ref=f7e221]:
+        - button "Ringkasan Perizinan" [ref=f7e222] [cursor=pointer]
+        - button "Total Pengajuan Izin" [ref=f7e223] [cursor=pointer]
+      - generic [ref=f7e224]:
+        - generic [ref=f7e225]:
+          - generic [ref=f7e226]: Total pengajuan
+          - generic [ref=f7e227]: "10"
+        - generic [ref=f7e228]:
+          - generic [ref=f7e229]: Izin selesai
+          - generic [ref=f7e230]: "8"
+        - generic [ref=f7e231]:
+          - generic [ref=f7e232]: Izin aktif
+          - generic [ref=f7e233]: "1"
+      - generic [ref=f7e234]:
+        - generic [ref=f7e235]:
+          - generic [ref=f7e236]:
+            - generic [ref=f7e237]: IZIN AKTIF SAYA
+            - heading "TK-20261111-723" [level=3] [ref=f7e238]
+          - generic [ref=f7e239]: Menunggu Verifikasi Atasan
+        - generic [ref=f7e240]: Dinas Kantor • Kembali ke Area
+        - generic "Pelabuhan Cirebon" [ref=f7e241]
+        - generic "Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor." [ref=f7e242]: "\"Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.\""
+        - generic [ref=f7e243]:
+          - generic [ref=f7e244]:
+            - generic [ref=f7e245]: "Tim Dinas: 2 Personel Aktif"
+            - generic [ref=f7e246]: QR Bersama
+          - generic [ref=f7e247]:
+            - generic [ref=f7e248]:
+              - strong [ref=f7e249]: Budi Pratama, S.T.
+              - text: (Inisiator)
+            - generic [ref=f7e250]:
+              - strong [ref=f7e251]: Arthur Morgan, S.Tr.T.
+              - text: (Aktif Ikut)
+        - generic [ref=f7e252]:
+          - generic [ref=f7e253]:
+            - generic [ref=f7e254]: Jadwal Keluar
+            - generic [ref=f7e255]: "-"
+          - generic [ref=f7e256]:
+            - generic [ref=f7e257]: Batas Jam Kembali
+            - generic [ref=f7e258]: Rabu, 11 Nov 2026, 12.38 WIB
+        - link "Lihat Detail Pengajuan" [ref=f7e260] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f7e261]:
+        - heading "Pengajuan Terbaru" [level=3] [ref=f7e263]
+        - generic [ref=f7e264]:
+          - generic [ref=f7e265]:
+            - generic [ref=f7e266]:
+              - text: TK-20261106-901
+              - generic [ref=f7e267]: Terlambat
+            - generic [ref=f7e268]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f7e269] [cursor=pointer]
+        - generic [ref=f7e274]:
+          - generic [ref=f7e275]:
+            - generic [ref=f7e276]:
+              - text: IZ-20261019-013
+              - generic [ref=f7e277]: Selesai
+            - generic [ref=f7e278]: Dinas Kantor • PT Rekayasa Industri, Cikampek
+          - button "Detail Pengajuan" [ref=f7e279] [cursor=pointer]
+        - link "Semua riwayat" [ref=f7e285] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f7e98]:
+      - generic [ref=f7e286] [cursor=pointer]: Dashboard
+      - generic [ref=f7e293] [cursor=pointer]: Pengajuan
+      - generic [ref=f7e298] [cursor=pointer]: Riwayat
+    - generic [ref=f7e304]:
+      - generic [ref=f7e306]:
+        - generic [ref=f7e307]:
+          - text: RINCIAN TIKET
+          - heading "TK-20261111-723" [level=3] [ref=f7e308]
+        - button "Tutup" [ref=f7e309] [cursor=pointer]: ✕
+      - generic [ref=f7e310]:
+        - generic [ref=f7e311]:
+          - generic [ref=f7e312]:
+            - generic [ref=f7e313]: Budi Pratama, S.T.
+            - generic [ref=f7e314]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f7e315]: Menunggu Verifikasi Atasan
+        - generic [ref=f7e316]:
+          - button "Informasi Tiket" [ref=f7e317] [cursor=pointer]
+          - button "Riwayat Aktivitas" [ref=f7e318] [cursor=pointer]
+        - generic [ref=f7e319]:
+          - generic [ref=f7e320]:
+            - generic [ref=f7e321]: INFORMASI KARYAWAN
+            - generic [ref=f7e322]:
+              - strong [ref=f7e323]: "Nama:"
+              - text: Budi Pratama, S.T.
+              - strong [ref=f7e324]: "NIP:"
+              - text: PK-2024-8841
+              - strong [ref=f7e325]: "Departemen:"
+              - text: Departemen Rekayasa & Pemeliharaan
+              - strong [ref=f7e326]: "Atasan:"
+              - text: Ir. Hendra Gunawan, M.T.
+          - generic [ref=f7e327]:
+            - generic [ref=f7e328]: KEPERLUAN IZIN
+            - generic [ref=f7e329]:
+              - generic [ref=f7e330]:
+                - generic [ref=f7e331]: Tujuan Keluar
+                - generic [ref=f7e332]: Pelabuhan Cirebon
+              - generic [ref=f7e333]:
+                - generic [ref=f7e334]: Alasan Keperluan
+                - generic [ref=f7e335]: "\"Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.\""
+          - generic [ref=f7e336]:
+            - generic [ref=f7e337]: WAKTU KELUAR & KEMBALI
+            - generic [ref=f7e338]:
+              - generic [ref=f7e339]:
+                - generic [ref=f7e340]: Waktu Keluar
+                - generic [ref=f7e341]: Rabu, 11 Nov 2026, 10.40 WIB (Aktual)
+              - generic [ref=f7e342]:
+                - generic [ref=f7e343]: Batas Kembali
+                - generic [ref=f7e344]: Rabu, 11 Nov 2026, 12.38 WIB
+          - generic [ref=f7e345]:
+            - generic [ref=f7e346]:
+              - generic [ref=f7e347]: Tim Dinas Bersama
+              - generic [ref=f7e348]: 2 Karyawan Aktif
+            - generic [ref=f7e349]:
+              - generic [ref=f7e350]:
+                - generic [ref=f7e351]:
+                  - generic [ref=f7e352]:
+                    - strong [ref=f7e353]: Budi Pratama, S.T.
+                    - generic [ref=f7e354]: (Inisiator)
+                  - generic [ref=f7e355]: "NIP: PK-2024-8841"
+                - generic [ref=f7e356]: Aktif Ikut
+              - generic [ref=f7e357]:
+                - generic [ref=f7e358]:
+                  - strong [ref=f7e360]: Arthur Morgan, S.Tr.T.
+                  - generic [ref=f7e361]: "NIP: PK-2024-8842"
+                - generic [ref=f7e362]: Aktif Ikut
+          - generic [ref=f7e363]:
+            - generic [ref=f7e364]: Surat Perintah / Surat Tugas
+            - generic [ref=f7e365]:
+              - generic [ref=f7e366]:
+                - generic [ref=f7e367]: Surat_Tugas_Dinas.pdf
+                - generic [ref=f7e368]: 142 KB • Terlampir Resmi
+              - button "Lihat File" [ref=f7e369] [cursor=pointer]
+          - generic [ref=f7e370]:
+            - generic [ref=f7e371]: Riwayat Verifikasi Kedatangan & Foto Bukti Real-Time
+            - generic [ref=f7e373]:
+              - generic [ref=f7e374]: "Alasan Belum Tiba (Ir. Hendra Gunawan, M.T. • Putaran #2):"
+              - generic [ref=f7e375]: "\"kikkkkkk\""
+              - generic [ref=f7e376]: "Dikirim pada: Rabu, 11 Nov 2026, 13.04.45 WIB"
+            - generic [ref=f7e377]:
+              - img "Foto Bukti" [ref=f7e378] [cursor=pointer]
+              - generic [ref=f7e379]:
+                - generic [ref=f7e380]: Foto Bukti Real-Time Terbaru
+                - generic [ref=f7e381]:
+                  - text: "Oleh:"
+                  - strong [ref=f7e382]: Budi Pratama, S.T.
+                - generic [ref=f7e383]: "Stempel: Rabu, 11 Nov 2026, 13.04.54 WIB"
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
