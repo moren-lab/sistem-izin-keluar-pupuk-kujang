@@ -423,6 +423,20 @@ window.executeTapInGate = function(ticketId, memberNip, memberName) {
   t.timeFrozen = true;
 
   if (!t.timeline) t.timeline = [];
+
+  // Jika ada permohonan perpanjangan waktu yang belum diproses, otomatis gugur/dibatalkan karena telah tiba & Tap In
+  if (t.pendingExtension || t.hasExtensionPending) {
+    t.timeline.push({
+      event: 'Perpanjangan Waktu Gugur Otomatis',
+      time: nowFormatted,
+      by: `${memberName} (${memberNip})`,
+      desc: `Pengajuan perpanjangan waktu otomatis gugur karena personel telah Tap In kembali ke pabrik.`
+    });
+    delete t.pendingExtension;
+    t.hasExtensionPending = false;
+    delete t.extensionRequestedTime;
+  }
+
   t.timeline.push({
     event: 'Tap In Gerbang Masuk',
     time: nowFormatted,
@@ -458,6 +472,8 @@ window.executeTapInGate = function(ticketId, memberNip, memberName) {
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
   if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
   if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+  if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
+  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
 };
 
 window.reportArrivalAtOffice = function(ticketId) {

@@ -2966,8 +2966,23 @@
     t.status = 'Selesai';
     t.scanInTime = `${nowFormatted} (Pos 1 Gerbang Utama)`;
     t.scanInGate = 'Pos 1 Gerbang Utama';
-    t.hasExtensionPending = false;
-    t.pendingExtension = null;
+
+    if (t.pendingExtension || t.hasExtensionPending) {
+      if (!t.timeline) t.timeline = [];
+      t.timeline.push({
+        event: 'Perpanjangan Waktu Gugur Otomatis',
+        time: nowFormatted,
+        by: `${t.applicantName || 'Budi Pratama'} (Karyawan)`,
+        desc: `Pengajuan perpanjangan waktu otomatis dibatalkan karena karyawan telah Tap In masuk ke area pabrik.`
+      });
+      delete t.pendingExtension;
+      t.hasExtensionPending = false;
+      delete t.extensionRequestedTime;
+    } else {
+      t.hasExtensionPending = false;
+      t.pendingExtension = null;
+    }
+
     if (!t.timeline) t.timeline = [];
     t.timeline.push({
       event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Tepat Waktu)',
@@ -2987,6 +3002,8 @@
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
+    if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
+    if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
   };
 
   // -------------------------------------------------------------------

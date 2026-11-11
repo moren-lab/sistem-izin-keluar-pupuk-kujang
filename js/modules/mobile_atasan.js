@@ -307,9 +307,9 @@
     const pendingNew = tickets.filter(t =>
       !t.isEmergency &&
       !t.id.includes('-EMG-') &&
-      t.status === 'Menunggu Persetujuan'
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Verifikasi Atasan')
     );
-    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa');
+    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const processedTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak');
@@ -527,6 +527,64 @@
       pendingTicketsHtml = pendingNew.map(t => {
         const isReassignedAway = isTicketReassignedFromMobileApprover(t);
         const isReassignedToMe = isTicketReassignedToMobileApprover(t);
+
+        if (t.status === 'Menunggu Verifikasi Atasan') {
+          return `
+          <div class="mobile-ticket-item" style="border: 1.5px solid #93c5fd; border-radius: 10px; padding: 12px; margin-bottom: 0; background: #ffffff;">
+            <div class="mobile-ticket-item-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div>
+                <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+                <div style="font-size: 0.625rem; color: #64748b; font-weight: 600;">${t.id} • ${t.category || 'Dinas Kantor'}</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                <span class="mobile-badge" style="background: #eff6ff; color: #1d4ed8; font-weight: 800; border: 1px solid #bfdbfe;">Menunggu Verifikasi Atasan</span>
+                ${isReassignedAway ? `
+                  <span style="background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #fde68a;">Dialihkan ke ${t.approverName}</span>
+                ` : (isReassignedToMe ? `
+                  <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 9999px; border: 1px solid #bfdbfe;">Dialihkan dari ${t.reassignedFrom}</span>
+                ` : '')}
+              </div>
+            </div>
+
+            <div class="mobile-clamp-1" style="font-size: 0.725rem; color: #475569; margin: 4px 0 6px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;">
+              Rencana: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'} s/d ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}</strong>${t.destination ? ` • Keperluan: <strong>${escapeHtml(t.destination)}</strong>` : ''}
+            </div>
+
+            <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 10px 12px; margin: 8px 0;">
+              <div style="font-size: 0.75rem; font-weight: 800; color: #1e40af; margin-bottom: 3px;">
+                🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
+              </div>
+              <div style="font-size: 0.72rem; color: #2563eb; line-height: 1.4;">
+                Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+              </div>
+            </div>
+
+            ${isReassignedAway ? `
+              <div style="margin-top: 8px;">
+                <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Lihat Detail Pengajuan</span>
+                </button>
+              </div>
+            ` : `
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 700; background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+                  ✕ Belum Tiba
+                </button>
+                <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+                  ✓ Ya, Sudah Tiba
+                </button>
+              </div>
+              <div style="margin-top: 8px;">
+                <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span>Lihat Detail Pengajuan</span>
+                </button>
+              </div>
+            `}
+          </div>
+          `;
+        }
 
         return `
         <div class="mobile-ticket-item" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 0; background: #ffffff;">
@@ -781,12 +839,12 @@
     const pendingRegular = tickets.filter(t =>
       !t.isEmergency &&
       !t.id.includes('-EMG-') &&
-      t.status === 'Menunggu Persetujuan'
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Verifikasi Atasan')
     );
 
     // Izin darurat diletakkan di puncak antrean dengan prioritas tertinggi
     const pendingNew = [...pendingEmergTickets, ...pendingRegular];
-    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa');
+    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
 
     let activeList = currentAntreanSegment === 'baru' ? pendingNew : pendingExt;
 
@@ -815,6 +873,144 @@
           const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
           const isReassignedAway = isTicketReassignedFromMobileApprover(t);
           const isReassignedToMe = isTicketReassignedToMobileApprover(t);
+
+          if (t.status === 'Menunggu Verifikasi Atasan') {
+            const memberCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : 0);
+            const formattedDate = typeof window.formatDisplayDate === 'function' ? window.formatDisplayDate(t.plannedExit) : (t.planDate || 'Hari ini');
+            const exitTime = formatTimeOnly(getTExitTime(t)) || '11.30 WIB';
+            const returnTime = isPulang ? '— (tidak kembali)' : (formatTimeOnly(getTReturnTime(t)) || '13.00 WIB');
+            const createdText = t.createdAt ? (t.createdAt.includes('WIB') ? t.createdAt : `${t.createdAt} WIB`) : 'Hari ini, 11.26 WIB';
+
+            return `
+              <div class="mobile-ticket-item" style="margin-bottom: 12px; border: 1.5px solid #93c5fd; background: #ffffff; border-radius: 12px; padding: 14px;">
+                <!-- Header: TK Number & Status Menunggu Verifikasi Atasan -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                  <div>
+                    <div style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</div>
+                    <div style="font-size: 0.675rem; color: #64748b; margin-top: 2px;">Diajukan: ${createdText}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.775rem; font-weight: 800; color: #2563eb; line-height: 1.25;">
+                      Menunggu Verifikasi<br>Atasan
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Box Profil Karyawan Pemohon -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: #047857; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
+                      👨‍💼
+                    </div>
+                    <div>
+                      <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
+                      <div style="font-size: 0.675rem; color: #64748b;">NIP: ${getTNip(t)}</div>
+                      <div style="font-size: 0.65rem; color: #64748b;">${getTDept(t)}</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                    <span style="color: #059669; font-size: 0.75rem; font-weight: 800;">${t.category || 'Dinas Kantor'}</span>
+                    ${t.isGroupDinas ? `
+                      <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.675rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; border: 1px solid #bfdbfe; display: inline-flex; align-items: center; gap: 3px;">
+                        👥 Tim (${memberCount})
+                      </span>
+                    ` : ''}
+                  </div>
+                </div>
+
+                <!-- Box Detail Tujuan & Rencana Waktu -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.725rem;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="color: #64748b;">Tujuan keluar</span>
+                    <strong style="color: #0f172a; text-align: right;">${escapeHtml(t.destination || '-')}</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="color: #64748b;">Keperluan</span>
+                    <strong style="color: #0f172a; text-align: right;">${escapeHtml(t.reason || '-')}</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; padding-top: 4px; border-top: 1px dashed #cbd5e1;">
+                    <span style="color: #64748b;">Rencana waktu</span>
+                    <div style="text-align: right; color: #0f172a;">
+                      <strong>${formattedDate}</strong><br>
+                      <span>${exitTime} s/d ${returnTime}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dokumen Lampiran (jika ada) -->
+                ${(t.suratPerintah || t.attachment) ? `
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 12px; font-size: 0.725rem; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
+                      <span>📄</span>
+                      <span style="color: #166534; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${(t.suratPerintah && t.suratPerintah.name) || (t.attachment && t.attachment.name) || `Tiket-QR-${t.id}`}</span>
+                    </div>
+                    <button type="button" onclick="event.stopPropagation(); if (typeof window.viewSuratPerintahDetail==='function') window.viewSuratPerintahDetail('${t.id}'); else window.mobileOpenAtasanDetailModal('${t.id}');" style="background: #ffffff; color: #15803d; border: 1px solid #86efac; border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
+                      👁️ Lihat Dokumen
+                    </button>
+                  </div>
+                ` : ''}
+
+                <!-- Rombongan Dinas jika ada -->
+                ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+                  <div style="margin: 6px 0 8px 0; padding: 8px 10px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
+                      👥 Rombongan Dinas (${memberCount} Orang Aktif):
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                      <span style="font-size: 0.675rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 2px 7px; border-radius: 4px;">
+                        👑 ${escapeHtml(t.applicantName)} (Inisiator)
+                      </span>
+                      ${t.members.map(m => `
+                        <span style="font-size: 0.675rem; background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 2px 7px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
+                          ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
+                        </span>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
+                <!-- Catatan Keputusan Awal -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.725rem; color: #334155;">
+                  <strong>Catatan Keputusan:</strong> "${escapeHtml(t.approverNote || 'Disetujui. Selesaikan tugas tepat waktu.')}"
+                </div>
+
+                <!-- Box Verifikasi Biru (Tap In Gerbang Masuk) -->
+                <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
+                  <div style="font-size: 0.75rem; font-weight: 800; color: #1e40af; margin-bottom: 3px;">
+                    🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
+                  </div>
+                  <div style="font-size: 0.72rem; color: #2563eb; line-height: 1.4;">
+                    Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+                  </div>
+                </div>
+
+                ${isReassignedAway ? `
+                  <div style="margin-top: 8px;">
+                    <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                      <span>Detail Pengajuan</span>
+                    </button>
+                  </div>
+                ` : `
+                  <!-- Tombol Belum Tiba vs Ya, Sudah Tiba -->
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 700; background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+                      ✕ Belum Tiba
+                    </button>
+                    <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+                      ✓ Ya, Sudah Tiba
+                    </button>
+                  </div>
+
+                  <!-- Tombol Detail Pengajuan Lebar Penuh -->
+                  <div style="margin-top: 8px;">
+                    <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 38px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+                      <span>Detail Pengajuan</span>
+                    </button>
+                  </div>
+                `}
+              </div>
+            `;
+          }
 
           return `
             <div class="mobile-ticket-item" style="margin-bottom: 12px; ${isEmg ? 'border: 1.5px solid #fca5a5; background: #fff5f5;' : ''}">
@@ -1632,23 +1828,18 @@
           ` : ''}
 
           ${t.status === 'Menunggu Verifikasi Atasan' ? `
-            <div style="margin: 6px 0; padding: 8px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px;">
-              <div style="font-size: 0.7rem; font-weight: 700; color: #1e40af; margin-bottom: 6px;">
-                🏢 Karyawan lapor tiba (${t.arrivalReportedAt ? formatTimeOnly(t.arrivalReportedAt) : 'Baru saja'})
+            <div style="margin: 6px 0; padding: 8px 10px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px;">
+              <div style="font-size: 0.725rem; font-weight: 700; color: #1e40af; margin-bottom: 2px;">
+                🏢 Tap In Gerbang Masuk (${t.tapInTime || (t.arrivalReportedAt ? formatTimeOnly(t.arrivalReportedAt) : 'Baru saja')})
               </div>
-              <div style="display: flex; gap: 6px;">
-                <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 36px; padding: 4px; font-size: 0.7rem; font-weight: 600; color: #dc2626; border-color: #fca5a5;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
-                  ✕ Belum Tiba
-                </button>
-                <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 36px; padding: 4px; font-size: 0.725rem; font-weight: 700; background: #059669; border-color: #059669;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
-                  ✓ Ya, Sudah Tiba
-                </button>
+              <div style="font-size: 0.675rem; color: #3b82f6;">
+                Personel tim dinas telah tap in di gerbang. Menunggu verifikasi fisik kehadiran di Antrean Persetujuan.
               </div>
             </div>
           ` : ''}
           </div>
 
-          ${t.hasExtensionPending ? `
+          ${t.hasExtensionPending && t.status !== 'Menunggu Verifikasi Atasan' && t.status !== 'Selesai' ? `
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 10px; font-size: 0.7rem; color: #92400e; margin-bottom: 6px;">
               <strong>Estimasi yang diminta:</strong> ${t.extensionRequestedTime || '12.00'} WIB (belum disetujui)
             </div>
@@ -2984,6 +3175,7 @@
 
   // Expose module function
   window.renderMobileAtasan = renderMobileAtasan;
+  window.renderMobileApprover = renderMobileAtasan;
   window.getTName = getTName;
 
   // -------------------------------------------------------------------

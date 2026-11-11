@@ -1497,10 +1497,20 @@ function executeScanIn(ticketId) {
       desc: `Tap In kartu di ${gate} oleh Petugas (${officer.name}). Jam kepulangan terkunci pada ${nowFormatted}. Menunggu verifikasi fisik oleh Atasan (${ticket.approverName}).`
     });
 
-    if (ticket.pendingExtension) {
+    if (ticket.pendingExtension || ticket.hasExtensionPending) {
+      ticket.timeline.push({
+        event: 'Perpanjangan Waktu Gugur Otomatis',
+        time: nowFormatted,
+        by: `${securityName} (${gate})`,
+        desc: `Pengajuan perpanjangan waktu otomatis gugur karena karyawan telah Tap In kembali di ${gate}.`
+      });
+      delete ticket.pendingExtension;
+      ticket.hasExtensionPending = false;
+      delete ticket.extensionRequestedTime;
+    } else {
+      ticket.hasExtensionPending = false;
       ticket.pendingExtension = null;
     }
-    ticket.hasExtensionPending = false;
 
     window.saveTickets(ticketsList);
     const inputScanTicketCode = document.getElementById('inputScanTicketCode');
@@ -1538,6 +1548,7 @@ function executeScanIn(ticketId) {
     if (typeof window.renderMobileSecurity === 'function') window.renderMobileSecurity();
     if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
     if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+    if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
     return;
   }
 

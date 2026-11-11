@@ -181,6 +181,7 @@ function updateApproverMetrics() {
   const pendingExtensions = ticketsList.filter(t => 
     t.pendingExtension && 
     t.pendingExtension.status === 'Menunggu Persetujuan' &&
+    t.status !== 'Menunggu Verifikasi Atasan' &&
     isTicketAssignedToCurrentApprover(t)
   ).length;
 
@@ -275,7 +276,7 @@ function renderApproverDashboard() {
 
   const ticketsList = window.ticketsList || [];
   const pendingTickets = ticketsList.filter(t => !t.isEmergency && !(t.id && t.id.startsWith('TK-EMG-')) && t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
-  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
+  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' && isTicketAssignedToCurrentApprover(t));
   const outsideTickets = ticketsList.filter(t => !isDeletedByCurrentApprover(t) && (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketUnderMySupervision(t));
   const lockedEmergencyTickets = ticketsList.filter(t => t.isEmergency && t.status === 'Menunggu Otorisasi Darurat' && isTicketAssignedToCurrentApprover(t));
   const activeEmergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !t.emergencyLocked && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketAssignedToCurrentApprover(t));
@@ -755,7 +756,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : ''}
 
-            ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+            ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
               <div class="approver-alert-banner extension" style="border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; margin: 0.5rem 0;">
                 <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
                   <span>⏱️ Permohonan Perpanjangan Waktu</span>
@@ -808,7 +809,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; width: 100%;">
-                    ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' ? `
+                    ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
                       <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="openRejectExtensionModal('${t.id}')">
                         ✕ Tolak Perpanjang
                       </button>
@@ -871,6 +872,21 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                     </button>
                   </div>`;
                 }
+
+                // KHUSUS MENU PELACAKAN: Hanya pemantauan status (read-only), DILARANG menampilkan tombol konfirmasi kedatangan
+                if (window.currentApproverNav === 'pelacakan' || window.currentApproverNav === 'tim') {
+                  return `
+                  <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); width: 100%;">
+                    <span style="font-size: 0.725rem; color: #1e40af; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                      🏢 <span>Tap In gerbang tercatat (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) — Menunggu konfirmasi di Antrean</span>
+                    </span>
+                    <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
+                      <span>Detail Pengajuan</span>
+                    </button>
+                  </div>`;
+                }
+
+                // MENU ANTREAN PERSETUJUAN & DASHBOARD ATASAN: Tampilkan tombol aksi konfirmasi
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="padding: 0.45rem 0.65rem; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.725rem; color: #1e40af; line-height: 1.4;">
