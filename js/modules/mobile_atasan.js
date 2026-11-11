@@ -555,8 +555,20 @@
                 🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
               </div>
               <div style="font-size: 0.72rem; color: #2563eb; line-height: 1.4;">
-                Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+                ${t.arrivalProofPhoto
+                  ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi:`
+                  : `Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:`}
               </div>
+              ${t.arrivalProofPhoto ? `
+                <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px;">
+                  <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 78px; height: 56px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
+                  <div style="flex: 1; min-width: 0; font-size: 0.68rem;">
+                    <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                    <div>Oleh: <strong>${t.arrivalProofBy || getTName(t)}</strong></div>
+                    <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                  </div>
+                </div>
+              ` : ''}
             </div>
 
             ${isReassignedAway ? `
@@ -980,8 +992,21 @@
                     🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
                   </div>
                   <div style="font-size: 0.72rem; color: #2563eb; line-height: 1.4;">
-                    Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+                    ${t.arrivalProofPhoto
+                      ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi kembali:`
+                      : `Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:`}
                   </div>
+                  ${t.arrivalProofPhoto ? `
+                    <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px;">
+                      <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 82px; height: 58px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
+                      <div style="flex: 1; min-width: 0; font-size: 0.68rem;">
+                        <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                        <div>Oleh: <strong>${t.arrivalProofBy || getTName(t)}</strong></div>
+                        <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                        ${t.arrivalProofNote ? `<div style="font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">"${escapeHtml(t.arrivalProofNote)}"</div>` : ''}
+                      </div>
+                    </div>
+                  ` : ''}
                 </div>
 
                 ${isReassignedAway ? `
@@ -1547,6 +1572,16 @@
             <div style="font-size: 0.725rem; color: #3b82f6; margin-bottom: 10px;">
               Personel telah tap in di gerbang (${t.tapInTime || t.arrivalReportedAt || 'Terkunci'}). Mohon verifikasi kehadiran fisik personel di ruangan kerja Anda.
             </div>
+            ${t.arrivalProofPhoto ? `
+              <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; padding: 6px;">
+                <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 82px; height: 58px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
+                <div style="flex: 1; min-width: 0; font-size: 0.7rem;">
+                  <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                  <div>Oleh: <strong>${t.arrivalProofBy || getTName(t)}</strong></div>
+                  <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                </div>
+              </div>
+            ` : ''}
             <div style="display: flex; gap: 8px;">
               <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; color: #dc2626; border-color: #fca5a5;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
                 ✕ Belum Tiba
@@ -1751,6 +1786,9 @@
       } else if (t.status === 'Menunggu Verifikasi Atasan') {
         statusBadgeClass = 'disetujui';
         statusSubtitle = 'Karyawan lapor tiba • Menunggu verifikasi fisik atasan';
+      } else if (t.status === 'Menunggu Bukti Kedatangan') {
+        statusBadgeClass = 'menunggu';
+        statusSubtitle = 'Belum tiba • Menunggu karyawan upload foto bukti real-time';
       } else if (isOutside) {
         statusBadgeClass = 'sedang-di-luar';
         statusSubtitle = t.hasExtensionPending ? 'Menunggu keputusan perpanjangan' : 'Sedang berada di luar area pabrik';
@@ -1836,7 +1874,11 @@
                 Personel tim dinas telah tap in di gerbang. Menunggu verifikasi fisik kehadiran di Antrean Persetujuan.
               </div>
             </div>
-          ` : ''}
+          ` : (t.status === 'Menunggu Bukti Kedatangan' ? `
+            <div class="proof-reason-alert-box" style="margin: 6px 0; padding: 8px 10px; border-radius: 8px; font-size: 0.7rem;">
+              <strong>📷 Menunggu Bukti Foto Karyawan:</strong> "${escapeHtml(t.arrivalRejectReason || '-')}"
+            </div>
+          ` : '')}
           </div>
 
           ${t.hasExtensionPending && t.status !== 'Menunggu Verifikasi Atasan' && t.status !== 'Selesai' ? `

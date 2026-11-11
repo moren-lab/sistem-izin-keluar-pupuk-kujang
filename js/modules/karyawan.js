@@ -1298,34 +1298,46 @@ function renderKaryawanDashboard() {
     if (activeTicket) {
       const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
       const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
+      const isWaitingProof = (activeTicket.status === 'Menunggu Bukti Kedatangan');
       const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
       const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
-      const isApproved = !isOutside && !isWaitingVerify && (activeTicket.status === 'Disetujui');
+      const isApproved = !isOutside && !isWaitingVerify && !isWaitingProof && (activeTicket.status === 'Disetujui');
       const isEmergTicket = Boolean(
         activeTicket.isEmergency ||
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
       );
-      const isEmergLocked = !isOutside && !isWaitingVerify && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
+      const isEmergLocked = !isOutside && !isWaitingVerify && !isWaitingProof && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
         activeTicket.status === 'Menunggu Otorisasi Darurat' ||
         (activeTicket.emergencyLocked === true && activeTicket.status !== 'Disetujui') ||
         (activeTicket.qrLocked === true && activeTicket.status !== 'Disetujui')
       );
-      const isPending = !isOutside && !isWaitingVerify && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
+      const isPending = !isOutside && !isWaitingVerify && !isWaitingProof && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
 
       const currentEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841' };
       const myNip = currentEmpActor.nip || 'PK-2024-8841';
       const isMemberOnly = activeTicket.isGroupDinas && activeTicket.applicantNip !== myNip;
     const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
-      const isOutsideOrWaiting = isOutside || isWaitingVerify;
+      const isOutsideOrWaiting = isOutside || isWaitingVerify || isWaitingProof;
       const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
       const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let actionButtonsHtml = '';
-      if (isWaitingVerify) {
+      if (isWaitingProof) {
+        actionButtonsHtml = `
+          <div style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%;">
+            <div class="proof-reason-alert-box" style="padding: 0.45rem 0.65rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4;">
+              <strong>⚠️ Atasan Menandai Belum Tiba:</strong> "${activeTicket.arrivalRejectReason || '-'}"
+            </div>
+            <button type="button" class="btn-figma-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
+              <span>📷 Upload Foto</span>
+            </button>
+          </div>
+        `;
+      } else if (isWaitingVerify) {
         actionButtonsHtml = `
           <button class="btn-figma-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
             <span>⏳ Menunggu Verifikasi Atasan</span>
@@ -1666,34 +1678,48 @@ function renderPengajuanSayaView() {
   if (colPengajuanLeft) {
     const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
     const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
+    const isWaitingProof = (activeTicket.status === 'Menunggu Bukti Kedatangan');
     const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
     const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
-    const isApproved = !isOutside && !isWaitingVerify && (activeTicket.status === 'Disetujui');
+    const isApproved = !isOutside && !isWaitingVerify && !isWaitingProof && (activeTicket.status === 'Disetujui');
     const isEmergTicket = Boolean(
       activeTicket.isEmergency ||
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       (activeTicket.id && (activeTicket.id.includes('-EMG-') || activeTicket.id.startsWith('TK-EMG-')))
     );
-    const isEmergLocked = !isOutside && !isWaitingVerify && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
+    const isEmergLocked = !isOutside && !isWaitingVerify && !isWaitingProof && !isFinished && !isApproved && !activeTicket.scanOutTime && isEmergTicket && (
       activeTicket.status === 'Menunggu Otorisasi Darurat' ||
       (activeTicket.emergencyLocked === true && activeTicket.status !== 'Disetujui') ||
       (activeTicket.qrLocked === true && activeTicket.status !== 'Disetujui')
     );
-    const isPending = !isOutside && !isWaitingVerify && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
+    const isPending = !isOutside && !isWaitingVerify && !isWaitingProof && !isFinished && !isApproved && (activeTicket.status === 'Menunggu Persetujuan');
 
     const currentEmpActor = typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : { nip: 'PK-2024-8841' };
     const myNip = currentEmpActor.nip || 'PK-2024-8841';
     const isMemberOnly = activeTicket.isGroupDinas && activeTicket.applicantNip !== myNip;
     const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
-    const isOutsideOrWaiting = isOutside || isWaitingVerify;
+    const isOutsideOrWaiting = isOutside || isWaitingVerify || isWaitingProof;
     const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
     const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
     let actionButtonsHtml = '';
-    if (isWaitingVerify) {
+    if (isWaitingProof) {
+      actionButtonsHtml = `
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+          <div class="proof-reason-alert-box" style="padding: 0.55rem 0.75rem; border-radius: 8px; font-size: 0.775rem; line-height: 1.45;">
+            <div><strong>⚠️ Atasan (${activeTicket.arrivalRejectBy || 'Peninjau'}) menandai Belum Tiba (Putaran #${activeTicket.arrivalRejectionRound || 1}):</strong></div>
+            <div style="margin-top: 2px;">"${activeTicket.arrivalRejectReason || '-'}"</div>
+            <div style="font-size: 0.72rem; margin-top: 4px; opacity: 0.9;">🔒 Tap In Gerbang (${activeTicket.tapInTime || activeTicket.arrivalReportedTime || 'Terkunci'}) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).</div>
+          </div>
+          <button type="button" class="btn-figma-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0.6rem 1rem;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
+            <span>📷 Upload Foto</span>
+          </button>
+        </div>
+      `;
+    } else if (isWaitingVerify) {
       actionButtonsHtml = `
         <button class="btn-figma-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
           <span>⏳ Menunggu Verifikasi Atasan</span>
@@ -2107,6 +2133,10 @@ function getCleanEmpStatus(status, ticket) {
     label = 'Menunggu Verifikasi Atasan';
     color = '#2563eb';
     statusKey = 'waiting-verify';
+  } else if (status === 'Menunggu Bukti Kedatangan') {
+    label = 'Menunggu Bukti Kedatangan';
+    color = '#b45309';
+    statusKey = 'waiting-proof';
   } else if (status === 'Menunggu Otorisasi Darurat' || status === 'Darurat Terkunci') {
     label = 'Menunggu Otorisasi Darurat';
     color = '#be123c';
@@ -2133,6 +2163,7 @@ function getCleanEmpStatus(status, ticket) {
     'approved': 'rgba(16, 185, 129, 0.1)',
     'pending': 'rgba(245, 158, 11, 0.12)',
     'waiting-verify': 'rgba(37, 99, 235, 0.12)',
+    'waiting-proof': 'rgba(217, 119, 6, 0.14)',
     'emergency': 'rgba(190, 18, 60, 0.1)',
     'rejected': 'rgba(220, 38, 38, 0.1)',
     'expired': 'rgba(100, 116, 139, 0.1)',
@@ -2146,6 +2177,7 @@ function getCleanEmpStatus(status, ticket) {
     'approved': 'rgba(16, 185, 129, 0.25)',
     'pending': 'rgba(245, 158, 11, 0.3)',
     'waiting-verify': 'rgba(37, 99, 235, 0.3)',
+    'waiting-proof': 'rgba(217, 119, 6, 0.35)',
     'emergency': 'rgba(190, 18, 60, 0.25)',
     'rejected': 'rgba(220, 38, 38, 0.25)',
     'expired': 'rgba(100, 116, 139, 0.25)',
@@ -2715,7 +2747,13 @@ function renderKaryawanMobileDashboard() {
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
       let mobileBtnsHtml = '';
-      if (activeTicket.status === 'Menunggu Verifikasi Atasan') {
+      if (activeTicket.status === 'Menunggu Bukti Kedatangan') {
+        mobileBtnsHtml = `
+          <button type="button" class="btn-mobile-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; width: 100%;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
+            <span>📷 Upload Foto</span>
+          </button>
+        `;
+      } else if (activeTicket.status === 'Menunggu Verifikasi Atasan') {
         mobileBtnsHtml = `
           <button type="button" class="btn-mobile-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; width: 100%;">
             <span>⏳ Menunggu Verifikasi Atasan</span>
@@ -3186,5 +3224,368 @@ window.removeEmergSuratPerintahFile = function() {
 
   if (typeof window.showToast === 'function') {
     window.showToast('Berkas Surat Perintah dihapus.', 'info');
+  }
+};
+
+// ============================================================================
+// UPLOAD FOTO BUKTI KEDATANGAN + REALTIME WATERMARK + ANTI-TIMPAAN TIM DINAS
+// ============================================================================
+let _arrivalProofClockTimer = null;
+
+function formatProofRealtimeClockWib(dateObj) {
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const pad = n => String(n).padStart(2, '0');
+  const d = dateObj || new Date();
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())}.${pad(d.getSeconds())} WIB`;
+}
+
+function getFreshTicketsSnapshot() {
+  const storageKey = window.STORAGE_KEY || 'KUJANG_GATEPASS_TICKETS_V9';
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.warn('Gagal membaca snapshot tiket terbaru:', e);
+  }
+  return Array.isArray(window.ticketsList) ? window.ticketsList : [];
+}
+
+function findApproverTargetDynamically(approverName) {
+  const targetLower = (approverName || '').trim().toLowerCase();
+  const actors = window.ACTORS || {};
+  const candidates = [
+    actors.approver,
+    actors.approver2,
+    ...(Array.isArray(window.MOCK_USERS) ? window.MOCK_USERS.filter(u => u && u.role && (u.role.includes('approver') || u.role === 'atasan') && u.isActive !== false && u.active !== false) : [])
+  ].filter(Boolean);
+
+  if (targetLower) {
+    const exactMatch = candidates.find(u => u.name && (u.name.toLowerCase().includes(targetLower) || targetLower.includes(u.name.toLowerCase())));
+    if (exactMatch) return exactMatch;
+  }
+  return candidates[0] || { name: approverName || 'Atasan Peninjau', nip: '' };
+}
+
+window.openUploadArrivalProofModal = function(ticketId) {
+  const latestTickets = getFreshTicketsSnapshot();
+  if (Array.isArray(latestTickets)) window.ticketsList = latestTickets;
+  const t = latestTickets.find(x => x.id === ticketId);
+  if (!t) return;
+
+  if (t.status !== 'Menunggu Bukti Kedatangan' || t.arrivalProofSubmitted) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Foto bukti untuk #${t.id} sudah dikirim oleh ${t.arrivalProofBy || 'anggota tim lain'}.`, 'warning');
+    }
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+    return;
+  }
+
+  window._pendingUploadProofTicketId = ticketId;
+  window._pendingArrivalProofPayload = null;
+
+  const modal = document.getElementById('modalUploadArrivalProof');
+  if (!modal) return;
+
+  const tkEl = document.getElementById('uploadProofTicketId');
+  const tapInEl = document.getElementById('uploadProofLockedTapIn');
+  const reasonBox = document.getElementById('uploadProofReasonBox');
+  const reasonText = document.getElementById('uploadProofReasonText');
+  const fileInput = document.getElementById('uploadProofFileInput');
+  const dropzone = document.getElementById('uploadProofDropzone');
+  const previewWrap = document.getElementById('uploadProofPreviewWrap');
+  const previewImg = document.getElementById('uploadProofPreviewImg');
+  const noteInput = document.getElementById('uploadProofNoteInput');
+  const submitBtn = document.getElementById('btnSubmitArrivalProof');
+
+  if (tkEl) tkEl.textContent = `#${t.id}`;
+  if (tapInEl) tapInEl.textContent = t.tapInTime || t.arrivalReportedTime || t.arrivalReportedAt || t.reportedReturnTime || 'Terkunci';
+
+  if (reasonBox && reasonText) {
+    if (t.arrivalRejectReason) {
+      reasonBox.style.display = 'block';
+      reasonText.textContent = `"${t.arrivalRejectReason}" (${t.arrivalRejectBy || 'Atasan'} • Putaran #${t.arrivalRejectionRound || 1})`;
+    } else {
+      reasonBox.style.display = 'none';
+    }
+  }
+
+  if (fileInput) fileInput.value = '';
+  if (dropzone) dropzone.style.display = 'block';
+  if (previewWrap) previewWrap.style.display = 'none';
+  if (previewImg) previewImg.src = '';
+  if (noteInput) noteInput.value = '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.55';
+    submitBtn.style.cursor = 'not-allowed';
+  }
+
+  const updateLiveClock = () => {
+    const clockEl = document.getElementById('uploadProofLiveClock');
+    if (clockEl) clockEl.textContent = formatProofRealtimeClockWib(new Date());
+  };
+  updateLiveClock();
+  if (_arrivalProofClockTimer) clearInterval(_arrivalProofClockTimer);
+  _arrivalProofClockTimer = setInterval(updateLiveClock, 1000);
+
+  modal.classList.add('open');
+};
+
+window.closeUploadArrivalProofModal = function() {
+  const modal = document.getElementById('modalUploadArrivalProof');
+  if (modal) modal.classList.remove('open');
+  if (_arrivalProofClockTimer) {
+    clearInterval(_arrivalProofClockTimer);
+    _arrivalProofClockTimer = null;
+  }
+  window._pendingUploadProofTicketId = null;
+  window._pendingArrivalProofPayload = null;
+};
+
+window.handleArrivalProofFileSelect = function(event) {
+  const inputEl = event && event.target;
+  const file = inputEl && inputEl.files && inputEl.files[0];
+  if (!file) return;
+
+  if (!file.type || !file.type.startsWith('image/')) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Harap pilih berkas gambar foto (JPG/PNG/WebP) dari galeri.', 'error');
+    }
+    inputEl.value = '';
+    return;
+  }
+
+  const ticketId = window._pendingUploadProofTicketId;
+  const t = (window.ticketsList || []).find(x => x.id === ticketId) || { id: ticketId };
+  const actor = (typeof getCurrentEmployeeActor === 'function' ? getCurrentEmployeeActor() : null) || { name: t.applicantName || 'Karyawan', nip: t.applicantNip || '-' };
+
+  const reader = new FileReader();
+  reader.onload = function(loadEv) {
+    const img = new Image();
+    img.onload = function() {
+      const maxWidth = 960;
+      const targetW = img.width > maxWidth ? maxWidth : Math.max(img.width, 480);
+      const scale = targetW / (img.width || targetW);
+      const targetH = Math.max(Math.round((img.height || 360) * scale), 300);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, targetW, targetH);
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+
+      const captureDate = new Date();
+      const stampText = formatProofRealtimeClockWib(captureDate);
+      const lockedGate = t.tapInTime || t.arrivalReportedTime || t.arrivalReportedAt || t.reportedReturnTime || 'Terkunci';
+
+      const bandHeight = Math.max(92, Math.round(targetH * 0.19));
+      const bandY = targetH - bandHeight;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.fillRect(0, bandY, targetW, bandHeight);
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(0, bandY, targetW, 4);
+
+      const fontSizeTitle = Math.max(15, Math.round(targetW * 0.021));
+      const fontSizeSub = Math.max(12, Math.round(targetW * 0.016));
+      const padX = Math.max(16, Math.round(targetW * 0.022));
+
+      ctx.fillStyle = '#34d399';
+      ctx.font = `800 ${fontSizeTitle}px "Inter", "Segoe UI", Arial, sans-serif`;
+      ctx.fillText(`REALTIME PROOF • ${stampText}`, padX, bandY + Math.round(bandHeight * 0.34));
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = `700 ${fontSizeSub}px "Inter", "Segoe UI", Arial, sans-serif`;
+      ctx.fillText(`Tiket: #${t.id}  |  Pengunggah: ${actor.name} (${actor.nip})`, padX, bandY + Math.round(bandHeight * 0.62));
+
+      ctx.fillStyle = '#93c5fd';
+      ctx.font = `600 ${fontSizeSub}px "Inter", "Segoe UI", Arial, sans-serif`;
+      ctx.fillText(`Tap In Gerbang Terkunci: ${lockedGate}  |  Anti-Manipulasi Canvas`, padX, bandY + Math.round(bandHeight * 0.87));
+
+      const stampedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+      window._pendingArrivalProofPayload = {
+        dataUrl: stampedDataUrl,
+        capturedAt: stampText,
+        capturedIso: captureDate.toISOString(),
+        byName: actor.name,
+        byNip: actor.nip
+      };
+
+      const dropzone = document.getElementById('uploadProofDropzone');
+      const previewWrap = document.getElementById('uploadProofPreviewWrap');
+      const previewImg = document.getElementById('uploadProofPreviewImg');
+      const stampMeta = document.getElementById('uploadProofStampMeta');
+      const submitBtn = document.getElementById('btnSubmitArrivalProof');
+
+      if (previewImg) previewImg.src = stampedDataUrl;
+      if (stampMeta) stampMeta.textContent = `✓ Stempel waktu terpasang: ${stampText}`;
+      if (dropzone) dropzone.style.display = 'none';
+      if (previewWrap) previewWrap.style.display = 'flex';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+      }
+    };
+    img.src = loadEv.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.submitArrivalProofToApprover = function() {
+  const ticketId = window._pendingUploadProofTicketId;
+  const payload = window._pendingArrivalProofPayload;
+  if (!ticketId || !payload || !payload.dataUrl) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Wajib mengunggah foto bukti terlebih dahulu sebelum mengirim ke Atasan.', 'error');
+    }
+    return;
+  }
+
+  // ANTI-TIMPAAN GUARD: Baca snapshot terbaru langsung dari localStorage sebelum menulis
+  const freshList = getFreshTicketsSnapshot();
+  const freshTicket = freshList.find(x => x.id === ticketId);
+  if (!freshTicket) return;
+
+  if (freshTicket.status !== 'Menunggu Bukti Kedatangan' || freshTicket.arrivalProofSubmitted === true) {
+    window.ticketsList = freshList;
+    window.closeUploadArrivalProofModal();
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Pengiriman diblokir: Bukti untuk #${ticketId} sudah dikirim lebih dulu oleh ${freshTicket.arrivalProofBy || 'rekan tim lain'}.`, 'warning');
+    }
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+    if (typeof window.renderApproverView === 'function') window.renderApproverView();
+    return;
+  }
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+  const submitRealtimeWib = formatProofRealtimeClockWib(now);
+  const noteInput = document.getElementById('uploadProofNoteInput');
+  const note = noteInput ? noteInput.value.trim() : '';
+  const currentRound = freshTicket.arrivalRejectionRound || 1;
+
+  // Pertahankan kunci waktu Tap In Gerbang (tidak pernah di-reset)
+  freshTicket.timeFrozen = true;
+  freshTicket.arrivalProofSubmitted = true;
+  freshTicket.arrivalProofPhoto = payload.dataUrl;
+  freshTicket.arrivalProofAt = payload.capturedAt || submitRealtimeWib;
+  freshTicket.arrivalProofSubmittedAt = submitRealtimeWib;
+  freshTicket.arrivalProofBy = payload.byName;
+  freshTicket.arrivalProofByNip = payload.byNip;
+  freshTicket.arrivalProofNote = note;
+  freshTicket.status = 'Menunggu Verifikasi Atasan';
+
+  if (!Array.isArray(freshTicket.arrivalVerificationHistory)) freshTicket.arrivalVerificationHistory = [];
+  freshTicket.arrivalVerificationHistory.push({
+    round: currentRound,
+    type: 'proof_submitted',
+    by: payload.byName,
+    byNip: payload.byNip,
+    time: payload.capturedAt || submitRealtimeWib,
+    note,
+    photoDataUrl: payload.dataUrl,
+    lockedTapInTime: freshTicket.tapInTime || freshTicket.arrivalReportedTime || 'Terkunci'
+  });
+
+  if (!Array.isArray(freshTicket.timeline)) freshTicket.timeline = [];
+  freshTicket.timeline.push({
+    event: `Foto Bukti Kedatangan Diunggah (Putaran #${currentRound})`,
+    time: nowFormatted,
+    by: `${payload.byName} (Karyawan)`,
+    desc: `Karyawan mengunggah foto bukti berstempel waktu real-time (${payload.capturedAt || submitRealtimeWib})${note ? ` dengan catatan: "${note}"` : ''}. Dikirim kembali ke Atasan untuk konfirmasi.`
+  });
+
+  window.ticketsList = freshList;
+  if (typeof window.saveTickets === 'function') window.saveTickets(freshList);
+
+  if (typeof window.createNotification === 'function') {
+    const targetApprover = findApproverTargetDynamically(freshTicket.approverName);
+    window.createNotification({
+      recipientRole: 'approver',
+      recipientNip: targetApprover.nip || '',
+      recipientName: freshTicket.approverName || targetApprover.name,
+      actorSource: 'karyawan',
+      type: 'info',
+      title: 'Foto Bukti Kedatangan Diterima',
+      message: `${payload.byName} mengirim foto bukti real-time untuk #${freshTicket.id} (Putaran #${currentRound}). Mohon periksa & konfirmasi kembali.`,
+      ticketId: freshTicket.id,
+      priority: 'urgent',
+      eventId: `arr_proof_sent_${freshTicket.id}_r${currentRound}_${Date.now()}`
+    });
+  }
+
+  window.closeUploadArrivalProofModal();
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Foto bukti berstempel real-time berhasil dikirim ke Atasan untuk #${freshTicket.id}!`, 'success');
+  }
+
+  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+  if (typeof window.renderApproverView === 'function') window.renderApproverView();
+  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+};
+
+window.viewArrivalProofPhoto = function(ticketId, historyIdx) {
+  const list = getFreshTicketsSnapshot();
+  const t = list.find(x => x.id === ticketId);
+  if (!t) return;
+
+  let imgSrc = t.arrivalProofPhoto;
+  let uploader = t.arrivalProofBy || t.applicantName || 'Karyawan';
+  let timestamp = t.arrivalProofAt || '-';
+  let roundLabel = t.arrivalRejectionRound ? `Putaran #${t.arrivalRejectionRound}` : 'Terbaru';
+
+  if (typeof historyIdx === 'number' && Array.isArray(t.arrivalVerificationHistory) && t.arrivalVerificationHistory[historyIdx]) {
+    const h = t.arrivalVerificationHistory[historyIdx];
+    if (h.photoDataUrl) {
+      imgSrc = h.photoDataUrl;
+      uploader = h.by || uploader;
+      timestamp = h.time || timestamp;
+      roundLabel = `Putaran #${h.round || 1}`;
+    }
+  }
+
+  if (!imgSrc) {
+    if (typeof window.showToast === 'function') window.showToast('Foto bukti kedatangan tidak tersedia.', 'warning');
+    return;
+  }
+
+  const modal = document.getElementById('modalDocViewer');
+  const titleEl = document.getElementById('docViewerTitle');
+  const subEl = document.getElementById('docViewerSubtitle');
+  const metaEl = document.getElementById('docViewerMeta');
+  const iconEl = document.getElementById('docViewerIcon');
+  const bodyEl = document.getElementById('docViewerBody');
+  const btnZoom = document.getElementById('btnZoomDocViewer');
+
+  if (titleEl) titleEl.textContent = `Foto Bukti Kedatangan (${roundLabel})`;
+  if (subEl) subEl.textContent = `Tiket #${t.id} • Pengunggah: ${uploader}`;
+  if (metaEl) metaEl.textContent = `Stempel Waktu Real-Time: ${timestamp} • Tap In Gerbang: ${t.tapInTime || 'Terkunci'}`;
+  if (iconEl) iconEl.textContent = '📸';
+  if (btnZoom) btnZoom.style.display = 'inline-flex';
+  window._docViewerZoomed = false;
+
+  if (bodyEl) {
+    bodyEl.innerHTML = `
+      <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+        <img id="docViewerMainImg" class="doc-lightbox-img" src="${imgSrc}" alt="Foto Bukti Kedatangan" onclick="if(typeof window.toggleDocViewerZoom==='function') window.toggleDocViewerZoom()" title="Klik untuk Zoom">
+      </div>
+    `;
+  }
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
   }
 };

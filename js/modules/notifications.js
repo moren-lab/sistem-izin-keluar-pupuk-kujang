@@ -836,7 +836,7 @@
             ${getNotifIconSvg(n.type, n.priority)}
           </div>
           <div style="flex: 1; min-width: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 2px;">
               <span class="dropdown-notif-title" style="font-size: 0.8rem; font-weight: 800; color: var(--text-primary, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${n.title}</span>
               ${isUnread ? '<span class="notif-unread-dot" style="width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;"></span>' : ''}
             </div>
@@ -847,6 +847,9 @@
               ${n.ticketId ? `<span class="notif-ticket-pill">${n.ticketId}</span> • ` : ''}${formatRelativeTime(n.createdAt)}
             </div>
           </div>
+          <button type="button" class="btn-delete-notif-item btn-delete-notif-dropdown" aria-label="Hapus Notifikasi" style="width: 30px; height: 30px; min-width: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0; margin-top: 2px;" onclick="event.stopPropagation(); window.deleteDesktopDropdownNotification('${n.id}')" title="Hapus notifikasi ini">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </div>
       `;
     }).join('');
@@ -1111,6 +1114,58 @@
     if (typeof window.renderDesktopFullNotifikasiPage === 'function') {
       window.renderDesktopFullNotifikasiPage(currentTab);
     }
+    if (typeof window.renderDesktopNotifDropdownContent === 'function') {
+      window.renderDesktopNotifDropdownContent();
+    }
+  };
+
+  window.deleteDesktopDropdownNotification = function(notifId) {
+    if (typeof window.deleteNotification === 'function') {
+      window.deleteNotification(notifId);
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast('Notifikasi berhasil dihapus.', 'info');
+    }
+    if (typeof window.renderDesktopNotifDropdownContent === 'function') {
+      window.renderDesktopNotifDropdownContent();
+    }
+    const notifView = document.getElementById('viewNotifikasi');
+    if (notifView && notifView.style.display === 'block' && typeof window.renderDesktopFullNotifikasiPage === 'function') {
+      window.renderDesktopFullNotifikasiPage('all');
+    }
+  };
+
+  window.confirmClearAllDesktopNotifications = function(currentTab = 'all') {
+    const total = typeof window.getNotificationsForActiveActor === 'function' ? window.getNotificationsForActiveActor().length : 0;
+    if (total === 0) return;
+
+    const executeClear = function() {
+      if (typeof window.clearAllNotificationsForActiveActor === 'function') {
+        window.clearAllNotificationsForActiveActor();
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast('Seluruh riwayat notifikasi berhasil dibersihkan.', 'success');
+      }
+      if (typeof window.renderDesktopFullNotifikasiPage === 'function') {
+        window.renderDesktopFullNotifikasiPage(currentTab);
+      }
+      if (typeof window.renderDesktopNotifDropdownContent === 'function') {
+        window.renderDesktopNotifDropdownContent();
+      }
+    };
+
+    if (typeof window.openConfirmDialog === 'function') {
+      window.openConfirmDialog({
+        title: 'Hapus Semua Notifikasi?',
+        message: `Seluruh riwayat notifikasi (${total} pesan) akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`,
+        confirmText: 'Ya, Hapus Semua',
+        cancelText: 'Batal',
+        isDanger: true,
+        onConfirm: executeClear
+      });
+    } else if (confirm(`Hapus semua (${total}) notifikasi?`)) {
+      executeClear();
+    }
   };
 
   // Konfirmasi Hapus Satu Notifikasi (Mobile Bottom Sheet)
@@ -1219,5 +1274,5 @@
     }
   };
 
-  window.confirmClearAllNotifications = window.confirmClearAllMobileNotifications;
+  window.confirmClearAllNotifications = window.confirmClearAllDesktopNotifications;
   window.clearAllMobileNotifications = window.confirmClearAllMobileNotifications;

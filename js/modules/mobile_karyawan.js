@@ -1085,6 +1085,27 @@
           </div>
         </div>
       `;
+    } else if (t.status === 'Menunggu Bukti Kedatangan') {
+      actionButtonsHtml = `
+        <div class="proof-reason-alert-box" style="border-radius: 8px; padding: 10px; margin-top: 12px; text-align: left;">
+          <div style="font-size: 0.775rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+            <span>⚠️</span>
+            <span>Atasan Menandai Belum Tiba (Putaran #${t.arrivalRejectionRound || 1})</span>
+          </div>
+          <div style="font-size: 0.725rem; margin-top: 4px; line-height: 1.4;">
+            Alasan: "<strong>${escapeHtml(t.arrivalRejectReason || '-')}</strong>"
+          </div>
+          <div style="font-size: 0.68rem; margin-top: 4px; opacity: 0.9;">
+            🔒 Tap In Gerbang (${t.tapInTime || t.employeeReportedReturnTime || 'Terkunci'}) tetap terkunci. Wajib unggah foto bukti dari galeri.
+          </div>
+          <button type="button" class="mobile-btn-primary" style="margin-top: 8px; width: 100%; min-height: 42px; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.openUploadArrivalProofModal('${t.id}')">
+            <span>📷 Upload Foto</span>
+          </button>
+        </div>
+        <div style="text-align: center; margin-top: 8px;">
+          <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail Pengajuan</a>
+        </div>
+      `;
     } else if (t.status === 'Menunggu Verifikasi Atasan') {
       actionButtonsHtml = `
         <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; margin-top: 12px; text-align: left;">

@@ -861,6 +861,20 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               }
 
               // Standard Tracking View (Pelacakan) & Antrean
+              if (t.status === 'Menunggu Bukti Kedatangan') {
+                return `
+                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
+                  <div class="proof-reason-alert-box" style="padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4;">
+                    <strong>📷 Menunggu Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1}):</strong><br>
+                    Alasan Anda: "${t.arrivalRejectReason || '-'}"<br>
+                    <span style="opacity: 0.9;">Tap In Gerbang (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) tetap terkunci sampai bukti diunggah karyawan.</span>
+                  </div>
+                  <button class="btn-card-detail" style="width: 100%; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600; min-height: 32px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
+                    <span>Detail Pengajuan</span>
+                  </button>
+                </div>`;
+              }
+
               if (t.status === 'Menunggu Verifikasi Atasan') {
                 const isPrimary = isTicketAssignedToCurrentApprover(t);
                 if (!isPrimary) {
@@ -886,13 +900,27 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   </div>`;
                 }
 
-                // MENU ANTREAN PERSETUJUAN & DASHBOARD ATASAN: Tampilkan tombol aksi konfirmasi
+                // MENU ANTREAN PERSETUJUAN & DASHBOARD ATASAN: Tampilkan foto bukti (jika ada) & tombol aksi konfirmasi
+                const hasProofPhoto = Boolean(t.arrivalProofPhoto);
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="padding: 0.45rem 0.65rem; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.725rem; color: #1e40af; line-height: 1.4;">
                     <strong>🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}):</strong><br>
-                    Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+                    ${hasProofPhoto
+                      ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto & konfirmasi kembali:`
+                      : `Personel ${t.isGroupDinas ? 'tim dinas ' : ''}telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:`}
                   </div>
+                  ${hasProofPhoto ? `
+                    <div class="proof-photo-review-card" style="display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.65rem; border-radius: 8px;">
+                      <img src="${t.arrivalProofPhoto}" alt="Foto Bukti Kedatangan" class="proof-photo-thumb" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')" title="Klik untuk perbesar foto bukti">
+                      <div style="flex: 1; min-width: 0; font-size: 0.72rem; line-height: 1.4;">
+                        <div style="font-weight: 800; color: var(--text-primary, #0f172a);">📸 Foto Bukti Real-Time</div>
+                        <div style="color: #64748b;">Oleh: <strong>${t.arrivalProofBy || t.applicantName || 'Karyawan'}</strong></div>
+                        <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                        ${t.arrivalProofNote ? `<div style="color: #334155; font-style: italic; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${String(t.arrivalProofNote).replace(/"/g, '&quot;')}">"${t.arrivalProofNote}"</div>` : ''}
+                      </div>
+                    </div>
+                  ` : ''}
                   <div style="display: flex; gap: 0.45rem; width: 100%;">
                     <button type="button" class="btn-reject" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.rejectArrivalByApprover('${t.id}')">
                       ✕ Belum Tiba
@@ -1246,7 +1274,7 @@ function renderApproverView() {
 
   // 3. PELACAKAN IZIN KARYAWAN (HANYA IZIN AKTIF / BERJALAN)
   if (currentApproverNav === 'pelacakan' || currentApproverNav === 'tim') {
-    const activeStatuses = ['Sedang di Luar', 'Terlambat', 'Disetujui', 'Menunggu Verifikasi Atasan'];
+    const activeStatuses = ['Sedang di Luar', 'Terlambat', 'Disetujui', 'Menunggu Verifikasi Atasan', 'Menunggu Bukti Kedatangan'];
     let list = ticketsList.filter(t => 
       !isDeletedByCurrentApprover(t) && 
       isTicketUnderMySupervision(t) &&
@@ -2289,7 +2317,7 @@ window.confirmArrivalByApprover = function(ticketId) {
   const t = ticketsList.find(x => x.id === ticketId);
   if (!t) return;
 
-  const currentApprover = (typeof getCurrentApproverActor === 'function' ? getCurrentApproverActor() : null) || { name: 'Ir. Hendra Gunawan, M.T.' };
+  const currentApprover = (typeof getCurrentApproverActor === 'function' ? getCurrentApproverActor() : null) || { name: t.approverName || 'Atasan Peninjau' };
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -2318,27 +2346,29 @@ window.confirmArrivalByApprover = function(ticketId) {
     event: 'Kedatangan Dikonfirmasi Atasan (Selesai)',
     time: nowFormatted,
     by: `${currentApprover.name} (Atasan)`,
-    desc: `Kehadiran fisik karyawan di area kerja telah diverifikasi langsung oleh Atasan (${currentApprover.name}). Izin resmi selesai.`
+    desc: `Kehadiran fisik karyawan di area kerja telah diverifikasi langsung oleh Atasan (${currentApprover.name}) dengan waktu Tap In gerbang terkunci (${arrivalTime}). Izin resmi selesai.`
   });
 
   if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
 
   if (typeof window.createNotification === 'function') {
-    window.createNotification({
-      recipientRole: 'karyawan',
-      recipientNip: t.applicantNip || 'PK-2024-8841',
-      recipientName: t.applicantName || 'Budi Pratama, S.T.',
-      actorSource: 'approver',
-      type: 'selesai',
-      title: 'Izin Resmi Selesai',
-      message: `Atasan (${currentApprover.name}) telah memverifikasi kehadiran Anda di ruangan. Tiket #${t.id} resmi selesai.`,
-      ticketId: t.id,
-      priority: 'normal',
-      eventId: `arr_conf_${t.id}_${Date.now()}`
-    });
+    if (!t.initiatorCancelled && t.applicantNip) {
+      window.createNotification({
+        recipientRole: 'karyawan',
+        recipientNip: t.applicantNip,
+        recipientName: t.applicantName || 'Pemohon',
+        actorSource: 'approver',
+        type: 'selesai',
+        title: 'Izin Resmi Selesai',
+        message: `Atasan (${currentApprover.name}) telah memverifikasi kehadiran Anda di ruangan. Tiket #${t.id} resmi selesai.`,
+        ticketId: t.id,
+        priority: 'normal',
+        eventId: `arr_conf_${t.id}_${Date.now()}`
+      });
+    }
 
     if (t.isGroupDinas && Array.isArray(t.members)) {
-      t.members.filter(m => m.status !== 'batal').forEach(m => {
+      t.members.filter(m => m.status !== 'batal' && m.status !== 'cancelled' && m.nip).forEach(m => {
         window.createNotification({
           recipientRole: 'karyawan',
           recipientNip: m.nip,
@@ -2356,7 +2386,7 @@ window.confirmArrivalByApprover = function(ticketId) {
   }
 
   if (typeof window.showToast === 'function') {
-    window.showToast(`Kehadiran ${t.applicantName} & tim berhasil diverifikasi! Tiket #${t.id} resmi Selesai.`, 'success');
+    window.showToast(`Kehadiran ${t.applicantName || 'karyawan'} berhasil diverifikasi! Tiket #${t.id} resmi Selesai.`, 'success');
   }
 
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
@@ -2364,95 +2394,157 @@ window.confirmArrivalByApprover = function(ticketId) {
   if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
 };
+
+function formatArrivalRealtimeWib(dateObj) {
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const pad = n => String(n).padStart(2, '0');
+  const d = dateObj || new Date();
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())}.${pad(d.getSeconds())} WIB`;
+}
 
 window.rejectArrivalByApprover = function(ticketId) {
   const ticketsList = window.ticketsList || [];
   const t = ticketsList.find(x => x.id === ticketId);
   if (!t) return;
 
-  const confirmMsg = `Apakah Anda yakin bahwa personel tim dinas #${t.id} belum tiba di area kerja?\n\nKunci waktu kepulangan akan dibatalkan dan durasi izin dilanjutkan berjalan secara real-time.`;
-  if (typeof window.openConfirmDialog === 'function') {
-    window.openConfirmDialog({
-      title: 'Konfirmasi: Personel Belum Tiba',
-      message: `Apakah Anda yakin bahwa personel tim dinas <strong>#${t.id}</strong> belum tiba di area kerja?<br><br><span style="color:#dc2626; font-size:0.75rem;">Kunci waktu kepulangan akan dibatalkan dan status kembali ke 'Sedang di Luar'.</span>`,
-      confirmText: 'Ya, Belum Tiba',
-      cancelText: 'Batal',
-      isDanger: true,
-      onConfirm: () => executeRejectArrivalByApprover(ticketId)
-    });
-    return;
-  }
-  if (!confirm(confirmMsg)) return;
-  executeRejectArrivalByApprover(ticketId);
+  window._pendingRejectArrivalTicketId = ticketId;
+  const modal = document.getElementById('modalRejectArrivalReason');
+  if (!modal) return;
+
+  const tkEl = document.getElementById('rejectArrivalTicketId');
+  const nameEl = document.getElementById('rejectArrivalEmployeeName');
+  const lockEl = document.getElementById('rejectArrivalLockedTime');
+  const inputEl = document.getElementById('rejectArrivalReasonInput');
+  const errEl = document.getElementById('rejectArrivalReasonError');
+
+  if (tkEl) tkEl.textContent = `#${t.id}`;
+  if (nameEl) nameEl.textContent = t.applicantName || 'Pemohon';
+  if (lockEl) lockEl.textContent = t.tapInTime || t.arrivalReportedTime || t.arrivalReportedAt || t.reportedReturnTime || 'Terkunci';
+  if (inputEl) inputEl.value = '';
+  if (errEl) errEl.style.display = 'none';
+
+  modal.classList.add('open');
+  setTimeout(() => { if (inputEl) inputEl.focus(); }, 60);
 };
 
-function executeRejectArrivalByApprover(ticketId) {
+window.closeRejectArrivalReasonModal = function() {
+  const modal = document.getElementById('modalRejectArrivalReason');
+  if (modal) modal.classList.remove('open');
+  window._pendingRejectArrivalTicketId = null;
+};
+
+window.submitRejectArrivalReason = function() {
+  const ticketId = window._pendingRejectArrivalTicketId;
+  if (!ticketId) return;
+
+  const inputEl = document.getElementById('rejectArrivalReasonInput');
+  const errEl = document.getElementById('rejectArrivalReasonError');
+  const reason = inputEl ? inputEl.value.trim() : '';
+
+  if (!reason) {
+    if (errEl) errEl.style.display = 'block';
+    if (inputEl) inputEl.focus();
+    if (typeof window.showToast === 'function') {
+      window.showToast('Alasan wajib diisi sebelum mengirim permintaan bukti foto.', 'warning');
+    }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  executeRejectArrivalByApprover(ticketId, reason);
+};
+
+function executeRejectArrivalByApprover(ticketId, reason) {
   const ticketsList = window.ticketsList || [];
   const t = ticketsList.find(x => x.id === ticketId);
   if (!t) return;
 
-  const currentApprover = (typeof getCurrentApproverActor === 'function' ? getCurrentApproverActor() : null) || { name: 'Ir. Hendra Gunawan, M.T.' };
+  const currentApprover = (typeof getCurrentApproverActor === 'function' ? getCurrentApproverActor() : null) || { name: t.approverName || 'Atasan Peninjau' };
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+  const nowRealtimeFull = formatArrivalRealtimeWib(now);
+  const lockedGateTime = t.tapInTime || t.arrivalReportedTime || t.arrivalReportedAt || t.reportedReturnTime || nowFormatted;
 
-  t.status = 'Sedang di Luar';
-  t.arrivalReportedAt = null;
-  t.reportedReturnTime = null;
-  t.tapInTime = null;
-  t.arrivalReportedTime = null;
-  t.employeeReportedReturnTime = null;
-  t.timeFrozen = false;
+  // KUNCI WAKTU & HARI TETAP PERTAHANKAN (Dilarang menghapus t.tapInTime / t.timeFrozen)
+  t.timeFrozen = true;
+  if (!t.tapInTime && lockedGateTime) t.tapInTime = lockedGateTime;
+  t.arrivalRejectionRound = (t.arrivalRejectionRound || 0) + 1;
+  t.status = 'Menunggu Bukti Kedatangan';
+  t.arrivalRejectReason = reason;
+  t.arrivalRejectBy = currentApprover.name;
+  t.arrivalRejectAt = nowRealtimeFull;
+  t.arrivalProofSubmitted = false;
+
+  if (!Array.isArray(t.arrivalVerificationHistory)) t.arrivalVerificationHistory = [];
+  t.arrivalVerificationHistory.push({
+    round: t.arrivalRejectionRound,
+    type: 'rejected_by_approver',
+    by: currentApprover.name,
+    reason,
+    time: nowRealtimeFull,
+    lockedTapInTime: lockedGateTime
+  });
 
   if (!t.timeline) t.timeline = [];
   t.timeline.push({
-    event: 'Laporan Tiba Ditolak Atasan',
+    event: `Konfirmasi Belum Tiba (Putaran #${t.arrivalRejectionRound})`,
     time: nowFormatted,
     by: `${currentApprover.name} (Atasan)`,
-    desc: `Laporan tiba ditolak oleh ${currentApprover.name}: Personel belum berada di area kantor/ruangan. Kunci waktu dibatalkan dan status kembali ke 'Sedang di Luar'.`
+    desc: `Atasan menandai personel belum tiba dengan alasan: "${reason}". Waktu Tap In (${lockedGateTime}) tetap terkunci & sistem meminta karyawan mengunggah foto bukti real-time.`
   });
 
   if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
 
   if (typeof window.createNotification === 'function') {
-    window.createNotification({
-      recipientRole: 'karyawan',
-      recipientNip: t.applicantNip || 'PK-2024-8841',
-      recipientName: t.applicantName || 'Budi Pratama, S.T.',
-      actorSource: 'approver',
-      type: 'peringatan',
-      title: 'Laporan Tiba Ditolak',
-      message: `Atasan (${currentApprover.name}) menolak laporan tiba Anda: Anda belum terlihat berada di ruangan. Status izin tetap 'Sedang di Luar'.`,
-      ticketId: t.id,
-      priority: 'urgent',
-      eventId: `arr_rej_${t.id}_${Date.now()}`
-    });
+    if (!t.initiatorCancelled && t.applicantNip) {
+      window.createNotification({
+        recipientRole: 'karyawan',
+        recipientNip: t.applicantNip,
+        recipientName: t.applicantName || 'Pemohon',
+        actorSource: 'approver',
+        type: 'peringatan',
+        title: 'Diminta Upload Foto Bukti Kedatangan',
+        message: `${currentApprover.name} menandai belum tiba: "${reason}". Buka Pengajuan Saya & unggah foto bukti real-time untuk mengirim kembali ke Atasan.`,
+        ticketId: t.id,
+        priority: 'urgent',
+        eventId: `arr_req_proof_${t.id}_r${t.arrivalRejectionRound}_${Date.now()}`
+      });
+    }
 
     if (t.isGroupDinas && Array.isArray(t.members)) {
-      t.members.filter(m => m.status !== 'batal').forEach(m => {
+      t.members.filter(m => m.status !== 'batal' && m.status !== 'cancelled' && m.nip).forEach(m => {
         window.createNotification({
           recipientRole: 'karyawan',
           recipientNip: m.nip,
           recipientName: m.name,
           actorSource: 'approver',
           type: 'peringatan',
-          title: 'Laporan Tiba Ditolak',
-          message: `Atasan (${currentApprover.name}) menolak laporan tiba tim dinas: Personel belum berada di ruangan. Status izin #${t.id} kembali 'Sedang di Luar'.`,
+          title: 'Diminta Upload Foto Bukti Kedatangan',
+          message: `${currentApprover.name} menandai tim dinas #${t.id} belum tiba: "${reason}". Salah satu personel tim wajib mengunggah foto bukti real-time di Pengajuan Saya.`,
           ticketId: t.id,
           priority: 'urgent',
-          eventId: `arr_rej_${t.id}_${m.nip}_${Date.now()}`
+          eventId: `arr_req_proof_${t.id}_r${t.arrivalRejectionRound}_${m.nip}_${Date.now()}`
         });
       });
     }
   }
 
+  window.closeRejectArrivalReasonModal();
+  const detailModal = document.getElementById('modalTicketDetail');
+  if (detailModal && detailModal.classList.contains('open')) {
+    if (typeof window.openTicketDetail === 'function') window.openTicketDetail(t.id, 'detail');
+  }
+
   if (typeof window.showToast === 'function') {
-    window.showToast(`Laporan tiba ditolak. Status tiket #${t.id} dikembalikan ke 'Sedang di Luar'.`, 'warning');
+    window.showToast(`Alasan terkirim! Karyawan diminta mengunggah foto bukti untuk #${t.id}. Waktu Tap In tetap terkunci.`, 'warning');
   }
 
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
   if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
   if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
 }

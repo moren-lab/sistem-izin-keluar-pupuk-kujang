@@ -1736,6 +1736,65 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     }
   }
 
+  // Section 1c: Verifikasi Kedatangan & Bukti Foto Real-Time
+  const secProofDetail = document.getElementById('sectionArrivalProofDetail');
+  if (secProofDetail) {
+    const historyArr = Array.isArray(ticket.arrivalVerificationHistory) ? ticket.arrivalVerificationHistory : [];
+    const hasArrivalProofData = Boolean(ticket.arrivalRejectReason || ticket.arrivalProofPhoto || historyArr.length > 0);
+    if (hasArrivalProofData) {
+      secProofDetail.style.display = 'flex';
+      secProofDetail.style.flexDirection = 'column';
+      secProofDetail.style.gap = '0.55rem';
+      const canCurrentEmployeeUpload = isKaryawanActor && ticket.status === 'Menunggu Bukti Kedatangan';
+      secProofDetail.innerHTML = `
+        <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a);">
+          📷 Riwayat Verifikasi Kedatangan &amp; Foto Bukti Real-Time
+        </div>
+        ${ticket.arrivalRejectReason ? `
+          <div class="proof-reason-alert-box" style="padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.78rem; line-height: 1.45;">
+            <div style="font-weight: 800; margin-bottom: 2px;">⚠️ Alasan Belum Tiba (${ticket.arrivalRejectBy || 'Atasan'} • Putaran #${ticket.arrivalRejectionRound || 1}):</div>
+            <div>"${ticket.arrivalRejectReason}"</div>
+            ${ticket.arrivalRejectAt ? `<div style="font-size: 0.7rem; opacity: 0.85; margin-top: 3px;">🕒 Dikirim pada: ${ticket.arrivalRejectAt}</div>` : ''}
+          </div>
+        ` : ''}
+        ${ticket.arrivalProofPhoto ? `
+          <div class="proof-photo-review-card" style="display: flex; gap: 0.75rem; align-items: center; padding: 0.65rem 0.85rem; border-radius: 8px;">
+            <img src="${ticket.arrivalProofPhoto}" alt="Foto Bukti Kedatangan" class="proof-photo-thumb" onclick="if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${ticket.id}')" title="Klik untuk memperbesar foto">
+            <div style="flex: 1; min-width: 0; font-size: 0.76rem; line-height: 1.45;">
+              <div style="font-weight: 800;">📸 Foto Bukti Real-Time Terbaru</div>
+              <div>Diunggah oleh: <strong>${ticket.arrivalProofBy || ticket.applicantName || 'Karyawan'}</strong></div>
+              <div style="color: #059669; font-weight: 700;">🕒 Stempel Waktu: ${ticket.arrivalProofAt || '-'}</div>
+              ${ticket.arrivalProofNote ? `<div style="margin-top: 2px; font-style: italic;">"${ticket.arrivalProofNote}"</div>` : ''}
+            </div>
+          </div>
+        ` : ''}
+        ${canCurrentEmployeeUpload ? `
+          <button type="button" class="btn-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800;" onclick="document.getElementById('modalTicketDetail').classList.remove('open'); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${ticket.id}');">
+            📷 Upload Foto Bukti Sekarang
+          </button>
+        ` : ''}
+        ${historyArr.length > 2 ? `
+          <details style="font-size: 0.72rem; color: #64748b; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 0.5rem 0.75rem;">
+            <summary style="cursor: pointer; font-weight: 700;">Lihat Seluruh Putaran Verifikasi (${historyArr.length} catatan)</summary>
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.45rem;">
+              ${historyArr.map((h, idx) => `
+                <div style="border-top: 1px dashed var(--border-color, #cbd5e1); padding-top: 0.35rem;">
+                  <strong>Putaran #${h.round || 1} — ${h.type === 'proof_submitted' ? '📸 Foto Dikirim' : '⚠️ Belum Tiba'}</strong> (${h.time || '-'}) oleh ${h.by || '-'}
+                  ${h.reason ? `<div>Alasan: "${h.reason}"</div>` : ''}
+                  ${h.note ? `<div>Catatan: "${h.note}"</div>` : ''}
+                  ${h.photoDataUrl ? `<button type="button" class="btn-outline" style="margin-top: 3px; padding: 2px 8px; font-size: 0.68rem;" onclick="if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${ticket.id}', ${idx})">🖼️ Lihat Foto Putaran #${h.round || 1}</button>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </details>
+        ` : ''}
+      `;
+    } else {
+      secProofDetail.style.display = 'none';
+      secProofDetail.innerHTML = '';
+    }
+  }
+
   // Section 4B: Surat Perintah / Tugas Dinas
   const secSurat = document.getElementById('sectionSuratPerintahDetail');
   const detailSuratName = document.getElementById('detailSuratName');

@@ -114,7 +114,7 @@ function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurre
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
       t.status !== 'Kedaluwarsa' &&
-      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Menunggu Verifikasi Atasan');
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Menunggu Verifikasi Atasan' || t.status === 'Menunggu Bukti Kedatangan');
   });
 }
 

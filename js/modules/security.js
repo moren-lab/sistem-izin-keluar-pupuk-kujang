@@ -999,8 +999,9 @@ function filterSecurityLogTickets() {
     }
 
     // Riwayat Pos Jaga: HANYA tiket yang sudah 'Selesai' atau 'Terlambat'
-    // Status aktif ('Sedang di Luar', 'Disetujui', dsb.) TIDAK masuk ke riwayat pos jaga karena sudah ada di menu Pelacakan Karyawan di Luar
-    const isCompletedOrLate = (t.status === 'Selesai' || t.status === 'Terlambat' || t.isLate);
+    // Status aktif ('Sedang di Luar', 'Disetujui', 'Menunggu Verifikasi Atasan', 'Menunggu Bukti Kedatangan', dsb.) TIDAK masuk ke riwayat pos jaga
+    const isActiveAwaitingArrival = ['Sedang di Luar', 'Disetujui', 'Menunggu Persetujuan', 'Menunggu Otorisasi Darurat', 'Menunggu Verifikasi Atasan', 'Menunggu Bukti Kedatangan'].includes(t.status);
+    const isCompletedOrLate = !isActiveAwaitingArrival && (t.status === 'Selesai' || t.status === 'Terlambat' || t.isLate);
     if (!isCompletedOrLate) return false;
 
     // Filter Gerbang Pos (Multi-gate Pos 1, 2, 3)

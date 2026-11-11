@@ -59,6 +59,8 @@ function getStatusPill(status, ticket) {
     case 'Menunggu Otorisasi Darurat':
     case 'Darurat Terkunci': color = '#b91c1c'; break;
     case 'Sedang di Luar': color = '#0284c7'; break;
+    case 'Menunggu Verifikasi Atasan': color = '#2563eb'; break;
+    case 'Menunggu Bukti Kedatangan': color = '#b45309'; break;
     case 'Terlambat': color = '#dc2626'; break;
     case 'Kedaluwarsa': color = '#64748b'; break;
     case 'Selesai': color = '#059669'; break;
