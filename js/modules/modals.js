@@ -1745,7 +1745,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       secProofDetail.style.display = 'flex';
       secProofDetail.style.flexDirection = 'column';
       secProofDetail.style.gap = '0.55rem';
-      const canCurrentEmployeeUpload = isKaryawanActor && ticket.status === 'Menunggu Bukti Kedatangan';
+      const isEmpViewer = (typeof window.isEmployeeRole === 'function' ? window.isEmployeeRole(window.currentActor) : (!window.currentActor || String(window.currentActor).startsWith('karyawan')));
+      const canCurrentEmployeeUpload = isEmpViewer && ticket.status === 'Menunggu Bukti Kedatangan';
       secProofDetail.innerHTML = `
         <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a);">
           📷 Riwayat Verifikasi Kedatangan &amp; Foto Bukti Real-Time
@@ -1769,7 +1770,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
           </div>
         ` : ''}
         ${canCurrentEmployeeUpload ? `
-          <button type="button" class="btn-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800;" onclick="document.getElementById('modalTicketDetail').classList.remove('open'); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${ticket.id}');">
+          <button type="button" class="btn-danger-solid" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; width: 100%; justify-content: center;" onclick="document.getElementById('modalTicketDetail').classList.remove('open'); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${ticket.id}');">
             📷 Upload Foto Bukti Sekarang
           </button>
         ` : ''}

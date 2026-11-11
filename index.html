@@ -3467,9 +3467,9 @@
         </div>
       </div>
       <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.65rem;">
-        <button type="button" class="btn-outline" onclick="window.closeRejectArrivalReasonModal()">Batal</button>
-        <button type="button" class="btn-emergency" id="btnSubmitRejectArrivalReason" onclick="window.submitRejectArrivalReason()">
-          Kirim Alasan & Minta Foto Bukti
+        <button type="button" class="btn-secondary" onclick="window.closeRejectArrivalReasonModal()">Batal</button>
+        <button type="button" class="btn-danger-solid" id="btnSubmitRejectArrivalReason" onclick="window.submitRejectArrivalReason()">
+          Kirim Alasan &amp; Minta Foto Bukti
         </button>
       </div>
     </div>
@@ -3509,7 +3509,7 @@
             <div style="font-size: 0.875rem; font-weight: 800; color: var(--text-primary, #0f172a);">Pilih Foto Bukti dari Galeri</div>
             <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px;">Format JPG / PNG / WebP • Stempel hari &amp; waktu real-time akan langsung dicetak ke foto</div>
             <div style="margin-top: 0.65rem;">
-              <span class="btn-outline" style="display: inline-flex; align-items: center; gap: 6px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">🖼️ Buka Galeri Perangkat</span>
+              <span class="btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; padding: 0.45rem 0.9rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px;">🖼️ Buka Galeri Perangkat</span>
             </div>
           </div>
 
@@ -3519,7 +3519,7 @@
             </div>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
               <span id="uploadProofStampMeta" style="font-size: 0.74rem; font-weight: 700; color: #059669;">✓ Stempel waktu real-time terpasang pada foto</span>
-              <button type="button" class="btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.76rem; font-weight: 700; border-radius: 8px;" onclick="document.getElementById('uploadProofFileInput').click()">
+              <button type="button" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.76rem; font-weight: 700; border-radius: 8px;" onclick="document.getElementById('uploadProofFileInput').click()">
                 🔄 Ganti Foto Galeri
               </button>
             </div>
@@ -3532,8 +3532,8 @@
         </div>
       </div>
       <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.65rem;">
-        <button type="button" class="btn-outline" onclick="window.closeUploadArrivalProofModal()">Batal</button>
-        <button type="button" class="btn-primary" id="btnSubmitArrivalProof" onclick="window.submitArrivalProofToApprover()" disabled style="opacity: 0.55; cursor: not-allowed;">
+        <button type="button" class="btn-secondary" onclick="window.closeUploadArrivalProofModal()">Batal</button>
+        <button type="button" class="btn-primary-action" id="btnSubmitArrivalProof" onclick="window.submitArrivalProofToApprover()" disabled style="opacity: 0.55; cursor: not-allowed; background: #2563eb; color: #ffffff; border: none; padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 700;">
           📤 Kirim Kembali ke Atasan
         </button>
       </div>

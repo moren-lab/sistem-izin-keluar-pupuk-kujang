@@ -12563,7 +12563,7 @@ body.theme-dark .sop-num {
 .proof-preview-frame img {
   display: block;
   width: 100%;
-  max-height: 290px;
+  max-height: 205px;
   object-fit: contain;
   background: #0b1120;
 }
@@ -12739,109 +12739,203 @@ body.theme-dark [style*="background-color: #10b981"] {
   color: #ffffff !important;
 }
 
-/* Inline Light Callout Surfaces inside App Views & Modals */
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #eff6ff"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#eff6ff"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #e0f2fe"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#e0f2fe"] {
-  background: rgba(30, 58, 138, 0.22) !important;
-  border-color: rgba(96, 165, 250, 0.4) !important;
+/* Inline Light Callout Surfaces inside App Views, Modals & Mobile */
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #eff6ff"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#eff6ff"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #e0f2fe"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#e0f2fe"] {
+  background: rgba(30, 58, 138, 0.24) !important;
+  border-color: rgba(96, 165, 250, 0.42) !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #fffbeb"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#fffbeb"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #fef3c7"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#fef3c7"] {
-  background: rgba(180, 83, 9, 0.2) !important;
-  border-color: rgba(245, 158, 11, 0.4) !important;
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #fffbeb"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#fffbeb"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #fef3c7"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#fef3c7"] {
+  background: rgba(180, 83, 9, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.42) !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #fff1f2"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#fff1f2"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #fff5f5"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#fff5f5"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #fee2e2"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#fee2e2"] {
-  background: rgba(190, 18, 60, 0.2) !important;
-  border-color: rgba(251, 113, 133, 0.42) !important;
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #fff1f2"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#fff1f2"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #fff5f5"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#fff5f5"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #fef2f2"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#fef2f2"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #fee2e2"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#fee2e2"] {
+  background: rgba(190, 18, 60, 0.22) !important;
+  border-color: rgba(251, 113, 133, 0.44) !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #ecfdf5"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#ecfdf5"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background: #d1fae5"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalEmergencyPin, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="background:#d1fae5"] {
-  background: rgba(6, 95, 70, 0.24) !important;
-  border-color: rgba(52, 211, 153, 0.42) !important;
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #ecfdf5"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#ecfdf5"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #f0fdf4"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#f0fdf4"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #d1fae5"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#d1fae5"] {
+  background: rgba(6, 95, 70, 0.26) !important;
+  border-color: rgba(52, 211, 153, 0.44) !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #mobileActionSheet) [style*="background: #f8fafc"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #mobileActionSheet) [style*="background:#f8fafc"] {
+/* Inline neutral surfaces (#f8fafc, #f1f5f9, #e0e7ff, #ffffff) across Views, All Modals & Mobile */
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #f8fafc"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#f8fafc"] {
   background: #161f2e !important;
   border-color: #334155 !important;
 }
 
-/* Inline Text Color Contrast Upgrades in Dark Mode */
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #b91c1c"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#b91c1c"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #991b1b"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #dc2626"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectDecision, #modalCancelTicket, #modalExtendTicket, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#dc2626"] {
-  color: #fca5a5 !important;
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #ffffff"]:not(#digitalPassQrContainer):not(#mobileQrCanvasContainer):not(.mobile-qrcode-wrapper):not(.brand-icon-box):not(.timeline-dot):not(.printable-report-signatures *),
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background:#ffffff"]:not(#digitalPassQrContainer):not(#mobileQrCanvasContainer):not(.mobile-qrcode-wrapper):not(.brand-icon-box):not(.timeline-dot):not(.printable-report-signatures *),
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #e0e7ff"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="background: #f1f5f9"] {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #047857"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#047857"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #059669"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#059669"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #065f46"] {
-  color: #34d399 !important;
+/* Dinas Kantor Tim & Surat Perintah Form Wrappers, Dropzones & Floating Dropdowns */
+body.theme-dark #groupDinasMembersWrapper,
+body.theme-dark #emergGroupDinasMembersWrapper,
+body.theme-dark #mGroupDinasWrapper,
+body.theme-dark #mSuratPerintahWrapper {
+  background: #161f2e !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #2563eb"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#2563eb"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #1d4ed8"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #1e40af"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #0369a1"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#0369a1"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #0284c7"] {
-  color: #93c5fd !important;
+body.theme-dark #dropzoneSuratPerintah,
+body.theme-dark #dropzoneEmergSuratPerintah,
+body.theme-dark #mDropzoneSuratPerintah {
+  background: #0f172a !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #b45309"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#b45309"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #92400e"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #78350f"] {
-  color: #fcd34d !important;
+body.theme-dark #dropzoneSuratPerintah:hover,
+body.theme-dark #dropzoneEmergSuratPerintah:hover,
+body.theme-dark #mDropzoneSuratPerintah:hover {
+  background: #1e293b !important;
+  border-color: #38bdf8 !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #0f172a"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#0f172a"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #1e293b"] {
+body.theme-dark #previewSuratPerintahCard,
+body.theme-dark #previewEmergSuratPerintahCard,
+body.theme-dark #mPreviewSuratPerintahCard {
+  background: rgba(6, 95, 70, 0.24) !important;
+  border-color: rgba(52, 211, 153, 0.45) !important;
+  color: #e2e8f0 !important;
+}
+
+body.theme-dark #memberFloatingDropdown,
+body.theme-dark #emergMemberFloatingDropdown,
+body.theme-dark #mMemberFloatingDropdown,
+body.theme-dark .approver-floating-dropdown {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+body.theme-dark #mobileNotifDropdown,
+body.theme-dark .mobile-confirm-dialog-card {
+  background: #0f172a !important;
+  border-color: #334155 !important;
   color: #f1f5f9 !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #334155"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#334155"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #475569"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#475569"] {
+/* Inline Text Color Contrast Upgrades in Dark Mode */
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #b91c1c"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#b91c1c"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #991b1b"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #dc2626"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#dc2626"] {
+  color: #fca5a5 !important;
+}
+
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #047857"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#047857"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #059669"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#059669"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #15803d"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #065f46"] {
+  color: #34d399 !important;
+}
+
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #2563eb"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#2563eb"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #3b82f6"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #1d4ed8"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #1e40af"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #0369a1"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#0369a1"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #0284c7"] {
+  color: #93c5fd !important;
+}
+
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #b45309"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#b45309"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #92400e"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #78350f"] {
+  color: #fcd34d !important;
+}
+
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #0f172a"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#0f172a"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #1e293b"] {
+  color: #f1f5f9 !important;
+}
+
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #334155"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#334155"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #475569"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#475569"] {
   color: #cbd5e1 !important;
 }
 
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color: #64748b"],
-body.theme-dark :is(#mainAppWrapper, #modalTicketDetail, #modalSimulasiTapIn, #modalRejectArrivalReason, #modalUploadArrivalProof, #modalDeleteConfirm, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet) [style*="color:#64748b"] {
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color: #64748b"],
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #desktopNotifDropdown, #mobileNotifDropdown, #mobileActionSheet, #mobileAppContainer) [style*="color:#64748b"] {
   color: #94a3b8 !important;
 }
 
-/* Keep solid green/red/blue buttons crisp white even if text color rule exists */
-body.theme-dark .btn-primary,
-body.theme-dark .btn-success,
-body.theme-dark .btn-danger,
-body.theme-dark .btn-danger-solid,
-body.theme-dark .mobile-btn-danger,
-body.theme-dark button[style*="background: #059669"],
-body.theme-dark button[style*="background: #dc2626"],
-body.theme-dark button[style*="background: #2563eb"],
-body.theme-dark button[style*="background: #d97706"] {
+/* Keep solid green/red/blue buttons & outline/secondary buttons crisp in dark mode */
+.btn-secondary {
+  background: var(--bg-subtle, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+body.theme-dark .btn-secondary,
+body.theme-dark .btn-outline {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #475569 !important;
+}
+
+body.theme-dark .btn-secondary:hover,
+body.theme-dark .btn-outline:hover {
+  background: #334155 !important;
+}
+
+body.theme-dark .btn-emergency {
+  background: #be123c !important;
+  border-color: #be123c !important;
+  color: #ffffff !important;
+}
+
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #mobileAppContainer) :is(.btn-primary, .btn-success, .btn-danger, .btn-danger-solid, .btn-emergency, .mobile-btn-danger, #btnConfirmLogoutModal, button[style*="background: #059669"], button[style*="background: #047857"], button[style*="background: #dc2626"], button[style*="background: #be123c"], button[style*="background: #2563eb"], button[style*="background: #1d4ed8"], button[style*="background: #d97706"]),
+body.theme-dark :is(#viewKaryawan, #viewApprover, #viewSecurity, #viewAdmin, #viewNotifikasi, .top-navbar, .modal-overlay, #mobileAppContainer) :is(.btn-primary, .btn-success, .btn-danger, .btn-danger-solid, .btn-emergency, .mobile-btn-danger, #btnConfirmLogoutModal, button[style*="background: #059669"], button[style*="background: #047857"], button[style*="background: #dc2626"], button[style*="background: #be123c"], button[style*="background: #2563eb"], button[style*="background: #1d4ed8"], button[style*="background: #d97706"]) span {
   color: #ffffff !important;
 }
 

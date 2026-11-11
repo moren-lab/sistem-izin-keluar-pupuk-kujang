@@ -1332,7 +1332,7 @@ function renderKaryawanDashboard() {
             <div class="proof-reason-alert-box" style="padding: 0.45rem 0.65rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4;">
               <strong>⚠️ Atasan Menandai Belum Tiba:</strong> "${activeTicket.arrivalRejectReason || '-'}"
             </div>
-            <button type="button" class="btn-figma-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
+            <button type="button" class="btn-danger-solid" style="width: 100%; justify-content: center; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
               <span>📷 Upload Foto</span>
             </button>
           </div>
@@ -1714,7 +1714,7 @@ function renderPengajuanSayaView() {
             <div style="margin-top: 2px;">"${activeTicket.arrivalRejectReason || '-'}"</div>
             <div style="font-size: 0.72rem; margin-top: 4px; opacity: 0.9;">🔒 Tap In Gerbang (${activeTicket.tapInTime || activeTicket.arrivalReportedTime || 'Terkunci'}) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).</div>
           </div>
-          <button type="button" class="btn-figma-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0.6rem 1rem;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
+          <button type="button" class="btn-danger-solid" style="width: 100%; justify-content: center; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; padding: 0.6rem 1rem;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
             <span>📷 Upload Foto</span>
           </button>
         </div>
