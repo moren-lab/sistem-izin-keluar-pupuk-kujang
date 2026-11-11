@@ -268,6 +268,10 @@ const DEFAULT_TICKETS = [
     plannedExit: _d3.plannedExit,
     estimatedReturn: _d3.estimatedReturn,
     status: 'Selesai',
+    isGroupDinas: true,
+    members: [
+      { nip: 'PK-2024-8842', name: 'Arthur Morgan, S.Tr.T.', department: 'Departemen Rekayasa & Pemeliharaan', role: 'Anggota', status: 'aktif' }
+    ],
     isLate: true,
     lateMinutes: 15,
     createdAt: _d3.createdAt,
@@ -297,12 +301,14 @@ const DEFAULT_TICKETS = [
     status: 'Selesai',
     createdAt: _d4.createdAt,
     approverName: 'Ir. Hendra Gunawan, M.T.',
-    approverNote: 'Ditolak: alasan tidak memadai. Mohon koordinasikan dengan rekan kerja terlebih dahulu.',
-    scanOutTime: null,
+    approverNote: 'Disetujui. Semoga urusan keluarga lekas terselesaikan dengan baik.',
+    scanOutTime: '06 Nov 2026, 10.05 WIB (Pos 1 Gerbang Utama)',
+    scanOutGate: 'Pos 1 Gerbang Utama',
     scanInTime: null,
     timeline: [
-      { event: 'Pengajuan Dibuat', time: '09 Okt 2026, 14.10 WIB', by: 'Budi Pratama', desc: 'Pengajuan pulang mendahului.' },
-      { event: 'Ditolak Atasan', time: '09 Okt 2026, 14.40 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Ditolak: alasan tidak memadai.' }
+      { event: 'Pengajuan Dibuat', time: '06 Nov 2026, 09.40 WIB', by: 'Budi Pratama, S.T.', desc: 'Pengajuan izin pulang mendahului.' },
+      { event: 'Disetujui Atasan', time: '06 Nov 2026, 09.50 WIB', by: 'Ir. Hendra Gunawan, M.T.', desc: 'Disetujui untuk pulang mendahului.' },
+      { event: 'Scan Out Pos Jaga', time: '06 Nov 2026, 10.05 WIB', by: 'Pos 1 Gerbang Utama', desc: 'Scan kartu keluar gerbang oleh petugas keamanan.' }
     ]
   },
   {
@@ -408,6 +414,18 @@ function loadTickets() {
         if (t.emergencyLocked || t.qrLocked) {
           t.emergencyLocked = false;
           t.qrLocked = false;
+          changed = true;
+        }
+      }
+      // Rekonsiliasi tiket IZ-20261009-002 agar memiliki catatan pemindaian gerbang yang valid
+      if (t.id === 'IZ-20261009-002') {
+        if (!t.scanOutTime || t.scanOutTime === 'null') {
+          t.scanOutTime = '06 Nov 2026, 10.05 WIB (Pos 1 Gerbang Utama)';
+          t.scanOutGate = 'Pos 1 Gerbang Utama';
+          changed = true;
+        }
+        if (t.approverNote && t.approverNote.includes('Ditolak')) {
+          t.approverNote = 'Disetujui. Semoga urusan keluarga lekas terselesaikan dengan baik.';
           changed = true;
         }
       }

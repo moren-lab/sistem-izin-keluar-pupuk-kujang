@@ -150,7 +150,15 @@ function unlockEmergencyTicket(ticketId, method, authorizerName, extraNote) {
   ticket.emergencyUnlockMethod = method;
   ticket.emergencyUnlockedBy = authorizerName;
   ticket.emergencyUnlockedAt = nowFormatted;
-  ticket.approverNote = `[Otorisasi Darurat Sah]: QR Code dibuka melalui "${method}" oleh ${authorizerName}. ${extraNote || ''}`;
+  let methodShort = method;
+  if (method.includes('Scan Wajah') || method.includes('Face Scan')) {
+    methodShort = 'Face Scan Biometrik';
+  } else if (method.includes('Kode Sandi') || method.includes('OTP')) {
+    methodShort = 'Kode Sandi / OTP';
+  } else if (method.includes('Persetujuan Langsung')) {
+    methodShort = 'Dashboard Atasan';
+  }
+  ticket.approverNote = `[Otorisasi Sah]: QR Code dibuka via ${methodShort} oleh ${authorizerName}.`;
 
   if (!ticket.timeline) ticket.timeline = [];
   ticket.timeline.push(

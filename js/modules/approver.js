@@ -367,7 +367,7 @@ function renderApproverDashboard() {
                   <span class="tag-badge" style="background: #dbeafe; color: #1e40af; font-weight: 700; border: 1px solid #bfdbfe;">Tembusan</span>
                 </div>
                 <div style="font-size: 0.8rem; color: #1e3a8a; margin-top: 3px;">
-                  Staf Anda terdaftar dalam rombongan tugas dinas kantor bersama tim (Menunggu persetujuan Atasan Utama).
+                  Staf Anda terdaftar dalam tim tugas dinas kantor (Menunggu persetujuan Atasan Utama).
                 </div>
                 <div style="font-size: 0.75rem; color: #2563eb; margin-top: 2px;">
                   Anda dapat memantau rincian penugasan, jadwal, dan lampiran surat tugas di menu Antrean.
@@ -667,6 +667,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
       displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
     }
     const isDinas = displayCategory === 'Dinas Kantor';
+    const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
 
     return `
           <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : ''}">
@@ -690,6 +691,10 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                 <span style="font-weight: 700; font-size: 0.75rem; color: ${isDinas ? '#059669' : '#d97706'}; white-space: nowrap;">${displayCategory}</span>
                 ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                ${isGroupDinas ? (() => {
+                  const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                  return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                })() : ''}
               </div>
             </div>
 
@@ -713,7 +718,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   const names = myMembers.map(m => m.name.split(',')[0]).join(', ');
                   return `
                     <div class="approver-alert-banner" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
-                      <span>📋 <strong>Tembusan Pengawasan:</strong> Staf Anda (<strong>${names}</strong>) terdaftar dalam rombongan dinas ini</span>
+                      <span>📋 <strong>Tembusan Pengawasan:</strong> Staf Anda (<strong>${names}</strong>) terdaftar dalam tim dinas ini</span>
                       <span style="font-size: 0.7rem; color: #1e40af; font-weight: 700;">Peninjau: ${t.approverName}</span>
                     </div>
                   `;
@@ -747,16 +752,6 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 <button type="button" onclick="event.stopPropagation(); window.viewSuratPerintahDetail('${t.id}')" style="background: #ffffff; color: #15803d; border: 1px solid #86efac; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
                   👁️ Lihat Dokumen
                 </button>
-              </div>
-            ` : ''}
-
-            ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
-              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.4rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
-                <div style="font-weight: 700; color: #1e40af; margin-bottom: 3px;">👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif):</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                  <span style="background: #d1fae5; color: #065f46; font-weight: 700; padding: 1px 6px; border-radius: 4px;">👑 ${t.applicantName} (Inisiator)</span>
-                  ${t.members.map(m => `<span style="background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${m.name}${m.status === 'batal' ? ' (Batal)' : ''}</span>`).join('')}
-                </div>
               </div>
             ` : ''}
 
@@ -880,7 +875,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="padding: 0.45rem 0.65rem; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.725rem; color: #1e40af; line-height: 1.4;">
                     <strong>🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}):</strong><br>
-                    Personel rombongan dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
+                    Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:
                   </div>
                   <div style="display: flex; gap: 0.45rem; width: 100%;">
                     <button type="button" class="btn-reject" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.rejectArrivalByApprover('${t.id}')">
@@ -932,12 +927,12 @@ function renderApproverTable(list, containerElement) {
       <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
-            <th style="min-width: 160px;">Nomor Tiket & Kategori</th>
-            <th style="min-width: 180px;">Pemohon & Departemen</th>
-            <th style="min-width: 200px;">Tujuan & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
+            <th style="white-space: nowrap; min-width: 180px;">Pemohon & Departemen</th>
+            <th style="white-space: nowrap; min-width: 200px;">Tujuan & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="min-width: 180px;">Catatan Keputusan</th>
+            <th style="white-space: nowrap; min-width: 180px;">Catatan Keputusan</th>
             <th style="white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
@@ -948,6 +943,8 @@ function renderApproverTable(list, containerElement) {
             if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
               displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
             }
+            const isDinas = displayCategory === 'Dinas Kantor';
+            const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
             const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
             const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
               ? window.formatTicketScheduleWithDay(t)
@@ -955,7 +952,19 @@ function renderApproverTable(list, containerElement) {
 
             let catatanHtml = `<span style="color: var(--text-muted); font-size: 0.75rem;">-</span>`;
             if (t.approverNote) {
-              catatanHtml = `<span style="color: var(--text-primary); font-size: 0.75rem; font-style: normal;" title="${(t.approverNote || '').replace(/"/g, '&quot;')}">"${t.approverNote}"</span>`;
+              let noteText = t.approverNote;
+              if (noteText.includes('[Otorisasi Darurat Sah]: QR Code dibuka melalui "Scan Wajah Atasan (Face Scan Biometrik)"') || (noteText.includes('[Otorisasi') && noteText.includes('Face Scan'))) {
+                noteText = `[Otorisasi Sah]: QR Code dibuka via Face Scan Biometrik oleh ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}.`;
+              } else if (noteText.includes('[Otorisasi Darurat Sah]:')) {
+                noteText = noteText.replace(/\[Otorisasi Darurat Sah\]:?\s*/gi, '[Otorisasi Sah]: ')
+                                   .replace(/melalui\s*"([^"]+)"/gi, 'via $1')
+                                   .replace(/Verifikasi wajah biometrik berhasil dilakukan langsung di tempat kejadian\./gi, '')
+                                   .replace(/Disetujui 1-Klik melalui Dashboard Atasan\./gi, '')
+                                   .replace(/Verifikasi kode sandi otorisasi.*cocok secara sah\./gi, '')
+                                   .replace(/\s{2,}/g, ' ')
+                                   .trim();
+              }
+              catatanHtml = `<span style="color: var(--text-primary); font-size: 0.75rem; font-style: normal;" title="${(t.approverNote || '').replace(/"/g, '&quot;')}">"${noteText}"</span>`;
             } else if (t.rejectionReason) {
               catatanHtml = `<span style="color: #ef4444; font-size: 0.75rem;" title="${(t.rejectionReason || '').replace(/"/g, '&quot;')}">${t.rejectionReason}</span>`;
             } else if (t.reassignedTo) {
@@ -984,8 +993,15 @@ function renderApproverTable(list, containerElement) {
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</span>
                     ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+                    ${isGroupDinas ? (() => {
+                      const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                      return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                    })() : ''}
                   </div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${displayCategory} — ${t.type}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35;">
+                    <div>${displayCategory}</div>
+                    <div>${t.type}</div>
+                  </div>
                 </td>
                 <td style="vertical-align: middle;">
                   <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
@@ -1199,7 +1215,7 @@ function renderApproverView() {
                   <span>📋 Tembusan Pengajuan Dinas Staf Anda</span>
                   <span class="approver-reassigned-badge" style="background: #dbeafe; color: #1e40af;">${memberDinasList.length}</span>
                 </h4>
-                <span class="approver-reassigned-sub">Staf Anda terdaftar dalam rombongan dinas kantor</span>
+                <span class="approver-reassigned-sub">Staf Anda terdaftar dalam tim dinas kantor</span>
               </div>
               ${tempDivMemberDinas.innerHTML}
             </div>
@@ -2314,7 +2330,7 @@ window.confirmArrivalByApprover = function(ticketId) {
           actorSource: 'approver',
           type: 'selesai',
           title: 'Izin Dinas Selesai',
-          message: `Atasan (${currentApprover.name}) telah memverifikasi kepulangan rombongan Anda. Tiket #${t.id} resmi selesai.`,
+          message: `Atasan (${currentApprover.name}) telah memverifikasi kepulangan tim dinas Anda. Tiket #${t.id} resmi selesai.`,
           ticketId: t.id,
           priority: 'normal',
           eventId: `arr_conf_${t.id}_${m.nip}_${Date.now()}`
@@ -2338,11 +2354,11 @@ window.rejectArrivalByApprover = function(ticketId) {
   const t = ticketsList.find(x => x.id === ticketId);
   if (!t) return;
 
-  const confirmMsg = `Apakah Anda yakin bahwa personel rombongan dinas #${t.id} belum tiba di area kerja?\n\nKunci waktu kepulangan akan dibatalkan dan durasi izin dilanjutkan berjalan secara real-time.`;
+  const confirmMsg = `Apakah Anda yakin bahwa personel tim dinas #${t.id} belum tiba di area kerja?\n\nKunci waktu kepulangan akan dibatalkan dan durasi izin dilanjutkan berjalan secara real-time.`;
   if (typeof window.openConfirmDialog === 'function') {
     window.openConfirmDialog({
       title: 'Konfirmasi: Personel Belum Tiba',
-      message: `Apakah Anda yakin bahwa personel rombongan dinas <strong>#${t.id}</strong> belum tiba di area kerja?<br><br><span style="color:#dc2626; font-size:0.75rem;">Kunci waktu kepulangan akan dibatalkan dan status kembali ke 'Sedang di Luar'.</span>`,
+      message: `Apakah Anda yakin bahwa personel tim dinas <strong>#${t.id}</strong> belum tiba di area kerja?<br><br><span style="color:#dc2626; font-size:0.75rem;">Kunci waktu kepulangan akan dibatalkan dan status kembali ke 'Sedang di Luar'.</span>`,
       confirmText: 'Ya, Belum Tiba',
       cancelText: 'Batal',
       isDanger: true,
@@ -2406,7 +2422,7 @@ function executeRejectArrivalByApprover(ticketId) {
           actorSource: 'approver',
           type: 'peringatan',
           title: 'Laporan Tiba Ditolak',
-          message: `Atasan (${currentApprover.name}) menolak laporan tiba rombongan: Personel belum berada di ruangan. Status izin #${t.id} kembali 'Sedang di Luar'.`,
+          message: `Atasan (${currentApprover.name}) menolak laporan tiba tim dinas: Personel belum berada di ruangan. Status izin #${t.id} kembali 'Sedang di Luar'.`,
           ticketId: t.id,
           priority: 'urgent',
           eventId: `arr_rej_${t.id}_${m.nip}_${Date.now()}`

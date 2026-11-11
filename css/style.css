@@ -11746,10 +11746,7 @@ body.theme-dark .sidebar-brand-subtitle p {
 }
 
 #modalTicketDetail #modalDetailSubtitle {
-  font-size: 0.825rem;
-  color: var(--text-secondary, #64748b);
-  margin-top: 3px;
-  font-weight: 500;
+  display: none !important;
 }
 
 #modalTicketDetail .figma-tab-btn {

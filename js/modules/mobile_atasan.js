@@ -863,7 +863,7 @@
               ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
                 <div style="margin: 6px 0 8px 0; padding: 6px 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
                   <div style="font-size: 0.675rem; font-weight: 700; color: #1e40af; margin-bottom: 3px;">
-                    👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang):
+                    👥 Tim Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang):
                   </div>
                   <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                     <span style="font-size: 0.675rem; background: #dbeafe; color: #1e40af; font-weight: 700; padding: 1px 6px; border-radius: 4px;">
@@ -1219,7 +1219,7 @@
         ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
           <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #f0fdf4; border: 1.5px solid #bbf7d0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 0.7rem; color: #15803d; font-weight: 800; text-transform: uppercase;">👥 ANGGOTA ROMBONGAN DINAS</span>
+              <span style="font-size: 0.7rem; color: #15803d; font-weight: 800; text-transform: uppercase;">👥 ANGGOTA TIM DINAS</span>
               <span style="font-size: 0.675rem; font-weight: 700; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 999px;">
                 ${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif
               </span>
@@ -1346,7 +1346,7 @@
           return `
           <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #eff6ff; border: 1.5px solid #93c5fd;">
             <div style="font-size: 0.825rem; font-weight: 800; color: #1e40af; margin-bottom: 4px;">
-              🏢 Rombongan Dinas Melaporkan Tiba di Kantor
+              🏢 Tim Dinas Melaporkan Tiba di Kantor
             </div>
             <div style="font-size: 0.725rem; color: #3b82f6; margin-bottom: 10px;">
               Personel telah tap in di gerbang (${t.tapInTime || t.arrivalReportedAt || 'Terkunci'}). Mohon verifikasi kehadiran fisik personel di ruangan kerja Anda.
@@ -1582,7 +1582,7 @@
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
             </div>
-            <span class="mobile-badge ${statusBadgeClass}">${isLate ? 'Terlambat' : t.status}</span>
+            <span class="mobile-badge ${statusBadgeClass}">${(isSelesai && isLate) || t.status === 'Terlambat' ? 'Selesai (Terlambat)' : (isLate ? 'Terlambat' : t.status)}</span>
           </div>
 
           <div style="font-family: monospace; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
@@ -1616,7 +1616,7 @@
           ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
             <div style="margin: 6px 0; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
               <div style="font-size: 0.65rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
-                👥 Rombongan Dinas:
+                👥 Tim Dinas:
               </div>
               <div style="display: flex; flex-wrap: wrap; gap: 3px;">
                 <span style="font-size: 0.65rem; background: #e0f2fe; color: #0369a1; padding: 1px 5px; border-radius: 4px; font-weight: 700;">

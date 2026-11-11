@@ -633,7 +633,11 @@
               <div style="font-size: 0.85rem; font-weight: 800; color: #1e293b; margin-top: 1px;">${getTName(t)}</div>
               <div style="font-size: 0.675rem; color: #64748b;">${getTNip(t)} • ${t.department || 'Rekayasa & Pemeliharaan'}</div>
             </div>
-            <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
+            ${(() => {
+              const isLateDone = (t.status === 'Selesai' && (t.isLate || t.lateMinutes > 0 || (t.scanInTime && t.scanInTime.includes('[Terlambat]')))) || t.status === 'Terlambat';
+              const dispStat = isLateDone ? 'Selesai (Terlambat)' : t.status;
+              return `<span class="mobile-badge ${getBadgeClass(dispStat)}">${dispStat}</span>`;
+            })()}
           </div>
 
           <div style="font-size: 0.725rem; color: #047857; font-weight: 700; margin-bottom: 2px;">${t.category} • ${getTType(t)}</div>
@@ -868,7 +872,11 @@
               <span style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</span>
               ${isEmergencyTicket ? '<span class="mobile-badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 1px 5px; border-radius: 4px;">Izin Darurat</span>' : ''}
             </div>
-            <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
+            ${(() => {
+              const isLateDone = (t.status === 'Selesai' && (t.isLate || t.lateMinutes > 0 || (t.scanInTime && t.scanInTime.includes('[Terlambat]')))) || t.status === 'Terlambat';
+              const dispStat = isLateDone ? 'Selesai (Terlambat)' : t.status;
+              return `<span class="mobile-badge ${getBadgeClass(dispStat)}">${dispStat}</span>`;
+            })()}
           </div>
 
           <!-- Baris 2: Nama Karyawan (Tebal) & NIP, Departemen -->
@@ -957,7 +965,11 @@
               <span style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</span>
               ${isEmergencyTicket ? '<span class="mobile-badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.6rem; font-weight: 800; padding: 1px 4px; border-radius: 4px;">Izin Darurat</span>' : ''}
             </div>
-            <span class="mobile-badge ${getBadgeClass(t.status)}">${t.status}</span>
+            ${(() => {
+              const isLateDone = (t.status === 'Selesai' && (t.isLate || t.lateMinutes > 0 || (t.scanInTime && t.scanInTime.includes('[Terlambat]')))) || t.status === 'Terlambat';
+              const dispStat = isLateDone ? 'Selesai (Terlambat)' : t.status;
+              return `<span class="mobile-badge ${getBadgeClass(dispStat)}">${dispStat}</span>`;
+            })()}
           </div>
 
           <!-- Baris 2: Nama Karyawan & NIP -->
@@ -1208,7 +1220,7 @@
           ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
             <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #eff6ff; border: 1.5px solid #bfdbfe;">
               <div style="font-size: 0.7rem; color: #1e40af; font-weight: 800; text-transform: uppercase; margin-bottom: 6px;">
-                👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif)
+                👥 Tim Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif)
               </div>
               <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #ffffff; border-radius: 4px; border: 1px solid #e2e8f0;">
@@ -1464,7 +1476,7 @@
         ? [t.initiatorCancelled ? null : `${t.applicantName} (Inisiator)`, ...t.members.filter(m => m.status !== 'batal').map(m => m.name)].filter(Boolean)
         : [];
       const descGroup = activePassengers.length > 0
-        ? `Petugas Pos Jaga memvalidasi keberangkatan rombongan dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}). Status: Sedang di Luar.`
+        ? `Petugas Pos Jaga memvalidasi keberangkatan tim dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}). Status: Sedang di Luar.`
         : `Karyawan diverifikasi keluar gerbang pabrik melalui ${activeGate}. Status: Sedang di Luar.`;
       t.timeline.push({
         event: 'Scan Out Pos Jaga',
@@ -1482,8 +1494,8 @@
               recipientName: m.name,
               actorSource: 'security',
               type: 'info',
-              title: 'Verifikasi Keluar Kawasan (Rombongan Dinas)',
-              message: `Keberangkatan rombongan dinas (#${t.id}) telah diverifikasi oleh Petugas di ${activeGate}.`,
+              title: 'Verifikasi Keluar Kawasan (Tim Dinas)',
+              message: `Keberangkatan tim dinas (#${t.id}) telah diverifikasi oleh Petugas di ${activeGate}.`,
               ticketId: t.id,
               priority: 'normal',
               eventId: `scanout_${t.id}_${m.nip}`

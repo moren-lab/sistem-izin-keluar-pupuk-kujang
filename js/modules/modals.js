@@ -299,7 +299,7 @@ function openEditTicketModal(ticketId) {
   const myEmpNip = activeEmpActor ? activeEmpActor.nip : 'PK-2024-8841';
   if (ticket.isGroupDinas && ticket.applicantNip !== myEmpNip && (ticket.initiatorNip && ticket.initiatorNip !== myEmpNip)) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Hanya inisiator pengajuan yang berhak mengubah rincian izin dinas rombongan.', 'warning');
+      window.showToast('Hanya inisiator pengajuan yang berhak mengubah rincian izin dinas tim.', 'warning');
     }
     return;
   }
@@ -1611,8 +1611,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   const modalDetailSubtitle = document.getElementById('modalDetailSubtitle');
   if (modalDetailSubtitle) {
-    const dayStr = typeof window.formatDisplayDateOnly === 'function' ? window.formatDisplayDateOnly(ticket.plannedExit || ticket.createdAt) : (ticket.createdAt || '06-11-2026');
-    modalDetailSubtitle.textContent = `${ticket.applicantName || "Budi Pratama, S.T."} — ${ticket.category || 'Dinas Kantor'} — ${dayStr}`;
+    modalDetailSubtitle.style.display = 'none';
   }
 
   // Status Badge on Top Right (Identik Gambar 1 - Clean Text, NO Pill)
@@ -1784,6 +1783,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     const scanOutStr = ticket.scanOutTime ? (ticket.scanOutTime.includes('WIB') ? ticket.scanOutTime : `${ticket.scanOutTime} WIB`) : '';
     infoTableActualExit.textContent = scanOutStr || (ticket.status === 'Selesai' ? '09.03 WIB' : '-');
     infoTableActualExit.style.fontWeight = '700';
+    infoTableActualExit.style.color = 'var(--text-primary, #0f172a)';
   }
 
   const infoTablePlanReturn = document.getElementById('infoTablePlanReturn');
@@ -1807,6 +1807,22 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
         ? (ticket.isLate ? '10.52 WIB — Terlambat' : '10.52 WIB — Tepat Waktu')
         : (ticket.status === 'Terlambat' ? '⚠️ Belum Tap In (Terlambat)' : '-'));
     infoTableActualReturn.style.fontWeight = '700';
+    infoTableActualReturn.style.color = 'var(--text-primary, #0f172a)';
+  }
+
+  // Late Callout Box under Jadwal Keluar & Kembali (Identik Gambar 6)
+  const infoLateNoticeBox = document.getElementById('infoLateNoticeBox');
+  if (infoLateNoticeBox) {
+    const isLateTicket = Boolean(ticket.isLate || ticket.status === 'Terlambat' || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
+    if (isLateTicket) {
+      const lateDuration = typeof window.formatLateDurationFull === 'function'
+        ? window.formatLateDurationFull(ticket.lateMinutes || 15)
+        : (typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes || 15) : `${ticket.lateMinutes || 15} menit`);
+      infoLateNoticeBox.innerHTML = `Kembali melewati estimasi (+${lateDuration} terlambat).`;
+      infoLateNoticeBox.style.display = 'block';
+    } else {
+      infoLateNoticeBox.style.display = 'none';
+    }
   }
 
   const approverName = ticket.approverName || 'Arthur Morgan, S.Tr.T.';
@@ -2241,8 +2257,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     }
   }
 
+  const isGroupDinasActiveForTapIn = Boolean((ticket.isGroupDinas || (Array.isArray(ticket.members) && ticket.members.length > 0)) && (ticket.category === 'Dinas Kantor' || ticket.category === 'Dinas Perusahaan'));
+
   if (btnDetailReportArrival) {
-    const isMyActiveDinas = isKaryawanActor && ticket.category === 'Dinas Kantor' && ticket.status === 'Sedang di Luar';
+    const isMyActiveDinas = isKaryawanActor && ticket.category === 'Dinas Kantor' && (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && isGroupDinasActiveForTapIn;
     if (isMyActiveDinas) {
       btnDetailReportArrival.style.display = 'inline-flex';
       btnDetailReportArrival.textContent = '💳 Simulasi Tap In Gerbang';
@@ -2312,7 +2330,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (btnDetailScanIn) {
     const isOutsideToReturn = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && !ticket.scanInTime;
     const isKaryawan = (window.currentActor === 'karyawan');
-    if (isOutsideToReturn && isKaryawan) {
+    
+    // Hapus button tap in saat ada button "💳 Simulasi Tap In Gerbang" khusus jika dinas kantor pakai Tim.
+    // Jika perorangan / biasa, tetap tampilkan Tap In biasa.
+    if (isOutsideToReturn && isKaryawan && !isGroupDinasActiveForTapIn) {
       btnDetailScanIn.style.display = 'inline-flex';
       btnDetailScanIn.onclick = function () {
         if (typeof window.executeScanIn === 'function') {
@@ -2565,7 +2586,7 @@ function openCancelModal(ticketId, callback) {
     if (cancelGroupDinasNotice) cancelGroupDinasNotice.style.display = 'block';
     if (isTaggedMember) {
       if (cancelPromptText) {
-        cancelPromptText.innerHTML = `Batalkan keikutsertaan Anda dalam izin rombongan dinas tiket <strong id="cancelTicketId">${ticketId}</strong>? Rekan tim lain dan inisiator tetap dapat melanjutkan dinas.`;
+        cancelPromptText.innerHTML = `Batalkan keikutsertaan Anda dalam izin tim dinas tiket <strong id="cancelTicketId">${ticketId}</strong>? Rekan tim lain dan inisiator tetap dapat melanjutkan dinas.`;
       }
       if (btnCancelOnlyMe) btnCancelOnlyMe.style.display = 'none';
       if (btnConfirmCancelTicket) {
@@ -2574,7 +2595,7 @@ function openCancelModal(ticketId, callback) {
     } else if (isInitiator) {
       const activeMembers = (ticket.members || []).filter(m => m.status !== 'batal');
       if (cancelPromptText) {
-        cancelPromptText.innerHTML = `Anda adalah <strong>Inisiator Pengajuan</strong> rombongan dinas <strong id="cancelTicketId">${ticketId}</strong>. Silakan tentukan tindakan pembatalan:`;
+        cancelPromptText.innerHTML = `Anda adalah <strong>Inisiator Pengajuan</strong> tim dinas <strong id="cancelTicketId">${ticketId}</strong>. Silakan tentukan tindakan pembatalan:`;
       }
       if (activeMembers.length > 0) {
         if (btnCancelOnlyMe) {
@@ -3194,7 +3215,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const actTik = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(m.nip) : null;
           if (actTik && (!window.editingTicketId || actTik.id !== window.editingTicketId)) {
             if (typeof window.showToast === 'function') {
-              window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari rombongan terlebih dahulu.`, 'warning');
+              window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari tim terlebih dahulu.`, 'warning');
             }
             return;
           }
@@ -3549,7 +3570,7 @@ document.addEventListener('DOMContentLoaded', () => {
               actorSource: 'karyawan',
               type: 'pengajuan_dinas_bersama',
               title: 'Izin Dinas Kantor Bersama',
-              message: `Anda ditambahkan oleh ${newTicket.applicantName} ke pengajuan izin Dinas Kantor (${newTicket.destination}). Izin ini aktif bersama rombongan tim.`,
+              message: `Anda ditambahkan oleh ${newTicket.applicantName} ke pengajuan izin Dinas Kantor (${newTicket.destination}). Izin ini aktif bersama tim.`,
               ticketId: newTicket.id,
               priority: 'normal',
               eventId: `grp_notif_${newTicket.id}_${m.nip}`
@@ -3920,7 +3941,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const actTik = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(m.nip) : null;
           if (actTik && (!window.editingEmergencyTicketId || actTik.id !== window.editingEmergencyTicketId)) {
             if (typeof window.showToast === 'function') {
-              window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari rombongan terlebih dahulu.`, 'warning');
+              window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari tim terlebih dahulu.`, 'warning');
             }
             return;
           }

@@ -634,6 +634,7 @@
     // 4. Card View HTML (Points 1, 2, 4, 5, 6, 7, 8, 9, 10)
     const cardsHtml = pageTickets.map(t => {
       const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
+      const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && (t.category === 'Dinas Kantor' || !t.category || t.category === 'Dinas Perusahaan'));
       const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
       const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
       const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
@@ -647,6 +648,7 @@
               <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span style="font-family: monospace; font-size: 0.875rem; font-weight: 800; color: #0f172a;">${t.id}</span>
                 ${isEmergency ? '<span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; border: 1.2px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Izin Darurat</span>' : ''}
+                ${isGroupDinas ? '<span class="mobile-badge rombongan" style="background: #e0f2fe; color: #0369a1; border: 1.2px solid #bae6fd; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">👥 Tim</span>' : ''}
               </div>
               <div style="font-size: 0.725rem; font-weight: 600; color: #334155; margin-top: 1px;">Diajukan ${dateStr}</div>
             </div>
@@ -689,6 +691,7 @@
     // 5. List View HTML (Points 1, 2, 4, 5, 6, 7, 8, 9, 10)
     const listHtml = pageTickets.map(t => {
       const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
+      const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && (t.category === 'Dinas Kantor' || !t.category || t.category === 'Dinas Perusahaan'));
       const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
       const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
       const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
@@ -701,6 +704,7 @@
               <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span style="font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0f172a;">${t.id}</span>
                 ${isEmergency ? '<span class="mobile-badge darurat" style="background: #fee2e2; color: #b91c1c; border: 1.2px solid #fca5a5; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Izin Darurat</span>' : ''}
+                ${isGroupDinas ? '<span class="mobile-badge rombongan" style="background: #e0f2fe; color: #0369a1; border: 1.2px solid #bae6fd; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">👥 Tim</span>' : ''}
               </div>
               <div style="font-size: 0.725rem; font-weight: 600; color: #334155; margin-top: 1px;">Diajukan ${dateStr}</div>
             </div>
@@ -1166,7 +1170,7 @@
       groupMembersHtml = `
         <div style="margin: 8px 0; padding: 8px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 0.7rem; font-weight: 700; color: #475569;">👥 Rombongan Dinas (${activeCount} Karyawan Aktif)</span>
+            <span style="font-size: 0.7rem; font-weight: 700; color: #475569;">👥 Tim Dinas (${activeCount} Karyawan Aktif)</span>
             <span style="font-size: 0.65rem; color: #2563eb; font-weight: 700;">QR Bersama</span>
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 4px;">
@@ -1712,7 +1716,7 @@
           <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
             <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Batalkan Keikutsertaan Dinas Bersama</div>
             <div style="font-size: 0.825rem; color: #475569; line-height: 1.45;">
-              Apakah Anda yakin ingin membatalkan keikutsertaan Anda dalam tiket rombongan dinas <strong>${escapeHtml(t.id)}</strong>? Anggota tim lain dan inisiator tetap dapat melanjutkan dinas.
+              Apakah Anda yakin ingin membatalkan keikutsertaan Anda dalam tiket tim dinas <strong>${escapeHtml(t.id)}</strong>? Anggota tim lain dan inisiator tetap dapat melanjutkan dinas.
             </div>
           </div>
         `;
@@ -1730,9 +1734,9 @@
         const activeMembers = (t.members || []).filter(m => m.status !== 'batal');
         promptHtml = `
           <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af; margin-bottom: 4px;">Inisiator Dinas Rombongan</div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af; margin-bottom: 4px;">Inisiator Tim Dinas</div>
             <div style="font-size: 0.825rem; color: #1e3a8a; line-height: 1.45;">
-              Anda adalah <strong>Inisiator Pengajuan</strong> rombongan dinas tiket <strong>${escapeHtml(t.id)}</strong>. Pilih opsi pembatalan di bawah:
+              Anda adalah <strong>Inisiator Pengajuan</strong> tim dinas tiket <strong>${escapeHtml(t.id)}</strong>. Pilih opsi pembatalan di bawah:
             </div>
           </div>
         `;
@@ -2148,7 +2152,7 @@
     if (!nip) return;
     if (!window._selectedGroupMembersMobile) window._selectedGroupMembersMobile = [];
     if (window._selectedGroupMembersMobile.length >= 5) {
-      if (typeof window.showToast === 'function') window.showToast('Maksimal anggota rombongan dinas adalah 5 orang.', 'warning');
+      if (typeof window.showToast === 'function') window.showToast('Maksimal anggota tim dinas adalah 5 orang.', 'warning');
       return;
     }
     const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
@@ -2159,7 +2163,7 @@
     const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(user.nip) : null;
     if (activeTicket) {
       if (typeof window.showToast === 'function') {
-        window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke rombongan dinas.`, 'warning');
+        window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke tim dinas.`, 'warning');
       }
       return;
     }
@@ -2443,7 +2447,7 @@
         const actTik = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(m.nip) : null;
         if (actTik && (!window.editingTicketId || actTik.id !== window.editingTicketId)) {
           if (typeof window.showToast === 'function') {
-            window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari rombongan terlebih dahulu.`, 'warning');
+            window.showToast(`Anggota (${m.name}) masih memiliki izin aktif (#${actTik.id}). Harap hapus anggota ini dari tim terlebih dahulu.`, 'warning');
           }
           return;
         }
@@ -2864,7 +2868,7 @@
                 actorSource: 'karyawan',
                 type: 'pengajuan_dinas_bersama',
                 title: 'Izin Dinas Kantor Bersama',
-                message: `Anda ditambahkan oleh ${newTicket.applicantName} ke pengajuan izin Dinas Kantor (${newTicket.destination}). Izin ini aktif bersama rombongan tim.`,
+                message: `Anda ditambahkan oleh ${newTicket.applicantName} ke pengajuan izin Dinas Kantor (${newTicket.destination}). Izin ini aktif bersama tim dinas.`,
                 ticketId: newTicket.id,
                 priority: 'normal',
                 eventId: `grp_notif_m_${newTicket.id}_${m.nip}`
@@ -3075,6 +3079,13 @@
     t.emergencyLocked = false;
     t.qrLocked = false;
     t.emergencyUnlockMethod = method;
+    let methodShort = method;
+    if (method.includes('Scan Wajah') || method.includes('Face Scan')) {
+      methodShort = 'Face Scan Biometrik';
+    } else if (method.includes('Persetujuan Langsung')) {
+      methodShort = 'Dashboard Atasan';
+    }
+    t.approverNote = `[Otorisasi Sah]: QR Code dibuka via ${methodShort} oleh ${t.approverName || 'Atasan'}.`;
 
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
@@ -3326,7 +3337,7 @@
           ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
             <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
               <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;">
-                👥 Rombongan Tim Dinas (${(t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length} Orang)
+                👥 Tim Dinas (${(t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length} Orang)
               </div>
               <div style="display: flex; flex-direction: column; gap: 6px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
@@ -3447,7 +3458,7 @@
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
           ${(isPending || (isApproved && !isOutside)) ? `
             <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 10px; font-size: 0.725rem; color: #9f1239; line-height: 1.4;">
-              💡 Anda terdaftar sebagai anggota rombongan dinas. Anda dapat membatalkan keikutsertaan Anda secara mandiri tanpa membatalkan izin rekan tim lainnya.
+              💡 Anda terdaftar sebagai anggota tim dinas. Anda dapat membatalkan keikutsertaan Anda secara mandiri tanpa membatalkan izin rekan tim lainnya.
             </div>
             <button type="button" class="mobile-btn-danger mobile-btn-cancel-solid" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenCancelSheet('${t.id}')">
               Batalkan Keikutsertaan Saya
@@ -3455,7 +3466,7 @@
           ` : ''}
           ${isApproved && !isOutside ? `
             <button type="button" class="mobile-btn-secondary mobile-btn-qr-blue" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenQrModal('${t.id}')">
-              Tampilkan QR Code Rombongan
+              Tampilkan QR Code Tim
             </button>
           ` : ''}
           ${isOutside ? `

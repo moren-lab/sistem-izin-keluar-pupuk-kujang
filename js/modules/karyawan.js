@@ -219,7 +219,7 @@ document.addEventListener('click', (e) => {
 window.addGroupMemberByNip = function(nip) {
   if (!nip) return;
   if (window._selectedGroupMembers.length >= 5) {
-    if (typeof window.showToast === 'function') window.showToast('Maksimal anggota rombongan dinas adalah 5 orang.', 'warning');
+    if (typeof window.showToast === 'function') window.showToast('Maksimal anggota tim dinas adalah 5 orang.', 'warning');
     return;
   }
   const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
@@ -230,7 +230,7 @@ window.addGroupMemberByNip = function(nip) {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(user.nip) : null;
   if (activeTicket) {
     if (typeof window.showToast === 'function') {
-      window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke rombongan dinas.`, 'warning');
+      window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke tim dinas.`, 'warning');
     }
     return;
   }
@@ -369,7 +369,7 @@ window.openSimulasiTapInModal = function(ticketId) {
         eligibleMembers.push({
           name: m.name,
           nip: m.nip,
-          role: 'Anggota Rombongan'
+          role: 'Anggota Tim'
         });
       });
     }
@@ -961,7 +961,10 @@ function filterEmpTickets() {
 
     // Status Filter:
     if (status !== 'all') {
-      if (status === 'Terlambat') {
+      if (status === 'Darurat') {
+        const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.startsWith('TK-EMG') || t.id.includes('-EMG-'))) || t.category === 'Izin Darurat' || t.category === 'Darurat' || (t.type && t.type.toLowerCase().includes('darurat')));
+        if (!isEmergency) return false;
+      } else if (status === 'Terlambat') {
         const isLate = t.status === 'Terlambat' || !!t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
         if (!isLate) return false;
       } else if (status === 'Kedaluwarsa') {
@@ -1401,7 +1404,10 @@ function renderKaryawanDashboard() {
             ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
             ${activeTicket.isGroupDinas ? `<span style="font-size: 0.72rem; color: #047857; font-weight: 800; background: #ecfdf5; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.3px;">👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600; line-height: 1.35;">
+            <div>${activeTicket.category}</div>
+            <div style="font-weight: 500; font-size: 0.75rem; color: var(--text-muted);">${activeTicket.type}</div>
+          </div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
           <div style="margin-top: 8px; display: inline-flex; align-items: center;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -1411,7 +1417,7 @@ function renderKaryawanDashboard() {
         ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
           <div style="margin-top: 8px; background: rgba(5, 150, 105, 0.05); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem;">
             <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; justify-content: space-between;">
-              <span>👥 Rombongan Dinas:</span>
+              <span>👥 Tim Dinas:</span>
               <span style="font-size: 0.7rem; font-weight: 600; color: #047857;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
@@ -1768,7 +1774,10 @@ function renderPengajuanSayaView() {
             ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
             ${activeTicket.isGroupDinas ? `<span style="font-size: 0.72rem; color: #047857; font-weight: 800; background: #ecfdf5; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.3px;">👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600;">${activeTicket.category} — ${activeTicket.type}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600; line-height: 1.35;">
+            <div>${activeTicket.category}</div>
+            <div style="font-weight: 500; font-size: 0.75rem; color: var(--text-muted);">${activeTicket.type}</div>
+          </div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
           <div style="margin-top: 8px; display: inline-flex; align-items: center;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -1778,7 +1787,7 @@ function renderPengajuanSayaView() {
         ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
           <div style="margin-top: 8px; background: rgba(5, 150, 105, 0.05); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem;">
             <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; justify-content: space-between;">
-              <span>👥 Rombongan Dinas:</span>
+              <span>👥 Tim Dinas:</span>
               <span style="font-size: 0.7rem; font-weight: 600; color: #047857;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
@@ -2054,8 +2063,7 @@ function getCleanEmpStatus(status, ticket) {
 
   if (status === 'Selesai') {
     if (ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || ticket.lateMinutes > 0)) {
-      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes || 10) : `${ticket.lateMinutes || 10} mnt`;
-      label = `Selesai (Terlambat ${lateStr})`;
+      label = 'Selesai (Terlambat)';
       color = '#b45309';
       statusKey = 'selesai-late';
     } else {
@@ -2068,10 +2076,7 @@ function getCleanEmpStatus(status, ticket) {
     color = '#0284c7';
     statusKey = 'outside';
   } else if (status === 'Terlambat') {
-    const lateStr = (ticket && ticket.lateMinutes) 
-      ? ` (${typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes) : ticket.lateMinutes + ' mnt'})` 
-      : '';
-    label = `Selesai (Terlambat${lateStr})`;
+    label = 'Selesai (Terlambat)';
     color = '#b45309';
     statusKey = 'selesai-late';
   } else if (status === 'Disetujui') {
@@ -2216,6 +2221,8 @@ function renderEmpCards(list, containerElement) {
           displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
         }
         const isDinas = displayCategory === 'Dinas Kantor';
+        const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
+        const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
 
         return `
           <div class="figma-grid-item" data-status="${t.status}" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48);' : ''}">
@@ -2241,6 +2248,7 @@ function renderEmpCards(list, containerElement) {
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                 <span class="figma-tag-badge ${isDinas ? 'badge-dinas' : 'badge-pribadi'}" style="white-space: nowrap;">${displayCategory}</span>
                 ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                ${isGroupDinas ? `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>` : ''}
               </div>
             </div>
 
@@ -2313,12 +2321,12 @@ function renderEmpTable(list, containerElement) {
       <table class="figma-table" style="min-width: 950px;">
         <thead>
           <tr>
-            <th style="min-width: 150px;">Nomor Tiket & Kategori</th>
-            <th style="min-width: 180px;">Pemohon & NIP</th>
-            <th style="min-width: 180px;">Tujuan & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
+            <th style="white-space: nowrap; min-width: 180px;">Pemohon & NIP</th>
+            <th style="white-space: nowrap; min-width: 180px;">Tujuan & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="min-width: 180px;">Catatan</th>
+            <th style="white-space: nowrap; min-width: 180px;">Catatan</th>
             <th style="white-space: nowrap; min-width: 175px;">Tindakan</th>
           </tr>
         </thead>
@@ -2345,6 +2353,9 @@ function renderEmpTable(list, containerElement) {
     if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
       displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
     }
+    const isDinas = displayCategory === 'Dinas Kantor';
+    const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
+    const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
 
     return `
               <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
@@ -2352,8 +2363,12 @@ function renderEmpTable(list, containerElement) {
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem;">${t.id}</span>
                     ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+                    ${isGroupDinas ? `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>` : ''}
                   </div>
-                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 2px;">${displayCategory} — ${t.type}</div>
+                  <div style="font-size: 0.725rem; color: #64748b; margin-top: 3px; line-height: 1.35;">
+                    <div>${displayCategory}</div>
+                    <div>${t.type}</div>
+                  </div>
                 </td>
                 <td style="vertical-align: middle;">
                   <div style="display: flex; align-items: flex-start; gap: 0.55rem;">
@@ -3049,7 +3064,7 @@ window.addEmergGroupMemberByNip = function(nip) {
   if (!nip) return;
   if (!window._selectedEmergGroupMembers) window._selectedEmergGroupMembers = [];
   if (window._selectedEmergGroupMembers.length >= 5) {
-    if (typeof window.showToast === 'function') window.showToast('Maksimal anggota rombongan dinas adalah 5 orang.', 'warning');
+    if (typeof window.showToast === 'function') window.showToast('Maksimal anggota tim dinas adalah 5 orang.', 'warning');
     return;
   }
   const allUsers = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
@@ -3059,7 +3074,7 @@ window.addEmergGroupMemberByNip = function(nip) {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket(user.nip) : null;
   if (activeTicket) {
     if (typeof window.showToast === 'function') {
-      window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke rombongan dinas.`, 'warning');
+      window.showToast(`Karyawan (${user.name}) saat ini masih memiliki izin aktif (#${activeTicket.id}) dan tidak dapat ditambahkan ke tim dinas.`, 'warning');
     }
     return;
   }

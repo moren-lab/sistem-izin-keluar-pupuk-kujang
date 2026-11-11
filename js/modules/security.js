@@ -489,6 +489,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
       displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
     }
     const isDinas = displayCategory === 'Dinas Kantor';
+    const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
 
     // Hanya izin darurat yang memiliki aksen border samping (sesuai permintaan user: Hapus semua warna di samping card kecuali izin darurat)
     const borderColor = isEmergency ? 'var(--rose-danger)' : '';
@@ -524,6 +525,10 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                   <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}" style="white-space: nowrap;">${displayCategory}</span>
                   ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                  ${isGroupDinas ? (() => {
+                    const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                    return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                  })() : ''}
                 </div>
               </div>
 
@@ -547,15 +552,13 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               <!-- Realization Summary Row (Scan Out & Tap In) -->
               <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem;">
                 ${t.scanOutTime ? `<div style="color: #065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-                ${t.scanInTime ? `<div style="color: ${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight: ${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${t.scanInTime}</div>` : ''}
+                ${t.scanInTime ? (() => {
+                  const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
+                  const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
+                  return `<div style="color: ${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight: ${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${cleanScanIn}${isLateCompleted ? ` <span style="color: #b45309; font-weight: 700;">[Terlambat ${lateDuration}]</span>` : ''}</div>`;
+                })() : ''}
                 ${(!t.scanOutTime && !t.scanInTime) ? `<div style="color: var(--text-muted);">Belum ada catatan pemindaian gerbang</div>` : ''}
               </div>
-
-              ${isLateCompleted ? `
-                <div class="sec-status-callout warning" style="border-radius:6px; padding:0.4rem 0.6rem; font-size:0.725rem; font-weight:700; margin-bottom: 0.6rem;">
-                  Kembali melewati estimasi (+${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`} terlambat).
-                </div>
-              ` : ''}
 
               <!-- Action Buttons (Single Symmetrical Row) -->
               <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
@@ -596,6 +599,10 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                 <span class="tag-badge ${isDinas ? 'tag-dinas' : 'tag-pribadi'}" style="white-space: nowrap;">${displayCategory}</span>
                 ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                ${isGroupDinas ? (() => {
+                  const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                  return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                })() : ''}
               </div>
             </div>
 
@@ -615,16 +622,6 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             </div>
 
-            ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
-              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.35rem 0.6rem; margin: 0.35rem 0; font-size: 0.725rem;">
-                <div style="font-weight: 700; color: #1e40af; margin-bottom: 2px;">👥 Rombongan Dinas (${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang):</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                  <span style="background: #dbeafe; color: #1e40af; font-weight: 700; padding: 1px 5px; border-radius: 4px;">${t.applicantName} (Inisiator)</span>
-                  ${t.members.map(m => `<span style="background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; padding: 1px 5px; border-radius: 4px; border: 1px solid #cbd5e1; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${m.name}${m.status === 'batal' ? ' (Batal)' : ''}</span>`).join('')}
-                </div>
-              </div>
-            ` : ''}
-
             <!-- Pos Gate Badge -->
             <div style="display: flex; justify-content: flex-end; margin-bottom: 0.4rem;">
               ${gateBadgeHtml}
@@ -636,12 +633,6 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             ` : ''}
 
-            ${isLateCompleted ? `
-              <div class="sec-status-callout warning" style="border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem; font-weight:700;">
-                Karyawan kembali melewati estimasi waktu (+${typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`} terlambat).
-              </div>
-            ` : ''}
-
             ${isExpired ? `
               <div class="sec-status-callout neutral" style="border-radius:6px; padding:0.45rem 0.65rem; font-size:0.75rem;">
                 Tiket telah kedaluwarsa & hangus (+10 menit dari rencana keluar). Dilarang diproses keluar.
@@ -649,7 +640,11 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             ` : ''}
 
             ${t.scanOutTime ? `<div style="font-size:0.75rem; color:#065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-            ${t.scanInTime ? `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${t.scanInTime}</div>` : ''}
+            ${t.scanInTime ? (() => {
+              const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
+              const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
+              return `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${cleanScanIn}${isLateCompleted ? ` <span style="color: #b45309; font-weight: 700;">[Terlambat ${lateDuration}]</span>` : ''}</div>`;
+            })() : ''}
 
             <!-- Quick Action Buttons for Satpam (Single Symmetrical Row) -->
             <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
@@ -695,12 +690,12 @@ function renderSecurityTable(list, containerElement) {
       <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
-            <th style="min-width: 160px;">Nomor Tiket & Kategori</th>
-            <th style="min-width: 140px;">Gerbang Pos</th>
-            <th style="min-width: 200px;">Pemohon & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
+            <th style="white-space: nowrap; min-width: 140px;">Gerbang Pos</th>
+            <th style="white-space: nowrap; min-width: 190px;">Pemohon & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="min-width: 200px;">Catatan Realisasi</th>
+            <th style="white-space: nowrap; min-width: 190px;">Catatan Realisasi</th>
             <th style="white-space: nowrap; min-width: 170px;">Tindakan</th>
           </tr>
         </thead>
@@ -710,19 +705,32 @@ function renderSecurityTable(list, containerElement) {
     const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
     const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
 
-    let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
+    let catatanHtml = `<span style="color: var(--text-muted); font-size: 0.725rem;">Belum ada catatan pemindaian gerbang</span>`;
     if (t.scanInTime && t.scanOutTime) {
       const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
       const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
-      catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Tap In: ${inSimple}</span>`;
+      const isLate = Boolean(t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0));
+      const cleanInSimple = inSimple.replace(/\s*\[Terlambat\]/gi, '').trim();
+      catatanHtml = `<span style="color: ${isLate ? '#b45309' : '#047857'}; font-size: 0.725rem;">Scan Out: ${outSimple} — Tap In: ${cleanInSimple}${isLate ? ' <span style="font-weight:700;">[Terlambat]</span>' : ''}</span>`;
     } else if (t.scanOutTime) {
       const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
-      catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+      const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
+      if (t.status === 'Selesai' || isPulang) {
+        catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} (Pulang)</span>`;
+      } else {
+        catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+      }
+    } else if (t.scanInTime) {
+      const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
+      catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Tap In: ${inSimple}</span>`;
     } else if (t.status === 'Terlambat') {
       catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
-    } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
-      catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
+    } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
+      catatanHtml = `<span style="color: #b91c1c; font-size: 0.725rem;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
+    } else if (t.status === 'Kedaluwarsa') {
+      catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Kedaluwarsa sebelum scan keluar</span>`;
+    } else if (t.status === 'Dibatalkan') {
+      catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Pengajuan dibatalkan</span>`;
     }
 
     const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
@@ -745,6 +753,8 @@ function renderSecurityTable(list, containerElement) {
     if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
       displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
     }
+    const isDinas = displayCategory === 'Dinas Kantor';
+    const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
 
     return `
               <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
@@ -752,8 +762,15 @@ function renderSecurityTable(list, containerElement) {
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</span>
                     ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
+                    ${isGroupDinas ? (() => {
+                      const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                      return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                    })() : ''}
                   </div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${displayCategory} — ${t.type}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35;">
+                    <div>${displayCategory}</div>
+                    <div>${t.type}</div>
+                  </div>
                 </td>
                 <td style="vertical-align: middle;">${gateBadge}</td>
                 <td style="vertical-align: middle;">
@@ -1060,12 +1077,12 @@ function renderSecurityLogTable(list, containerElement) {
       <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
-            <th style="min-width: 160px;">Nomor Tiket & Kategori</th>
-            <th style="min-width: 140px;">Gerbang Pos</th>
-            <th style="min-width: 200px;">Pemohon & Keperluan</th>
+            <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
+            <th style="white-space: nowrap; min-width: 140px;">Gerbang Pos</th>
+            <th style="white-space: nowrap; min-width: 190px;">Pemohon & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="min-width: 200px;">Catatan Pemindaian</th>
+            <th style="white-space: nowrap; min-width: 200px;">Catatan Pemindaian</th>
             <th style="white-space: nowrap; min-width: 170px;">Tindakan</th>
           </tr>
         </thead>
@@ -1075,25 +1092,32 @@ function renderSecurityLogTable(list, containerElement) {
     const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
     const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
 
-    let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Atasan', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
+    let catatanHtml = `<span style="color: var(--text-muted); font-size: 0.725rem;">Belum ada catatan pemindaian gerbang</span>`;
     if (t.scanInTime && t.scanOutTime) {
       const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
       const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
-      catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} — Tap In: ${inSimple}</span>`;
+      const isLate = Boolean(t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0));
+      const cleanInSimple = inSimple.replace(/\s*\[Terlambat\]/gi, '').trim();
+      catatanHtml = `<span style="color: ${isLate ? '#b45309' : '#047857'}; font-size: 0.725rem;">Scan Out: ${outSimple} — Tap In: ${cleanInSimple}${isLate ? ' <span style="font-weight:700;">[Terlambat]</span>' : ''}</span>`;
     } else if (t.scanOutTime) {
       const outSimple = t.scanOutTime.replace(/ \(Pos .*\)/, '');
-      catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+      const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
+      if (t.status === 'Selesai' || isPulang) {
+        catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Scan Out: ${outSimple} (Pulang)</span>`;
+      } else {
+        catatanHtml = `<span style="color: #0284c7; font-size: 0.725rem;">Sedang di Luar (Scan Out: ${outSimple})</span>`;
+      }
+    } else if (t.scanInTime) {
+      const inSimple = t.scanInTime.replace(/ \(Pos .*\)/, '');
+      catatanHtml = `<span style="color: #047857; font-size: 0.725rem;">Tap In: ${inSimple}</span>`;
     } else if (t.status === 'Terlambat') {
       catatanHtml = `<span style="color: #b91c1c; font-weight: 600; font-size: 0.725rem;">Melewati batas waktu kembali — Belum Scan Masuk</span>`;
-    } else if (t.isLate || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
-      const lateStr = typeof window.formatLateDuration === 'function' ? window.formatLateDuration(t.lateMinutes || 10) : `${t.lateMinutes || 10} mnt`;
-      catatanHtml = `<span style="color: #b45309; font-weight: 500; font-size: 0.725rem;">Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12:10 WIB')} (+${lateStr})</span>`;
     } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
       catatanHtml = `<span style="color: #b91c1c; font-size: 0.725rem;">${t.rejectionReason || 'Ditolak: alasan tidak memadai'}</span>`;
     } else if (t.status === 'Kedaluwarsa') {
       catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Kedaluwarsa sebelum scan keluar</span>`;
     } else if (t.status === 'Dibatalkan') {
-      catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Pengajuan dibatalkan oleh pemohon</span>`;
+      catatanHtml = `<span style="color: #64748b; font-size: 0.725rem;">Pengajuan dibatalkan</span>`;
     }
 
     const scheduleWithDay = typeof window.formatTicketScheduleWithDay === 'function'
@@ -1117,7 +1141,10 @@ function renderSecurityLogTable(list, containerElement) {
               <tr>
                 <td style="vertical-align: middle;">
                   <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px;">${t.category} — ${t.type}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35;">
+                    <div>${t.category}</div>
+                    <div>${t.type}</div>
+                  </div>
                 </td>
                 <td style="vertical-align: middle;">
                   ${gateBadge}
@@ -1315,7 +1342,7 @@ function executeScanOut(ticketId) {
       ? [ticket.initiatorCancelled ? null : `${ticket.applicantName} (Inisiator)`, ...ticket.members.filter(m => m.status !== 'batal').map(m => m.name)].filter(Boolean)
       : [];
     const descGroup = activePassengers.length > 0
-      ? `Petugas Pos Jaga memvalidasi keberangkatan rombongan dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}). Status: Sedang di Luar.`
+      ? `Petugas Pos Jaga memvalidasi keberangkatan tim dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}). Status: Sedang di Luar.`
       : `Karyawan berhasil diverifikasi keluar kawasan melalui ${gate}. Status: Sedang di Luar.`;
     ticket.timeline.push({
       event: 'Scan Out Pos Jaga',
@@ -1333,8 +1360,8 @@ function executeScanOut(ticketId) {
             recipientName: m.name,
             actorSource: 'security',
             type: 'info',
-            title: 'Verifikasi Keluar Kawasan (Rombongan Dinas)',
-            message: `Keberangkatan rombongan dinas (#${ticket.id}) telah diverifikasi oleh Petugas di ${gate}.`,
+            title: 'Verifikasi Keluar Kawasan (Tim Dinas)',
+            message: `Keberangkatan tim dinas (#${ticket.id}) telah diverifikasi oleh Petugas di ${gate}.`,
             ticketId: ticket.id,
             priority: 'normal',
             eventId: `scanout_${ticket.id}_${m.nip}`

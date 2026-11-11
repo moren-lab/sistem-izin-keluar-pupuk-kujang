@@ -48,9 +48,8 @@ function getStatusPill(status, ticket) {
   }
 
   const isLateCompleted = (status === 'Selesai') && ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
-  if (isLateCompleted) {
-    const lateStr = formatLateDuration(ticket.lateMinutes || 10);
-    return `<span style="font-weight: 700; font-size: 0.8125rem; color: #b45309; letter-spacing: -0.01em;">Selesai (Terlambat ${lateStr})</span>`;
+  if (isLateCompleted || status === 'Terlambat') {
+    return `<span style="font-weight: 700; font-size: 0.8125rem; color: #b45309; letter-spacing: -0.01em;">Selesai (Terlambat)</span>`;
   }
 
   let color = '#059669';
