@@ -1844,7 +1844,6 @@ function renderPengajuanSayaView() {
             <strong>🏢 Tap In Gerbang Tercatat:</strong> Jam kepulangan telah dikunci pada <strong>${activeTicket.tapInTime || activeTicket.arrivalReportedTime || activeTicket.reportedReturnTime || '-'}</strong>${activeTicket.tapInMember ? ` (oleh ${activeTicket.tapInMember})` : ''}. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan kerja.
           </div>
         ` : ''}
-        </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
