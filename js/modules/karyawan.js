@@ -1329,18 +1329,18 @@ function renderKaryawanDashboard() {
       if (isWaitingProof) {
         actionButtonsHtml = `
           <div style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%;">
-            <div class="proof-reason-alert-box" style="padding: 0.45rem 0.65rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4;">
-              <strong>⚠️ Atasan Menandai Belum Tiba:</strong> "${activeTicket.arrivalRejectReason || '-'}"
+            <div class="proof-reason-alert-box" style="padding: 0.45rem 0.65rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4; background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;">
+              <strong>Atasan Menandai Belum Tiba:</strong> "${activeTicket.arrivalRejectReason || '-'}"
             </div>
             <button type="button" class="btn-danger-solid" style="width: 100%; justify-content: center; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
-              <span>📷 Upload Foto</span>
+              <span>Upload Foto</span>
             </button>
           </div>
         `;
       } else if (isWaitingVerify) {
         actionButtonsHtml = `
-          <button class="btn-figma-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
-            <span>⏳ Menunggu Verifikasi Atasan</span>
+          <button class="btn-figma-secondary" disabled style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
+            <span>Menunggu Verifikasi Atasan</span>
           </button>
         `;
       } else if (isOutside) {
@@ -1430,7 +1430,7 @@ function renderKaryawanDashboard() {
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
             ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
-            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.72rem; color: #047857; font-weight: 800; background: #ecfdf5; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.3px;">👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
+            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600; line-height: 1.35;">
             <div>${activeTicket.category}</div>
@@ -1443,21 +1443,15 @@ function renderKaryawanDashboard() {
         </div>
 
         ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
-          <div style="margin-top: 8px; background: rgba(5, 150, 105, 0.05); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem;">
-            <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; justify-content: space-between;">
-              <span>👥 Tim Dinas:</span>
-              <span style="font-size: 0.7rem; font-weight: 600; color: #047857;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
+          <div style="margin-top: 8px; font-size: 0.75rem;">
+            <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between;">
+              <span>Tim Dinas:</span>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
-              ${!activeTicket.initiatorCancelled ? `<span style="background: #d1fae5; color: #065f46; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👑 ${activeTicket.applicantName} (Inisiator)</span>` : `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${activeTicket.applicantName} (Batal)</span>`}
-              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${m.name} (Batal)</span>` : `<span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👤 ${m.name}</span>`).join('')}
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+              ${!activeTicket.initiatorCancelled ? `<span><strong>${activeTicket.applicantName}</strong> <span style="color: #d97706; font-weight: 700;">(Inisiator)</span></span>` : `<span style="color: #94a3b8; text-decoration: line-through;">${activeTicket.applicantName} (Batal)</span>`}
+              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="color: #94a3b8; text-decoration: line-through;">${m.name} (Batal)</span>` : `<span><strong>${m.name}</strong> <span style="color: #16a34a; font-weight: 700;">(Aktif Ikut)</span></span>`).join(', ')}
             </div>
-          </div>
-        ` : ''}
-
-        ${isWaitingVerify ? `
-          <div style="margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
-            <strong>🏢 Tap In Gerbang Tercatat:</strong> Jam kepulangan telah dikunci pada <strong>${activeTicket.tapInTime || activeTicket.arrivalReportedTime || activeTicket.reportedReturnTime || '-'}</strong>${activeTicket.tapInMember ? ` (oleh ${activeTicket.tapInMember})` : ''}. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan kerja.
           </div>
         ` : ''}
 
@@ -1675,9 +1669,9 @@ function renderPengajuanSayaView() {
   document.body.classList.remove('modal-open');
 
   // Left Column
+  const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
   if (colPengajuanLeft) {
     const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
-    const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
     const isWaitingProof = (activeTicket.status === 'Menunggu Bukti Kedatangan');
     const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
     const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
@@ -1709,20 +1703,20 @@ function renderPengajuanSayaView() {
     if (isWaitingProof) {
       actionButtonsHtml = `
         <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-          <div class="proof-reason-alert-box" style="padding: 0.55rem 0.75rem; border-radius: 8px; font-size: 0.775rem; line-height: 1.45;">
-            <div><strong>⚠️ Atasan (${activeTicket.arrivalRejectBy || 'Peninjau'}) menandai Belum Tiba (Putaran #${activeTicket.arrivalRejectionRound || 1}):</strong></div>
+          <div class="proof-reason-alert-box" style="padding: 0.55rem 0.75rem; border-radius: 8px; font-size: 0.775rem; line-height: 1.45; background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;">
+            <div><strong>Atasan (${activeTicket.arrivalRejectBy || 'Peninjau'}) menandai Belum Tiba (Putaran #${activeTicket.arrivalRejectionRound || 1}):</strong></div>
             <div style="margin-top: 2px;">"${activeTicket.arrivalRejectReason || '-'}"</div>
-            <div style="font-size: 0.72rem; margin-top: 4px; opacity: 0.9;">🔒 Tap In Gerbang (${activeTicket.tapInTime || activeTicket.arrivalReportedTime || 'Terkunci'}) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).</div>
+            <div style="font-size: 0.72rem; margin-top: 4px; opacity: 0.9; color: #475569;">Tap In Gerbang (${activeTicket.tapInTime || activeTicket.arrivalReportedTime || 'Terkunci'}) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).</div>
           </div>
           <button type="button" class="btn-danger-solid" style="width: 100%; justify-content: center; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; padding: 0.6rem 1rem;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
-            <span>📷 Upload Foto</span>
+            <span>Upload Foto</span>
           </button>
         </div>
       `;
     } else if (isWaitingVerify) {
       actionButtonsHtml = `
-        <button class="btn-figma-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
-          <span>⏳ Menunggu Verifikasi Atasan</span>
+        <button class="btn-figma-secondary" disabled style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px;">
+          <span>Menunggu Verifikasi Atasan</span>
         </button>
       `;
     } else if (isOutside) {
@@ -1814,7 +1808,7 @@ function renderPengajuanSayaView() {
           <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
             ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
-            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.72rem; color: #047857; font-weight: 800; background: #ecfdf5; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.3px;">👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
+            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600; line-height: 1.35;">
             <div>${activeTicket.category}</div>
@@ -1827,21 +1821,15 @@ function renderPengajuanSayaView() {
         </div>
 
         ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
-          <div style="margin-top: 8px; background: rgba(5, 150, 105, 0.05); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem;">
-            <div style="font-weight: 700; color: #065f46; display: flex; align-items: center; justify-content: space-between;">
-              <span>👥 Tim Dinas:</span>
-              <span style="font-size: 0.7rem; font-weight: 600; color: #047857;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
+          <div style="margin-top: 8px; font-size: 0.75rem;">
+            <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between;">
+              <span>Tim Dinas:</span>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
-              ${!activeTicket.initiatorCancelled ? `<span style="background: #d1fae5; color: #065f46; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👑 ${activeTicket.applicantName} (Inisiator)</span>` : `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${activeTicket.applicantName} (Batal)</span>`}
-              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="background: #f1f5f9; color: #94a3b8; text-decoration: line-through; padding: 2px 7px; border-radius: 4px;">${m.name} (Batal)</span>` : `<span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 600;">👤 ${m.name}</span>`).join('')}
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+              ${!activeTicket.initiatorCancelled ? `<span><strong>${activeTicket.applicantName}</strong> <span style="color: #d97706; font-weight: 700;">(Inisiator)</span></span>` : `<span style="color: #94a3b8; text-decoration: line-through;">${activeTicket.applicantName} (Batal)</span>`}
+              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="color: #94a3b8; text-decoration: line-through;">${m.name} (Batal)</span>` : `<span><strong>${m.name}</strong> <span style="color: #16a34a; font-weight: 700;">(Aktif Ikut)</span></span>`).join(', ')}
             </div>
-          </div>
-        ` : ''}
-
-        ${isWaitingVerify ? `
-          <div style="margin-top: 0.75rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #1e40af; line-height: 1.4;">
-            <strong>🏢 Tap In Gerbang Tercatat:</strong> Jam kepulangan telah dikunci pada <strong>${activeTicket.tapInTime || activeTicket.arrivalReportedTime || activeTicket.reportedReturnTime || '-'}</strong>${activeTicket.tapInMember ? ` (oleh ${activeTicket.tapInMember})` : ''}. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan kerja.
           </div>
         ` : ''}
 
@@ -1923,6 +1911,13 @@ function renderPengajuanSayaView() {
           <h3 class="figma-card-title">Kronologi tercatat</h3>
         </div>
         ${buildActivePermitTimeline(activeTicket)}
+
+        ${isWaitingVerify ? `
+          <div style="margin-top: 1rem; padding: 0.85rem 1rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.775rem; line-height: 1.45;">
+            <div style="font-weight: 800; color: #0f172a; margin-bottom: 3px;">Tap In Gerbang Tercatat:</div>
+            <div style="color: #334155;">Jam kepulangan telah dikunci pada <strong>${activeTicket.tapInTime || activeTicket.arrivalReportedTime || activeTicket.reportedReturnTime || '-'}</strong>${activeTicket.tapInMember ? ` (oleh ${activeTicket.tapInMember})` : ''}. Menunggu Atasan (${activeTicket.approverName}) memverifikasi fisik kehadiran Anda di ruangan kerja.</div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -2160,10 +2155,10 @@ function getCleanEmpStatus(status, ticket) {
     'outside': 'rgba(2, 132, 199, 0.1)',
     'late': 'rgba(220, 38, 38, 0.1)',
     'approved': 'rgba(16, 185, 129, 0.1)',
-    'pending': 'rgba(245, 158, 11, 0.12)',
-    'waiting-verify': 'rgba(37, 99, 235, 0.12)',
-    'waiting-proof': 'rgba(217, 119, 6, 0.14)',
-    'emergency': 'rgba(190, 18, 60, 0.1)',
+    'pending': '#ffffff',
+    'waiting-verify': '#ffffff',
+    'waiting-proof': '#ffffff',
+    'emergency': '#ffffff',
     'rejected': 'rgba(220, 38, 38, 0.1)',
     'expired': 'rgba(100, 116, 139, 0.1)',
     'cancelled': 'rgba(100, 116, 139, 0.1)'
@@ -2174,10 +2169,10 @@ function getCleanEmpStatus(status, ticket) {
     'outside': 'rgba(2, 132, 199, 0.25)',
     'late': 'rgba(220, 38, 38, 0.25)',
     'approved': 'rgba(16, 185, 129, 0.25)',
-    'pending': 'rgba(245, 158, 11, 0.3)',
-    'waiting-verify': 'rgba(37, 99, 235, 0.3)',
-    'waiting-proof': 'rgba(217, 119, 6, 0.35)',
-    'emergency': 'rgba(190, 18, 60, 0.25)',
+    'pending': '#cbd5e1',
+    'waiting-verify': '#cbd5e1',
+    'waiting-proof': '#cbd5e1',
+    'emergency': '#cbd5e1',
     'rejected': 'rgba(220, 38, 38, 0.25)',
     'expired': 'rgba(100, 116, 139, 0.25)',
     'cancelled': 'rgba(100, 116, 139, 0.25)'
@@ -2199,7 +2194,6 @@ function renderEmpCards(list, containerElement) {
   if (!list || list.length === 0) {
     target.innerHTML = `
       <div style="text-align: center; padding: 3rem 1.5rem; background: var(--card-bg, #ffffff); border: 1px dashed var(--border-color, #e2e8f0); border-radius: 10px; margin-top: 0.85rem;">
-        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📄</div>
         <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary, #0f172a);">Tidak Ada Data Pengajuan</div>
         <div style="font-size: 0.8rem; color: var(--text-muted, #64748b); margin-top: 0.25rem;">Tidak ditemukan pengajuan izin yang sesuai dengan filter atau kata kunci pencarian.</div>
       </div>
@@ -2355,7 +2349,6 @@ function renderEmpTable(list, containerElement) {
   if (!list || list.length === 0) {
     target.innerHTML = `
       <div style="text-align: center; padding: 3rem 1.5rem; background: var(--card-bg, #ffffff); border: 1px dashed var(--border-color, #e2e8f0); border-radius: 10px; margin-top: 0.85rem;">
-        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📄</div>
         <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary, #0f172a);">Tidak Ada Data Pengajuan</div>
         <div style="font-size: 0.8rem; color: var(--text-muted, #64748b); margin-top: 0.25rem;">Tidak ditemukan pengajuan izin yang sesuai dengan filter atau kata kunci pencarian.</div>
       </div>
@@ -2749,13 +2742,13 @@ function renderKaryawanMobileDashboard() {
       if (activeTicket.status === 'Menunggu Bukti Kedatangan') {
         mobileBtnsHtml = `
           <button type="button" class="btn-mobile-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; width: 100%;" onclick="window.openUploadArrivalProofModal('${activeTicket.id}')">
-            <span>📷 Upload Foto</span>
+            <span>Upload Foto</span>
           </button>
         `;
       } else if (activeTicket.status === 'Menunggu Verifikasi Atasan') {
         mobileBtnsHtml = `
-          <button type="button" class="btn-mobile-secondary" disabled style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-weight: 700; cursor: not-allowed; width: 100%;">
-            <span>⏳ Menunggu Verifikasi Atasan</span>
+          <button type="button" class="btn-mobile-secondary" disabled style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; cursor: not-allowed; width: 100%;">
+            <span>Menunggu Verifikasi Atasan</span>
           </button>
         `;
       } else if (isApproved) {
@@ -3501,7 +3494,9 @@ window.submitArrivalProofToApprover = function() {
     event: `Foto Bukti Kedatangan Diunggah (Putaran #${currentRound})`,
     time: nowFormatted,
     by: `${payload.byName} (Karyawan)`,
-    desc: `Karyawan mengunggah foto bukti berstempel waktu real-time (${payload.capturedAt || submitRealtimeWib})${note ? ` dengan catatan: "${note}"` : ''}. Dikirim kembali ke Atasan untuk konfirmasi.`
+    desc: `Karyawan mengunggah foto bukti berstempel waktu real-time (${payload.capturedAt || submitRealtimeWib})${note ? ` dengan catatan: "${note}"` : ''}. Dikirim kembali ke Atasan untuk konfirmasi.`,
+    photoDataUrl: payload.dataUrl,
+    round: currentRound
   });
 
   window.ticketsList = freshList;
@@ -3524,16 +3519,21 @@ window.submitArrivalProofToApprover = function() {
   }
 
   window.closeUploadArrivalProofModal();
+  if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
 
   if (typeof window.showToast === 'function') {
     window.showToast(`Foto bukti berstempel real-time berhasil dikirim ke Atasan untuk #${freshTicket.id}!`, 'success');
   }
 
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
   if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
-  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+  if (typeof window.renderMobileActiveView === 'function') {
+    window.renderMobileActiveView();
+  } else {
+    if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+    if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+  }
 };
 
 window.viewArrivalProofPhoto = function(ticketId, historyIdx) {
@@ -3572,7 +3572,7 @@ window.viewArrivalProofPhoto = function(ticketId, historyIdx) {
   if (titleEl) titleEl.textContent = `Foto Bukti Kedatangan (${roundLabel})`;
   if (subEl) subEl.textContent = `Tiket #${t.id} • Pengunggah: ${uploader}`;
   if (metaEl) metaEl.textContent = `Stempel Waktu Real-Time: ${timestamp} • Tap In Gerbang: ${t.tapInTime || 'Terkunci'}`;
-  if (iconEl) iconEl.textContent = '📸';
+  if (iconEl) iconEl.textContent = 'FOTO';
   if (btnZoom) btnZoom.style.display = 'inline-flex';
   window._docViewerZoomed = false;
 

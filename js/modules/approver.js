@@ -357,26 +357,25 @@ function renderApproverDashboard() {
 
     if (memberDinasPendingTickets.length > 0) {
       bannerHtml += `
-        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 0.95rem 1.25rem; margin-bottom: 0.85rem; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);">
+        <div style="background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; padding: 0.95rem 1.25rem; margin-bottom: 0.85rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
             <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-              <div style="font-size: 1.5rem;">📋</div>
               <div>
                 <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                  <span style="font-weight: 800; font-size: 0.9rem; color: #1e40af;">
+                  <span style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary, #0f172a);">
                     ${memberDinasPendingTickets.length} TEMBUSAN PENGAJUAN DINAS STAF ANDA
                   </span>
-                  <span class="tag-badge" style="background: #dbeafe; color: #1e40af; font-weight: 700; border: 1px solid #bfdbfe;">Tembusan</span>
+                  <span class="tag-badge" style="background: #ffffff; color: #334155; font-weight: 700; border: 1px solid #cbd5e1;">Tembusan</span>
                 </div>
-                <div style="font-size: 0.8rem; color: #1e3a8a; margin-top: 3px;">
+                <div style="font-size: 0.8rem; color: #475569; margin-top: 3px;">
                   Staf Anda terdaftar dalam tim tugas dinas kantor (Menunggu persetujuan Atasan Utama).
                 </div>
-                <div style="font-size: 0.75rem; color: #2563eb; margin-top: 2px;">
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
                   Anda dapat memantau rincian penugasan, jadwal, dan lampiran surat tugas di menu Antrean.
                 </div>
               </div>
             </div>
-            <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem; background: #ffffff; border-color: #bfdbfe; color: #1e40af;" onclick="setApproverNav('antrian')">
+            <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem; background: #ffffff; border-color: #cbd5e1; color: #334155;" onclick="setApproverNav('antrian')">
               Lihat di Antrean →
             </button>
           </div>
@@ -477,35 +476,35 @@ function renderApproverDashboard() {
       waitingVerificationTickets.forEach(t => {
         const hasProofPhoto = Boolean(t.arrivalProofPhoto);
         html += `
-          <div class="feed-item" style="border-left: 4px solid #2563eb; background: #eff6ff; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
+          <div class="feed-item" style="border: 1px solid var(--border-color, #e2e8f0); border-left: 4px solid #2563eb; background: #ffffff; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
                 ${window.getStatusPill(t.status, t)}
               </div>
-              <span style="font-size: 0.72rem; color: #1e40af; font-weight: 700;">🔒 Tap In: ${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}</span>
+              <span style="font-size: 0.72rem; color: #475569; font-weight: 700;">Tap In: ${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}</span>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
               <strong>${t.applicantName || 'Pemohon'}</strong> (${t.applicantNip || '-'}) — Tujuan: <strong>${t.destination || '-'}</strong>
             </div>
-            <div style="font-size: 0.775rem; color: #1e40af; line-height: 1.4;">
+            <div style="font-size: 0.775rem; color: #334155; line-height: 1.4;">
               ${hasProofPhoto
-                ? `📸 Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi kembali:`
-                : `🏢 Personel telah melakukan Tap In di gerbang. Periksa kehadiran fisik di ruangan kerja:`}
+                ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi kembali:`
+                : `Personel telah melakukan Tap In di gerbang. Periksa kehadiran fisik di ruangan kerja:`}
             </div>
             ${hasProofPhoto ? `
-              <div class="proof-photo-review-card" style="display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.65rem; border-radius: 8px;">
+              <div class="proof-photo-review-card" style="display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.65rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0);">
                 <img src="${t.arrivalProofPhoto}" alt="Foto Bukti Kedatangan" class="proof-photo-thumb" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')" title="Klik untuk perbesar foto bukti">
                 <div style="flex: 1; min-width: 0; font-size: 0.72rem; line-height: 1.4;">
-                  <div style="font-weight: 800; color: var(--text-primary, #0f172a);">📸 Foto Bukti Real-Time</div>
+                  <div style="font-weight: 800; color: var(--text-primary, #0f172a);">Foto Bukti Real-Time</div>
                   <div style="color: #64748b;">Oleh: <strong>${t.arrivalProofBy || t.applicantName || 'Karyawan'}</strong></div>
-                  <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                  <div style="color: #059669; font-weight: 700;">${t.arrivalProofAt || '-'}</div>
                 </div>
               </div>
             ` : ''}
             <div style="display: flex; justify-content: flex-end; gap: 0.45rem; flex-wrap: wrap; padding-top: 0.45rem; border-top: 1px solid rgba(59, 130, 246, 0.25);">
               <button type="button" class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'detail')">Detail Pengajuan</button>
-              <button type="button" class="btn-reject" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 700;" onclick="window.rejectArrivalByApprover('${t.id}')">✕ Belum Tiba</button>
+              <button type="button" class="btn-reject" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px;" onclick="window.rejectArrivalByApprover('${t.id}')">✕ Belum Tiba</button>
               <button type="button" class="btn-approve" style="padding: 0.35rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="window.confirmArrivalByApprover('${t.id}')">✓ Ya, Sudah Tiba</button>
             </div>
           </div>
@@ -734,7 +733,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
                 ${isGroupDinas ? (() => {
                   const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-                  return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                  return `<span style="font-size: 0.68rem; font-weight: 700; color: #334155; background: #ffffff; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">Tim (${groupCount})</span>`;
                 })() : ''}
               </div>
             </div>
@@ -758,9 +757,9 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 if (myMembers.length > 0 && !isTicketAssignedToCurrentApprover(t)) {
                   const names = myMembers.map(m => m.name.split(',')[0]).join(', ');
                   return `
-                    <div class="approver-alert-banner" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
-                      <span>📋 <strong>Tembusan Pengawasan:</strong> Staf Anda (<strong>${names}</strong>) terdaftar dalam tim dinas ini</span>
-                      <span style="font-size: 0.7rem; color: #1e40af; font-weight: 700;">Peninjau: ${t.approverName}</span>
+                    <div class="approver-alert-banner" style="background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                      <span style="color: #334155;"><strong>Tembusan Pengawasan:</strong> Staf Anda (<strong>${names}</strong>) terdaftar dalam tim dinas ini</span>
+                      <span style="font-size: 0.7rem; color: #475569; font-weight: 700;">Peninjau: ${t.approverName}</span>
                     </div>
                   `;
                 }
@@ -785,13 +784,12 @@ function renderApproverCards(list, containerElement, isTracking = false) {
             </div>
 
             ${t.suratPerintah ? `
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.35rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; padding: 0.35rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
                 <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
-                  <span style="font-size: 0.85rem;">📄</span>
-                  <span style="color: #166534; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.suratPerintah.name || 'Surat Perintah Dinas').replace(/"/g, '&quot;')}">${t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf'}</span>
+                  <span style="color: #334155; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.suratPerintah.name || 'Surat Perintah Dinas').replace(/"/g, '&quot;')}">${t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf'}</span>
                 </div>
-                <button type="button" onclick="event.stopPropagation(); window.viewSuratPerintahDetail('${t.id}')" style="background: #ffffff; color: #15803d; border: 1px solid #86efac; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
-                  👁️ Lihat Dokumen
+                <button type="button" onclick="event.stopPropagation(); window.viewSuratPerintahDetail('${t.id}')" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
+                  Lihat Dokumen
                 </button>
               </div>
             ` : ''}
@@ -889,7 +887,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || isEmergDeciding || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
-                  <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; background: ${isReassignedAway ? '#fffbeb' : '#eff6ff'}; border: 1px solid ${isReassignedAway ? '#fef3c7' : '#bfdbfe'}; border-radius: 6px; font-size: 0.725rem; color: ${isReassignedAway ? '#92400e' : '#1e40af'}; font-weight: 600;">
+                  <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; font-size: 0.725rem; color: #334155; font-weight: 600;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
                     <span>${isReassignedAway ? `Dialihkan ke: <strong>${t.approverName || 'Pejabat Terkait'}</strong>` : `Menunggu keputusan dari: <strong>${t.approverName || 'Pejabat Terkait'}</strong>`}</span>
                   </div>
@@ -904,10 +902,10 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               if (t.status === 'Menunggu Bukti Kedatangan') {
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
-                  <div class="proof-reason-alert-box" style="padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4;">
-                    <strong>📷 Menunggu Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1}):</strong><br>
+                  <div class="proof-reason-alert-box" style="padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.725rem; line-height: 1.4; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); color: #0f172a;">
+                    <strong>Menunggu Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1}):</strong><br>
                     Alasan Anda: "${t.arrivalRejectReason || '-'}"<br>
-                    <span style="opacity: 0.9;">Tap In Gerbang (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) tetap terkunci sampai bukti diunggah karyawan.</span>
+                    <span style="opacity: 0.9; color: #475569;">Tap In Gerbang (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) tetap terkunci sampai bukti diunggah karyawan.</span>
                   </div>
                   <button class="btn-card-detail" style="width: 100%; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600; min-height: 32px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
                     <span>Detail Pengajuan</span>
@@ -920,7 +918,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 if (!isPrimary) {
                   return `
                   <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); width: 100%;">
-                    <span style="font-size: 0.72rem; color: #1e40af; font-weight: 600;">🏢 Tap In gerbang tercatat (Menunggu konfirmasi ${t.approverName})</span>
+                    <span style="font-size: 0.72rem; color: #475569; font-weight: 600;">Tap In gerbang tercatat (Menunggu konfirmasi ${t.approverName})</span>
                     <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                       <span>Detail Pengajuan</span>
                     </button>
@@ -931,8 +929,8 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 if (window.currentApproverNav === 'pelacakan' || window.currentApproverNav === 'tim') {
                   return `
                   <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); width: 100%;">
-                    <span style="font-size: 0.725rem; color: #1e40af; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                      🏢 <span>Tap In gerbang tercatat (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) — Menunggu konfirmasi di Antrean</span>
+                    <span style="font-size: 0.725rem; color: #475569; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                      <span>Tap In gerbang tercatat (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) — Menunggu konfirmasi di Antrean</span>
                     </span>
                     <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                       <span>Detail Pengajuan</span>
@@ -944,25 +942,25 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 const hasProofPhoto = Boolean(t.arrivalProofPhoto);
                 return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
-                  <div style="padding: 0.45rem 0.65rem; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 0.725rem; color: #1e40af; line-height: 1.4;">
-                    <strong>🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}):</strong><br>
+                  <div style="padding: 0.45rem 0.65rem; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; font-size: 0.725rem; color: #334155; line-height: 1.4;">
+                    <strong style="color: #0f172a;">Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}):</strong><br>
                     ${hasProofPhoto
                       ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto & konfirmasi kembali:`
                       : `Personel ${t.isGroupDinas ? 'tim dinas ' : ''}telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:`}
                   </div>
                   ${hasProofPhoto ? `
-                    <div class="proof-photo-review-card" style="display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.65rem; border-radius: 8px;">
+                    <div class="proof-photo-review-card" style="display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.65rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0);">
                       <img src="${t.arrivalProofPhoto}" alt="Foto Bukti Kedatangan" class="proof-photo-thumb" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')" title="Klik untuk perbesar foto bukti">
                       <div style="flex: 1; min-width: 0; font-size: 0.72rem; line-height: 1.4;">
-                        <div style="font-weight: 800; color: var(--text-primary, #0f172a);">📸 Foto Bukti Real-Time</div>
+                        <div style="font-weight: 800; color: var(--text-primary, #0f172a);">Foto Bukti Real-Time</div>
                         <div style="color: #64748b;">Oleh: <strong>${t.arrivalProofBy || t.applicantName || 'Karyawan'}</strong></div>
-                        <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                        <div style="color: #059669; font-weight: 700;">${t.arrivalProofAt || '-'}</div>
                         ${t.arrivalProofNote ? `<div style="color: #334155; font-style: italic; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${String(t.arrivalProofNote).replace(/"/g, '&quot;')}">"${t.arrivalProofNote}"</div>` : ''}
                       </div>
                     </div>
                   ` : ''}
                   <div style="display: flex; gap: 0.45rem; width: 100%;">
-                    <button type="button" class="btn-reject" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.rejectArrivalByApprover('${t.id}')">
+                    <button type="button" class="btn-reject" style="flex: 1; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.rejectArrivalByApprover('${t.id}')">
                       ✕ Belum Tiba
                     </button>
                     <button type="button" class="btn-approve" style="flex: 1.3; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="window.confirmArrivalByApprover('${t.id}')">
@@ -2584,7 +2582,11 @@ function executeRejectArrivalByApprover(ticketId, reason) {
 
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
   if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
-  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-  if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+  if (typeof window.renderMobileActiveView === 'function') {
+    window.renderMobileActiveView();
+  } else {
+    if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+    if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+  }
 }

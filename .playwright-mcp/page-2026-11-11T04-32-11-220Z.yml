@@ -1,0 +1,111 @@
+- generic [ref=f3e1]:
+  - text: – – – – – – –
+  - generic [ref=f3e2]:
+    - banner [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f3e6]
+        - generic [ref=f3e7]:
+          - generic [ref=f3e8]: PUPUK KUJANG
+          - generic [ref=f3e9]: Perizinan Keluar Area
+      - generic [ref=f3e10]:
+        - button "Karyawan ▼" [ref=f3e466] [cursor=pointer]:
+          - generic [ref=f3e15]: Karyawan
+          - generic [ref=f3e16]: ▼
+        - button "Notifikasi" [ref=f3e18] [cursor=pointer]:
+          - generic [ref=f3e129]: "1"
+        - button "Menu Akun & Keluar SAKTI" [ref=f3e22] [cursor=pointer]:
+          - img "BP" [ref=f3e467]
+    - main [ref=f3e24]:
+      - generic [ref=f3e468]:
+        - generic [ref=f3e469]:
+          - generic [ref=f3e470]:
+            - generic [ref=f3e471]: IZIN AKTIF SAYA
+            - heading "TK-20261111-457" [level=3] [ref=f3e472]
+          - generic [ref=f3e473]: Menunggu Bukti Kedatangan
+        - generic [ref=f3e474]: Dinas Kantor • Kembali ke Area
+        - generic "WSW - SWS" [ref=f3e475]
+        - generic "Keperluan dinas" [ref=f3e476]: "\"Keperluan dinas\""
+        - generic [ref=f3e477]:
+          - generic [ref=f3e478]:
+            - generic [ref=f3e479]: 👥 Tim Dinas (2 Karyawan Aktif)
+            - generic [ref=f3e480]: QR Bersama
+          - generic [ref=f3e481]:
+            - generic [ref=f3e482]: Budi Pratama, S.T. (Inisiator)
+            - generic [ref=f3e483]: Arthur Morgan, S.Tr.T.
+        - generic [ref=f3e484]:
+          - generic [ref=f3e485]:
+            - generic [ref=f3e486]: Jadwal Keluar
+            - generic [ref=f3e487]: Rabu, 11 Nov 2026, 09.00 WIB
+          - generic [ref=f3e488]:
+            - generic [ref=f3e489]: Batas Jam Kembali
+            - generic [ref=f3e490]: Rabu, 11 Nov 2026, 12.42 WIB
+        - generic [ref=f3e491]:
+          - generic [ref=f3e492]:
+            - generic [ref=f3e493]: ⚠️
+            - generic [ref=f3e494]: "Atasan (Ir. Hendra Gunawan, M.T.) menandai Belum Tiba (Putaran #2):"
+          - generic [ref=f3e495]: "\"Personel belum terlihat di meja kerja, mohon unggah foto bukti real-time.\""
+          - generic [ref=f3e496]: 🔒 Tap In Gerbang (11 Nov 2026, 10.43 WIB) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).
+        - button "📷 Upload Foto" [active] [ref=f3e497] [cursor=pointer]
+        - link "Lihat Detail Pengajuan" [ref=f3e500] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f3e501]:
+        - heading "Kronologi tercatat" [level=3] [ref=f3e502]
+        - generic [ref=f3e503]:
+          - generic [ref=f3e508]:
+            - generic [ref=f3e509]: 11 Nov 2026, 09.15 WIB
+            - generic [ref=f3e510]: Scan Out Gerbang
+            - generic [ref=f3e511]: Meninggalkan area pabrik.
+          - generic [ref=f3e516]:
+            - generic [ref=f3e517]: 11 Nov 2026, 11.30 WIB
+            - generic [ref=f3e518]: Pengajuan Perpanjangan
+            - generic [ref=f3e519]: Mengajukan perpanjangan hingga 14.00 WIB.
+          - generic [ref=f3e524]:
+            - generic [ref=f3e525]: 11 Nov 2026, 08.05 WIB
+            - generic [ref=f3e526]: Perpanjangan Waktu Gugur Otomatis
+            - generic [ref=f3e527]: Pengajuan perpanjangan waktu otomatis gugur karena personel telah Tap In kembali ke pabrik.
+          - generic [ref=f3e532]:
+            - generic [ref=f3e533]: 11 Nov 2026, 08.05 WIB
+            - generic [ref=f3e534]: Tap In Gerbang Masuk
+            - generic [ref=f3e535]: Tap In kartu akses di Pos 1 Gerbang Utama oleh Budi Pratama, S.T.. Jam kepulangan terkunci pada 11 Nov 2026, 08.05 WIB. Menunggu verifikasi kehadiran fisik oleh Atasan.
+          - generic [ref=f3e539]:
+            - generic [ref=f3e540]: 11 Nov 2026, 11.30 WIB
+            - generic [ref=f3e541]: "Konfirmasi Belum Tiba (Putaran #2)"
+            - generic [ref=f3e542]: "Atasan menandai personel belum tiba dengan alasan: \"Personel belum terlihat di meja kerja, mohon unggah foto bukti real-time.\". Waktu Tap In (11 Nov 2026, 10.43 WIB) tetap terkunci & sistem meminta karyawan mengunggah foto bukti real-time."
+    - navigation [ref=f3e104]:
+      - generic [ref=f3e543] [cursor=pointer]: Dashboard
+      - generic [ref=f3e550] [cursor=pointer]: Pengajuan
+      - generic [ref=f3e555] [cursor=pointer]: Riwayat
+  - generic [ref=f3e561]:
+    - generic [ref=f3e562]:
+      - generic [ref=f3e563]:
+        - heading "Upload Foto Bukti Kedatangan" [level=3] [ref=f3e564]
+        - paragraph [ref=f3e565]: Foto dari galeri akan otomatis disematkan stempel hari & jam real-time
+      - button "✕" [ref=f3e566] [cursor=pointer]
+    - generic [ref=f3e567]:
+      - generic [ref=f3e568]:
+        - generic [ref=f3e569]:
+          - generic [ref=f3e570]: "TIKET #TK-20261111-457"
+          - generic [ref=f3e571]:
+            - text: "🔒 Tap In Gerbang:"
+            - strong [ref=f3e572]: 11 Nov 2026, 10.43 WIB
+            - text: (Terkunci)
+        - generic [ref=f3e573]:
+          - generic [ref=f3e574]: ● TRACKING REALTIME
+          - generic [ref=f3e575]: Rabu, 11 Nov 2026, 11.32.10 WIB
+      - generic [ref=f3e576]:
+        - generic [ref=f3e577]: "⚠️ Catatan Atasan (Personel Belum Tiba):"
+        - generic [ref=f3e578]: "\"Personel belum terlihat di meja kerja, mohon unggah foto bukti real-time.\" (Ir. Hendra Gunawan, M.T. • Putaran #2)"
+      - generic [ref=f3e580] [cursor=pointer]:
+        - generic [ref=f3e581]: 📷
+        - generic [ref=f3e582]: Pilih Foto Bukti dari Galeri
+        - generic [ref=f3e583]: Format JPG / PNG / WebP • Stempel hari & waktu real-time akan langsung dicetak ke foto
+        - generic [ref=f3e584]: 🖼️ Buka Galeri Perangkat
+      - generic [ref=f3e586]:
+        - generic [ref=f3e587]: Catatan Tambahan (Opsional)
+        - textbox "Catatan Tambahan (Opsional)" [ref=f3e588]:
+          - /placeholder: "Contoh: Sudah berada di ruang kontrol Unit Produksi..."
+    - generic [ref=f3e589]:
+      - button "Batal" [ref=f3e590] [cursor=pointer]
+      - button "📤 Kirim Kembali ke Atasan" [disabled] [ref=f3e591]
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

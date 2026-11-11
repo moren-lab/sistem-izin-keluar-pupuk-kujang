@@ -119,7 +119,7 @@
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
       t.status !== 'Kedaluwarsa' &&
-      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat')
+      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Menunggu Verifikasi Atasan' || t.status === 'Menunggu Bukti Kedatangan')
     );
   }
 
@@ -198,6 +198,12 @@
     if (targetTab) currentKaryawanTab = targetTab;
     if (!container) container = document.getElementById('mobileMainContent');
     if (!container) return;
+
+    // GUARD: Jika mobile sedang aktif sebagai Approver atau Security, dilarang menimpa mobileMainContent
+    const activeRole = (typeof window.getCurrentMobileRole === 'function' ? window.getCurrentMobileRole() : (window.currentMobileRole || window.currentActor));
+    if (activeRole && !['karyawan', 'karyawan2'].includes(activeRole)) {
+      return;
+    }
 
     if (currentKaryawanTab === 'dashboard') {
       renderDashboard(container);
@@ -291,6 +297,34 @@
             </div>
             <div class="mobile-active-strip-desc" style="color: #fee2e2;">
               ${activeTicket.category} — Batas waktu TELAH TERLEWAT! Segera Tap In di Pos 1.
+            </div>
+          </div>
+        `;
+      } else if (activeTicket.status === 'Menunggu Bukti Kedatangan') {
+        activeStripHtml = `
+          <div class="mobile-active-strip" style="background: rgba(239, 68, 68, 0.22); border: 1px solid rgba(239, 68, 68, 0.5);">
+            <div class="mobile-active-strip-head">
+              <span class="mobile-active-strip-title" style="color: #fca5a5;">
+                Status: Menunggu Bukti Kedatangan — ${activeTicket.id}
+              </span>
+              <span class="mobile-active-strip-badge" style="background: #dc2626; color: #ffffff;">Butuh Bukti</span>
+            </div>
+            <div class="mobile-active-strip-desc" style="color: #fee2e2;">
+              Atasan (${escapeHtml(activeTicket.arrivalRejectBy || approver.name)}) menandai Belum Tiba. Wajib unggah foto bukti real-time.
+            </div>
+          </div>
+        `;
+      } else if (activeTicket.status === 'Menunggu Verifikasi Atasan') {
+        activeStripHtml = `
+          <div class="mobile-active-strip" style="background: rgba(37, 99, 235, 0.18); border: 1px solid rgba(37, 99, 235, 0.45);">
+            <div class="mobile-active-strip-head">
+              <span class="mobile-active-strip-title" style="color: #93c5fd;">
+                Status: Menunggu Verifikasi Atasan — ${activeTicket.id}
+              </span>
+              <span class="mobile-active-strip-badge" style="background: #2563eb; color: #ffffff;">Verifikasi</span>
+            </div>
+            <div class="mobile-active-strip-desc" style="color: #dbeafe;">
+              Laporan kedatangan tercatat. Menunggu verifikasi kehadiran fisik oleh Atasan (${escapeHtml(activeTicket.approverName || approver.name)}).
             </div>
           </div>
         `;
@@ -1005,6 +1039,7 @@
     const myEmp = getActiveEmp();
     const myNip = myEmp ? myEmp.nip : 'PK-2024-8841';
     const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === myNip && m.status !== 'batal'));
+    const isOwnerOrTeamMember = (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) || isTaggedMember;
 
     const col1Label = (isOutside && t.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
     const col1Val = (isOutside && t.scanOutTime)
@@ -1086,36 +1121,32 @@
         </div>
       `;
     } else if (t.status === 'Menunggu Bukti Kedatangan') {
+      const approverName = t.arrivalRejectBy || t.approverName || (typeof window.getPrimaryApprover === 'function' ? window.getPrimaryApprover().name : 'Atasan');
+      const lockedTime = t.tapInTime || t.arrivalReportedTime || t.employeeReportedReturnTime || 'Terkunci';
       actionButtonsHtml = `
-        <div class="proof-reason-alert-box" style="border-radius: 8px; padding: 10px; margin-top: 12px; text-align: left;">
-          <div style="font-size: 0.775rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-            <span>⚠️</span>
-            <span>Atasan Menandai Belum Tiba (Putaran #${t.arrivalRejectionRound || 1})</span>
+        <div class="proof-reason-alert-box" style="border-radius: 8px; padding: 10px 12px; margin-top: 12px; text-align: left; background: #ffffff; border: 1px solid #e2e8f0;">
+          <div style="font-size: 0.775rem; font-weight: 800; display: flex; align-items: center; gap: 6px; color: #0f172a;">
+            <span>Atasan (${escapeHtml(approverName)}) menandai Belum Tiba (Putaran #${t.arrivalRejectionRound || 1}):</span>
           </div>
-          <div style="font-size: 0.725rem; margin-top: 4px; line-height: 1.4;">
-            Alasan: "<strong>${escapeHtml(t.arrivalRejectReason || '-')}</strong>"
+          <div style="font-size: 0.75rem; margin-top: 4px; line-height: 1.4; color: #334155; font-weight: 600;">
+            "${escapeHtml(t.arrivalRejectReason || 'Personel belum terlihat di ruangan kerja.')}"
           </div>
-          <div style="font-size: 0.68rem; margin-top: 4px; opacity: 0.9;">
-            🔒 Tap In Gerbang (${t.tapInTime || t.employeeReportedReturnTime || 'Terkunci'}) tetap terkunci. Wajib unggah foto bukti dari galeri.
+          <div style="font-size: 0.68rem; margin-top: 5px; color: #475569; line-height: 1.35; opacity: 0.95;">
+            Tap In Gerbang (${lockedTime}) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).
           </div>
-          <button type="button" class="mobile-btn-primary" style="margin-top: 8px; width: 100%; min-height: 42px; background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.openUploadArrivalProofModal('${t.id}')">
-            <span>📷 Upload Foto</span>
-          </button>
         </div>
+        ${isOwnerOrTeamMember ? `
+          <button type="button" class="mobile-btn-primary" style="margin-top: 10px; width: 100%; min-height: 44px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(220,38,38,0.25); cursor: pointer;" onclick="if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${t.id}')">
+            <span>Upload Foto</span>
+          </button>
+        ` : ''}
         <div style="text-align: center; margin-top: 8px;">
           <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail Pengajuan</a>
         </div>
       `;
     } else if (t.status === 'Menunggu Verifikasi Atasan') {
       actionButtonsHtml = `
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; margin-top: 12px; text-align: left;">
-          <div style="font-size: 0.775rem; font-weight: 800; color: #1e40af; display: flex; align-items: center; gap: 6px;">
-            <span>🏢</span>
-            <span>Menunggu Verifikasi Kehadiran Atasan</span>
-          </div>
-          <div style="font-size: 0.725rem; color: #1e3a8a; margin-top: 3px; line-height: 1.35;">
-            Laporan tiba di kantor telah dicatat pada <strong>${t.employeeReportedReturnTime || 'terkunci'}</strong>. Waktu kembali aman selagi menunggu verifikasi Atasan.
-          </div>
+       
         </div>
         <div style="text-align: center; margin-top: 8px;">
           <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail Pengajuan</a>
@@ -1191,15 +1222,15 @@
       groupMembersHtml = `
         <div style="margin: 8px 0; padding: 8px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 0.7rem; font-weight: 700; color: #475569;">👥 Tim Dinas (${activeCount} Karyawan Aktif)</span>
+            <span style="font-size: 0.7rem; font-weight: 700; color: #475569;">Tim Dinas (${activeCount} Karyawan Aktif)</span>
             <span style="font-size: 0.65rem; color: #2563eb; font-weight: 700;">QR Bersama</span>
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-            <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${t.initiatorCancelled ? '#fee2e2' : '#dbeafe'}; color: ${t.initiatorCancelled ? '#dc2626' : '#1e40af'}; font-weight: 700; ${t.initiatorCancelled ? 'text-decoration: line-through;' : ''}">
+            <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${t.initiatorCancelled ? '#fee2e2' : '#ffffff'}; border: 1px solid ${t.initiatorCancelled ? '#fca5a5' : '#cbd5e1'}; color: ${t.initiatorCancelled ? '#dc2626' : '#334155'}; font-weight: 700; ${t.initiatorCancelled ? 'text-decoration: line-through;' : ''}">
               ${escapeHtml(t.applicantName)} (Inisiator)
             </span>
             ${t.members.map(m => `
-              <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${m.status === 'batal' ? '#fee2e2' : '#f1f5f9'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; font-weight: 600; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
+              <span style="font-size: 0.675rem; padding: 2px 6px; border-radius: 4px; background: ${m.status === 'batal' ? '#fee2e2' : '#ffffff'}; border: 1px solid ${m.status === 'batal' ? '#fca5a5' : '#cbd5e1'}; color: ${m.status === 'batal' ? '#dc2626' : '#334155'}; font-weight: 600; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
                 ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
               </span>
             `).join('')}
@@ -1248,19 +1279,47 @@
     }
 
     if (t.timeline && t.timeline.length > 0) {
-      return t.timeline.map((item, idx) => `
-        <div class="mobile-timeline-item">
-          <div class="mobile-timeline-track">
-            <div class="mobile-timeline-dot ${idx === 0 ? 'active' : 'done'}"></div>
-            ${idx < t.timeline.length - 1 ? '<div class="mobile-timeline-line"></div>' : ''}
+      return t.timeline.map((item, idx) => {
+        let photoUrl = item.photoDataUrl || '';
+        let historyIdx = -1;
+        const evLower = (item.event || '').toLowerCase();
+        if (evLower.includes('foto bukti') || evLower.includes('bukti kedatangan')) {
+          const roundMatch = (item.event || '').match(/Putaran\s*#?(\d+)/i);
+          const roundNum = roundMatch ? parseInt(roundMatch[1], 10) : 1;
+          if (!photoUrl && Array.isArray(t.arrivalVerificationHistory)) {
+            const hIndex = t.arrivalVerificationHistory.findIndex(h => h.round === roundNum && h.photoDataUrl);
+            if (hIndex >= 0) {
+              photoUrl = t.arrivalVerificationHistory[hIndex].photoDataUrl;
+              historyIdx = hIndex;
+            }
+          }
+          if (!photoUrl && t.arrivalProofPhoto) {
+            photoUrl = t.arrivalProofPhoto;
+          }
+        }
+
+        return `
+          <div class="mobile-timeline-item">
+            <div class="mobile-timeline-track">
+              <div class="mobile-timeline-dot ${idx === 0 ? 'active' : 'done'}"></div>
+              ${idx < t.timeline.length - 1 ? '<div class="mobile-timeline-line"></div>' : ''}
+            </div>
+            <div class="mobile-timeline-content">
+              <div class="mobile-timeline-time">${item.time}</div>
+              <div class="mobile-timeline-title" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                <span>${item.event}</span>
+                ${photoUrl ? `
+                  <span style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}', ${historyIdx >= 0 ? historyIdx : "''"})" title="Klik untuk lihat foto bukti">
+                    <img src="${photoUrl}" alt="Foto Bukti" style="width: 24px; height: 18px; border-radius: 2px; object-fit: cover; vertical-align: middle;">
+                    <span style="font-size: 0.68rem; color: #2563eb; font-weight: 700;">Lihat Foto</span>
+                  </span>
+                ` : ''}
+              </div>
+              <div class="mobile-timeline-desc">${item.desc || (item.by ? 'Oleh ' + item.by : '')}</div>
+            </div>
           </div>
-          <div class="mobile-timeline-content">
-            <div class="mobile-timeline-time">${item.time}</div>
-            <div class="mobile-timeline-title">${item.event}</div>
-            <div class="mobile-timeline-desc">${item.desc || (item.by ? 'Oleh ' + item.by : '')}</div>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     const isApproved = t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Selesai' || t.status === 'Terlambat';
@@ -3304,6 +3363,7 @@
       (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841'));
     const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === myActorNip && m.status !== 'batal'));
     const isGroupDinasActive = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.filter(m => m.status !== 'batal').length > 0);
+    const canUploadProof = isOwner || isTaggedMember;
 
     // Push state for Android / hardware back gesture
     try {
@@ -3373,23 +3433,28 @@
           </div>
 
           ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
-            <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
-              <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;">
-                👥 Tim Dinas (${(t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length} Orang)
+            <div style="margin-bottom: 12px; padding: 4px 2px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-size: 0.75rem; color: #0f172a; font-weight: 800; text-transform: uppercase;">
+                  Tim Dinas Bersama
+                </span>
+                <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">
+                  ${(t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length} Karyawan Aktif
+                </span>
               </div>
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
-                  <div style="font-size: 0.75rem; color: #0f172a;">
-                    <strong>${escapeHtml(t.applicantName || 'Inisiator')}</strong> (${t.applicantNip || 'Inisiator'})
+              <div style="display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9;">
+                  <div style="font-size: 0.775rem; color: #0f172a;">
+                    <strong>${escapeHtml(t.applicantName || 'Inisiator')}</strong> (${t.applicantNip || 'Inisiator'}) <span style="font-size: 0.72rem; font-weight: 700; color: #d97706; margin-left: 4px;">(Inisiator)</span>
                   </div>
-                  <span style="font-size: 0.65rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Inisiator</span>
+                  <span style="font-size: 0.75rem; font-weight: 700; color: #16a34a;">Aktif Ikut</span>
                 </div>
                 ${t.members.map(m => `
-                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: ${m.status === 'batal' ? '#fef2f2' : '#f8fafc'}; border: 1px solid ${m.status === 'batal' ? '#fecaca' : '#e2e8f0'}; border-radius: 6px;">
-                    <div style="font-size: 0.75rem; color: ${m.status === 'batal' ? '#991b1b' : '#0f172a'};">
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9;">
+                    <div style="font-size: 0.775rem; color: ${m.status === 'batal' ? '#991b1b' : '#0f172a'};">
                       <strong>${escapeHtml(m.name)}</strong> (${m.nip})
                     </div>
-                    <span style="font-size: 0.65rem; font-weight: 700; color: ${m.status === 'batal' ? '#dc2626' : '#059669'}; background: ${m.status === 'batal' ? '#fee2e2' : '#ecfdf5'}; padding: 2px 6px; border-radius: 4px;">${m.status === 'batal' ? 'Batal' : 'Aktif'}</span>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: ${m.status === 'batal' ? '#dc2626' : '#16a34a'};">${m.status === 'batal' ? 'Batal' : 'Aktif Ikut'}</span>
                   </div>
                 `).join('')}
               </div>
@@ -3397,20 +3462,20 @@
           ` : ''}
 
           ${t.suratPerintah ? `
-            <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #f0fdf4; border: 1px solid #bbf7d0;">
-              <div style="font-size: 0.7rem; color: #166534; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;">
-                📄 Surat Perintah / Surat Tugas
+            <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0;">
+              <div style="font-size: 0.7rem; color: #334155; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;">
+                Surat Perintah / Surat Tugas
               </div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                 <div style="min-width: 0;">
                   <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
                     ${escapeHtml(t.suratPerintah.name || 'Surat_Perintah.pdf')}
                   </div>
-                  <div style="font-size: 0.675rem; color: #15803d;">
-                    ${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi
+                  <div style="font-size: 0.675rem; color: #64748b;">
+                    ${Math.round((t.suratPerintah.size || 140000)/1024)} KB • <span style="color: #16a34a; font-weight: 700;">Terlampir</span> Resmi
                   </div>
                 </div>
-                <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #86efac; color: #166534; font-weight: 700; cursor: pointer;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
+                <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-weight: 700; cursor: pointer;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
                   Lihat File
                 </button>
               </div>
@@ -3421,22 +3486,39 @@
            
           ` : ''}
 
-          ${(t.arrivalRejectReason || t.arrivalProofPhoto) ? `
-            <div class="proof-reason-alert-box" style="border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
+          ${(t.status === 'Menunggu Bukti Kedatangan' || t.arrivalRejectReason || t.arrivalProofPhoto || (Array.isArray(t.arrivalVerificationHistory) && t.arrivalVerificationHistory.length > 0)) ? `
+            <div style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 0.8rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                <span>Riwayat Verifikasi Kedatangan &amp; Foto Bukti Real-Time</span>
+              </div>
               ${t.arrivalRejectReason ? `
-                <div style="font-size: 0.75rem; font-weight: 800;">⚠️ Alasan Belum Tiba (${escapeHtml(t.arrivalRejectBy || 'Atasan')} • Putaran #${t.arrivalRejectionRound || 1}):</div>
-                <div style="font-size: 0.75rem; margin-top: 2px; line-height: 1.4;">"${escapeHtml(t.arrivalRejectReason)}"</div>
-                <div style="font-size: 0.68rem; margin-top: 4px; opacity: 0.9;">🔒 Tap In Gerbang (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) tetap terkunci.</div>
-              ` : ''}
-              ${t.arrivalProofPhoto ? `
-                <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px; border-radius: 8px;">
-                  <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 80px; height: 56px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
-                  <div style="flex: 1; min-width: 0; font-size: 0.68rem; line-height: 1.35;">
-                    <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
-                    <div>Oleh: <strong>${escapeHtml(t.arrivalProofBy || '-')}</strong></div>
-                    <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                <div class="proof-reason-alert-box" style="padding: 10px 12px; border-radius: 8px; font-size: 0.775rem; line-height: 1.45; background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;">
+                  <div style="font-weight: 800; color: #0f172a; margin-bottom: 3px;">
+                    Alasan Belum Tiba (${escapeHtml(t.arrivalRejectBy || 'Atasan')} • Putaran #${t.arrivalRejectionRound || 1}):
+                  </div>
+                  <div style="color: #334155; font-weight: 600; margin-bottom: 4px;">
+                    "${escapeHtml(t.arrivalRejectReason)}"
+                  </div>
+                  <div style="font-size: 0.7rem; color: #64748b; opacity: 0.9;">
+                    Dikirim pada: ${t.arrivalRejectAt || t.tapInTime || '-'}
                   </div>
                 </div>
+              ` : ''}
+              ${t.arrivalProofPhoto ? `
+                <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0;">
+                  <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 80px; height: 56px; border-radius: 6px; object-fit: cover; cursor: pointer;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
+                  <div style="flex: 1; min-width: 0; font-size: 0.725rem; line-height: 1.4;">
+                    <div style="font-weight: 800; color: #0f172a;">Foto Bukti Real-Time Terbaru</div>
+                    <div style="color: #1e293b;">Oleh: <strong>${escapeHtml(t.arrivalProofBy || '-')}</strong></div>
+                    <div style="color: #059669; font-weight: 700;">Stempel: ${t.arrivalProofAt || '-'}</div>
+                    ${t.arrivalProofNote ? `<div style="font-style: italic; color: #475569; margin-top: 2px;">"${escapeHtml(t.arrivalProofNote)}"</div>` : ''}
+                  </div>
+                </div>
+              ` : ''}
+              ${(t.status === 'Menunggu Bukti Kedatangan' && canUploadProof) ? `
+                <button type="button" class="mobile-btn-primary" style="background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; min-height: 44px; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-shadow: 0 1px 3px rgba(220,38,38,0.25); cursor: pointer;" onclick="window.mobileCloseSheet(); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${t.id}')">
+                  <span>Upload Foto Bukti Sekarang</span>
+                </button>
               ` : ''}
             </div>
           ` : ''}
@@ -3451,11 +3533,6 @@
         <!-- Action buttons according to ticket status & role (Perubahan 5: Hanya Pemilik Karyawan yang melihat tombol aksi) -->
         ${isOwner ? `
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
-          ${t.status === 'Menunggu Bukti Kedatangan' ? `
-            <button type="button" class="mobile-btn-primary" style="background: #dc2626; border-color: #dc2626; color: #ffffff; min-height: 44px; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileCloseSheet(); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${t.id}')">
-              <span>📷 Upload Foto</span>
-            </button>
-          ` : ''}
           ${isPending ? `
             <button type="button" class="mobile-btn-secondary mobile-btn-edit-solid" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileCloseSheet(); window.mobileOpenEditSheet('${t.id}')">
               Edit Pengajuan Ini

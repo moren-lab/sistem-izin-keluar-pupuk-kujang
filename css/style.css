@@ -12569,16 +12569,16 @@ body.theme-dark .sop-num {
 }
 
 .proof-reason-alert-box {
-  background: #fff1f2;
-  border: 1.5px solid #fca5a5;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
   padding: 0.85rem 1rem;
-  color: #9f1239;
+  color: var(--text-primary, #0f172a);
 }
 
 .proof-photo-review-card {
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
   padding: 0.85rem 1rem;
 }

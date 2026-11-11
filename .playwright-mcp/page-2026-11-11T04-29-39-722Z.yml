@@ -1,0 +1,97 @@
+- generic [active] [ref=f3e1]:
+  - text: – – – – – – –
+  - generic [ref=f3e2]:
+    - banner [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f3e6]
+        - generic [ref=f3e7]:
+          - generic [ref=f3e8]: PUPUK KUJANG
+          - generic [ref=f3e9]: Perizinan Keluar Area
+      - generic [ref=f3e10]:
+        - button "Karyawan ▼" [ref=f3e11] [cursor=pointer]:
+          - generic [ref=f3e15]: Karyawan
+          - generic [ref=f3e16]: ▼
+        - button "Notifikasi" [ref=f3e18] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f3e22] [cursor=pointer]:
+          - img "BP" [ref=f3e23]
+    - main [ref=f3e24]:
+      - generic [ref=f3e25]:
+        - generic [ref=f3e26]: Selamat siang,
+        - heading "Budi Pratama, S.T." [level=2] [ref=f3e27]
+        - generic [ref=f3e28]: Karyawan
+        - generic [ref=f3e29]: Departemen Rekayasa & Pemeliharaan
+        - generic [ref=f3e30]: "Atasan: Ir. Hendra Gunawan, M.T."
+        - button "Pengajuan Saya" [ref=f3e31] [cursor=pointer]
+      - generic [ref=f3e33]:
+        - button "Ringkasan Perizinan" [ref=f3e34] [cursor=pointer]
+        - button "Total Pengajuan Izin" [ref=f3e35] [cursor=pointer]
+      - generic [ref=f3e36]:
+        - generic [ref=f3e37]:
+          - generic [ref=f3e38]: Total pengajuan
+          - generic [ref=f3e39]: "12"
+        - generic [ref=f3e40]:
+          - generic [ref=f3e41]: Izin selesai
+          - generic [ref=f3e42]: "8"
+        - generic [ref=f3e43]:
+          - generic [ref=f3e44]: Izin aktif
+          - generic [ref=f3e45]: "1"
+      - generic [ref=f3e46]:
+        - generic [ref=f3e47]:
+          - generic [ref=f3e48]:
+            - generic [ref=f3e49]: IZIN AKTIF SAYA
+            - heading "TK-20261111-457" [level=3] [ref=f3e50]
+          - generic [ref=f3e51]: Menunggu Bukti Kedatangan
+        - generic [ref=f3e52]: Dinas Kantor • Kembali ke Area
+        - generic "WSW - SWS" [ref=f3e53]
+        - generic "Keperluan dinas" [ref=f3e54]: "\"Keperluan dinas\""
+        - generic [ref=f3e55]:
+          - generic [ref=f3e56]:
+            - generic [ref=f3e57]: 👥 Tim Dinas (2 Karyawan Aktif)
+            - generic [ref=f3e58]: QR Bersama
+          - generic [ref=f3e59]:
+            - generic [ref=f3e60]: Budi Pratama, S.T. (Inisiator)
+            - generic [ref=f3e61]: Arthur Morgan, S.Tr.T.
+        - generic [ref=f3e62]:
+          - generic [ref=f3e63]:
+            - generic [ref=f3e64]: Jadwal Keluar
+            - generic [ref=f3e65]: Rabu, 11 Nov 2026, 09.00 WIB
+          - generic [ref=f3e66]:
+            - generic [ref=f3e67]: Batas Jam Kembali
+            - generic [ref=f3e68]: Rabu, 11 Nov 2026, 12.42 WIB
+        - generic [ref=f3e69]:
+          - generic [ref=f3e70]:
+            - generic [ref=f3e71]: ⚠️
+            - generic [ref=f3e72]: "Atasan (Ir. Hendra Gunawan, M.T.) menandai Belum Tiba (Putaran #1):"
+          - generic [ref=f3e73]: "\"dcc\""
+          - generic [ref=f3e74]: 🔒 Tap In Gerbang (11 Nov 2026, 10.43 WIB) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).
+        - button "📷 Upload Foto" [ref=f3e75] [cursor=pointer]
+        - link "Lihat Detail Pengajuan" [ref=f3e78] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f3e79]:
+        - heading "Pengajuan Terbaru" [level=3] [ref=f3e81]
+        - generic [ref=f3e82]:
+          - generic [ref=f3e83]:
+            - generic [ref=f3e84]:
+              - text: TK-20261111-558
+              - generic [ref=f3e85]: Menunggu Verifikasi Atasan
+            - generic [ref=f3e86]: Dinas Kantor • XS
+          - button "Detail Pengajuan" [ref=f3e87] [cursor=pointer]
+        - generic [ref=f3e92]:
+          - generic [ref=f3e93]:
+            - generic [ref=f3e94]:
+              - text: TK-20261106-443
+              - generic [ref=f3e95]: Terlambat
+            - generic [ref=f3e96]: Dinas Kantor • Area Pabrik 1B - Unit Produksi Ammonia Cikampek
+          - button "Detail Pengajuan" [ref=f3e97] [cursor=pointer]
+        - link "Semua riwayat" [ref=f3e103] [cursor=pointer]:
+          - /url: "#"
+    - navigation [ref=f3e104]:
+      - generic [ref=f3e105] [cursor=pointer]: Dashboard
+      - generic [ref=f3e112] [cursor=pointer]: Pengajuan
+      - generic [ref=f3e117] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic [ref=f3e122]: Beralih ke akun Budi Pratama, S.T.
+    - generic [ref=f3e124]: Selamat datang, Budi Pratama, S.T. (undefined)
+    - generic [ref=f3e126]: Beralih ke akun Budi Pratama, S.T.

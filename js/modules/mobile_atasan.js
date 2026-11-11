@@ -284,6 +284,12 @@
     if (!container) container = document.getElementById('mobileMainContent');
     if (!container) return;
 
+    // GUARD: Jika mobile sedang aktif sebagai Karyawan atau Security, dilarang menimpa mobileMainContent
+    const activeRole = (typeof window.getCurrentMobileRole === 'function' ? window.getCurrentMobileRole() : (window.currentMobileRole || window.currentActor));
+    if (activeRole && !['approver', 'approver2', 'atasan'].includes(activeRole)) {
+      return;
+    }
+
     if (currentAtasanTab === 'dashboard') {
       renderAtasanDashboard(container);
     } else if (currentAtasanTab === 'antrean') {
@@ -550,22 +556,22 @@
               Rencana: <strong>${formatTimeOnly(getTExitTime(t)) || '11.30 WIB'} s/d ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}</strong>${t.destination ? ` • Keperluan: <strong>${escapeHtml(t.destination)}</strong>` : ''}
             </div>
 
-            <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 10px 12px; margin: 8px 0;">
-              <div style="font-size: 0.75rem; font-weight: 800; color: #1e40af; margin-bottom: 3px;">
-                🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin: 8px 0;">
+              <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a; margin-bottom: 3px;">
+                Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
               </div>
-              <div style="font-size: 0.72rem; color: #2563eb; line-height: 1.4;">
+              <div style="font-size: 0.72rem; color: #334155; line-height: 1.4;">
                 ${t.arrivalProofPhoto
                   ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi:`
                   : `Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:`}
               </div>
               ${t.arrivalProofPhoto ? `
-                <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px;">
+                <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px; background: #ffffff; border: 1px solid #e2e8f0;">
                   <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 78px; height: 56px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
                   <div style="flex: 1; min-width: 0; font-size: 0.68rem;">
-                    <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                    <div style="font-weight: 800; color: #0f172a;">Foto Bukti Real-Time</div>
                     <div>Oleh: <strong>${t.arrivalProofBy || getTName(t)}</strong></div>
-                    <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                    <div style="color: #059669; font-weight: 700;">${t.arrivalProofAt || '-'}</div>
                   </div>
                 </div>
               ` : ''}
@@ -580,10 +586,10 @@
               </div>
             ` : `
               <div style="display: flex; gap: 8px;">
-                <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 700; background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+                <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 32px; padding: 4px 8px; font-size: 0.72rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
                   ✕ Belum Tiba
                 </button>
-                <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+                <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 32px; padding: 4px 8px; font-size: 0.72rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
                   ✓ Ya, Sudah Tiba
                 </button>
               </div>
@@ -986,23 +992,23 @@
                   <strong>Catatan Keputusan:</strong> "${escapeHtml(t.approverNote || 'Disetujui. Selesaikan tugas tepat waktu.')}"
                 </div>
 
-                <!-- Box Verifikasi Biru (Tap In Gerbang Masuk) -->
-                <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
-                  <div style="font-size: 0.75rem; font-weight: 800; color: #1e40af; margin-bottom: 3px;">
-                    🏢 Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
+                <!-- Box Verifikasi (Tap In Gerbang Masuk) -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
+                  <div style="font-size: 0.75rem; font-weight: 800; color: #0f172a; margin-bottom: 3px;">
+                    Tap In Gerbang Masuk (${t.tapInTime || t.arrivalReportedAt || t.arrivalReportedTime || 'Terkunci'}):
                   </div>
-                  <div style="font-size: 0.72rem; color: #2563eb; line-height: 1.4;">
+                  <div style="font-size: 0.72rem; color: #334155; line-height: 1.4;">
                     ${t.arrivalProofPhoto
                       ? `Karyawan mengirim ulang <strong>Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1})</strong>. Periksa foto &amp; konfirmasi kembali:`
                       : `Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:`}
                   </div>
                   ${t.arrivalProofPhoto ? `
-                    <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px;">
+                    <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-top: 8px; padding: 6px; background: #ffffff; border: 1px solid #e2e8f0;">
                       <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 82px; height: 58px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
                       <div style="flex: 1; min-width: 0; font-size: 0.68rem;">
-                        <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                        <div style="font-weight: 800; color: #0f172a;">Foto Bukti Real-Time</div>
                         <div>Oleh: <strong>${t.arrivalProofBy || getTName(t)}</strong></div>
-                        <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                        <div style="color: #059669; font-weight: 700;">${t.arrivalProofAt || '-'}</div>
                         ${t.arrivalProofNote ? `<div style="font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">"${escapeHtml(t.arrivalProofNote)}"</div>` : ''}
                       </div>
                     </div>
@@ -1018,10 +1024,10 @@
                 ` : `
                   <!-- Tombol Belum Tiba vs Ya, Sudah Tiba -->
                   <div style="display: flex; gap: 8px;">
-                    <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 700; background: #fee2e2; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+                    <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 32px; padding: 4px 8px; font-size: 0.72rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
                       ✕ Belum Tiba
                     </button>
-                    <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+                    <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 32px; padding: 4px 8px; font-size: 0.72rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
                       ✓ Ya, Sudah Tiba
                     </button>
                   </div>
@@ -1441,7 +1447,7 @@
           <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #f0fdf4; border: 1.5px solid #bbf7d0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span style="font-size: 0.7rem; color: #15803d; font-weight: 800; text-transform: uppercase;">👥 ANGGOTA TIM DINAS</span>
-              <span style="font-size: 0.675rem; font-weight: 700; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 999px;">
+              <span style="font-size: 0.675rem; font-weight: 700; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 999px;">
                 ${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif
               </span>
             </div>
@@ -1451,7 +1457,7 @@
                   <div style="font-weight: 700; color: #0f172a;">${escapeHtml(t.applicantName)}</div>
                   <div style="font-size: 0.65rem; color: #64748b;">${t.nip || '-'} • Inisiator Pengajuan</div>
                 </div>
-                <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${t.initiatorCancelled ? 'background: #fee2e2; color: #dc2626;' : 'background: #dbeafe; color: #1e40af;'}">
+                <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${t.initiatorCancelled ? 'background: #ffffff; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ffffff; color: #334155; border: 1px solid #cbd5e1;'}">
                   ${t.initiatorCancelled ? 'Batal Ikut' : 'Inisiator (Aktif)'}
                 </span>
               </div>
@@ -1461,7 +1467,7 @@
                     <div style="font-weight: 700; color: ${m.status === 'batal' ? '#94a3b8' : '#0f172a'}; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${escapeHtml(m.name)}</div>
                     <div style="font-size: 0.65rem; color: #64748b;">${m.nip || '-'} • ${m.department || 'Anggota Tim'}</div>
                   </div>
-                  <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${m.status === 'batal' ? 'background: #fee2e2; color: #dc2626;' : 'background: #dcfce7; color: #166534;'}">
+                  <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${m.status === 'batal' ? 'background: #ffffff; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ffffff; color: #334155; border: 1px solid #cbd5e1;'}">
                     ${m.status === 'batal' ? 'Batal' : 'Ikut Serta'}
                   </span>
                 </div>
@@ -1472,17 +1478,16 @@
 
         ${t.suratPerintah ? `
           <!-- Card Dokumen Surat Perintah Dinas -->
-          <div class="mobile-card" style="margin-bottom: 8px; padding: 10px 14px; background: #f0fdf4; border: 1.5px solid #86efac;">
-            <div style="font-size: 0.7rem; color: #166534; font-weight: 800; margin-bottom: 4px; text-transform: uppercase;">DOKUMEN SURAT PERINTAH DINAS</div>
+          <div class="mobile-card" style="margin-bottom: 8px; padding: 10px 14px; background: #ffffff; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.7rem; color: #334155; font-weight: 800; margin-bottom: 4px; text-transform: uppercase;">DOKUMEN SURAT PERINTAH DINAS</div>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 1.25rem;">📄</span>
                 <div>
                   <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a;">${escapeHtml(t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf')}</div>
-                  <div style="font-size: 0.675rem; color: #15803d;">${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi</div>
+                  <div style="font-size: 0.675rem; color: #64748b;">${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi</div>
                 </div>
               </div>
-              <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #86efac; color: #166534; font-weight: 700;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
+              <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-weight: 700;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
                 Lihat Berkas
               </button>
             </div>
@@ -1554,39 +1559,39 @@
           const isAssignedToMe = Boolean(t.approverName && approver.name && (t.approverName.toLowerCase().includes(approver.name.toLowerCase()) || approver.name.toLowerCase().includes(t.approverName.toLowerCase())));
           if (!isAssignedToMe) {
             return `
-              <div class="mobile-card" style="padding: 12px; margin-bottom: 14px; background: #eff6ff; border: 1.5px solid #93c5fd; text-align: center;">
-                <div style="font-size: 0.775rem; font-weight: 700; color: #1e40af;">
-                  🏢 Staf Telah Tap In di Gerbang Masuk
+              <div class="mobile-card" style="padding: 12px; margin-bottom: 14px; background: #ffffff; border: 1px solid #e2e8f0; text-align: center;">
+                <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a;">
+                  Staf Telah Tap In di Gerbang Masuk
                 </div>
-                <div style="font-size: 0.7rem; color: #3b82f6; margin-top: 4px;">
+                <div style="font-size: 0.7rem; color: #475569; margin-top: 4px;">
                   Menunggu verifikasi fisik & konfirmasi kedatangan oleh Atasan Peninjau (<strong>${t.approverName}</strong>).
                 </div>
               </div>
             `;
           }
           return `
-          <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #eff6ff; border: 1.5px solid #93c5fd;">
-            <div style="font-size: 0.825rem; font-weight: 800; color: #1e40af; margin-bottom: 4px;">
-              🏢 Tim Dinas Melaporkan Tiba di Kantor
+          <div class="mobile-card" style="padding: 14px; margin-bottom: 14px; background: #ffffff; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">
+              Tim Dinas Melaporkan Tiba di Kantor
             </div>
-            <div style="font-size: 0.725rem; color: #3b82f6; margin-bottom: 10px;">
+            <div style="font-size: 0.725rem; color: #475569; margin-bottom: 10px;">
               Personel telah tap in di gerbang (${t.tapInTime || t.arrivalReportedAt || 'Terkunci'}). Mohon verifikasi kehadiran fisik personel di ruangan kerja Anda.
             </div>
             ${t.arrivalProofPhoto ? `
-              <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; padding: 6px;">
+              <div class="proof-photo-review-card" style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; padding: 6px; background: #ffffff; border: 1px solid #e2e8f0;">
                 <img src="${t.arrivalProofPhoto}" alt="Foto Bukti" class="proof-photo-thumb" style="width: 82px; height: 58px;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')">
                 <div style="flex: 1; min-width: 0; font-size: 0.7rem;">
-                  <div style="font-weight: 800;">📸 Foto Bukti Real-Time</div>
+                  <div style="font-weight: 800; color: #0f172a;">Foto Bukti Real-Time</div>
                   <div>Oleh: <strong>${t.arrivalProofBy || getTName(t)}</strong></div>
-                  <div style="color: #059669; font-weight: 700;">🕒 ${t.arrivalProofAt || '-'}</div>
+                  <div style="color: #059669; font-weight: 700;">${t.arrivalProofAt || '-'}</div>
                 </div>
               </div>
             ` : ''}
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; padding: 8px; font-size: 0.75rem; font-weight: 600; color: #dc2626; border-color: #fca5a5;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 34px; padding: 4px 8px; font-size: 0.725rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.mobileAtasanRejectArrival('${t.id}')">
                 ✕ Belum Tiba
               </button>
-              <button type="button" class="mobile-btn-primary" style="flex: 1.3; min-height: 44px; padding: 8px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
+              <button type="button" class="mobile-btn-primary" style="flex: 1.3; min-height: 34px; padding: 4px 8px; font-size: 0.725rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.mobileAtasanConfirmArrival('${t.id}')">
                 ✓ Ya, Sudah Tiba
               </button>
             </div>

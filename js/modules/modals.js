@@ -1687,22 +1687,22 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       let membersHtml = '';
       const initiatorCancelled = Boolean(ticket.initiatorCancelled);
       membersHtml += `
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: ${initiatorCancelled ? '#f1f5f9' : '#ffffff'}; border: 1px solid ${initiatorCancelled ? '#e2e8f0' : '#bfdbfe'}; border-radius: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color, #f1f5f9);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 28px; height: 28px; border-radius: 50%; background: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
               ${(ticket.applicantName || 'I').charAt(0)}
             </div>
             <div>
               <div style="font-size: 0.8rem; font-weight: 700; color: ${initiatorCancelled ? '#94a3b8' : '#0f172a'}; ${initiatorCancelled ? 'text-decoration: line-through;' : ''}">
-                ${ticket.applicantName || 'Pemohon'} <span style="font-size: 0.675rem; font-weight: 800; background: #dbeafe; color: #1d4ed8; padding: 1px 6px; border-radius: 4px;">Inisiator</span>
+                ${ticket.applicantName || 'Pemohon'} <span style="font-size: 0.72rem; font-weight: 700; color: #d97706; margin-left: 4px;">(Inisiator)</span>
               </div>
               <div style="font-size: 0.7rem; color: #64748b;">NIP: ${ticket.applicantNip || '-'}</div>
             </div>
           </div>
           <div>
             ${initiatorCancelled
-              ? '<span style="font-size: 0.7rem; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Batal Ikut</span>'
-              : '<span style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">Aktif Ikut</span>'}
+              ? '<span style="font-size: 0.75rem; font-weight: 700; color: #dc2626;">Batal Ikut</span>'
+              : '<span style="font-size: 0.75rem; font-weight: 700; color: #16a34a;">Aktif Ikut</span>'}
           </div>
         </div>
       `;
@@ -1710,9 +1710,9 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       ticket.members.forEach(m => {
         const isBatal = m.status === 'batal';
         membersHtml += `
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: ${isBatal ? '#f8fafc' : '#ffffff'}; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color, #f1f5f9);">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">
                 ${(m.name || 'M').charAt(0)}
               </div>
               <div>
@@ -1724,8 +1724,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
             </div>
             <div>
               ${isBatal
-                ? '<span style="font-size: 0.7rem; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Batal Ikut</span>'
-                : '<span style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">Aktif Ikut</span>'}
+                ? '<span style="font-size: 0.75rem; font-weight: 700; color: #dc2626;">Batal Ikut</span>'
+                : '<span style="font-size: 0.75rem; font-weight: 700; color: #16a34a;">Aktif Ikut</span>'}
             </div>
           </div>
         `;
@@ -1749,45 +1749,30 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       const canCurrentEmployeeUpload = isEmpViewer && ticket.status === 'Menunggu Bukti Kedatangan';
       secProofDetail.innerHTML = `
         <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary, #0f172a);">
-          📷 Riwayat Verifikasi Kedatangan &amp; Foto Bukti Real-Time
+          Riwayat Verifikasi Kedatangan &amp; Foto Bukti Real-Time
         </div>
         ${ticket.arrivalRejectReason ? `
-          <div class="proof-reason-alert-box" style="padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.78rem; line-height: 1.45;">
-            <div style="font-weight: 800; margin-bottom: 2px;">⚠️ Alasan Belum Tiba (${ticket.arrivalRejectBy || 'Atasan'} • Putaran #${ticket.arrivalRejectionRound || 1}):</div>
+          <div class="proof-reason-alert-box" style="padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.78rem; line-height: 1.45; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); color: #0f172a;">
+            <div style="font-weight: 800; margin-bottom: 2px;">Alasan Belum Tiba (${ticket.arrivalRejectBy || 'Atasan'} • Putaran #${ticket.arrivalRejectionRound || 1}):</div>
             <div>"${ticket.arrivalRejectReason}"</div>
-            ${ticket.arrivalRejectAt ? `<div style="font-size: 0.7rem; opacity: 0.85; margin-top: 3px;">🕒 Dikirim pada: ${ticket.arrivalRejectAt}</div>` : ''}
+            ${ticket.arrivalRejectAt ? `<div style="font-size: 0.7rem; opacity: 0.85; margin-top: 3px; color: #64748b;">Dikirim pada: ${ticket.arrivalRejectAt}</div>` : ''}
           </div>
         ` : ''}
         ${ticket.arrivalProofPhoto ? `
-          <div class="proof-photo-review-card" style="display: flex; gap: 0.75rem; align-items: center; padding: 0.65rem 0.85rem; border-radius: 8px;">
+          <div class="proof-photo-review-card" style="display: flex; gap: 0.75rem; align-items: center; padding: 0.65rem 0.85rem; border-radius: 8px; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0);">
             <img src="${ticket.arrivalProofPhoto}" alt="Foto Bukti Kedatangan" class="proof-photo-thumb" onclick="if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${ticket.id}')" title="Klik untuk memperbesar foto">
             <div style="flex: 1; min-width: 0; font-size: 0.76rem; line-height: 1.45;">
-              <div style="font-weight: 800;">📸 Foto Bukti Real-Time Terbaru</div>
+              <div style="font-weight: 800; color: #0f172a;">Foto Bukti Real-Time Terbaru</div>
               <div>Diunggah oleh: <strong>${ticket.arrivalProofBy || ticket.applicantName || 'Karyawan'}</strong></div>
-              <div style="color: #059669; font-weight: 700;">🕒 Stempel Waktu: ${ticket.arrivalProofAt || '-'}</div>
+              <div style="color: #059669; font-weight: 700;">Stempel Waktu: ${ticket.arrivalProofAt || '-'}</div>
               ${ticket.arrivalProofNote ? `<div style="margin-top: 2px; font-style: italic;">"${ticket.arrivalProofNote}"</div>` : ''}
             </div>
           </div>
         ` : ''}
         ${canCurrentEmployeeUpload ? `
           <button type="button" class="btn-danger-solid" style="background: #dc2626; border-color: #dc2626; color: #ffffff; font-weight: 800; width: 100%; justify-content: center;" onclick="document.getElementById('modalTicketDetail').classList.remove('open'); if(typeof window.openUploadArrivalProofModal==='function') window.openUploadArrivalProofModal('${ticket.id}');">
-            📷 Upload Foto Bukti Sekarang
+            Upload Foto Bukti Sekarang
           </button>
-        ` : ''}
-        ${historyArr.length > 2 ? `
-          <details style="font-size: 0.72rem; color: #64748b; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 0.5rem 0.75rem;">
-            <summary style="cursor: pointer; font-weight: 700;">Lihat Seluruh Putaran Verifikasi (${historyArr.length} catatan)</summary>
-            <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.45rem;">
-              ${historyArr.map((h, idx) => `
-                <div style="border-top: 1px dashed var(--border-color, #cbd5e1); padding-top: 0.35rem;">
-                  <strong>Putaran #${h.round || 1} — ${h.type === 'proof_submitted' ? '📸 Foto Dikirim' : '⚠️ Belum Tiba'}</strong> (${h.time || '-'}) oleh ${h.by || '-'}
-                  ${h.reason ? `<div>Alasan: "${h.reason}"</div>` : ''}
-                  ${h.note ? `<div>Catatan: "${h.note}"</div>` : ''}
-                  ${h.photoDataUrl ? `<button type="button" class="btn-outline" style="margin-top: 3px; padding: 2px 8px; font-size: 0.68rem;" onclick="if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${ticket.id}', ${idx})">🖼️ Lihat Foto Putaran #${h.round || 1}</button>` : ''}
-                </div>
-              `).join('')}
-            </div>
-          </details>
         ` : ''}
       `;
     } else {
@@ -1810,7 +1795,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
         detailSuratMeta.textContent = `${kbSize} KB • Dokumen Perintah Resmi Unit Kerja`;
       }
       if (detailSuratIcon) {
-        detailSuratIcon.textContent = (ticket.suratPerintah.type && ticket.suratPerintah.type.includes('image')) ? '🖼️' : '📑';
+        detailSuratIcon.textContent = (ticket.suratPerintah.type && ticket.suratPerintah.type.includes('image')) ? 'IMG' : 'PDF';
       }
       const btnViewSurat = document.getElementById('btnViewSuratPerintah');
       if (btnViewSurat) {
@@ -2029,11 +2014,36 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
           dotColor = '#e11d48';
         }
 
+        let photoUrl = item.photoDataUrl || '';
+        let historyIdx = -1;
+        if (evLower.includes('foto bukti') || evLower.includes('bukti kedatangan')) {
+          const roundMatch = (item.event || '').match(/Putaran\s*#?(\d+)/i);
+          const roundNum = roundMatch ? parseInt(roundMatch[1], 10) : 1;
+          if (!photoUrl && Array.isArray(ticket.arrivalVerificationHistory)) {
+            const hIndex = ticket.arrivalVerificationHistory.findIndex(h => h.round === roundNum && h.photoDataUrl);
+            if (hIndex >= 0) {
+              photoUrl = ticket.arrivalVerificationHistory[hIndex].photoDataUrl;
+              historyIdx = hIndex;
+            }
+          }
+          if (!photoUrl && ticket.arrivalProofPhoto) {
+            photoUrl = ticket.arrivalProofPhoto;
+          }
+        }
+
         return `
           <div class="figma-timeline-item">
             <div class="figma-timeline-dot" style="background: ${dotColor};"></div>
-            <div class="figma-timeline-top">
-              <span class="figma-timeline-event" style="${idx === 0 ? 'font-weight: 800; color: #0f172a;' : ''}">${item.event}</span>
+            <div class="figma-timeline-top" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="figma-timeline-event" style="${idx === 0 ? 'font-weight: 800; color: #0f172a;' : ''}">${item.event}</span>
+                ${photoUrl ? `
+                  <span style="display: inline-flex; align-items: center; gap: 5px; cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff;" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${ticket.id}', ${historyIdx >= 0 ? historyIdx : "''"})" title="Klik untuk lihat foto bukti">
+                    <img src="${photoUrl}" alt="Foto Bukti" style="width: 24px; height: 18px; border-radius: 2px; object-fit: cover; vertical-align: middle;">
+                    <span style="font-size: 0.7rem; color: #2563eb; font-weight: 700;">Lihat Foto</span>
+                  </span>
+                ` : ''}
+              </div>
               <span class="figma-timeline-time">${item.time}</span>
             </div>
             <div class="figma-timeline-actor">${item.by || 'Sistem'}</div>
@@ -2322,6 +2332,9 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       };
 
       btnDetailRejectArrival.style.display = 'inline-flex';
+      btnDetailRejectArrival.style.background = '#dc2626';
+      btnDetailRejectArrival.style.color = '#ffffff';
+      btnDetailRejectArrival.style.borderColor = '#dc2626';
       btnDetailRejectArrival.textContent = '✕ Belum Tiba';
       btnDetailRejectArrival.onclick = () => {
         if (modalTicketDetail) modalTicketDetail.classList.remove('open');

@@ -1,0 +1,141 @@
+- generic [ref=f2e1]:
+  - text: – – – – – – –
+  - generic [ref=f2e2]:
+    - banner [ref=f2e3]:
+      - generic [ref=f2e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f2e6]
+        - generic [ref=f2e7]:
+          - generic [ref=f2e8]: PUPUK KUJANG
+          - generic [ref=f2e9]: Perizinan Keluar Area
+      - generic [ref=f2e10]:
+        - button "Karyawan ▼" [ref=f2e11] [cursor=pointer]:
+          - generic [ref=f2e15]: Karyawan
+          - generic [ref=f2e16]: ▼
+        - button "Notifikasi" [ref=f2e18] [cursor=pointer]
+        - button "Menu Akun & Keluar SAKTI" [ref=f2e22] [cursor=pointer]:
+          - img "BP" [ref=f2e23]
+    - main [ref=f2e24]:
+      - generic [ref=f2e390]:
+        - generic [ref=f2e391]:
+          - generic [ref=f2e392]:
+            - generic [ref=f2e393]: IZIN AKTIF SAYA
+            - heading "TK-20261111-457" [level=3] [ref=f2e394]
+          - generic [ref=f2e395]: Menunggu Bukti Kedatangan
+        - generic [ref=f2e396]: Dinas Kantor • Kembali ke Area
+        - generic "WSW - SWS" [ref=f2e397]
+        - generic "Keperluan dinas" [ref=f2e398]: "\"Keperluan dinas\""
+        - generic [ref=f2e399]:
+          - generic [ref=f2e400]:
+            - generic [ref=f2e401]: 👥 Tim Dinas (2 Karyawan Aktif)
+            - generic [ref=f2e402]: QR Bersama
+          - generic [ref=f2e403]:
+            - generic [ref=f2e404]: Budi Pratama, S.T. (Inisiator)
+            - generic [ref=f2e405]: Arthur Morgan, S.Tr.T.
+        - generic [ref=f2e406]:
+          - generic [ref=f2e407]:
+            - generic [ref=f2e408]: Jadwal Keluar
+            - generic [ref=f2e409]: Rabu, 11 Nov 2026, 09.00 WIB
+          - generic [ref=f2e410]:
+            - generic [ref=f2e411]: Batas Jam Kembali
+            - generic [ref=f2e412]: Rabu, 11 Nov 2026, 12.42 WIB
+        - generic [ref=f2e413]:
+          - generic [ref=f2e414]:
+            - generic [ref=f2e415]: ⚠️
+            - generic [ref=f2e416]: "Atasan (Ir. Hendra Gunawan, M.T.) menandai Belum Tiba (Putaran #1):"
+          - generic [ref=f2e417]: "\"dcc\""
+          - generic [ref=f2e418]: 🔒 Tap In Gerbang (11 Nov 2026, 10.43 WIB) tetap terkunci. Wajib unggah foto bukti dari galeri (dilengkapi stempel waktu real-time).
+        - button "📷 Upload Foto" [ref=f2e419] [cursor=pointer]
+        - link "Lihat Detail Pengajuan" [active] [ref=f2e422] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=f2e423]:
+        - heading "Kronologi tercatat" [level=3] [ref=f2e424]
+        - generic [ref=f2e425]:
+          - generic [ref=f2e430]:
+            - generic [ref=f2e431]: 11 Nov 2026, 09.15 WIB
+            - generic [ref=f2e432]: Scan Out Gerbang
+            - generic [ref=f2e433]: Meninggalkan area pabrik.
+          - generic [ref=f2e438]:
+            - generic [ref=f2e439]: 11 Nov 2026, 11.30 WIB
+            - generic [ref=f2e440]: Pengajuan Perpanjangan
+            - generic [ref=f2e441]: Mengajukan perpanjangan hingga 14.00 WIB.
+          - generic [ref=f2e446]:
+            - generic [ref=f2e447]: 11 Nov 2026, 08.05 WIB
+            - generic [ref=f2e448]: Perpanjangan Waktu Gugur Otomatis
+            - generic [ref=f2e449]: Pengajuan perpanjangan waktu otomatis gugur karena personel telah Tap In kembali ke pabrik.
+          - generic [ref=f2e453]:
+            - generic [ref=f2e454]: 11 Nov 2026, 08.05 WIB
+            - generic [ref=f2e455]: Tap In Gerbang Masuk
+            - generic [ref=f2e456]: Tap In kartu akses di Pos 1 Gerbang Utama oleh Budi Pratama, S.T.. Jam kepulangan terkunci pada 11 Nov 2026, 08.05 WIB. Menunggu verifikasi kehadiran fisik oleh Atasan.
+    - navigation [ref=f2e102]:
+      - generic [ref=f2e457] [cursor=pointer]: Dashboard
+      - generic [ref=f2e464] [cursor=pointer]: Pengajuan
+      - generic [ref=f2e469] [cursor=pointer]: Riwayat
+    - generic [ref=f2e211]:
+      - generic [ref=f2e475]:
+        - generic [ref=f2e476]:
+          - text: RINCIAN TIKET
+          - heading "TK-20261111-457" [level=3] [ref=f2e477]
+        - button "Tutup" [ref=f2e478] [cursor=pointer]: ✕
+      - generic [ref=f2e479]:
+        - generic [ref=f2e480]:
+          - generic [ref=f2e481]:
+            - generic [ref=f2e482]: Budi Pratama, S.T.
+            - generic [ref=f2e483]: Dinas Kantor • Kembali ke Area
+          - generic [ref=f2e484]: Menunggu Bukti Kedatangan
+        - generic [ref=f2e485]:
+          - button "Informasi Tiket" [ref=f2e486] [cursor=pointer]
+          - button "Riwayat Aktivitas" [ref=f2e487] [cursor=pointer]
+        - generic [ref=f2e488]:
+          - generic [ref=f2e489]:
+            - generic [ref=f2e490]: INFORMASI KARYAWAN
+            - generic [ref=f2e491]:
+              - strong [ref=f2e492]: "Nama:"
+              - text: Budi Pratama, S.T.
+              - strong [ref=f2e493]: "NIP:"
+              - text: PK-2024-8841
+              - strong [ref=f2e494]: "Departemen:"
+              - text: Departemen Rekayasa & Pemeliharaan
+              - strong [ref=f2e495]: "Atasan:"
+              - text: Ir. Hendra Gunawan, M.T.
+          - generic [ref=f2e496]:
+            - generic [ref=f2e497]: KEPERLUAN IZIN
+            - generic [ref=f2e498]:
+              - generic [ref=f2e499]:
+                - generic [ref=f2e500]: Tujuan Keluar
+                - generic [ref=f2e501]: WSW - SWS
+              - generic [ref=f2e502]:
+                - generic [ref=f2e503]: Alasan Keperluan
+                - generic [ref=f2e504]: "\"Keperluan dinas\""
+          - generic [ref=f2e505]:
+            - generic [ref=f2e506]: WAKTU KELUAR & KEMBALI
+            - generic [ref=f2e507]:
+              - generic [ref=f2e508]:
+                - generic [ref=f2e509]: Waktu Keluar
+                - generic [ref=f2e510]: Rabu, 11 Nov 2026, 10.43 WIB (Aktual)
+              - generic [ref=f2e511]:
+                - generic [ref=f2e512]: Batas Kembali
+                - generic [ref=f2e513]: Rabu, 11 Nov 2026, 12.42 WIB
+          - generic [ref=f2e514]:
+            - generic [ref=f2e515]: 👥 Tim Dinas (2 Orang)
+            - generic [ref=f2e516]:
+              - generic [ref=f2e517]:
+                - generic [ref=f2e518]:
+                  - strong [ref=f2e519]: Budi Pratama, S.T.
+                  - text: (PK-2024-8841)
+                - generic [ref=f2e520]: Inisiator
+              - generic [ref=f2e521]:
+                - generic [ref=f2e522]:
+                  - strong [ref=f2e523]: Arthur Morgan, S.Tr.T.
+                  - text: (PK-2024-8842)
+                - generic [ref=f2e524]: Aktif
+          - generic [ref=f2e525]:
+            - generic [ref=f2e526]:
+              - generic [ref=f2e527]: 📷
+              - generic [ref=f2e528]: Riwayat Verifikasi Kedatangan & Foto Bukti Real-Time
+            - generic [ref=f2e529]:
+              - generic [ref=f2e530]: "⚠️ Alasan Belum Tiba (Ir. Hendra Gunawan, M.T. • Putaran #1):"
+              - generic [ref=f2e531]: "\"dcc\""
+              - generic [ref=f2e532]: "🕒 Dikirim pada: Rabu, 11 Nov 2026, 10.43.18 WIB"
+            - button "📷 Upload Foto Bukti Sekarang" [ref=f2e533] [cursor=pointer]
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

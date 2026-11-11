@@ -267,6 +267,12 @@
     if (!container) container = document.getElementById('mobileMainContent');
     if (!container) return;
 
+    // GUARD: Jika mobile sedang aktif BUKAN security, dilarang menimpa mobileMainContent
+    const activeRole = (typeof window.getCurrentMobileRole === 'function' ? window.getCurrentMobileRole() : (window.currentMobileRole || window.currentActor));
+    if (activeRole && activeRole !== 'security') {
+      return;
+    }
+
     // Gracefully stop camera if leaving scanner
     if (currentSecurityTab !== 'scanner' && isMobileCameraActive) {
       stopMobileCameraScanner();

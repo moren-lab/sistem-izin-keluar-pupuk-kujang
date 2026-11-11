@@ -1,0 +1,94 @@
+- generic [active] [ref=f3e1]:
+  - text: – – – – – – –
+  - generic [ref=f3e2]:
+    - banner [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f3e6]
+        - generic [ref=f3e7]:
+          - generic [ref=f3e8]: PUPUK KUJANG
+          - generic [ref=f3e9]: Perizinan Keluar Area • Atasan 1
+      - generic [ref=f3e10]:
+        - button "Atasan 1 ▼" [ref=f3e128] [cursor=pointer]:
+          - generic [ref=f3e15]: Atasan 1
+          - generic [ref=f3e16]: ▼
+        - button "Notifikasi" [ref=f3e18] [cursor=pointer]:
+          - generic [ref=f3e129]: "7"
+        - button "Menu Akun & Keluar SAKTI" [ref=f3e22] [cursor=pointer]:
+          - img "HG" [ref=f3e130]
+    - main [ref=f3e24]:
+      - textbox "Cari nama bawahan, NIP, nomor tiket..." [ref=f3e361]
+      - generic [ref=f3e362]:
+        - generic [ref=f3e363]: 2 tiket pelacakan (2 aktif • 0 selesai)
+        - generic [ref=f3e364]:
+          - button "Hapus Semua Riwayat Selesai" [ref=f3e365] [cursor=pointer]
+          - button "Filter Pelacakan" [ref=f3e368] [cursor=pointer]
+      - generic [ref=f3e371]:
+        - generic [ref=f3e372]:
+          - generic [ref=f3e373]:
+            - heading "Pelacakan Karyawan Aktif" [level=3] [ref=f3e374]
+            - generic [ref=f3e375]: "2"
+          - generic [ref=f3e376]: Prioritas Pantau
+        - generic [ref=f3e377]:
+          - generic [ref=f3e378]:
+            - generic [ref=f3e379]:
+              - generic [ref=f3e380]: Budi Pratama, S.T.
+              - generic [ref=f3e381]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f3e382]: Selesai (Terlambat)
+          - generic [ref=f3e383]: TK-20261106-443
+          - generic [ref=f3e384]: Terlambat • Melebihi batas jam kembali
+          - generic [ref=f3e385]:
+            - generic [ref=f3e386]:
+              - generic [ref=f3e387]: Rencana keluar
+              - generic [ref=f3e388]: 22.00 WIB
+            - generic [ref=f3e389]:
+              - generic [ref=f3e390]: Scan Out aktual
+              - generic [ref=f3e391]: 20.19 WIB
+            - generic [ref=f3e392]:
+              - generic [ref=f3e393]: Estimasi kembali
+              - generic [ref=f3e394]: 13.16 WIB
+            - generic [ref=f3e395]:
+              - generic [ref=f3e396]: Tap In aktual
+              - generic [ref=f3e397]: —
+            - generic [ref=f3e398]:
+              - generic [ref=f3e399]: "👥 Tim Dinas:"
+              - generic [ref=f3e400]:
+                - generic [ref=f3e401]: Budi Pratama, S.T. (Inisiator)
+                - generic [ref=f3e402]: Arthur Morgan
+          - button "Lihat Detail Pengajuan" [ref=f3e404] [cursor=pointer]
+        - generic [ref=f3e409]:
+          - generic [ref=f3e410]:
+            - generic [ref=f3e411]:
+              - generic [ref=f3e412]: Budi Pratama, S.T.
+              - generic [ref=f3e413]: PK-2024-8841 • Departemen Rekayasa & Pemeliharaan
+            - generic [ref=f3e414]: Selesai (Terlambat)
+          - generic [ref=f3e415]: TK-20261106-901
+          - generic [ref=f3e416]: Terlambat • Melebihi batas jam kembali
+          - generic [ref=f3e417]:
+            - generic [ref=f3e418]:
+              - generic [ref=f3e419]: Rencana keluar
+              - generic [ref=f3e420]: 09.00 WIB
+            - generic [ref=f3e421]:
+              - generic [ref=f3e422]: Scan Out aktual
+              - generic [ref=f3e423]: 09.05 WIB
+            - generic [ref=f3e424]:
+              - generic [ref=f3e425]: Estimasi kembali
+              - generic [ref=f3e426]: 14.30 WIB
+            - generic [ref=f3e427]:
+              - generic [ref=f3e428]: Tap In aktual
+              - generic [ref=f3e429]: —
+          - button "Lihat Detail Pengajuan" [ref=f3e431] [cursor=pointer]
+      - generic [ref=f3e436]: Penyelesaian
+      - generic [ref=f3e438]:
+        - generic [ref=f3e439]:
+          - generic [ref=f3e440]:
+            - heading "Riwayat Penyelesaian Karyawan" [level=3] [ref=f3e441]
+            - generic [ref=f3e442]: "0"
+          - generic [ref=f3e443]: Selesai / Final
+        - generic [ref=f3e444]: Belum ada catatan riwayat perizinan selesai pada periode ini.
+    - navigation [ref=f3e104]:
+      - generic [ref=f3e445] [cursor=pointer]: Dashboard
+      - generic [ref=f3e452] [cursor=pointer]: Antrean
+      - generic [ref=f3e457] [cursor=pointer]: Pelacakan
+      - generic [ref=f3e462] [cursor=pointer]: Riwayat
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

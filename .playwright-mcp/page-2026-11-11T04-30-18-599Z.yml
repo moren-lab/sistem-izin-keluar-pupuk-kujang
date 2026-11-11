@@ -1,0 +1,150 @@
+- generic [ref=f3e1]:
+  - text: – – – – – – –
+  - generic [ref=f3e2]:
+    - banner [ref=f3e3]:
+      - generic [ref=f3e4]:
+        - img "Logo PT Pupuk Kujang" [ref=f3e6]
+        - generic [ref=f3e7]:
+          - generic [ref=f3e8]: PUPUK KUJANG
+          - generic [ref=f3e9]: Perizinan Keluar Area • Atasan 1
+      - generic [ref=f3e10]:
+        - button "Atasan 1 ▼" [ref=f3e128] [cursor=pointer]:
+          - generic [ref=f3e15]: Atasan 1
+          - generic [ref=f3e16]: ▼
+        - button "Notifikasi" [ref=f3e18] [cursor=pointer]:
+          - generic [ref=f3e129]: "7"
+        - button "Menu Akun & Keluar SAKTI" [ref=f3e22] [cursor=pointer]:
+          - img "HG" [ref=f3e130]
+    - main [ref=f3e24]:
+      - generic [ref=f3e131]:
+        - button "Izin Baru (2)" [ref=f3e132] [cursor=pointer]
+        - button "Perpanjangan (0)" [ref=f3e133] [cursor=pointer]
+      - generic [ref=f3e134]:
+        - generic [ref=f3e135]: 2 izin baru menunggu persetujuan
+        - button "Filter" [ref=f3e136] [cursor=pointer]
+      - generic [ref=f3e140]:
+        - generic [ref=f3e141]:
+          - generic [ref=f3e142]:
+            - generic [ref=f3e143]: TK-20261111-457
+            - generic [ref=f3e144]: "Diajukan: 11 Nov 2026, 09.00 WIB"
+          - generic [ref=f3e145]: Menunggu VerifikasiAtasan
+        - generic [ref=f3e147]:
+          - generic [ref=f3e148]:
+            - generic [ref=f3e149]: 👨‍💼
+            - generic [ref=f3e150]:
+              - generic [ref=f3e151]: Budi Pratama, S.T.
+              - generic [ref=f3e152]: "NIP: PK-2024-8841"
+              - generic [ref=f3e153]: Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f3e154]:
+            - generic [ref=f3e155]: Dinas Kantor
+            - generic [ref=f3e156]: 👥 Tim (2)
+        - generic [ref=f3e157]:
+          - generic [ref=f3e158]:
+            - generic [ref=f3e159]: Tujuan keluar
+            - strong [ref=f3e160]: WSW - SWS
+          - generic [ref=f3e161]:
+            - generic [ref=f3e162]: Keperluan
+            - strong [ref=f3e163]: Keperluan dinas
+          - generic [ref=f3e164]:
+            - generic [ref=f3e165]: Rencana waktu
+            - generic [ref=f3e166]:
+              - strong [ref=f3e167]: Rabu, 11 Nov 2026, 09.00 WIB
+              - text: 09.00 WIB s/d 12.42 WIB
+        - generic [ref=f3e168]:
+          - generic [ref=f3e169]: "👥 Rombongan Dinas (2 Orang Aktif):"
+          - generic [ref=f3e170]:
+            - generic [ref=f3e171]: 👑 Budi Pratama, S.T. (Inisiator)
+            - generic [ref=f3e172]: Arthur Morgan, S.Tr.T.
+        - generic [ref=f3e173]:
+          - strong [ref=f3e174]: "Catatan Keputusan:"
+          - text: "\"Disetujui.\""
+        - generic [ref=f3e175]:
+          - generic [ref=f3e176]: "🏢 Tap In Gerbang Masuk (11 Nov 2026, 10.43 WIB):"
+          - generic [ref=f3e177]: "Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:"
+        - generic [ref=f3e178]:
+          - button "✕ Belum Tiba" [ref=f3e179] [cursor=pointer]
+          - button "✓ Ya, Sudah Tiba" [ref=f3e180] [cursor=pointer]
+        - button "Detail Pengajuan" [ref=f3e182] [cursor=pointer]
+      - generic [ref=f3e184]:
+        - generic [ref=f3e185]:
+          - generic [ref=f3e186]:
+            - generic [ref=f3e187]: TK-20261111-558
+            - generic [ref=f3e188]: "Diajukan: 11 Nov 2026, 11.26 WIB"
+          - generic [ref=f3e189]: Menunggu VerifikasiAtasan
+        - generic [ref=f3e191]:
+          - generic [ref=f3e192]:
+            - generic [ref=f3e193]: 👨‍💼
+            - generic [ref=f3e194]:
+              - generic [ref=f3e195]: Budi Pratama, S.T.
+              - generic [ref=f3e196]: "NIP: PK-2024-8841"
+              - generic [ref=f3e197]: Departemen Rekayasa & Pemeliharaan
+          - generic [ref=f3e198]:
+            - generic [ref=f3e199]: Dinas Kantor
+            - generic [ref=f3e200]: 👥 Tim (2)
+        - generic [ref=f3e201]:
+          - generic [ref=f3e202]:
+            - generic [ref=f3e203]: Tujuan keluar
+            - strong [ref=f3e204]: XS
+          - generic [ref=f3e205]:
+            - generic [ref=f3e206]: Keperluan
+            - strong [ref=f3e207]: XSX
+          - generic [ref=f3e208]:
+            - generic [ref=f3e209]: Rencana waktu
+            - generic [ref=f3e210]:
+              - strong [ref=f3e211]: Rabu, 11 Nov 2026, 12.26 WIB
+              - text: 12.26 WIB s/d 13.56 WIB
+        - generic [ref=f3e212]:
+          - generic [ref=f3e213]:
+            - generic [ref=f3e214]: 📄
+            - generic [ref=f3e215]: Tiket-QR-TK-20261111-558.pdf
+          - button "👁️ Lihat Dokumen" [ref=f3e216] [cursor=pointer]
+        - generic [ref=f3e217]:
+          - generic [ref=f3e218]: "👥 Rombongan Dinas (2 Orang Aktif):"
+          - generic [ref=f3e219]:
+            - generic [ref=f3e220]: 👑 Budi Pratama, S.T. (Inisiator)
+            - generic [ref=f3e221]: Arthur Morgan, S.Tr.T.
+        - generic [ref=f3e222]:
+          - strong [ref=f3e223]: "Catatan Keputusan:"
+          - text: "\"Disetujui. Selesaikan tugas tepat waktu.\""
+        - generic [ref=f3e224]:
+          - generic [ref=f3e225]: "🏢 Tap In Gerbang Masuk (11 Nov 2026, 11.26 WIB):"
+          - generic [ref=f3e226]: "Personel tim dinas telah tap in di gerbang. Periksa kehadiran fisik di ruangan kerja dan berikan konfirmasi:"
+        - generic [ref=f3e227]:
+          - button "✕ Belum Tiba" [ref=f3e228] [cursor=pointer]
+          - button "✓ Ya, Sudah Tiba" [ref=f3e229] [cursor=pointer]
+        - button "Detail Pengajuan" [ref=f3e231] [cursor=pointer]
+    - navigation [ref=f3e104]:
+      - generic [ref=f3e233] [cursor=pointer]: Dashboard
+      - generic [ref=f3e240] [cursor=pointer]: Antrean
+      - generic [ref=f3e245] [cursor=pointer]: Pelacakan
+      - generic [ref=f3e250] [cursor=pointer]: Riwayat
+  - generic [ref=f3e255]:
+    - generic [ref=f3e256]:
+      - generic [ref=f3e257]:
+        - heading "Personel Belum Tiba — Minta Bukti Foto" [level=3] [ref=f3e258]
+        - paragraph [ref=f3e259]: Wajib mengisi alasan agar karyawan mengunggah foto bukti kedatangan
+      - button "✕" [ref=f3e260] [cursor=pointer]
+    - generic [ref=f3e261]:
+      - generic [ref=f3e262]:
+        - generic [ref=f3e263]:
+          - text: Tiket
+          - strong [ref=f3e264]: "#TK-20261111-457"
+          - text: —
+          - strong [ref=f3e265]: Budi Pratama, S.T.
+        - generic [ref=f3e266]:
+          - text: ⏱️ Catatan Tap In Gerbang (
+          - strong [ref=f3e267]: 11 Nov 2026, 10.43 WIB
+          - text: ) tetap
+          - strong [ref=f3e268]: terkunci
+          - text: sesuai waktu tiba di gerbang.
+      - generic [ref=f3e269]:
+        - generic [ref=f3e270]:
+          - text: Alasan / Keterangan Atasan
+          - generic [ref=f3e271]: "* Wajib diisi"
+        - textbox "Alasan / Keterangan Atasan * Wajib diisi" [active] [ref=f3e272]:
+          - /placeholder: "Contoh: Personel belum terlihat di meja/area unit kerja, mohon unggah foto bukti kedatangan saat ini..."
+    - generic [ref=f3e273]:
+      - button "Batal" [ref=f3e274] [cursor=pointer]
+      - button "Kirim Alasan & Minta Foto Bukti" [ref=f3e275] [cursor=pointer]
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"

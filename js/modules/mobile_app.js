@@ -25,6 +25,7 @@
     } else {
       currentMobileRole = 'karyawan';
     }
+    window.currentMobileRole = currentMobileRole;
 
     renderMobileShell();
     renderActiveView();
@@ -440,6 +441,7 @@
     }
 
     currentMobileRole = role;
+    window.currentMobileRole = currentMobileRole;
     currentMobileTab = 'dashboard';
 
     // Also inform desktop switchRole if exists
@@ -470,6 +472,7 @@
     } else {
       currentMobileRole = 'karyawan';
     }
+    window.currentMobileRole = currentMobileRole;
     currentMobileTab = 'dashboard';
     renderMobileShell();
     renderActiveView();
@@ -1003,6 +1006,9 @@
 
   // Expose global render active view
   window.renderMobileActiveView = renderActiveView;
+  window.getCurrentMobileRole = function () {
+    return currentMobileRole || window.currentMobileRole || window.currentActor || 'karyawan';
+  };
 
   // Expose global initializer
   window.initMobileApp = initMobileApp;
