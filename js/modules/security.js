@@ -551,11 +551,11 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
               <!-- Realization Summary Row (Scan Out & Tap In) -->
               <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem;">
-                ${t.scanOutTime ? `<div style="color: #065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
+                ${t.scanOutTime ? `<div style="color: var(--text-secondary, #475569);"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
                 ${t.scanInTime ? (() => {
                   const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
                   const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
-                  return `<div style="color: ${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight: ${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${cleanScanIn}${isLateCompleted ? ` <span style="color: #b45309; font-weight: 700;">[Terlambat ${lateDuration}]</span>` : ''}</div>`;
+                  return `<div style="color: var(--text-secondary, #475569); font-weight: ${isLateCompleted ? '600' : 'normal'};"><strong>Tap In:</strong> ${cleanScanIn}${isLateCompleted ? ` <span>[Terlambat ${lateDuration}]</span>` : ''}</div>`;
                 })() : ''}
                 ${(!t.scanOutTime && !t.scanInTime) ? `<div style="color: var(--text-muted);">Belum ada catatan pemindaian gerbang</div>` : ''}
               </div>

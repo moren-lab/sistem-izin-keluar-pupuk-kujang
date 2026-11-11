@@ -386,12 +386,13 @@ body.theme-dark .figma-hero-banner {
 }
 body.theme-dark .figma-hero-banner.approver-theme,
 body.theme-dark .dashboard-hero-banner.approver-theme {
-  background: linear-gradient(135deg, #0d223c 0%, #133357 50%, #08192d 100%) !important;
-  border: 1px solid #1b4577 !important;
+  background: linear-gradient(135deg, #0d1017 0%, #141923 55%, #090c12 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.32) !important;
 }
-body.theme-dark .figma-hero-banner.security-theme {
-  background: linear-gradient(135deg, #0a2d39 0%, #0f3f50 50%, #061f28 100%) !important;
-  border: 1px solid #14566b !important;
+body.theme-dark .figma-hero-banner.security-theme,
+body.theme-dark .dashboard-hero-banner.security-theme {
+  background: linear-gradient(135deg, #0b1b2b 0%, #12263a 50%, #08131f 100%) !important;
+  border: 1px solid #1b3652 !important;
 }
 
 body.theme-dark .dashboard-theme-toggle-btn {
@@ -723,6 +724,38 @@ body.theme-dark .tag-badge {
   color: #cbd5e1 !important;
 }
 body.theme-dark .figma-tag-badge.badge-dinas,
+body.theme-dark .figma-tag-badge.badge-pribadi,
+body.theme-dark .card-history-item .tag-badge,
+body.theme-dark .card-history-item .tag-badge.tag-dinas,
+body.theme-dark .card-history-item .tag-badge.tag-pribadi {
+  background: rgba(148, 163, 184, 0.12) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
+}
+.card-history-item .tag-badge.tag-dinas,
+.card-history-item .tag-badge.tag-pribadi {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0;
+}
+.card-history-item .approver-alert-banner,
+.card-history-item .approver-alert-banner.reassign-away,
+.card-history-item .approver-alert-banner.reassign-to,
+.card-history-item .approver-alert-banner.extension,
+.card-history-item .approver-alert-banner.emergency {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+body.theme-dark .card-history-item .approver-alert-banner,
+body.theme-dark .card-history-item .approver-alert-banner.reassign-away,
+body.theme-dark .card-history-item .approver-alert-banner.reassign-to,
+body.theme-dark .card-history-item .approver-alert-banner.extension,
+body.theme-dark .card-history-item .approver-alert-banner.emergency {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
+}
 body.theme-dark .tag-badge.tag-dinas,
 body.theme-dark .figma-tag-badge[style*="background: #eff6ff"],
 body.theme-dark .figma-tag-badge[style*="background:#eff6ff"] {
@@ -730,7 +763,6 @@ body.theme-dark .figma-tag-badge[style*="background:#eff6ff"] {
   border: 1px solid rgba(16, 185, 129, 0.35) !important;
   color: #34d399 !important;
 }
-body.theme-dark .figma-tag-badge.badge-pribadi,
 body.theme-dark .tag-badge.tag-pribadi,
 body.theme-dark .figma-tag-badge[style*="background: #fefce8"],
 body.theme-dark .figma-tag-badge[style*="background:#fefce8"] {
@@ -780,34 +812,34 @@ body.theme-dark .detail-schedule-row {
   border-top-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Note Banners (Status alert box inside card) */
+/* Note Banners (Monochrome neutral in Riwayat cards) */
 body.theme-dark .figma-note-banner,
-body.theme-dark .figma-grid-item [style*="background: #f0fdf4"],
-body.theme-dark .figma-grid-item [style*="background:#f0fdf4"] {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border: 1px solid rgba(16, 185, 129, 0.35) !important;
-  color: #34d399 !important;
-}
 body.theme-dark .figma-note-banner.note-warning,
-body.theme-dark .figma-grid-item [style*="background: #fffbeb"],
-body.theme-dark .figma-grid-item [style*="background:#fffbeb"] {
-  background: rgba(245, 158, 11, 0.12) !important;
-  border: 1px solid rgba(245, 158, 11, 0.35) !important;
-  color: #fbbf24 !important;
-}
 body.theme-dark .figma-note-banner.note-danger,
-body.theme-dark .figma-grid-item [style*="background: #fef2f2"],
-body.theme-dark .figma-grid-item [style*="background:#fef2f2"] {
-  background: rgba(239, 68, 68, 0.12) !important;
-  border: 1px solid rgba(239, 68, 68, 0.35) !important;
-  color: #f87171 !important;
-}
 body.theme-dark .figma-note-banner.note-muted,
 body.theme-dark .figma-grid-item [style*="background: #f8fafc"],
 body.theme-dark .figma-grid-item [style*="background:#f8fafc"] {
   background: rgba(148, 163, 184, 0.1) !important;
   border: 1px solid rgba(148, 163, 184, 0.25) !important;
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-grid-item [style*="background: #f0fdf4"],
+body.theme-dark .figma-grid-item [style*="background:#f0fdf4"] {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-grid-item [style*="background: #fffbeb"],
+body.theme-dark .figma-grid-item [style*="background:#fffbeb"] {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
+}
+body.theme-dark .figma-grid-item [style*="background: #fef2f2"],
+body.theme-dark .figma-grid-item [style*="background:#fef2f2"] {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
 }
 
 /* Status text coloring */
@@ -2666,7 +2698,9 @@ body {
 }
 
 .role-switch-btn.active.approver {
-  background: #0f766e;
+  background: #12161f;
+  color: #fef3c7;
+  border: 1px solid #d4af37;
 }
 
 .role-switch-btn.active.security {
@@ -4179,7 +4213,7 @@ body.modal-open {
   background: #f8fafc;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.75rem;
   flex-shrink: 0;
 }
@@ -4695,11 +4729,12 @@ body.modal-open {
 }
 
 .dashboard-hero-banner.approver-theme {
-  background: linear-gradient(135deg, #0f766e 0%, #1e293b 100%);
+  background: #12161f;
+  border: 1px solid rgba(212, 175, 55, 0.35);
 }
 
 .dashboard-hero-banner.security-theme {
-  background: linear-gradient(135deg, #0369a1 0%, #0f172a 100%);
+  background: #12263a;
 }
 
 .dashboard-hero-content {
@@ -4737,11 +4772,11 @@ body.modal-open {
 }
 
 .dashboard-hero-banner.approver-theme .dashboard-hero-text p {
-  color: #99f6e4;
+  color: #d4b86a;
 }
 
 .dashboard-hero-banner.security-theme .dashboard-hero-text p {
-  color: #bae6fd;
+  color: #93b4d4;
 }
 
 .dashboard-hero-actions {
@@ -6972,21 +7007,34 @@ body.theme-dark .btn-figma-warning:hover,
 }
 
 .figma-hero-banner.security-theme {
-  background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 60%, #082f49 100%) !important;
-  box-shadow: 0 4px 14px rgba(3, 105, 161, 0.25) !important;
+  background: #12263a !important;
+  border: 1px solid #1b3652;
+  box-shadow: 0 4px 14px rgba(18, 38, 58, 0.2) !important;
 }
 
-.figma-hero-banner.security-theme .figma-hero-top p {
-  color: #bae6fd !important;
+.figma-hero-banner.security-theme .figma-hero-top p,
+.figma-hero-banner.security-theme .hero-strip-sub {
+  color: #93b4d4 !important;
+}
+
+.figma-hero-banner.security-theme .btn-hero-action {
+  color: #12263a;
 }
 
 .figma-hero-banner.approver-theme {
-  background: linear-gradient(135deg, #0f766e 0%, #115e59 50%, #0f2b48 100%) !important;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25) !important;
+  background: #12161f !important;
+  border: 1px solid rgba(212, 175, 55, 0.32);
+  border-top: 2px solid #d4af37;
+  box-shadow: 0 4px 16px rgba(18, 22, 31, 0.18) !important;
 }
 
-.figma-hero-banner.approver-theme .figma-hero-top p {
-  color: #99f6e4 !important;
+.figma-hero-banner.approver-theme .figma-hero-top p,
+.figma-hero-banner.approver-theme .hero-strip-sub {
+  color: #d4b86a !important;
+}
+
+.figma-hero-banner.approver-theme .btn-hero-action {
+  color: #12161f;
 }
 
 /* Figma Blue Button (Edit Pengajuan) */
@@ -10056,7 +10104,7 @@ body.theme-dark .mobile-btn-secondary {
 
 .modal-overlay .modal-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   gap: 0.75rem;
 }
@@ -11611,59 +11659,136 @@ body.theme-dark .btn-antrian-pill.pill-regular.active {
 }
 
 /* ===================================================================
-   DYNAMIC ROLE-BASED SIDEBAR COLORS (Identik Dashboard Banner Gambar 4 & 5)
+   DYNAMIC ROLE-BASED SIDEBAR COLORS (Unified Deep Corporate Brightness)
    =================================================================== */
 
-/* ATASAN / APPROVER SIDEBAR (Sesuai Banner Dashboard Atasan Gambar 4) */
+/* ATASAN / APPROVER SIDEBAR — Executive Obsidian + Metallic Gold Accent */
 body.role-is-approver .sidebar {
-  background: linear-gradient(180deg, #115e59 0%, #0f766e 40%, #0f2b48 100%) !important;
-  border-right: 1px solid #0d4b47 !important;
+  background: #12161f !important;
+  border-right: 1px solid rgba(212, 175, 55, 0.22) !important;
 }
 body.role-is-approver .sidebar-header {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: #12161f !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.16) !important;
 }
-body.role-is-approver .sidebar-footer-card {
-  background: rgba(15, 43, 72, 0.5) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+body.role-is-approver .brand-corp-name,
+body.role-is-approver .sidebar-brand-subtitle p,
+body.role-is-approver .nav-section-label,
+body.role-is-approver .sidebar-info-card p {
+  color: #d4b86a !important;
 }
-body.role-is-approver .sidebar-info-card {
-  background: rgba(15, 43, 72, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+body.role-is-approver .sidebar-navigation .nav-item {
+  color: #e2e8f0 !important;
 }
-body.role-is-approver .sidebar-navigation .nav-item.active {
-  background: rgba(255, 255, 255, 0.16) !important;
-  color: #ffffff !important;
-  border-left: 3px solid #5eead4 !important;
+body.role-is-approver .sidebar-navigation .nav-item svg {
+  stroke: #d4af37 !important;
 }
 body.role-is-approver .sidebar-navigation .nav-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(212, 175, 55, 0.08) !important;
+  color: #ffffff !important;
+}
+body.role-is-approver .sidebar-navigation .nav-item.active {
+  background: rgba(212, 175, 55, 0.14) !important;
+  color: #fef3c7 !important;
+  border-left: 3px solid #d4af37 !important;
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.22) !important;
+}
+body.role-is-approver .sidebar-navigation .nav-item.active svg {
+  stroke: #f5d061 !important;
+}
+body.role-is-approver .sidebar-footer-card {
+  background: #0d1017 !important;
+  border-top: 1px solid rgba(212, 175, 55, 0.18) !important;
+}
+body.role-is-approver .sidebar-info-card {
+  background: #0d1017 !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
 }
 
-/* POS JAGA / SECURITY SIDEBAR (Sesuai Banner Dashboard Pos Jaga Gambar 5) */
+/* POS JAGA / SECURITY SIDEBAR — Deep Navy Steel */
 body.role-is-security .sidebar {
-  background: linear-gradient(180deg, #075985 0%, #0c4a6e 40%, #082f49 100%) !important;
-  border-right: 1px solid #073b5c !important;
+  background: #12263a !important;
+  border-right: 1px solid #1b3652 !important;
 }
 body.role-is-security .sidebar-header {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: #12263a !important;
+  border-bottom: 1px solid #1b3652 !important;
 }
-body.role-is-security .sidebar-footer-card {
-  background: rgba(8, 47, 73, 0.5) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+body.role-is-security .brand-corp-name,
+body.role-is-security .sidebar-brand-subtitle p,
+body.role-is-security .nav-section-label,
+body.role-is-security .sidebar-info-card p {
+  color: #93b4d4 !important;
 }
-body.role-is-security .sidebar-info-card {
-  background: rgba(8, 47, 73, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+body.role-is-security .sidebar-navigation .nav-item {
+  color: #dbeafe !important;
 }
-body.role-is-security .sidebar-navigation .nav-item.active {
-  background: rgba(255, 255, 255, 0.16) !important;
-  color: #ffffff !important;
-  border-left: 3px solid #7dd3fc !important;
+body.role-is-security .sidebar-navigation .nav-item svg {
+  stroke: #7dd3fc !important;
 }
 body.role-is-security .sidebar-navigation .nav-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: #18314a !important;
+  color: #ffffff !important;
+}
+body.role-is-security .sidebar-navigation .nav-item.active {
+  background: #1c3957 !important;
+  color: #ffffff !important;
+  border-left: 3px solid #7dd3fc !important;
+  box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.16) !important;
+}
+body.role-is-security .sidebar-navigation .nav-item.active svg {
+  stroke: #ffffff !important;
+}
+body.role-is-security .sidebar-footer-card {
+  background: #0e1e2e !important;
+  border-top: 1px solid #1b3652 !important;
+}
+body.role-is-security .sidebar-info-card {
+  background: #0e1e2e !important;
+  border: 1px solid #1b3652 !important;
+}
+
+/* ADMIN K3 SIDEBAR — Deep Slate Charcoal */
+body.role-is-admin .sidebar {
+  background: #1b2029 !important;
+  border-right: 1px solid #28303e !important;
+}
+body.role-is-admin .sidebar-header {
+  background: #1b2029 !important;
+  border-bottom: 1px solid #28303e !important;
+}
+body.role-is-admin .brand-corp-name,
+body.role-is-admin .sidebar-brand-subtitle p,
+body.role-is-admin .nav-section-label,
+body.role-is-admin .sidebar-info-card p {
+  color: #94a3b8 !important;
+}
+body.role-is-admin .sidebar-navigation .nav-item {
+  color: #e2e8f0 !important;
+}
+body.role-is-admin .sidebar-navigation .nav-item svg {
+  stroke: #94a3b8 !important;
+}
+body.role-is-admin .sidebar-navigation .nav-item:hover {
+  background: #232a36 !important;
+  color: #ffffff !important;
+}
+body.role-is-admin .sidebar-navigation .nav-item.active {
+  background: #2a3342 !important;
+  color: #ffffff !important;
+  border-left: 3px solid #cbd5e1 !important;
+  box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.14) !important;
+}
+body.role-is-admin .sidebar-navigation .nav-item.active svg {
+  stroke: #ffffff !important;
+}
+body.role-is-admin .sidebar-footer-card {
+  background: #141820 !important;
+  border-top: 1px solid #28303e !important;
+}
+body.role-is-admin .sidebar-info-card {
+  background: #141820 !important;
+  border: 1px solid #28303e !important;
 }
 
 
@@ -11686,6 +11811,21 @@ body.theme-dark.role-is-security .sidebar-header,
 body.theme-dark.role-is-admin .sidebar-header {
   background: #090e17 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark .brand-corp-name,
+body.theme-dark.role-is-approver .brand-corp-name,
+body.theme-dark.role-is-security .brand-corp-name,
+body.theme-dark.role-is-admin .brand-corp-name,
+body.theme-dark .nav-section-label,
+body.theme-dark.role-is-approver .nav-section-label,
+body.theme-dark.role-is-security .nav-section-label,
+body.theme-dark.role-is-admin .nav-section-label,
+body.theme-dark .sidebar-info-card p,
+body.theme-dark.role-is-approver .sidebar-info-card p,
+body.theme-dark.role-is-security .sidebar-info-card p,
+body.theme-dark.role-is-admin .sidebar-info-card p {
+  color: #94a3b8 !important;
 }
 
 body.theme-dark .sidebar-footer-card,
@@ -11712,6 +11852,13 @@ body.theme-dark.role-is-admin .sidebar-navigation .nav-item {
   color: #94a3b8 !important;
 }
 
+body.theme-dark .sidebar-navigation .nav-item svg,
+body.theme-dark.role-is-approver .sidebar-navigation .nav-item svg,
+body.theme-dark.role-is-security .sidebar-navigation .nav-item svg,
+body.theme-dark.role-is-admin .sidebar-navigation .nav-item svg {
+  stroke: #94a3b8 !important;
+}
+
 body.theme-dark .sidebar-navigation .nav-item:hover,
 body.theme-dark.role-is-approver .sidebar-navigation .nav-item:hover,
 body.theme-dark.role-is-security .sidebar-navigation .nav-item:hover,
@@ -11728,6 +11875,13 @@ body.theme-dark.role-is-admin .sidebar-navigation .nav-item.active {
   color: #34d399 !important;
   border-left: 3px solid #10b981 !important;
   box-shadow: none !important;
+}
+
+body.theme-dark .sidebar-navigation .nav-item.active svg,
+body.theme-dark.role-is-approver .sidebar-navigation .nav-item.active svg,
+body.theme-dark.role-is-security .sidebar-navigation .nav-item.active svg,
+body.theme-dark.role-is-admin .sidebar-navigation .nav-item.active svg {
+  stroke: #34d399 !important;
 }
 
 body.theme-dark .sidebar-brand-subtitle h4 {

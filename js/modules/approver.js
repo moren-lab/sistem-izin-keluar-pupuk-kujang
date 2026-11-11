@@ -696,6 +696,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
   const target = containerElement || containerApproverRequests;
   if (!target) return;
   const isTrackingView = isTracking || (window.currentApproverNav === 'pelacakan') || (target === containerApproverRequests);
+  const isRiwayatView = (window.currentApproverNav === 'riwayat');
 
   target.innerHTML = `
     <div class="cards-grid">
@@ -710,7 +711,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
 
     return `
-          <div class="card-item" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : ''}">
+          <div class="card-item${isRiwayatView ? ' card-history-item' : ''}" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : ''}">
             <div class="card-top">
               <div>
                 <span class="card-id-num">${t.id}</span>
@@ -729,11 +730,11 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 </div>
               </div>
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
-                <span style="font-weight: 700; font-size: 0.75rem; color: ${isDinas ? '#059669' : '#d97706'}; white-space: nowrap;">${displayCategory}</span>
+                <span style="font-weight: 700; font-size: 0.75rem; color: ${isRiwayatView ? 'var(--text-secondary, #475569)' : (isDinas ? '#059669' : '#d97706')}; white-space: nowrap;">${displayCategory}</span>
                 ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
                 ${isGroupDinas ? (() => {
                   const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-                  return `<span style="font-size: 0.68rem; font-weight: 700; color: #334155; background: #ffffff; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">Tim (${groupCount})</span>`;
+                  return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
                 })() : ''}
               </div>
             </div>
@@ -973,7 +974,6 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 </div>`;
               }
 
-              const isRiwayatView = (window.currentApproverNav === 'riwayat');
               return `
               <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
@@ -1000,7 +1000,7 @@ window.currentApproverViewMode = window.currentApproverViewMode || 'card';
 /**
  * Render Figma List / Table untuk Pelacakan Izin Karyawan di Atasan
  */
-function renderApproverTable(list, containerElement) {
+function renderApproverTable(list, containerElement, isReadOnlyMonitoring = false) {
   const target = containerElement || document.getElementById('containerApproverRequests');
   if (!target) return;
 
@@ -1033,10 +1033,18 @@ function renderApproverTable(list, containerElement) {
               : `<div style="font-weight: 600; color: var(--text-primary); font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
 
             let catatanHtml = `<span style="color: var(--text-muted); font-size: 0.75rem;">-</span>`;
-            if (t.approverNote) {
+            if (t.status === 'Menunggu Verifikasi Atasan') {
+              catatanHtml = t.arrivalProofPhoto
+                ? `<span style="color: #2563eb; font-size: 0.74rem; font-weight: 600;">📷 Foto Bukti Kedatangan (Putaran #${t.arrivalRejectionRound || 1}) siap ditinjau</span>`
+                : `<span style="color: #0f172a; font-size: 0.74rem; font-weight: 600;">Tap In Gerbang (${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}) — Perlu konfirmasi fisik</span>`;
+            } else if (t.status === 'Menunggu Bukti Kedatangan') {
+              catatanHtml = `<span style="color: #d97706; font-size: 0.74rem; font-weight: 600;">Putaran #${t.arrivalRejectionRound || 1}: "${t.arrivalRejectReason || 'Menunggu bukti foto'}"</span>`;
+            } else if (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan') {
+              catatanHtml = `<span style="color: #d97706; font-size: 0.74rem; font-weight: 600;">Perpanjangan s/d ${t.pendingExtension.newReturn || '-'} (${t.pendingExtension.reason || '-'})</span>`;
+            } else if (t.approverNote) {
               let noteText = t.approverNote;
               if (noteText.includes('[Otorisasi Darurat Sah]: QR Code dibuka melalui "Scan Wajah Atasan (Face Scan Biometrik)"') || (noteText.includes('[Otorisasi') && noteText.includes('Face Scan'))) {
-                noteText = `[Otorisasi Sah]: QR Code dibuka via Face Scan Biometrik oleh ${t.approverName || 'Ir. Hendra Gunawan, M.T.'}.`;
+                noteText = `[Otorisasi Sah]: QR Code dibuka via Face Scan Biometrik oleh ${t.approverName || 'Atasan Peninjau'}.`;
               } else if (noteText.includes('[Otorisasi Darurat Sah]:')) {
                 noteText = noteText.replace(/\[Otorisasi Darurat Sah\]:?\s*/gi, '[Otorisasi Sah]: ')
                                    .replace(/melalui\s*"([^"]+)"/gi, 'via $1')
@@ -1053,9 +1061,65 @@ function renderApproverTable(list, containerElement) {
               catatanHtml = `<span style="color: #f59e0b; font-size: 0.725rem;">Dialihkan ke ${t.reassignedTo}</span>`;
             }
 
+            const isAntrianView = (window.currentApproverNav === 'antrian');
             const isRiwayatView = (window.currentApproverNav === 'riwayat');
+            const isAssigned = isTicketAssignedToCurrentApprover(t);
+            const isReassignedAway = isTicketReassignedFromCurrentApprover(t);
+            const canDecide = !isReadOnlyMonitoring && isAssigned && !isReassignedAway;
+            const isPending = (t.status === 'Menunggu Persetujuan');
+            const isEmergDeciding = (t.status === 'Menunggu Otorisasi Darurat');
+
+            let extraAntrianBtns = '';
+            if (isAntrianView && canDecide) {
+              if (t.status === 'Menunggu Verifikasi Atasan') {
+                extraAntrianBtns = `
+                  ${t.arrivalProofPhoto ? `
+                    <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); if(typeof window.viewArrivalProofPhoto==='function') window.viewArrivalProofPhoto('${t.id}')" title="Lihat Foto Bukti Kedatangan">
+                      <span>📷 Foto</span>
+                    </button>
+                  ` : ''}
+                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); window.rejectArrivalByApprover('${t.id}')">
+                    ✕ Belum Tiba
+                  </button>
+                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); window.confirmArrivalByApprover('${t.id}')">
+                    ✓ Sudah Tiba
+                  </button>
+                `;
+              } else if (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan') {
+                extraAntrianBtns = `
+                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openRejectExtensionModal('${t.id}')">
+                    ✕ Tolak Perpanjang
+                  </button>
+                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); approveExtensionRequest('${t.id}')">
+                    ✓ Setujui Perpanjang
+                  </button>
+                `;
+              } else if (isEmergDeciding) {
+                extraAntrianBtns = t.selectedMethod === 'facescan' ? `
+                  <span style="font-size: 0.72rem; color: #7e22ce; background: #faf5ff; border: 1px solid #e9d5ff; padding: 0.28rem 0.55rem; border-radius: 6px; font-weight: 700;">🤳 Scan Wajah (Menunggu)</span>
+                ` : `
+                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openRejectModal('${t.id}')">
+                    ✕ Tolak
+                  </button>
+                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer; background: #059669;" onclick="event.stopPropagation(); window.emergencyDirectApprove('${t.id}')">
+                    ✓ Setujui
+                  </button>
+                `;
+              } else if (isPending) {
+                extraAntrianBtns = `
+                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openRejectModal('${t.id}')">
+                    ✕ Tolak
+                  </button>
+                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openApproveModal('${t.id}')">
+                    ✓ Setujui
+                  </button>
+                `;
+              }
+            }
+
             let tindakanHtml = `
               <div class="action-pills-row">
+                ${extraAntrianBtns}
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
@@ -1257,10 +1321,15 @@ function renderApproverView() {
     } else {
       if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'none';
       if (containerApproverPendingQueue) {
+        const isAntrianTable = (window.currentApproverAntrianViewMode === 'table');
         let queueHtml = '';
         if (pendingList.length > 0) {
           const tempDiv = document.createElement('div');
-          renderApproverCards(pendingList, tempDiv);
+          if (isAntrianTable) {
+            renderApproverTable(pendingList, tempDiv, false);
+          } else {
+            renderApproverCards(pendingList, tempDiv);
+          }
           queueHtml += tempDiv.innerHTML;
         } else {
           queueHtml += `
@@ -1272,7 +1341,11 @@ function renderApproverView() {
 
         if (reassignedAwayList.length > 0) {
           const tempDivReassigned = document.createElement('div');
-          renderApproverCards(reassignedAwayList, tempDivReassigned, true);
+          if (isAntrianTable) {
+            renderApproverTable(reassignedAwayList, tempDivReassigned, true);
+          } else {
+            renderApproverCards(reassignedAwayList, tempDivReassigned, true);
+          }
           queueHtml += `
             <div class="approver-reassigned-section">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1289,7 +1362,11 @@ function renderApproverView() {
 
         if (memberDinasList.length > 0) {
           const tempDivMemberDinas = document.createElement('div');
-          renderApproverCards(memberDinasList, tempDivMemberDinas, true);
+          if (isAntrianTable) {
+            renderApproverTable(memberDinasList, tempDivMemberDinas, true);
+          } else {
+            renderApproverCards(memberDinasList, tempDivMemberDinas, true);
+          }
           queueHtml += `
             <div class="approver-reassigned-section" style="margin-top: 1.5rem;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1305,6 +1382,11 @@ function renderApproverView() {
         }
 
         containerApproverPendingQueue.innerHTML = queueHtml;
+        if (isAntrianTable && typeof window.enableDragScroll === 'function') {
+          containerApproverPendingQueue.querySelectorAll('.figma-table-card').forEach(card => {
+            window.enableDragScroll(card);
+          });
+        }
       }
     }
     return;
@@ -2247,6 +2329,15 @@ function setApproverRiwayatViewMode(mode) {
   renderApproverView();
 }
 
+function setApproverAntrianViewMode(mode) {
+  window.currentApproverAntrianViewMode = mode;
+  const btnCard = document.getElementById('btnApproverAntrianViewCard');
+  const btnTable = document.getElementById('btnApproverAntrianViewTable');
+  if (btnCard) btnCard.classList.toggle('active', mode !== 'table');
+  if (btnTable) btnTable.classList.toggle('active', mode === 'table');
+  renderApproverView();
+}
+
 // Expose globally
 window.updateApproverMetrics = updateApproverMetrics;
 window.renderApproverDashboard = renderApproverDashboard;
@@ -2263,6 +2354,7 @@ window.clearApproverTrackingHistory = clearApproverTrackingHistory;
 window.clearApproverRiwayatHistory = clearApproverTrackingHistory;
 window.setApproverViewMode = setApproverViewMode;
 window.setApproverRiwayatViewMode = setApproverRiwayatViewMode;
+window.setApproverAntrianViewMode = setApproverAntrianViewMode;
 window.setApproverAntrianFilter = function (filterNature) {
   window.currentApproverAntrianFilter = filterNature || 'all';
   if (typeof window.renderApproverView === 'function') {

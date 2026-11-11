@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261111_1035">
+  <link rel="stylesheet" href="css/style.css?v=20261112_0630">
   <link rel="stylesheet" href="css/auth.css?v=20261111_1035">
   <link rel="stylesheet" href="css/mobile.css?v=20261111_1035">
   <link rel="icon" type="image/png" href="Pupuk Kujang Icon - Colored - zonalogo.com.png">
@@ -1755,6 +1755,32 @@
                 </div>
               </div>
 
+              <!-- View Switcher (Card / List) Antrian Persetujuan -->
+              <div class="figma-results-bar" style="display: flex; justify-content: flex-end; align-items: center; margin: 0.75rem 0 0.75rem 0;">
+                <div class="figma-view-switcher">
+                  <button type="button" class="btn-figma-toggle active" id="btnApproverAntrianViewCard" onclick="window.setApproverAntrianViewMode('card')" title="Tampilan Kartu">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Card</span>
+                  </button>
+                  <button type="button" class="btn-figma-toggle" id="btnApproverAntrianViewTable" onclick="window.setApproverAntrianViewMode('table')" title="Tampilan List / Tabel">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <span>List</span>
+                  </button>
+                </div>
+              </div>
+
               <!-- Content Container Approver Antrian -->
               <div id="containerApproverPendingQueue">
                 <!-- Rendered via JS -->
@@ -3466,7 +3492,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+      <div class="modal-footer" style="display: flex; justify-content: center; gap: 0.65rem;">
         <button type="button" class="btn-secondary" onclick="window.closeRejectArrivalReasonModal()">Batal</button>
         <button type="button" class="btn-danger-solid" id="btnSubmitRejectArrivalReason" onclick="window.submitRejectArrivalReason()">
           Kirim Alasan &amp; Minta Foto Bukti
@@ -3531,7 +3557,7 @@
           <textarea id="uploadProofNoteInput" class="form-textarea" rows="2" placeholder="Contoh: Sudah berada di ruang kontrol Unit Produksi..."></textarea>
         </div>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+      <div class="modal-footer" style="display: flex; justify-content: center; gap: 0.65rem;">
         <button type="button" class="btn-secondary" onclick="window.closeUploadArrivalProofModal()">Batal</button>
         <button type="button" class="btn-primary-action" id="btnSubmitArrivalProof" onclick="window.submitArrivalProofToApprover()" disabled style="opacity: 0.55; cursor: not-allowed; background: #2563eb; color: #ffffff; border: none; padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 700;">
           Kirim Kembali ke Atasan
@@ -4125,7 +4151,7 @@
         </div>
       </div>
 
-      <div class="modal-footer" id="modalCancelFooter" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; flex-wrap: wrap;">
+      <div class="modal-footer" id="modalCancelFooter" style="display: flex; justify-content: center; gap: 0.75rem; padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; flex-wrap: wrap;">
         <button type="button" class="btn-figma-secondary" id="btnAbortCancel"
           style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155;"
           onclick="document.getElementById('modalCancelRequest').classList.remove('open')">
@@ -4367,7 +4393,7 @@
       </div>
 
       <div class="modal-footer"
-        style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
         <button type="button" class="btn-figma-secondary" id="btnBlockedEditTicket"
           style="display: none; padding: 0.5rem 0.85rem; font-size: 0.8rem;">Edit Izin Ini</button>
         <button type="button" class="btn-emergency" id="btnBlockedCancelTicket"
@@ -4389,7 +4415,7 @@
         <div id="noticeModalMessage"></div>
       </div>
       <div class="modal-footer"
-        style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: flex-end;">
+        style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: center;">
         <button type="button" class="btn-figma-secondary" id="btnNoticeDismiss"
           style="padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc;"
           onclick="window.closeNoticeModal()">
@@ -4417,7 +4443,7 @@
       </div>
 
       <div class="modal-footer"
-        style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: flex-end; gap: 0.65rem;">
+        style="padding: 0.85rem 1.25rem 1.15rem; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: center; gap: 0.65rem;">
         <button type="button" class="btn-figma-secondary" id="btnCancelDeleteConfirm"
           style="padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; background: #ffffff; color: #334155;"
           onclick="window.closeDeleteConfirmModal()">
@@ -4457,7 +4483,7 @@
         </div>
       </div>
 
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+      <div class="modal-footer" style="display: flex; justify-content: center; gap: 0.65rem;">
         <button type="button" class="btn-figma-secondary" id="btnCancelLogoutModal"
           style="padding: 0.45rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; background: #ffffff; color: #334155;"
           onclick="window.closeLogoutModal()">
@@ -4672,7 +4698,7 @@
       </div>
 
       <div class="modal-footer"
-        style="padding: 1rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid #f1f5f9;">
+        style="padding: 1rem 1.5rem; display: flex; justify-content: center; gap: 0.75rem; border-top: 1px solid #f1f5f9;">
         <button type="button" class="btn-figma-primary" id="btnSubmitExtendDuration"
           style="background: #059669; border-color: #059669; color: white; padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: 6px; font-weight: 600;">
           Kirim Permohonan Perpanjangan
@@ -4737,7 +4763,7 @@
       </div>
 
       <div class="modal-footer"
-        style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; border-top: 1px solid #f1f5f9;">
+        style="padding: 1rem 1.5rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; border-top: 1px solid #f1f5f9;">
         <button type="button" class="btn-figma-danger" id="btnCancelPendingExtension"
           onclick="executeCancelPendingExtension()"
           style="padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 700; border-radius: 6px; cursor: pointer;">
@@ -5047,14 +5073,14 @@
   <script src="js/modules/ui.js?v=20261111_1035"></script>
   <script src="js/modules/scheduler.js?v=20261111_1035"></script>
   <script src="js/modules/navigation.js?v=20261111_1035"></script>
-  <script src="js/modules/karyawan.js?v=20261111_1035"></script>
-  <script src="js/modules/approver.js?v=20261111_1035"></script>
-  <script src="js/modules/security.js?v=20261111_1035"></script>
+  <script src="js/modules/karyawan.js?v=20261112_0630"></script>
+  <script src="js/modules/approver.js?v=20261112_0630"></script>
+  <script src="js/modules/security.js?v=20261112_0345"></script>
   <script src="js/modules/admin.js?v=20261111_1035"></script>
   <script src="js/modules/charts.js?v=20261111_1035"></script>
   <script src="js/modules/emergency.js?v=20261111_1035"></script>
   <script src="js/modules/modals.js?v=20261111_1035"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261111_1035"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261112_0630"></script>
   <script src="js/modules/mobile_atasan.js?v=20261111_1035"></script>
   <script src="js/modules/mobile_security.js?v=20261111_1035"></script>
   <script src="js/modules/mobile_app.js?v=20261111_1035"></script>

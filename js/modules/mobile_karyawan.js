@@ -1216,31 +1216,6 @@
       }
     }
 
-    let groupMembersHtml = '';
-    if (t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) {
-      const activeCount = (t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length;
-      groupMembersHtml = `
-        <div style="margin: 8px 0; padding: 6px 0; font-size: 0.75rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 0.725rem; font-weight: 700; color: #1e293b;">Tim Dinas: <span style="color: #2563eb; font-weight: 700; margin-left: 2px;">${activeCount} Personel Aktif</span></span>
-            <span style="font-size: 0.675rem; color: #2563eb; font-weight: 700;">QR Bersama</span>
-          </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; line-height: 1.4; color: #334155;">
-            ${!t.initiatorCancelled ? `
-              <span><strong>${escapeHtml(t.applicantName)}</strong> <span style="color: #d97706; font-weight: 700;">(Inisiator)</span></span>
-            ` : `
-              <span style="color: #94a3b8; text-decoration: line-through;">${escapeHtml(t.applicantName)} (Batal)</span>
-            `}
-            ${t.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `
-              <span style="color: #94a3b8; text-decoration: line-through;">${escapeHtml(m.name)} (Batal)</span>
-            ` : `
-              <span><strong>${escapeHtml(m.name)}</strong> <span style="color: #16a34a; font-weight: 700;">(Aktif Ikut)</span></span>
-            `).join(', ')}
-          </div>
-        </div>
-      `;
-    }
-
     return `
       <section class="mobile-card" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div class="mobile-card-header">
@@ -1256,8 +1231,6 @@
         <div style="font-size: 0.775rem; color: #059669; font-weight: 700;">${t.category} • ${getTType(t)}</div>
         <div class="mobile-clamp-1" style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 3px 0 2px 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.destination || 'Area Cikampek').replace(/"/g, '&quot;')}">${t.destination || 'Area Cikampek'}</div>
         <div class="mobile-clamp-1" style="font-size: 0.75rem; color: #0f172a; font-weight: 700; margin-bottom: 8px; font-style: normal; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35;" title="${(t.reason || 'Keperluan dinas kantor').replace(/"/g, '&quot;')}">"${t.reason || 'Keperluan dinas kantor'}"</div>
-
-        ${groupMembersHtml}
 
         <div class="mobile-ticket-grid-meta">
           <div>

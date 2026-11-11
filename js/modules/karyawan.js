@@ -1442,19 +1442,6 @@ function renderKaryawanDashboard() {
           </div>
         </div>
 
-        ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
-          <div style="margin-top: 8px; font-size: 0.75rem;">
-            <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between;">
-              <span>Tim Dinas:</span>
-              <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-              ${!activeTicket.initiatorCancelled ? `<span><strong>${activeTicket.applicantName}</strong> <span style="color: #d97706; font-weight: 700;">(Inisiator)</span></span>` : `<span style="color: #94a3b8; text-decoration: line-through;">${activeTicket.applicantName} (Batal)</span>`}
-              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="color: #94a3b8; text-decoration: line-through;">${m.name} (Batal)</span>` : `<span><strong>${m.name}</strong> <span style="color: #16a34a; font-weight: 700;">(Aktif Ikut)</span></span>`).join(', ')}
-            </div>
-          </div>
-        ` : ''}
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
             <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
@@ -1501,12 +1488,13 @@ function renderKaryawanDashboard() {
     }
   }
 
-  // 1.3 Card: Pengajuan terbaru (2 Completed recent tickets)
+  // 1.3 Card: Pengajuan terbaru (Maksimal 5 riwayat selesai terbaru, tata letak 1 baris horizontal)
   if (karyawanDashboardRecentList) {
     const completedItems = ticketsList.filter(t =>
       (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) &&
+      !t.deletedByKaryawan &&
       t.status === 'Selesai'
-    ).slice(0, 2);
+    ).slice(0, 5);
 
     if (completedItems.length === 0) {
       karyawanDashboardRecentList.innerHTML = `
@@ -1533,25 +1521,25 @@ function renderKaryawanDashboard() {
         }
 
         return `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; ${idx < completedItems.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''} gap: 1rem; flex-wrap: wrap;">
+          <div class="dashboard-recent-row" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0; ${idx < completedItems.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''} gap: 0.65rem; flex-wrap: nowrap;">
             <!-- Kolom 1: ID Tiket & Kategori -->
-            <div style="min-width: 170px; flex: 1;">
-              <div style="font-size: 0.875rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; letter-spacing: -0.2px;">${t.id}</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px; font-weight: 500;">${dayMonth} — ${t.category}</div>
+            <div style="min-width: 0; flex: 1 1 auto;">
+              <div style="font-size: 0.875rem; font-weight: 800; font-family: var(--font-mono); color: #0f172a; letter-spacing: -0.2px; white-space: nowrap;">${t.id}</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${dayMonth} — ${t.category}</div>
             </div>
 
-            <!-- Kolom 2: Rentang Waktu (Kolom terpisah teratur agar waktu rapi sejajar) -->
-            <div style="min-width: 125px; text-align: right;">
+            <!-- Kolom 2: Rentang Waktu -->
+            <div style="flex-shrink: 0; text-align: right; white-space: nowrap;">
               <span style="font-size: 0.8rem; color: #334155; font-weight: 600; font-family: var(--font-mono);">${timeSpan}</span>
             </div>
 
-            <!-- Kolom 3: Status Pill (Lebar teratur agar tidak menabrak waktu) -->
-            <div style="min-width: 190px; text-align: left;">
+            <!-- Kolom 3: Status Pill -->
+            <div style="flex-shrink: 0; text-align: left; white-space: nowrap;">
               ${getCleanEmpStatus(t.status || 'Selesai', t)}
             </div>
 
             <!-- Kolom 4: Aksi Detail Pengajuan & Hapus -->
-            <div style="min-width: 175px; text-align: right; white-space: nowrap;">
+            <div style="flex-shrink: 0; text-align: right; white-space: nowrap;">
               <div class="action-pills-row">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
@@ -1819,19 +1807,6 @@ function renderPengajuanSayaView() {
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
-
-        ${activeTicket.isGroupDinas && Array.isArray(activeTicket.members) ? `
-          <div style="margin-top: 8px; font-size: 0.75rem;">
-            <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between;">
-              <span>Tim Dinas:</span>
-              <span style="font-size: 0.72rem; font-weight: 700; color: #2563eb;">${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Personel Aktif</span>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-              ${!activeTicket.initiatorCancelled ? `<span><strong>${activeTicket.applicantName}</strong> <span style="color: #d97706; font-weight: 700;">(Inisiator)</span></span>` : `<span style="color: #94a3b8; text-decoration: line-through;">${activeTicket.applicantName} (Batal)</span>`}
-              ${activeTicket.members.map(m => (m.status === 'batal' || m.status === 'cancelled') ? `<span style="color: #94a3b8; text-decoration: line-through;">${m.name} (Batal)</span>` : `<span><strong>${m.name}</strong> <span style="color: #16a34a; font-weight: 700;">(Aktif Ikut)</span></span>`).join(', ')}
-            </div>
-          </div>
-        ` : ''}
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
           <div>
@@ -2205,42 +2180,22 @@ function renderEmpCards(list, containerElement) {
     <div class="figma-card-grid">
       ${list.map(t => {
         let catatanText = `<span style="display:inline-flex; align-items:center; gap:4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Ir. Hendra Gunawan, M.T.', 18)} <span>${t.approverName || 'Atasan'}</span></span>`;
-        let catatanColor = '#059669';
-        let catatanBg = '#f0fdf4';
-        let catatanBorder = '#dcfce7';
-        let noteType = 'success';
+        let catatanColor = '#475569';
+        let catatanBg = '#f8fafc';
+        let catatanBorder = '#e2e8f0';
+        let noteType = 'muted';
 
         if (t.status === 'Terlambat') {
           catatanText = '⚠️ Melewati batas estimasi kembali — Belum Tap In di Pos 1';
-          catatanColor = '#b91c1c';
-          catatanBg = '#fef2f2';
-          catatanBorder = '#fecaca';
-          noteType = 'danger';
         } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
           const lateFull = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
           catatanText = `⏱️ Kembali ${t.actualReturnTime || (t.scanInTime ? t.scanInTime.slice(11, 16) + ' WIB' : '12.10 WIB')} — +${lateFull} dari estimasi`;
-          catatanColor = '#b45309';
-          catatanBg = '#fffbeb';
-          catatanBorder = '#fde68a';
-          noteType = 'warning';
         } else if (t.status === 'Ditolak' || (t.status || '').toLowerCase().includes('tolak')) {
           catatanText = `✕ ${t.rejectionReason || 'Ditolak: alasan tidak memadai'}`;
-          catatanColor = '#b91c1c';
-          catatanBg = '#fef2f2';
-          catatanBorder = '#fecaca';
-          noteType = 'danger';
         } else if (t.status === 'Kedaluwarsa' || t.status === 'Kadaluwarsa') {
           catatanText = '⏱️ Waktu berlaku izin habis sebelum verifikasi scan keluar';
-          catatanColor = '#64748b';
-          catatanBg = '#f8fafc';
-          catatanBorder = '#e2e8f0';
-          noteType = 'muted';
         } else if (t.status === 'Dibatalkan' || (t.status || '').toLowerCase().includes('batal')) {
           catatanText = '✕ Pengajuan izin dibatalkan oleh pemohon';
-          catatanColor = '#64748b';
-          catatanBg = '#f8fafc';
-          catatanBorder = '#e2e8f0';
-          noteType = 'muted';
         }
 
         // Format tanggal secara rapi & manusiawi (contoh: 26 Okt 2026)
