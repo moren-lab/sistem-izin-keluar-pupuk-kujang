@@ -1,0 +1,192 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - complementary [ref=f1e3]:
+      - link "Pupuk Kujang Logo PUPUK KUJANG PT Pupuk Kujang" [ref=f1e5] [cursor=pointer]:
+        - /url: "#"
+        - img "Pupuk Kujang Logo" [ref=f1e7]
+        - generic [ref=f1e8]:
+          - generic [ref=f1e9]: PUPUK KUJANG
+          - generic [ref=f1e10]: PT Pupuk Kujang
+      - navigation [ref=f1e11]:
+        - generic [ref=f1e12]: MENU UTAMA
+        - generic "Dashboard" [ref=f1e13] [cursor=pointer]
+        - generic "Pengajuan Saya" [ref=f1e21] [cursor=pointer]: "1"
+        - generic "Riwayat Pengajuan" [ref=f1e28] [cursor=pointer]
+      - generic [ref=f1e34]:
+        - generic [ref=f1e35]: TERHUBUNG MELALUI
+        - generic [ref=f1e36]: Portal SAKTI / KUJANG ID
+        - generic [ref=f1e37]:
+          - img "Foto Budi Pratama, S.T." [ref=f1e39]
+          - generic [ref=f1e40]:
+            - generic [ref=f1e41]: Budi Pratama, S.T.
+            - generic [ref=f1e42]: "NIP: PK-2024-8841"
+        - button "Keluar" [ref=f1e43] [cursor=pointer]
+    - generic "Geser untuk mengatur lebar menu (Klik ganda untuk reset 260px)" [ref=f1e48]
+    - generic [ref=f1e50]:
+      - banner [ref=f1e51]:
+        - generic [ref=f1e52]:
+          - button "Toggle Sidebar" [ref=f1e53] [cursor=pointer]
+          - generic [ref=f1e55]:
+            - generic [ref=f1e56]: Karyawan
+            - generic [ref=f1e57]: ›
+            - generic [ref=f1e58]: Dashboard
+        - generic [ref=f1e59]:
+          - button "Notifikasi" [ref=f1e61] [cursor=pointer]
+          - generic "Beralih peran untuk menguji alur terintegrasi" [ref=f1e65]:
+            - button "Karyawan" [ref=f1e67] [cursor=pointer]
+            - button "Atasan" [ref=f1e73] [cursor=pointer]
+            - button "Pos Jaga" [ref=f1e80] [cursor=pointer]
+            - button "Admin K3" [ref=f1e85] [cursor=pointer]
+            - button "Reset" [ref=f1e90] [cursor=pointer]
+      - main [ref=f1e95]:
+        - generic [ref=f1e97]:
+          - generic [ref=f1e98]:
+            - generic [ref=f1e100]:
+              - generic [ref=f1e101]:
+                - heading [level=2] [ref=f1e102]:
+                  - text: Selamat sore,
+                  - img "Foto Budi Pratama, S.T." [ref=f1e103]
+                  - text: Budi Pratama, S.T.
+                - paragraph [ref=f1e104]: "Karyawan | Departemen Rekayasa & Pemeliharaan | Atasan: Ir. Hendra Gunawan, M.T."
+              - generic "Beralih Mode Gelap / Terang" [ref=f1e105]:
+                - generic "Beralih Mode Gelap / Terang" [ref=f1e106] [cursor=pointer]:
+                  - checkbox "☀️ 🌙"
+                  - generic [ref=f1e107]:
+                    - generic [ref=f1e108]: ☀️
+                    - generic [ref=f1e109]: 🌙
+            - generic [ref=f1e110]:
+              - generic [ref=f1e111]:
+                - generic "Menunggu Verifikasi Atasan" [ref=f1e112]
+                - generic [ref=f1e114]: "Status: Izin Aktif — TK-20261111-723"
+                - generic [ref=f1e115]: Dinas Kantor — Batas kembali Rabu, 11 Nov 2026, 12.38 WIB
+              - button "Pengajuan Saya →" [ref=f1e116] [cursor=pointer]
+          - heading "Ringkasan Perizinan" [level=1] [ref=f1e119]
+          - generic [ref=f1e120]:
+            - generic [ref=f1e121]:
+              - generic [ref=f1e122]: Total pengajuan bulan ini
+              - generic [ref=f1e123]: "10"
+              - generic [ref=f1e124]: 1–19 Oktober 2026
+            - generic [ref=f1e125]:
+              - generic [ref=f1e126]: Izin selesai
+              - generic [ref=f1e127]: "8"
+              - generic [ref=f1e128]: 7 tepat waktu, 1 terlambat
+            - generic [ref=f1e129]:
+              - generic [ref=f1e130]: Izin aktif
+              - generic [ref=f1e131]: "1"
+              - generic [ref=f1e132]: Menunggu Verifikasi Atasan
+          - generic [ref=f1e133]:
+            - generic [ref=f1e134]:
+              - generic [ref=f1e135]:
+                - generic [ref=f1e136]:
+                  - heading "Izin aktif saya" [level=3] [ref=f1e137]
+                  - link "Detail Pengajuan" [ref=f1e138] [cursor=pointer]:
+                    - /url: "#"
+                - generic [ref=f1e139]:
+                  - generic [ref=f1e140]:
+                    - generic [ref=f1e141]: TK-20261111-723
+                    - generic [ref=f1e142]: • Dinas Bersama (2 Orang)
+                  - generic [ref=f1e143]:
+                    - generic [ref=f1e144]: Dinas Kantor
+                    - generic [ref=f1e145]: Kembali ke Area
+                  - generic "Pelabuhan Cirebon — Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor." [ref=f1e146]
+                  - generic "Menunggu Verifikasi Atasan" [ref=f1e148]
+                - generic [ref=f1e150]:
+                  - generic [ref=f1e151]:
+                    - generic [ref=f1e152]: Scan Out Pos 1
+                    - generic [ref=f1e153]: 11 Nov 2026, 10.40 WIB
+                  - generic [ref=f1e154]:
+                    - generic [ref=f1e155]: Batas kembali
+                    - generic [ref=f1e156]: Rabu, 11 Nov 2026, 12.38 WIB
+                - button "Menunggu Verifikasi Atasan" [disabled] [ref=f1e158]
+              - generic [ref=f1e160]:
+                - generic [ref=f1e161]:
+                  - heading "Pengajuan terbaru" [level=3] [ref=f1e162]
+                  - link "Semua riwayat" [ref=f1e163] [cursor=pointer]:
+                    - /url: "#"
+                - generic [ref=f1e164]:
+                  - generic [ref=f1e165]:
+                    - generic:
+                      - generic: IZ-20261016-006
+                      - generic: 11 Nov — Dinas Kantor
+                    - generic [ref=f1e166]: 08:30 s/d 10:45 WIB
+                    - generic "Selesai" [ref=f1e168]
+                    - generic [ref=f1e171]:
+                      - button "Detail Pengajuan" [ref=f1e172] [cursor=pointer]
+                      - button "Hapus" [ref=f1e177] [cursor=pointer]
+                  - generic [ref=f1e181]:
+                    - generic:
+                      - generic: IZ-20261014-003
+                      - generic: 9 Nov — Urusan Pribadi
+                    - generic [ref=f1e182]: 09:00 s/d 11:00 WIB
+                    - generic "Selesai" [ref=f1e184]
+                    - generic [ref=f1e187]:
+                      - button "Detail Pengajuan" [ref=f1e188] [cursor=pointer]
+                      - button "Hapus" [ref=f1e193] [cursor=pointer]
+                  - generic [ref=f1e197]:
+                    - generic:
+                      - generic: IZ-20261012-005
+                      - generic: 8 Nov — Dinas Kantor
+                    - generic [ref=f1e198]: 13:00 s/d 15:30 WIB
+                    - generic "Selesai (Terlambat)" [ref=f1e200]
+                    - generic [ref=f1e203]:
+                      - button "Detail Pengajuan" [ref=f1e204] [cursor=pointer]
+                      - button "Hapus" [ref=f1e209] [cursor=pointer]
+                  - generic [ref=f1e213]:
+                    - generic:
+                      - generic: IZ-20261009-002
+                      - generic: 7 Nov — Urusan Pribadi
+                    - generic [ref=f1e214]: 10:00 s/d 12:00 WIB
+                    - generic "Selesai" [ref=f1e216]
+                    - generic [ref=f1e219]:
+                      - button "Detail Pengajuan" [ref=f1e220] [cursor=pointer]
+                      - button "Hapus" [ref=f1e225] [cursor=pointer]
+                  - generic [ref=f1e229]:
+                    - generic:
+                      - generic: IZ-20261007-004
+                      - generic: 30 Okt — Dinas Kantor
+                    - generic [ref=f1e230]: 09:00 s/d 11:30 WIB
+                    - generic "Selesai" [ref=f1e232]
+                    - generic [ref=f1e235]:
+                      - button "Detail Pengajuan" [ref=f1e236] [cursor=pointer]
+                      - button "Hapus" [ref=f1e241] [cursor=pointer]
+            - generic [ref=f1e245]:
+              - generic [ref=f1e246]:
+                - generic [ref=f1e247]:
+                  - heading "Total Pengajuan Izin" [level=3] [ref=f1e248]
+                  - combobox "Filter Periode" [ref=f1e249] [cursor=pointer]:
+                    - option "Bulan Ini" [selected]
+                    - option "Tahun Ini"
+                    - option "Semua Riwayat"
+                - generic [ref=f1e251]:
+                  - img [ref=f1e253]:
+                    - generic [ref=f1e254]:
+                      - generic [ref=f1e256] [cursor=pointer]
+                      - generic [ref=f1e257] [cursor=pointer]
+                    - generic [ref=f1e258]: "7"
+                    - generic [ref=f1e259]: Total Izin
+                  - generic [ref=f1e260]:
+                    - generic [ref=f1e261]:
+                      - generic [ref=f1e262]: Total Izin (Biasa)
+                      - generic [ref=f1e265]: 6 izin (85.7%)
+                    - generic [ref=f1e266]:
+                      - generic [ref=f1e267]: Izin Darurat
+                      - generic [ref=f1e270]: 1 izin (14.3%)
+              - generic [ref=f1e271]:
+                - heading "Ketentuan izin keluar" [level=3] [ref=f1e273]
+                - list [ref=f1e274]:
+                  - listitem [ref=f1e275]: – Izin reguler memerlukan persetujuan Atasan. Maksimal satu tiket aktif.
+                  - listitem [ref=f1e276]: – Tunjukkan QR kepada petugas saat keluar dan kembali.
+                  - listitem [ref=f1e277]: – Ajukan perpanjangan sebelum batas jam kembali.
+              - generic [ref=f1e278]:
+                - heading "Kontak Pos Jaga 1" [level=3] [ref=f1e280]
+                - generic [ref=f1e281]:
+                  - generic [ref=f1e282]: Petugas Pengamanan — 24 jam
+                  - generic [ref=f1e283]: Ekstensi 110 / 0264 316 110
+                  - generic [ref=f1e284]: Hubungi petugas jika terjadi kendala pemindaian QR.
+        - text: – – – –
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic [ref=f1e285]: Beralih ke akun Budi Pratama, S.T.
+    - generic [ref=f1e287]: Selamat datang, Budi Pratama, S.T. (undefined)
+    - generic [ref=f1e289]: Beralih ke akun Budi Pratama, S.T.

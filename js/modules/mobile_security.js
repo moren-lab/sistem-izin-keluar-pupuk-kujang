@@ -757,20 +757,17 @@
   // -------------------------------------------------------------------
   // 5. RIWAYAT PEMINDAIAN (Pos Jaga - Sesuai Standar Tampilan Riwayat Karyawan)
   // -------------------------------------------------------------------
-  function renderSecurityRiwayat(container) {
+  function getSecurityRiwayatFilteredData() {
     const tickets = getTickets();
-
+    const isFinalStatus = (st) => (st === 'Selesai' || st === 'Ditolak' || st === 'Dibatalkan' || st === 'Kedaluwarsa');
     const hasDeletableTickets = tickets.some(t =>
-      !t.deletedBySecurity &&
-      Boolean(t.scanOutTime) &&
-      (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+      !t.deletedBySecurity && isFinalStatus(t.status)
     );
 
-    // 1. Filter log transaksi gerbang (HANYA tiket yang sudah dipindai keluar / Scan Out oleh Pos Jaga)
+    // 1. Filter log transaksi gerbang & riwayat final Pos Jaga (Sesuai Rule 7: Strictly Final Status Only)
     let eligible = tickets.filter(t => {
       if (t.deletedBySecurity) return false;
-      // Riwayat Pos Jaga hanya mulai ada setelah Pos Jaga melakukan Scan Out ke karyawannya
-      return Boolean(t.scanOutTime);
+      return isFinalStatus(t.status);
     });
 
     // 2. Filter Periode (Hari Ini, Minggu Ini, Bulan Ini, Tahun Ini, Semua Waktu)
@@ -808,7 +805,7 @@
       });
     }
 
-    // 5. Filter Pencarian Live Search (ID, Nama, NIP, Tujuan, Departemen, Alasan, Kategori, Gerbang)
+    // 5. Filter Pencarian Live Search (ID, Nama, NIP, Tim Dinas, Tujuan, Departemen, Alasan, Kategori, Gerbang)
     if (riwayatSearchQuery && riwayatSearchQuery.trim()) {
       const q = riwayatSearchQuery.trim().toLowerCase();
       eligible = eligible.filter(t => {
@@ -822,9 +819,13 @@
         const typeStr = (t.type || t.returnType || '').toLowerCase();
         const gateOutStr = (t.scanOutGate || '').toLowerCase();
         const gateInStr = (t.scanInGate || '').toLowerCase();
+        const memberMatch = Array.isArray(t.members) && t.members.some(m =>
+          (m.name && m.name.toLowerCase().includes(q)) ||
+          (m.nip && m.nip.toLowerCase().includes(q))
+        );
         return idStr.includes(q) || nameStr.includes(q) || nipStr.includes(q) ||
           destStr.includes(q) || deptStr.includes(q) || reasonStr.includes(q) ||
-          catStr.includes(q) || typeStr.includes(q) || gateOutStr.includes(q) || gateInStr.includes(q);
+          catStr.includes(q) || typeStr.includes(q) || gateOutStr.includes(q) || gateInStr.includes(q) || memberMatch;
       });
     }
 
@@ -838,7 +839,6 @@
       return parseTime(b) - parseTime(a);
     });
 
-    // 7. Paginasi Dinamis
     const totalItems = eligible.length;
     const totalPages = Math.ceil(totalItems / riwayatPageSize) || 1;
     if (currentRiwayatPage > totalPages) currentRiwayatPage = 1;
@@ -847,18 +847,18 @@
     const startIndex = (currentRiwayatPage - 1) * riwayatPageSize;
     const pageTickets = eligible.slice(startIndex, startIndex + riwayatPageSize);
 
-    // Keterangan teks periode
-    const periodMap = {
-      'all': 'Semua waktu',
-      'today': 'Hari ini',
-      'week': 'Minggu ini',
-      'month': 'Bulan ini',
-      'year': 'Tahun ini'
+    return {
+      eligible,
+      hasDeletableTickets,
+      totalItems,
+      totalPages,
+      startIndex,
+      pageTickets
     };
-    const periodText = periodMap[riwayatPeriodFilter] || 'Semua waktu';
+  }
 
-    // 8. Tampilan Card View
-    const cardsHtml = pageTickets.map(t => {
+  function renderSecurityRiwayatCardRows(pageTickets) {
+    return pageTickets.map(t => {
       const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
       const isLate = isTicketLate(t);
       const isEmergencyTicket = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
@@ -906,9 +906,9 @@
           <!-- Baris 5: Rencana Waktu -->
           <div style="font-size: 0.725rem; color: #475569; font-weight: 600; margin-bottom: 8px;">
             ${isPulang
-          ? `<span style="color: #0f172a; font-weight: 700;">Rencana Keluar:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'}`
-          : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
-        }
+              ? `<span style="color: #0f172a; font-weight: 700;">Rencana Keluar:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'}`
+              : `<span style="color: #0f172a; font-weight: 700;">Rencana:</span> ${formatTimeOnly(getTExitTime(t)) || '10.00 WIB'} – ${formatTimeOnly(getTReturnTime(t)) || '13.00 WIB'}`
+            }
           </div>
 
           <!-- Baris 6: Kotak Kecil Scan Out & Masuk Kembali -->
@@ -933,30 +933,35 @@
           <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 4px; gap: 8px;">
             <div style="font-size: 0.7rem; font-weight: 600; color: ${isCompleted ? '#047857' : (isLate ? '#b91c1c' : '#475569')};">
               ${isCompleted
-          ? `✓ Selesai ${isLate ? 'terlambat' : 'tepat waktu'}`
-          : (isLate
-            ? `⚠️ Terlambat ${t.lateMinutes || 30} menit`
-            : (t.status === 'Sedang di Luar'
-              ? '• Sedang di luar kawasan'
-              : '• Siap verifikasi keluar gerbang'
-            )
-          )
-        }
+                ? `✓ Selesai ${isLate ? 'terlambat' : 'tepat waktu'}`
+                : (isLate
+                  ? `⚠️ Terlambat ${t.lateMinutes || 30} menit`
+                  : (t.status === 'Sedang di Luar'
+                    ? '• Sedang di luar kawasan'
+                    : '• Siap verifikasi keluar gerbang'
+                  )
+                )
+              }
             </div>
-            <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
-            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Lihat Detail Pengajuan</span>
-            </button>
+            <!-- Tombol Detail Pengajuan (Kecil Ramping) & Tombol Hapus 1 Riwayat (Tong Sampah Merah) -->
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.675rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 32px; height: 32px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Lihat Detail Pengajuan</span>
+              </button>
+              <button type="button" class="mobile-btn-danger" title="Hapus Riwayat" aria-label="Hapus Riwayat" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'security')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+  }
 
-    // 9. Tampilan List View
-    const listHtml = pageTickets.map(t => {
+  function renderSecurityRiwayatListRows(pageTickets) {
+    return pageTickets.map(t => {
       const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului');
-      const isLate = isTicketLate(t);
       const isEmergencyTicket = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))));
       const destText = (t.destination && t.destination.trim()) ? t.destination.trim() : 'Tanpa tujuan';
       const typeDisplay = formatTipeKepulanganDisplay(t.type || t.returnType);
@@ -999,18 +1004,24 @@
             <div style="font-size: 0.7rem; color: #334155; font-weight: 600;">
               Scan Out: <strong style="color: #0f172a;">${scanOutT || '—'}</strong> • Masuk: <strong style="color: ${isPulang ? '#64748b' : (scanInT ? '#0f172a' : '#dc2626')}; font-weight: 800;">${isPulang ? '—' : (scanInT || 'Belum')}</strong>
             </div>
-            <!-- Perubahan 1: Detail Pengajuan (Pil Putih Border Tipis + Icon Dokumen) -->
-            <button type="button" class="mobile-btn-secondary" style="padding: 5px 10px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 36px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              <span>Lihat Detail Pengajuan</span>
-            </button>
+            <!-- Tombol Detail Pengajuan (Kecil Ramping) & Tombol Hapus 1 Riwayat (Tong Sampah Merah) -->
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.675rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; min-height: 32px; height: 32px; cursor: pointer;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span>Lihat Detail Pengajuan</span>
+              </button>
+              <button type="button" class="mobile-btn-danger" title="Hapus Riwayat" aria-label="Hapus Riwayat" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'security')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+  }
 
-    // 10. Tampilan Kosong (Empty State)
-    const emptyHtml = `
+  function renderSecurityRiwayatEmptyHtml() {
+    return `
       <div class="mobile-card" style="text-align: center; padding: 28px 16px; border: 1.5px dashed #cbd5e1; border-radius: 14px; background: #ffffff;">
         <div style="color: #94a3b8; margin-bottom: 8px;">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
@@ -1019,68 +1030,113 @@
         <div style="font-size: 0.775rem; color: #475569; max-width: 270px; margin: 0 auto; line-height: 1.4;">
           ${riwayatSearchQuery ? `Tidak ada log yang cocok dengan kata kunci "<strong>${riwayatSearchQuery}</strong>".` : 'Tidak ada catatan pemindaian yang sesuai dengan kriteria filter ini.'}
         </div>
-        ${(riwayatSearchQuery || riwayatStatusFilter !== 'all' || riwayatCategoryFilter !== 'all' || riwayatPeriodFilter !== 'all') ? `
+        ${(riwayatSearchQuery || riwayatStatusFilter !== 'all' || riwayatCategoryFilter !== 'all' || riwayatPeriodFilter !== 'all' || riwayatDateStart || riwayatDateEnd) ? `
           <button type="button" class="mobile-btn-secondary" style="margin-top: 14px; padding: 8px 16px; font-size: 0.75rem; width: auto; font-weight: 700; min-height: 40px; display: inline-flex; align-items: center; gap: 6px;" onclick="window.mobileResetSecurityRiwayatFilter()">
             <span>Reset Pencarian & Filter</span>
           </button>
         ` : ''}
       </div>
     `;
+  }
 
-    // 11. Tombol Paginasi Dinamis
-    let paginationHtml = '';
-    if (totalPages > 1) {
-      let pageBtns = '';
-      for (let p = 1; p <= totalPages; p++) {
-        const isActive = (p === currentRiwayatPage);
-        pageBtns += `
-          <button type="button" style="min-width: 36px; height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid ${isActive ? '#2563eb' : '#cbd5e1'}; background: ${isActive ? '#2563eb' : '#ffffff'}; color: ${isActive ? '#ffffff' : '#334155'}; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileSetSecurityRiwayatPage(${p})">
-            ${p}
-          </button>
-        `;
-      }
-      paginationHtml = `
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 18px 0 8px 0; gap: 8px;">
-          <div style="font-size: 0.725rem; color: #64748b; font-weight: 600;">
-            Menampilkan ${startIndex + 1}–${Math.min(startIndex + riwayatPageSize, totalItems)} dari ${totalItems} catatan
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
-            ${pageBtns}
-          </div>
-        </div>
+  function renderSecurityRiwayatPaginationHtml(totalPages, startIndex, totalItems) {
+    if (totalPages <= 1) return '';
+    let pageBtns = '';
+    for (let p = 1; p <= totalPages; p++) {
+      const isActive = (p === currentRiwayatPage);
+      pageBtns += `
+        <button type="button" style="min-width: 36px; height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid ${isActive ? '#2563eb' : '#cbd5e1'}; background: ${isActive ? '#2563eb' : '#ffffff'}; color: ${isActive ? '#ffffff' : '#334155'}; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileSetSecurityRiwayatPage(${p})">
+          ${p}
+        </button>
       `;
     }
+    return `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 18px 0 8px 0; gap: 8px;">
+        <div style="font-size: 0.725rem; color: #64748b; font-weight: 600;">
+          Menampilkan ${startIndex + 1}–${Math.min(startIndex + riwayatPageSize, totalItems)} dari ${totalItems} catatan
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+          ${pageBtns}
+        </div>
+      </div>
+    `;
+  }
+
+  // FUNGSI IN-PLACE UPDATE: Memperbarui daftar tanpa merusak DOM input pencarian (Keyboard tidak tertutup pada HP)
+  function renderSecurityRiwayatListOnly() {
+    const listContainer = document.getElementById('mSecurityRiwayatItemsContainer');
+    const countContainer = document.getElementById('mRiwayatSecCountText');
+    const pagContainer = document.getElementById('mSecurityRiwayatPaginationContainer');
+    const clearBtn = document.getElementById('mBtnClearRiwayatSecSearch');
+
+    if (!listContainer) {
+      renderSecurityRiwayat();
+      return;
+    }
+
+    if (clearBtn) {
+      clearBtn.style.display = riwayatSearchQuery ? 'inline-flex' : 'none';
+    }
+
+    const data = getSecurityRiwayatFilteredData();
+    const rowsHtml = currentRiwayatView === 'list'
+      ? renderSecurityRiwayatListRows(data.pageTickets)
+      : renderSecurityRiwayatCardRows(data.pageTickets);
+
+    if (countContainer) {
+      countContainer.innerText = `${data.totalItems} log pemindaian`;
+    }
+
+    listContainer.innerHTML = (data.totalItems === 0 ? renderSecurityRiwayatEmptyHtml() : rowsHtml);
+
+    if (pagContainer) {
+      pagContainer.innerHTML = renderSecurityRiwayatPaginationHtml(data.totalPages, data.startIndex, data.totalItems);
+    }
+  }
+
+  function renderSecurityRiwayat(container) {
+    if (!container) container = document.getElementById('mobileMainContent');
+    if (!container) return;
+
+    const data = getSecurityRiwayatFilteredData();
+    const rowsHtml = currentRiwayatView === 'list'
+      ? renderSecurityRiwayatListRows(data.pageTickets)
+      : renderSecurityRiwayatCardRows(data.pageTickets);
+    const emptyHtml = renderSecurityRiwayatEmptyHtml();
+    const paginationHtml = renderSecurityRiwayatPaginationHtml(data.totalPages, data.startIndex, data.totalItems);
 
     container.innerHTML = `
       <!-- Header Halaman Riwayat Pos Jaga -->
       <div class="mobile-page-header" style="margin-bottom: 12px;">
         <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">Riwayat Pemindaian</h2>
-        
+      </div>
 
-      <!-- 1. Search Bar (Live search with debounce and clear button) -->
+      <!-- 1. Search Bar (Live search in-place tanpa merusak fokus keyboard HP) -->
       <div style="display: flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" style="flex-shrink: 0; margin-right: 8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="mRiwayatSecLiveSearch" placeholder="Cari nomor tiket, nama, NIP, tujuan..." value="${riwayatSearchQuery}" style="flex: 1; border: none; background: transparent; font-size: 0.825rem; color: #0f172a; padding: 11px 0; outline: none; min-width: 0;" oninput="window.mobileDebounceSecurityRiwayatSearch(this.value)">
+        <button type="button" aria-label="Cari" style="border: none; background: transparent; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; margin-right: 8px;" onclick="window.mobileExecuteSecurityRiwayatSearch(document.getElementById('mRiwayatSecLiveSearch').value)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <input type="text" id="mRiwayatSecLiveSearch" placeholder="Cari nomor tiket, nama, NIP, tujuan..." value="${riwayatSearchQuery}" style="flex: 1; border: none; background: transparent; font-size: 0.825rem; color: #0f172a; padding: 11px 0; outline: none; min-width: 0;" oninput="window.mobileDebounceSecurityRiwayatSearch(this.value)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); window.mobileExecuteSecurityRiwayatSearch(this.value); }">
         <button type="button" id="mBtnClearRiwayatSecSearch" aria-label="Hapus teks pencarian" style="display: ${riwayatSearchQuery ? 'inline-flex' : 'none'}; border: none; background: #e2e8f0; color: #475569; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; flex-shrink: 0; margin-left: 6px;" onclick="window.mobileClearSecurityRiwayatSearch()">✕</button>
       </div>
 
-      <!-- 2. Toolbar (Perubahan 2: Toggle Dihapus; Perubahan 3: Filter & Hapus Riwayat Berdampingan di Kanan Bawah Kolom Pencarian) -->
+      <!-- 2. Toolbar -->
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 0.75rem; font-weight: 700; color: #475569;">
-          ${totalItems} log pemindaian
+        <div style="font-size: 0.75rem; font-weight: 700; color: #475569;" id="mRiwayatSecCountText">
+          ${data.totalItems} log pemindaian
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <!-- Tombol Unduh Log Gerbang CSV -->
           <button type="button" class="mobile-btn-export-csv mobile-touch-hit-44" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; border: 1.5px solid #0284c7; background: #f0f9ff; color: #0284c7; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-sizing: border-box;" onclick="window.mobileExportSecurityRiwayatCsv()" title="Unduh Log Gerbang (CSV)" aria-label="Unduh Log Gerbang (CSV)">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           </button>
-          <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px) -->
+          <!-- Tombol Filter -->
           <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isSecurityRiwayatFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isSecurityRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isSecurityRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isSecurityRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleSecurityRiwayatFilter()" title="Filter Riwayat Pemindaian" aria-label="Filter Riwayat Pemindaian">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
             ${(riwayatStatusFilter !== 'all' || riwayatCategoryFilter !== 'all' || riwayatPeriodFilter !== 'all' || riwayatDateStart || riwayatDateEnd) ? '<span style="position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>' : ''}
           </button>
           <!-- Tombol Merah Solid Sampah -->
-          <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('security')">
+          <button type="button" class="mobile-btn-clear-history mobile-touch-hit-44" ${data.hasDeletableTickets ? '' : 'disabled'} title="Hapus Riwayat Selesai" aria-label="Hapus Riwayat Selesai" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);" onclick="window.mobileClearRiwayat('security')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
           </button>
         </div>
@@ -1120,7 +1176,7 @@
             </div>
           </div>
 
-          <!-- Filter Kategori & Status (2 Kolom) -->
+          <!-- Filter Kategori & Status (2 Kolom - Strict Rule 7 Final Statuses) -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
               <label class="mobile-filter-label">Kategori</label>
@@ -1134,11 +1190,11 @@
               <label class="mobile-filter-label">Status</label>
               <select class="mobile-filter-select" id="mRiwayatSecStatus" onchange="window.mobileHandleSecurityRiwayatStatusChange(this.value)">
                 <option value="all" ${riwayatStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
-                <option value="Sedang di Luar" ${riwayatStatusFilter === 'Sedang di Luar' ? 'selected' : ''}>Sedang di Luar</option>
-                <option value="Disetujui" ${riwayatStatusFilter === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
                 <option value="Selesai" ${riwayatStatusFilter === 'Selesai' ? 'selected' : ''}>Selesai</option>
-                <option value="Terlambat" ${riwayatStatusFilter === 'Terlambat' ? 'selected' : ''}>Terlambat</option>
+                <option value="Terlambat" ${riwayatStatusFilter === 'Terlambat' ? 'selected' : ''}>Selesai (Terlambat)</option>
                 <option value="Kedaluwarsa" ${riwayatStatusFilter === 'Kedaluwarsa' ? 'selected' : ''}>Kedaluwarsa</option>
+                <option value="Ditolak" ${riwayatStatusFilter === 'Ditolak' ? 'selected' : ''}>Ditolak</option>
+                <option value="Dibatalkan" ${riwayatStatusFilter === 'Dibatalkan' ? 'selected' : ''}>Dibatalkan</option>
               </select>
             </div>
           </div>
@@ -1152,16 +1208,15 @@
         </div>
       </div>
 
-      <!-- 4. Ringkasan Hasil -->
-     
-
-      <!-- 5. Items Container -->
+      <!-- 4. Items Container -->
       <div id="mSecurityRiwayatItemsContainer">
-        ${totalItems === 0 ? emptyHtml : listHtml}
+        ${data.totalItems === 0 ? emptyHtml : rowsHtml}
       </div>
 
-      <!-- 6. Paginasi -->
-      ${paginationHtml}
+      <!-- 5. Paginasi -->
+      <div id="mSecurityRiwayatPaginationContainer">
+        ${paginationHtml}
+      </div>
     `;
   }
 
@@ -2099,56 +2154,84 @@
   window.mobileHandleSecurityRiwayatPeriodChange = function (val) {
     riwayatPeriodFilter = val;
     currentRiwayatPage = 1;
-    renderMobileSecurity(null, 'riwayat');
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileHandleSecurityRiwayatCatChange = function (val) {
     riwayatCategoryFilter = val;
     currentRiwayatPage = 1;
-    renderMobileSecurity(null, 'riwayat');
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileHandleSecurityRiwayatStatusChange = function (val) {
     riwayatStatusFilter = val;
     currentRiwayatPage = 1;
-    renderMobileSecurity(null, 'riwayat');
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileDebounceSecurityRiwayatSearch = function (val) {
     if (riwayatSearchDebounceTimer) clearTimeout(riwayatSearchDebounceTimer);
     const clearBtn = document.getElementById('mBtnClearRiwayatSecSearch');
-    if (clearBtn) clearBtn.style.display = val && val.trim() ? 'inline-flex' : 'none';
+    const rawVal = val ? val.trim() : '';
 
-    riwayatSearchDebounceTimer = setTimeout(() => {
-      riwayatSearchQuery = val;
+    if (clearBtn) clearBtn.style.display = rawVal ? 'inline-flex' : 'none';
+
+    // Jika pengguna menghapus input hingga kosong, langsung tampilkan seluruh riwayat seketika
+    if (rawVal.length === 0) {
+      riwayatSearchQuery = '';
       currentRiwayatPage = 1;
-      renderMobileSecurity(null, 'riwayat');
-    }, 250);
+      renderSecurityRiwayatListOnly();
+      return;
+    }
+
+    // Jika pengguna baru mengetik 1 karakter, jangan memicu auto-search agar pengguna leluasa mengetik tanpa interupsi
+    if (rawVal.length === 1) {
+      return;
+    }
+
+    // Ketika karakter >= 2, tunggu jeda pengetikan 400ms lalu perbarui daftar secara in-place tanpa merusak fokus keyboard HP
+    riwayatSearchDebounceTimer = setTimeout(() => {
+      riwayatSearchQuery = rawVal;
+      currentRiwayatPage = 1;
+      renderSecurityRiwayatListOnly();
+    }, 400);
+  };
+
+  window.mobileExecuteSecurityRiwayatSearch = function (val) {
+    if (riwayatSearchDebounceTimer) clearTimeout(riwayatSearchDebounceTimer);
+    riwayatSearchQuery = val ? val.trim() : '';
+    currentRiwayatPage = 1;
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileClearSecurityRiwayatSearch = function () {
+    if (riwayatSearchDebounceTimer) clearTimeout(riwayatSearchDebounceTimer);
     riwayatSearchQuery = '';
     currentRiwayatPage = 1;
     const inp = document.getElementById('mRiwayatSecLiveSearch');
-    if (inp) inp.value = '';
+    if (inp) {
+      inp.value = '';
+      inp.focus();
+    }
     const clearBtn = document.getElementById('mBtnClearRiwayatSecSearch');
     if (clearBtn) clearBtn.style.display = 'none';
-    renderMobileSecurity(null, 'riwayat');
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileHandleSecurityDateStart = function (val) {
     riwayatDateStart = val;
     currentRiwayatPage = 1;
-    renderMobileSecurity(null, 'riwayat');
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileHandleSecurityDateEnd = function (val) {
     riwayatDateEnd = val;
     currentRiwayatPage = 1;
-    renderMobileSecurity(null, 'riwayat');
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileResetSecurityRiwayatFilter = function () {
+    if (riwayatSearchDebounceTimer) clearTimeout(riwayatSearchDebounceTimer);
     riwayatSearchQuery = '';
     riwayatStatusFilter = 'all';
     riwayatCategoryFilter = 'all';
@@ -2156,7 +2239,24 @@
     riwayatDateStart = '';
     riwayatDateEnd = '';
     currentRiwayatPage = 1;
-    renderMobileSecurity(null, 'riwayat');
+
+    const inp = document.getElementById('mRiwayatSecLiveSearch');
+    if (inp) inp.value = '';
+    const clearBtn = document.getElementById('mBtnClearRiwayatSecSearch');
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    const selPeriod = document.getElementById('mRiwayatSecPeriod');
+    if (selPeriod) selPeriod.value = 'all';
+    const selCat = document.getElementById('mRiwayatSecCat');
+    if (selCat) selCat.value = 'all';
+    const selStatus = document.getElementById('mRiwayatSecStatus');
+    if (selStatus) selStatus.value = 'all';
+    const dStart = document.getElementById('mSecurityRiwayatDateStart');
+    if (dStart) dStart.value = '';
+    const dEnd = document.getElementById('mSecurityRiwayatDateEnd');
+    if (dEnd) dEnd.value = '';
+
+    renderSecurityRiwayatListOnly();
   };
 
   window.mobileToggleTorch = async function () {

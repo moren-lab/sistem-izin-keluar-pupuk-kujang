@@ -53,6 +53,7 @@
   let atasanTimDebounceTimer = null;
   let selectedTimTicketId = null;
   let viewingTicketId = null;
+  let atasanDetailSourceTab = 'antrean';
   let currentAtasanDetailTab = 'info'; // 'info' | 'jejak'
 
   function getActiveApprover() {
@@ -1396,8 +1397,8 @@
 
     container.innerHTML = `
       <div style="margin-bottom: 10px;">
-        <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; padding: 4px 0; display: inline-flex; align-items: center; gap: 4px; color: #059669; font-weight: 700;" onclick="window.mobileSwitchTab('antrean')">
-          ← Kembali ke antrean
+        <button type="button" class="mobile-link-rincian" style="border:none; background:none; font-size: 0.75rem; padding: 4px 0; display: inline-flex; align-items: center; gap: 4px; color: #059669; font-weight: 700;" onclick="window.mobileSwitchTab('${atasanDetailSourceTab || 'antrean'}')">
+          ← Kembali ke ${atasanDetailSourceTab === 'riwayat' ? 'riwayat' : (atasanDetailSourceTab === 'pelacakan' ? 'pelacakan' : 'antrean')}
         </button>
       </div>
 
@@ -1893,7 +1894,7 @@
           ` : ''}
 
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}', 'riwayat')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Lihat Detail Pengajuan</span>
             </button>
@@ -2280,7 +2281,7 @@
           </div>
 
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}')">
+            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}', 'riwayat')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Lihat Detail Pengajuan</span>
             </button>
@@ -2372,10 +2373,12 @@
       <!-- History Cards List -->
       ${cardsHtml || '<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada riwayat yang cocok dengan filter.</div>'}
 
-      <!-- Pagination -->
-      <div style="display: flex; justify-content: center; gap: 6px; margin: 16px 0;">
-        <span style="display: inline-flex; width: 32px; height: 32px; border-radius: 8px; background: #2563eb; color: #fff; font-size: 0.75rem; font-weight: 800; align-items: center; justify-content: center;">1</span>
-      </div>
+      <!-- Pagination (Hanya tampil jika ada data riwayat, diposisikan di pojok kanan bawah dengan warna hijau) -->
+      ${filtered.length > 0 ? `
+        <div style="display: flex; justify-content: flex-end; margin: 16px 0 8px 0;">
+          <span style="display: inline-flex; width: 32px; height: 32px; border-radius: 8px; background: #16a34a; color: #ffffff; font-size: 0.75rem; font-weight: 800; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(22, 163, 74, 0.25);">1</span>
+        </div>
+      ` : ''}
     `;
   }
 
@@ -2630,8 +2633,16 @@
 
 
 
-  window.mobileOpenAtasanDetailModal = function (ticketId) {
+  window.mobileOpenAtasanDetailModal = function (ticketId, sourceTab) {
     viewingTicketId = ticketId;
+    if (sourceTab) {
+      atasanDetailSourceTab = sourceTab;
+    } else if (typeof window.getCurrentMobileTab === 'function') {
+      atasanDetailSourceTab = window.getCurrentMobileTab();
+    } else if (window.currentMobileTab) {
+      atasanDetailSourceTab = window.currentMobileTab;
+    }
+    window.atasanDetailSourceTab = atasanDetailSourceTab;
     renderMobileAtasan(null, 'detail');
   };
 

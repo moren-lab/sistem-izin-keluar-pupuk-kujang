@@ -1,0 +1,192 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - complementary [ref=f2e3]:
+      - link "Pupuk Kujang Logo PUPUK KUJANG PT Pupuk Kujang" [ref=f2e5] [cursor=pointer]:
+        - /url: "#"
+        - img "Pupuk Kujang Logo" [ref=f2e7]
+        - generic [ref=f2e8]:
+          - generic [ref=f2e9]: PUPUK KUJANG
+          - generic [ref=f2e10]: PT Pupuk Kujang
+      - navigation [ref=f2e11]:
+        - generic "Dashboard" [ref=f2e12] [cursor=pointer]
+        - generic [ref=f2e20]: Persetujuan dan pelacakan
+        - generic "Antrian Persetujuan" [ref=f2e21] [cursor=pointer]
+        - generic "Pelacakan Izin Karyawan" [ref=f2e27] [cursor=pointer]
+        - generic "Riwayat Izin Karyawan" [ref=f2e33] [cursor=pointer]
+      - generic [ref=f2e38]:
+        - generic [ref=f2e39]: TERHUBUNG MELALUI
+        - generic [ref=f2e40]: Portal SAKTI / KUJANG ID
+        - generic [ref=f2e41]:
+          - img "Foto Ir. Hendra Gunawan, M.T." [ref=f2e43]
+          - generic [ref=f2e44]:
+            - generic [ref=f2e45]: Ir. Hendra Gunawan, M.T.
+            - generic [ref=f2e46]: "NIP: PK-2015-1002"
+        - button "Keluar" [ref=f2e47] [cursor=pointer]
+    - generic "Geser untuk mengatur lebar menu (Klik ganda untuk reset 260px)" [ref=f2e52]
+    - generic [ref=f2e54]:
+      - banner [ref=f2e55]:
+        - generic [ref=f2e56]:
+          - button "Toggle Sidebar" [ref=f2e57] [cursor=pointer]
+          - generic [ref=f2e59]:
+            - generic [ref=f2e60]: Atasan 1
+            - generic [ref=f2e61]: ›
+            - generic [ref=f2e62]: Dashboard
+        - generic [ref=f2e63]:
+          - button "Notifikasi" [ref=f2e65] [cursor=pointer]
+          - generic "Beralih peran untuk menguji alur terintegrasi" [ref=f2e69]:
+            - button "Karyawan" [ref=f2e71] [cursor=pointer]
+            - button "Atasan" [ref=f2e77] [cursor=pointer]
+            - button "Pos Jaga" [ref=f2e84] [cursor=pointer]
+            - button "Admin K3" [ref=f2e89] [cursor=pointer]
+            - button "Reset" [ref=f2e94] [cursor=pointer]
+      - main [ref=f2e99]:
+        - text: – – –
+        - generic [ref=f2e101]:
+          - generic [ref=f2e102]:
+            - generic [ref=f2e104]:
+              - generic [ref=f2e105]:
+                - heading [level=2] [ref=f2e106]:
+                  - text: Selamat sore,
+                  - img "Foto Ir. Hendra Gunawan, M.T." [ref=f2e107]
+                  - text: Ir. Hendra Gunawan, M.T.
+                - paragraph [ref=f2e108]: "Atasan 1 (Manager) | Departemen Rekayasa & Pemeliharaan | Prinsip: No Approval, No Exit"
+              - generic "Beralih Mode Gelap / Terang" [ref=f2e109]:
+                - generic "Beralih Mode Gelap / Terang" [ref=f2e110] [cursor=pointer]:
+                  - checkbox "☀️ 🌙"
+                  - generic [ref=f2e111]:
+                    - generic [ref=f2e112]: ☀️
+                    - generic [ref=f2e113]: 🌙
+            - generic [ref=f2e114]:
+              - generic [ref=f2e115]:
+                - generic [ref=f2e116]: "Status Antrean: Tidak Ada Pengajuan Menunggu"
+                - generic [ref=f2e117]: Semua pengajuan izin bawahan telah diproses secara tepat waktu.
+              - button "Review Antrean Izin →" [ref=f2e118] [cursor=pointer]
+          - heading "Ringkasan Persetujuan" [level=1] [ref=f2e121]
+          - generic [ref=f2e122]:
+            - generic [ref=f2e123]:
+              - generic [ref=f2e124]: Perlu Keputusan Segera
+              - generic [ref=f2e125]: "0"
+              - generic [ref=f2e126]: Menunggu persetujuan
+            - generic [ref=f2e127]:
+              - generic [ref=f2e128]: Telah Disetujui
+              - generic [ref=f2e129]: "0"
+              - generic [ref=f2e130]: Tiket disetujui
+            - generic [ref=f2e131]:
+              - generic [ref=f2e132]: Ditolak
+              - generic [ref=f2e133]: "0"
+              - generic [ref=f2e134]: Tidak diizinkan
+            - generic [ref=f2e135]:
+              - generic [ref=f2e136]: Total Permohonan Masuk
+              - generic [ref=f2e137]: "10"
+              - generic [ref=f2e138]: Bulan ini
+          - generic [ref=f2e139]:
+            - generic [ref=f2e140]:
+              - generic [ref=f2e141]:
+                - generic [ref=f2e142]:
+                  - generic [ref=f2e143]: ⚡
+                  - generic [ref=f2e144]: Antrean Persetujuan Cepat
+                - button "Buka Semua Antrian →" [ref=f2e145] [cursor=pointer]
+              - generic [ref=f2e146]: Tidak ada antrian izin yang menunggu keputusan. Semua beres!
+            - generic [ref=f2e148]:
+              - generic [ref=f2e149]:
+                - generic [ref=f2e150]:
+                  - generic [ref=f2e151]:
+                    - generic [ref=f2e152]:
+                      - generic [ref=f2e153]: 📈
+                      - generic [ref=f2e154]: Volume pengajuan tim
+                    - paragraph [ref=f2e155]: Oktober 2026 — Volume Pengajuan Tim Ir. Hendra Gunawan
+                  - combobox "Filter Periode Tren Tim" [ref=f2e156] [cursor=pointer]:
+                    - option "📅 Minggu Ini" [selected]
+                    - option "📅 Bulan Ini"
+                - generic [ref=f2e158]:
+                  - generic [ref=f2e160]:
+                    - generic [ref=f2e161]:
+                      - text: Total Volume 7 Hari
+                      - generic [ref=f2e162]:
+                        - strong [ref=f2e163]: "8"
+                        - text: Pengajuan
+                    - generic [ref=f2e165]:
+                      - text: Hari Puncak
+                      - generic [ref=f2e166]: Rabu (3)
+                    - generic [ref=f2e168]:
+                      - text: Rata-rata Harian
+                      - generic [ref=f2e169]: ~1.1 / hari
+                  - img [ref=f2e171]:
+                    - generic [ref=f2e172]: "0"
+                    - generic [ref=f2e173]: "1"
+                    - generic [ref=f2e174]: "3"
+                    - generic [ref=f2e175]: "4"
+                    - generic [ref=f2e176]: "5"
+                    - generic [ref=f2e177] [cursor=pointer]:
+                      - generic [ref=f2e179]: "2"
+                      - 'generic "Jumat (6 Nov): 2 Pengajuan (25% volume tim)" [ref=f2e180]'
+                      - generic [ref=f2e181]: Jum
+                      - generic [ref=f2e182]: 6 Nov
+                    - generic [ref=f2e183] [cursor=pointer]:
+                      - generic [ref=f2e185]: "1"
+                      - 'generic "Sabtu (7 Nov): 1 Pengajuan (13% volume tim)" [ref=f2e186]'
+                      - generic [ref=f2e187]: Sab
+                      - generic [ref=f2e188]: 7 Nov
+                    - generic [ref=f2e189] [cursor=pointer]:
+                      - generic [ref=f2e191]: "1"
+                      - 'generic "Minggu (8 Nov): 1 Pengajuan (13% volume tim)" [ref=f2e192]'
+                      - generic [ref=f2e193]: Min
+                      - generic [ref=f2e194]: 8 Nov
+                    - generic [ref=f2e195] [cursor=pointer]:
+                      - generic [ref=f2e197]: "1"
+                      - 'generic "Senin (9 Nov): 1 Pengajuan (13% volume tim)" [ref=f2e198]'
+                      - generic [ref=f2e199]: Sen
+                      - generic [ref=f2e200]: 9 Nov
+                    - generic [ref=f2e201] [cursor=pointer]:
+                      - generic [ref=f2e203]: "0"
+                      - 'generic "Selasa (10 Nov): 0 Pengajuan (0% volume tim)" [ref=f2e204]'
+                      - generic [ref=f2e205]: Sel
+                      - generic [ref=f2e206]: 10 Nov
+                    - generic [ref=f2e207] [cursor=pointer]:
+                      - generic [ref=f2e209]: PUNCAK
+                      - generic [ref=f2e213]: "3"
+                      - 'generic "Rabu (11 Nov): 3 Pengajuan (38% volume tim)" [ref=f2e214]'
+                      - generic [ref=f2e215]: Rab
+                      - generic [ref=f2e216]: 11 Nov
+                    - generic [ref=f2e217] [cursor=pointer]:
+                      - generic [ref=f2e219]: "0"
+                      - 'generic "Kamis (Hari Ini) (12 Nov): 0 Pengajuan (0% volume tim)" [ref=f2e220]'
+                      - generic [ref=f2e221]: Kam
+                      - generic [ref=f2e222]: 12 Nov
+              - generic [ref=f2e224]:
+                - generic [ref=f2e225]:
+                  - generic [ref=f2e226]:
+                    - generic [ref=f2e227]: 🚶‍♂️
+                    - generic [ref=f2e228]: Monitor Bawahan di Luar Area
+                  - button "Pelacakan Penuh →" [ref=f2e229] [cursor=pointer]
+                - generic [ref=f2e231]:
+                  - generic [ref=f2e232]:
+                    - generic [ref=f2e233]: ⚠️
+                    - generic [ref=f2e234]:
+                      - generic [ref=f2e235]: Budi Pratama, S.T. — PT Rekayasa Industri, Cikampek
+                      - generic [ref=f2e237]: "TK-20261106-901 — Est. Kembali: 2026-11-06 14:30:00"
+                  - generic "Selesai (Terlambat)" [ref=f2e239]
+              - generic [ref=f2e241]:
+                - generic [ref=f2e243]:
+                  - generic [ref=f2e244]: 🛡️
+                  - generic [ref=f2e245]: Panduan Persetujuan (SOP)
+                - generic [ref=f2e246]:
+                  - paragraph [ref=f2e247]:
+                    - text: "-"
+                    - strong [ref=f2e248]: "Dinas Kantor:"
+                    - text: Verifikasi urgensi pekerjaan dan kelengkapan dokumen tugas.
+                  - paragraph [ref=f2e249]:
+                    - text: "-"
+                    - strong [ref=f2e250]: "Urusan Pribadi:"
+                    - text: Diberikan secara proporsional dengan estimasi waktu kembali yang wajar.
+                  - paragraph [ref=f2e251]:
+                    - text: "-"
+                    - strong [ref=f2e252]: "Penolakan:"
+                    - text: Wajib menyertakan catatan alasan penolakan yang jelas bagi pemohon.
+        - text: – – – –
+  - option "Aktif (Diberikan Akses)" [selected]
+  - option "Dicabut (Akses Ditangguhkan)"
+  - generic:
+    - generic: Beralih ke mode Atasan (Ir. Hendra Gunawan, M.T.)
+    - generic [ref=f2e253]: Selamat datang, Ir. Hendra Gunawan, M.T. (Atasan 1 (Manager))
+    - generic: Beralih ke mode Atasan (Ir. Hendra Gunawan, M.T.)
