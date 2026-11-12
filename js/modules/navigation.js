@@ -748,7 +748,6 @@ window.updateMobileBottomNav = updateMobileBottomNav;
 
 // BIND LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
-  initSidebarResizer();
   const btnToggleSidebar = document.getElementById('btnToggleSidebar');
   const btnCloseSidebarMobile = document.getElementById('btnCloseSidebarMobile');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
@@ -1405,6 +1404,15 @@ function closeLogoutModal() {
 
 function executeLogout() {
   closeLogoutModal();
+  try {
+    sessionStorage.removeItem('kujang_skip_confirm_delete');
+    sessionStorage.removeItem('kujang_skip_confirm_approve');
+    const chkDel = document.getElementById('chkDontShowDeleteConfirm');
+    if (chkDel) chkDel.checked = false;
+    const chkApp = document.getElementById('chkDontShowApproveConfirm');
+    if (chkApp) chkApp.checked = false;
+  } catch (e) { }
+
   if (typeof window.stopCameraScanner === 'function') {
     try { window.stopCameraScanner(); } catch (e) { }
   }
@@ -1464,6 +1472,17 @@ function updateThemeUI(isDark) {
     el.textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
   });
 
+  const popoverIcon = document.getElementById('sidebarPopoverThemeIcon');
+  const popoverLabel = document.getElementById('sidebarPopoverThemeLabel');
+  if (popoverIcon) popoverIcon.textContent = isDark ? '☀️' : '🌙';
+  if (popoverLabel) popoverLabel.textContent = isDark ? 'Mode Terang' : 'Mode Malam';
+
+  const mProfileThemeBtn = document.getElementById('mProfileThemeToggleBtn');
+  if (mProfileThemeBtn) {
+    mProfileThemeBtn.innerHTML = isDark ? '☀️' : '🌙';
+    mProfileThemeBtn.setAttribute('title', isDark ? 'Ubah ke Mode Terang' : 'Ubah ke Mode Malam');
+  }
+
   // Re-render interactive charts with dark mode styling
   try {
     if (typeof window.renderAllCharts === 'function') {
@@ -1489,6 +1508,41 @@ function initTheme() {
   updateThemeUI(isDark);
 }
 
+function toggleSidebarSettingsPopover(e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  const popover = document.getElementById('sidebarSettingsPopover');
+  const btn = document.getElementById('btnSidebarSettings');
+  if (!popover) return;
+  const nextOpen = !popover.classList.contains('open');
+  if (nextOpen && btn) {
+    const rect = btn.getBoundingClientRect();
+    popover.style.left = `${Math.round(rect.left)}px`;
+    popover.style.bottom = `${Math.round(window.innerHeight - rect.top + 8)}px`;
+  }
+  popover.classList.toggle('open', nextOpen);
+  popover.setAttribute('aria-hidden', nextOpen ? 'false' : 'true');
+  if (btn) btn.classList.toggle('active', nextOpen);
+}
+
+function closeSidebarSettingsPopover() {
+  const popover = document.getElementById('sidebarSettingsPopover');
+  const btn = document.getElementById('btnSidebarSettings');
+  if (popover) {
+    popover.classList.remove('open');
+    popover.setAttribute('aria-hidden', 'true');
+  }
+  if (btn) btn.classList.remove('active');
+}
+
+document.addEventListener('click', (e) => {
+  const popover = document.getElementById('sidebarSettingsPopover');
+  const btn = document.getElementById('btnSidebarSettings');
+  if (!popover || !popover.classList.contains('open')) return;
+  if (!popover.contains(e.target) && (!btn || !btn.contains(e.target))) {
+    closeSidebarSettingsPopover();
+  }
+});
+
 // Expose globally
 window.updateClock = updateClock;
 window.toggleSidebar = toggleSidebar;
@@ -1506,6 +1560,8 @@ window.initRoleSwitcherScroll = initRoleSwitcherScroll;
 window.updateThemeUI = updateThemeUI;
 window.toggleDarkMode = toggleDarkMode;
 window.initTheme = initTheme;
+window.toggleSidebarSettingsPopover = toggleSidebarSettingsPopover;
+window.closeSidebarSettingsPopover = closeSidebarSettingsPopover;
 
 
 
@@ -1513,90 +1569,6 @@ window.initTheme = initTheme;
 // SIDEBAR DRAG-TO-RESIZE IMPLEMENTATION
 // ===================================================================
 function initSidebarResizer() {
-  const resizer = document.getElementById('sidebarResizer');
-  const sidebar = document.getElementById('appSidebar');
-  if (!resizer || !sidebar) return;
-
-  const MIN_WIDTH = 180;
-  const MAX_WIDTH = 460;
-  const DEFAULT_WIDTH = 260;
-  const STORAGE_KEY = 'KUJANG_SIDEBAR_WIDTH';
-
-  // Restore saved width from localStorage
-  const savedWidth = localStorage.getItem(STORAGE_KEY);
-  if (savedWidth && window.innerWidth > 900) {
-    const parsed = parseInt(savedWidth, 10);
-    if (!isNaN(parsed) && parsed >= MIN_WIDTH && parsed <= MAX_WIDTH) {
-      sidebar.style.width = parsed + 'px';
-    }
-  }
-
-  let isDragging = false;
-  let startX = 0;
-  let startWidth = DEFAULT_WIDTH;
-
-  function onPointerDown(e) {
-    if (window.innerWidth <= 900) return;
-    isDragging = true;
-    startX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    startWidth = sidebar.getBoundingClientRect().width;
-
-    document.body.classList.add('is-resizing-sidebar');
-    if (e.cancelable) e.preventDefault();
-  }
-
-  function onPointerMove(e) {
-    if (!isDragging) return;
-    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const deltaX = clientX - startX;
-    let newWidth = startWidth + deltaX;
-
-    // Geser jauh ke kiri (< 120px) otomatis ciutkan ke rail mini (collapsed)
-    if (newWidth < 120) {
-      if (!sidebar.classList.contains('collapsed')) {
-        sidebar.classList.add('collapsed');
-      }
-      return;
-    } else {
-      if (sidebar.classList.contains('collapsed')) {
-        sidebar.classList.remove('collapsed');
-      }
-    }
-
-    if (newWidth < MIN_WIDTH) newWidth = MIN_WIDTH;
-    if (newWidth > MAX_WIDTH) newWidth = MAX_WIDTH;
-
-    sidebar.style.width = newWidth + 'px';
-  }
-
-  function onPointerUp() {
-    if (!isDragging) return;
-    isDragging = false;
-    document.body.classList.remove('is-resizing-sidebar');
-
-    const finalWidth = Math.round(sidebar.getBoundingClientRect().width);
-    if (!sidebar.classList.contains('collapsed') && finalWidth >= MIN_WIDTH) {
-      localStorage.setItem(STORAGE_KEY, finalWidth);
-    }
-  }
-
-  // Mouse & Touch Listeners
-  resizer.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-
-  resizer.addEventListener('touchstart', onPointerDown, { passive: false });
-  window.addEventListener('touchmove', onPointerMove, { passive: false });
-  window.addEventListener('touchend', onPointerUp);
-
-  // Double Click: Reset width back to 260px default
-  resizer.addEventListener('dblclick', () => {
-    sidebar.classList.remove('collapsed');
-    sidebar.style.width = DEFAULT_WIDTH + 'px';
-    localStorage.setItem(STORAGE_KEY, DEFAULT_WIDTH);
-    if (typeof window.showToast === 'function') {
-      window.showToast('Lebar sidebar dikembalikan ke default (260px).', 'info');
-    }
-  });
+  // Fitur resize sidebar telah dinonaktifkan sesuai permintaan pengguna
 }
 window.initSidebarResizer = initSidebarResizer;

@@ -235,7 +235,10 @@ function handleOpenNewRequest() {
     window.resetAllDinasUploadState();
   }
   if (selectReqCategory) selectReqCategory.value = '';
-  if (selectReqType) selectReqType.value = '';
+  if (selectReqType) {
+    selectReqType.value = '';
+    selectReqType.dispatchEvent(new Event('change'));
+  }
   if (inputDestination) { inputDestination.value = ''; const c = document.getElementById('countInputDestination'); if (c) c.textContent = '0'; }
   if (inputReason) inputReason.value = '';
   if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'block';
@@ -381,6 +384,7 @@ function openEditNormalModal(ticket) {
   if (selectReqCategory) selectReqCategory.value = ticket.category || 'Dinas Perusahaan';
   if (selectReqType) {
     selectReqType.value = ticket.type || 'Kembali ke Area';
+    selectReqType.dispatchEvent(new Event('change'));
     if (groupEstimatedReturn) {
       groupEstimatedReturn.style.display = ticket.type === 'Pulang Mendahului' ? 'none' : 'block';
     }
@@ -473,6 +477,7 @@ function openEditEmergencyModal(ticket) {
   if (selectEmergCategory) selectEmergCategory.value = ticket.category || 'Dinas Kantor';
   if (selectEmergType) {
     selectEmergType.value = ticket.type || 'Kembali ke Area';
+    selectEmergType.dispatchEvent(new Event('change'));
     if (emergGroupEstimatedReturn) {
       emergGroupEstimatedReturn.style.display = ticket.type === 'Pulang Mendahului' ? 'none' : 'block';
     }
@@ -592,12 +597,29 @@ function setupRadioToggles() {
     });
   }
 
+  function syncReasonFieldByReturnType(typeValue, labelId, inputId, defaultLabelText, defaultPlaceholder) {
+    const labelEl = document.getElementById(labelId);
+    const inputEl = document.getElementById(inputId);
+    const isPulangAwal = (typeValue === 'Pulang Mendahului');
+    if (labelEl) {
+      const text = isPulangAwal
+        ? 'Alasan Keperluan Izin dan memilih pulang lebih awal'
+        : defaultLabelText;
+      labelEl.innerHTML = `${text} <span style="color: var(--rose-danger, #dc2626);">*</span>`;
+    }
+    if (inputEl) {
+      inputEl.placeholder = isPulangAwal
+        ? 'Masukkan alasan keperluan izin dan memilih pulang lebih awal...'
+        : defaultPlaceholder;
+    }
+  }
+
   // Dropdown Tipe Kepulangan (Form Pengajuan Biasa)
   const selectReqType = document.getElementById('selectReqType');
   const groupEstimatedReturn = document.getElementById('groupEstimatedReturn');
   const inputEstimatedReturn = document.getElementById('inputEstimatedReturn');
   if (selectReqType) {
-    selectReqType.addEventListener('change', () => {
+    const syncReqTypeUI = () => {
       if (selectReqType.value === 'Pulang Mendahului') {
         if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'none';
         if (inputEstimatedReturn) inputEstimatedReturn.required = false;
@@ -605,7 +627,16 @@ function setupRadioToggles() {
         if (groupEstimatedReturn) groupEstimatedReturn.style.display = 'block';
         if (inputEstimatedReturn) inputEstimatedReturn.required = true;
       }
-    });
+      syncReasonFieldByReturnType(
+        selectReqType.value,
+        'labelInputReason',
+        'inputReason',
+        'Alasan Keperluan Izin',
+        'Masukkan alasan keperluan izin...'
+      );
+    };
+    selectReqType.addEventListener('change', syncReqTypeUI);
+    syncReqTypeUI();
   }
 
   // Dropdown Tipe Kepulangan (Form Izin Darurat)
@@ -613,7 +644,7 @@ function setupRadioToggles() {
   const emergGroupEstimatedReturn = document.getElementById('emergGroupEstimatedReturn');
   const emergEstimatedReturn = document.getElementById('emergEstimatedReturn');
   if (selectEmergType) {
-    selectEmergType.addEventListener('change', () => {
+    const syncEmergTypeUI = () => {
       if (selectEmergType.value === 'Pulang Mendahului') {
         if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'none';
         if (emergEstimatedReturn) emergEstimatedReturn.required = false;
@@ -621,7 +652,16 @@ function setupRadioToggles() {
         if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
         if (emergEstimatedReturn) emergEstimatedReturn.required = true;
       }
-    });
+      syncReasonFieldByReturnType(
+        selectEmergType.value,
+        'labelEmergReason',
+        'emergReason',
+        'Alasan Kedaruratan',
+        'Masukkan alasan kondisi kedaruratan...'
+      );
+    };
+    selectEmergType.addEventListener('change', syncEmergTypeUI);
+    syncEmergTypeUI();
   }
 
   // Backwards compatibility for legacy radio buttons if present
@@ -1634,18 +1674,54 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     modalDetailSubtitle.style.display = 'none';
   }
 
-  // Status Badge on Top Right (Identik Gambar 1 - Clean Text, NO Pill)
+  // Status Badge on Top Right (Menyatu dengan info menit terlambat jika status terlambat/selesai terlambat)
   const detailStatusPillTop = document.getElementById('detailStatusPillTop');
   if (detailStatusPillTop) {
-    if (typeof window.getCleanEmpStatus === 'function') {
-      detailStatusPillTop.innerHTML = window.getCleanEmpStatus(ticket.status, ticket);
+    const isLateCompleted = (ticket.status === 'Selesai') && Boolean(ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
+    const isOutLate = (ticket.status === 'Terlambat');
+
+    if (isLateCompleted) {
+      const lateMins = Number(ticket.lateMinutes) || 15;
+      detailStatusPillTop.innerHTML = `<span class="figma-clean-status" style="font-weight: 700; font-size: 0.85rem; color: #b45309;">Selesai (Terlambat ${lateMins} Menit)</span>`;
+    } else if (isOutLate) {
+      // Real-time counter menit terlambat saat sedang di luar
+      const calcLateMins = () => {
+        let retDate = null;
+        if (ticket.estimatedReturn) {
+          retDate = typeof window.parseTicketDateTime === 'function' ? window.parseTicketDateTime(ticket.estimatedReturn) : new Date(ticket.estimatedReturn);
+        }
+        if (!retDate || isNaN(retDate.getTime())) {
+          return Number(ticket.lateMinutes) || 1;
+        }
+        const diffMs = Date.now() - retDate.getTime();
+        return Math.max(1, Math.floor(diffMs / 60000));
+      };
+
+      const renderRealtimeLate = () => {
+        const curMins = calcLateMins();
+        detailStatusPillTop.innerHTML = `<span class="figma-clean-status" style="font-weight: 700; font-size: 0.85rem; color: #dc2626;">Sedang di Luar (Terlambat ${curMins} Menit)</span>`;
+      };
+
+      renderRealtimeLate();
+      if (window._detailRealtimeLateTimer) {
+        clearInterval(window._detailRealtimeLateTimer);
+      }
+      window._detailRealtimeLateTimer = setInterval(renderRealtimeLate, 30000); // refresh realtime
     } else {
-      let color = '#d97706';
-      if (ticket.status === 'Disetujui' || ticket.status === 'Selesai') color = '#059669';
-      else if (ticket.status === 'Sedang di Luar') color = '#0284c7';
-      else if (ticket.status === 'Terlambat' || ticket.status === 'Ditolak' || ticket.status === 'Menunggu Otorisasi Darurat') color = '#dc2626';
-      else if (ticket.status === 'Kedaluwarsa' || ticket.status === 'Dibatalkan') color = '#64748b';
-      detailStatusPillTop.innerHTML = `<span class="figma-clean-status" style="font-weight: 700; font-size: 0.85rem; color: ${color};">${ticket.status}</span>`;
+      if (window._detailRealtimeLateTimer) {
+        clearInterval(window._detailRealtimeLateTimer);
+        window._detailRealtimeLateTimer = null;
+      }
+      if (typeof window.getCleanEmpStatus === 'function') {
+        detailStatusPillTop.innerHTML = window.getCleanEmpStatus(ticket.status, ticket);
+      } else {
+        let color = '#d97706';
+        if (ticket.status === 'Disetujui' || ticket.status === 'Selesai') color = '#059669';
+        else if (ticket.status === 'Sedang di Luar') color = '#0284c7';
+        else if (ticket.status === 'Ditolak' || ticket.status === 'Menunggu Otorisasi Darurat') color = '#dc2626';
+        else if (ticket.status === 'Kedaluwarsa' || ticket.status === 'Dibatalkan') color = '#64748b';
+        detailStatusPillTop.innerHTML = `<span class="figma-clean-status" style="font-weight: 700; font-size: 0.85rem; color: ${color};">${ticket.status}</span>`;
+      }
     }
   }
 
@@ -1875,19 +1951,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     infoTableActualReturn.style.color = 'var(--text-primary, #0f172a)';
   }
 
-  // Late Callout Box under Jadwal Keluar & Kembali (Identik Gambar 6)
+  // Late Callout Box under Jadwal Keluar & Kembali: Dihilangkan sesuai instruksi pengguna (menit keterlambatan langsung ditampilkan di status badge)
   const infoLateNoticeBox = document.getElementById('infoLateNoticeBox');
   if (infoLateNoticeBox) {
-    const isLateTicket = Boolean(ticket.isLate || ticket.status === 'Terlambat' || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
-    if (isLateTicket) {
-      const lateDuration = typeof window.formatLateDurationFull === 'function'
-        ? window.formatLateDurationFull(ticket.lateMinutes || 15)
-        : (typeof window.formatLateDuration === 'function' ? window.formatLateDuration(ticket.lateMinutes || 15) : `${ticket.lateMinutes || 15} menit`);
-      infoLateNoticeBox.innerHTML = `Kembali melewati estimasi (+${lateDuration} terlambat).`;
-      infoLateNoticeBox.style.display = 'block';
-    } else {
-      infoLateNoticeBox.style.display = 'none';
-    }
+    infoLateNoticeBox.style.display = 'none';
   }
 
   const approverName = ticket.approverName || 'Arthur Morgan, S.Tr.T.';
@@ -2571,6 +2638,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 }
 
 function closeTicketDetailModal() {
+  if (window._detailRealtimeLateTimer) {
+    clearInterval(window._detailRealtimeLateTimer);
+    window._detailRealtimeLateTimer = null;
+  }
   const wasFromNotif = Boolean(window._openedFromNotification);
   const notifSource = window._openedFromNotificationSource || 'dropdown';
   const notifTab = window._openedFromNotificationTab || 'all';
@@ -2914,7 +2985,10 @@ function handleOpenEmergency() {
   if (emergDest) { emergDest.value = ''; const c = document.getElementById('countEmergDest'); if (c) c.textContent = '0'; }
   if (emergReason) emergReason.value = '';
   if (selectEmergCategory) selectEmergCategory.value = '';
-  if (selectEmergType) selectEmergType.value = '';
+  if (selectEmergType) {
+    selectEmergType.value = '';
+    selectEmergType.dispatchEvent(new Event('change'));
+  }
   if (emergGroupEstimatedReturn) emergGroupEstimatedReturn.style.display = 'block';
   const emergGroupDinasWrapper = document.getElementById('emergGroupDinasMembersWrapper');
   if (emergGroupDinasWrapper) emergGroupDinasWrapper.style.display = 'none';
@@ -4795,16 +4869,32 @@ if (typeof document !== 'undefined') {
 
 window.openDeleteConfirmModal = function (options) {
   const { title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus data ini?', confirmText = 'Hapus', onConfirm = null } = options || {};
+
+  // Cek apakah user telah memilih untuk melewati konfirmasi hapus selama sesi ini
+  if (sessionStorage.getItem('kujang_skip_confirm_delete') === 'true') {
+    if (typeof onConfirm === 'function') onConfirm();
+    return;
+  }
+
   const modal = document.getElementById('modalDeleteConfirm');
   const titleEl = document.getElementById('deleteModalTitle');
   const msgEl = document.getElementById('deleteModalMessage');
   const btnExecute = document.getElementById('btnExecuteDeleteConfirm');
+  const chkDontShow = document.getElementById('chkDontShowDeleteConfirm');
+  const labelDontShow = document.getElementById('labelDontShowDeleteConfirm');
+
   if (modal) {
     if (titleEl) titleEl.textContent = title;
     if (msgEl) msgEl.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
+    if (labelDontShow) labelDontShow.style.display = 'flex';
+    if (chkDontShow) chkDontShow.checked = false;
+
     if (btnExecute) {
       btnExecute.textContent = confirmText;
       btnExecute.onclick = function () {
+        if (chkDontShow && chkDontShow.checked) {
+          try { sessionStorage.setItem('kujang_skip_confirm_delete', 'true'); } catch (e) { }
+        }
         modal.classList.remove('open');
         modal.style.display = 'none';
         if (typeof onConfirm === 'function') onConfirm();

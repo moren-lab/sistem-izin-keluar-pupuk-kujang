@@ -847,9 +847,6 @@
               ${n.ticketId ? `<span class="notif-ticket-pill">${n.ticketId}</span> • ` : ''}${formatRelativeTime(n.createdAt)}
             </div>
           </div>
-          <button type="button" class="btn-delete-notif-item btn-delete-notif-dropdown" aria-label="Hapus Notifikasi" style="width: 30px; height: 30px; min-width: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; padding: 0; flex-shrink: 0; margin-top: 2px;" onclick="event.stopPropagation(); window.deleteDesktopDropdownNotification('${n.id}')" title="Hapus notifikasi ini">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
         </div>
       `;
     }).join('');

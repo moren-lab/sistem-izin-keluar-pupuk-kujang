@@ -640,8 +640,13 @@
             <img src="${profile.photoUrl}" alt="${profile.initials}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.textContent='${profile.initials}';">
           </div>
           <div style="flex: 1; min-width: 0;">
-            <div class="mobile-avatar-sheet-name" style="font-size: 0.925rem; font-weight: 800; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              ${profile.name}
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div class="mobile-avatar-sheet-name" style="font-size: 0.925rem; font-weight: 800; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+                ${profile.name}
+              </div>
+              <button type="button" class="mobile-profile-theme-btn" id="mProfileThemeToggleBtn" onclick="window.toggleDarkMode(); const isD = document.body.classList.contains('theme-dark'); this.innerHTML = isD ? '☀️' : '🌙'; this.setAttribute('title', isD ? 'Ubah ke Mode Terang' : 'Ubah ke Mode Malam');" aria-label="Ubah Mode Malam" title="${document.body.classList.contains('theme-dark') ? 'Ubah ke Mode Terang' : 'Ubah ke Mode Malam'}" style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1); background: var(--card-bg, #ffffff); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; transition: all 0.2s ease;">
+                ${document.body.classList.contains('theme-dark') ? '☀️' : '🌙'}
+              </button>
             </div>
             <div style="font-size: 0.75rem; color: #059669; font-weight: 700; margin-top: 2px;">
               ${profile.roleLabel}

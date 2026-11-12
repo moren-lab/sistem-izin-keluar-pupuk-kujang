@@ -831,7 +831,7 @@ function renderAdminReports(isPrinting = false) {
     const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && (t.category === 'Dinas Kantor' || t.category === 'Dinas Perusahaan'));
     return `
-      <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
+      <tr>
         <td style="white-space: nowrap;">
           <div style="display: flex; align-items: center; gap: 0.45rem;">
             <span class="report-ticket-id">${t.id}</span>
@@ -2644,7 +2644,7 @@ function renderAdminStatusTracking() {
     const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && (t.category === 'Dinas Kantor' || t.category === 'Dinas Perusahaan'));
     return `
-      <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
+      <tr>
         <td>
           <div style="display: flex; align-items: center; gap: 0.45rem;">
             <a href="javascript:void(0)" onclick="window.viewAdminTicketDetail('${t.id}')" class="report-ticket-id" style="text-decoration: none; font-weight: 700; color: var(--primary-accent);">

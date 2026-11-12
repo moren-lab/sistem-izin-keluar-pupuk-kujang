@@ -502,12 +502,19 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
     // A. SPECIAL AIRY LAYOUT FOR RIWAYAT MODE (isHistoryMode === true)
     if (isHistoryMode) {
+      const secSelState = window.riwayatSelectState && window.riwayatSelectState.security;
+      const isSelectActive = Boolean(secSelState && secSelState.active);
+      const isSelected = Boolean(isSelectActive && secSelState.selected && secSelState.selected.has(t.id));
+
       return `
-            <div class="card-item card-history-item" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''} display: flex; flex-direction: column;">
+            <div class="card-item card-history-item${isSelected ? ' riwayat-card-selected' : ''}${isSelectActive ? ' riwayat-select-active-item' : ''}" data-select-role="security" data-ticket-id="${t.id}" style="${borderColor ? `border-left: 4px solid ${borderColor};` : ''} display: flex; flex-direction: column;" onclick="window.handleRiwayatItemClick('security', '${t.id}', event)">
               <div class="card-top" style="margin-bottom: 0.65rem;">
-                <div>
-                  <span class="card-id-num">${t.id}</span>
-                  <div class="card-created-meta">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
+                <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                  ${isSelectActive ? `<input type="checkbox" class="riwayat-select-checkbox" style="margin-top: 2px;" ${isSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('security', '${t.id}', this.checked)" onclick="event.stopPropagation()">` : ''}
+                  <div>
+                    <span class="card-id-num">${t.id}</span>
+                    <div class="card-created-meta">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
+                  </div>
                 </div>
                 ${window.getStatusPill(t.status, t)}
               </div>
@@ -565,10 +572,6 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
-                </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Hapus</span>
                 </button>
               </div>
             </div>
@@ -695,8 +698,7 @@ function renderSecurityTable(list, containerElement) {
             <th style="white-space: nowrap; min-width: 190px;">Pemohon & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="white-space: nowrap; min-width: 190px;">Catatan Realisasi</th>
-            <th style="white-space: nowrap; min-width: 170px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 60px; text-align: center;">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -738,10 +740,13 @@ function renderSecurityTable(list, containerElement) {
       : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
 
     let tindakanHtml = `
-              <div class="action-pills-row">
-                <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-                  <span>Detail Pengajuan</span>
+              <div style="display: flex; justify-content: center; align-items: center;">
+                <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'security', '${t.id}')" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <circle cx="12" cy="19" r="2"></circle>
+                  </svg>
                 </button>
               </div>
             `;
@@ -757,7 +762,7 @@ function renderSecurityTable(list, containerElement) {
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
 
     return `
-              <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
+              <tr>
                 <td style="vertical-align: middle;">
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</span>
@@ -785,8 +790,7 @@ function renderSecurityTable(list, containerElement) {
                 </td>
                 <td style="vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
-                <td style="vertical-align: middle;">${catatanHtml}</td>
-                <td style="vertical-align: middle; white-space: nowrap;">${tindakanHtml}</td>
+                <td style="vertical-align: middle; white-space: nowrap; text-align: center;">${tindakanHtml}</td>
               </tr>
             `;
   }).join('')}
@@ -914,6 +918,7 @@ function renderSecurityView() {
     }
 
     if (filteredLog.length === 0) {
+      if (typeof window.renderRiwayatSelectionBar === 'function') window.renderRiwayatSelectionBar('security', []);
       if (containerSecurityLog) containerSecurityLog.innerHTML = '';
       if (emptySecurityLogBox) emptySecurityLogBox.style.display = 'flex';
       const figmaSecurityRiwayatPagination = document.getElementById('figmaSecurityRiwayatPagination');
@@ -953,6 +958,9 @@ function renderSecurityView() {
       }
     }
 
+    if (typeof window.renderRiwayatSelectionBar === 'function') {
+      window.renderRiwayatSelectionBar('security', paginatedLog.map(t => t.id));
+    }
     if (window.currentSecurityLogViewMode === 'table') {
       renderSecurityLogTable(paginatedLog, containerSecurityLog);
     } else {
@@ -998,10 +1006,10 @@ function filterSecurityLogTickets() {
       if (!isMyTicket) return false;
     }
 
-    // Riwayat Pos Jaga: HANYA tiket yang sudah 'Selesai' atau 'Terlambat'
-    // Status aktif ('Sedang di Luar', 'Disetujui', 'Menunggu Verifikasi Atasan', 'Menunggu Bukti Kedatangan', dsb.) TIDAK masuk ke riwayat pos jaga
-    const isActiveAwaitingArrival = ['Sedang di Luar', 'Disetujui', 'Menunggu Persetujuan', 'Menunggu Otorisasi Darurat', 'Menunggu Verifikasi Atasan', 'Menunggu Bukti Kedatangan'].includes(t.status);
-    const isCompletedOrLate = !isActiveAwaitingArrival && (t.status === 'Selesai' || t.status === 'Terlambat' || t.isLate);
+    // Riwayat Pos Jaga: HANYA tiket berstatus final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa)
+    // Status aktif ('Sedang di Luar', 'Terlambat' sebelum Tap In, 'Disetujui', 'Menunggu Verifikasi Atasan', 'Menunggu Bukti Kedatangan', dsb.) TIDAK masuk ke riwayat pos jaga
+    const isFinalSecStatus = ['Selesai', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status);
+    const isCompletedOrLate = isFinalSecStatus || (t.status === 'Terlambat' && Boolean(t.scanInTime));
     if (!isCompletedOrLate) return false;
 
     // Filter Gerbang Pos (Multi-gate Pos 1, 2, 3)
@@ -1072,19 +1080,22 @@ function filterSecurityLogTickets() {
 
 function renderSecurityLogTable(list, containerElement) {
   if (!containerElement) return;
+  const secSelState = window.riwayatSelectState && window.riwayatSelectState.security;
+  const isSelectActive = Boolean(secSelState && secSelState.active);
+  const allVisibleChecked = isSelectActive && list.length > 0 && list.every(t => secSelState.selected.has(t.id));
 
   containerElement.innerHTML = `
     <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
       <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
+            ${isSelectActive ? `<th style="width: 40px; text-align: center;"></th>` : ''}
             <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
             <th style="white-space: nowrap; min-width: 140px;">Gerbang Pos</th>
             <th style="white-space: nowrap; min-width: 190px;">Pemohon & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="white-space: nowrap; min-width: 200px;">Catatan Pemindaian</th>
-            <th style="white-space: nowrap; min-width: 170px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 60px; text-align: center;">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -1126,20 +1137,22 @@ function renderSecurityLogTable(list, containerElement) {
       : `<div style="font-weight: 600; color: #0f172a; font-size: 0.775rem; white-space: nowrap;">${(t.plannedExit || '').slice(0, 10)}</div><div style="font-size: 0.75rem; color: #475569; font-family: var(--font-mono); margin-top: 2px; white-space: nowrap;">${(t.plannedExit || '').slice(11, 16)} WIB</div>`;
 
     let tindakanHtml = `
-              <div class="action-pills-row">
-                <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Pengajuan">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-                  <span>Detail Pengajuan</span>
-                </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Riwayat #${t.id}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Hapus</span>
+              <div style="display: flex; justify-content: center; align-items: center;">
+                <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'security', '${t.id}')" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <circle cx="12" cy="19" r="2"></circle>
+                  </svg>
                 </button>
               </div>
             `;
 
+    const isRowSelected = Boolean(isSelectActive && secSelState.selected.has(t.id));
+
     return `
-              <tr>
+              <tr class="${isRowSelected ? 'riwayat-card-selected ' : ''}${isSelectActive ? 'riwayat-select-active-item' : ''}" data-select-role="security" data-ticket-id="${t.id}" onclick="window.handleRiwayatItemClick('security', '${t.id}', event)">
+                ${isSelectActive ? `<td style="vertical-align: middle; text-align: center;"><input type="checkbox" class="riwayat-select-checkbox" ${isRowSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('security', '${t.id}', this.checked)" onclick="event.stopPropagation()"></td>` : ''}
                 <td style="vertical-align: middle;">
                   <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
                   <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35;">
@@ -1161,8 +1174,7 @@ function renderSecurityLogTable(list, containerElement) {
                 </td>
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
-                <td style="vertical-align: middle; line-height: 1.45;">${catatanHtml}</td>
-                <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${tindakanHtml}</td>
               </tr>
             `;
   }).join('')}

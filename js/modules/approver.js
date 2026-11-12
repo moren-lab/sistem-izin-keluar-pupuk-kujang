@@ -710,12 +710,19 @@ function renderApproverCards(list, containerElement, isTracking = false) {
     const isDinas = displayCategory === 'Dinas Kantor';
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
 
+    const appSelState = isRiwayatView && window.riwayatSelectState && window.riwayatSelectState.approver;
+    const isSelectActive = Boolean(isRiwayatView && appSelState && appSelState.active);
+    const isSelected = Boolean(isSelectActive && appSelState.selected && appSelState.selected.has(t.id));
+
     return `
-          <div class="card-item${isRiwayatView ? ' card-history-item' : ''}" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger);' : ''}">
+          <div class="card-item${isRiwayatView ? ' card-history-item' : ''}${isSelected ? ' riwayat-card-selected' : ''}${isSelectActive ? ' riwayat-select-active-item' : ''}" data-select-role="approver" data-ticket-id="${t.id}" onclick="${isRiwayatView ? `window.handleRiwayatItemClick('approver', '${t.id}', event)` : ''}">
             <div class="card-top">
-              <div>
-                <span class="card-id-num">${t.id}</span>
-                <div class="card-created-meta">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
+              <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                ${isSelectActive ? `<input type="checkbox" class="riwayat-select-checkbox" style="margin-top: 2px;" ${isSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('approver', '${t.id}', this.checked)" onclick="event.stopPropagation()">` : ''}
+                <div>
+                  <span class="card-id-num">${t.id}</span>
+                  <div class="card-created-meta">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
+                </div>
               </div>
               ${window.getStatusPill(t.status, t)}
             </div>
@@ -981,11 +988,10 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   <span>Detail Pengajuan</span>
                 </button>
                 ${isRiwayatView ? `
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus Riwayat #${t.id}">
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); deleteApproverTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
-                </button>
-                ` : ''}
+                </button>` : ''}
               </div>`;
             })()}
           </div>
@@ -1004,18 +1010,23 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
   const target = containerElement || document.getElementById('containerApproverRequests');
   if (!target) return;
 
+  const isRiwayatTable = (window.currentApproverNav === 'riwayat');
+  const appSelState = isRiwayatTable && window.riwayatSelectState && window.riwayatSelectState.approver;
+  const isSelectActive = Boolean(isRiwayatTable && appSelState && appSelState.active);
+  const allVisibleChecked = isSelectActive && list.length > 0 && list.every(t => appSelState.selected.has(t.id));
+
   target.innerHTML = `
     <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
       <table class="figma-table" style="min-width: 980px;">
         <thead>
           <tr>
+            ${isSelectActive ? `<th style="width: 40px; text-align: center;"></th>` : ''}
             <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
             <th style="white-space: nowrap; min-width: 180px;">Pemohon & Departemen</th>
             <th style="white-space: nowrap; min-width: 200px;">Tujuan & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="white-space: nowrap; min-width: 180px;">Catatan Keputusan</th>
-            <th style="white-space: nowrap; min-width: 175px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 60px; text-align: center;">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -1118,23 +1129,23 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
             }
 
             let tindakanHtml = `
-              <div class="action-pills-row">
+              <div style="display: flex; justify-content: center; align-items: center; gap: 0.35rem;">
                 ${extraAntrianBtns}
-                <button type="button" class="btn-pill-action btn-pill-detail" onclick="event.stopPropagation(); window.openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-                  <span>Detail Pengajuan</span>
+                <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'approver', '${t.id}')" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <circle cx="12" cy="19" r="2"></circle>
+                  </svg>
                 </button>
-                ${isRiwayatView ? `
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteApproverTicket('${t.id}')" title="Hapus Riwayat #${t.id}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Hapus</span>
-                </button>
-                ` : ''}
               </div>
             `;
 
+            const isRowSelected = Boolean(isSelectActive && appSelState.selected.has(t.id));
+
             return `
-              <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
+              <tr class="${isRowSelected ? 'riwayat-card-selected ' : ''}${isSelectActive ? 'riwayat-select-active-item' : ''}" data-select-role="approver" data-ticket-id="${t.id}" onclick="${isRiwayatView ? `window.handleRiwayatItemClick('approver', '${t.id}', event)` : ''}">
+                ${isSelectActive ? `<td style="vertical-align: middle; text-align: center;"><input type="checkbox" class="riwayat-select-checkbox" ${isRowSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('approver', '${t.id}', this.checked)" onclick="event.stopPropagation()"></td>` : ''}
                 <td style="vertical-align: middle;">
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</span>
@@ -1165,8 +1176,7 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
                 </td>
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
-                <td style="vertical-align: middle; line-height: 1.45;">${catatanHtml}</td>
-                <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${tindakanHtml}</td>
               </tr>
             `;
           }).join('')}
@@ -1621,12 +1631,16 @@ function renderApproverView() {
     }
 
     if (totalItems === 0) {
+      if (typeof window.renderRiwayatSelectionBar === 'function') window.renderRiwayatSelectionBar('approver', []);
       if (containerApproverRiwayatRequests) containerApproverRiwayatRequests.innerHTML = '';
       if (emptyApproverRiwayatBox) emptyApproverRiwayatBox.style.display = 'flex';
       return;
     }
 
     if (emptyApproverRiwayatBox) emptyApproverRiwayatBox.style.display = 'none';
+    if (typeof window.renderRiwayatSelectionBar === 'function') {
+      window.renderRiwayatSelectionBar('approver', pageItems.map(t => t.id));
+    }
     if (window.currentApproverRiwayatViewMode === 'table') {
       renderApproverTable(pageItems, containerApproverRiwayatRequests);
     } else {
@@ -1655,6 +1669,13 @@ function openApproveModal(ticketId) {
     return;
   }
 
+  // Cek preferensi sesi: Jika user memilih lewati pop up konfirmasi approve
+  if (sessionStorage.getItem('kujang_skip_confirm_approve') === 'true') {
+    window.currentDecisionTicketId = ticketId;
+    confirmApproveDecision();
+    return;
+  }
+
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
 
@@ -1663,10 +1684,12 @@ function openApproveModal(ticketId) {
   const approveEmployeeName = document.getElementById('approveEmployeeName');
   const approveNoteInput = document.getElementById('approveNoteInput');
   const modalApproveDecision = document.getElementById('modalApproveDecision');
+  const chkDontShowApprove = document.getElementById('chkDontShowApproveConfirm');
 
   if (approveTicketId) approveTicketId.textContent = ticket.id;
   if (approveEmployeeName) approveEmployeeName.textContent = ticket.applicantName || 'Budi Pratama';
   if (approveNoteInput) approveNoteInput.value = '';
+  if (chkDontShowApprove) chkDontShowApprove.checked = false;
   if (modalApproveDecision) modalApproveDecision.classList.add('open');
 }
 
@@ -1854,6 +1877,11 @@ function confirmApproveDecision() {
   
   const modalApproveDecision = document.getElementById('modalApproveDecision');
   if (modalApproveDecision) modalApproveDecision.classList.remove('open');
+
+  const chkDontShowApprove = document.getElementById('chkDontShowApproveConfirm');
+  if (chkDontShowApprove && chkDontShowApprove.checked) {
+    try { sessionStorage.setItem('kujang_skip_confirm_approve', 'true'); } catch (e) { }
+  }
   
   const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');

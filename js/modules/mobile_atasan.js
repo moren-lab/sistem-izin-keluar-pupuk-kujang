@@ -1822,7 +1822,7 @@
               <div style="font-size: 0.875rem; font-weight: 800; color: #0f172a;">${getTName(t)}</div>
               <div style="font-size: 0.7rem; color: #64748b;">${getTNip(t)} • ${getTDept(t)}</div>
             </div>
-            <span class="mobile-badge ${statusBadgeClass}">${(isSelesai && isLate) || t.status === 'Terlambat' ? 'Selesai (Terlambat)' : (isLate ? 'Terlambat' : t.status)}</span>
+            <span class="mobile-badge ${statusBadgeClass}">${(isSelesai && isLate) ? 'Selesai (Terlambat)' : (t.status === 'Terlambat' ? 'Sedang di Luar (Terlambat)' : (isLate ? 'Sedang di Luar (Terlambat)' : t.status))}</span>
           </div>
 
           <div style="font-family: monospace; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 2px;">

@@ -48,8 +48,11 @@ function getStatusPill(status, ticket) {
   }
 
   const isLateCompleted = (status === 'Selesai') && ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || (ticket.lateMinutes > 0));
-  if (isLateCompleted || status === 'Terlambat') {
+  if (isLateCompleted) {
     return `<span style="font-weight: 700; font-size: 0.8125rem; color: #b45309; letter-spacing: -0.01em;">Selesai (Terlambat)</span>`;
+  }
+  if (status === 'Terlambat') {
+    return `<span style="font-weight: 700; font-size: 0.8125rem; color: #dc2626; letter-spacing: -0.01em;">Sedang di Luar (Terlambat)</span>`;
   }
 
   let color = '#059669';
@@ -236,11 +239,20 @@ function matchesPeriodFilter(ticket, period) {
 
 // UNIVERSAL CONFIRMATION DIALOG MODAL
 function openConfirmDialog({ title = 'Konfirmasi', message = '', confirmText = 'Ya', cancelText = 'Batal', isDanger = false, onConfirm }) {
+  // Cek apakah user telah memilih untuk melewati konfirmasi hapus selama sesi ini
+  if (isDanger && sessionStorage.getItem('kujang_skip_confirm_delete') === 'true') {
+    if (typeof onConfirm === 'function') onConfirm();
+    return;
+  }
+
   const modal = document.getElementById('modalDeleteConfirm');
   const titleEl = document.getElementById('deleteModalTitle');
   const msgEl = document.getElementById('deleteModalMessage');
   const btnExec = document.getElementById('btnExecuteDeleteConfirm');
   const btnCancel = document.getElementById('btnCancelDeleteConfirm');
+  const chkDontShow = document.getElementById('chkDontShowDeleteConfirm');
+  const labelDontShow = document.getElementById('labelDontShowDeleteConfirm');
+
   if (!modal) {
     if (confirm(message.replace(/<[^>]+>/g, ''))) {
       if (typeof onConfirm === 'function') onConfirm();
@@ -250,11 +262,23 @@ function openConfirmDialog({ title = 'Konfirmasi', message = '', confirmText = '
   if (titleEl) titleEl.textContent = title;
   if (msgEl) msgEl.innerHTML = message;
   if (btnCancel) btnCancel.textContent = cancelText;
+
+  // Tampilkan opsi jangan ingatkan lagi hanya untuk dialog yang relevan (misal hapus)
+  if (labelDontShow) {
+    labelDontShow.style.display = isDanger ? 'flex' : 'none';
+  }
+  if (chkDontShow) {
+    chkDontShow.checked = false;
+  }
+
   if (btnExec) {
     btnExec.textContent = confirmText;
     btnExec.style.background = isDanger ? '#dc2626' : '#059669';
     btnExec.style.borderColor = isDanger ? '#dc2626' : '#059669';
     btnExec.onclick = () => {
+      if (chkDontShow && chkDontShow.checked) {
+        try { sessionStorage.setItem('kujang_skip_confirm_delete', 'true'); } catch (e) { }
+      }
       closeDeleteConfirmModal();
       if (typeof onConfirm === 'function') onConfirm();
     };
@@ -439,6 +463,272 @@ function initAllTableDragScroll() {
 
 window.enableDragScroll = enableDragScroll;
 window.initAllTableDragScroll = initAllTableDragScroll;
+
+// ==========================================
+// MULTI-SELECT DELETE RIWAYAT (KARYAWAN, ATASAN, POS JAGA)
+// ==========================================
+window.riwayatSelectState = window.riwayatSelectState || {
+  karyawan: { active: false, selected: new Set(), visibleIds: [] },
+  approver: { active: false, selected: new Set(), visibleIds: [] },
+  security: { active: false, selected: new Set(), visibleIds: [] }
+};
+
+function getRiwayatRoleConfig(role) {
+  if (role === 'approver') {
+    return {
+      btnId: 'btnSelectApproverRiwayat',
+      barId: 'approverRiwayatSelectionBar',
+      refresh: () => { if (typeof window.renderApproverView === 'function') window.renderApproverView(); }
+    };
+  }
+  if (role === 'security') {
+    return {
+      btnId: 'btnSelectSecurityRiwayat',
+      barId: 'securityRiwayatSelectionBar',
+      refresh: () => { if (typeof window.renderSecurityView === 'function') window.renderSecurityView(); }
+    };
+  }
+  return {
+    btnId: 'btnSelectEmpRiwayat',
+    barId: 'empRiwayatSelectionBar',
+    refresh: () => {
+      if (typeof window.renderRiwayatView === 'function') window.renderRiwayatView();
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+    }
+  };
+}
+
+window.toggleRiwayatSelectMode = function (role, forceState) {
+  const st = window.riwayatSelectState[role];
+  if (!st) return;
+  const next = typeof forceState === 'boolean' ? forceState : !st.active;
+  st.active = next;
+  if (!next) st.selected.clear();
+  const cfg = getRiwayatRoleConfig(role);
+  const btn = document.getElementById(cfg.btnId);
+  if (btn) btn.classList.toggle('active', next);
+  cfg.refresh();
+};
+
+window.toggleRiwayatTicketSelection = function (role, ticketId, isChecked) {
+  const st = window.riwayatSelectState[role];
+  if (!st || !ticketId) return;
+  if (typeof isChecked === 'undefined') {
+    isChecked = !st.selected.has(ticketId);
+  }
+  if (isChecked) {
+    st.selected.add(ticketId);
+  } else {
+    st.selected.delete(ticketId);
+  }
+  const cards = document.querySelectorAll(`[data-select-role="${role}"][data-ticket-id="${ticketId}"]`);
+  cards.forEach(el => {
+    el.classList.toggle('riwayat-card-selected', !!isChecked);
+    const cb = el.querySelector('input.riwayat-select-checkbox');
+    if (cb) cb.checked = !!isChecked;
+  });
+  window.renderRiwayatSelectionBar(role, st.visibleIds || []);
+};
+
+window.handleRiwayatItemClick = function (role, ticketId, evt) {
+  const st = window.riwayatSelectState[role];
+  if (!st || !st.active) return;
+  if (evt) {
+    // Abaikan jika klik tepat di tombol aksi, link, atau checkbox itu sendiri
+    if (evt.target.closest('button, a, input, select, .action-pills-row, .btn-action-more-dots')) {
+      return;
+    }
+    evt.preventDefault();
+    evt.stopPropagation();
+  }
+  window.toggleRiwayatTicketSelection(role, ticketId);
+};
+
+window.selectAllVisibleRiwayat = function (role, isChecked) {
+  const st = window.riwayatSelectState[role];
+  if (!st) return;
+  const ids = st.visibleIds || [];
+  ids.forEach(id => {
+    if (isChecked) st.selected.add(id);
+    else st.selected.delete(id);
+  });
+  const cfg = getRiwayatRoleConfig(role);
+  cfg.refresh();
+};
+
+window.renderRiwayatSelectionBar = function (role, visibleIds) {
+  const st = window.riwayatSelectState[role];
+  if (!st) return;
+  st.visibleIds = Array.isArray(visibleIds) ? visibleIds : [];
+  const cfg = getRiwayatRoleConfig(role);
+  const btn = document.getElementById(cfg.btnId);
+  if (btn) btn.classList.toggle('active', Boolean(st.active));
+  const bar = document.getElementById(cfg.barId);
+  if (!bar) return;
+
+  if (!st.active) {
+    bar.style.display = 'none';
+    bar.innerHTML = '';
+    return;
+  }
+
+  const count = st.selected.size;
+  const allVisibleChecked = st.visibleIds.length > 0 && st.visibleIds.every(id => st.selected.has(id));
+  bar.style.display = 'flex';
+  bar.innerHTML = `
+    <label class="riwayat-select-all-wrap">
+      <input type="checkbox" class="riwayat-select-checkbox" ${allVisibleChecked ? 'checked' : ''} onchange="window.selectAllVisibleRiwayat('${role}', this.checked)">
+      <span>Pilih Semua (${st.visibleIds.length})</span>
+    </label>
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+      <span class="riwayat-selected-count">${count} dipilih</span>
+      <button type="button" class="btn-danger-solid" style="padding: 0.4rem 0.85rem; font-size: 0.78rem; border-radius: 6px; font-weight: 700; cursor: ${count === 0 ? 'not-allowed' : 'pointer'}; opacity: ${count === 0 ? '0.5' : '1'};" ${count === 0 ? 'disabled' : ''} onclick="window.deleteSelectedRiwayat('${role}')">
+        Hapus Terpilih (${count})
+      </button>
+      <button type="button" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; border-radius: 6px; font-weight: 700;" onclick="window.toggleRiwayatSelectMode('${role}', false)">
+        Batal
+      </button>
+    </div>
+  `;
+};
+
+window.deleteSelectedRiwayat = function (role) {
+  const st = window.riwayatSelectState[role];
+  if (!st || st.selected.size === 0) {
+    if (typeof window.showToast === 'function') window.showToast('Pilih minimal 1 riwayat terlebih dahulu.', 'warning');
+    return;
+  }
+
+  const idsToDelete = new Set(st.selected);
+  const count = idsToDelete.size;
+  const cfg = getRiwayatRoleConfig(role);
+
+  const handler = () => {
+    const ticketsList = window.ticketsList || [];
+    let deletedCount = 0;
+    const isApprover2 = (window.currentActor === 'approver2');
+    const currentApprover = (typeof window.getCurrentApproverActor === 'function') ? window.getCurrentApproverActor() : null;
+    const approverNip = currentApprover ? currentApprover.nip : null;
+
+    ticketsList.forEach(t => {
+      if (!idsToDelete.has(t.id)) return;
+      if (role === 'karyawan') {
+        t.deletedByKaryawan = true;
+        deletedCount++;
+      } else if (role === 'approver') {
+        if (!Array.isArray(t.deletedByApproverNips)) t.deletedByApproverNips = [];
+        if (approverNip && !t.deletedByApproverNips.includes(approverNip)) t.deletedByApproverNips.push(approverNip);
+        if (isApprover2) t.deletedByApprover2 = true;
+        else t.deletedByApprover1 = true;
+        t.deletedByApprover = true;
+        deletedCount++;
+      } else if (role === 'security') {
+        t.deletedBySecurity = true;
+        deletedCount++;
+      }
+    });
+
+    if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
+    st.selected.clear();
+    st.active = false;
+    cfg.refresh();
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`${deletedCount} riwayat terpilih berhasil dihapus.`, 'success');
+    }
+  };
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Hapus Riwayat Terpilih',
+      message: `Apakah Anda yakin ingin menghapus <strong>${count}</strong> riwayat yang dipilih dari daftar?`,
+      onConfirm: handler
+    });
+  } else if (confirm(`Apakah Anda yakin ingin menghapus ${count} riwayat yang dipilih?`)) {
+    handler();
+  }
+};
+
+window.toggleRowActionDropdown = function (btn, role, ticketId) {
+  const popover = document.getElementById('tableRowActionPopover');
+  if (!popover || !btn) return;
+
+  const isCurrentOpen = popover.classList.contains('open') && popover._currentTicketId === ticketId;
+  if (isCurrentOpen) {
+    window.closeTableRowActionPopover();
+    return;
+  }
+
+  const rect = btn.getBoundingClientRect();
+  const popoverWidth = 160;
+  let leftPos = rect.right - popoverWidth;
+  if (leftPos < 10) leftPos = 10;
+
+  popover.style.top = `${Math.round(rect.bottom + 4)}px`;
+  popover.style.left = `${Math.round(leftPos)}px`;
+  popover._currentTicketId = ticketId;
+  popover._currentRole = role;
+  popover._triggerBtn = btn;
+
+  popover.innerHTML = `
+    <button type="button" class="table-row-popover-item" onclick="event.stopPropagation(); window.closeTableRowActionPopover(); if (typeof openTicketDetail === 'function') openTicketDetail('${ticketId}', 'detail');">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <line x1="10" y1="9" x2="8" y2="9"></line>
+      </svg>
+      <span>Detail Pengajuan</span>
+    </button>
+    <button type="button" class="table-row-popover-item danger" onclick="event.stopPropagation(); window.closeTableRowActionPopover(); window.handleRowActionDelete('${role}', '${ticketId}');">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      <span>Hapus</span>
+    </button>
+  `;
+
+  popover.classList.add('open');
+  popover.setAttribute('aria-hidden', 'false');
+};
+
+window.closeTableRowActionPopover = function () {
+  const popover = document.getElementById('tableRowActionPopover');
+  if (popover) {
+    popover.classList.remove('open');
+    popover.setAttribute('aria-hidden', 'true');
+    popover._currentTicketId = null;
+    popover._currentRole = null;
+    popover._triggerBtn = null;
+  }
+};
+
+window.handleRowActionDelete = function (role, ticketId) {
+  if (role === 'karyawan') {
+    if (typeof window.deleteEmpTicket === 'function') window.deleteEmpTicket(ticketId);
+  } else if (role === 'approver') {
+    if (typeof window.deleteApproverTicket === 'function') window.deleteApproverTicket(ticketId);
+  } else if (role === 'security') {
+    if (typeof window.deleteSecurityTicket === 'function') window.deleteSecurityTicket(ticketId, 'riwayat');
+  }
+};
+
+document.addEventListener('click', (e) => {
+  const popover = document.getElementById('tableRowActionPopover');
+  if (!popover || !popover.classList.contains('open')) return;
+  if (!popover.contains(e.target) && (!popover._triggerBtn || !popover._triggerBtn.contains(e.target))) {
+    window.closeTableRowActionPopover();
+  }
+});
+
+window.addEventListener('scroll', () => {
+  const popover = document.getElementById('tableRowActionPopover');
+  if (popover && popover.classList.contains('open')) {
+    window.closeTableRowActionPopover();
+  }
+}, { passive: true });
 
 document.addEventListener('DOMContentLoaded', () => {
   initAllTableDragScroll();

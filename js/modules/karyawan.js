@@ -902,12 +902,21 @@ function updateKaryawanMetrics() {
   const activeCount = activeTicket ? 1 : 0;
 
   const statEmpTotalMonth = document.getElementById('statEmpTotalMonth');
+  const statEmpTotalMonthSub = document.getElementById('statEmpTotalMonthSub');
   const statEmpCompletedCount = document.getElementById('statEmpCompletedCount');
   const statEmpCompletedSub = document.getElementById('statEmpCompletedSub');
   const statEmpActiveCount = document.getElementById('statEmpActiveCount');
   const statEmpActiveSub = document.getElementById('statEmpActiveSub');
 
   if (statEmpTotalMonth) statEmpTotalMonth.textContent = totalMonth;
+  if (statEmpTotalMonthSub) {
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const currentMonthName = months[now.getMonth()];
+    const currentYear = now.getFullYear();
+    const currentDay = now.getDate();
+    statEmpTotalMonthSub.textContent = `1–${currentDay} ${currentMonthName} ${currentYear}`;
+  }
   if (statEmpCompletedCount) statEmpCompletedCount.textContent = completedCount;
   if (statEmpCompletedSub) {
     statEmpCompletedSub.textContent = `${onTimeCompleted} tepat waktu, ${lateCompleted} terlambat`;
@@ -955,8 +964,8 @@ function filterEmpTickets() {
   const type = filterEmpType ? filterEmpType.value : 'all';
   const status = filterEmpStatus ? filterEmpStatus.value : 'all';
 
-  // Status resmi yang diizinkan untuk Riwayat Pengajuan
-  const RIWAYAT_STATUSES = ['selesai', 'terlambat', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
+  // Status resmi yang diizinkan untuk Riwayat Pengajuan (hanya status final; 'Terlambat' sebelum Tap In tetap aktif)
+  const RIWAYAT_STATUSES = ['selesai', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
 
   const filtered = ticketsList.filter(t => {
     // Check if deleted by employee
@@ -966,9 +975,9 @@ function filterEmpTickets() {
     const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')) || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip));
     if (!isMyTicket) return false;
 
-    // HANYA tiket berstatus riwayat yang diizinkan (mengecualikan status aktif seperti Menunggu Persetujuan, Menunggu Otorisasi Darurat, Disetujui, Sedang di Luar)
+    // HANYA tiket berstatus final yang diizinkan (tiket aktif termasuk 'Terlambat' sebelum Tap In tidak boleh masuk Riwayat)
     const tStatusNorm = (t.status || '').toLowerCase().trim();
-    const isRiwayat = RIWAYAT_STATUSES.includes(tStatusNorm) || !!t.isLate;
+    const isRiwayat = RIWAYAT_STATUSES.includes(tStatusNorm);
     if (!isRiwayat) return false;
 
     // 1. Dropdown Filters
@@ -981,7 +990,7 @@ function filterEmpTickets() {
         const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.startsWith('TK-EMG') || t.id.includes('-EMG-'))) || t.category === 'Izin Darurat' || t.category === 'Darurat' || (t.type && t.type.toLowerCase().includes('darurat')));
         if (!isEmergency) return false;
       } else if (status === 'Terlambat') {
-        const isLate = t.status === 'Terlambat' || !!t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
+        const isLate = tStatusNorm === 'selesai' && (!!t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.lateMinutes > 0));
         if (!isLate) return false;
       } else if (status === 'Kedaluwarsa') {
         if (tStatusNorm !== 'kedaluwarsa' && tStatusNorm !== 'kadaluwarsa') return false;
@@ -1918,6 +1927,9 @@ function renderRiwayatView() {
     if (figmaRiwayatCountMeta) {
       figmaRiwayatCountMeta.textContent = '0 pengajuan ditemukan';
     }
+    if (typeof window.renderRiwayatSelectionBar === 'function') {
+      window.renderRiwayatSelectionBar('karyawan', []);
+    }
     return;
   }
 
@@ -1950,6 +1962,9 @@ function renderRiwayatView() {
   renderPaginationButtons(totalPages, currentPage);
 
   // Render Card or Table
+  if (typeof window.renderRiwayatSelectionBar === 'function') {
+    window.renderRiwayatSelectionBar('karyawan', pageItems.map(t => t.id));
+  }
   if (window.currentEmpViewMode === 'table') {
     renderEmpTable(pageItems, containerEmpRequests);
   } else {
@@ -2087,9 +2102,9 @@ function getCleanEmpStatus(status, ticket) {
     color = '#0284c7';
     statusKey = 'outside';
   } else if (status === 'Terlambat') {
-    label = 'Selesai (Terlambat)';
-    color = '#b45309';
-    statusKey = 'selesai-late';
+    label = 'Sedang di Luar (Terlambat)';
+    color = '#dc2626';
+    statusKey = 'late';
   } else if (status === 'Disetujui') {
     label = 'Disetujui';
     color = '#059669';
@@ -2220,13 +2235,20 @@ function renderEmpCards(list, containerElement) {
         const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
         const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
 
+        const empSelState = window.riwayatSelectState && window.riwayatSelectState.karyawan;
+        const isSelectActive = Boolean(empSelState && empSelState.active);
+        const isSelected = Boolean(isSelectActive && empSelState.selected && empSelState.selected.has(t.id));
+
         return `
-          <div class="figma-grid-item" data-status="${t.status}" style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48);' : ''}">
+          <div class="figma-grid-item${isSelected ? ' riwayat-card-selected' : ''}${isSelectActive ? ' riwayat-select-active-item' : ''}" data-status="${t.status}" data-select-role="karyawan" data-ticket-id="${t.id}" onclick="window.handleRiwayatItemClick('karyawan', '${t.id}', event)">
             <!-- Header ID & Status -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-              <div>
-                <div class="figma-ticket-id" style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); letter-spacing: -0.2px;">${t.id}</div>
-                <div class="figma-ticket-date" style="font-size: 0.725rem; color: #64748b; margin-top: 2px; font-weight: 500;">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : (t.createdAt || 'Hari ini')}</div>
+              <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                ${isSelectActive ? `<input type="checkbox" class="riwayat-select-checkbox" style="margin-top: 2px;" ${isSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('karyawan', '${t.id}', this.checked)" onclick="event.stopPropagation()">` : ''}
+                <div>
+                  <div class="figma-ticket-id" style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); letter-spacing: -0.2px;">${t.id}</div>
+                  <div class="figma-ticket-date" style="font-size: 0.725rem; color: #64748b; margin-top: 2px; font-weight: 500;">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : (t.createdAt || 'Hari ini')}</div>
+                </div>
               </div>
               <div style="text-align: right;">${getCleanEmpStatus(t.status, t)}</div>
             </div>
@@ -2276,12 +2298,12 @@ function renderEmpCards(list, containerElement) {
                   Buka QR Izin
                 </button>
               ` : ''}
-              <div class="action-pills-row" style="flex: 1; width: 100%;">
+              <div class="action-pills-row" style="flex: 1; width: 100%; justify-content: flex-end; gap: 0.45rem;">
                 <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
                 </button>
@@ -2311,33 +2333,37 @@ function renderEmpTable(list, containerElement) {
     return;
   }
 
+  const empSelState = window.riwayatSelectState && window.riwayatSelectState.karyawan;
+  const isSelectActive = Boolean(empSelState && empSelState.active);
+  const allVisibleChecked = isSelectActive && list.length > 0 && list.every(t => empSelState.selected.has(t.id));
+
   target.innerHTML = `
     <div class="figma-table-card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
       <table class="figma-table" style="min-width: 950px;">
         <thead>
           <tr>
+            ${isSelectActive ? `<th style="width: 40px; text-align: center;"></th>` : ''}
             <th style="white-space: nowrap; min-width: 170px;">Nomor Tiket & Kategori</th>
             <th style="white-space: nowrap; min-width: 180px;">Pemohon & NIP</th>
             <th style="white-space: nowrap; min-width: 180px;">Tujuan & Keperluan</th>
             <th style="white-space: nowrap; min-width: 140px;">Rencana Waktu</th>
             <th style="white-space: nowrap; min-width: 95px;">Status</th>
-            <th style="white-space: nowrap; min-width: 180px;">Catatan</th>
-            <th style="white-space: nowrap; min-width: 175px;">Tindakan</th>
+            <th style="white-space: nowrap; min-width: 60px; text-align: center;">Aksi</th>
           </tr>
         </thead>
         <tbody>
           ${list.map(t => {
+    const isRowSelected = Boolean(isSelectActive && empSelState.selected.has(t.id));
+    const isSelected = isRowSelected;
     const statusHtml = getCleanEmpStatus(t.status, t);
-    let catatanHtml = `<span style="color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px;">✓ Tepat waktu — Disetujui ${window.renderUserPhoto(t.approverName || 'Hendra Gunawan', 18)} <span>${t.approverName || 'Hendra Gunawan'}</span></span>`;
     let tindakanHtml = `
-      <div class="action-pills-row">
-        <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-          <span>Detail Pengajuan</span>
-        </button>
-        <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          <span>Hapus</span>
+      <div style="display: flex; justify-content: center; align-items: center;">
+        <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'karyawan', '${t.id}')" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="2"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+            <circle cx="12" cy="19" r="2"></circle>
+          </svg>
         </button>
       </div>
     `;
@@ -2353,7 +2379,8 @@ function renderEmpTable(list, containerElement) {
     const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
 
     return `
-              <tr style="${isEmergency ? 'border-left: 4px solid var(--rose-danger, #e11d48); background-color: rgba(225, 29, 72, 0.035);' : ''}">
+              <tr class="${isSelected ? 'riwayat-card-selected ' : ''}${isSelectActive ? 'riwayat-select-active-item' : ''}" data-select-role="karyawan" data-ticket-id="${t.id}" onclick="window.handleRiwayatItemClick('karyawan', '${t.id}', event)">
+                ${isSelectActive ? `<td style="vertical-align: middle; text-align: center;"><input type="checkbox" class="riwayat-select-checkbox" ${isRowSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('karyawan', '${t.id}', this.checked)" onclick="event.stopPropagation()"></td>` : ''}
                 <td style="vertical-align: middle;">
                   <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span style="font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem;">${t.id}</span>
@@ -2381,8 +2408,7 @@ function renderEmpTable(list, containerElement) {
                 </td>
                 <td>${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>
-                <td style="font-size: 0.75rem;">${catatanHtml}</td>
-                <td style="white-space: nowrap; vertical-align: middle;">${tindakanHtml}</td>
+                <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${tindakanHtml}</td>
               </tr>
             `;
   }).join('')}

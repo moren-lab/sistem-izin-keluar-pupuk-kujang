@@ -1851,8 +1851,8 @@
 
           <!-- 4. Alasan Keperluan Izin -->
           <div class="mobile-form-group" style="margin-bottom: 12px;">
-            <label class="mobile-form-label">${isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin'} <span class="req">*</span></label>
-            <textarea class="mobile-textarea" id="mFormReason" placeholder="${isEmergency ? 'Masukkan alasan kondisi kedaruratan...' : 'Masukkan alasan keperluan izin...'}" required style="min-height: 65px;">${initialReason}</textarea>
+            <label class="mobile-form-label" id="mFormReasonLabel" data-is-emergency="${isEmergency ? '1' : '0'}">${initialType === 'Pulang Mendahului' ? 'Alasan Keperluan Izin dan memilih pulang lebih awal' : (isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin')} <span class="req">*</span></label>
+            <textarea class="mobile-textarea" id="mFormReason" placeholder="${initialType === 'Pulang Mendahului' ? 'Masukkan alasan keperluan izin dan memilih pulang lebih awal...' : (isEmergency ? 'Masukkan alasan kondisi kedaruratan...' : 'Masukkan alasan keperluan izin...')}" required style="min-height: 65px;">${initialReason}</textarea>
           </div>
 
           <!-- 5. Rencana Waktu Keluar & Perkiraan Waktu Kembali (Anti Waktu Lampau) -->
@@ -2336,6 +2336,22 @@
   window.mobileToggleReturnType = function (val) {
     const wrap = document.getElementById('mFormWrapReturn');
     const input = document.getElementById('mFormEstimatedReturn');
+    const reasonLabel = document.getElementById('mFormReasonLabel');
+    const reasonInput = document.getElementById('mFormReason');
+    if (reasonLabel) {
+      const isEmergency = reasonLabel.getAttribute('data-is-emergency') === '1';
+      if (val === 'Pulang Mendahului') {
+        reasonLabel.innerHTML = 'Alasan Keperluan Izin dan memilih pulang lebih awal <span class="req">*</span>';
+      } else {
+        reasonLabel.innerHTML = `${isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin'} <span class="req">*</span>`;
+      }
+    }
+    if (reasonInput) {
+      const isEmergency = reasonLabel && reasonLabel.getAttribute('data-is-emergency') === '1';
+      reasonInput.placeholder = val === 'Pulang Mendahului'
+        ? 'Masukkan alasan keperluan izin dan memilih pulang lebih awal...'
+        : (isEmergency ? 'Masukkan alasan kondisi kedaruratan...' : 'Masukkan alasan keperluan izin...');
+    }
     if (!wrap || !input) return;
     if (val === 'Pulang Mendahului') {
       wrap.style.display = 'none';
