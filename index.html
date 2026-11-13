@@ -1437,6 +1437,10 @@
                   </svg>
                   <span>Pilih</span>
                 </button>
+                <button type="button" class="btn-export-pdf" id="btnEmpExportPdf" onclick="window.openExportPdfModal('karyawan')" title="Ekspor riwayat ke PDF Resmi" style="height: 34px; padding: 0 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; border: 1.2px solid #008444; background: #ecfdf5; color: #008444; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  <span>Ekspor PDF</span>
+                </button>
                 <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearEmpRiwayat" onclick="window.deleteAllEmpRiwayat()" title="Hapus Seluruh Riwayat Pengajuan Selesai">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -1933,6 +1937,10 @@
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                   </svg>
                   <span>Pilih</span>
+                </button>
+                <button type="button" class="btn-export-pdf" id="btnApproverExportPdf" onclick="window.openExportPdfModal('approver')" title="Ekspor riwayat ke PDF Resmi" style="height: 34px; padding: 0 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; border: 1.2px solid #008444; background: #ecfdf5; color: #008444; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  <span>Ekspor PDF</span>
                 </button>
                 <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearApproverRiwayat" onclick="window.clearApproverRiwayatHistory()" title="Hapus riwayat pengajuan final dari tampilan">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2611,6 +2619,14 @@
                     </button>
                   </div>
 
+                  <button type="button" class="btn-secondary" id="btnSecurityExportPdf" onclick="window.openExportPdfModal('security')" title="Ekspor riwayat ke PDF Resmi" style="font-size: 0.775rem; border: 1.2px solid #008444; color: #008444; background: #ecfdf5; font-weight: 700;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                      <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    <span>Ekspor PDF</span>
+                  </button>
                   <button class="btn-secondary" id="btnSecurityLogExport" style="font-size: 0.775rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -5059,6 +5075,116 @@
     </div>
   </div>
 
+  
+  <!-- MODAL PRATINJAU EKSPOR DOKUMEN PDF (SESUAI GAMBAR 1 RESMI BUMN) -->
+  <div class="modal-overlay" id="modalExportPdfPreview" style="display: none; align-items: center; justify-content: center; z-index: 99999; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); padding: 16px;">
+    <div class="modal-card" style="max-width: 860px; width: 100%; max-height: 94vh; display: flex; flex-direction: column; background: #ffffff; border-radius: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #cbd5e1;">
+      
+      <!-- Modal Header -->
+      <div class="modal-header no-print" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;">Pratinjau Ekspor Dokumen PDF</h3>
+          <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: #64748b;">Periksa tata letak dokumen sebelum mencetak atau menyimpan sebagai PDF.</p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="window.closeExportPdfModal()" title="Tutup Pratinjau" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b; line-height: 1;">✕</button>
+      </div>
+
+      <!-- Modal Toolbar (Controls: Edit Judul Dokumen) -->
+      <div class="export-pdf-toolbar no-print" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 20px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+          <label for="exportPdfInputTitle" style="font-weight: 700; color: #334155; white-space: nowrap;">Judul Dokumen:</label>
+          <input type="text" id="exportPdfInputTitle" value="Judul" oninput="window.updateExportPdfTitle(this.value)" placeholder="Ketik judul dokumen..." style="flex: 1; max-width: 420px; padding: 6px 10px; border: 1.2px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+        </div>
+        <div id="exportPdfMetaInfo" style="font-size: 0.75rem; color: #64748b; white-space: nowrap;">
+          Menampilkan 0 baris data
+        </div>
+      </div>
+
+      <!-- Modal Body (Paper Container) -->
+      <div class="modal-body" style="padding: 24px 20px; overflow-y: auto; background: #64748b; flex: 1; display: block;">
+        
+        <!-- DOCUMENT A4 PREVIEW (IDENTIK GAMBAR 1) -->
+        <div id="printableOfficialPdfDocument" class="official-pdf-sheet" style="background: #ffffff; width: 100%; max-width: 794px; min-height: 980px; margin: 0 auto; padding: 24px 32px 30px 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          
+          <div>
+            <!-- 1. Top Decorative Green Bar (Sesuai Gambar 1: Bar Hijau di Tengah Atas) -->
+            <div class="pdf-top-bar" style="background: #008444; height: 10px; width: 68%; margin: 0 auto 16px auto; border-radius: 0 0 3px 3px;"></div>
+
+            <!-- 2. Header 3 Logo: Danantara (Kiri), Pupuk Indonesia (Tengah), Pupuk Kujang (Kanan) -->
+            <div class="pdf-logos-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; padding: 0 6px;">
+              <div style="flex: 1; text-align: left;">
+                <img src="assets/danantara.png" alt="Danantara Indonesia" style="height: 34px; max-width: 150px; object-fit: contain;">
+              </div>
+              <div style="flex: 1; text-align: center;">
+                <img src="assets/pupuk-indonesia.png" alt="Pupuk Indonesia" style="height: 44px; max-width: 170px; object-fit: contain;">
+              </div>
+              <div style="flex: 1; text-align: right;">
+                <img src="assets/pupuk-kujang.png" alt="Pupuk Kujang" style="height: 44px; max-width: 150px; object-fit: contain;">
+              </div>
+            </div>
+
+            <!-- 3. Judul Dokumen (Sesuai Gambar 1: Bold di Tengah) -->
+            <h2 id="pdfDocumentDisplayTitle" style="text-align: center; font-size: 1.25rem; font-weight: 800; color: #000000; margin: 16px 0 20px 0; letter-spacing: -0.2px;">Judul</h2>
+
+            <!-- 4. Tabel 6 Kolom Sesuai Persis Gambar 1 -->
+            <div class="pdf-table-wrapper" style="width: 100%; overflow-x: auto;">
+              <table id="pdfOfficialReportTable" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8pt; color: #000000; table-layout: fixed;">
+                <thead>
+                  <tr style="background: #ffffff;">
+                    <th style="border: 1px solid #000000; padding: 7px 5px; text-align: center; font-weight: 800; width: 14%; word-break: break-word;">Tanggal dan Waktu</th>
+                    <th style="border: 1px solid #000000; padding: 7px 5px; text-align: center; font-weight: 800; width: 17%; word-break: break-word;">Identitas akses</th>
+                    <th style="border: 1px solid #000000; padding: 7px 5px; text-align: center; font-weight: 800; width: 17%; word-break: break-word;">Departemen</th>
+                    <th style="border: 1px solid #000000; padding: 7px 5px; text-align: center; font-weight: 800; width: 17%; word-break: break-word;">Keperluan</th>
+                    <th style="border: 1px solid #000000; padding: 7px 5px; text-align: center; font-weight: 800; width: 22%; word-break: break-word;">WaktuScan out, Tap in, dan batas kembali</th>
+                    <th style="border: 1px solid #000000; padding: 7px 5px; text-align: center; font-weight: 800; width: 13%; word-break: break-word;">Status akhir</th>
+                  </tr>
+                </thead>
+                <tbody id="pdfOfficialReportTableBody">
+                  <!-- Generated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 5. Tanda Tangan VP (Sesuai Gambar 1: Rata Kanan Bawah Tabel) -->
+            <div class="pdf-signature-section" style="margin-left: auto; width: 260px; text-align: center; margin-top: 26px; page-break-inside: avoid;">
+              <div style="font-size: 0.825rem; font-weight: 700; color: #000000; margin-bottom: 8px;">VP Teknologi Informasi PKC</div>
+              <div id="pdfExportSignatureQr" style="width: 68px; height: 68px; margin: 0 auto 8px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.2px dashed #008444; border-radius: 4px; background: #f0fdf4;">
+                <div style="font-weight: 800; font-size: 0.825rem; color: #008444;">(QR)</div>
+              </div>
+              <div style="font-size: 0.9rem; font-weight: 800; color: #000000; text-decoration: underline; letter-spacing: 0.2px;"><u>Jojok Satriadi</u></div>
+            </div>
+          </div>
+
+          <!-- Bagian Bawah Dokumen -->
+          <div style="margin-top: 24px;">
+            <!-- 6. Footer Resmi Perusahaan (Sesuai Gambar 1: Tengah Bawah) -->
+            <div class="pdf-footer-section" style="text-align: center; font-size: 0.78rem; color: #1e293b; line-height: 1.4; page-break-inside: avoid; margin-bottom: 8px;">
+              <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; margin-bottom: 2px;">PT Pupuk Kujang</div>
+              <div style="font-size: 0.725rem; color: #475569;">Jl. Jend A. Yani No 39 Cikampek 41373 Karawang, Jawa Barat, Telp : (0264) 316141, 317007 (Hunting System)</div>
+            </div>
+
+            <!-- 7. Bottom Decorative Green Bar (Sesuai Gambar 1: Bar Hijau Penuh di Bawah Halaman) -->
+            <div class="pdf-bottom-bar" style="background: #008444; height: 14px; width: 100%; border-radius: 2px 2px 0 0;"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer (Tombol di Tengah Sesuai Aturan Sistem) -->
+      <div class="modal-footer no-print" style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 14px 20px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+        <button type="button" class="btn-primary" id="btnConfirmExportPdf" onclick="window.executePrintExportPdf()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; padding: 10px 24px; background: #008444; border: none; color: #ffffff; border-radius: 8px; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(0, 132, 68, 0.3);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Cetak / Unduh PDF</span>
+        </button>
+        <button type="button" class="btn-secondary" onclick="window.closeExportPdfModal()" style="font-weight: 600; padding: 10px 20px; border-radius: 8px; font-size: 0.875rem; border: 1.2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
+          <span>Tutup</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Note: Dynamic Mobile Bottom Nav is managed inside #mobileAppContainer by mobile_app.js -->
 
   <!-- FLOATING TABLE ROW ACTION POPOVER (TITIK TIGA: DETAIL & HAPUS) -->
@@ -5088,6 +5214,7 @@
   <script src="js/modules/mobile_atasan.js?v=20261113_0530"></script>
   <script src="js/modules/mobile_security.js?v=20261111_1035"></script>
   <script src="js/modules/mobile_app.js?v=20261113_0530"></script>
+  <script src="js/modules/export_pdf.js?v=20261113_0900"></script>
   <script src="js/app.js?v=20261113_0530"></script>
 </body>
 

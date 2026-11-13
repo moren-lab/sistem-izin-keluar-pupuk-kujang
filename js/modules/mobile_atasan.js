@@ -698,24 +698,24 @@
     }
 
     container.innerHTML = `
-      <!-- Hero Header Card Atasan (Dark Green) -->
-      <section class="mobile-hero-card" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);">
-        <div class="mobile-hero-greeting-sub" style="color: #a7f3d0;">Pusat Persetujuan & Monitoring Bawahan</div>
+      <!-- Hero Header Card Atasan (Executive Obsidian + Gold Accent) -->
+      <section class="mobile-hero-card approver-theme" style="background: #12161f; border: 1px solid rgba(212, 175, 55, 0.32); border-top: 2px solid #d4af37; box-shadow: 0 4px 16px rgba(18, 22, 31, 0.25);">
+        <div class="mobile-hero-greeting-sub" style="color: #d4b86a; font-weight: 700;">Pusat Persetujuan & Monitoring Bawahan</div>
         <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-top: 4px;">${approver.name}</div>
-        <div style="font-size: 0.775rem; color: #e2e8f0; margin-top: 2px;">${approver.title || 'Atasan'}</div>
+        <div style="font-size: 0.775rem; color: #d4b86a; margin-top: 2px;">${approver.title || 'Atasan'}</div>
 
-        <div class="mobile-hero-divider" style="background: rgba(255,255,255,0.15); margin: 12px 0;"></div>
+        <div class="mobile-hero-divider" style="background: rgba(212, 175, 55, 0.22); margin: 12px 0;"></div>
 
        
       </section>
 
       <!-- Switcher Segment: Ringkasan perizinan | Volume pengajuan tim (Di Atas Dashboard) -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <button type="button" id="mAtasanBtnSegRingkasan" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #065f46; background: ${atasanDashboardSegment === 'ringkasan' ? '#065f46' : '#ffffff'}; color: ${atasanDashboardSegment === 'ringkasan' ? '#ffffff' : '#065f46'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('ringkasan')">
+        <button type="button" id="mAtasanBtnSegRingkasan" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${atasanDashboardSegment === 'ringkasan' ? '#d4af37' : '#cbd5e1'}; background: ${atasanDashboardSegment === 'ringkasan' ? '#12161f' : '#ffffff'}; color: ${atasanDashboardSegment === 'ringkasan' ? '#fef3c7' : '#475569'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('ringkasan')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span>Ringkasan perizinan</span>
         </button>
-        <button type="button" id="mAtasanBtnSegVolume" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #065f46; background: ${atasanDashboardSegment === 'volume' ? '#065f46' : '#ffffff'}; color: ${atasanDashboardSegment === 'volume' ? '#ffffff' : '#065f46'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('volume')">
+        <button type="button" id="mAtasanBtnSegVolume" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${atasanDashboardSegment === 'volume' ? '#d4af37' : '#cbd5e1'}; background: ${atasanDashboardSegment === 'volume' ? '#12161f' : '#ffffff'}; color: ${atasanDashboardSegment === 'volume' ? '#fef3c7' : '#475569'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('volume')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
           <span>Volume pengajuan tim</span>
         </button>
@@ -2594,23 +2594,31 @@
 
       if (segment === 'ringkasan') {
 
-        btnRingkasan.style.background = '#065f46';
+        btnRingkasan.style.background = '#12161f';
 
-        btnRingkasan.style.color = '#ffffff';
+        btnRingkasan.style.color = '#fef3c7';
+
+        btnRingkasan.style.borderColor = '#d4af37';
 
         btnVolume.style.background = '#ffffff';
 
-        btnVolume.style.color = '#065f46';
+        btnVolume.style.color = '#475569';
+
+        btnVolume.style.borderColor = '#cbd5e1';
 
       } else {
 
         btnRingkasan.style.background = '#ffffff';
 
-        btnRingkasan.style.color = '#065f46';
+        btnRingkasan.style.color = '#475569';
 
-        btnVolume.style.background = '#065f46';
+        btnRingkasan.style.borderColor = '#cbd5e1';
 
-        btnVolume.style.color = '#ffffff';
+        btnVolume.style.background = '#12161f';
+
+        btnVolume.style.color = '#fef3c7';
+
+        btnVolume.style.borderColor = '#d4af37';
 
       }
 

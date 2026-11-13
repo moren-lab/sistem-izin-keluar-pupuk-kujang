@@ -386,13 +386,13 @@
     }).join('');
 
     container.innerHTML = `
-      <!-- Hero Pos Jaga Profile (Green Hero with White Button) -->
-      <section class="mobile-hero-card">
-        <div class="mobile-hero-greeting-sub">Selamat pagi, petugas Pos Jaga</div>
-        <h2 class="mobile-hero-name">${officer.name}</h2>
-        <div class="mobile-hero-role">NIP ${officer.nip} • ${officer.dept}</div>
+      <!-- Hero Pos Jaga Profile (Deep Navy Steel matching web Pos Jaga) -->
+      <section class="mobile-hero-card security-theme" style="background: #12263a; border: 1px solid #1b3652; box-shadow: 0 4px 16px rgba(18, 38, 58, 0.25);">
+        <div class="mobile-hero-greeting-sub" style="color: #93b4d4;">Selamat pagi, petugas Pos Jaga</div>
+        <h2 class="mobile-hero-name" style="color: #ffffff;">${officer.name}</h2>
+        <div class="mobile-hero-role" style="color: #93b4d4;">NIP ${officer.nip} • ${officer.dept}</div>
 
-        <div class="mobile-hero-divider"></div>
+        <div class="mobile-hero-divider" style="background: rgba(147, 180, 212, 0.22);"></div>
 
         <button type="button" class="mobile-hero-btn mobile-hero-btn-white" onclick="window.mobileSwitchTab('scanner')">
           <span>Buka Kamera Scan</span>

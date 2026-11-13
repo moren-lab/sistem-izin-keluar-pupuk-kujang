@@ -982,6 +982,10 @@ function exportAdminExcel() {
 }
 
 function printAdminReport() {
+  if (typeof window.openExportPdfModal === 'function') {
+    window.openExportPdfModal('admin');
+    return;
+  }
   const printTitle = document.getElementById('adminPrintTimestamp');
   if (printTitle) {
     const now = new Date();
