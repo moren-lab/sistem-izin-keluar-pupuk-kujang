@@ -585,9 +585,7 @@ window.renderRiwayatSelectionBar = function (role, visibleIds) {
       <button type="button" class="btn-danger-solid" style="padding: 0.4rem 0.85rem; font-size: 0.78rem; border-radius: 6px; font-weight: 700; cursor: ${count === 0 ? 'not-allowed' : 'pointer'}; opacity: ${count === 0 ? '0.5' : '1'};" ${count === 0 ? 'disabled' : ''} onclick="window.deleteSelectedRiwayat('${role}')">
         Hapus Terpilih (${count})
       </button>
-      <button type="button" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; border-radius: 6px; font-weight: 700;" onclick="window.toggleRiwayatSelectMode('${role}', false)">
-        Batal
-      </button>
+
     </div>
   `;
 };
@@ -602,6 +600,8 @@ window.deleteSelectedRiwayat = function (role) {
   const idsToDelete = new Set(st.selected);
   const count = idsToDelete.size;
   const cfg = getRiwayatRoleConfig(role);
+
+  const savedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
   const handler = () => {
     const ticketsList = window.ticketsList || [];
@@ -632,6 +632,11 @@ window.deleteSelectedRiwayat = function (role) {
     st.selected.clear();
     st.active = false;
     cfg.refresh();
+
+    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    });
 
     if (typeof window.showToast === 'function') {
       window.showToast(`${deletedCount} riwayat terpilih berhasil dihapus.`, 'success');

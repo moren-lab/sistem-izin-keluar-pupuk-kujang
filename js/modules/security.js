@@ -2135,6 +2135,8 @@ function deleteSecurityTicket(ticketId, source) {
     return;
   }
 
+  const savedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
   const handler = () => {
     let ticketsList = window.ticketsList || [];
     const t = ticketsList.find(x => x.id === ticketId);
@@ -2144,6 +2146,11 @@ function deleteSecurityTicket(ticketId, source) {
     }
 
     renderSecurityView();
+
+    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    });
 
     if (typeof window.showToast === 'function') {
       window.showToast(`Pengajuan #${ticketId} berhasil dihapus dari ${label}.`, 'info');

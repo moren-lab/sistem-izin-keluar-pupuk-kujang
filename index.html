@@ -1430,17 +1430,6 @@
                 <p class="figma-section-sub"></p>
               </div>
               <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <button type="button" class="btn-select-history" id="btnSelectEmpRiwayat" onclick="window.toggleRiwayatSelectMode('karyawan')" title="Pilih beberapa riwayat untuk dihapus">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 11 12 14 22 4"></polyline>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                  </svg>
-                  <span>Pilih</span>
-                </button>
-                <button type="button" class="btn-export-pdf" id="btnEmpExportPdf" onclick="window.openExportPdfModal('karyawan')" title="Ekspor riwayat ke PDF Resmi" style="height: 34px; padding: 0 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; border: 1.2px solid #008444; background: #ecfdf5; color: #008444; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                  <span>Ekspor PDF</span>
-                </button>
                 <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearEmpRiwayat" onclick="window.deleteAllEmpRiwayat()" title="Hapus Seluruh Riwayat Pengajuan Selesai">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -1464,6 +1453,15 @@
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                   <input type="text" id="searchEmpInput" placeholder="Cari tiket, alasan, atau tujuan">
+                </div>
+                <div style="margin-top: 8px;">
+                  <button type="button" class="btn-select-history" id="btnSelectEmpRiwayat" onclick="window.toggleRiwayatSelectMode('karyawan')" title="Pilih beberapa riwayat untuk dihapus">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 11 12 14 22 4"></polyline>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Pilih</span>
+                  </button>
                 </div>
               </div>
 
@@ -1931,17 +1929,6 @@
                 <h1>Riwayat Izin Karyawan</h1>
               </div>
               <div class="filters-group" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <button type="button" class="btn-select-history" id="btnSelectApproverRiwayat" onclick="window.toggleRiwayatSelectMode('approver')" title="Pilih beberapa riwayat untuk dihapus">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 11 12 14 22 4"></polyline>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                  </svg>
-                  <span>Pilih</span>
-                </button>
-                <button type="button" class="btn-export-pdf" id="btnApproverExportPdf" onclick="window.openExportPdfModal('approver')" title="Ekspor riwayat ke PDF Resmi" style="height: 34px; padding: 0 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; border: 1.2px solid #008444; background: #ecfdf5; color: #008444; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                  <span>Ekspor PDF</span>
-                </button>
                 <button type="button" class="btn-clear-history btn-danger-solid" id="btnClearApproverRiwayat" onclick="window.clearApproverRiwayatHistory()" title="Hapus riwayat pengajuan final dari tampilan">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -1965,6 +1952,15 @@
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                   <input type="text" id="searchApproverRiwayatInput" placeholder="Cari tiket, alasan, atau nama pemohon">
+                </div>
+                <div style="margin-top: 8px;">
+                  <button type="button" class="btn-select-history" id="btnSelectApproverRiwayat" onclick="window.toggleRiwayatSelectMode('approver')" title="Pilih beberapa riwayat untuk dihapus">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 11 12 14 22 4"></polyline>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Pilih</span>
+                  </button>
                 </div>
               </div>
 
@@ -2619,14 +2615,6 @@
                     </button>
                   </div>
 
-                  <button type="button" class="btn-secondary" id="btnSecurityExportPdf" onclick="window.openExportPdfModal('security')" title="Ekspor riwayat ke PDF Resmi" style="font-size: 0.775rem; border: 1.2px solid #008444; color: #008444; background: #ecfdf5; font-weight: 700;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                      <rect x="6" y="14" width="12" height="8"></rect>
-                    </svg>
-                    <span>Ekspor PDF</span>
-                  </button>
                   <button class="btn-secondary" id="btnSecurityLogExport" style="font-size: 0.775rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -5089,11 +5077,11 @@
         <button type="button" class="btn-close-modal" onclick="window.closeExportPdfModal()" title="Tutup Pratinjau" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b; line-height: 1;">✕</button>
       </div>
 
-      <!-- Modal Toolbar (Controls: Edit Judul Dokumen) -->
+      <!-- Modal Toolbar (Info Dokumen Otomatis) -->
       <div class="export-pdf-toolbar no-print" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 20px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem;">
-        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-          <label for="exportPdfInputTitle" style="font-weight: 700; color: #334155; white-space: nowrap;">Judul Dokumen:</label>
-          <input type="text" id="exportPdfInputTitle" value="Judul" oninput="window.updateExportPdfTitle(this.value)" placeholder="Ketik judul dokumen..." style="flex: 1; max-width: 420px; padding: 6px 10px; border: 1.2px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-weight: 700; color: #334155;">Judul Laporan:</span>
+          <span style="font-weight: 800; color: #008444;">Laporan &amp; Rekapitulasi Data Perizinan</span>
         </div>
         <div id="exportPdfMetaInfo" style="font-size: 0.75rem; color: #64748b; white-space: nowrap;">
           Menampilkan 0 baris data
@@ -5123,8 +5111,8 @@
               </div>
             </div>
 
-            <!-- 3. Judul Dokumen (Sesuai Gambar 1: Bold di Tengah) -->
-            <h2 id="pdfDocumentDisplayTitle" style="text-align: center; font-size: 1.25rem; font-weight: 800; color: #000000; margin: 16px 0 20px 0; letter-spacing: -0.2px;">Judul</h2>
+            <!-- 3. Judul Dokumen (Sesuai Gambar 1: Bold di Tengah - Otomatis) -->
+            <h2 id="pdfDocumentDisplayTitle" style="text-align: center; font-size: 1.25rem; font-weight: 800; color: #000000; margin: 16px 0 20px 0; letter-spacing: -0.2px;">Laporan &amp; Rekapitulasi Data Perizinan</h2>
 
             <!-- 4. Tabel 6 Kolom Sesuai Persis Gambar 1 -->
             <div class="pdf-table-wrapper" style="width: 100%; overflow-x: auto;">

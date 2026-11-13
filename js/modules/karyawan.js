@@ -1554,7 +1554,7 @@ function renderKaryawanDashboard() {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.preventDefault(); event.stopPropagation(); deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
                 </button>
@@ -2303,7 +2303,7 @@ function renderEmpCards(list, containerElement) {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   <span>Detail Pengajuan</span>
                 </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.preventDefault(); event.stopPropagation(); deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   <span>Hapus</span>
                 </button>
@@ -2513,6 +2513,8 @@ function deleteEmpTicket(ticketId) {
     return;
   }
 
+  const savedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
   const handler = () => {
     t.deletedByKaryawan = true;
     window.saveTickets(ticketsList);
@@ -2521,6 +2523,12 @@ function deleteEmpTicket(ticketId) {
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.renderAdminStatusTracking === 'function') window.renderAdminStatusTracking();
     if (typeof window.updateAdminMetrics === 'function') window.updateAdminMetrics();
+
+    // Pulihkan posisi scroll persis pada posisi saat tombol hapus ditekan
+    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    });
 
     if (typeof window.showToast === 'function') {
       window.showToast('1 riwayat dihapus', 'info');

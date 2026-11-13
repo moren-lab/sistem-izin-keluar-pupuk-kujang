@@ -107,11 +107,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Modal background scroll lock observer (hanya untuk modal pop-up floating asli, bukan formulir inline penuh)
+  let savedScrollBeforeModalOpen = 0;
   const modalObserver = new MutationObserver(() => {
     const hasOpenModal = Array.from(document.querySelectorAll('.modal-overlay.open')).some(
       m => !m.closest('#karyawanFullFormContainer')
     );
-    document.body.classList.toggle('modal-open', hasOpenModal);
+    if (hasOpenModal) {
+      if (!document.body.classList.contains('modal-open')) {
+        savedScrollBeforeModalOpen = window.scrollY || document.documentElement.scrollTop || 0;
+        document.body.classList.add('modal-open');
+      }
+    } else {
+      if (document.body.classList.contains('modal-open')) {
+        document.body.classList.remove('modal-open');
+        if (savedScrollBeforeModalOpen > 0) {
+          window.scrollTo({ top: savedScrollBeforeModalOpen, behavior: 'instant' });
+        }
+      }
+    }
   });
   document.querySelectorAll('.modal-overlay').forEach(modal => {
     modalObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });

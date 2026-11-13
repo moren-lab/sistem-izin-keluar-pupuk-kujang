@@ -103,12 +103,10 @@
     }
     currentExportTickets = tickets;
 
-    // Title setup
-    const titleInput = document.getElementById('exportPdfInputTitle');
+    // Title setup (Otomatis: Laporan & Rekapitulasi Data Perizinan)
+    const fixedTitle = 'Laporan & Rekapitulasi Data Perizinan';
     const displayTitle = document.getElementById('pdfDocumentDisplayTitle');
-    const defaultTitle = customTitle || 'Judul';
-    if (titleInput) titleInput.value = defaultTitle;
-    if (displayTitle) displayTitle.textContent = defaultTitle;
+    if (displayTitle) displayTitle.textContent = fixedTitle;
 
     // Meta count
     const metaInfo = document.getElementById('exportPdfMetaInfo');

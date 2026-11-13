@@ -2247,6 +2247,8 @@ function deleteApproverTicket(ticketId) {
     return;
   }
 
+  const savedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
   const handler = () => {
     let tickets = window.ticketsList || [];
     const target = tickets.find(t => t.id === ticketId);
@@ -2273,6 +2275,10 @@ function deleteApproverTicket(ticketId) {
         window.showToast(`Catatan izin #${ticketId} berhasil dihapus dari riwayat ${who}.`, 'info');
       }
       renderApproverView();
+      window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+      });
     }
   };
 

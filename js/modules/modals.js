@@ -4870,6 +4870,9 @@ if (typeof document !== 'undefined') {
 window.openDeleteConfirmModal = function (options) {
   const { title = 'Konfirmasi Hapus', message = 'Apakah Anda yakin ingin menghapus data ini?', confirmText = 'Hapus', onConfirm = null } = options || {};
 
+  // Simpan posisi scroll sebelum modal muncul
+  const savedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
   // Cek apakah user telah memilih untuk melewati konfirmasi hapus selama sesi ini
   if (sessionStorage.getItem('kujang_skip_confirm_delete') === 'true') {
     if (typeof onConfirm === 'function') onConfirm();
@@ -4898,10 +4901,13 @@ window.openDeleteConfirmModal = function (options) {
         modal.classList.remove('open');
         modal.style.display = 'none';
         if (typeof onConfirm === 'function') onConfirm();
+        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
       };
     }
     modal.classList.add('open');
     modal.style.display = 'flex';
+    // Pertahankan posisi scroll agar tidak melompat ke atas saat modal terbuka
+    window.scrollTo({ top: savedScrollY, behavior: 'instant' });
   } else if (confirm(typeof message === 'string' ? message.replace(/<[^>]+>/g, '') : message)) {
     if (typeof onConfirm === 'function') onConfirm();
   }
