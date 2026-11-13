@@ -508,6 +508,67 @@ window.toggleDocViewerZoom = function() {
   }
 };
 
+// Gesture Pinch-to-Zoom (Cubit 2 Jari) pada Modal Pratinjau Dokumen / Gambar Mobile
+let _pinchStartDist = 0;
+let _pinchStartScale = 1;
+window._currentDocViewerScale = 1;
+
+function initDocViewerPinchZoom() {
+  const stage = document.getElementById('docViewerStage');
+  if (!stage || stage._pinchBound) return;
+  stage._pinchBound = true;
+
+  function getTouchDistance(t1, t2) {
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  function getZoomableElement() {
+    return document.getElementById('docViewerMainImg') || document.getElementById('docViewerA4Paper');
+  }
+
+  stage.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      const target = getZoomableElement();
+      if (!target) return;
+      _pinchStartDist = getTouchDistance(e.touches[0], e.touches[1]);
+      _pinchStartScale = window._currentDocViewerScale || 1;
+      target.style.transition = 'none';
+    }
+  }, { passive: false });
+
+  stage.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      const target = getZoomableElement();
+      if (!target) return;
+      e.preventDefault();
+      const dist = getTouchDistance(e.touches[0], e.touches[1]);
+      if (_pinchStartDist > 0) {
+        const factor = dist / _pinchStartDist;
+        window._currentDocViewerScale = Math.min(Math.max(_pinchStartScale * factor, 0.8), 3.5);
+        target.style.transform = `scale(${window._currentDocViewerScale})`;
+        target.style.transformOrigin = 'center center';
+      }
+    }
+  }, { passive: false });
+
+  stage.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) {
+      _pinchStartDist = 0;
+      const target = getZoomableElement();
+      if (target) {
+        target.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        if (window._currentDocViewerScale < 1) {
+          window._currentDocViewerScale = 1;
+          target.style.transform = 'scale(1)';
+        }
+      }
+    }
+  });
+}
+window.initDocViewerPinchZoom = initDocViewerPinchZoom;
+
 // Listener tombol ESC global untuk keluar dari Lightbox
 if (!window._docLightboxEscBound) {
   window._docLightboxEscBound = true;
@@ -692,6 +753,9 @@ window.viewSuratPerintahDetail = function(ticketIdParam) {
   if (modal) {
     modal.style.display = 'flex';
     modal.classList.add('open');
+    if (typeof initDocViewerPinchZoom === 'function') {
+      initDocViewerPinchZoom();
+    }
   }
 };
 
@@ -707,6 +771,12 @@ window.closeDocViewerModal = function() {
   }
   window._activeViewingDoc = null;
   window._docViewerZoomed = false;
+  window._currentDocViewerScale = 1;
+  const target = document.getElementById('docViewerMainImg') || document.getElementById('docViewerA4Paper');
+  if (target) {
+    target.style.transform = '';
+    target.style.transformOrigin = '';
+  }
 };
 
 window.downloadCurrentDocViewerFile = function() {
@@ -3575,5 +3645,8 @@ window.viewArrivalProofPhoto = function(ticketId, historyIdx) {
   if (modal) {
     modal.style.display = 'flex';
     modal.classList.add('open');
+    if (typeof initDocViewerPinchZoom === 'function') {
+      initDocViewerPinchZoom();
+    }
   }
 };

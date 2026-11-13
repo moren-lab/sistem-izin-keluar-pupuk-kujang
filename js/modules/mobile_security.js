@@ -1472,40 +1472,25 @@
     t.securityNipOut = officer.nip;
     if (!t.timeline) t.timeline = [];
 
-    if (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului') {
-      const isGroupDinasActive = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.filter(m => m.status !== 'batal').length > 0);
-      if (isGroupDinasActive) {
-      t.status = 'Menunggu Verifikasi Atasan';
-      t.tapInGate = activeGate;
-      t.tapInTime = nowFormatted;
-      t.arrivalReportedTime = nowFormatted;
-      t.arrivalReportedAt = nowFormatted;
-      t.reportedReturnTime = nowFormatted;
-      t.timeFrozen = true;
-      t.scanInGate = activeGate;
-      t.securityOfficerIn = officer.name;
-      t.securityNipIn = officer.nip;
-      t.hasExtensionPending = false;
-      t.pendingExtension = null;
-      if (!t.timeline) t.timeline = [];
+    const isPulang = (t.type === 'Pulang Mendahului' || t.type === 'Pulang Lebih Awal' || t.returnType === 'Pulang Mendahului' || t.returnType === 'Pulang Lebih Awal' || (t.returnType && String(t.returnType).toLowerCase().includes('pulang')));
+
+    if (isPulang) {
+      t.status = 'Selesai';
+      const activePassengers = (t.isGroupDinas && Array.isArray(t.members))
+        ? [t.initiatorCancelled ? null : `${t.applicantName} (Inisiator)`, ...t.members.filter(m => m.status !== 'batal').map(m => m.name)].filter(Boolean)
+        : [];
+      const descGroup = activePassengers.length > 0
+        ? `Petugas Pos Jaga memvalidasi kepulangan tim dinas (${activePassengers.length} orang: ${activePassengers.join(', ')}) melalui ${activeGate} (Pulang Lebih Awal). Tiket langsung Selesai.`
+        : `Karyawan meninggalkan kawasan pabrik melalui ${activeGate} (Pulang Lebih Awal). Tiket langsung Selesai.`;
+
       t.timeline.push({
-        event: 'Tap In Gerbang Masuk',
+        event: 'Scan Out Pos Jaga (Pulang)',
         time: nowFormatted,
         by: `${officer.name} (${activeGate})`,
         gate: activeGate,
-        desc: `Tap In di ${activeGate} oleh Petugas (${officer.name}). Jam kepulangan terkunci. Menunggu verifikasi kehadiran fisik oleh Atasan.`
+        desc: descGroup
       });
-      saveTicketsToStorage(tickets);
-      if (typeof window.showToast === 'function') {
-        window.showToast(`Tap In berhasil di ${activeGate}! Jam kepulangan terkunci. Menunggu verifikasi Atasan.`, 'success');
-      }
-      closeMobileSheet();
-      renderMobileSecurity(null, currentSecurityTab);
-      if (typeof window.renderActiveView === 'function') window.renderActiveView();
-      return;
-    }
 
-    t.status = 'Selesai';
       if (typeof window.createNotification === 'function') {
         const applicantInfo = resolveDynamicApplicantInfo(t);
         window.createNotification({
@@ -1520,14 +1505,26 @@
           priority: 'normal',
           eventId: `completed_${t.id}`
         });
+
+        // Notifikasi tembusan ke anggota tim dinas
+        if (t.isGroupDinas && Array.isArray(t.members)) {
+          t.members.filter(m => m.status !== 'batal').forEach(m => {
+            window.createNotification({
+              recipientRole: 'karyawan',
+              recipientNip: m.nip,
+              recipientName: m.name,
+              actorSource: 'security',
+              type: 'selesai',
+              title: 'Izin Tim Selesai Diproses',
+              message: `Kepulangan tim dinas (#${t.id}) telah diverifikasi oleh Petugas Pos Jaga di ${activeGate}. Tiket selesai.`,
+              ticketId: t.id,
+              priority: 'normal',
+              eventId: `completed_team_${t.id}_${m.nip}`
+            });
+          });
+        }
       }
-      t.timeline.push({
-        event: 'Scan Out Pos Jaga (Pulang)',
-        time: nowFormatted,
-        by: `${officer.name} (${activeGate})`,
-        gate: activeGate,
-        desc: `Karyawan meninggalkan kawasan pabrik melalui ${activeGate} (Pulang Lebih Awal). Tiket langsung Selesai.`
-      });
+
       if (typeof window.showToast === 'function') {
         window.showToast(`Scan Out berhasil di ${activeGate}! Tiket #${t.id} selesai diproses (Pulang Lebih Awal).`, 'success');
       }

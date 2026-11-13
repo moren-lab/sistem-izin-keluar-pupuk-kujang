@@ -814,7 +814,7 @@
           const isLate = (act.title.toLowerCase().includes('terlambat') || act.status === 'Terlambat');
           const timeDisplay = formatTimeOnly(act.rawTime) || 'Hari ini';
           return `
-              <div style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;" onclick="window.mobileOpenAtasanDetailModal('${act.ticketId}')">
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
                 <div style="font-size: 0.7rem; font-weight: 800; color: ${isLate ? '#b91c1c' : '#64748b'}; min-width: 60px; flex-shrink: 0;">
                   ${timeDisplay}
                 </div>
@@ -1136,7 +1136,7 @@
                     <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
                       Tolak Tim
                     </button>
-                    <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
+                    <button type="button" class="mobile-btn-primary" style="flex: 1.2; min-height: 42px; padding: 6px; font-size: 0.775rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
                       Setujui Tim
                     </button>
                   </div>
@@ -1444,57 +1444,6 @@
           </div>
         </div>
 
-        ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
-          <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #f0fdf4; border: 1.5px solid #bbf7d0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 0.7rem; color: #15803d; font-weight: 800; text-transform: uppercase;">👥 ANGGOTA TIM DINAS</span>
-              <span style="font-size: 0.675rem; font-weight: 700; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 999px;">
-                ${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif
-              </span>
-            </div>
-            <div style="font-size: 0.725rem; display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #ffffff; border-radius: 6px; border: 1px solid #e2e8f0;">
-                <div>
-                  <div style="font-weight: 700; color: #0f172a;">${escapeHtml(t.applicantName)}</div>
-                  <div style="font-size: 0.65rem; color: #64748b;">${t.nip || '-'} • Inisiator Pengajuan</div>
-                </div>
-                <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${t.initiatorCancelled ? 'background: #ffffff; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ffffff; color: #334155; border: 1px solid #cbd5e1;'}">
-                  ${t.initiatorCancelled ? 'Batal Ikut' : 'Inisiator (Aktif)'}
-                </span>
-              </div>
-              ${t.members.map(m => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #ffffff; border-radius: 6px; border: 1px solid #e2e8f0;">
-                  <div>
-                    <div style="font-weight: 700; color: ${m.status === 'batal' ? '#94a3b8' : '#0f172a'}; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">${escapeHtml(m.name)}</div>
-                    <div style="font-size: 0.65rem; color: #64748b;">${m.nip || '-'} • ${m.department || 'Anggota Tim'}</div>
-                  </div>
-                  <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${m.status === 'batal' ? 'background: #ffffff; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ffffff; color: #334155; border: 1px solid #cbd5e1;'}">
-                    ${m.status === 'batal' ? 'Batal' : 'Ikut Serta'}
-                  </span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
-
-        ${t.suratPerintah ? `
-          <!-- Card Dokumen Surat Perintah Dinas -->
-          <div class="mobile-card" style="margin-bottom: 8px; padding: 10px 14px; background: #ffffff; border: 1px solid #e2e8f0;">
-            <div style="font-size: 0.7rem; color: #334155; font-weight: 800; margin-bottom: 4px; text-transform: uppercase;">DOKUMEN SURAT PERINTAH DINAS</div>
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div>
-                  <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a;">${escapeHtml(t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf')}</div>
-                  <div style="font-size: 0.675rem; color: #64748b;">${Math.round((t.suratPerintah.size || 140000)/1024)} KB • Terlampir Resmi</div>
-                </div>
-              </div>
-              <button type="button" class="mobile-btn-secondary" style="padding: 4px 8px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-weight: 700;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
-                Lihat Berkas
-              </button>
-            </div>
-          </div>
-        ` : ''}
-
         <!-- Card 2: Keperluan Izin -->
         <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">KEPERLUAN IZIN</div>
@@ -1511,7 +1460,7 @@
         </div>
 
         <!-- Card 3: Waktu Keluar & Kembali -->
-        <div class="mobile-card" style="margin-bottom: 12px; padding: 12px 14px;">
+        <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px;">
           <div style="font-size: 0.7rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">${isPulang ? 'WAKTU KELUAR' : 'WAKTU KELUAR & KEMBALI'}</div>
           <div class="mobile-ticket-grid-meta" style="margin: 4px 0 0 0;">
             <div>
@@ -1524,6 +1473,71 @@
             </div>
           </div>
         </div>
+
+        <!-- Card 4: Tim Dinas Bersama (Identik Layout Karyawan) -->
+        ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
+          <div style="margin-bottom: 12px; padding: 4px 2px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; color: #0f172a; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">
+                Tim Dinas Bersama
+              </span>
+              <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">
+                ${(t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length} Karyawan Aktif
+              </span>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; gap: 12px;">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 0.8rem; color: #0f172a; line-height: 1.35; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                    <strong>${escapeHtml(t.applicantName || 'Inisiator')}</strong>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #d97706;">(Inisiator)</span>
+                  </div>
+                  <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
+                    NIP: ${t.applicantNip || 'PK-2024-8841'}
+                  </div>
+                </div>
+                <div style="flex-shrink: 0; text-align: right;">
+                  <span style="font-size: 0.75rem; font-weight: 700; color: ${t.initiatorCancelled ? '#dc2626' : '#16a34a'}; white-space: nowrap;">
+                    ${t.initiatorCancelled ? 'Batal' : 'Aktif Ikut'}
+                  </span>
+                </div>
+              </div>
+              ${t.members.map(m => `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; gap: 12px;">
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 0.8rem; color: ${(m.status === 'batal' || m.status === 'cancelled') ? '#94a3b8' : '#0f172a'}; line-height: 1.35; ${(m.status === 'batal' || m.status === 'cancelled') ? 'text-decoration: line-through;' : ''}">
+                      <strong>${escapeHtml(m.name)}</strong>
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
+                      NIP: ${m.nip}
+                    </div>
+                  </div>
+                  <div style="flex-shrink: 0; text-align: right;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: ${(m.status === 'batal' || m.status === 'cancelled') ? '#dc2626' : '#16a34a'}; white-space: nowrap;">
+                      ${(m.status === 'batal' || m.status === 'cancelled') ? 'Batal' : 'Aktif Ikut'}
+                    </span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${t.suratPerintah ? `
+          <!-- Card Dokumen Surat Perintah Dinas -->
+          <div class="mobile-card" style="margin-bottom: 8px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0;">
+            <div style="font-size: 0.7rem; color: #334155; font-weight: 800; margin-bottom: 6px; text-transform: uppercase;">DOKUMEN SURAT PERINTAH DINAS</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="min-width: 0;">
+                <div style="font-size: 0.775rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${escapeHtml(t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf')}</div>
+                <div style="font-size: 0.675rem; color: #64748b;">${Math.round((t.suratPerintah.size || 140000)/1024)} KB • <span style="color: #16a34a; font-weight: 700;">Terlampir</span> Resmi</div>
+              </div>
+              <button type="button" class="mobile-btn-secondary" style="padding: 4px 10px; font-size: 0.7rem; min-height: 32px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-weight: 700; cursor: pointer;" onclick="if(window.viewSuratPerintahDetail){window.currentDetailTicketId='${t.id}'; window.viewSuratPerintahDetail();}">
+                Lihat File
+              </button>
+            </div>
+          </div>
+        ` : ''}
 
         <!-- Bagian Keputusan Atasan (Hanya muncul di Tab Informasi Tiket, bukan di Riwayat Aktivitas) -->
         ${isPending ? (isReassignedAway ? `
@@ -1852,20 +1866,38 @@
               <div class="mobile-meta-sub">Tap In aktual</div>
               <div class="mobile-meta-val">${t.scanInTime ? formatTimeOnly(t.scanInTime) : '—'}</div>
             </div>
+          </div>
 
           ${(t.isGroupDinas && Array.isArray(t.members) && t.members.length > 0) ? `
-            <div style="margin: 6px 0; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
-              <div style="font-size: 0.65rem; font-weight: 700; color: #475569; margin-bottom: 2px;">
-                👥 Tim Dinas:
-              </div>
-              <div style="display: flex; flex-wrap: wrap; gap: 3px;">
-                <span style="font-size: 0.65rem; background: #e0f2fe; color: #0369a1; padding: 1px 5px; border-radius: 4px; font-weight: 700;">
-                  ${escapeHtml(t.applicantName)} (Inisiator)
+            <div style="margin: 8px 0 10px 0; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-size: 0.725rem; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 0.3px;">
+                  👥 Tim Dinas Bersama
                 </span>
-                ${t.members.map(m => `
-                  <span style="font-size: 0.65rem; background: ${m.status === 'batal' ? '#fee2e2' : '#f1f5f9'}; color: ${m.status === 'batal' ? '#dc2626' : '#475569'}; padding: 1px 5px; border-radius: 4px; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
-                    ${escapeHtml(m.name)}${m.status === 'batal' ? ' (Batal)' : ''}
+                <span style="font-size: 0.675rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 999px; border: 1px solid #bfdbfe;">
+                  ${((t.initiatorCancelled ? 0 : 1) + t.members.filter(m => m.status !== 'batal').length)} Orang Aktif
+                </span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <!-- Inisiator -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: #ffffff; border-radius: 6px; border: 1px solid #f1f5f9;">
+                  <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                    ${escapeHtml(t.applicantName)} <span style="font-size: 0.675rem; color: #64748b; font-weight: 500;">(Inisiator)</span>
                   </span>
+                  <span style="font-size: 0.65rem; font-weight: 700; padding: 1px 7px; border-radius: 4px; ${t.initiatorCancelled ? 'background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;'}">
+                    ${t.initiatorCancelled ? 'Batal' : 'Aktif'}
+                  </span>
+                </div>
+                <!-- Anggota Tim -->
+                ${t.members.map(m => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: #ffffff; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <span style="font-size: 0.75rem; color: ${m.status === 'batal' ? '#94a3b8' : '#0f172a'}; font-weight: 600; ${m.status === 'batal' ? 'text-decoration: line-through;' : ''}">
+                      ${escapeHtml(m.name)}
+                    </span>
+                    <span style="font-size: 0.65rem; font-weight: 700; padding: 1px 7px; border-radius: 4px; ${m.status === 'batal' ? 'background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;' : 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;'}">
+                      ${m.status === 'batal' ? 'Batal' : 'Aktif'}
+                    </span>
+                  </div>
                 `).join('')}
               </div>
             </div>
@@ -1885,7 +1917,6 @@
               <strong>📷 Menunggu Bukti Foto Karyawan:</strong> "${escapeHtml(t.arrivalRejectReason || '-')}"
             </div>
           ` : '')}
-          </div>
 
           ${t.hasExtensionPending && t.status !== 'Menunggu Verifikasi Atasan' && t.status !== 'Selesai' ? `
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 6px 10px; font-size: 0.7rem; color: #92400e; margin-bottom: 6px;">
@@ -1894,7 +1925,10 @@
           ` : ''}
 
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}', 'riwayat')">
+            <button type="button" class="mobile-btn-secondary" style="padding: 6px 12px; font-size: 0.725rem; width: auto; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 36px;" onclick="window.mobileOpenAtasanDetailModal('${t.id}', '${isHistoryStatus(t) ? 'riwayat' : 'pelacakan'}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Lihat Detail Pengajuan</span>
+            </button>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Lihat Detail Pengajuan</span>
             </button>
@@ -2853,8 +2887,88 @@
     renderMobileAtasan(null, 'riwayat');
   };
 
+  // Pop-up Modal Persetujuan Atasan dengan Catatan Opsional (Paritas Fitur Web)
+  window.mobileOpenAtasanApproveModal = function (ticketId) {
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
+    if (!t) return;
+
+    if (isTicketReassignedFromMobileApprover(t)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Pengajuan ini telah dialihkan ke atasan lain.', 'danger');
+      }
+      return;
+    }
+
+    if (t.status !== 'Menunggu Persetujuan' && t.status !== 'Menunggu Otorisasi Darurat') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Peringatan: Tiket #${t.id} telah berstatus '${t.status}'.`, 'warning');
+      }
+      return;
+    }
+
+    const sheet = document.getElementById('mobileActionSheet');
+    if (!sheet) return;
+
+    const exitFormatted = formatTimeOnly(getTExitTime(t)) || '10.00 WIB';
+    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
+    const returnFormatted = isPulang ? 'Pulang Lebih Awal' : (formatTimeOnly(getTReturnTime(t)) || '13.00 WIB');
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+        <div>
+          <span style="font-size: 0.675rem; color: #059669; font-weight: 800; text-transform: uppercase;">PERSETUJUAN ATASAN</span>
+          <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
+        </div>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 14px 16px;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+          <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">${getTName(t)}</div>
+          <div style="font-size: 0.725rem; color: #64748b;">${getTNip(t)} • ${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
+          <div style="border-top: 1px dashed #e2e8f0; margin-top: 6px; padding-top: 6px; font-size: 0.725rem; color: #334155; display: flex; flex-direction: column; gap: 2px;">
+            <div><strong>Keperluan:</strong> ${t.category || 'Dinas Kantor'} (${t.destination || 'Area Rekayasa'})</div>
+            <div><strong>Waktu:</strong> ${exitFormatted} s/d ${returnFormatted}</div>
+          </div>
+        </div>
+
+        <div class="mobile-form-group" style="margin-bottom: 14px;">
+          <label class="mobile-form-label" style="font-size: 0.75rem; font-weight: 700; color: #334155; margin-bottom: 4px; display: block;">
+            Catatan Persetujuan (Opsional)
+          </label>
+          <textarea id="mApproveModalNote" class="mobile-textarea" placeholder="Misal: Disetujui. Selesaikan tugas tepat waktu dan patuhi SOP K3." style="font-size: 0.775rem; min-height: 64px; width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px;"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; font-size: 0.8rem; font-weight: 700; border-radius: 8px;" onclick="window.mobileCloseSheet()">
+            Batal
+          </button>
+          <button type="button" class="mobile-btn-primary" style="flex: 1.5; min-height: 44px; font-size: 0.8rem; font-weight: 800; background: #059669; border-color: #059669; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.mobileConfirmApproveFromModal('${t.id}')">
+            ✓ Setujui Pengajuan
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (typeof window.mobileOpenSheet === 'function') {
+      window.mobileOpenSheet();
+    } else {
+      sheet.classList.add('open');
+      const backdrop = document.getElementById('mobileSheetBackdrop');
+      if (backdrop) backdrop.classList.add('open');
+    }
+  };
+
+  window.mobileConfirmApproveFromModal = function (ticketId) {
+    const noteEl = document.getElementById('mApproveModalNote');
+    const note = (noteEl && noteEl.value && noteEl.value.trim()) ? noteEl.value.trim() : 'Disetujui. Selesaikan tugas tepat waktu.';
+    if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+    window.mobileAtasanExecuteDecision(ticketId, 'approve', note);
+  };
+
   window.mobileQuickApproveTicket = function (ticketId) {
-    window.mobileAtasanExecuteDecision(ticketId, 'approve', 'Disetujui. Selesaikan tugas tepat waktu.');
+    window.mobileOpenAtasanApproveModal(ticketId);
   };
 
   window.mobileAtasanExecuteDecision = function (ticketId, decision, defaultNote) {
