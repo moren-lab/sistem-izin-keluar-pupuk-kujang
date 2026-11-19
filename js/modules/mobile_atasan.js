@@ -85,17 +85,32 @@
       };
     }
 
-    if (window.activeApproverUser && window.activeApproverUser.nip === 'PK-2015-1002') {
+    if (window.activeApproverUser && window.activeApproverUser.nip) {
       return {
         ...window.activeApproverUser,
-        title: window.activeApproverUser.title || window.activeApproverUser.role || 'Manajer Rekayasa & Pemeliharaan',
+        title: window.activeApproverUser.title || window.activeApproverUser.role || 'Manajer',
         dept: window.activeApproverUser.department || 'Departemen Rekayasa & Pemeliharaan',
         department: window.activeApproverUser.department || 'Departemen Rekayasa & Pemeliharaan'
       };
     }
 
-    const hendra = users.find(u => (u.nip === 'PK-2015-1002' || (u.roleKey === 'approver' && !u.nip.includes('0845'))) && u.status === 'Aktif') ||
-                   users.find(u => (u.nip === 'PK-2015-1002' || u.roleKey === 'approver' || (u.name && u.name.includes('Hendra Gunawan'))) && u.nip !== 'PK-2012-0845') || {
+    try {
+      const savedApprNip = localStorage.getItem('KUJANG_ACTIVE_APPR_NIP');
+      if (savedApprNip) {
+        const found = users.find(u => u.nip === savedApprNip && u.status === 'Aktif');
+        if (found) {
+          return {
+            ...found,
+            title: found.title || found.role || 'Manajer',
+            dept: found.department || 'Departemen Rekayasa & Pemeliharaan',
+            department: found.department || 'Departemen Rekayasa & Pemeliharaan'
+          };
+        }
+      }
+    } catch (e) {}
+
+    const primary = users.find(u => u.roleKey === 'approver' && u.status === 'Aktif') ||
+                    users.find(u => u.roleKey === 'approver') || {
       name: 'Ir. Hendra Gunawan, M.T.',
       nip: 'PK-2015-1002',
       title: 'Manajer Rekayasa & Pemeliharaan',
@@ -103,10 +118,10 @@
       department: 'Departemen Rekayasa & Pemeliharaan'
     };
     return {
-      ...hendra,
-      title: hendra.title || hendra.role || 'Manajer Rekayasa & Pemeliharaan',
-      dept: hendra.department || hendra.dept || 'Departemen Rekayasa & Pemeliharaan',
-      department: hendra.department || hendra.dept || 'Departemen Rekayasa & Pemeliharaan'
+      ...primary,
+      title: primary.title || primary.role || 'Manajer',
+      dept: primary.department || primary.dept || 'Departemen Rekayasa & Pemeliharaan',
+      department: primary.department || primary.dept || 'Departemen Rekayasa & Pemeliharaan'
     };
   }
 
@@ -1703,8 +1718,6 @@
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const readyTickets = tickets.filter(t => t.status === 'Disetujui');
-    const pendingTickets = tickets.filter(t => t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
-    const finishedTickets = tickets.filter(t => t.status === 'Selesai');
 
     const parseTime = (t) => {
       const raw = t.scanOutTime || t.approvedAt || t.createdAt || t.plannedExit || 0;
@@ -1712,16 +1725,13 @@
       return (d && !isNaN(d.getTime())) ? d.getTime() : 0;
     };
 
-    const hasDeletableTickets = tickets.some(t =>
-      !isDeletedByCurrentMobileApprover(t) &&
-      (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
-    );
-
     // HANYA perizinan yang sedang berjalan/aktif (Mirip Pelacakan Pos Jaga)
     const activeRunningTickets = tickets.filter(t =>
       t.status === 'Sedang di Luar' ||
       t.status === 'Terlambat' ||
       t.status === 'Disetujui' ||
+      t.status === 'Menunggu Verifikasi Atasan' ||
+      t.status === 'Menunggu Bukti Kedatangan' ||
       (t.isEmergency && (t.emergencyLocked || t.status === 'Menunggu Otorisasi Darurat'))
     );
 
@@ -1750,12 +1760,8 @@
       teamCardsList = sortedEligible.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     } else if (atasanTimFilter === 'ready') {
       teamCardsList = sortedEligible.filter(t => t.status === 'Disetujui');
-    } else if (atasanTimFilter === 'pending') {
-      teamCardsList = sortedEligible.filter(t => t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
-    } else if (atasanTimFilter === 'finished') {
-      teamCardsList = sortedEligible.filter(t => t.status === 'Selesai');
     } else {
-      // 'all': Seluruh tiket bawahan (Aktif, Menunggu, Selesai) tampil lengkap
+      // 'all': Seluruh tiket bawahan aktif berjalan
       teamCardsList = [...sortedEligible];
     }
 
@@ -1969,106 +1975,17 @@
           ` : ''}
 
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px;">
-            <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="window.mobileOpenAtasanDetailModal('${t.id}', '${isHistoryStatus(t) ? 'riwayat' : 'pelacakan'}')">
+            <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="window.mobileOpenAtasanDetailModal('${t.id}', 'pelacakan')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
             </button>
-            ${(t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa') ? `
-              <button type="button" class="mobile-btn-danger" title="Hapus Riwayat" aria-label="Hapus Riwayat" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'approver')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
-            ` : ''}
           </div>
         </div>
       `;
     }
 
-    // Pemisahan domain Pelacakan Aktif (Prioritas) vs Riwayat Selesai
-    const isHistoryStatus = (t) => (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
-    const isActiveStatus = (t) => !isHistoryStatus(t);
-
-    const allActiveCards = teamCardsList.filter(t => isActiveStatus(t));
-    const allHistoryCards = teamCardsList.filter(t => isHistoryStatus(t));
-
-    const pageActiveCards = pageTeamCards.filter(t => isActiveStatus(t));
-    const pageHistoryCards = pageTeamCards.filter(t => isHistoryStatus(t));
-
-    const showActiveSection = (atasanTimFilter !== 'finished');
-    const showHistorySection = (atasanTimFilter === 'all' || atasanTimFilter === 'finished');
-
-    let sectionsHtml = '';
-
-    // 1. SEKSI ATAS: PELACAKAN KARYAWAN AKTIF (PRIORITAS)
-    if (showActiveSection) {
-      const activeListHtml = pageActiveCards.length > 0
-        ? pageActiveCards.map(t => renderTeamCardItem(t)).join('')
-        : `
-          <div style="background: #f8fafc; border: 1.5px dashed #e2e8f0; border-radius: 12px; padding: 14px 16px; text-align: center; font-size: 0.75rem; color: #64748b; margin-bottom: 12px;">
-            ${atasanTimSearchQuery ? 'Tidak ada tiket aktif yang cocok dengan kata kunci pencarian.' : 'Tidak ada bawahan yang sedang berada di luar area atau menunggu perizinan saat ini.'}
-          </div>
-        `;
-
-      sectionsHtml += `
-        <div class="mobile-tracking-section-active" style="margin-bottom: 6px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <h3 style="font-size: 0.925rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">
-                Pelacakan Karyawan Aktif
-              </h3>
-              <span style="background: #ecfdf5; color: #059669; font-weight: 800; font-size: 0.725rem; padding: 2px 8px; border-radius: 999px; border: 1px solid #a7f3d0;">
-                ${allActiveCards.length}
-              </span>
-            </div>
-            <span style="font-size: 0.675rem; font-weight: 700; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 999px; padding: 2px 8px;">
-              Prioritas Pantau
-            </span>
-          </div>
-          ${activeListHtml}
-        </div>
-      `;
-    }
-
-    // 2. PEMISAH VISUAL DASHED DIVIDER (Gaya Web Referensi Image 2)
-    if (showActiveSection && showHistorySection && (pageActiveCards.length > 0 || pageHistoryCards.length > 0)) {
-      sectionsHtml += `
-        <div style="margin: 20px 0 16px 0; border-top: 1.5px dashed #cbd5e1; position: relative;">
-          <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f8fafc; padding: 0 10px; font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
-            Penyelesaian
-          </span>
-        </div>
-      `;
-    }
-
-    // 3. SEKSI BAWAH: RIWAYAT PENYELESAIAN KARYAWAN
-    if (showHistorySection) {
-      const historyListHtml = pageHistoryCards.length > 0
-        ? pageHistoryCards.map(t => renderTeamCardItem(t)).join('')
-        : `
-          <div style="background: #f8fafc; border: 1.5px dashed #e2e8f0; border-radius: 12px; padding: 14px 16px; text-align: center; font-size: 0.75rem; color: #64748b;">
-            ${atasanTimSearchQuery ? 'Tidak ada riwayat selesai yang cocok dengan kata kunci pencarian.' : 'Belum ada catatan riwayat perizinan selesai pada periode ini.'}
-          </div>
-        `;
-
-      sectionsHtml += `
-        <div class="mobile-tracking-section-history" style="margin-top: 6px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <h3 style="font-size: 0.925rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.01em;">
-                Riwayat Penyelesaian Karyawan
-              </h3>
-              <span style="background: #f1f5f9; color: #475569; font-weight: 800; font-size: 0.725rem; padding: 2px 8px; border-radius: 999px; border: 1px solid #cbd5e1;">
-                ${allHistoryCards.length}
-              </span>
-            </div>
-            <span style="font-size: 0.675rem; font-weight: 700; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 2px 8px;">
-              Selesai / Final
-            </span>
-          </div>
-          ${historyListHtml}
-        </div>
-      `;
-    }
-
-    const listHtml = sectionsHtml;
+    const listHtml = pageTeamCards.length > 0
+      ? pageTeamCards.map(t => renderTeamCardItem(t)).join('')
+      : '';
 
     // Empty state
     const emptyHtml = `
@@ -2117,8 +2034,6 @@
     if (atasanTimFilter === 'outside') filterLabel = 'Sedang di Luar';
     else if (atasanTimFilter === 'late') filterLabel = 'Terlambat';
     else if (atasanTimFilter === 'ready') filterLabel = 'Siap Keluar';
-    else if (atasanTimFilter === 'pending') filterLabel = 'Menunggu Persetujuan';
-    else if (atasanTimFilter === 'finished') filterLabel = 'Selesai';
 
     let dateFilterLabel = '';
     if (atasanTimDateFilter === 'today') dateFilterLabel = 'Hari Ini';
@@ -2148,7 +2063,7 @@
       <!-- Toolbar: Ringkasan di Kiri, Tombol Hapus Semua & Filter di Kanan (Sejajar) -->
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
         <div style="font-size: 0.775rem; font-weight: 700; color: #475569;">
-          ${totalTimItems} tiket pelacakan (${allActiveCards.length} aktif • ${allHistoryCards.length} selesai)
+          ${totalTimItems} tiket pelacakan aktif
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <!-- Tombol Filter Status & Hari Pelacakan -->
@@ -2181,12 +2096,10 @@
             <div>
               <label class="mobile-filter-label">Status</label>
               <select class="mobile-filter-select" id="mAtasanSelectTimFilter">
-                <option value="all" ${atasanTimFilter === 'all' ? 'selected' : ''}>Semua Status (${sortedEligible.length})</option>
+                <option value="all" ${atasanTimFilter === 'all' ? 'selected' : ''}>Semua Status Aktif (${sortedEligible.length})</option>
                 <option value="outside" ${atasanTimFilter === 'outside' ? 'selected' : ''}>Sedang di Luar (${outsideTickets.length})</option>
                 <option value="late" ${atasanTimFilter === 'late' ? 'selected' : ''}>Terlambat (${lateTickets.length})</option>
                 <option value="ready" ${atasanTimFilter === 'ready' ? 'selected' : ''}>Siap Keluar (${readyTickets.length})</option>
-                <option value="pending" ${atasanTimFilter === 'pending' ? 'selected' : ''}>Menunggu Persetujuan (${pendingTickets.length})</option>
-                <option value="finished" ${atasanTimFilter === 'finished' ? 'selected' : ''}>Selesai (${finishedTickets.length})</option>
               </select>
             </div>
           </div>
