@@ -909,18 +909,26 @@ function renderAdminReports(isPrinting = false) {
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && (t.category === 'Dinas Kantor' || t.category === 'Dinas Perusahaan'));
     return `
       <tr>
-        <td style="white-space: nowrap;">
-          <div style="display: flex; align-items: center; gap: 0.45rem;">
-            <span class="report-ticket-id">${t.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1.5px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap; line-height: 1.3;">🚨 Darurat</span>` : ''}
-            ${isGroupDinas ? (() => {
-              const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-              return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1.5px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap; line-height: 1.3;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
-            })() : ''}
-          </div>
+        <td style="vertical-align: middle;">
+          <div class="report-ticket-id" style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+          ${(isEmergency || isGroupDinas) ? `
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
+              ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+              ${isGroupDinas ? (() => {
+                const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+              })() : ''}
+            </div>
+          ` : ''}
         </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 0.65rem;">${window.renderUserPhoto(t.applicantName, 30)} <div><div class="report-emp-name">${t.applicantName}</div><div class="report-emp-nip">NIP: ${t.applicantNip}</div></div></div>
+        <td style="vertical-align: middle;">
+          <div class="user-info-flex-cell" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.65rem;">
+            ${window.renderUserPhoto(t.applicantName, 30, 'flex-shrink: 0 !important; margin-right: 0 !important;')}
+            <div>
+              <div class="report-emp-name">${t.applicantName}</div>
+              <div class="report-emp-nip">NIP: ${t.applicantNip}</div>
+            </div>
+          </div>
         </td>
         <td>
           <div class="report-dept-name">${t.department}</div>
@@ -3203,21 +3211,31 @@ function renderAdminStatusTracking() {
     const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && (t.category === 'Dinas Kantor' || t.category === 'Dinas Perusahaan'));
     return `
       <tr>
-        <td>
-          <div style="display: flex; align-items: center; gap: 0.45rem;">
-            <a href="javascript:void(0)" onclick="window.viewAdminTicketDetail('${t.id}')" class="report-ticket-id" style="text-decoration: none; font-weight: 700; color: var(--primary-accent);">
+        <td style="vertical-align: middle;">
+          <div class="report-ticket-id" style="font-weight: 700; font-family: var(--font-mono); color: var(--primary-accent); font-size: 0.8rem; white-space: nowrap;">
+            <a href="javascript:void(0)" onclick="window.viewAdminTicketDetail('${t.id}')" style="text-decoration: none; font-weight: 700; color: var(--primary-accent);">
               ${t.id}
             </a>
-            ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1.5px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap; line-height: 1.3;">🚨 Darurat</span>` : ''}
-            ${isGroupDinas ? (() => {
-              const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-              return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1.5px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap; line-height: 1.3;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
-            })() : ''}
           </div>
+          ${(isEmergency || isGroupDinas) ? `
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
+              ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+              ${isGroupDinas ? (() => {
+                const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+              })() : ''}
+            </div>
+          ` : ''}
           <div style="margin-top: 3px;">${cleanCategoryBadge(t.category)}</div>
         </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 0.65rem;">${window.renderUserPhoto(t.applicantName, 30)} <div><div class="report-emp-name">${t.applicantName}</div><div class="report-emp-nip">NIP: ${t.applicantNip}</div></div></div>
+        <td style="vertical-align: middle;">
+          <div class="user-info-flex-cell" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.65rem;">
+            ${window.renderUserPhoto(t.applicantName, 30, 'flex-shrink: 0 !important; margin-right: 0 !important;')}
+            <div>
+              <div class="report-emp-name">${t.applicantName}</div>
+              <div class="report-emp-nip">NIP: ${t.applicantNip}</div>
+            </div>
+          </div>
         </td>
         <td>
           <div class="report-dept-name">${t.department}</div>

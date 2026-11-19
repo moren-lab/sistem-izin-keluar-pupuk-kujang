@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261119_1420">
+  <link rel="stylesheet" href="css/style.css?v=20261119_1455">
   <link rel="stylesheet" href="css/auth.css?v=20261116_1400">
   <link rel="stylesheet" href="css/mobile.css?v=20261117_0830">
   <link rel="icon" type="pupuk-kujang-cikampek-seeklogo" href="pupuk-kujang-cikampek-seeklogo.png">
@@ -790,9 +790,13 @@
                     <h3 class="figma-card-title">Ketentuan izin keluar</h3>
                   </div>
                   <ul class="figma-bullet-list">
-                    <li>Izin reguler memerlukan persetujuan Atasan. Maksimal satu tiket aktif.</li>
-                    <li>Tunjukkan QR kepada petugas saat keluar dan kembali.</li>
-                    <li>Ajukan perpanjangan sebelum batas jam kembali.</li>
+                    <li><strong>Izin Reguler & Persetujuan:</strong> Izin Dinas Kantor atau Urusan Pribadi wajib disetujui Atasan. Maksimal 1 tiket izin aktif yang sedang berjalan.</li>
+                    <li><strong>Izin Darurat (Emergency Pass):</strong> Dapat diajukan saat kondisi medis/mendesak dan langsung diproses keluar melalui otorisasi sah Atasan.</li>
+                    <li><strong>Pengajuan Tim / Rombongan:</strong> Inisiator dapat mendaftarkan anggota tim dinas dalam satu tiket manifes terpadu.</li>
+                    <li><strong>Verifikasi Gerbang:</strong> Tunjukkan kode QR dinamis kepada petugas Pos Jaga saat keluar (Scan Out) dan saat kembali (Tap In).</li>
+                    <li><strong>Perpanjangan Waktu:</strong> Jika terjadi kendala/keterlambatan di luar, ajukan perpanjangan waktu sebelum batas estimasi kembali terlampaui.</li>
+                    <li><strong>Konfirmasi Kedatangan:</strong> Lakukan konfirmasi fisik kepulangan dengan Atasan (termasuk unggah foto bukti kedatangan bila diminta).</li>
+                    <li><strong>Pembatalan Tiket:</strong> Pengajuan izin yang belum dilakukan Scan Out dapat dibatalkan sewaktu-waktu oleh pemohon.</li>
                   </ul>
                 </div>
 
@@ -1706,11 +1710,13 @@
                     </div>
                   </div>
                   <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
-                    <p>- <strong>Dinas Kantor:</strong> Verifikasi urgensi pekerjaan dan kelengkapan dokumen tugas.</p>
-                    <p style="margin-top: 6px;">- <strong>Urusan Pribadi:</strong> Diberikan secara proporsional dengan
-                      estimasi waktu kembali yang wajar.</p>
-                    <p style="margin-top: 6px;">- <strong>Penolakan:</strong> Wajib menyertakan catatan alasan penolakan
-                      yang jelas bagi pemohon.</p>
+                    <p>- <strong>Verifikasi Pengajuan:</strong> Periksa urgensi tugas dinas, surat perintah tugas, dan batas waktu sebelum menyetujui.</p>
+                    <p style="margin-top: 6px;">- <strong>Otorisasi Izin Darurat:</strong> Otorisasi kilat (1-klik atau Face Scan biometrik) untuk pembukaan gerbang darurat.</p>
+                    <p style="margin-top: 6px;">- <strong>Persetujuan Rombongan Tim:</strong> Evaluasi inisiator beserta seluruh anggota tim yang terdaftar dalam satu manifes dinas.</p>
+                    <p style="margin-top: 6px;">- <strong>Pengalihan Antrean (Reassign):</strong> Alihkan wewenang peninjauan ke pejabat aktif lain jika sedang dinas luar atau cuti.</p>
+                    <p style="margin-top: 6px;">- <strong>Evaluasi Perpanjangan:</strong> Tinjau permohonan penambahan durasi waktu keluar staf beserta alasan keterlambatan.</p>
+                    <p style="margin-top: 6px;">- <strong>Konfirmasi Kedatangan & Foto:</strong> Konfirmasi kepulangan staf setelah Tap In gerbang, atau minta unggah foto bukti bila diperlukan.</p>
+                    <p style="margin-top: 6px;">- <strong>Penolakan Izin:</strong> Wajib menyertakan catatan evaluasi alasan penolakan yang jelas bagi pemohon.</p>
                   </div>
                 </div>
               </div>
@@ -2169,11 +2175,13 @@
                     </h3>
                   </div>
                   <ul class="figma-bullet-list">
-                    <li>Verifikasi kecocokan foto identitas digital dan nomor plat kendaraan dinas/pribadi.</li>
-                    <li>Tiket Izin Darurat (Emergency Pass) dapat langsung diproses setelah otorisasi terkonfirmasi.
-                    </li>
-                    <li>Konfirmasi kepulangan karyawan dilakukan dengan tombol <strong>Tap In / Tap In</strong>.</li>
-                    <li>Hubungi petugas pengawas K3 (Ext. 110) jika terdapat ketidaksesuaian data di gerbang.</li>
+                    <li><strong>Verifikasi QR & Identitas:</strong> Pindai QR Code tiket pemohon dan cocokkan foto profil digital, NIP, serta plat kendaraan dinas/pribadi.</li>
+                    <li><strong>Scan Out Gerbang Keluar:</strong> Pastikan status tiket Disetujui (Approved) sebelum mengizinkan meninggalkan area pabrik.</li>
+                    <li><strong>Prosedur Izin Darurat:</strong> Tiket Darurat sah dapat langsung diproses keluar gerbang dengan verifikasi otorisasi Atasan.</li>
+                    <li><strong>Pemeriksaan Manifes Tim:</strong> Cocokkan jumlah personil rombongan tim dinas dengan manifes tiket sebelum membuka gerbang.</li>
+                    <li><strong>Tap In Gerbang Masuk:</strong> Catat waktu kedatangan kembali; sistem otomatis menandai status keterlambatan jika melewati batas toleransi.</li>
+                    <li><strong>Pelacakan Aktif Real-Time:</strong> Pantau karyawan yang sedang berada di luar pabrik melalui menu Pelacakan Izin Aktif.</li>
+                    <li><strong>Koordinasi K3 & Keamanan:</strong> Hubungi Pengawas K3 & Pengamanan (Ext. 110) jika terdapat kendala pemindaian atau ketidaksesuaian data gerbang.</li>
                   </ul>
                 </div>
               </div>
@@ -5172,21 +5180,21 @@
   <script src="js/data/authData.js?v=20261116_1400"></script>
   <script src="js/modules/auth.js?v=20261116_1400"></script>
   <script src="js/modules/notifications.js?v=20261116_1400"></script>
-  <script src="js/modules/ui.js?v=20261119_0730"></script>
+  <script src="js/modules/ui.js?v=20261119_1455"></script>
   <script src="js/modules/scheduler.js?v=20261119_0430"></script>
   <script src="js/modules/navigation.js?v=20261116_1400"></script>
   <script src="js/modules/karyawan.js?v=20261119_1420"></script>
   <script src="js/modules/approver.js?v=20261119_1420"></script>
   <script src="js/modules/security.js?v=20261119_1420"></script>
-  <script src="js/modules/admin.js?v=20261118_1430"></script>
+  <script src="js/modules/admin.js?v=20261119_1455"></script>
   <script src="js/modules/charts.js?v=20261116_1400"></script>
   <script src="js/modules/emergency.js?v=20261116_1400"></script>
   <script src="js/modules/modals.js?v=20261119_0805"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261119_0730"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261119_1455"></script>
   <script src="js/modules/mobile_atasan.js?v=20261118_1445"></script>
   <script src="js/modules/mobile_security.js?v=20261117_0930"></script>
   <script src="js/modules/mobile_app.js?v=20261119_0430"></script>
-  <script src="js/modules/export_pdf.js?v=20261119_0730"></script>
+  <script src="js/modules/export_pdf.js?v=20261119_1455"></script>
   <script src="js/app.js?v=20261116_1400"></script>
 </body>
 

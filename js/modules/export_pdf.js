@@ -36,7 +36,7 @@
 
     return `
       <div style="font-weight: 700; color: #000000; font-size: 8.5pt;">${dateStr}</div>
-      <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">${timeStr}</div>
+      <div style="font-size: 7.5pt; color: #000000; margin-top: 2px;">${timeStr}</div>
     `;
   }
 
@@ -44,14 +44,20 @@
     const name = t.applicantName || 'Budi Pratama, S.T.';
     const nip = t.applicantNip || 'PK-2024-8841';
     const id = t.id || 'TK-20261112-001';
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
     const isGroup = Boolean(t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0));
     const memberCount = isGroup ? ((t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2))) : 1;
 
+    let metaBadges = [];
+    if (isEmergency) metaBadges.push('[Darurat]');
+    if (isGroup) metaBadges.push(`[Tim: ${memberCount} Orang]`);
+    const metaText = metaBadges.length > 0 ? ` ${metaBadges.join(' ')}` : '';
+
     return `
       <div style="font-weight: 700; color: #000000; font-size: 8.5pt;">${name}</div>
-      <div style="font-size: 7.5pt; color: #475569;">NIP: ${nip}</div>
-      <div style="font-size: 7.5pt; color: #008444; font-weight: 700; margin-top: 2px;">
-        ${id} ${isGroup ? `<span style="font-size: 6.5pt; background: #e0f2fe; color: #0369a1; padding: 1px 4px; border-radius: 3px; font-weight: 700;">👥 Tim (${memberCount})</span>` : ''}
+      <div style="font-size: 7.5pt; color: #000000; margin-top: 1px;">NIP: ${nip}</div>
+      <div style="font-size: 7.5pt; color: #000000; font-weight: 700; margin-top: 2px;">
+        ${id}${metaText}
       </div>
     `;
   }
@@ -158,12 +164,10 @@
           <tr style="height: 38px; page-break-inside: avoid; break-inside: avoid;">
             <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; text-align: center;">${formatDateWaktu(t)}</td>
             <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top;">${formatIdentitasAkses(t)}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 8pt; color: #1e293b;">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 8pt; color: #1e293b;">${t.reason || t.destination || t.category || '-'}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 8pt; color: #000000;">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 8pt; color: #000000;">${t.reason || t.destination || t.category || '-'}</td>
             <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top;">${formatWaktuScanTapBatas(t)}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: middle; text-align: center;">
-              <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 7.5pt; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;">${t.status || 'Selesai'}</span>
-            </td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: middle; text-align: center; font-size: 8pt; font-weight: 700; color: #000000;">${t.status || 'Selesai'}</td>
           </tr>
         `).join('');
       }

@@ -14526,7 +14526,7 @@ body.theme-dark [style*="color:#be123c"] {
 input[type="date"],
 input[type="datetime-local"],
 input[type="time"] {
-  cursor: pointer !important;
+  cursor: text !important;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
