@@ -553,32 +553,38 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
                 </div>
               </div>
 
-              <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
-              <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin-bottom: 0.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
-                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
-                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '').replace(/\r?\n+/g, ' ')}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
-                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
-                  <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
-                </div>
-                <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
-                  <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
-                  <div class="detail-schedule-val" style="text-align: right;">${scheduleWithDay}</div>
+              <!-- Detail Box (Tujuan keluar, Keperluan, Rencana Waktu) Sesuai Gambar 2 (Titik Dua Sejajar) -->
+              <div class="figma-card-detail-box" style="padding: 0.5rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin-bottom: 0.5rem;">
+                <div class="realization-grid">
+                  <span class="realization-label">Tujuan keluar</span>
+                  <span class="realization-separator">:</span>
+                  <span class="realization-value" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
+
+                  <span class="realization-label">Keperluan</span>
+                  <span class="realization-separator">:</span>
+                  <span class="realization-value" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
+
+                  <span class="realization-label">Rencana Waktu</span>
+                  <span class="realization-separator">:</span>
+                  <div class="realization-value realization-schedule">${scheduleWithDay}</div>
                 </div>
               </div>
 
 
-              <!-- Realization Summary Row (Scan Out & Tap In) -->
-              <div class="card-realization-box" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 1; min-height: 52px; justify-content: center;">
-                ${t.scanOutTime ? `<div style="color: var(--text-secondary, #475569);"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-                ${t.scanInTime ? (() => {
-                  const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
-                  const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
-                  return `<div style="color: var(--text-secondary, #475569); font-weight: ${isLateCompleted ? '600' : 'normal'};"><strong>Tap In:</strong> ${cleanScanIn}${isLateCompleted ? ` <span>[Terlambat ${lateDuration}]</span>` : ''}</div>`;
-                })() : ''}
-                ${(!t.scanOutTime && !t.scanInTime) ? `<div style="color: var(--text-muted);">Belum ada catatan pemindaian gerbang</div>` : ''}
+              <!-- Realization Summary Row (Scan Out & Tap In - Walaupun kedaluwarsa tetap ada, isinya - strip) -->
+              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 1; min-height: 52px; justify-content: center;">
+                <div class="realization-grid">
+                  <span class="realization-label">Scan Out</span>
+                  <span class="realization-separator">:</span>
+                  <span class="realization-value" title="${(t.scanOutTime || '-').replace(/"/g, '&quot;')}">${t.scanOutTime || '-'}</span>
+                  <span class="realization-label">Tap In</span>
+                  <span class="realization-separator">:</span>
+                  <span class="realization-value" title="${(t.scanInTime || '-').replace(/"/g, '&quot;')}">${t.scanInTime ? (() => {
+                    const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
+                    const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
+                    return `${cleanScanIn}${isLateCompleted ? ` <span style="color: #b45309; font-weight: 700;">[Terlambat ${lateDuration}]</span>` : ''}`;
+                  })() : '-'}</span>
+                </div>
               </div>
 
               <!-- Action Buttons (Single Symmetrical Row) -->
@@ -627,19 +633,20 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             </div>
 
-            <!-- Detail Box (Tujuan keluar, Keperluan, Rencana waktu) Sesuai Gambar 2 -->
-            <div class="figma-card-detail-box" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.55rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.35rem 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Tujuan keluar</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 600; text-align: right; line-height: 1.35; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; min-width: 95px; flex-shrink: 0; white-space: nowrap;">Keperluan</span>
-                <span class="detail-val" style="font-size: 0.75rem; color: var(--text-primary, #0f172a); font-weight: 500; text-align: right; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.35;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
-              </div>
-              <div class="detail-schedule-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding-top: 0.35rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
-                <span class="detail-label" style="font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap;">Rencana waktu</span>
-                <div class="detail-schedule-val" style="text-align: right;">${scheduleWithDay}</div>
+            <!-- Detail Box (Tujuan keluar, Keperluan, Rencana Waktu) Sesuai Gambar 2 (Titik Dua Sejajar) -->
+            <div class="figma-card-detail-box" style="padding: 0.5rem 0.65rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; margin: 0.35rem 0;">
+              <div class="realization-grid">
+                <span class="realization-label">Tujuan keluar</span>
+                <span class="realization-separator">:</span>
+                <span class="realization-value" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
+
+                <span class="realization-label">Keperluan</span>
+                <span class="realization-separator">:</span>
+                <span class="realization-value" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
+
+                <span class="realization-label">Rencana Waktu</span>
+                <span class="realization-separator">:</span>
+                <div class="realization-value realization-schedule">${scheduleWithDay}</div>
               </div>
             </div>
 
@@ -660,12 +667,26 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             ` : ''}
 
-            ${t.scanOutTime ? `<div style="font-size:0.75rem; color:#065f46;"><strong>Scan Out:</strong> ${t.scanOutTime}</div>` : ''}
-            ${t.scanInTime ? (() => {
-              const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
-              const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
-              return `<div style="font-size:0.75rem; color:${isLateCompleted ? '#b45309' : '#0e7490'}; font-weight:${isLateCompleted ? '700' : 'normal'};"><strong>Tap In:</strong> ${cleanScanIn}${isLateCompleted ? ` <span style="color: #b45309; font-weight: 700;">[Terlambat ${lateDuration}]</span>` : ''}</div>`;
-            })() : ''}
+            ${(t.scanOutTime || t.scanInTime) ? `
+              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin: 0.35rem 0; flex: 1; min-height: 40px; justify-content: center;">
+                <div class="realization-grid">
+                  ${t.scanOutTime ? `
+                    <span class="realization-label">Scan Out</span>
+                    <span class="realization-separator">:</span>
+                    <span class="realization-value">${t.scanOutTime}</span>
+                  ` : ''}
+                  ${t.scanInTime ? (() => {
+                    const cleanScanIn = t.scanInTime.replace(/\s*\[Terlambat\]/gi, '').trim();
+                    const lateDuration = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
+                    return `
+                      <span class="realization-label">Tap In</span>
+                      <span class="realization-separator">:</span>
+                      <span class="realization-value" style="font-weight:${isLateCompleted ? '700' : 'normal'};">${cleanScanIn}${isLateCompleted ? ` <span style="color: #b45309; font-weight: 700;">[Terlambat ${lateDuration}]</span>` : ''}</span>
+                    `;
+                  })() : ''}
+                </div>
+              </div>
+            ` : ''}
 
             <!-- Quick Action Buttons for Satpam (Single Symmetrical Row) -->
             <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
@@ -782,25 +803,27 @@ function renderSecurityTable(list, containerElement) {
     return `
               <tr>
                 <td style="vertical-align: middle;">
-                  <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
-                    <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</span>
-                    ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px;">🚨 Darurat</span>` : ''}
-                    ${isGroupDinas ? (() => {
-                      const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-                      return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
-                    })() : ''}
-                  </div>
+                  <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+                  ${(isEmergency || isGroupDinas) ? `
+                    <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
+                      ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                      ${isGroupDinas ? (() => {
+                        const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+                        return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                      })() : ''}
+                    </div>
+                  ` : ''}
                   <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35;">
                     <div>${displayCategory}</div>
-                    <div>${t.type}</div>
+                    <div>${t.type || 'Kembali ke Area'}</div>
                   </div>
                 </td>
                 <td style="vertical-align: middle;">${gateBadge}</td>
                 <td style="vertical-align: middle;">
-                  <div style="display: flex; align-items: flex-start; gap: 0.55rem;">
-                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 28)}
-                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                  <div class="user-info-flex-cell" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.65rem; min-width: 0;">
+                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 32, 'flex-shrink: 0 !important; margin-right: 0 !important;')}
+                    <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary); line-height: 1.3; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
                       <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
                       <div style="font-size: 0.7rem; color: var(--text-muted); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.25;" title="${cleanDest} • ${cleanReason}">${cleanDest} • ${cleanReason}</div>
                     </div>
@@ -1118,6 +1141,15 @@ function renderSecurityLogTable(list, containerElement) {
         </thead>
         <tbody>
           ${list.map(t => {
+    const isEmergency = Boolean(t.isEmergency || (t.id && t.id.startsWith('TK-EMG')) || (t.category && t.category.toLowerCase().includes('darurat')));
+    let displayCategory = t.category;
+    if (!displayCategory || displayCategory === 'Izin Darurat' || displayCategory === 'Darurat') {
+      displayCategory = (t.type === 'Pulang Mendahului' || (t.reason && t.reason.toLowerCase().includes('keluarga'))) ? 'Urusan Pribadi' : 'Dinas Kantor';
+    }
+    const isDinas = displayCategory === 'Dinas Kantor';
+    const isGroupDinas = Boolean((t.isGroupDinas || (Array.isArray(t.members) && t.members.length > 0)) && isDinas);
+    const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
+
     const statusHtml = typeof window.getCleanEmpStatus === 'function' ? window.getCleanEmpStatus(t.status, t) : window.getStatusPill(t.status, t);
     const ticketGate = typeof getTicketGate === 'function' ? getTicketGate(t) : (t.scanOutGate || t.scanInGate || 'Pos 1 Gerbang Utama');
     const gateBadge = typeof getGateBadgeHtml === 'function' ? getGateBadgeHtml(ticketGate) : `<span class="gate-badge-pill pos-1">${ticketGate}</span>`;
@@ -1173,18 +1205,24 @@ function renderSecurityLogTable(list, containerElement) {
                 ${isSelectActive ? `<td style="vertical-align: middle; text-align: center;"><input type="checkbox" class="riwayat-select-checkbox" ${isRowSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('security', '${t.id}', this.checked)" onclick="event.stopPropagation()"></td>` : ''}
                 <td style="vertical-align: middle;">
                   <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
+                  ${(isEmergency || isGroupDinas) ? `
+                    <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
+                      ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                      ${isGroupDinas ? `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>` : ''}
+                    </div>
+                  ` : ''}
                   <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35;">
-                    <div>${t.category}</div>
-                    <div>${t.type}</div>
+                    <div>${displayCategory}</div>
+                    <div>${t.type || 'Kembali ke Area'}</div>
                   </div>
                 </td>
                 <td style="vertical-align: middle;">
                   ${gateBadge}
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="display: flex; align-items: center; gap: 0.65rem;">
-                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 32)}
-                    <div>
+                  <div class="user-info-flex-cell" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0.65rem; min-width: 0;">
+                    ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 32, 'flex-shrink: 0 !important; margin-right: 0 !important;')}
+                    <div style="min-width: 0; flex: 1;">
                       <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.applicantName || 'Budi Pratama'} (${(t.destination || '').replace(/"/g, '&quot;')})">${t.applicantName || 'Budi Pratama'} <span style="font-weight: 500; color: var(--text-secondary);">(${(t.destination || '-').replace(/\r?\n+/g, ' ')})</span></div>
                       <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
                     </div>

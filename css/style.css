@@ -3881,6 +3881,8 @@ body.theme-dark .role-dropdown-item.active {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
+  background: var(--bg-subtle, #f8fafc);
+  padding: 0.5rem 0.65rem !important;
 }
 
 body.theme-dark .card-realization-box {
@@ -3895,6 +3897,78 @@ body.theme-dark .card-realization-box strong {
 
 body.theme-dark .card-realization-box div {
   color: #cbd5e1 !important;
+}
+
+/* Realization Grid Layout (Aligned Key-Value Layout with Straight Aligned Colons, Sesuai Gambar 2) */
+.realization-grid {
+  display: grid;
+  grid-template-columns: 110px 10px 1fr;
+  row-gap: 0.35rem;
+  column-gap: 0.35rem;
+  align-items: baseline;
+  width: 100%;
+  font-size: 0.725rem;
+  line-height: 1.35;
+}
+
+.realization-grid.security-grid {
+  grid-template-columns: 110px 10px 1fr;
+}
+
+.realization-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.realization-separator {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+  text-align: center;
+}
+
+.realization-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  display: block;
+}
+
+.realization-value.realization-schedule {
+  white-space: normal;
+  overflow: visible;
+}
+
+body.theme-dark .realization-label,
+body.theme-dark .realization-separator {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .realization-value {
+  color: #f8fafc !important;
+}
+
+/* Card Decision Box (Catatan Keputusan Terpisah di Atas Scan Out & Tap In Sesuai Permintaan) */
+.card-decision-box {
+  background: var(--bg-subtle, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.725rem;
+  margin-bottom: 0.45rem;
+}
+
+body.theme-dark .card-decision-box {
+  background: #141c2c !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
 }
 
 /* CARD ACTION BUTTONS (TIKET & QR CODE + LIHAT RINCIAN) */
@@ -12625,8 +12699,8 @@ body.theme-dark #modalTicketDetail #btnDetailApproveTicket:hover {
 
 /* Universal Single-Row Ellipsis Truncation for Table Lists (Identik Gambar 2) */
 .figma-table td:nth-child(2) > div > div > div,
-.figma-table td:nth-child(3) > div,
-.figma-table td:nth-child(6) > div,
+.figma-table td:nth-child(3) > div:not(.user-info-flex-cell):not([style*="display: flex"]):not([style*="display:flex"]),
+.figma-table td:nth-child(6) > div:not([style*="display: flex"]):not([style*="display:flex"]),
 .report-data-table td:nth-child(2) .report-emp-name,
 .report-data-table td:nth-child(3) .report-dept-name,
 .report-data-table td:nth-child(4) div {
@@ -12635,6 +12709,27 @@ body.theme-dark #modalTicketDetail #btnDetailApproveTicket:hover {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   display: block !important;
+}
+
+/* User Info Flex Cell in Tables (Avatar strictly side-by-side with Name) */
+.figma-table td .user-info-flex-cell,
+.report-data-table td .user-info-flex-cell {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.figma-table td .user-info-flex-cell img.user-profile-photo-inline,
+.report-data-table td .user-info-flex-cell img.user-profile-photo-inline {
+  flex-shrink: 0 !important;
+  margin-right: 0 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
 }
 
 /* Tooltip hint on hover */
