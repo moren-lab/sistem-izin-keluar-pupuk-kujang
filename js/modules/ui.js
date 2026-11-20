@@ -785,15 +785,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Native Date/Time Picker Trigger:
-// Mengizinkan pengetikan langsung pada area teks (tanggal, bulan, tahun, jam) dan membuka picker saat klik ikon kalender di sisi kanan
+// Membuka kalender / datetime picker secara langsung saat mengklik area mana pun pada input datetime-local, date, atau time (tanpa harus menekan ikon kalender kecil di sisi kanan)
 document.addEventListener('click', (e) => {
   const target = e.target;
   if (target && target.tagName === 'INPUT') {
     const type = target.type;
     if (type === 'datetime-local' || type === 'date' || type === 'time') {
-      // Buka showPicker hanya jika klik berada di area ikon kalender/jam di sisi kanan (lebar ~42px)
-      const isRightIconClick = (e.offsetX > (target.clientWidth - 42));
-      if (isRightIconClick && !target.disabled && !target.readOnly && typeof target.showPicker === 'function') {
+      if (!target.disabled && !target.readOnly && typeof target.showPicker === 'function') {
         try {
           target.showPicker();
         } catch (err) {

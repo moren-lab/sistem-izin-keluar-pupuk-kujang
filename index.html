@@ -1082,14 +1082,14 @@
                                 <label class="form-label" for="inputPlannedExit" style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.35rem; display: block;">
                                   Rencana Waktu Keluar <span style="color: var(--rose-danger, #dc2626);">*</span>
                                 </label>
-                                <input type="datetime-local" id="inputPlannedExit" class="form-input" required style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                                <input type="datetime-local" id="inputPlannedExit" class="form-input" required onclick="if(typeof this.showPicker==='function'){try{this.showPicker();}catch(e){}}" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">
                               </div>
 
                               <div class="form-group" id="groupEstimatedReturn" style="margin-bottom: 0;">
                                 <label class="form-label" for="inputEstimatedReturn" style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.35rem; display: block;">
                                   Perkiraan Waktu Kembali <span style="color: var(--rose-danger, #dc2626);">*</span>
                                 </label>
-                                <input type="datetime-local" id="inputEstimatedReturn" class="form-input" required style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                                <input type="datetime-local" id="inputEstimatedReturn" class="form-input" required onclick="if(typeof this.showPicker==='function'){try{this.showPicker();}catch(e){}}" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">
                               </div>
                             </div>
 
@@ -1328,14 +1328,14 @@
                               <label class="form-label" for="emergPlannedExit" style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.35rem; display: block;">
                                 Rencana Waktu Keluar <span style="color: var(--rose-danger, #dc2626);">*</span>
                               </label>
-                              <input type="datetime-local" id="emergPlannedExit" class="form-input" required style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                              <input type="datetime-local" id="emergPlannedExit" class="form-input" required onclick="if(typeof this.showPicker==='function'){try{this.showPicker();}catch(e){}}" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">
                             </div>
 
                             <div class="form-group" id="emergGroupEstimatedReturn" style="margin-bottom: 0;">
                               <label class="form-label" for="emergEstimatedReturn" style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.35rem; display: block;">
                                 Perkiraan Waktu Kembali <span style="color: var(--rose-danger, #dc2626);">*</span>
                               </label>
-                              <input type="datetime-local" id="emergEstimatedReturn" class="form-input" required style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                              <input type="datetime-local" id="emergEstimatedReturn" class="form-input" required onclick="if(typeof this.showPicker==='function'){try{this.showPicker();}catch(e){}}" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">
                             </div>
                           </div>
 
@@ -4668,8 +4668,8 @@
             style="font-weight: 600; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.35rem;">
             Perkiraan Waktu Kembali Baru <span style="color: var(--rose-danger);">*</span>
           </label>
-          <input type="datetime-local" id="inputExtendNewReturn" class="form-input" required
-            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px;">
+          <input type="datetime-local" id="inputExtendNewReturn" class="form-input" required onclick="if(typeof this.showPicker==='function'){try{this.showPicker();}catch(e){}}"
+            style="font-size: 0.825rem; padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer;">
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
