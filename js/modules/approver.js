@@ -726,15 +726,17 @@ function renderApproverCards(list, containerElement, isTracking = false) {
 
     return `
           <div class="card-item${isRiwayatView ? ' card-history-item' : ''}${isSelected ? ' riwayat-card-selected' : ''}${isSelectActive ? ' riwayat-select-active-item' : ''}" data-select-role="approver" data-ticket-id="${t.id}" onclick="${isRiwayatView ? `window.handleRiwayatItemClick('approver', '${t.id}', event)` : ''}">
-            <div class="card-top">
-              <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+            <div class="card-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; width: 100%;">
+              <div style="display: flex; align-items: flex-start; gap: 0.5rem; min-width: 0;">
                 ${isSelectActive ? `<input type="checkbox" class="riwayat-select-checkbox" style="margin-top: 2px;" ${isSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('approver', '${t.id}', this.checked)" onclick="event.stopPropagation()">` : ''}
-                <div>
-                  <span class="card-id-num">${t.id}</span>
-                  <div class="card-created-meta">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
+                <div style="min-width: 0;">
+                  <span class="card-id-num" style="white-space: nowrap; font-size: 0.9rem; letter-spacing: -0.2px;">${t.id}</span>
+                  <div class="card-created-meta" style="white-space: nowrap; font-size: 0.68rem;">Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(t.createdAt) : t.createdAt}</div>
                 </div>
               </div>
-              ${window.getStatusPill(t.status, t)}
+              <div style="text-align: right; flex-shrink: 0; margin-left: auto; display: flex; justify-content: flex-end;">
+                ${window.getStatusPill(t.status, t)}
+              </div>
             </div>
 
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:flex-start; justify-content:space-between; gap: 0.75rem;">
@@ -826,13 +828,58 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : ''}
 
-            <!-- Catatan Keputusan (Terpisah di atas kolom Scan Out & Tap In) -->
-            ${t.approverNote ? `
-              <div class="card-decision-box" title="Catatan Keputusan: ${(t.approverNote || '').replace(/"/g, '&quot;')}">
-                <div class="realization-grid">
-                  <span class="realization-label">Catatan Keputusan</span>
-                  <span class="realization-separator">:</span>
-                  <span class="realization-value">"${t.approverNote}"</span>
+            <!-- Catatan Keputusan / Info Darurat / Catatan Sistem -->
+            ${t.approverNote ? (() => {
+              const isEmergPending = (isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !['Disetujui', 'Selesai', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status);
+              const isSystemNote = isEmergPending || (t.approverNote && t.approverNote.startsWith('[Izin Darurat'));
+              const noteLabel = isSystemNote ? 'Info Darurat' : 'Catatan Keputusan';
+              return `
+                <div class="card-decision-box" title="${noteLabel}: ${(t.approverNote || '').replace(/"/g, '&quot;')}">
+                  <div class="realization-grid">
+                    <span class="realization-label">${noteLabel}</span>
+                    <span class="realization-separator">:</span>
+                    <span class="realization-value">"${t.approverNote}"</span>
+                  </div>
+                </div>
+              `;
+            })() : ''}
+
+            ${(!isRiwayatView && !isTrackingView && !t.approverNote && (!t.pendingExtension || t.pendingExtension.status !== 'Menunggu Persetujuan')) ? `
+              <!-- Placeholder Ilustrasi Status Menunggu Keputusan Penyetuju (Sesuai Sudut Pandang Approver) -->
+              <div class="pending-card-placeholder" style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0.85rem 0.75rem 0.5rem; margin: 0.2rem 0; min-height: 115px;">
+                <div class="pending-illustration-wrap" style="position: relative; width: 100px; height: 78px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem;">
+                  <!-- Subtle Organic Background Leaves / Shapes -->
+                  <svg width="106" height="80" viewBox="0 0 116 88" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <path d="M12 56C8 46 12 34 22 28C32 22 36 30 36 42C36 54 18 68 12 56Z" fill="#e0f2fe" fill-opacity="0.6"/>
+                    <path d="M104 58C110 48 106 36 96 30C86 24 82 32 82 44C82 56 98 70 104 58Z" fill="#e0f2fe" fill-opacity="0.6"/>
+                    <path d="M18 24L19.5 20.5L23 19L19.5 17.5L18 14L16.5 17.5L13 19L16.5 20.5L18 24Z" fill="#bae6fd"/>
+                    <path d="M96 20L97.5 16.5L101 15L97.5 13.5L96 10L94.5 13.5L91 15L94.5 16.5L96 20Z" fill="#bae6fd"/>
+                  </svg>
+
+                  <!-- Document Sheet Icon -->
+                  <svg width="48" height="58" viewBox="0 0 54 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: relative; z-index: 1;">
+                    <path d="M4 10C4 6.68629 6.68629 4 10 4H36L50 18V54C50 57.3137 47.3137 60 44 60H10C6.68629 60 4 57.3137 4 54V10Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M35 4V18H49" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5" stroke-linejoin="round"/>
+                    <!-- 3 Horizontal Text Lines -->
+                    <line x1="12" y1="22" x2="30" y2="22" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="12" y1="30" x2="38" y2="30" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="12" y1="38" x2="26" y2="38" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                  </svg>
+
+                  <!-- Clock Badge on Bottom-Right with Brand Green Accent -->
+                  <div class="pending-clock-badge" style="position: absolute; right: 14px; bottom: 4px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: #ffffff; border: 2px solid #059669; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="12 6 12 12 16 12" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="pending-placeholder-title" style="font-weight: 700; font-size: 0.8rem; color: #334155; line-height: 1.35; margin-bottom: 2px;">
+                  Menunggu Keputusan Anda
+                </div>
+                <div class="pending-placeholder-sub" style="font-size: 0.71rem; color: #64748b; line-height: 1.35;">
+                  Silakan periksa detail dan tentukan keputusan di bawah
+                  ${!t.suratPerintah ? '<div style="font-size: 0.68rem; color: #94a3b8; font-style: italic; margin-top: 2px;">(Tidak ada berkas lampiran tambahan)</div>' : ''}
                 </div>
               </div>
             ` : ''}
@@ -871,7 +918,15 @@ function renderApproverCards(list, containerElement, isTracking = false) {
         if (canDecide && (isPending || isEmergDeciding || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
           // Decision Mode (Exclusive to Officially Assigned Approver)
           return `
-                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
+                ${isEmergDeciding && t.selectedMethod !== 'facescan' ? `
+                  <div class="card-contextual-info-strip" style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; padding: 0.45rem 0.65rem; font-size: 0.725rem; color: #475569; line-height: 1.4; display: flex; align-items: flex-start; gap: 0.45rem; margin-top: auto; margin-bottom: 0.25rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <div>
+                      <span class="info-strip-title" style="font-weight: 600; color: #334155;">Otorisasi Akses Gerbang:</span> <span class="info-strip-desc" style="color: #64748b;">QR Code gerbang saat ini terkunci. Berikan keputusan untuk mengaktifkan akses keluar pemohon.</span>
+                    </div>
+                  </div>
+                ` : ''}
+                <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: ${isEmergDeciding ? '0' : 'auto'}; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; width: 100%;">
                     ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
                       <button class="btn-reject" style="width: 100%; min-height: 34px; justify-content: center; font-size: 0.75rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;" onclick="openRejectExtensionModal('${t.id}')">

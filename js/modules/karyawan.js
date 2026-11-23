@@ -1166,7 +1166,7 @@ function buildActivePermitTimeline(activeTicket) {
   // STEP 2: Persetujuan Atasan
   if (isPending) {
     steps.push({
-      title: isEmergency ? 'Menunggu Otorisasi Darurat' : 'Menunggu persetujuan atasan',
+      title: isEmergency ? 'Menunggu Otorisasi' : 'Menunggu persetujuan atasan',
       time: 'Sedang berlangsung',
       desc: `Menunggu tinjauan & keputusan dari ${activeTicket.approverName || 'Atasan Langsung'}`,
       state: 'active_pending'
@@ -2298,7 +2298,7 @@ function getCleanEmpStatus(status, ticket) {
     color = '#b45309';
     statusKey = 'waiting-proof';
   } else if (status === 'Menunggu Otorisasi Darurat' || status === 'Darurat Terkunci') {
-    label = 'Menunggu Otorisasi Darurat';
+    label = 'Menunggu Otorisasi';
     color = '#be123c';
     statusKey = 'emergency';
   } else if (status === 'Ditolak') {

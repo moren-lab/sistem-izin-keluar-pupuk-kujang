@@ -2833,7 +2833,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     if (detailStatusPillTop && !isFinished) {
       const isEmergBadge = ticket.status === 'Menunggu Otorisasi Darurat' || (ticket.id && ticket.id.includes('-EMG-') && ticket.status !== 'Disetujui' && ticket.status !== 'Sedang di Luar' && ticket.status !== 'Selesai');
       if (isEmergBadge) {
-        detailStatusPillTop.innerHTML = `<span style="color: #b91c1c; font-weight: 800; font-size: 0.8rem;">Menunggu Otorisasi Darurat</span>`;
+        detailStatusPillTop.innerHTML = `<span style="color: #b91c1c; font-weight: 800; font-size: 0.8rem;">Menunggu Otorisasi</span>`;
       }
     }
 
