@@ -123,7 +123,13 @@
       const all = window.ticketsList || [];
       return all.filter(t => ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status) || t.scanOutTime);
     }
-    return window.ticketsList || [];
+    if (source === 'admin') {
+      const all = (typeof window.filterAdminReportTickets === 'function')
+        ? window.filterAdminReportTickets()
+        : (window.ticketsList || []);
+      return all.filter(t => ['Selesai', 'Selesai (Terlambat)', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa', 'Kadaluwarsa'].includes(t.status) || (typeof t.status === 'string' && t.status.startsWith('Selesai')));
+    }
+    return (window.ticketsList || []).filter(t => ['Selesai', 'Selesai (Terlambat)', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa', 'Kadaluwarsa'].includes(t.status) || (typeof t.status === 'string' && t.status.startsWith('Selesai')));
   }
 
   function openExportPdfModal(source = 'admin', customTickets = null, customTitle = null) {

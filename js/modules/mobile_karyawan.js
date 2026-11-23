@@ -289,7 +289,7 @@
               <span class="mobile-active-strip-badge" style="background: #10b981; color: #064e3b;">Disetujui</span>
             </div>
             <div class="mobile-active-strip-desc" style="color: #d1fae5;">
-              ${activeTicket.category || 'Dinas Kantor'} — QR Siap Digunakan di Pos 1 — Jadwal Keluar ${activeTicket.plannedExit ? formatTimeOnly(activeTicket.plannedExit) : ''}
+              ${activeTicket.category || 'Dinas Kantor'} — QR Siap Digunakan di Pos Gerbang — Jadwal Keluar ${activeTicket.plannedExit ? formatTimeOnly(activeTicket.plannedExit) : ''}
             </div>
           </div>
         `;
@@ -317,7 +317,7 @@
               <span class="mobile-active-strip-badge" style="background: #dc2626; color: #ffffff;">Terlambat</span>
             </div>
             <div class="mobile-active-strip-desc" style="color: #fee2e2;">
-              ${activeTicket.category} — Batas waktu TELAH TERLEWAT! Segera Tap In di Pos 1.
+              ${activeTicket.category} — Batas waktu TELAH TERLEWAT! Segera Tap In di Pos Gerbang.
             </div>
           </div>
         `;
@@ -1540,16 +1540,16 @@
       };
     } else if (isApproved && !t.scanOutTime) {
       ongoingItem = {
-        event: 'Siap Scan Out di Pos 1 Gerbang Utama',
+        event: 'Siap Scan Out di Pos Gerbang',
         time: t.plannedExit ? (window.formatDisplayDate ? window.formatDisplayDate(t.plannedExit) : t.plannedExit) : 'Siap Keluar',
         desc: 'Tunjukkan QR Code digital kepada petugas satpam di pos jaga',
         state: 'active_ready'
       };
     } else if (isOutside) {
       ongoingItem = {
-        event: t.status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos 1)' : 'Sedang Berada di Luar Area',
-        time: t.status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos 1',
-        desc: t.status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos 1 Gerbang Utama!' : `Batas kembali: ${t.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(t.estimatedReturn) : t.estimatedReturn) : '-'}`,
+        event: t.status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos Gerbang)' : 'Sedang Berada di Luar Area',
+        time: t.status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos Gerbang',
+        desc: t.status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos Gerbang!' : `Batas kembali: ${t.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(t.estimatedReturn) : t.estimatedReturn) : '-'}`,
         state: t.status === 'Terlambat' ? 'active_overdue' : 'active_outside'
       };
     } else if (isWaitingProof) {
@@ -3753,7 +3753,7 @@
           event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Tepat Waktu)',
           time: nowFormatted,
           by: `${actorApplicant} (Karyawan)`,
-          desc: `Tap In Kartu Akses berhasil di Pos 1 Gerbang Utama. Karyawan kembali ke area pabrik. Tiket #${t.id} resmi selesai.`
+          desc: `Tap In Kartu Akses berhasil di Pos Gerbang. Karyawan kembali ke area pabrik. Tiket #${t.id} resmi selesai.`
         });
 
         if (typeof window.saveTickets === 'function') window.saveTickets(tickets);

@@ -441,7 +441,7 @@ window.executeTapInGate = function(ticketId, memberNip, memberName) {
     event: 'Tap In Gerbang Masuk',
     time: nowFormatted,
     by: `${memberName} (${memberNip})`,
-    desc: `Tap In kartu akses di Pos 1 Gerbang Utama oleh ${memberName}. Jam kepulangan terkunci pada ${nowFormatted}. Menunggu verifikasi kehadiran fisik oleh Atasan.`
+    desc: `Tap In kartu akses di Pos Gerbang oleh ${memberName}. Jam kepulangan terkunci pada ${nowFormatted}. Menunggu verifikasi kehadiran fisik oleh Atasan.`
   });
 
   window.saveTickets(ticketsList);
@@ -1143,8 +1143,8 @@ function buildActivePermitTimeline(activeTicket) {
 
   const timeCreated = eventDibuat ? eventDibuat.time : (activeTicket.createdAt || 'Baru saja diajukan');
   const timeApproved = eventDisetujui ? eventDisetujui.time : (activeTicket.approvedAt || 'Menunggu verifikasi');
-  const timeScanOut = eventScanOut ? eventScanOut.time : (activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : `Rencana ${plannedTimeStr}`);
-  const timeScanIn = eventScanIn ? eventScanIn.time : (activeTicket.scanInTime ? activeTicket.scanInTime.replace(/ \(Pos 1.*\)/, '') : `Batas ${returnTimeStr}`);
+  const timeScanOut = eventScanOut ? eventScanOut.time : (activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \((Pos \d|Pos Gerbang).*?\)/, '') : `Rencana ${plannedTimeStr}`);
+  const timeScanIn = eventScanIn ? eventScanIn.time : (activeTicket.scanInTime ? activeTicket.scanInTime.replace(/ \((Pos \d|Pos Gerbang).*?\)/, '') : `Batas ${returnTimeStr}`);
 
   // Status flags
   const isPending = (status === 'Menunggu Persetujuan' || status === 'Menunggu Otorisasi Darurat');
@@ -1191,23 +1191,23 @@ function buildActivePermitTimeline(activeTicket) {
   // STEP 3: Scan Out Pos Jaga
   if (isPending || isRejected) {
     steps.push({
-      title: 'Scan Out tercatat di Pos 1',
+      title: 'Scan Out tercatat di Pos Gerbang',
       time: `Rencana ${plannedTimeStr}`,
       desc: isRejected ? 'Dibatalkan karena izin ditolak' : 'Menunggu persetujuan atasan sebelum scan gerbang',
       state: 'upcoming'
     });
   } else if (isApproved) {
     steps.push({
-      title: 'Siap Scan Out di Pos 1 Gerbang Utama',
+      title: 'Siap Scan Out di Pos Gerbang',
       time: `Jadwal: ${plannedTimeStr}`,
-      desc: 'Tunjukkan QR Code digital kepada petugas satpam di gerbang',
+      desc: 'Tunjukkan QR Code digital kepada petugas satpam di pos gerbang',
       state: 'active_ready'
     });
   } else {
     steps.push({
       title: 'Scan Out tercatat',
       time: timeScanOut,
-      desc: 'Pos 1 — Karyawan meninggalkan area operasional',
+      desc: `${activeTicket.scanOutGate || 'Pos Gerbang'} — Karyawan meninggalkan area operasional`,
       state: 'completed'
     });
   }
@@ -1225,20 +1225,20 @@ function buildActivePermitTimeline(activeTicket) {
       steps.push({
         title: 'Tap In Kartu Akses tercatat',
         time: timeScanIn,
-        desc: activeTicket.isLate ? 'Karyawan kembali ke area pabrik via Tap In (Terlambat)' : 'Pos 1 — Karyawan kembali ke area pabrik tepat waktu via Tap In',
+        desc: activeTicket.isLate ? 'Karyawan kembali ke area pabrik via Tap In (Terlambat)' : `${activeTicket.scanInGate || 'Pos Gerbang'} — Karyawan kembali ke area pabrik tepat waktu via Tap In`,
         state: 'completed'
       });
     } else if (isOutside) {
       steps.push({
-        title: status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos 1)' : 'Batas kembali ' + returnTimeStr,
-        time: status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos 1',
-        desc: status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos 1 Gerbang Utama!' : 'Belum kembali ke area',
+        title: status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos Gerbang)' : 'Batas kembali ' + returnTimeStr,
+        time: status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos Gerbang',
+        desc: status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos Gerbang!' : 'Belum kembali ke area',
         state: status === 'Terlambat' ? 'active_overdue' : 'active_outside'
       });
     } else {
       steps.push({
         title: 'Batas kembali ' + returnTimeStr,
-        time: 'Tap In Kartu di Pos 1',
+        time: 'Tap In Kartu di Pos Gerbang',
         desc: 'Belum kembali ke area',
         state: 'upcoming'
       });
@@ -1345,13 +1345,13 @@ function renderKaryawanDashboard() {
         statusSub = `${activeTicket.category} — Menunggu Persetujuan Atasan (${activeTicket.approverName || (primaryApprover ? primaryApprover.name : 'Atasan Langsung')})`;
       } else if (activeTicket.status === 'Disetujui') {
         statusText = `Status: Izin Disetujui — ${activeTicket.id}`;
-        statusSub = `${activeTicket.category} — QR Siap Digunakan di Pos 1 — Jadwal Keluar ${activeTicket.plannedExit ? activeTicket.plannedExit.slice(11, 16) + ' WIB' : ''}`;
+        statusSub = `${activeTicket.category} — QR Siap Digunakan di Pos Gerbang — Jadwal Keluar ${activeTicket.plannedExit ? activeTicket.plannedExit.slice(11, 16) + ' WIB' : ''}`;
       } else if (activeTicket.status === 'Terlambat') {
         statusText = `Status: Terlambat Kembali — ${activeTicket.id}`;
-        statusSub = `${activeTicket.category} — Batas waktu ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : ''} TELAH TERLEWAT! Segera Tap In Kartu Akses di Pos 1.`;
+        statusSub = `${activeTicket.category} — Batas waktu ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : ''} TELAH TERLEWAT! Segera Tap In Kartu Akses di Pos Gerbang.`;
       } else if (activeTicket.status === 'Sedang di Luar') {
         statusText = `Status: Izin Aktif — ${activeTicket.id}`;
-        statusSub = `${activeTicket.category} — Scan Out ${activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : '10:05 WIB'} — Batas kembali ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '13:00 WIB'}`;
+        statusSub = `${activeTicket.category} — Scan Out ${activeTicket.scanOutTime ? activeTicket.scanOutTime.replace(/ \((Pos \d|Pos Gerbang).*?\)/, '') : '10:05 WIB'} — Batas kembali ${activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '13:00 WIB'}`;
       }
 
       figmaHeroStrip.innerHTML = `
@@ -1405,7 +1405,7 @@ function renderKaryawanDashboard() {
     const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
       const isOutsideOrWaiting = isOutside || isWaitingVerify || isWaitingProof;
-      const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
+      const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Gerbang' : 'Jadwal Keluar';
       const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
@@ -1846,7 +1846,7 @@ function renderPengajuanSayaView() {
     const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
     const isOutsideOrWaiting = isOutside || isWaitingVerify || isWaitingProof;
-    const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Pos 1' : 'Jadwal Keluar';
+    const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Gerbang' : 'Jadwal Keluar';
     const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
     const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
@@ -2377,7 +2377,7 @@ function renderEmpCards(list, containerElement) {
         let noteType = 'muted';
 
         if (t.status === 'Terlambat') {
-          catatanText = '⚠️ Melewati batas estimasi kembali — Belum Tap In di Pos 1';
+          catatanText = '⚠️ Melewati batas estimasi kembali — Belum Tap In di Pos Gerbang';
         } else if (t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat')) || (t.status === 'Selesai' && t.scanInTime && t.scanInTime.includes('[Terlambat]'))) {
           const lateFull = typeof window.formatLateDurationFull === 'function' ? window.formatLateDurationFull(t.lateMinutes || 10) : `${t.lateMinutes || 10} menit`;
           const rawReturnTime = t.actualReturnTime || t.scanInTime || '';

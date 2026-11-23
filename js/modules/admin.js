@@ -139,10 +139,12 @@ function cleanStatusBadge(status, ticket) {
   let color = '#059669';
   if (status === 'Sedang di Luar') color = '#0284c7';
   else if (status === 'Terlambat') color = '#dc2626';
-  else if (status === 'Kedaluwarsa') color = '#64748b';
+  else if (status === 'Kedaluwarsa' || status === 'Kadaluwarsa') color = '#64748b';
   else if (status === 'Disetujui') color = '#059669';
   else if (status === 'Menunggu Persetujuan') color = '#d97706';
   else if (status === 'Ditolak') color = '#dc2626';
+  else if (status === 'Dibatalkan') color = '#64748b';
+  else if (status === 'Selesai (Terlambat)') color = '#b45309';
   return `<span style="font-weight: 700; font-size: 0.8125rem; color: ${color}; letter-spacing: -0.01em;">${status || 'Selesai'}</span>`;
 }
 
@@ -796,13 +798,30 @@ function filterAdminReportTickets() {
   const activeDate = (dateEl && dateEl.value) ? dateEl.value : adminReportDateFilter;
   const sortOrder = (sortEl && sortEl.value) ? sortEl.value : 'desc';
 
+  // DAFTAR STATUS AKHIR / FINAL (Sesuai Aturan Sistem: Menolak status berjalan dalam kolom Status Akhir)
+  const FINAL_STATUSES = ['Selesai', 'Selesai (Terlambat)', 'Kedaluwarsa', 'Kadaluwarsa', 'Dibatalkan', 'Ditolak'];
+  const isFinalTicket = (t) => {
+    if (!t || !t.status) return false;
+    return FINAL_STATUSES.includes(t.status) || (typeof t.status === 'string' && t.status.startsWith('Selesai'));
+  };
+
   let list = tickets.filter(ticket => {
+    // 0. Filter Status Akhir: Wajib tiket yang sudah selesai/final, bukan yang masih berjalan/proses
+    if (!isFinalTicket(ticket)) return false;
+
     // 1. Status Filter
     if (activeStatus !== 'all') {
+      const isLateDone = ticket.status === 'Selesai (Terlambat)' || (ticket.status === 'Selesai' && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || ticket.lateMinutes > 0));
       if (activeStatus === 'Selesai') {
-        if (ticket.status !== 'Selesai' && ticket.status !== 'Selesai (Terlambat)') return false;
+        if (ticket.status !== 'Selesai' || isLateDone) return false;
+      } else if (activeStatus === 'Selesai (Terlambat)') {
+        if (!isLateDone) return false;
       } else if (activeStatus === 'Kedaluwarsa') {
         if (ticket.status !== 'Kedaluwarsa' && ticket.status !== 'Kadaluwarsa') return false;
+      } else if (activeStatus === 'Dibatalkan') {
+        if (ticket.status !== 'Dibatalkan') return false;
+      } else if (activeStatus === 'Ditolak') {
+        if (ticket.status !== 'Ditolak') return false;
       } else if (ticket.status !== activeStatus) {
         return false;
       }

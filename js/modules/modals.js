@@ -2216,11 +2216,11 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     } else if (ticket.status === 'Selesai') {
       infoNoticeText.textContent = `Perjalanan selesai pukul ${ticket.scanInTime || '10.52'} WIB. QR tiket ini tidak berlaku lagi.`;
     } else if (ticket.status === 'Terlambat') {
-      infoNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ PERINGATAN: Karyawan telah melewati batas waktu estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Tap In Kartu Akses.</span>`;
+      infoNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ PERINGATAN: Karyawan telah melewati batas waktu estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos Gerbang untuk melakukan Tap In Kartu Akses.</span>`;
     } else if (ticket.status === 'Sedang di Luar') {
       infoNoticeText.textContent = `Karyawan sedang di luar kawasan. Wajib kembali dan Tap In Kartu Akses sebelum ${ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16).replace(':', '.') : '13.00'} WIB.`;
     } else if (ticket.status === 'Disetujui') {
-      infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos 1 untuk Scan Out.`;
+      infoNoticeText.textContent = `Tiket telah disetujui. Tunjukkan QR Code digital kepada Petugas di Pos Gerbang untuk Scan Out.`;
     } else if (ticket.status === 'Menunggu Persetujuan') {
       infoNoticeText.textContent = `Tiket sedang menunggu persetujuan dari Atasan langsung (${ticket.approverName || 'Ir. Hendra Gunawan, M.T.'}). QR belum aktif.`;
     } else if (ticket.status === 'Ditolak') {
@@ -2928,7 +2928,7 @@ function openCancelModal(ticketId, callback) {
 
   if (!canCancel) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Tap In di Pos 1 untuk menyelesaikan izin.', 'danger');
+      window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Tap In di Pos Gerbang untuk menyelesaikan izin.', 'danger');
     }
     return;
   }
