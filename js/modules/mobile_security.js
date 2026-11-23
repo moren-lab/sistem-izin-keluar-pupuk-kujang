@@ -810,8 +810,8 @@
   // -------------------------------------------------------------------
   function getSecurityRiwayatFilteredData() {
     const tickets = getTickets();
-    const isFinalStatus = (st) => (st === 'Selesai' || st === 'Ditolak' || st === 'Dibatalkan' || st === 'Kedaluwarsa');
-    const hasGateActivity = (t) => Boolean(t.scanOutTime || t.scanInTime || t.tapInTime || t.status === 'Selesai');
+    const isFinalStatus = (st) => (st === 'Selesai' || st === 'Selesai (Terlambat)' || (typeof st === 'string' && st.startsWith('Selesai')) || st === 'Ditolak' || st === 'Dibatalkan' || st === 'Kedaluwarsa');
+    const hasGateActivity = (t) => Boolean(t.scanOutTime || t.scanInTime || t.tapInTime || t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')));
     const hasDeletableTickets = tickets.some(t =>
       !t.deletedBySecurity && isFinalStatus(t.status) && hasGateActivity(t)
     );
@@ -839,6 +839,8 @@
     if (riwayatStatusFilter !== 'all') {
       if (riwayatStatusFilter === 'Terlambat') {
         eligible = eligible.filter(t => t.status === 'Terlambat' || t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')));
+      } else if (riwayatStatusFilter === 'Selesai') {
+        eligible = eligible.filter(t => t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')));
       } else {
         eligible = eligible.filter(t => t.status === riwayatStatusFilter);
       }

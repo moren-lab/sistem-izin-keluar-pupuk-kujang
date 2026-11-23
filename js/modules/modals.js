@@ -324,8 +324,8 @@ function openEditTicketModal(ticketId) {
   }
 
   // Tiket yang sudah berada di riwayat (status final) tidak boleh diedit sama sekali
-  const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
-  if (FINISHED_STATUSES.includes(ticket.status)) {
+  const FINISHED_STATUSES = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+  if (FINISHED_STATUSES.includes(ticket.status) || (typeof ticket.status === 'string' && ticket.status.startsWith('Selesai'))) {
     if (typeof window.showToast === 'function') {
       window.showToast(`Tiket berstatus "${ticket.status}" sudah berada di riwayat dan tidak dapat diedit lagi!`, 'warning');
     }
@@ -2377,8 +2377,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     }
   }
 
-  const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
-  const isFinished = FINISHED_STATUSES.includes(ticket.status);
+  const FINISHED_STATUSES = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+  const isFinished = FINISHED_STATUSES.includes(ticket.status) || (typeof ticket.status === 'string' && ticket.status.startsWith('Selesai'));
 
   // Footer Metadata & Buttons
   const detailFooterMeta = document.getElementById('detailFooterMeta');

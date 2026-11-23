@@ -329,14 +329,15 @@ function renderAdminRecentFeed() {
   tickets.forEach(ticket => {
     const logs = ticket.activityLog || ticket.timeline || [];
     logs.forEach(log => {
+      const eventName = String((log && (log.event || log.action || log.status || log.title)) || 'Aktivitas');
       allEvents.push({
         ticketId: ticket.id,
         applicantName: ticket.applicantName,
         category: ticket.category,
-        event: log.event,
-        time: log.time,
-        by: log.by,
-        desc: log.desc
+        event: eventName,
+        time: (log && (log.time || log.timestamp)) || '',
+        by: (log && (log.by || log.actor)) || 'Sistem',
+        desc: (log && (log.desc || log.note)) || ''
       });
     });
   });
@@ -350,21 +351,22 @@ function renderAdminRecentFeed() {
 
   containerFeed.innerHTML = recentEvents.map(evt => {
     let pillClass = '';
-    if (evt.event.includes('Disetujui')) pillClass = 'event-approve';
-    else if (evt.event.includes('Ditolak')) pillClass = 'event-reject';
-    else if (evt.event.includes('Scan Out')) pillClass = 'event-out';
-    else if (evt.event.includes('Tap In')) pillClass = 'event-in';
-    else if (evt.event.includes('Terlambat')) pillClass = 'event-overdue';
-    else if (evt.event.includes('Kedaluwarsa')) pillClass = 'event-expire';
+    const evtName = String(evt.event || '');
+    if (evtName.includes('Disetujui')) pillClass = 'event-approve';
+    else if (evtName.includes('Ditolak')) pillClass = 'event-reject';
+    else if (evtName.includes('Scan Out')) pillClass = 'event-out';
+    else if (evtName.includes('Tap In') || evtName.includes('Selesai')) pillClass = 'event-in';
+    else if (evtName.includes('Terlambat')) pillClass = 'event-overdue';
+    else if (evtName.includes('Kedaluwarsa') || evtName.includes('Kadaluwarsa')) pillClass = 'event-expire';
 
     return `
       <div style="padding: 0.65rem 0; border-bottom: 1px solid var(--border-color);">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 3px;">
-          <span class="audit-pill ${pillClass}">${evt.event}</span>
+          <span class="audit-pill ${pillClass}">${evtName}</span>
           <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">${evt.time}</span>
         </div>
         <div style="font-size: 0.825rem; font-weight: 600; color: var(--text-primary);">
-          ${evt.applicantName} <span style="font-weight: 400; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem;">(${evt.ticketId})</span>
+          ${evt.applicantName || 'Karyawan'} <span style="font-weight: 400; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem;">(${evt.ticketId})</span>
         </div>
         <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 1px;">
           ${evt.by}: ${evt.desc}

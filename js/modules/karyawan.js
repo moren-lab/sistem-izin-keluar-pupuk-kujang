@@ -1041,7 +1041,7 @@ function filterEmpTickets() {
   const status = filterEmpStatus ? filterEmpStatus.value : 'all';
 
   // Status resmi yang diizinkan untuk Riwayat Pengajuan (hanya status final; 'Terlambat' sebelum Tap In tetap aktif)
-  const RIWAYAT_STATUSES = ['selesai', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
+  const RIWAYAT_STATUSES = ['selesai', 'selesai (terlambat)', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
 
   const filtered = ticketsList.filter(t => {
     // Check if deleted by employee
@@ -1053,7 +1053,7 @@ function filterEmpTickets() {
 
     // HANYA tiket berstatus final yang diizinkan (tiket aktif termasuk 'Terlambat' sebelum Tap In tidak boleh masuk Riwayat)
     const tStatusNorm = (t.status || '').toLowerCase().trim();
-    const isRiwayat = RIWAYAT_STATUSES.includes(tStatusNorm);
+    const isRiwayat = RIWAYAT_STATUSES.includes(tStatusNorm) || tStatusNorm.startsWith('selesai');
     if (!isRiwayat) return false;
 
     // 1. Dropdown Filters
@@ -1067,7 +1067,7 @@ function filterEmpTickets() {
         const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.startsWith('TK-EMG') || t.id.includes('-EMG-'))) || t.category === 'Izin Darurat' || t.category === 'Darurat' || (t.type && t.type.toLowerCase().includes('darurat')));
         if (!isEmergency) return false;
       } else if (status === 'Terlambat') {
-        if (tStatusNorm !== 'selesai' || !isLateTicket) return false;
+        if (!tStatusNorm.startsWith('selesai') || !isLateTicket) return false;
       } else if (status === 'Kedaluwarsa') {
         if (tStatusNorm !== 'kedaluwarsa' && tStatusNorm !== 'kadaluwarsa') return false;
       } else if (status === 'Ditolak') {
@@ -1075,7 +1075,7 @@ function filterEmpTickets() {
       } else if (status === 'Dibatalkan') {
         if (!tStatusNorm.includes('batal')) return false;
       } else if (status === 'Selesai') {
-        if (tStatusNorm !== 'selesai' || isLateTicket) return false;
+        if (!tStatusNorm.startsWith('selesai') || isLateTicket) return false;
       } else {
         if (t.status !== status) return false;
       }
@@ -1384,8 +1384,8 @@ function renderKaryawanDashboard() {
       const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
       const isWaitingVerify = (activeTicket.status === 'Menunggu Verifikasi Atasan');
       const isWaitingProof = (activeTicket.status === 'Menunggu Bukti Kedatangan');
-      const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
-      const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
+      const FINISHED_STATUSES = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+      const isFinished = FINISHED_STATUSES.includes(activeTicket.status) || (typeof activeTicket.status === 'string' && activeTicket.status.startsWith('Selesai'));
       const isApproved = !isOutside && !isWaitingVerify && !isWaitingProof && (activeTicket.status === 'Disetujui');
       const isEmergTicket = Boolean(
         activeTicket.isEmergency ||
@@ -1598,13 +1598,13 @@ function renderKaryawanDashboard() {
 
   // 1.3 Card: Pengajuan terbaru (Maksimal 5 riwayat selesai terbaru, tata letak 1 baris horizontal)
   if (karyawanDashboardRecentList) {
-    const RIWAYAT_STATUSES = ['selesai', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
+    const RIWAYAT_STATUSES = ['selesai', 'selesai (terlambat)', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
     const myHistoryTickets = ticketsList.filter(t => {
       if (t.deletedByKaryawan) return false;
       const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip));
       if (!isMyTicket) return false;
       const normStatus = (t.status || '').toLowerCase().trim();
-      return RIWAYAT_STATUSES.includes(normStatus);
+      return RIWAYAT_STATUSES.includes(normStatus) || normStatus.startsWith('selesai');
     });
 
     myHistoryTickets.sort((a, b) => {
@@ -1825,8 +1825,8 @@ function renderPengajuanSayaView() {
   if (colPengajuanLeft) {
     const isOutside = (activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat');
     const isWaitingProof = (activeTicket.status === 'Menunggu Bukti Kedatangan');
-    const FINISHED_STATUSES = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
-    const isFinished = FINISHED_STATUSES.includes(activeTicket.status);
+    const FINISHED_STATUSES = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+    const isFinished = FINISHED_STATUSES.includes(activeTicket.status) || (typeof activeTicket.status === 'string' && activeTicket.status.startsWith('Selesai'));
     const isApproved = !isOutside && !isWaitingVerify && !isWaitingProof && (activeTicket.status === 'Disetujui');
     const isEmergTicket = Boolean(
       activeTicket.isEmergency ||

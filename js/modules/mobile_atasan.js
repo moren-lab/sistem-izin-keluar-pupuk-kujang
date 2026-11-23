@@ -237,21 +237,31 @@
       if (hasMember) return true;
     }
 
+    const tApproverName = (ticket.approverName || '').toLowerCase();
+    const tApproverNip = (ticket.approverNip || '').trim();
+    if (aNip && tApproverNip && aNip === tApproverNip) return true;
+    if (aName && tApproverName && (tApproverName.includes(aName) || aName.includes(tApproverName))) return true;
+
     if (aName.includes('hendra')) {
       const supervisor = (empSupervisor || '').toLowerCase();
-      return supervisor.includes('hendra') || (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || ticket.applicantNip === 'PK-2024-8842' || (ticket.department || '').toLowerCase().includes('rekayasa')));
+      return supervisor.includes('hendra') || tApproverName.includes('hendra') || (!supervisor && (ticket.applicantNip === 'PK-2024-8841' || ticket.applicantNip === 'PK-2024-8842' || (ticket.department || '').toLowerCase().includes('rekayasa')));
     }
     if (aName.includes('dewi')) {
       const supervisor = (empSupervisor || '').toLowerCase();
-      return supervisor.includes('dewi');
+      return supervisor.includes('dewi') || tApproverName.includes('dewi');
     }
-    return false;
+    if (aName.includes('subagja')) {
+      const supervisor = (empSupervisor || '').toLowerCase();
+      return supervisor.includes('subagja') || tApproverName.includes('subagja') || (ticket.applicantNip === 'PK-2024-8843');
+    }
+    const supervisor = (empSupervisor || '').toLowerCase();
+    return Boolean(supervisor && aName && (supervisor.includes(aName) || aName.includes(supervisor)));
   }
 
   function isDeletedByCurrentMobileApprover(t) {
     if (!t) return false;
     // Tiket aktif/berjalan tidak boleh pernah tersembunyi sebagai tiket terhapus
-    const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+    const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
     if (!isFinished) return false;
     if (t.deletedByApprover) return true;
     const app = getActiveApprover();
@@ -2129,7 +2139,7 @@
     const approver = getActiveApprover();
     const tickets = getTeamTickets().filter(t => {
       // Riwayat Atasan strictly berstatus final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa)
-      return t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa';
+      return t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa';
     });
     const hasDeletableTickets = tickets.length > 0;
 
@@ -2146,7 +2156,7 @@
       );
     }
     if (atasanRiwayatFilterDecision !== 'all') {
-      if (atasanRiwayatFilterDecision === 'approved') filtered = filtered.filter(t => t.status === 'Disetujui' || (t.status === 'Selesai' && !t.rejectionReason));
+      if (atasanRiwayatFilterDecision === 'approved') filtered = filtered.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')));
       else if (atasanRiwayatFilterDecision === 'rejected') filtered = filtered.filter(t => t.status === 'Ditolak');
       else if (atasanRiwayatFilterDecision === 'emergency') filtered = filtered.filter(t => Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-'))));
     }

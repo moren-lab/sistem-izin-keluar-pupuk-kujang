@@ -2580,10 +2580,16 @@ window.confirmArrivalByApprover = function (ticketId) {
     window.showToast(`Kehadiran ${t.applicantName || 'karyawan'} berhasil diverifikasi! Tiket #${t.id} resmi Selesai.`, 'success');
   }
 
-  if (typeof window.renderApproverView === 'function') window.renderApproverView();
-  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
-  if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
-  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+  try { if (typeof window.renderApproverView === 'function') window.renderApproverView(); } catch (e) {}
+  try { if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics(); } catch (e) {}
+  try { if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover(); } catch (e) {}
+  try { if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan(); } catch (e) {}
+  try { if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView(); } catch (e) {}
+  try { if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan(); } catch (e) {}
+  try { if (typeof window.renderSecurityView === 'function') window.renderSecurityView(); } catch (e) {}
+  try { if (typeof window.renderMobileSecurity === 'function') window.renderMobileSecurity(); } catch (e) {}
+  try { if (typeof window.renderAdminView === 'function') window.renderAdminView(); } catch (e) {}
+  try { if (typeof window.renderActiveView === 'function') window.renderActiveView(); } catch (e) {}
 };
 
 function formatArrivalRealtimeWib(dateObj) {

@@ -1671,13 +1671,18 @@ function executeScanIn(ticketId) {
     );
   }
 
-  renderSecurityView();
-  if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-  if (typeof window.renderApproverView === 'function') window.renderApproverView();
-  if (typeof window.renderAdminView === 'function') window.renderAdminView();
-  if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
-  if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-  if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+  try { if (typeof renderSecurityView === 'function') renderSecurityView(); } catch (e) {}
+  try { if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView(); } catch (e) {}
+  try { if (typeof window.renderApproverView === 'function') window.renderApproverView(); } catch (e) {}
+  try { if (typeof window.renderAdminView === 'function') window.renderAdminView(); } catch (e) {}
+  try { if (typeof window.renderMobileSecurity === 'function') window.renderMobileSecurity(); } catch (e) {}
+  try { if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan(); } catch (e) {}
+  try { if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover(); } catch (e) {}
+  try { if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan(); } catch (e) {}
+  try { if (typeof window.renderActiveView === 'function') window.renderActiveView(); } catch (e) {}
+  try { if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics(); } catch (e) {}
+  try { if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics(); } catch (e) {}
+  try { if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics(); } catch (e) {}
 }
 
 // CAMERA CONTROLLER

@@ -337,6 +337,65 @@
     }
 
     if (tab === 'riwayat') {
+      const allEvents = [];
+      tickets.forEach(ticket => {
+        const logs = ticket.activityLog || ticket.timeline || [];
+        logs.forEach(log => {
+          const eventName = String((log && (log.event || log.action || log.status || log.title)) || 'Aktivitas');
+          allEvents.push({
+            ticketId: ticket.id,
+            applicantName: ticket.applicantName || 'Karyawan',
+            category: ticket.category || 'Izin Keluar',
+            event: eventName,
+            time: (log && (log.time || log.timestamp)) || '',
+            by: (log && (log.by || log.actor)) || 'Sistem',
+            desc: (log && (log.desc || log.note)) || ''
+          });
+        });
+      });
+
+      const recentEvents = allEvents.reverse();
+
+      const eventsHtml = recentEvents.length === 0 ? `
+        <div style="font-size: 0.8rem; color: #64748b; padding: 24px; text-align: center;">Belum ada aktivitas otorisasi tercatat.</div>
+      ` : recentEvents.map(evt => {
+        let icon = '📋';
+        let bg = '#f1f5f9';
+        let color = '#475569';
+        const eStr = evt.event.toLowerCase();
+        if (eStr.includes('disetujui')) {
+          icon = '✓'; bg = '#ecfdf5'; color = '#059669';
+        } else if (eStr.includes('tolak')) {
+          icon = '✕'; bg = '#fef2f2'; color = '#dc2626';
+        } else if (eStr.includes('scan out')) {
+          icon = '🚪'; bg = '#e0f2fe'; color = '#0284c7';
+        } else if (eStr.includes('tap in') || eStr.includes('selesai')) {
+          icon = '🏁'; bg = '#dcfce7'; color = '#15803d';
+        } else if (eStr.includes('terlambat')) {
+          icon = '⚠️'; bg = '#fffbeb'; color = '#b45309';
+        } else if (eStr.includes('darurat')) {
+          icon = '🚨'; bg = '#fee2e2'; color = '#b91c1c';
+        }
+
+        return `
+          <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+            <div style="background:${bg}; color:${color}; border-radius:50%; width:30px; height:30px; min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:800; flex-shrink:0;">${icon}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 6px; flex-wrap: wrap;">
+                <span style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">${evt.event}</span>
+                <span style="font-size: 0.65rem; color: #94a3b8; font-family: monospace;">${evt.time}</span>
+              </div>
+              <div style="font-size: 0.725rem; font-weight: 700; color: #334155; margin-top: 1px;">
+                ${evt.applicantName} <span style="font-family: monospace; color: #64748b; font-size: 0.7rem;">(${evt.ticketId})</span>
+              </div>
+              <div style="font-size: 0.675rem; color: #64748b; margin-top: 2px; line-height: 1.35;">
+                <span style="font-weight: 600; color: #475569;">${evt.by}:</span> ${evt.desc}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
       container.innerHTML = `
         <div class="mobile-page-header">
           <div class="mobile-page-category-tag">Keamanan Sistem</div>
@@ -345,32 +404,7 @@
         </div>
 
         <div class="mobile-card" style="padding: 14px;">
-          <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
-            <div style="background:#ecfdf5; color:#059669; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:800;">✓</div>
-            <div style="flex:1;">
-              <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">Otorisasi Izin Darurat Disetujui</div>
-              <div style="font-size: 0.7rem; color: #64748b;">Ir. Hendra Gunawan menyetujui izin Arif Maulana (IZ-20261002-001)</div>
-              <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px;">Hari ini • 10.45 WIB</div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
-            <div style="background:#e0f2fe; color:#0284c7; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:800;">🚪</div>
-            <div style="flex:1;">
-              <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">Verifikasi Gerbang Keluar (Scan Out)</div>
-              <div style="font-size: 0.7rem; color: #64748b;">Pos 1 Utama memverifikasi keberangkatan tugas dinas</div>
-              <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px;">Hari ini • 10.15 WIB</div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <div style="background:#f5f3ff; color:#7c3aed; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:800;">🔑</div>
-            <div style="flex:1;">
-              <div style="font-size: 0.775rem; font-weight: 800; color: #0f172a;">Login Single Sign-On KUJANG ID</div>
-              <div style="font-size: 0.7rem; color: #64748b;">Autentikasi 2FA OTP berhasil diverifikasi via Identik PI Smart</div>
-              <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px;">Hari ini • 07.45 WIB</div>
-            </div>
-          </div>
+          ${eventsHtml}
         </div>
       `;
       return;
@@ -948,7 +982,7 @@
   // -------------------------------------------------------------------
   // 6. GLOBAL MOBILE HISTORY DELETION (ALL ACTORS)
   // -------------------------------------------------------------------
-  const FINISHED_STATUSES_RULE = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+  const FINISHED_STATUSES_RULE = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
 
   window.mobileClearRiwayat = function (actor) {
     const role = actor || currentMobileRole;
@@ -1153,7 +1187,7 @@
   window.mobileConfirmSingleDelete = function (ticketId, flag) {
     let tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
-    const FINISHED_STATUSES_RULE = ['Selesai', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
+    const FINISHED_STATUSES_RULE = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
     if (t) {
       if (!FINISHED_STATUSES_RULE.includes(t.status)) {
         if (typeof window.showToast === 'function') {

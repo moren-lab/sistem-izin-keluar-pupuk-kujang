@@ -94,7 +94,7 @@
     const tickets = window.ticketsList || [];
     const myNip = emp.nip || 'PK-2024-8841';
     return tickets.filter(t => {
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+      const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
       const isDeleted = isFinished && t.deletedByKaryawan;
       if (isDeleted) return false;
       return (
@@ -669,16 +669,18 @@
   function renderRiwayat(container) {
     const emp = getActiveEmp();
     let allEmpTickets = getEmpTickets().filter(t => {
+      const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
       const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
-      if (isEmergency) return true; // Izin darurat masuk riwayat segera setelah pengajuan dibuat
-      return t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
+      // Sesuai Aturan Global Rule 7: Riwayat HANYA berisi status final (Selesai, Ditolak, Dibatalkan, Kedaluwarsa)
+      if (isEmergency && isFinished) return true;
+      return isFinished;
     });
 
     const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
     const hasDeletableTickets = (window.ticketsList || []).some(t =>
       !t.deletedByKaryawan &&
       (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841')) &&
-      (t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
+      (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
     );
 
     // 1. Filter by Status
@@ -686,7 +688,10 @@
     if (riwayatStatusFilter !== 'all') {
       filtered = filtered.filter(t => {
         if (riwayatStatusFilter === 'Terlambat') {
-          return t.status === 'Terlambat' || t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
+          return t.status === 'Terlambat' || t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
+        }
+        if (riwayatStatusFilter === 'Selesai') {
+          return t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai'));
         }
         return t.status === riwayatStatusFilter;
       });
@@ -987,16 +992,20 @@
 
     const allEmpTickets = baseTickets.filter(t => {
       if (t.deletedByKaryawan) return false;
+      const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
       const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
-      if (isEmergency) return true;
-      return t.status === 'Selesai' || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa' || t.status === 'Sedang di Luar' || t.status === 'Terlambat';
+      if (isEmergency && isFinished) return true;
+      return isFinished;
     });
 
     let filtered = allEmpTickets;
     if (riwayatStatusFilter !== 'all') {
       filtered = filtered.filter(t => {
         if (riwayatStatusFilter === 'Terlambat') {
-          return t.status === 'Terlambat' || t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
+          return t.status === 'Terlambat' || t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'));
+        }
+        if (riwayatStatusFilter === 'Selesai') {
+          return t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai'));
         }
         return t.status === riwayatStatusFilter;
       });
@@ -3697,68 +3706,84 @@
   // TAP IN KARTU AKSES (ALUR KEMBALI KE PABRIK)
   // -------------------------------------------------------------------
   window.mobileExecuteTapIn = function (ticketId) {
+    let executedInCore = false;
     if (typeof window.executeScanIn === 'function') {
-      window.executeScanIn(ticketId);
-      currentKaryawanTab = 'pengajuan';
       try {
-        sessionStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', 'pengajuan');
-        localStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', 'pengajuan');
-        sessionStorage.removeItem('KUJANG_FORM_IS_EMERGENCY');
-      } catch (e) {}
-      renderMobileKaryawan(null, 'pengajuan');
-      if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
-      return;
+        window.executeScanIn(ticketId);
+        executedInCore = true;
+      } catch (err) {
+        console.warn('executeScanIn threw error, falling back to local mobile handler:', err);
+      }
     }
-    const tickets = window.ticketsList || [];
-    const t = tickets.find(x => x.id === ticketId);
-    if (!t) return;
-    const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
-    const wasOverdue = (t.status === 'Terlambat');
 
-    t.status = 'Selesai';
-    t.scanInTime = `${nowFormatted} (Pos 1 Gerbang Utama)`;
-    t.scanInGate = 'Pos 1 Gerbang Utama';
+    if (!executedInCore) {
+      const tickets = window.ticketsList || [];
+      const t = tickets.find(x => x.id === ticketId);
+      if (t) {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
+        const wasOverdue = (t.status === 'Terlambat');
 
-    if (t.pendingExtension || t.hasExtensionPending) {
-      if (!t.timeline) t.timeline = [];
-      t.timeline.push({
-        event: 'Perpanjangan Waktu Gugur Otomatis',
-        time: nowFormatted,
-        by: `${t.applicantName || 'Budi Pratama'} (Karyawan)`,
-        desc: `Pengajuan perpanjangan waktu otomatis dibatalkan karena karyawan telah Tap In masuk ke area pabrik.`
-      });
-      delete t.pendingExtension;
-      t.hasExtensionPending = false;
-      delete t.extensionRequestedTime;
+        t.status = 'Selesai';
+        t.scanInTime = `${nowFormatted} (Pos 1 Gerbang Utama)`;
+        t.scanInGate = 'Pos 1 Gerbang Utama';
+
+        if (t.pendingExtension || t.hasExtensionPending) {
+          if (!t.timeline) t.timeline = [];
+          const actorApplicant = t.applicantName || (typeof getActiveEmp === 'function' ? getActiveEmp().name : '') || 'Karyawan';
+          t.timeline.push({
+            event: 'Perpanjangan Waktu Gugur Otomatis',
+            time: nowFormatted,
+            by: `${actorApplicant} (Karyawan)`,
+            desc: `Pengajuan perpanjangan waktu otomatis dibatalkan karena karyawan telah Tap In masuk ke area pabrik.`
+          });
+          delete t.pendingExtension;
+          t.hasExtensionPending = false;
+          delete t.extensionRequestedTime;
+        } else {
+          t.hasExtensionPending = false;
+          t.pendingExtension = null;
+        }
+
+        const actorApplicant = t.applicantName || (typeof getActiveEmp === 'function' ? getActiveEmp().name : '') || 'Karyawan';
+        if (!t.timeline) t.timeline = [];
+        t.timeline.push({
+          event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Tepat Waktu)',
+          time: nowFormatted,
+          by: `${actorApplicant} (Karyawan)`,
+          desc: `Tap In Kartu Akses berhasil di Pos 1 Gerbang Utama. Karyawan kembali ke area pabrik. Tiket #${t.id} resmi selesai.`
+        });
+
+        if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+        else localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Tap In Kartu Akses berhasil! Anda telah kembali ke area pabrik. Tiket #${t.id} selesai.`, wasOverdue ? 'warning' : 'success');
+        }
+      }
+    }
+
+    // Arahkan ke tab riwayat agar karyawan dapat langsung melihat tiket yang selesai
+    currentKaryawanTab = 'riwayat';
+    try {
+      sessionStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', 'riwayat');
+      localStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', 'riwayat');
+      sessionStorage.removeItem('KUJANG_FORM_IS_EMERGENCY');
+    } catch (e) {}
+
+    if (typeof window.mobileSwitchTab === 'function') {
+      window.mobileSwitchTab('riwayat');
     } else {
-      t.hasExtensionPending = false;
-      t.pendingExtension = null;
+      renderMobileKaryawan(null, 'riwayat');
     }
 
-    if (!t.timeline) t.timeline = [];
-    t.timeline.push({
-      event: wasOverdue ? 'Tap In Kartu (Kembali Terlambat)' : 'Tap In Kartu (Kembali Tepat Waktu)',
-      time: nowFormatted,
-      by: `${t.applicantName || 'Budi Pratama'} (Karyawan)`,
-      desc: `Tap In Kartu Akses berhasil di Pos 1 Gerbang Utama. Karyawan kembali ke area pabrik. Tiket #${t.id} resmi selesai.`
-    });
-
-    if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
-    else localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
-
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Tap In Kartu Akses berhasil! Anda telah kembali ke area pabrik. Tiket #${t.id} selesai.`, wasOverdue ? 'warning' : 'success');
-    }
-
-    renderMobileKaryawan(null, currentKaryawanTab);
-    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-    if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-    if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
-    if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
-    if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover();
+    try { if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView(); } catch (e) {}
+    try { if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics(); } catch (e) {}
+    try { if (typeof window.renderSecurityView === 'function') window.renderSecurityView(); } catch (e) {}
+    try { if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan(); } catch (e) {}
+    try { if (typeof window.renderMobileApprover === 'function') window.renderMobileApprover(); } catch (e) {}
   };
 
   // -------------------------------------------------------------------
