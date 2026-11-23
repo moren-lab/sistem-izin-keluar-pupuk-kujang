@@ -782,6 +782,14 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   `;
           }
         }
+        if (isRiwayatView) {
+          return `
+            <div class="approver-alert-banner neutral-banner" style="border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+              <span style="color: var(--text-secondary, #475569);">↳ <strong>Status Pengalihan:</strong> -</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted, #94a3b8); font-weight: 600;">Langsung</span>
+            </div>
+          `;
+        }
         return '';
       })())}
 
@@ -802,14 +810,23 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             </div>
 
-            ${t.suratPerintah ? `
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; padding: 0.35rem 0.65rem; font-size: 0.725rem; margin-bottom: 0.4rem;">
-                <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
-                  <span style="color: #334155; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.suratPerintah.name || 'Surat Perintah Dinas').replace(/"/g, '&quot;')}">${t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf'}</span>
-                </div>
-                <button type="button" onclick="event.stopPropagation(); window.viewSuratPerintahDetail('${t.id}')" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
-                  Lihat Dokumen
-                </button>
+            ${(t.suratPerintah || isRiwayatView) ? `
+              <div class="card-document-box">
+                ${t.suratPerintah ? `
+                  <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span style="color: var(--text-primary, #334155); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.suratPerintah.name || 'Surat Perintah Dinas').replace(/"/g, '&quot;')}">${t.suratPerintah.name || 'Surat_Perintah_Dinas.pdf'}</span>
+                  </div>
+                  <button type="button" onclick="event.stopPropagation(); window.viewSuratPerintahDetail('${t.id}')" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
+                    Lihat Dokumen
+                  </button>
+                ` : `
+                  <div style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary, #475569);">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: #94a3b8;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span>Dokumen Lampiran : -</span>
+                  </div>
+                  <span style="font-size: 0.7rem; color: var(--text-muted, #94a3b8); font-style: italic;">Tidak Ada</span>
+                `}
               </div>
             ` : ''}
 
@@ -827,19 +844,19 @@ function renderApproverCards(list, containerElement, isTracking = false) {
             ` : ''}
 
             <!-- Catatan Keputusan (Terpisah di atas kolom Scan Out & Tap In) -->
-            ${t.approverNote ? `
-              <div class="card-decision-box" title="Catatan Keputusan: ${(t.approverNote || '').replace(/"/g, '&quot;')}">
+            ${(t.approverNote || isRiwayatView) ? `
+              <div class="card-decision-box" title="Catatan Keputusan: ${(t.approverNote || '-').replace(/"/g, '&quot;')}">
                 <div class="realization-grid">
                   <span class="realization-label">Catatan Keputusan</span>
                   <span class="realization-separator">:</span>
-                  <span class="realization-value">"${t.approverNote}"</span>
+                  <span class="realization-value">${t.approverNote ? `"${t.approverNote}"` : '-'}</span>
                 </div>
               </div>
             ` : ''}
 
             ${isRiwayatView ? `
               <!-- Realization Summary Row (Scan Out & Tap In - Walaupun kedaluwarsa tetap ada, isinya - strip) -->
-              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 1; min-height: 52px; justify-content: center;">
+              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 0 0 auto; min-height: 52px; justify-content: center;">
                 <div class="realization-grid">
                   <span class="realization-label">Scan Out</span>
                   <span class="realization-separator">:</span>
@@ -850,7 +867,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                 </div>
               </div>
             ` : (isTrackingView && (t.scanOutTime || t.scanInTime) ? `
-              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 1; min-height: 52px; justify-content: center;">
+              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 0 0 auto; min-height: 52px; justify-content: center;">
                 <div class="realization-grid">
                   <span class="realization-label">Scan Out</span>
                   <span class="realization-separator">:</span>

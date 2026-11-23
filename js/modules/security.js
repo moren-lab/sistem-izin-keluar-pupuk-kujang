@@ -572,7 +572,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
 
               <!-- Realization Summary Row (Scan Out & Tap In - Walaupun kedaluwarsa tetap ada, isinya - strip) -->
-              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 1; min-height: 52px; justify-content: center;">
+              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; flex: 0 0 auto; min-height: 52px; justify-content: center;">
                 <div class="realization-grid">
                   <span class="realization-label">Scan Out</span>
                   <span class="realization-separator">:</span>
@@ -668,7 +668,7 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
             ` : ''}
 
             ${(t.scanOutTime || t.scanInTime) ? `
-              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin: 0.35rem 0; flex: 1; min-height: 40px; justify-content: center;">
+              <div class="card-realization-box" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.725rem; display: flex; flex-direction: column; gap: 0.3rem; margin: 0.35rem 0; flex: 0 0 auto; min-height: 40px; justify-content: center;">
                 <div class="realization-grid">
                   ${t.scanOutTime ? `
                     <span class="realization-label">Scan Out</span>

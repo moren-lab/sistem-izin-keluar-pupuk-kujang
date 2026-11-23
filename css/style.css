@@ -3874,15 +3874,52 @@ body.theme-dark .role-dropdown-item.active {
   gap: 0.6rem;
 }
 
-/* Card Realization & Keterangan Box (Stretches vertically to avoid awkward empty space) */
+/* Card Realization & Keterangan Box (Compact & consistent height across all cards) */
 .card-realization-box {
-  flex: 1 1 auto !important;
+  flex: 0 0 auto !important;
   min-height: 52px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   background: var(--bg-subtle, #f8fafc);
   padding: 0.5rem 0.65rem !important;
+}
+
+.card-document-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.725rem;
+  margin-bottom: 0.4rem;
+  min-height: 31px;
+}
+
+body.theme-dark .card-document-box {
+  background: #141c2c !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+
+body.theme-dark .card-document-box button {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.approver-alert-banner.neutral-banner {
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+body.theme-dark .approver-alert-banner.neutral-banner {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  color: #cbd5e1 !important;
 }
 
 body.theme-dark .card-realization-box {
