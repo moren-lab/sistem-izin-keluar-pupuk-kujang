@@ -1312,7 +1312,7 @@
     const isTaggedMember = Boolean(t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => m.nip === myNip && m.status !== 'batal'));
     const isOwnerOrTeamMember = (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) || isTaggedMember;
 
-    const col1Label = (isOutside && t.scanOutTime) ? 'Scan Out • Pos 1' : 'Jadwal Keluar';
+    const col1Label = (isOutside && t.scanOutTime) ? 'Scan Out • Pos Gerbang' : 'Jadwal Keluar';
     const col1Val = (isOutside && t.scanOutTime)
       ? formatDisplayDate(t.scanOutTime)
       : (t.plannedExit ? formatDisplayDate(t.plannedExit) : '-');
@@ -1547,9 +1547,9 @@
       };
     } else if (isOutside) {
       ongoingItem = {
-        event: t.status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos Gerbang)' : 'Sedang Berada di Luar Area',
-        time: t.status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos Gerbang',
-        desc: t.status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos Gerbang!' : `Batas kembali: ${t.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(t.estimatedReturn) : t.estimatedReturn) : '-'}`,
+        event: t.status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos Gerbang)' : 'Tap In Kartu di Pos Gerbang',
+        time: t.status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : `Batas kembali ${t.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(t.estimatedReturn) : t.estimatedReturn) : '-'}`,
+        desc: t.status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos Gerbang!' : 'Belum kembali ke area',
         state: t.status === 'Terlambat' ? 'active_overdue' : 'active_outside'
       };
     } else if (isWaitingProof) {
@@ -1576,10 +1576,10 @@
     } else {
       const fallbackList = [];
       if (t.status === 'Selesai') {
-        fallbackList.push({ event: 'Tap In Tercatat', time: t.scanInTime ? (typeof formatTimeOnly === 'function' ? formatTimeOnly(t.scanInTime) : t.scanInTime) : 'Tercatat', desc: (t.scanInGate || 'Pos 1') + ' • Karyawan telah kembali ke pabrik.' });
+        fallbackList.push({ event: 'Tap In Tercatat', time: t.scanInTime ? (typeof formatTimeOnly === 'function' ? formatTimeOnly(t.scanInTime) : t.scanInTime) : 'Tercatat', desc: (t.scanInGate || 'Pos Gerbang') + ' • Karyawan telah kembali ke pabrik.' });
       }
       if (t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || t.scanOutTime) {
-        fallbackList.push({ event: 'Scan Out Tercatat', time: t.scanOutTime ? (typeof formatTimeOnly === 'function' ? formatTimeOnly(t.scanOutTime) : t.scanOutTime) : 'Tercatat', desc: (t.scanOutGate || 'Pos 1') + ' • Karyawan meninggalkan area.' });
+        fallbackList.push({ event: 'Scan Out Tercatat', time: t.scanOutTime ? (typeof formatTimeOnly === 'function' ? formatTimeOnly(t.scanOutTime) : t.scanOutTime) : 'Tercatat', desc: (t.scanOutGate || 'Pos Gerbang') + ' • Karyawan meninggalkan area.' });
       }
       if (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai') {
         fallbackList.push({ event: 'Disetujui oleh Atasan', time: t.approvedAt ? (typeof formatTimeOnly === 'function' ? formatTimeOnly(t.approvedAt) : t.approvedAt) : 'Telah Disetujui', desc: 'Disetujui • ' + (t.approverName || 'Ir. Hendra Gunawan, M.T.') });
@@ -3727,8 +3727,8 @@
         const wasOverdue = (t.status === 'Terlambat');
 
         t.status = 'Selesai';
-        t.scanInTime = `${nowFormatted} (Pos 1 Gerbang Utama)`;
-        t.scanInGate = 'Pos 1 Gerbang Utama';
+        t.scanInTime = `${nowFormatted} (Pos Gerbang)`;
+        t.scanInGate = 'Pos Gerbang';
 
         if (t.pendingExtension || t.hasExtensionPending) {
           if (!t.timeline) t.timeline = [];

@@ -1191,7 +1191,7 @@ function buildActivePermitTimeline(activeTicket) {
   // STEP 3: Scan Out Pos Jaga
   if (isPending || isRejected) {
     steps.push({
-      title: 'Scan Out tercatat di Pos Gerbang',
+      title: 'Scan Out terlebih dahulu di Pos Gerbang',
       time: `Rencana ${plannedTimeStr}`,
       desc: isRejected ? 'Dibatalkan karena izin ditolak' : 'Menunggu persetujuan atasan sebelum scan gerbang',
       state: 'upcoming'
@@ -1230,15 +1230,15 @@ function buildActivePermitTimeline(activeTicket) {
       });
     } else if (isOutside) {
       steps.push({
-        title: status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos Gerbang)' : 'Batas kembali ' + returnTimeStr,
-        time: status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Tap In Kartu di Pos Gerbang',
+        title: status === 'Terlambat' ? 'Tap In Terlambat (Segera ke Pos Gerbang)' : 'Tap In Kartu di Pos Gerbang',
+        time: status === 'Terlambat' ? '⚠️ Melewati batas estimasi' : 'Batas kembali ' + returnTimeStr,
         desc: status === 'Terlambat' ? 'Segera lakukan Tap In Kartu Akses di Pos Gerbang!' : 'Belum kembali ke area',
         state: status === 'Terlambat' ? 'active_overdue' : 'active_outside'
       });
     } else {
       steps.push({
-        title: 'Batas kembali ' + returnTimeStr,
-        time: 'Tap In Kartu di Pos Gerbang',
+        title: 'Tap In Kartu di Pos Gerbang',
+        time: 'Batas kembali ' + returnTimeStr,
         desc: 'Belum kembali ke area',
         state: 'upcoming'
       });
@@ -1406,7 +1406,7 @@ function renderKaryawanDashboard() {
 
       const isOutsideOrWaiting = isOutside || isWaitingVerify || isWaitingProof;
       const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Gerbang' : 'Jadwal Keluar';
-      const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+      const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \((Pos 1|Pos Gerbang|Pos).*?\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
@@ -1847,7 +1847,7 @@ function renderPengajuanSayaView() {
 
     const isOutsideOrWaiting = isOutside || isWaitingVerify || isWaitingProof;
     const col1Label = (isOutsideOrWaiting && activeTicket.scanOutTime) ? 'Scan Out Gerbang' : 'Jadwal Keluar';
-    const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+    const col1Val = (isOutsideOrWaiting && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \((Pos 1|Pos Gerbang|Pos).*?\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
     const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
     const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 
@@ -2911,8 +2911,8 @@ function renderKaryawanMobileDashboard() {
       const isOutside = activeTicket.status === 'Sedang di Luar' || activeTicket.status === 'Terlambat';
       const isEmergency = activeTicket.isEmergency || (activeTicket.id && activeTicket.id.includes('-EMG-')) || activeTicket.status === 'Menunggu Otorisasi Darurat';
 
-      const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos 1' : 'Rencana Keluar';
-      const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \(Pos 1.*\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
+      const col1Label = (isOutside && activeTicket.scanOutTime) ? 'Scan Out • Pos Gerbang' : 'Rencana Keluar';
+      const col1Val = (isOutside && activeTicket.scanOutTime) ? activeTicket.scanOutTime.replace(/ \((Pos 1|Pos Gerbang|Pos).*?\)/, '') : (activeTicket.plannedExit ? window.formatDisplayDate(activeTicket.plannedExit) : '-');
       const col2Label = activeTicket.type === 'Pulang Mendahului' ? 'Tipe Kepulangan' : 'Batas kembali';
       const col2Val = activeTicket.type === 'Pulang Mendahului' ? 'Pulang Lebih Awal' : (activeTicket.estimatedReturn ? window.formatDisplayDate(activeTicket.estimatedReturn) : '-');
 

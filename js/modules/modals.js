@@ -1508,7 +1508,7 @@ function openDigitalPassModal(ticketId) {
   const digitalPassNoticeText = document.getElementById('digitalPassNoticeText');
   if (digitalPassNoticeText) {
     if (ticket.status === 'Terlambat') {
-      digitalPassNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ TERLAMBAT: Melewati batas estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos 1 untuk melakukan Tap In Kartu Akses.</span>`;
+      digitalPassNoticeText.innerHTML = `<span style="color:#b91c1c; font-weight:800;">⚠️ TERLAMBAT: Melewati batas estimasi kembali (${ticket.estimatedReturn ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn) : ''}). Segera kembali ke Pos Gerbang untuk melakukan Tap In Kartu Akses.</span>`;
     } else {
       const timeReturn = ticket.estimatedReturn ? ticket.estimatedReturn.slice(11, 16) + ' WIB' : '13.00 WIB';
       digitalPassNoticeText.textContent = `Jangan bagikan QR. Batas kembali ${timeReturn}; QR dinonaktifkan setelah Tap In Kartu Akses.`;
@@ -2173,7 +2173,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   if (hasScannedOut) {
     const officerName = ticket.securityOfficerOut || 'Sertu Agus';
-    const gateUsed = ticket.scanOutGate || 'Pos 1 (Gerbang Utama)';
+    const gateUsed = ticket.scanOutGate || 'Pos Gerbang';
     const scanOutSimple = (ticket.scanOutTime || '').replace(/\s*\(Pos.*?\)/gi, '');
 
     if (infoSecurityAvatar) {
@@ -2312,7 +2312,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
               </div>
               <span class="figma-timeline-time">${dayStr} — ${ticket.scanInTime || '10.52'} WIB</span>
             </div>
-            <div class="figma-timeline-actor">Pos 1 — ${ticket.securityName || 'Agus Setiawan'}</div>
+            <div class="figma-timeline-actor">Pos Gerbang — ${ticket.securityName || 'Agus Setiawan'}</div>
             <div class="figma-timeline-desc">Tepat Waktu — kembali ke kawasan pabrik.</div>
           </div>
         `);
@@ -2331,7 +2331,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
               </div>
               <span class="figma-timeline-time">${dayStr} — ${ticket.scanOutTime || '09.03'} WIB</span>
             </div>
-            <div class="figma-timeline-actor" style="display:flex; align-items:center; gap:6px;">${window.renderUserPhoto(ticket.securityName || 'Agus Setiawan', 20)} <span>Pos 1 — ${ticket.securityName || 'Agus Setiawan'}</span></div>
+            <div class="figma-timeline-actor" style="display:flex; align-items:center; gap:6px;">${window.renderUserPhoto(ticket.securityName || 'Agus Setiawan', 20)} <span>Pos Gerbang — ${ticket.securityName || 'Agus Setiawan'}</span></div>
             <div class="figma-timeline-desc">Identitas dan QR sesuai. Karyawan keluar area.</div>
           </div>
         `);
