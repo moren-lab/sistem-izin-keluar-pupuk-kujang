@@ -56,15 +56,10 @@ function getStatusPill(status, ticket) {
   }
 
   let color = '#059669';
-  let label = status;
-  if (status === 'Menunggu Otorisasi Darurat' || status === 'Darurat Terkunci') {
-    label = 'Menunggu Otorisasi';
-  }
   switch (status) {
     case 'Disetujui': color = '#059669'; break;
     case 'Menunggu Persetujuan': color = '#d97706'; break;
     case 'Menunggu Otorisasi Darurat':
-    case 'Menunggu Otorisasi':
     case 'Darurat Terkunci': color = '#b91c1c'; break;
     case 'Sedang di Luar': color = '#0284c7'; break;
     case 'Menunggu Verifikasi Atasan': color = '#2563eb'; break;
@@ -76,7 +71,7 @@ function getStatusPill(status, ticket) {
     case 'Dibatalkan': color = '#94a3b8'; break;
     default: color = '#d97706';
   }
-  return `<span style="font-weight: 700; font-size: 0.8125rem; color: ${color}; letter-spacing: -0.01em;">${label}</span>`;
+  return `<span style="font-weight: 700; font-size: 0.8125rem; color: ${color}; letter-spacing: -0.01em;">${status}</span>`;
 }
 
 function normalizeReturnDateTime(val) {

@@ -3839,30 +3839,18 @@ body.theme-dark .role-dropdown-item.active {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem;
-  width: 100%;
 }
 
 .card-id-num {
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-primary);
-  white-space: nowrap;
-  letter-spacing: -0.2px;
 }
 
 .card-created-meta {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.figma-clean-status {
-  white-space: nowrap !important;
-  text-align: right;
-  flex-shrink: 0;
-  margin-left: auto;
 }
 
 .card-details-box {
@@ -3909,73 +3897,6 @@ body.theme-dark .card-realization-box strong {
 
 body.theme-dark .card-realization-box div {
   color: #cbd5e1 !important;
-}
-
-/* Placeholder Ilustrasi Pengajuan Menunggu Persetujuan (Sesuai Gambar 2) */
-.pending-card-placeholder {
-  user-select: none;
-}
-
-body.theme-dark .pending-card-placeholder .pending-placeholder-title {
-  color: #cbd5e1 !important;
-}
-
-body.theme-dark .pending-card-placeholder .pending-placeholder-sub {
-  color: #64748b !important;
-}
-
-body.theme-dark .pending-card-placeholder svg path[fill="#ffffff"],
-body.theme-dark .pending-card-placeholder svg path[fill="#fff"] {
-  fill: #1e293b !important;
-}
-
-body.theme-dark .pending-card-placeholder svg path[stroke="#cbd5e1"],
-body.theme-dark .pending-card-placeholder svg line[stroke="#cbd5e1"] {
-  stroke: #475569 !important;
-}
-
-body.theme-dark .pending-card-placeholder svg path[fill="#e0f2fe"] {
-  fill: #0f2b48 !important;
-  fill-opacity: 0.5 !important;
-}
-
-body.theme-dark .pending-card-placeholder .pending-clock-badge {
-  background: #1e293b !important;
-  border-color: #64748b !important;
-}
-
-body.theme-dark .pending-card-placeholder .pending-clock-badge svg {
-  stroke: #94a3b8 !important;
-}
-
-/* Strip Info Kontekstual Ruang Kosong pada Kartu Izin */
-.card-contextual-info-strip {
-  background: var(--bg-subtle, #f8fafc);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 6px;
-  padding: 0.45rem 0.65rem;
-  font-size: 0.725rem;
-  line-height: 1.4;
-  color: #475569;
-  user-select: none;
-}
-
-body.theme-dark .card-contextual-info-strip {
-  background: #141c2c !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #94a3b8 !important;
-}
-
-body.theme-dark .card-contextual-info-strip svg {
-  stroke: #94a3b8 !important;
-}
-
-body.theme-dark .card-contextual-info-strip .info-strip-title {
-  color: #f1f5f9 !important;
-}
-
-body.theme-dark .card-contextual-info-strip .info-strip-desc {
-  color: #94a3b8 !important;
 }
 
 /* Realization Grid Layout (Aligned Key-Value Layout with Straight Aligned Colons, Sesuai Gambar 2) */
