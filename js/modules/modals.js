@@ -3026,8 +3026,13 @@ function openCancelModal(ticketId, callback) {
 
   if (!canCancel || (Boolean(ticket.scanOutTime) && ticket.status !== 'Disetujui')) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Tap In di Pos Gerbang untuk menyelesaikan izin.', 'danger');
+      if (ticket.status === 'Selesai' || ticket.status === 'Selesai (Terlambat)') {
+        window.showToast(`Tiket #${ticket.id} telah selesai dan tidak dapat dibatalkan lagi.`, 'warning');
+      } else {
+        window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Tap In di Pos Gerbang untuk menyelesaikan izin.', 'danger');
+      }
     }
+    if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     return;
   }
 
@@ -3134,10 +3139,15 @@ function confirmCancelTicket() {
 
     if (ticket.scanOutTime || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai') {
       if (typeof window.showToast === 'function') {
-        window.showToast(`Akses Ditolak: Tiket #${ticketId} tidak dapat dibatalkan karena sudah aktif di luar area atau telah selesai.`, 'danger');
+        if (ticket.status === 'Selesai' || ticket.status === 'Selesai (Terlambat)') {
+          window.showToast(`Tiket #${ticketId} telah selesai dan tidak dapat dibatalkan lagi.`, 'warning');
+        } else {
+          window.showToast(`Akses Ditolak: Tiket #${ticketId} tidak dapat dibatalkan karena sudah aktif di luar area (Scan Out).`, 'danger');
+        }
       }
       const modalCancelRequest = document.getElementById('modalCancelRequest');
       if (modalCancelRequest) modalCancelRequest.classList.remove('open');
+      if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
       return;
     }
     const ACTORS = window.ACTORS || {};
@@ -3159,6 +3169,20 @@ function confirmCancelTicket() {
     });
 
     window.saveTickets(ticketsList);
+
+    // Kirim pembatalan langsung ke backend MySQL
+    try {
+      fetch('api/update_ticket.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel',
+          ticketId: ticketId,
+          cancellationReason: reason,
+          cancelledBy: `${getActiveEmployeeActorInfo().name} (Karyawan)`
+        })
+      }).catch(e => console.warn('[Modals] Gagal sync pembatalan ke MySQL:', e));
+    } catch (e) {}
 
     const modalCancelRequest = document.getElementById('modalCancelRequest');
     if (modalCancelRequest) modalCancelRequest.classList.remove('open');

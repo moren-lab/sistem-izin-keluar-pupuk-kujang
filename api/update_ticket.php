@@ -304,9 +304,14 @@ try {
             $approverName = isset($input['approverName']) ? $input['approverName'] : $ticket['approver_name'];
             $note = isset($input['note']) ? $input['note'] : 'Perpanjangan disetujui.';
 
-            // Ambil waktu perpanjangan
-            $stmtGet = $pdo->prepare("SELECT * FROM `ticket_extensions` WHERE `id` = :id");
-            $stmtGet->execute([':id' => $extensionId]);
+            // Ambil data perpanjangan (fallback jika ID tidak disertakan)
+            if ($extensionId > 0) {
+                $stmtGet = $pdo->prepare("SELECT * FROM `ticket_extensions` WHERE `id` = :id");
+                $stmtGet->execute([':id' => $extensionId]);
+            } else {
+                $stmtGet = $pdo->prepare("SELECT * FROM `ticket_extensions` WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan' ORDER BY `id` DESC LIMIT 1");
+                $stmtGet->execute([':ticket_id' => $ticketId]);
+            }
             $extData = $stmtGet->fetch();
 
             if ($extData) {
@@ -315,7 +320,7 @@ try {
                     SET `status` = 'Disetujui', `approver_note` = :note, `decided_at` = NOW()
                     WHERE `id` = :id
                 ");
-                $stmtExt->execute([':note' => $note, ':id' => $extensionId]);
+                $stmtExt->execute([':note' => $note, ':id' => $extData['id']]);
 
                 // Update estimasi kembali tiket utama
                 $stmtUpTicket = $pdo->prepare("UPDATE `tickets` SET `estimated_return` = :ret WHERE `id` = :id");
@@ -330,9 +335,65 @@ try {
                     ':ticket_id' => $ticketId,
                     ':event_time' => $nowDisplay,
                     ':actor_by' => $approverName,
-                    ':description' => "Estimasi kembali diperbarui s/d {$extData['new_estimated_return']}."
+                    ':description' => "Estimasi kembali diperbarui s/d {$extData['new_estimated_return']}. Catatan: {$note}"
                 ]);
             }
+            break;
+
+        case 'reject_extension':
+            $extensionId = isset($input['extensionId']) ? (int)$input['extensionId'] : 0;
+            $approverName = isset($input['approverName']) ? $input['approverName'] : $ticket['approver_name'];
+            $note = isset($input['note']) ? $input['note'] : 'Perpanjangan ditolak, harap kembali segera.';
+
+            if ($extensionId > 0) {
+                $stmtGet = $pdo->prepare("SELECT * FROM `ticket_extensions` WHERE `id` = :id");
+                $stmtGet->execute([':id' => $extensionId]);
+            } else {
+                $stmtGet = $pdo->prepare("SELECT * FROM `ticket_extensions` WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan' ORDER BY `id` DESC LIMIT 1");
+                $stmtGet->execute([':ticket_id' => $ticketId]);
+            }
+            $extData = $stmtGet->fetch();
+
+            if ($extData) {
+                $stmtExt = $pdo->prepare("
+                    UPDATE `ticket_extensions`
+                    SET `status` = 'Ditolak', `approver_note` = :note, `decided_at` = NOW()
+                    WHERE `id` = :id
+                ");
+                $stmtExt->execute([':note' => $note, ':id' => $extData['id']]);
+
+                // Timeline
+                $stmtTl = $pdo->prepare("
+                    INSERT INTO `ticket_timeline` (`ticket_id`, `event`, `event_time`, `actor_by`, `description`)
+                    VALUES (:ticket_id, 'Perpanjangan Waktu Ditolak', :event_time, :actor_by, :description)
+                ");
+                $stmtTl->execute([
+                    ':ticket_id' => $ticketId,
+                    ':event_time' => $nowDisplay,
+                    ':actor_by' => $approverName,
+                    ':description' => "Permohonan perpanjangan ditolak. Catatan: {$note}"
+                ]);
+            }
+            break;
+
+        case 'cancel_extension':
+            $stmtExt = $pdo->prepare("
+                UPDATE `ticket_extensions`
+                SET `status` = 'Dibatalkan', `decided_at` = NOW()
+                WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan'
+            ");
+            $stmtExt->execute([':ticket_id' => $ticketId]);
+
+            $stmtTl = $pdo->prepare("
+                INSERT INTO `ticket_timeline` (`ticket_id`, `event`, `event_time`, `actor_by`, `description`)
+                VALUES (:ticket_id, 'Perpanjangan Dibatalkan', :event_time, :actor_by, :description)
+            ");
+            $stmtTl->execute([
+                ':ticket_id' => $ticketId,
+                ':event_time' => $nowDisplay,
+                ':actor_by' => $ticket['applicant_name'],
+                ':description' => 'Permohonan perpanjangan waktu dibatalkan mandiri sebelum disetujui Atasan.'
+            ]);
             break;
 
         default:

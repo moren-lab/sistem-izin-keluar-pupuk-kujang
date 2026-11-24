@@ -77,7 +77,7 @@
 
   // Helper Pengguna Aktif yang Benar-Benar Akurat (Individual)
   function getActiveUserInfo() {
-    const actorKey = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
+    const actorKey = (typeof window.getCurrentMobileRole === 'function' && window.innerWidth <= 768 ? window.getCurrentMobileRole() : null) || (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
     const actors = window.ACTORS || {};
 
     // 1. Cek sesi login aktif Kujang ID jika ada
@@ -127,6 +127,7 @@
 
     return {
       roleKey: actorKey,
+      role: actorKey,
       nip: (actor && actor.nip) || defaultNip,
       name: (actor && actor.name) || defaultName
     };
@@ -235,8 +236,66 @@
     // Update UI badge jika modul UI sudah termuat
     updateNotificationBadges();
 
+    // Push notifikasi baru ke database server MySQL
+    try {
+      const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
+      fetch(`${apiBase}/notifications.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          recipientRole: newNotif.recipientRole,
+          recipientNip: newNotif.recipientNip,
+          recipientName: newNotif.recipientName,
+          actorSource: newNotif.actorSource,
+          type: newNotif.type,
+          priority: newNotif.priority,
+          title: newNotif.title,
+          message: newNotif.message,
+          ticketId: newNotif.ticketId,
+          eventId: newNotif.eventId
+        })
+      }).catch(e => console.warn('[Notifications] Gagal push notifikasi ke server:', e));
+    } catch (e) {}
+
     return newNotif;
   }
+
+  // Penggabung Notifikasi dari Server MySQL (Sinkronisasi Multi-Device HP & Laptop)
+  function mergeServerNotifications(serverNotifs) {
+    if (!Array.isArray(serverNotifs) || serverNotifs.length === 0) return;
+    let changed = false;
+    serverNotifs.forEach(sn => {
+      const exists = notificationsList.find(n => (sn.eventId && n.eventId === sn.eventId) || (n.id === sn.id));
+      if (!exists) {
+        notificationsList.unshift({
+          id: sn.id,
+          recipientRole: sn.recipientRole,
+          recipientNip: sn.recipientNip,
+          recipientName: sn.recipientName,
+          actorSource: sn.actorSource,
+          type: sn.type,
+          priority: sn.priority,
+          title: sn.title,
+          message: sn.message,
+          ticketId: sn.ticketId,
+          createdAt: sn.createdAt,
+          isRead: Boolean(sn.isRead),
+          eventId: sn.eventId
+        });
+        changed = true;
+      }
+    });
+    if (changed) {
+      notificationsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      saveStoredNotifications(notificationsList);
+      updateNotificationBadges();
+      if (typeof window.renderMobileNotifDropdownContent === 'function') {
+        window.renderMobileNotifDropdownContent();
+      }
+    }
+  }
+  window.mergeServerNotifications = mergeServerNotifications;
 
   // 3. Helper Pencocokan Notifikasi Individual per Pengguna (Mencegah Kebocoran Antar Atasan/Karyawan)
   function isNotificationForUser(n, user) {
@@ -352,6 +411,14 @@
       notif.isRead = true;
       saveStoredNotifications(notificationsList);
       updateNotificationBadges();
+      try {
+        const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
+        fetch(`${apiBase}/notifications.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark_read', id: notifId })
+        }).catch(() => {});
+      } catch (e) {}
       return true;
     }
     return false;

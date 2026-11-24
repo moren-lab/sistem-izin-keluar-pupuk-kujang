@@ -164,6 +164,20 @@ function playScannerBeep() {
 function showToast(message, type = 'success', duration = 2000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
+
+  // Anti-Spam & Deduplication: Jangan tumpuk toast dengan pesan yang sama persis
+  const existingToasts = container.querySelectorAll('.toast');
+  for (const existing of existingToasts) {
+    if (existing.textContent.trim() === String(message).trim()) {
+      return;
+    }
+  }
+
+  // Batasi maksimal 3 toast bersamaan agar layar (terutama mobile) tidak tertutup
+  if (existingToasts.length >= 3) {
+    existingToasts[0].remove();
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
 

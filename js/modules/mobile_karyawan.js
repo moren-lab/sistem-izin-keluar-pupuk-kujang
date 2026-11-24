@@ -2145,11 +2145,29 @@
       return;
     }
 
-    // Guard: Tiket yang sudah Scan Out atau Selesai tidak boleh dibatalkan mandiri
-    const isOutsideOrDone = t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || (Boolean(t.scanOutTime) && t.status !== 'Disetujui');
+    // Guard: Tiket yang sudah selesai tidak dapat dibatalkan
+    if (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Izin #${t.id} telah selesai dan tidak dapat dibatalkan lagi.`, 'warning');
+      }
+      if (typeof window.renderMobileActiveView === 'function') {
+        window.renderMobileActiveView();
+      } else if (typeof window.renderMobileKaryawan === 'function') {
+        window.renderMobileKaryawan();
+      }
+      return;
+    }
+
+    // Guard: Tiket yang sudah Scan Out atau sedang di luar area pabrik
+    const isOutsideOrDone = t.status === 'Sedang di Luar' || t.status === 'Terlambat' || (Boolean(t.scanOutTime) && t.status !== 'Disetujui');
     if (isOutsideOrDone) {
       if (typeof window.showToast === 'function') {
         window.showToast('Izin tidak dapat dibatalkan karena Anda telah tercatat keluar pabrik (Scan Out). Anda wajib melakukan Tap In di Pos Jaga.', 'danger');
+      }
+      if (typeof window.renderMobileActiveView === 'function') {
+        window.renderMobileActiveView();
+      } else if (typeof window.renderMobileKaryawan === 'function') {
+        window.renderMobileKaryawan();
       }
       return;
     }
@@ -2157,6 +2175,11 @@
     if (t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa') {
       if (typeof window.showToast === 'function') {
         window.showToast(`Izin telah berstatus '${t.status}' dan tidak dapat dibatalkan lagi.`, 'warning');
+      }
+      if (typeof window.renderMobileActiveView === 'function') {
+        window.renderMobileActiveView();
+      } else if (typeof window.renderMobileKaryawan === 'function') {
+        window.renderMobileKaryawan();
       }
       return;
     }
@@ -2286,10 +2309,18 @@
     }
 
     // Guard: Tiket yang sudah Scan Out atau selesai tidak boleh dibatalkan mandiri
-    if (t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || t.scanOutTime) {
+    if (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Izin #${ticketId} telah selesai dan tidak dapat dibatalkan.`, 'warning');
+      }
+      if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
+      return;
+    }
+    if (t.status === 'Sedang di Luar' || t.status === 'Terlambat' || (Boolean(t.scanOutTime) && t.status !== 'Disetujui')) {
       if (typeof window.showToast === 'function') {
         window.showToast('Izin tidak dapat dibatalkan karena Anda telah tercatat keluar area pabrik (Scan Out). Anda wajib melakukan Tap In di Pos Jaga.', 'danger');
       }
+      if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
       return;
     }
 
@@ -2318,13 +2349,31 @@
       window.ticketsList = tickets;
     }
 
+    // Sinkronisasi pembatalan tiket ke database MySQL secara real-time
+    try {
+      fetch('api/update_ticket.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel',
+          ticketId: ticketId,
+          cancellationReason: reason,
+          cancelledBy: `${emp.name} (Karyawan)`
+        })
+      }).catch(e => console.warn('[Mobile] Gagal sync pembatalan ke MySQL:', e));
+    } catch (e) {}
+
     window.mobileCloseSheet();
 
     if (typeof window.showToast === 'function') {
       window.showToast(`Tiket #${ticketId} berhasil dibatalkan. Anda kini dapat mengajukan izin baru.`, 'success');
     }
 
-    renderMobileKaryawan(null, currentKaryawanTab);
+    if (typeof window.renderMobileActiveView === 'function') {
+      window.renderMobileActiveView();
+    } else {
+      renderMobileKaryawan(null, currentKaryawanTab);
+    }
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
@@ -3515,10 +3564,10 @@
         plannedReturn: data.returnType === 'Pulang Mendahului' ? null : data.estimatedReturn,
         approverName: data.approverName,
         approverNip: resolvedApproverNip,
-        approverNote: (resolvedSupervisorName && data.approverName && resolvedSupervisorName !== data.approverName) ? `${emp.name} bawahan dari ${resolvedSupervisorName} mengalihkan pengajuan kepada anda.` : null,
-        systemNote: (resolvedSupervisorName && data.approverName && resolvedSupervisorName !== data.approverName) ? `${emp.name} bawahan dari ${resolvedSupervisorName} mengalihkan pengajuan kepada anda.` : null,
-        reassignedFrom: (resolvedSupervisorName && data.approverName && resolvedSupervisorName !== data.approverName) ? resolvedSupervisorName : null,
-        reassignedTo: (resolvedSupervisorName && data.approverName && resolvedSupervisorName !== data.approverName) ? data.approverName : null,
+        approverNote: null,
+        systemNote: null,
+        reassignedFrom: null,
+        reassignedTo: null,
         directSupervisor: resolvedSupervisorName,
         directSupervisorNip: resolvedSupervisorNip,
         status: data.isEmergency ? 'Menunggu Otorisasi Darurat' : 'Menunggu Persetujuan',
@@ -3984,8 +4033,11 @@
         }
 
         // Render ulang tampilan aktif Karyawan agar langsung masuk ke status Sedang di Luar
-        if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
-        if (typeof window.renderMobileKaryawanTickets === 'function') window.renderMobileKaryawanTickets();
+        if (typeof window.renderMobileActiveView === 'function') {
+          window.renderMobileActiveView();
+        } else if (typeof window.renderMobileKaryawan === 'function') {
+          window.renderMobileKaryawan();
+        }
       }
     }, 600);
   }
@@ -4583,6 +4635,15 @@
     if (isSubmittingPerpanjangan) return;
 
     const submitBtn = e.target && e.target.querySelector ? e.target.querySelector('button[type="submit"]') : null;
+    const unlockBtn = () => {
+      isSubmittingPerpanjangan = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.pointerEvents = 'auto';
+      }
+    };
+
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.style.opacity = '0.6';
@@ -4595,7 +4656,7 @@
 
     if (!newTime || !reason) {
       if (typeof window.showToast === 'function') window.showToast('Harap lengkapi waktu dan alasan perpanjangan!', 'warning');
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.pointerEvents = 'auto'; }
+      unlockBtn();
       return;
     }
 
@@ -4613,6 +4674,7 @@
         } else {
           alert(`Ajukan perpanjangan hanya bisa sebelum jam pulang (${workHoursCheck.scheduleText})!`);
         }
+        unlockBtn();
         return;
       }
     }
@@ -4623,12 +4685,16 @@
       } else {
         alert('Waktu perpanjangan tidak boleh di masa lampau!');
       }
+      unlockBtn();
       return;
     }
 
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
-    if (!t) return;
+    if (!t) {
+      unlockBtn();
+      return;
+    }
 
     // 2. Validasi Batas Usulan Jam Kembali Baru terhadap Jam Pulang Kerja
     const isDinas = t.category && String(t.category).toLowerCase().includes('dinas');
@@ -4637,6 +4703,7 @@
         if (typeof window.showToast === 'function') {
           window.showToast('Perpanjangan waktu Urusan Pribadi hanya dapat diajukan untuk hari ini!', 'danger');
         }
+        unlockBtn();
         return;
       }
       const dayOfWeek = nowTime.getDay();
@@ -4650,6 +4717,7 @@
         if (typeof window.showToast === 'function') {
           window.showToast(`Perpanjangan waktu tidak boleh melebihi batas jam pulang kantor (${closingStr})!`, 'danger');
         }
+        unlockBtn();
         return;
       }
     } else {
@@ -4659,6 +4727,7 @@
           if (typeof window.showToast === 'function') {
             window.showToast(extCheck.message, 'danger');
           }
+          unlockBtn();
           return;
         }
       }
@@ -4695,6 +4764,21 @@
       window.ticketsList = tickets;
     }
 
+    // Sinkronisasi Permohonan Perpanjangan langsung ke MySQL
+    try {
+      const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
+      fetch(`${apiBase}/update_ticket.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticketId: ticketId,
+          action: 'request_extension',
+          newEstimatedReturn: newTime,
+          reason: reason
+        })
+      }).catch(e => console.warn('[Sync] Gagal push perpanjangan ke MySQL:', e));
+    } catch (e) {}
+
     window.mobileCloseSheet();
 
     if (typeof window.createNotification === 'function') {
@@ -4717,7 +4801,7 @@
     renderMobileKaryawan(null, currentKaryawanTab);
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
-    isSubmittingPerpanjangan = false;
+    unlockBtn();
   };
 
   // -------------------------------------------------------------------

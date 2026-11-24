@@ -68,7 +68,45 @@
             t.scanInTime = null;
             t.scanInGate = null;
           }
+
+          // Otomatis pastikan notifikasi persetujuan dibuat untuk Karyawan jika tiket berstatus 'Disetujui'
+          if (t.status === 'Disetujui') {
+            const notifEventId = `approved_${t.id}`;
+            const notifs = (typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('kujang_notifications') || '[]') : []);
+            const hasNotif = notifs.some(n => n.eventId === notifEventId || (n.ticketId === t.id && (n.type === 'disetujui' || n.type === 'persetujuan')));
+            if (!hasNotif && typeof window.createNotification === 'function') {
+              window.createNotification({
+                recipientRole: 'karyawan',
+                recipientNip: t.applicantNip || 'PK-2024-8841',
+                recipientName: t.applicantName || 'Budi Pratama, S.T.',
+                actorSource: 'approver',
+                type: 'disetujui',
+                title: 'Pengajuan Disetujui',
+                message: `Pengajuan izin Anda (#${t.id}) telah disetujui oleh ${t.approverName || 'Atasan'}. QR Code resmi siap digunakan.`,
+                ticketId: t.id,
+                priority: 'normal',
+                eventId: notifEventId
+              });
+            }
+          }
         });
+
+        // Sinkronisasi notifikasi lintas perangkat dari MySQL
+        try {
+          const curRole = (typeof window.getCurrentMobileRole === 'function' && window.innerWidth <= 768 ? window.getCurrentMobileRole() : null) || (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
+          const notifRes = await fetch(`${API_BASE}/notifications.php?role=${encodeURIComponent(curRole)}`, {
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+          });
+          if (notifRes.ok) {
+            const notifData = await notifRes.json();
+            if (notifData && notifData.success && Array.isArray(notifData.data)) {
+              if (typeof window.mergeServerNotifications === 'function') {
+                window.mergeServerNotifications(notifData.data);
+              }
+            }
+          }
+        } catch (e) {}
 
         const currentHash = computeHash(window.ticketsList || []);
         const serverHash = computeHash(serverTickets);
@@ -100,6 +138,9 @@
               }
               if (typeof window.showToast === 'function') {
                 window.showToast(`✅ Tiket #${activeQrT.id} berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+              }
+              if (typeof window.renderMobileActiveView === 'function') {
+                window.renderMobileActiveView();
               }
             }
           }
@@ -149,7 +190,7 @@
   // Helper Refresh UI Tanpa Gangguan
   function refreshActiveViewSafely() {
     try {
-      const role = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
+      const role = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : (window.getCurrentMobileRole ? window.getCurrentMobileRole() : window.currentActor)) || 'karyawan';
 
       // 1. Dashboard & Charts
       if (typeof window.refreshAllDashboardData === 'function') {
@@ -159,25 +200,26 @@
       }
 
       // 2. Tampilan Web Desktop per Aktor
-      if (role === 'karyawan' && typeof window.renderKaryawanView === 'function') {
+      if (typeof window.renderKaryawanView === 'function') {
         window.renderKaryawanView();
-      } else if ((role === 'approver' || role === 'approver2') && typeof window.renderApproverView === 'function') {
+      }
+      if (typeof window.renderApproverView === 'function') {
         window.renderApproverView();
-      } else if (role === 'security' && typeof window.renderSecurityView === 'function') {
+      }
+      if (typeof window.renderSecurityView === 'function') {
         window.renderSecurityView();
-      } else if (role === 'admin' && typeof window.renderAdminView === 'function') {
+      }
+      if (typeof window.renderAdminView === 'function') {
         window.renderAdminView();
       }
 
-      // 3. Tampilan Mobile HP
-      if (typeof window.renderMobileKaryawanTickets === 'function') {
-        window.renderMobileKaryawanTickets();
-      }
-      if (typeof window.renderMobileApproverPendingTickets === 'function') {
-        window.renderMobileApproverPendingTickets();
-      }
-      if (typeof window.renderMobileSecurityActiveTickets === 'function') {
-        window.renderMobileSecurityActiveTickets();
+      // 3. Tampilan Mobile HP (Auto-update kartu status, riwayat, antrean secara real-time)
+      if (typeof window.renderMobileActiveView === 'function') {
+        window.renderMobileActiveView();
+      } else {
+        if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+        if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
+        if (typeof window.renderMobileSecurity === 'function') window.renderMobileSecurity();
       }
 
       // 4. Update Metrik & Badges
@@ -243,6 +285,19 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         }).catch(e => console.warn('[SyncEngine] Gagal sync tiket individual:', e));
+
+        if (t.pendingExtension && t.hasExtensionPending && t.pendingExtension.status === 'Menunggu Persetujuan') {
+          fetch(`${API_BASE}/update_ticket.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ticketId: t.id,
+              action: 'request_extension',
+              newEstimatedReturn: t.pendingExtension.newEstimatedReturn || t.extensionRequestedTime,
+              reason: t.pendingExtension.reason || t.extensionReason
+            })
+          }).catch(() => {});
+        }
       }
     } catch (err) {
       console.warn('[SyncEngine] Gagal push perubahan ke MySQL:', err);

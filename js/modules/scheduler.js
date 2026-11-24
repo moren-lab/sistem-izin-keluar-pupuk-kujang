@@ -92,7 +92,7 @@ function parseTicketDateTime(val) {
 function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841'))) {
   // Ambil tiket terbaru dari window.ticketsList atau localStorage
   const list = window.ticketsList || (typeof window.loadTickets === 'function' ? window.loadTickets() : []);
-  return list.find(t => {
+  const activeCandidates = list.filter(t => {
     // 1. Cek apakah user adalah inisiator (pembuat) tiket
     const isInitiator = (t.applicantNip === nip || (!t.applicantNip && nip === 'PK-2024-8841'));
     // 2. Cek apakah user adalah anggota tim dinas bersama
@@ -116,6 +116,18 @@ function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurre
       t.status !== 'Kedaluwarsa' &&
       (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Menunggu Verifikasi Atasan' || t.status === 'Menunggu Bukti Kedatangan');
   });
+
+  if (activeCandidates.length === 0) return null;
+
+  // Sort candidate aktif: prioritaskan tiket yang dibuat paling baru (ID/createdAt descending)
+  activeCandidates.sort((a, b) => {
+    const timeA = new Date(a.createdAt || a.created_at || 0).getTime() || 0;
+    const timeB = new Date(b.createdAt || b.created_at || 0).getTime() || 0;
+    if (timeA !== timeB) return timeB - timeA;
+    return String(b.id || '').localeCompare(String(a.id || ''));
+  });
+
+  return activeCandidates[0];
 }
 
 /**
