@@ -4042,7 +4042,7 @@
   </div>
 
   <!-- ================= MODAL 5B: TIKET IZIN DIGITAL QR (FIGMA SCREEN 4) ================= -->
-  <div class="modal-overlay" id="modalDigitalPassQR">
+  <div class="modal-overlay" id="modalDigitalPassQR" onclick="if(event.target === this) { window.closeDigitalPassModal ? window.closeDigitalPassModal() : this.classList.remove('open'); }">
     <div class="modal-card" style="max-width: 520px;">
       <!-- Header Khusus Cetak Fisik (Hanya tampil saat dicetak) -->
       <div class="ticket-print-header"
@@ -5176,7 +5176,7 @@
   <script src="html5-qrcode.min.js" defer></script>
   <script src="html2pdf.bundle.min.js" defer></script>
   <script src="js/data/mockData.js?v=20261119_0430"></script>
-  <script src="js/data/syncApi.js?v=20261123_1440"></script>
+  <script src="js/data/syncApi.js?v=20261124_0835"></script>
   <script src="js/data/authData.js?v=20261116_1400"></script>
   <script src="js/modules/auth.js?v=20261116_1400"></script>
   <script src="js/modules/notifications.js?v=20261116_1400"></script>
@@ -5185,14 +5185,14 @@
   <script src="js/modules/navigation.js?v=20261120_0555"></script>
   <script src="js/modules/karyawan.js?v=20261123_1030"></script>
   <script src="js/modules/approver.js?v=20261123_1000"></script>
-  <script src="js/modules/security.js?v=20261123_1000"></script>
+  <script src="js/modules/security.js?v=20261124_0815"></script>
   <script src="js/modules/admin.js?v=20261123_1030"></script>
   <script src="js/modules/charts.js?v=20261116_1400"></script>
   <script src="js/modules/emergency.js?v=20261116_1400"></script>
-  <script src="js/modules/modals.js?v=20261123_1030"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261123_1030"></script>
+  <script src="js/modules/modals.js?v=20261124_0835"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261124_0835"></script>
   <script src="js/modules/mobile_atasan.js?v=20261123_1000"></script>
-  <script src="js/modules/mobile_security.js?v=20261117_0930"></script>
+  <script src="js/modules/mobile_security.js?v=20261124_0815"></script>
   <script src="js/modules/mobile_app.js?v=20261119_0430"></script>
   <script src="js/modules/export_pdf.js?v=20261123_1030"></script>
   <script src="js/app.js?v=20261116_1400"></script>

@@ -1625,6 +1625,26 @@
       localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
     }
 
+    if (typeof window.currentOpenedMobileQrTicketId !== 'undefined' && window.currentOpenedMobileQrTicketId === t.id) {
+      window.currentOpenedMobileQrTicketId = null;
+      if (typeof window.stopQrScanOutWatcher === 'function') window.stopQrScanOutWatcher();
+      if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+    }
+    if (typeof window.currentOpenedDesktopQrTicketId !== 'undefined' && window.currentOpenedDesktopQrTicketId === t.id) {
+      window.currentOpenedDesktopQrTicketId = null;
+      if (typeof window.stopDesktopQrScanOutWatcher === 'function') window.stopDesktopQrScanOutWatcher();
+    }
+    const modalPass = document.getElementById('modalDigitalPassQR');
+    if (modalPass) modalPass.classList.remove('open');
+    const modalDetail = document.getElementById('modalTicketDetail');
+    if (modalDetail) {
+      if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+      else {
+        modalDetail.classList.remove('open');
+        modalDetail.style.display = 'none';
+      }
+    }
+
     closeMobileSheet();
     renderMobileSecurity(null, currentSecurityTab);
     if (typeof window.renderActiveView === 'function') window.renderActiveView();
@@ -1636,7 +1656,27 @@
     if (typeof window.executeScanIn === 'function') {
       try {
         window.executeScanIn(ticketId);
-        closeMobileSheet();
+        if (typeof window.currentOpenedMobileQrTicketId !== 'undefined' && window.currentOpenedMobileQrTicketId === t.id) {
+      window.currentOpenedMobileQrTicketId = null;
+      if (typeof window.stopQrScanOutWatcher === 'function') window.stopQrScanOutWatcher();
+      if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+    }
+    if (typeof window.currentOpenedDesktopQrTicketId !== 'undefined' && window.currentOpenedDesktopQrTicketId === t.id) {
+      window.currentOpenedDesktopQrTicketId = null;
+      if (typeof window.stopDesktopQrScanOutWatcher === 'function') window.stopDesktopQrScanOutWatcher();
+    }
+    const modalPass = document.getElementById('modalDigitalPassQR');
+    if (modalPass) modalPass.classList.remove('open');
+    const modalDetail = document.getElementById('modalTicketDetail');
+    if (modalDetail) {
+      if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+      else {
+        modalDetail.classList.remove('open');
+        modalDetail.style.display = 'none';
+      }
+    }
+
+    closeMobileSheet();
         renderMobileSecurity(null, currentSecurityTab);
         if (typeof window.renderActiveView === 'function') window.renderActiveView();
         return;
@@ -1694,7 +1734,27 @@
       if (typeof window.showToast === 'function') {
         window.showToast(`Tap In berhasil di ${activeGate}! Jam kepulangan terkunci. Menunggu verifikasi Atasan.`, 'success');
       }
-      closeMobileSheet();
+      if (typeof window.currentOpenedMobileQrTicketId !== 'undefined' && window.currentOpenedMobileQrTicketId === t.id) {
+      window.currentOpenedMobileQrTicketId = null;
+      if (typeof window.stopQrScanOutWatcher === 'function') window.stopQrScanOutWatcher();
+      if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+    }
+    if (typeof window.currentOpenedDesktopQrTicketId !== 'undefined' && window.currentOpenedDesktopQrTicketId === t.id) {
+      window.currentOpenedDesktopQrTicketId = null;
+      if (typeof window.stopDesktopQrScanOutWatcher === 'function') window.stopDesktopQrScanOutWatcher();
+    }
+    const modalPass = document.getElementById('modalDigitalPassQR');
+    if (modalPass) modalPass.classList.remove('open');
+    const modalDetail = document.getElementById('modalTicketDetail');
+    if (modalDetail) {
+      if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+      else {
+        modalDetail.classList.remove('open');
+        modalDetail.style.display = 'none';
+      }
+    }
+
+    closeMobileSheet();
       renderMobileSecurity(null, currentSecurityTab);
       if (typeof window.renderActiveView === 'function') window.renderActiveView();
       return;
@@ -1737,6 +1797,26 @@
       window.saveTickets(tickets);
     } else {
       localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
+    }
+
+    if (typeof window.currentOpenedMobileQrTicketId !== 'undefined' && window.currentOpenedMobileQrTicketId === t.id) {
+      window.currentOpenedMobileQrTicketId = null;
+      if (typeof window.stopQrScanOutWatcher === 'function') window.stopQrScanOutWatcher();
+      if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+    }
+    if (typeof window.currentOpenedDesktopQrTicketId !== 'undefined' && window.currentOpenedDesktopQrTicketId === t.id) {
+      window.currentOpenedDesktopQrTicketId = null;
+      if (typeof window.stopDesktopQrScanOutWatcher === 'function') window.stopDesktopQrScanOutWatcher();
+    }
+    const modalPass = document.getElementById('modalDigitalPassQR');
+    if (modalPass) modalPass.classList.remove('open');
+    const modalDetail = document.getElementById('modalTicketDetail');
+    if (modalDetail) {
+      if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+      else {
+        modalDetail.classList.remove('open');
+        modalDetail.style.display = 'none';
+      }
     }
 
     closeMobileSheet();

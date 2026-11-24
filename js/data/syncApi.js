@@ -55,6 +55,21 @@
       if (resJson && resJson.success && Array.isArray(resJson.data)) {
         isApiOnline = true;
         const serverTickets = resJson.data;
+
+        // Normalisasi & Integritas Status Tiket (Cegah kontradiksi data)
+        serverTickets.forEach(t => {
+          if (t.scanInTime && !['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'].includes(t.status)) {
+            t.status = 'Selesai';
+          } else if (t.scanOutTime && !t.scanInTime && (t.status === 'Disetujui' || t.status === 'Menunggu Persetujuan')) {
+            t.status = 'Sedang di Luar';
+          } else if (t.status === 'Disetujui' || t.status === 'Menunggu Persetujuan') {
+            t.scanOutTime = null;
+            t.scanOutGate = null;
+            t.scanInTime = null;
+            t.scanInGate = null;
+          }
+        });
+
         const currentHash = computeHash(window.ticketsList || []);
         const serverHash = computeHash(serverTickets);
 
@@ -70,6 +85,52 @@
               localStorage.setItem(window.STORAGE_KEY, JSON.stringify(serverTickets));
             }
           } catch (e) {}
+
+          // Auto-close QR Sheet jika tiket yang sedang ditampilkan di layar karyawan sudah di-scan di pos jaga
+          if (window.currentOpenedMobileQrTicketId) {
+            const activeQrT = serverTickets.find(x => x.id === window.currentOpenedMobileQrTicketId);
+            if (activeQrT && activeQrT.status !== 'Disetujui') {
+              const gateName = activeQrT.scanOutGate ? ` di ${activeQrT.scanOutGate}` : '';
+              window.currentOpenedMobileQrTicketId = null;
+              if (typeof window.stopQrScanOutWatcher === 'function') {
+                window.stopQrScanOutWatcher();
+              }
+              if (typeof window.mobileCloseSheet === 'function') {
+                window.mobileCloseSheet();
+              }
+              if (typeof window.showToast === 'function') {
+                window.showToast(`✅ Tiket #${activeQrT.id} berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+              }
+            }
+          }
+
+          // Auto-close Desktop QR Modal jika tiket yang sedang ditampilkan di layar laptop karyawan sudah di-scan di pos jaga
+          if (window.currentOpenedDesktopQrTicketId) {
+            const activeDesktopQrT = serverTickets.find(x => x.id === window.currentOpenedDesktopQrTicketId);
+            if (activeDesktopQrT && activeDesktopQrT.status !== 'Disetujui') {
+              const gateName = activeDesktopQrT.scanOutGate ? ` di ${activeDesktopQrT.scanOutGate}` : '';
+              const tid = window.currentOpenedDesktopQrTicketId;
+              window.currentOpenedDesktopQrTicketId = null;
+              if (typeof window.stopDesktopQrScanOutWatcher === 'function') {
+                window.stopDesktopQrScanOutWatcher();
+              }
+              const modalPass = document.getElementById('modalDigitalPassQR');
+              if (modalPass) modalPass.classList.remove('open');
+              const modalDetail = document.getElementById('modalTicketDetail');
+              if (modalDetail) {
+                if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+                else {
+                  modalDetail.classList.remove('open');
+                  modalDetail.style.display = 'none';
+                }
+              }
+              if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+              if (typeof window.refreshAllDashboardData === 'function') window.refreshAllDashboardData();
+              if (typeof window.showToast === 'function') {
+                window.showToast(`✅ Tiket #${tid} telah berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+              }
+            }
+          }
 
           // Refresh UI aktif sesuai modul yang tersedia
           refreshActiveViewSafely();
@@ -194,21 +255,68 @@
       const originalSave = window.saveTickets;
       window.saveTickets = function (data) {
         originalSave(data);
+
+        // Jika QR sheet mobile terbuka dan tiket yang di-save sudah bukan 'Disetujui'
+        if (window.currentOpenedMobileQrTicketId) {
+          const currentT = (data || []).find(x => x.id === window.currentOpenedMobileQrTicketId);
+          if (currentT && currentT.status !== 'Disetujui') {
+            const gateName = currentT.scanOutGate ? ` di ${currentT.scanOutGate}` : '';
+            window.currentOpenedMobileQrTicketId = null;
+            if (typeof window.stopQrScanOutWatcher === 'function') window.stopQrScanOutWatcher();
+            if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+            if (typeof window.showToast === 'function') {
+              window.showToast(`✅ Tiket telah berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+            }
+          }
+        }
+
+        // Jika Desktop QR modal terbuka dan tiket yang di-save sudah bukan 'Disetujui'
+        if (window.currentOpenedDesktopQrTicketId) {
+          const currentDesktopT = (data || []).find(x => x.id === window.currentOpenedDesktopQrTicketId);
+          if (currentDesktopT && currentDesktopT.status !== 'Disetujui') {
+            const gateName = currentDesktopT.scanOutGate ? ` di ${currentDesktopT.scanOutGate}` : '';
+            const tid = window.currentOpenedDesktopQrTicketId;
+            window.currentOpenedDesktopQrTicketId = null;
+            if (typeof window.stopDesktopQrScanOutWatcher === 'function') window.stopDesktopQrScanOutWatcher();
+            const modalPass = document.getElementById('modalDigitalPassQR');
+            if (modalPass) modalPass.classList.remove('open');
+            const modalDetail = document.getElementById('modalTicketDetail');
+            if (modalDetail) {
+              if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+              else {
+                modalDetail.classList.remove('open');
+                modalDetail.style.display = 'none';
+              }
+            }
+            if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
+            if (typeof window.refreshAllDashboardData === 'function') window.refreshAllDashboardData();
+            if (typeof window.showToast === 'function') {
+              window.showToast(`✅ Tiket #${tid} telah berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+            }
+          }
+        }
+
         pushTicketChangesToMySQL(data);
       };
       console.log('[SyncEngine] Hook window.saveTickets berhasil diaktifkan.');
     }
   }
 
-  // 5. Polling Real-time Sinkronisasi (Setiap 4 Detik)
+  // 5. Polling Real-time Sinkronisasi (Dinamis: 1.2 detik saat QR terbuka, 4 detik normal)
   function startBackgroundPolling() {
-    if (pollIntervalTimer) clearInterval(pollIntervalTimer);
+    if (pollIntervalTimer) clearTimeout(pollIntervalTimer);
 
-    pollIntervalTimer = setInterval(() => {
-      if (!document.hidden) {
-        fetchTicketsFromMySQL(false);
-      }
-    }, 4000);
+    const scheduleNext = () => {
+      const delay = (window.currentOpenedMobileQrTicketId || window.currentOpenedDesktopQrTicketId) ? 1200 : 4000;
+      pollIntervalTimer = setTimeout(async () => {
+        if (!document.hidden) {
+          await fetchTicketsFromMySQL(false);
+        }
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
   }
 
   // 6. Jalankan Inisialisasi Saat DOM Siap

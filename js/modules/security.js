@@ -1480,9 +1480,27 @@ function executeScanOut(ticketId) {
   const inputScanTicketCode = document.getElementById('inputScanTicketCode');
   if (inputScanTicketCode) inputScanTicketCode.value = '';
 
-  // Tutup modal rincian tiket agar kartu langsung hilang dan tidak bisa langsung di-Tap In
+  // Tutup modal rincian tiket & lembar QR mobile agar kartu langsung hilang
+  if (typeof window.currentOpenedMobileQrTicketId !== 'undefined' && window.currentOpenedMobileQrTicketId === ticket.id) {
+    window.currentOpenedMobileQrTicketId = null;
+    if (typeof window.stopQrScanOutWatcher === 'function') window.stopQrScanOutWatcher();
+    if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+  }
+  // Tutup modal rincian tiket & lembar QR desktop
+  if (typeof window.currentOpenedDesktopQrTicketId !== 'undefined' && window.currentOpenedDesktopQrTicketId === ticket.id) {
+    window.currentOpenedDesktopQrTicketId = null;
+    if (typeof window.stopDesktopQrScanOutWatcher === 'function') window.stopDesktopQrScanOutWatcher();
+  }
+  const modalDigitalPassQR = document.getElementById('modalDigitalPassQR');
+  if (modalDigitalPassQR) modalDigitalPassQR.classList.remove('open');
   const modalTicketDetail = document.getElementById('modalTicketDetail');
-  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+  if (modalTicketDetail) {
+    if (typeof window.closeTicketDetailModal === 'function') window.closeTicketDetailModal();
+    else {
+      modalTicketDetail.classList.remove('open');
+      modalTicketDetail.style.display = 'none';
+    }
+  }
 
   renderSecurityView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();

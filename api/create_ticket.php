@@ -57,6 +57,30 @@ $arrivalReportedTime = isset($input['arrivalReportedTime']) ? $input['arrivalRep
 $arrivalReportedAt = isset($input['arrivalReportedAt']) ? $input['arrivalReportedAt'] : null;
 $timeFrozen = !empty($input['timeFrozen']) ? 1 : 0;
 
+$scanOutGate = isset($input['scanOutGate']) ? $input['scanOutGate'] : null;
+$securityOfficerOut = isset($input['securityOfficerOut']) ? $input['securityOfficerOut'] : null;
+$scanOutTime = isset($input['scanOutTime']) ? $input['scanOutTime'] : null;
+$scanInGate = isset($input['scanInGate']) ? $input['scanInGate'] : null;
+$securityOfficerIn = isset($input['securityOfficerIn']) ? $input['securityOfficerIn'] : null;
+$scanInTime = isset($input['scanInTime']) ? $input['scanInTime'] : null;
+
+// Normalisasi & Integritas Status:
+// Jika status masih Menunggu Persetujuan atau Disetujui, tiket belum pernah Scan Out (tidak boleh ada catatan gerbang)
+if (in_array($status, ['Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi Darurat'])) {
+    $scanOutGate = null;
+    $securityOfficerOut = null;
+    $scanOutTime = null;
+    $scanInGate = null;
+    $securityOfficerIn = null;
+    $scanInTime = null;
+    $tapInTime = null;
+} elseif ($status === 'Sedang di Luar' || $status === 'Terlambat') {
+    $scanInGate = null;
+    $securityOfficerIn = null;
+    $scanInTime = null;
+    $tapInTime = null;
+}
+
 // Transaksi Database (Atomic)
 try {
     $pdo->beginTransaction();
@@ -94,13 +118,13 @@ try {
             `approver_name` = COALESCE(VALUES(`approver_name`), `approver_name`),
             `approver_title` = COALESCE(VALUES(`approver_title`), `approver_title`),
             `approver_note` = COALESCE(VALUES(`approver_note`), `approver_note`),
-            `scan_out_gate` = COALESCE(VALUES(`scan_out_gate`), `scan_out_gate`),
-            `security_officer_out` = COALESCE(VALUES(`security_officer_out`), `security_officer_out`),
-            `scan_out_time` = COALESCE(VALUES(`scan_out_time`), `scan_out_time`),
-            `scan_in_gate` = COALESCE(VALUES(`scan_in_gate`), `scan_in_gate`),
-            `security_officer_in` = COALESCE(VALUES(`security_officer_in`), `security_officer_in`),
-            `scan_in_time` = COALESCE(VALUES(`scan_in_time`), `scan_in_time`),
-            `tap_in_time` = COALESCE(VALUES(`tap_in_time`), `tap_in_time`),
+            `scan_out_gate` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi Darurat') THEN NULL ELSE COALESCE(VALUES(`scan_out_gate`), `scan_out_gate`) END,
+            `security_officer_out` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi Darurat') THEN NULL ELSE COALESCE(VALUES(`security_officer_out`), `security_officer_out`) END,
+            `scan_out_time` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi Darurat') THEN NULL ELSE COALESCE(VALUES(`scan_out_time`), `scan_out_time`) END,
+            `scan_in_gate` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Sedang di Luar', 'Terlambat') THEN NULL ELSE COALESCE(VALUES(`scan_in_gate`), `scan_in_gate`) END,
+            `security_officer_in` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Sedang di Luar', 'Terlambat') THEN NULL ELSE COALESCE(VALUES(`security_officer_in`), `security_officer_in`) END,
+            `scan_in_time` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Sedang di Luar', 'Terlambat') THEN NULL ELSE COALESCE(VALUES(`scan_in_time`), `scan_in_time`) END,
+            `tap_in_time` = CASE WHEN VALUES(`status`) IN ('Menunggu Persetujuan', 'Disetujui', 'Sedang di Luar', 'Terlambat') THEN NULL ELSE COALESCE(VALUES(`tap_in_time`), `tap_in_time`) END,
             `tap_in_member` = COALESCE(VALUES(`tap_in_member`), `tap_in_member`),
             `tap_in_nip` = COALESCE(VALUES(`tap_in_nip`), `tap_in_nip`),
             `arrival_reported_time` = COALESCE(VALUES(`arrival_reported_time`), `arrival_reported_time`),
@@ -135,12 +159,12 @@ try {
         ':emergency_authorizer_phone' => isset($input['emergencyAuthorizerPhone']) ? $input['emergencyAuthorizerPhone'] : null,
         ':emergency_authorization_note' => isset($input['emergencyAuthorizationNote']) ? $input['emergencyAuthorizationNote'] : null,
         ':emergency_verified_at' => $isEmergency ? date('Y-m-d H:i:s') : null,
-        ':scan_out_gate' => isset($input['scanOutGate']) ? $input['scanOutGate'] : null,
-        ':security_officer_out' => isset($input['securityOfficerOut']) ? $input['securityOfficerOut'] : null,
-        ':scan_out_time' => isset($input['scanOutTime']) ? $input['scanOutTime'] : null,
-        ':scan_in_gate' => isset($input['scanInGate']) ? $input['scanInGate'] : null,
-        ':security_officer_in' => isset($input['securityOfficerIn']) ? $input['securityOfficerIn'] : null,
-        ':scan_in_time' => isset($input['scanInTime']) ? $input['scanInTime'] : null,
+        ':scan_out_gate' => $scanOutGate,
+        ':security_officer_out' => $securityOfficerOut,
+        ':scan_out_time' => $scanOutTime,
+        ':scan_in_gate' => $scanInGate,
+        ':security_officer_in' => $securityOfficerIn,
+        ':scan_in_time' => $scanInTime,
         ':tap_in_time' => $tapInTime,
         ':tap_in_member' => $tapInMember,
         ':tap_in_nip' => $tapInNip,

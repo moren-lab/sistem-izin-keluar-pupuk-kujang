@@ -2146,7 +2146,8 @@
     }
 
     // Guard: Tiket yang sudah Scan Out atau Selesai tidak boleh dibatalkan mandiri
-    if (t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || t.scanOutTime) {
+    const isOutsideOrDone = t.status === 'Sedang di Luar' || t.status === 'Terlambat' || t.status === 'Selesai' || (Boolean(t.scanOutTime) && t.status !== 'Disetujui');
+    if (isOutsideOrDone) {
       if (typeof window.showToast === 'function') {
         window.showToast('Izin tidak dapat dibatalkan karena Anda telah tercatat keluar pabrik (Scan Out). Anda wajib melakukan Tap In di Pos Jaga.', 'danger');
       }
@@ -3950,8 +3951,53 @@
   // -------------------------------------------------------------------
   // 9. QR MODAL, DETAIL TIKET, DAN PERPANJANGAN WAKTU
   // -------------------------------------------------------------------
-  window.mobileOpenQrModal = function (ticketId) {
+  let qrScanWatcherTimer = null;
+  function startQrScanOutWatcher(ticketId) {
+    if (qrScanWatcherTimer) clearInterval(qrScanWatcherTimer);
+    window.currentOpenedMobileQrTicketId = ticketId;
+
+    qrScanWatcherTimer = setInterval(() => {
+      const sheet = document.getElementById('mobileActionSheet');
+      if (!sheet || !sheet.classList.contains('open') || window.currentOpenedMobileQrTicketId !== ticketId) {
+        clearInterval(qrScanWatcherTimer);
+        qrScanWatcherTimer = null;
+        return;
+      }
+
+      const tickets = (typeof window.loadTickets === 'function' ? window.loadTickets() : window.ticketsList) || [];
+      const currentT = tickets.find(x => x.id === ticketId);
+
+      // Jika tiket telah dipindai oleh Pos Jaga (status berubah dari 'Disetujui' ke 'Sedang di Luar' / 'Selesai')
+      if (currentT && currentT.status !== 'Disetujui') {
+        clearInterval(qrScanWatcherTimer);
+        qrScanWatcherTimer = null;
+        window.currentOpenedMobileQrTicketId = null;
+
+        // Tutup modal QR seketika
+        if (typeof window.mobileCloseSheet === 'function') {
+          window.mobileCloseSheet();
+        }
+
+        const gateName = currentT.scanOutGate ? ` di ${currentT.scanOutGate}` : '';
+        if (typeof window.showToast === 'function') {
+          window.showToast(`✅ Tiket telah berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+        }
+
+        // Render ulang tampilan aktif Karyawan agar langsung masuk ke status Sedang di Luar
+        if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+        if (typeof window.renderMobileKaryawanTickets === 'function') window.renderMobileKaryawanTickets();
+      }
+    }, 600);
+  }
+  window.startQrScanOutWatcher = startQrScanOutWatcher;
+  window.stopQrScanOutWatcher = function () {
+    if (qrScanWatcherTimer) {
+      clearInterval(qrScanWatcherTimer);
+      qrScanWatcherTimer = null;
+    }
+    window.currentOpenedMobileQrTicketId = null;
   };
+
   window.mobileOpenDigitalPassSheet = function (ticketId) {
     return window.mobileOpenQrModal(ticketId);
   };
@@ -3963,6 +4009,9 @@
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId) || getActiveTicket();
     if (!t) return;
+
+    // Mulai watcher otomatis agar saat Pos Jaga scan QR, tampilan langsung menutup sendiri
+    startQrScanOutWatcher(t.id);
 
     const isOutside = (t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
@@ -4852,6 +4901,10 @@
   };
 
   window.mobileCloseSheet = function () {
+    if (typeof window.stopQrScanOutWatcher === 'function') {
+      window.stopQrScanOutWatcher();
+    }
+    window.currentOpenedMobileQrTicketId = null;
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
     if (sheet) sheet.classList.remove('open');

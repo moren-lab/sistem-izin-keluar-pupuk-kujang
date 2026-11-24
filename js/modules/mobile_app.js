@@ -650,6 +650,11 @@
   };
 
   window.mobileCloseSheet = function () {
+    if (typeof window.stopQrScanOutWatcher === 'function') {
+      window.stopQrScanOutWatcher();
+    }
+    window.currentOpenedMobileQrTicketId = null;
+
     const wasFromNotif = Boolean(window._openedFromNotification);
     const notifTab = window._openedFromNotificationTab || 'all';
     const notifSource = window._openedFromNotificationSource;

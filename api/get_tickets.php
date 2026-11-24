@@ -139,6 +139,30 @@ try {
         // Format date string for createdAt display
         $createdDt = !empty($row['created_at']) ? date('d M Y, H.i \W\I\B', strtotime($row['created_at'])) : '';
 
+        // Normalisasi & Integritas Status Siklus Hidup Tiket:
+        $curStatus = $row['status'];
+        $sOut = $row['scan_out_time'];
+        $sIn = $row['scan_in_time'];
+
+        // 1. Jika sudah ada catatan Tap In / Masuk Kembali, status final adalah 'Selesai' (kecuali memang dibatalkan/ditolak)
+        if (!empty($sIn) && !in_array($curStatus, ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'])) {
+            $curStatus = 'Selesai';
+        }
+        // 2. Jika sudah ada Scan Out tapi belum Tap In, status AKTIF adalah 'Sedang di Luar' (atau 'Terlambat')
+        elseif (!empty($sOut) && empty($sIn) && in_array($curStatus, ['Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi Darurat'])) {
+            $curStatus = 'Sedang di Luar';
+        }
+        // 3. Jika status masih 'Disetujui' atau 'Menunggu Persetujuan', tidak boleh ada scanOutTime atau scanInTime
+        elseif (in_array($curStatus, ['Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi Darurat'])) {
+            $sOut = null;
+            $row['scan_out_gate'] = null;
+            $row['security_officer_out'] = null;
+            $sIn = null;
+            $row['scan_in_gate'] = null;
+            $row['security_officer_in'] = null;
+            $row['tap_in_time'] = null;
+        }
+
         $ticket = [
             'id' => $row['id'],
             'applicantNip' => $row['applicant_nip'],
@@ -153,7 +177,7 @@ try {
             'vehiclePlate' => $row['vehicle_plate'],
             'plannedExit' => $row['planned_exit'],
             'estimatedReturn' => $row['estimated_return'],
-            'status' => $row['status'],
+            'status' => $curStatus,
             'isEmergency' => (bool)$row['is_emergency'],
             'isGroupDinas' => (bool)$row['is_group_dinas'],
             'isLate' => (bool)$row['is_late'],
@@ -172,10 +196,10 @@ try {
             'emergencyVerifiedAt' => $row['emergency_verified_at'],
             'scanOutGate' => $row['scan_out_gate'],
             'securityOfficerOut' => $row['security_officer_out'],
-            'scanOutTime' => $row['scan_out_time'],
+            'scanOutTime' => $sOut,
             'scanInGate' => $row['scan_in_gate'],
             'securityOfficerIn' => $row['security_officer_in'],
-            'scanInTime' => $row['scan_in_time'],
+            'scanInTime' => $sIn,
             'tapInTime' => isset($row['tap_in_time']) ? $row['tap_in_time'] : null,
             'tapInMember' => isset($row['tap_in_member']) ? $row['tap_in_member'] : null,
             'tapInNip' => isset($row['tap_in_nip']) ? $row['tap_in_nip'] : null,

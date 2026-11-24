@@ -1462,6 +1462,80 @@ function switchDetailTab(tab) {
   }
 }
 
+// ==========================================
+// DESKTOP QR AUTO-CLOSE WATCHER (LAPTOP / DESKTOP VIEW)
+// ==========================================
+window.currentOpenedDesktopQrTicketId = null;
+let desktopQrScanWatcherTimer = null;
+
+function startDesktopQrScanOutWatcher(ticketId) {
+  stopDesktopQrScanOutWatcher();
+  window.currentOpenedDesktopQrTicketId = ticketId;
+
+  desktopQrScanWatcherTimer = setInterval(() => {
+    const modalPass = document.getElementById('modalDigitalPassQR');
+    const modalDetail = document.getElementById('modalTicketDetail');
+    const isPassOpen = modalPass && modalPass.classList.contains('open');
+    const isDetailOpen = modalDetail && (modalDetail.classList.contains('open') || modalDetail.style.display === 'flex');
+
+    // Jika kedua modal sudah tidak terbuka sama sekali di desktop, hentikan watcher
+    if (!isPassOpen && !isDetailOpen) {
+      stopDesktopQrScanOutWatcher();
+      return;
+    }
+
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+
+    // Jika status tiket sudah berubah menjadi 'Sedang di Luar', 'Selesai', atau 'Terlambat'
+    if (t.status !== 'Disetujui') {
+      stopDesktopQrScanOutWatcher();
+      if (modalPass) modalPass.classList.remove('open');
+      if (modalDetail) {
+        if (typeof window.closeTicketDetailModal === 'function') {
+          window.closeTicketDetailModal();
+        } else {
+          modalDetail.classList.remove('open');
+          modalDetail.style.display = 'none';
+        }
+      }
+
+      const gateName = t.scanOutGate ? ` di ${t.scanOutGate}` : '';
+      if (typeof window.showToast === 'function') {
+        window.showToast(`✅ Tiket #${t.id} telah berhasil dipindai oleh Pos Jaga${gateName}. Selamat jalan!`, 'success');
+      }
+      if (typeof window.renderKaryawanView === 'function') {
+        window.renderKaryawanView();
+      }
+      if (typeof window.refreshAllDashboardData === 'function') {
+        window.refreshAllDashboardData();
+      }
+    }
+  }, 600);
+}
+window.startDesktopQrScanOutWatcher = startDesktopQrScanOutWatcher;
+
+function stopDesktopQrScanOutWatcher() {
+  if (desktopQrScanWatcherTimer) {
+    clearInterval(desktopQrScanWatcherTimer);
+    desktopQrScanWatcherTimer = null;
+  }
+  window.currentOpenedDesktopQrTicketId = null;
+}
+window.stopDesktopQrScanOutWatcher = stopDesktopQrScanOutWatcher;
+
+function closeDigitalPassModal() {
+  const modalDigitalPassQR = document.getElementById('modalDigitalPassQR');
+  if (modalDigitalPassQR) {
+    modalDigitalPassQR.classList.remove('open');
+  }
+  if (typeof window.stopDesktopQrScanOutWatcher === 'function') {
+    window.stopDesktopQrScanOutWatcher();
+  }
+}
+window.closeDigitalPassModal = closeDigitalPassModal;
+
 // OPEN DIGITAL PASS QR MODAL (FIGMA SCREEN 4)
 function openDigitalPassModal(ticketId) {
   if (typeof window.checkOverdueAndExpiredTickets === 'function') {
@@ -1663,6 +1737,9 @@ function openDigitalPassModal(ticketId) {
   }, { once: true });
 
   modal.classList.add('open');
+  if (ticket.status === 'Disetujui') {
+    startDesktopQrScanOutWatcher(ticket.id);
+  }
 }
 window.openDigitalPassModal = openDigitalPassModal;
 
@@ -2853,10 +2930,16 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       window.checkAndApplyTextExpand('infoDestination', 'btnToggleDestExpand');
       window.checkAndApplyTextExpand('infoReason', 'btnToggleReasonExpand');
     }
+    if (ticket.status === 'Disetujui') {
+      startDesktopQrScanOutWatcher(ticket.id);
+    }
   }
 }
 
 function closeTicketDetailModal() {
+  if (typeof window.stopDesktopQrScanOutWatcher === 'function') {
+    window.stopDesktopQrScanOutWatcher();
+  }
   if (window._detailRealtimeLateTimer) {
     clearInterval(window._detailRealtimeLateTimer);
     window._detailRealtimeLateTimer = null;
@@ -2926,16 +3009,9 @@ function openCancelModal(ticketId, callback) {
   const isFinished = (ticket.status === 'Selesai' || ticket.status === 'Dibatalkan' || ticket.status === 'Ditolak' || ticket.status === 'Kedaluwarsa');
   const canCancel = !isOutside && !isFinished;
 
-  if (!canCancel) {
+  if (!canCancel || (Boolean(ticket.scanOutTime) && ticket.status !== 'Disetujui')) {
     if (typeof window.showToast === 'function') {
       window.showToast('Tiket ini tidak dapat dibatalkan karena karyawan telah meninggalkan kawasan pabrik (Scan Out). Silakan lakukan Tap In di Pos Gerbang untuk menyelesaikan izin.', 'danger');
-    }
-    return;
-  }
-
-  if (ticket && (ticket.scanOutTime || ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat' || ticket.status === 'Selesai')) {
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Akses Ditolak: Tiket #${ticketId} tidak dapat dibatalkan karena sudah aktif di luar area atau telah selesai.`, 'danger');
     }
     return;
   }
@@ -4053,8 +4129,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnCloseDigitalPassModal = document.getElementById('btnCloseDigitalPassModal');
   const modalDigitalPassQR = document.getElementById('modalDigitalPassQR');
-  if (btnCloseDigitalPassModal && modalDigitalPassQR) {
-    btnCloseDigitalPassModal.addEventListener('click', () => modalDigitalPassQR.classList.remove('open'));
+  if (btnCloseDigitalPassModal) {
+    btnCloseDigitalPassModal.addEventListener('click', closeDigitalPassModal);
+  }
+  if (modalDigitalPassQR) {
+    modalDigitalPassQR.addEventListener('click', (e) => {
+      if (e.target === modalDigitalPassQR) {
+        closeDigitalPassModal();
+      }
+    });
   }
 
   const btnCloseDetailModal = document.getElementById('btnCloseDetailModal');
