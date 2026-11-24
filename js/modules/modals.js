@@ -2123,8 +2123,11 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       if (badgeCatatanAtasan) {
         badgeCatatanAtasan.textContent = 'Alasan Penolakan';
         badgeCatatanAtasan.style.color = '#dc2626';
-        badgeCatatanAtasan.style.background = '#fee2e2';
-        badgeCatatanAtasan.style.borderColor = '#fecdd3';
+        badgeCatatanAtasan.style.background = 'transparent';
+        badgeCatatanAtasan.style.border = 'none';
+        badgeCatatanAtasan.style.padding = '0';
+        badgeCatatanAtasan.style.fontWeight = '700';
+        badgeCatatanAtasan.style.fontSize = '0.85rem';
       }
       if (boxCatatanAtasan) {
         boxCatatanAtasan.style.background = 'var(--bg-subtle, #f8fafc)';
@@ -2138,8 +2141,11 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       if (badgeCatatanAtasan) {
         badgeCatatanAtasan.textContent = 'Konfirmasi Kehadiran';
         badgeCatatanAtasan.style.color = '#b45309';
-        badgeCatatanAtasan.style.background = '#fef3c7';
-        badgeCatatanAtasan.style.borderColor = '#fde68a';
+        badgeCatatanAtasan.style.background = 'transparent';
+        badgeCatatanAtasan.style.border = 'none';
+        badgeCatatanAtasan.style.padding = '0';
+        badgeCatatanAtasan.style.fontWeight = '700';
+        badgeCatatanAtasan.style.fontSize = '0.85rem';
       }
       if (boxCatatanAtasan) {
         boxCatatanAtasan.style.background = 'var(--bg-subtle, #f8fafc)';
@@ -2152,9 +2158,12 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       txtCatatanAtasan.textContent = text;
       if (badgeCatatanAtasan) {
         badgeCatatanAtasan.textContent = 'Konfirmasi Kehadiran';
-        badgeCatatanAtasan.style.color = '#15803d';
-        badgeCatatanAtasan.style.background = '#dcfce7';
-        badgeCatatanAtasan.style.borderColor = '#bbf7d0';
+        badgeCatatanAtasan.style.color = '#059669';
+        badgeCatatanAtasan.style.background = 'transparent';
+        badgeCatatanAtasan.style.border = 'none';
+        badgeCatatanAtasan.style.padding = '0';
+        badgeCatatanAtasan.style.fontWeight = '700';
+        badgeCatatanAtasan.style.fontSize = '0.85rem';
       }
       if (boxCatatanAtasan) {
         boxCatatanAtasan.style.background = 'var(--bg-subtle, #f8fafc)';
@@ -2167,9 +2176,12 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       txtCatatanAtasan.textContent = text;
       if (badgeCatatanAtasan) {
         badgeCatatanAtasan.textContent = 'Catatan Persetujuan';
-        badgeCatatanAtasan.style.color = '#15803d';
-        badgeCatatanAtasan.style.background = '#dcfce7';
-        badgeCatatanAtasan.style.borderColor = '#bbf7d0';
+        badgeCatatanAtasan.style.color = '#059669';
+        badgeCatatanAtasan.style.background = 'transparent';
+        badgeCatatanAtasan.style.border = 'none';
+        badgeCatatanAtasan.style.padding = '0';
+        badgeCatatanAtasan.style.fontWeight = '700';
+        badgeCatatanAtasan.style.fontSize = '0.85rem';
       }
       if (boxCatatanAtasan) {
         boxCatatanAtasan.style.background = 'var(--bg-subtle, #f8fafc)';
@@ -2183,8 +2195,11 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       if (badgeCatatanAtasan) {
         badgeCatatanAtasan.textContent = 'Catatan Pengalihan';
         badgeCatatanAtasan.style.color = '#0369a1';
-        badgeCatatanAtasan.style.background = '#e0f2fe';
-        badgeCatatanAtasan.style.borderColor = '#bae6fd';
+        badgeCatatanAtasan.style.background = 'transparent';
+        badgeCatatanAtasan.style.border = 'none';
+        badgeCatatanAtasan.style.padding = '0';
+        badgeCatatanAtasan.style.fontWeight = '700';
+        badgeCatatanAtasan.style.fontSize = '0.85rem';
       }
       if (boxCatatanAtasan) {
         boxCatatanAtasan.style.background = 'var(--bg-subtle, #f8fafc)';
@@ -4954,6 +4969,9 @@ function openExtendDurationModal(ticketId) {
   window.currentExtendTicketId = ticket.id;
   const extendTicketId = document.getElementById('extendTicketId');
   const extendTicketDest = document.getElementById('extendTicketDest');
+  const extendTicketDestination = document.getElementById('extendTicketDestination');
+  const extendTicketReason = document.getElementById('extendTicketReason');
+  const extendCurrentScheduleDisplay = document.getElementById('extendCurrentScheduleDisplay');
   const extendCurrentReturnDisplay = document.getElementById('extendCurrentReturnDisplay');
   const inputExtendNewReturn = document.getElementById('inputExtendNewReturn');
   const inputExtendReason = document.getElementById('inputExtendReason');
@@ -4961,6 +4979,19 @@ function openExtendDurationModal(ticketId) {
 
   if (extendTicketId) extendTicketId.textContent = ticket.id;
   if (extendTicketDest) extendTicketDest.textContent = `${ticket.destination || '-'} — "${ticket.reason || '-'}"`;
+  if (extendTicketDestination) {
+    extendTicketDestination.textContent = (ticket.destination || '-').replace(/\r?\n+/g, ' ');
+    extendTicketDestination.title = ticket.destination || '';
+  }
+  if (extendTicketReason) {
+    extendTicketReason.textContent = (ticket.reason || '-').replace(/\r?\n+/g, ' ');
+    extendTicketReason.title = ticket.reason || '';
+  }
+  if (extendCurrentScheduleDisplay) {
+    extendCurrentScheduleDisplay.innerHTML = (typeof window.formatTicketScheduleWithDay === 'function')
+      ? window.formatTicketScheduleWithDay(ticket)
+      : (ticket.estimatedReturn || '-');
+  }
   if (extendCurrentReturnDisplay) {
     extendCurrentReturnDisplay.textContent = ticket.estimatedReturn
       ? (window.formatDisplayDate ? window.formatDisplayDate(ticket.estimatedReturn) : ticket.estimatedReturn)

@@ -1470,7 +1470,7 @@ function renderKaryawanDashboard() {
                 </button>
               `}
             ` : `
-              <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
+              <button class="btn-figma-secondary btn-ajukan-perpanjangan" style="font-weight: 700; background: #d97706; color: #ffffff; border-color: #d97706;" onclick="openExtendDurationModal('${activeTicket.id}')">
                 <span>Ajukan Perpanjangan</span>
               </button>
               ${isGroupDinasActive ? `
@@ -1913,7 +1913,7 @@ function renderPengajuanSayaView() {
               </button>
             `}
           ` : `
-            <button class="btn-figma-secondary" style="font-weight: 700;" onclick="openExtendDurationModal('${activeTicket.id}')">
+            <button class="btn-figma-secondary btn-ajukan-perpanjangan" style="font-weight: 700; background: #d97706; color: #ffffff; border-color: #d97706;" onclick="openExtendDurationModal('${activeTicket.id}')">
               <span>Ajukan Perpanjangan</span>
             </button>
             ${isGroupDinasActive ? `
@@ -2955,7 +2955,7 @@ function renderKaryawanMobileDashboard() {
               <span>Perpanjangan Telah Digunakan (Maks. 1x)</span>
             </button>
           ` : `
-            <button type="button" class="btn-mobile-secondary" onclick="openExtendDurationModal('${activeTicket.id}')">
+            <button type="button" class="btn-mobile-secondary btn-ajukan-perpanjangan" style="font-weight: 700; background: #d97706; color: #ffffff; border-color: #d97706;" onclick="openExtendDurationModal('${activeTicket.id}')">
               <span>Ajukan Perpanjangan</span>
             </button>
           `)) : ''}

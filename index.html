@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="css/style.css?v=20261123_0835">
+  <link rel="stylesheet" href="css/style.css?v=20261124_0845">
   <link rel="stylesheet" href="css/auth.css?v=20261116_1400">
   <link rel="stylesheet" href="css/mobile.css?v=20261117_0830">
   <link rel="icon" type="pupuk-kujang-cikampek-seeklogo" href="pupuk-kujang-cikampek-seeklogo.png">
@@ -3776,7 +3776,7 @@
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span>Catatan dari Atasan</span>
               </div>
-              <span id="detailCatatanAtasanBadge" style="font-size: 0.725rem; font-weight: 700; color: #15803d; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 9999px;">Catatan Persetujuan</span>
+              <span id="detailCatatanAtasanBadge" style="font-size: 0.825rem; font-weight: 700; color: #059669; background: transparent; border: none; padding: 0;">Catatan Persetujuan</span>
             </div>
             <div id="detailCatatanAtasanBox" style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
               <div id="detailCatatanAtasanText" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 600; line-height: 1.5; white-space: pre-wrap; word-break: break-word;">-</div>
@@ -4641,24 +4641,26 @@
             peninjauan.</span>
         </div>
 
-        <!-- Ringkasan Tiket Aktif -->
-        <div class="extend-summary-box"
-          style="border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.825rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">No. Tiket</span>
-            <strong id="extendTicketId"
-              style="font-family: var(--font-mono); color: var(--text-primary); font-size: 0.85rem;">-</strong>
+        <!-- Ringkasan Tiket Aktif (Tampilan & Tata Letak Sesuai Gambar 3) -->
+        <div class="figma-card-detail-box"
+          style="padding: 0.65rem 0.85rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; margin-bottom: 0.25rem;">
+          <div class="realization-grid">
+            <span class="realization-label">Tujuan keluar</span>
+            <span class="realization-separator">:</span>
+            <span class="realization-value" id="extendTicketDestination" title="-">-</span>
+
+            <span class="realization-label">Keperluan</span>
+            <span class="realization-separator">:</span>
+            <span class="realization-value" id="extendTicketReason" title="-">-</span>
+
+            <span class="realization-label">Rencana Waktu</span>
+            <span class="realization-separator">:</span>
+            <div class="realization-value realization-schedule" id="extendCurrentScheduleDisplay">-</div>
           </div>
-          <div style="margin-bottom: 0.4rem;">
-            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; display: block;">Tujuan & Keperluan</span>
-            <span id="extendTicketDest" style="font-weight: 600; color: var(--text-primary); line-height: 1.45; display: block; margin-top: 2px;">-</span>
-          </div>
-          <div>
-            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; display: block;">Estimasi Kembali
-              Semula</span>
-            <span id="extendCurrentReturnDisplay"
-              style="font-family: var(--font-mono); font-weight: 700; color: #000000;">-</span>
-          </div>
+          <!-- Hidden fallback elements for legacy compatibility -->
+          <span id="extendTicketId" style="display: none;"></span>
+          <span id="extendTicketDest" style="display: none;"></span>
+          <span id="extendCurrentReturnDisplay" style="display: none;"></span>
         </div>
 
         <!-- Form Input -->
@@ -5183,13 +5185,13 @@
   <script src="js/modules/ui.js?v=20261119_1455"></script>
   <script src="js/modules/scheduler.js?v=20261119_0430"></script>
   <script src="js/modules/navigation.js?v=20261120_0555"></script>
-  <script src="js/modules/karyawan.js?v=20261123_1030"></script>
+  <script src="js/modules/karyawan.js?v=20261124_0845"></script>
   <script src="js/modules/approver.js?v=20261123_1000"></script>
   <script src="js/modules/security.js?v=20261124_0815"></script>
   <script src="js/modules/admin.js?v=20261123_1030"></script>
   <script src="js/modules/charts.js?v=20261116_1400"></script>
   <script src="js/modules/emergency.js?v=20261116_1400"></script>
-  <script src="js/modules/modals.js?v=20261124_0835"></script>
+  <script src="js/modules/modals.js?v=20261124_0845"></script>
   <script src="js/modules/mobile_karyawan.js?v=20261124_0835"></script>
   <script src="js/modules/mobile_atasan.js?v=20261123_1000"></script>
   <script src="js/modules/mobile_security.js?v=20261124_0815"></script>

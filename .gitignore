@@ -12,6 +12,7 @@ Desktop.ini
 scratch/
 *.log
 .playwright-mcp/
+.env
 
 node_modules/
 package-lock.json

@@ -14774,3 +14774,36 @@ body.theme-dark #btnDetailRejectTicket:hover {
   color: #ffffff !important;
   border-color: rgba(244, 63, 94, 0.6) !important;
 }
+
+/* Button Ajukan Perpanjangan Warna Kuning/Amber (Sesuai Gambar 5) */
+.btn-ajukan-perpanjangan,
+#btnDetailExtend {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  border: 1px solid #d97706 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-ajukan-perpanjangan:hover,
+#btnDetailExtend:hover {
+  background: #b45309 !important;
+  border-color: #b45309 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.35) !important;
+}
+
+body.theme-dark .btn-ajukan-perpanjangan,
+body.theme-dark #btnDetailExtend {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  border-color: #b45309 !important;
+}
+
+body.theme-dark .btn-ajukan-perpanjangan:hover,
+body.theme-dark #btnDetailExtend:hover {
+  background: #f59e0b !important;
+  color: #0f172a !important;
+  border-color: #f59e0b !important;
+}
