@@ -2434,12 +2434,12 @@ function renderEmpCards(list, containerElement) {
 
             <!-- Applicant Box with Photo & Category -->
             <div style="background:var(--bg-subtle, #f8fafc); padding:0.55rem 0.75rem; border-radius:6px; display:flex; align-items:flex-start; justify-content:space-between; gap: 0.75rem; margin: 0.35rem 0;">
-              <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 36)}
-                <div style="display: flex; flex-direction: column; gap: 2px;">
-                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                  <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
-                  <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25;">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
+              <div style="display: flex; align-items: flex-start; gap: 0.65rem; min-width: 0; flex: 1; overflow: hidden;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 36, 'flex-shrink: 0 !important;')}
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; overflow: hidden;">
+                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.applicantName || 'Budi Pratama, S.T.'}">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="NIP: ${t.applicantNip || 'PK-2024-8841'}">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.department || 'Departemen Rekayasa & Pemeliharaan'}">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
                 </div>
               </div>
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">

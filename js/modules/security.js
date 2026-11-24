@@ -535,12 +535,12 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
               <!-- Employee badge -->
               <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:flex-start; justify-content:space-between; gap: 0.75rem; margin-bottom: 0.6rem;">
-                <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                  ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 36)}
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama'}</div>
-                    <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
-                    <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25;">${t.department || 'Departemen Terkait'}</div>
+                <div style="display: flex; align-items: flex-start; gap: 0.65rem; min-width: 0; flex: 1; overflow: hidden;">
+                  ${window.renderUserPhoto(t.applicantName || 'Budi Pratama', 36, 'flex-shrink: 0 !important;')}
+                  <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; overflow: hidden;">
+                    <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.applicantName || 'Budi Pratama'}">${t.applicantName || 'Budi Pratama'}</div>
+                    <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="NIP: ${t.applicantNip || 'PK-2024-8841'}">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.department || 'Departemen Terkait'}">${t.department || 'Departemen Terkait'}</div>
                   </div>
                 </div>
                 <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
@@ -615,12 +615,12 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
             <!-- Employee badge in gate view -->
             <div style="background:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:6px; display:flex; align-items:flex-start; justify-content:space-between; gap: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
-                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 36)}
-                <div style="display: flex; flex-direction: column; gap: 2px;">
-                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3;">${t.applicantName || 'Budi Pratama, S.T.'}</div>
-                  <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25;">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
-                  <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25;">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
+              <div style="display: flex; align-items: flex-start; gap: 0.65rem; min-width: 0; flex: 1; overflow: hidden;">
+                ${window.renderUserPhoto(t.applicantName || 'Budi Pratama, S.T.', 36, 'flex-shrink: 0 !important;')}
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; overflow: hidden;">
+                  <div style="font-weight:700; font-size:0.85rem; color:var(--text-primary); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.applicantName || 'Budi Pratama, S.T.'}">${t.applicantName || 'Budi Pratama, S.T.'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-secondary); font-family: var(--font-mono, monospace); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="NIP: ${t.applicantNip || 'PK-2024-8841'}">NIP: ${t.applicantNip || 'PK-2024-8841'}</div>
+                  <div style="font-size:0.72rem; color:var(--text-muted); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${t.department || 'Departemen Rekayasa & Pemeliharaan'}">${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
                 </div>
               </div>
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">

@@ -926,23 +926,6 @@ function loadUsers() {
           u.supervisor = defU.supervisor || defU.directSupervisor;
           changed = true;
         }
-        if (defU.nip === 'PK-2012-0543') {
-          if (u.status !== 'Aktif' || u.department !== defU.department || u.roleKey !== 'approver') {
-            u.status = 'Aktif';
-            u.department = defU.department;
-            u.roleKey = 'approver';
-            u.role = 'Atasan 1 (Manager)';
-            changed = true;
-          }
-        }
-        if (defU.nip === 'PK-2022-7719') {
-          if (u.directSupervisor !== 'Dr. Ahmad Subagja, M.M.' || u.department !== 'Departemen Produksi Amonia-1A') {
-            u.directSupervisor = 'Dr. Ahmad Subagja, M.M.';
-            u.supervisor = 'Dr. Ahmad Subagja, M.M.';
-            u.department = 'Departemen Produksi Amonia-1A';
-            changed = true;
-          }
-        }
       }
     });
 

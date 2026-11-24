@@ -1182,9 +1182,23 @@ function initAdminSupervisorSearchableDropdown() {
 
   searchInput.addEventListener('input', (e) => {
     const val = e.target.value;
+    const hiddenInput = document.getElementById('adminInputSupervisor');
+    if (hiddenInput) hiddenInput.value = val;
     if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
     openAdminSupervisorDropdown();
     renderAdminSupervisorDropdownItems(val);
+  });
+
+  searchInput.addEventListener('change', (e) => {
+    const hiddenInput = document.getElementById('adminInputSupervisor');
+    if (hiddenInput) hiddenInput.value = e.target.value;
+  });
+
+  searchInput.addEventListener('blur', (e) => {
+    const hiddenInput = document.getElementById('adminInputSupervisor');
+    if (hiddenInput && !hiddenInput.value && e.target.value) {
+      hiddenInput.value = e.target.value;
+    }
   });
 
   if (clearBtn) {
@@ -1363,9 +1377,7 @@ function setAdminSelectedSupervisor(name) {
   const searchInput = document.getElementById('adminInputSupervisorSearch');
   const clearBtn = document.getElementById('btnAdminSupervisorClear');
 
-  const approvers = getAdminAvailableSupervisors();
-  const sup = approvers.find(s => s.name === name) || approvers[0];
-  const finalName = sup ? sup.name : name;
+  const finalName = (name || '').trim();
 
   if (hiddenInput) hiddenInput.value = finalName;
   if (searchInput) searchInput.value = finalName;
@@ -2229,12 +2241,27 @@ function saveAdminUserAccess(event) {
   const nip = document.getElementById('adminInputNip').value.trim();
   const name = document.getElementById('adminInputName').value.trim();
   const email = document.getElementById('adminInputEmail').value.trim() || `${nip.toLowerCase().replace(/[^a-z0-9]/g, '')}@pupuk-kujang.co.id`;
-  const department = document.getElementById('adminInputDept').value;
+  const deptSearchInput = document.getElementById('adminInputDeptSearch');
+  const deptHiddenInput = document.getElementById('adminInputDept');
+  const department = (deptHiddenInput?.value?.trim()) || (deptSearchInput?.value?.trim()) || 'Departemen Rekayasa & Pemeliharaan';
   let roleKey = document.getElementById('adminInputRoleKey').value;
   if ((kujangId === 'KJG-991025' || (name && name.toLowerCase().includes('arthur morgan'))) && roleKey === 'karyawan') { roleKey = 'karyawan2'; }
   const roleTitleInput = document.getElementById('adminInputRoleTitle')?.value || '';
   const status = document.getElementById('adminInputStatus').value;
-  const directSupervisor = document.getElementById('adminInputSupervisor')?.value || 'Ir. Hendra Gunawan, M.T.';
+
+  const supSearchInput = document.getElementById('adminInputSupervisorSearch');
+  const supHiddenInput = document.getElementById('adminInputSupervisor');
+  let directSupervisor = (supSearchInput?.value?.trim()) || (supHiddenInput?.value?.trim()) || 'Ir. Hendra Gunawan, M.T.';
+
+  const availableSupervisors = typeof getAdminAvailableSupervisors === 'function' ? getAdminAvailableSupervisors() : [];
+  const matchedSup = availableSupervisors.find(s => 
+    s.name.toLowerCase() === directSupervisor.toLowerCase() || 
+    (s.nip && s.nip.toLowerCase() === directSupervisor.toLowerCase()) ||
+    s.name.toLowerCase().includes(directSupervisor.toLowerCase())
+  );
+  if (matchedSup) {
+    directSupervisor = matchedSup.name;
+  }
 
   if (!kujangId || !nip || !name) {
     alert('Mohon lengkapi KUJANG ID, NIP, dan Nama Pengguna.');
@@ -2370,7 +2397,7 @@ function saveAdminUserAccess(event) {
       return;
     }
 
-    idx = users.findIndex(u => u.kujangId === originalId || u.kujangId === kujangId);
+    idx = users.findIndex(u => u.kujangId === originalId || u.kujangId === kujangId || (u.nip && u.nip === nip));
     if (idx !== -1) {
       users[idx] = {
         ...users[idx],
@@ -2390,16 +2417,61 @@ function saveAdminUserAccess(event) {
       if (users[idx].roleKey === 'karyawan' || users[idx].kujangId === 'KJG-991024' || (users[idx].name && users[idx].name.includes('Budi Pratama'))) {
         if (window.ACTORS && window.ACTORS.karyawan) {
           window.ACTORS.karyawan.approverName = directSupervisor;
+          window.ACTORS.karyawan.directSupervisor = directSupervisor;
+          window.ACTORS.karyawan.supervisor = directSupervisor;
         }
       } else if (users[idx].roleKey === 'karyawan2' || users[idx].kujangId === 'KJG-991025' || (users[idx].name && users[idx].name.includes('Arthur Morgan'))) {
         if (window.ACTORS && window.ACTORS.karyawan2) {
           window.ACTORS.karyawan2.approverName = directSupervisor;
+          window.ACTORS.karyawan2.directSupervisor = directSupervisor;
+          window.ACTORS.karyawan2.supervisor = directSupervisor;
         }
       }
-      if (window.activeEmployeeUser && (window.activeEmployeeUser.nip === nip || window.activeEmployeeUser.kujangId === kujangId)) {
+      if (window.activeEmployeeUser && (window.activeEmployeeUser.nip === nip || window.activeEmployeeUser.kujangId === kujangId || window.activeEmployeeUser.name === name)) {
         window.activeEmployeeUser.directSupervisor = directSupervisor;
         window.activeEmployeeUser.supervisor = directSupervisor;
         window.activeEmployeeUser.approverName = directSupervisor;
+        window.activeEmployeeUser.department = department;
+        window.activeEmployeeUser.role = roleLabel;
+        window.activeEmployeeUser.roleKey = roleKey;
+      }
+      if (typeof MASTER_EMPLOYEES !== 'undefined' && Array.isArray(MASTER_EMPLOYEES)) {
+        const mEmp = MASTER_EMPLOYEES.find(m => m.nip === nip || m.name === name || (originalId && m.kujangId === originalId));
+        if (mEmp) {
+          mEmp.supervisor = directSupervisor;
+          mEmp.department = department;
+          mEmp.name = name;
+          mEmp.nip = nip;
+          mEmp.email = email;
+        }
+      }
+      if (typeof DEFAULT_USERS !== 'undefined' && Array.isArray(DEFAULT_USERS)) {
+        const defU = DEFAULT_USERS.find(d => d.kujangId === originalId || d.kujangId === kujangId || (d.nip && d.nip === nip));
+        if (defU) {
+          defU.nip = nip;
+          defU.name = name;
+          defU.email = email;
+          defU.department = department;
+          defU.role = roleLabel;
+          defU.roleKey = roleKey;
+          defU.status = status;
+          defU.directSupervisor = directSupervisor;
+          defU.supervisor = directSupervisor;
+        }
+      }
+      if (typeof window !== 'undefined' && Array.isArray(window.DEFAULT_USERS)) {
+        const defU = window.DEFAULT_USERS.find(d => d.kujangId === originalId || d.kujangId === kujangId || (d.nip && d.nip === nip));
+        if (defU) {
+          defU.nip = nip;
+          defU.name = name;
+          defU.email = email;
+          defU.department = department;
+          defU.role = roleLabel;
+          defU.roleKey = roleKey;
+          defU.status = status;
+          defU.directSupervisor = directSupervisor;
+          defU.supervisor = directSupervisor;
+        }
       }
     }
   }

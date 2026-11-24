@@ -864,7 +864,7 @@ function setupSingleApproverCombobox(cfg) {
     const approvers = getApprovers();
 
     if (!cleanQuery) {
-      if (beforeSearchBanner) beforeSearchBanner.style.display = 'flex';
+      if (beforeSearchBanner) beforeSearchBanner.style.display = 'none';
       if (dropdownSubtitle) dropdownSubtitle.textContent = 'Daftar Atasan Peninjau';
       if (foundBadge) foundBadge.textContent = `${approvers.length} Atasan`;
       if (emptyState) emptyState.style.display = 'none';
@@ -952,8 +952,8 @@ function setupSingleApproverCombobox(cfg) {
             <span class="approver-item-name">${highlightedName}</span>
             <span class="approver-item-nip">${approver.nip || ''}</span>
             <div class="approver-item-tags-wrap">
-              ${statusTag}
               ${directTag}
+              ${statusTag}
             </div>
           </div>
           <div class="approver-item-role">${highlightedTitle}</div>
@@ -2058,6 +2058,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     infoTablePlanExit.textContent = ticket.plannedExit ? `${ticket.plannedExit.slice(11, 16).replace(':', '.')} WIB` : '09.00 WIB';
     infoTablePlanExit.style.fontWeight = '700';
     infoTablePlanExit.style.color = '#0f172a';
+    infoTablePlanExit.style.whiteSpace = 'nowrap';
   }
 
   const infoTableActualExit = document.getElementById('infoTableActualExit');
@@ -2073,6 +2074,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     infoTablePlanReturn.textContent = ticket.estimatedReturn ? `${ticket.estimatedReturn.slice(11, 16).replace(':', '.')} WIB` : '-';
     infoTablePlanReturn.style.fontWeight = '700';
     infoTablePlanReturn.style.color = '#0f172a';
+    infoTablePlanReturn.style.whiteSpace = 'nowrap';
   }
 
   const infoTableActualReturn = document.getElementById('infoTableActualReturn');
