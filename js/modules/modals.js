@@ -2676,6 +2676,11 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   const isAssignedToMe = (myApproverLower.includes('dewi') && tApprover.includes('dewi')) || (myApproverLower.includes('hendra') && (tApprover.includes('hendra') || !tApprover.includes('dewi')));
   const isReassignedFromMe = Boolean(tFrom && ((myApproverLower.includes('dewi') && tFrom.includes('dewi')) || (myApproverLower.includes('hendra') && tFrom.includes('hendra'))));
 
+  const detailSwipeHintBadge = document.getElementById('detailSwipeHintBadge');
+  if (typeof window.resetDetailCardSwipeState === 'function') {
+    window.resetDetailCardSwipeState();
+  }
+
   if (btnDetailRejectTicket && btnDetailApproveTicket) {
     const isEmergFaceScan = Boolean(ticket.isEmergency || (ticket.id && ticket.id.includes('-EMG-'))) && (ticket.selectedMethod === 'facescan') && (ticket.status === 'Menunggu Otorisasi Darurat' || ticket.emergencyLocked);
     const isPendingExtDecision = Boolean(
@@ -2687,6 +2692,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     if (isApproverActor && isAssignedToMe && isPendingDecision && !isEmergFaceScan) {
       btnDetailRejectTicket.style.display = 'inline-flex';
       btnDetailApproveTicket.style.display = 'inline-flex';
+      if (detailSwipeHintBadge) detailSwipeHintBadge.style.display = 'inline-flex';
       btnDetailRejectTicket.onclick = () => {
         if (typeof window.openRejectModal === 'function') {
           window.openRejectModal(ticket.id);
@@ -2700,6 +2706,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     } else if (isApproverActor && isAssignedToMe && isPendingExtDecision) {
       btnDetailRejectTicket.style.display = 'inline-flex';
       btnDetailApproveTicket.style.display = 'inline-flex';
+      if (detailSwipeHintBadge) detailSwipeHintBadge.style.display = 'inline-flex';
       btnDetailRejectTicket.onclick = () => {
         if (typeof window.openRejectExtensionModal === 'function') {
           window.openRejectExtensionModal(ticket.id);
@@ -2713,6 +2720,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     } else {
       btnDetailRejectTicket.style.display = 'none';
       btnDetailApproveTicket.style.display = 'none';
+      if (detailSwipeHintBadge) detailSwipeHintBadge.style.display = 'none';
       btnDetailRejectTicket.onclick = null;
       btnDetailApproveTicket.onclick = null;
     }
@@ -2944,6 +2952,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     if (btnDetailRejectTicket) { btnDetailRejectTicket.style.setProperty('display', 'none', 'important'); btnDetailRejectTicket.onclick = null; }
     const btnDetailApproveTicket = document.getElementById('btnDetailApproveTicket');
     if (btnDetailApproveTicket) { btnDetailApproveTicket.style.setProperty('display', 'none', 'important'); btnDetailApproveTicket.onclick = null; }
+    const detailSwipeHintBadge = document.getElementById('detailSwipeHintBadge');
+    if (detailSwipeHintBadge) { detailSwipeHintBadge.style.setProperty('display', 'none', 'important'); }
     const btnDetailScanOut = document.getElementById('btnDetailScanOut');
     if (btnDetailScanOut) { btnDetailScanOut.style.setProperty('display', 'none', 'important'); btnDetailScanOut.onclick = null; }
     const btnDetailScanIn = document.getElementById('btnDetailScanIn');
@@ -5486,3 +5496,141 @@ document.addEventListener('keydown', (e) => {
     window.navigateTicketDetail(1);
   }
 });
+
+(function initDetailModalSwipeDecide() {
+  const SWIPE_THRESHOLD = 110;
+  let startX = 0;
+  let startY = 0;
+  let currentDx = 0;
+  let pointerActive = false;
+  let isHorizontalSwipe = false;
+
+  function getCardEls() {
+    const modal = document.getElementById('modalTicketDetail');
+    const card = modal ? modal.querySelector('.modal-detail-stage .modal-card') : null;
+    const approveStamp = document.getElementById('detailSwipeStampApprove');
+    const rejectStamp = document.getElementById('detailSwipeStampReject');
+    return { modal, card, approveStamp, rejectStamp };
+  }
+
+  function resetDetailCardSwipeState() {
+    const { card, approveStamp, rejectStamp } = getCardEls();
+    if (card) {
+      card.style.transition = '';
+      card.style.transform = '';
+      card.style.opacity = '';
+    }
+    if (approveStamp) approveStamp.style.opacity = '0';
+    if (rejectStamp) rejectStamp.style.opacity = '0';
+    pointerActive = false;
+    isHorizontalSwipe = false;
+    currentDx = 0;
+  }
+  window.resetDetailCardSwipeState = resetDetailCardSwipeState;
+
+  function canSwipeDecide() {
+    const modal = document.getElementById('modalTicketDetail');
+    if (!modal || !modal.classList.contains('open')) return false;
+    if (window.currentActor !== 'approver' && window.currentActor !== 'approver2') return false;
+    const btnApp = document.getElementById('btnDetailApproveTicket');
+    const btnRej = document.getElementById('btnDetailRejectTicket');
+    if (!btnApp || !btnRej) return false;
+    return getComputedStyle(btnApp).display !== 'none' && getComputedStyle(btnRej).display !== 'none';
+  }
+
+  function onStart(clientX, clientY, target) {
+    if (!canSwipeDecide()) return;
+    if (target && target.closest('button, a, input, textarea, select, [role="button"]')) return;
+    startX = clientX;
+    startY = clientY;
+    currentDx = 0;
+    pointerActive = true;
+    isHorizontalSwipe = false;
+  }
+
+  function onMove(clientX, clientY, e) {
+    if (!pointerActive) return;
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+
+    if (!isHorizontalSwipe) {
+      if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+        isHorizontalSwipe = true;
+      } else if (Math.abs(dy) > 14) {
+        pointerActive = false;
+        return;
+      } else {
+        return;
+      }
+    }
+
+    if (e && e.cancelable) e.preventDefault();
+    currentDx = dx;
+    const { card, approveStamp, rejectStamp } = getCardEls();
+    if (!card) return;
+    card.style.transition = 'none';
+    card.style.transform = `translateX(${dx}px) rotate(${(dx * 0.022).toFixed(2)}deg)`;
+
+    if (dx > 15) {
+      if (approveStamp) approveStamp.style.opacity = String(Math.min(1, (dx - 15) / 95));
+      if (rejectStamp) rejectStamp.style.opacity = '0';
+    } else if (dx < -15) {
+      if (rejectStamp) rejectStamp.style.opacity = String(Math.min(1, (-dx - 15) / 95));
+      if (approveStamp) approveStamp.style.opacity = '0';
+    } else {
+      if (approveStamp) approveStamp.style.opacity = '0';
+      if (rejectStamp) rejectStamp.style.opacity = '0';
+    }
+  }
+
+  function onEnd() {
+    if (!pointerActive) return;
+    pointerActive = false;
+    if (!isHorizontalSwipe) return;
+    isHorizontalSwipe = false;
+
+    const { card } = getCardEls();
+    if (!card) return;
+
+    if (currentDx >= SWIPE_THRESHOLD) {
+      card.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out';
+      card.style.transform = 'translateX(140px) rotate(4deg)';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        resetDetailCardSwipeState();
+        const btnApp = document.getElementById('btnDetailApproveTicket');
+        if (btnApp) btnApp.click();
+      }, 170);
+    } else if (currentDx <= -SWIPE_THRESHOLD) {
+      card.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out';
+      card.style.transform = 'translateX(-140px) rotate(-4deg)';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        resetDetailCardSwipeState();
+        const btnRej = document.getElementById('btnDetailRejectTicket');
+        if (btnRej) btnRej.click();
+      }, 170);
+    } else {
+      card.style.transition = 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)';
+      card.style.transform = '';
+      const { approveStamp, rejectStamp } = getCardEls();
+      if (approveStamp) approveStamp.style.opacity = '0';
+      if (rejectStamp) rejectStamp.style.opacity = '0';
+    }
+    currentDx = 0;
+  }
+
+  document.addEventListener('pointerdown', (e) => {
+    if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+    const { card } = getCardEls();
+    if (!card || !card.contains(e.target)) return;
+    onStart(e.clientX, e.clientY, e.target);
+  });
+
+  document.addEventListener('pointermove', (e) => {
+    onMove(e.clientX, e.clientY, e);
+  }, { passive: false });
+
+  document.addEventListener('pointerup', onEnd);
+  document.addEventListener('pointercancel', onEnd);
+})();

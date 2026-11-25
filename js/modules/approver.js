@@ -625,6 +625,79 @@ function renderApproverDashboard() {
   }
 }
 
+function isTicketApproachingScanOut(t) {
+  if (!t || !t.plannedExit) return false;
+  if (t.status !== 'Menunggu Persetujuan' && t.status !== 'Menunggu Otorisasi Darurat') return false;
+  const exitDate = typeof window.parseTicketDateTime === 'function'
+    ? window.parseTicketDateTime(t.plannedExit)
+    : new Date(t.plannedExit);
+  if (!exitDate || isNaN(exitDate.getTime())) return false;
+  const diffMins = Math.round((exitDate.getTime() - Date.now()) / 60000);
+  return diffMins <= 15;
+}
+
+function updateAntrianScanOutBalloon(group1All, group2All, group3All, activeTab) {
+  const balloon = document.getElementById('antrianScanOutBalloon');
+  const countEl = document.getElementById('antrianBalloonCount');
+  const pointerEl = document.getElementById('antrianBalloonPointer');
+  const filterGroup = document.getElementById('antrianFilterGroup');
+  if (!balloon || !countEl) return;
+
+  const urgentMap = {
+    direct: (group1All || []).filter(isTicketApproachingScanOut).length,
+    incoming: (group2All || []).filter(isTicketApproachingScanOut).length,
+    outgoing: (group3All || []).filter(isTicketApproachingScanOut).length
+  };
+
+  const order = ['direct', 'incoming', 'outgoing'];
+  let targetTab = null;
+  if (urgentMap[activeTab] > 0) {
+    targetTab = activeTab;
+  } else {
+    targetTab = order.find(k => urgentMap[k] > 0) || null;
+  }
+
+  if (!targetTab || urgentMap[targetTab] === 0) {
+    balloon.style.display = 'none';
+    balloon.onclick = null;
+    return;
+  }
+
+  const targetCount = urgentMap[targetTab];
+  countEl.textContent = `${targetCount} pengajuan`;
+  balloon.style.display = 'inline-flex';
+  balloon.onclick = () => {
+    if (typeof window.setApproverAntrianFilter === 'function') {
+      window.setApproverAntrianFilter(targetTab);
+    }
+  };
+  balloon.onkeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      balloon.click();
+    }
+  };
+
+  const btnIdMap = {
+    direct: 'btnFilterAntrianDirect',
+    incoming: 'btnFilterAntrianIncoming',
+    outgoing: 'btnFilterAntrianOutgoing'
+  };
+  const targetBtn = document.getElementById(btnIdMap[targetTab]);
+  if (targetBtn && filterGroup) {
+    requestAnimationFrame(() => {
+      const btnCenter = targetBtn.offsetLeft + (targetBtn.offsetWidth / 2);
+      const maxShift = Math.max(0, filterGroup.offsetWidth - balloon.offsetWidth);
+      const desiredLeft = Math.max(0, Math.min(btnCenter - (balloon.offsetWidth / 2), maxShift));
+      balloon.style.marginLeft = `${desiredLeft}px`;
+      if (pointerEl) {
+        const pointerLeft = Math.max(14, Math.min(btnCenter - desiredLeft - 6, balloon.offsetWidth - 22));
+        pointerEl.style.left = `${pointerLeft}px`;
+      }
+    });
+  }
+}
+
 function getApproverExitCountdownBadge(t) {
   if (!t) return '';
   const isPendingExt = Boolean(
@@ -1382,6 +1455,8 @@ function renderApproverView() {
     if (countDirect) countDirect.textContent = group1All.length;
     if (countIncoming) countIncoming.textContent = group2All.length;
     if (countOutgoing) countOutgoing.textContent = group3All.length;
+
+    updateAntrianScanOutBalloon(group1All, group2All, group3All, activeTab);
 
     const tabConfig = {
       direct: {

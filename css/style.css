@@ -3938,6 +3938,70 @@ body.theme-dark .approver-exit-countdown-pill.is-overdue .approver-exit-countdow
   color: #fecaca;
 }
 
+/* Balon Navy Ringkas di atas 3 Tab Antrean Persetujuan */
+.antrian-tabs-balloon-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 100%;
+}
+
+.antrian-scanout-balloon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #0a2540;
+  color: #ffffff;
+  padding: 0.45rem 0.85rem 0.45rem 0.5rem;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(10, 37, 64, 0.22);
+  transition: transform 0.15s ease, background 0.15s ease;
+  user-select: none;
+}
+
+.antrian-scanout-balloon:hover {
+  background: #0f3358;
+  transform: translateY(-1px);
+}
+
+.balloon-count-pill {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.balloon-text {
+  color: #ffffff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.balloon-pointer {
+  position: absolute;
+  bottom: -6px;
+  left: 48px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #0a2540;
+  transition: left 0.2s ease;
+}
+
+.antrian-scanout-balloon:hover .balloon-pointer {
+  border-top-color: #0f3358;
+}
+
 .card-id-num {
   font-family: var(--font-mono);
   font-weight: 800;
@@ -4392,6 +4456,60 @@ body.modal-open {
   justify-content: center;
 }
 
+.modal-detail-stage .modal-card {
+  will-change: transform, opacity;
+  touch-action: pan-y;
+}
+
+.detail-swipe-stamp {
+  position: absolute;
+  top: 24px;
+  z-index: 30;
+  padding: 0.45rem 1.1rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+}
+
+.detail-swipe-stamp.approve {
+  left: 24px;
+  color: #059669;
+  background: rgba(236, 253, 245, 0.96);
+  border: 2.5px solid #059669;
+  transform: rotate(-10deg);
+}
+
+.detail-swipe-stamp.reject {
+  right: 24px;
+  color: #dc2626;
+  background: rgba(254, 242, 242, 0.96);
+  border: 2.5px solid #dc2626;
+  transform: rotate(10deg);
+}
+
+.detail-swipe-hint {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+body.theme-dark .detail-swipe-hint {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
 .modal-side-nav-btn {
   position: absolute;
   top: 50%;
@@ -4441,7 +4559,61 @@ body.modal-open {
   font-family: var(--font-mono, monospace);
 }
 
-body.theme-dark .modal-side-nav-btn {
+body.theme-dark .modal-detail-stage .modal-card {
+  will-change: transform, opacity;
+  touch-action: pan-y;
+}
+
+.detail-swipe-stamp {
+  position: absolute;
+  top: 24px;
+  z-index: 30;
+  padding: 0.45rem 1.1rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+}
+
+.detail-swipe-stamp.approve {
+  left: 24px;
+  color: #059669;
+  background: rgba(236, 253, 245, 0.96);
+  border: 2.5px solid #059669;
+  transform: rotate(-10deg);
+}
+
+.detail-swipe-stamp.reject {
+  right: 24px;
+  color: #dc2626;
+  background: rgba(254, 242, 242, 0.96);
+  border: 2.5px solid #dc2626;
+  transform: rotate(10deg);
+}
+
+.detail-swipe-hint {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+body.theme-dark .detail-swipe-hint {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+.modal-side-nav-btn {
   background: rgba(30, 41, 59, 0.96);
   color: #f8fafc;
   border-color: rgba(255, 255, 255, 0.16);
@@ -4453,7 +4625,61 @@ body.theme-dark .modal-side-nav-btn:hover:not(:disabled) {
 }
 
 @media (max-width: 960px) {
-  .modal-side-nav-btn {
+  .modal-detail-stage .modal-card {
+  will-change: transform, opacity;
+  touch-action: pan-y;
+}
+
+.detail-swipe-stamp {
+  position: absolute;
+  top: 24px;
+  z-index: 30;
+  padding: 0.45rem 1.1rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+}
+
+.detail-swipe-stamp.approve {
+  left: 24px;
+  color: #059669;
+  background: rgba(236, 253, 245, 0.96);
+  border: 2.5px solid #059669;
+  transform: rotate(-10deg);
+}
+
+.detail-swipe-stamp.reject {
+  right: 24px;
+  color: #dc2626;
+  background: rgba(254, 242, 242, 0.96);
+  border: 2.5px solid #dc2626;
+  transform: rotate(10deg);
+}
+
+.detail-swipe-hint {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+body.theme-dark .detail-swipe-hint {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+.modal-side-nav-btn {
     width: 36px;
     height: 36px;
   }

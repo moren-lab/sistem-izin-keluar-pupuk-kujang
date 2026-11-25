@@ -1473,7 +1473,9 @@ function renderKaryawanDashboard() {
         `;
       } else if (isOutside) {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
-        const hasUsedExtension = activeTicket.extensionApproved || false;
+        const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
+        const isKembali = activeTicket.type !== 'Pulang Mendahului';
+        const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
 
         actionButtonsHtml = `
           ${(isKembali) ? (

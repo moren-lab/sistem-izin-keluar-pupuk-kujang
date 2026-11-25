@@ -1740,19 +1740,26 @@
                 </h2>
 
                 <!-- Tab 3 Kelompok Antrean: Reguler & Darurat, Persetujuan Pengalihan, Pantau Pengalihan -->
-                <div class="antrian-filter-pills" id="antrianFilterGroup">
-                  <button type="button" class="btn-antrian-pill active" id="btnFilterAntrianDirect" onclick="window.setApproverAntrianFilter('direct')">
-                    <span>Reguler &amp; Darurat</span>
-                    <span class="antrian-count-pill" id="countAntrianDirect">0</span>
-                  </button>
-                  <button type="button" class="btn-antrian-pill" id="btnFilterAntrianIncoming" onclick="window.setApproverAntrianFilter('incoming')">
-                    <span>Persetujuan Pengalihan</span>
-                    <span class="antrian-count-pill" id="countAntrianIncoming">0</span>
-                  </button>
-                  <button type="button" class="btn-antrian-pill" id="btnFilterAntrianOutgoing" onclick="window.setApproverAntrianFilter('outgoing')">
-                    <span>Pantau Pengalihan</span>
-                    <span class="antrian-count-pill" id="countAntrianOutgoing">0</span>
-                  </button>
+                <div class="antrian-tabs-balloon-wrap">
+                  <div id="antrianScanOutBalloon" class="antrian-scanout-balloon" style="display: none;" role="button" tabindex="0" title="Klik untuk menuju tab pengajuan yang mendekati Scan Out">
+                    <span class="balloon-count-pill" id="antrianBalloonCount">0 pengajuan</span>
+                    <span class="balloon-text" id="antrianBalloonText">Mendekati scan out</span>
+                    <span class="balloon-pointer" id="antrianBalloonPointer"></span>
+                  </div>
+                  <div class="antrian-filter-pills" id="antrianFilterGroup">
+                    <button type="button" class="btn-antrian-pill active" id="btnFilterAntrianDirect" onclick="window.setApproverAntrianFilter('direct')">
+                      <span>Reguler &amp; Darurat</span>
+                      <span class="antrian-count-pill" id="countAntrianDirect">0</span>
+                    </button>
+                    <button type="button" class="btn-antrian-pill" id="btnFilterAntrianIncoming" onclick="window.setApproverAntrianFilter('incoming')">
+                      <span>Persetujuan Pengalihan</span>
+                      <span class="antrian-count-pill" id="countAntrianIncoming">0</span>
+                    </button>
+                    <button type="button" class="btn-antrian-pill" id="btnFilterAntrianOutgoing" onclick="window.setApproverAntrianFilter('outgoing')">
+                      <span>Pantau Pengalihan</span>
+                      <span class="antrian-count-pill" id="countAntrianOutgoing">0</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -3635,7 +3642,9 @@
       <button type="button" class="modal-side-nav-btn next" id="btnDetailNextTicket" onclick="event.stopPropagation(); window.navigateTicketDetail && window.navigateTicketDetail(1)" title="Pengajuan Berikutnya (→)" aria-label="Pengajuan Berikutnya" style="display: none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
-      <div class="modal-card" style="max-width: 820px; width: 100%;">
+      <div class="modal-card" style="max-width: 820px; width: 100%; position: relative;">
+      <div id="detailSwipeStampApprove" class="detail-swipe-stamp approve" aria-hidden="true">✓ SETUJUI</div>
+      <div id="detailSwipeStampReject" class="detail-swipe-stamp reject" aria-hidden="true">✕ TOLAK</div>
       <div class="modal-header" style="padding: 1.25rem 1.5rem 1rem;">
         <div>
           <h3 id="modalDetailHeading" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 0;">Detail Pengajuan — IZ-20261016-006</h3>
@@ -3959,6 +3968,7 @@
             style="display: none; padding: 0.45rem 0.85rem; font-size: 0.8rem;">
             Batalkan Izin
           </button>
+          <span id="detailSwipeHintBadge" class="detail-swipe-hint" style="display: none;">← Geser Tolak • Setujui →</span>
           <button type="button" class="btn-reject" id="btnDetailRejectTicket"
             style="display: none; padding: 0.55rem 1.5rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; cursor: pointer;">
             ✕ Tolak
