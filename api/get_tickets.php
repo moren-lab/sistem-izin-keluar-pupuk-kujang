@@ -248,7 +248,7 @@ try {
             'hasExtensionPending' => $hasPendingExt,
             'extensionRequestedTime' => $hasPendingExt ? $pendingExtMap[$id]['newEstimatedReturn'] : null,
             'extensionReason' => $hasPendingExt ? $pendingExtMap[$id]['reason'] : null,
-            'extensionCount' => isset($extensionsMap[$id]) ? count($extensionsMap[$id]) : 0,
+            'extensionCount' => isset($extensionsMap[$id]) ? count(array_filter($extensionsMap[$id], function($x) { return $x['status'] === 'Disetujui'; })) : 0,
             'extensionApproved' => isset($extensionsMap[$id]) && array_reduce($extensionsMap[$id], function($c, $x) { return $c || $x['status'] === 'Disetujui'; }, false),
             'arrivalProofPhoto' => isset($proofsMap[$id]) ? $proofsMap[$id] : null,
             'deletedByKaryawan' => $isDeletedByApplicant,

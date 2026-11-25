@@ -1429,7 +1429,7 @@
     } else if (isOutside) {
       const isLateStatus = (t.status === 'Terlambat' || t.isLate);
       const hasPendingExt = Boolean(t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'));
-      const hasUsedExt = Boolean(t.extensionApproved || (t.extensionCount && t.extensionCount >= 1));
+      const hasUsedExt = Boolean(t.extensionApproved);
 
       let extButtonHtml = '';
       if (hasPendingExt) {
@@ -2354,16 +2354,21 @@
 
     // Sinkronisasi pembatalan tiket ke database MySQL secara real-time
     try {
-      fetch('api/update_ticket.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'cancel',
-          ticketId: ticketId,
-          cancellationReason: reason,
-          cancelledBy: `${emp.name} (Karyawan)`
-        })
-      }).catch(e => console.warn('[Mobile] Gagal sync pembatalan ke MySQL:', e));
+      const cancelTicketPayload = {
+        action: 'cancel',
+        ticketId: ticketId,
+        cancellationReason: reason,
+        cancelledBy: `${emp.name} (Karyawan)`
+      };
+      if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+        window.SyncEngine.callUpdateTicket(cancelTicketPayload);
+      } else {
+        fetch('api/update_ticket.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cancelTicketPayload)
+        }).catch(e => console.warn('[Mobile] Gagal sync pembatalan ke MySQL:', e));
+      }
     } catch (e) {}
 
     window.mobileCloseSheet();
@@ -2416,6 +2421,12 @@
     } else {
       localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
       window.ticketsList = tickets;
+    }
+    if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+      window.SyncEngine.callUpdateTicket({
+        ticketId: ticketId,
+        action: 'cancel_extension'
+      });
     }
 
     if (typeof window.showToast === 'function') {
@@ -4450,7 +4461,7 @@
                 <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 10px; font-size: 0.725rem; color: #b91c1c; font-weight: 700; text-align: center; line-height: 1.35; width: 100%;">
                   ⚠️ Batas waktu telah terlewati. Perpanjangan tidak tersedia, Anda wajib segera Tap In.
                 </div>
-              ` : (t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) ? `
+              ` : (t.extensionApproved) ? `
                 <button type="button" class="mobile-btn-secondary" disabled style="background: #f8fafc; color: #94a3b8; border: 1.5px solid #e2e8f0; min-height: 40px; font-weight: 700; opacity: 0.85; cursor: not-allowed; border-radius: 8px; text-align: center; width: 100%;">
                   Perpanjangan Telah Digunakan (Maks. 1x)
                 </button>
@@ -4570,7 +4581,7 @@
       return;
     }
 
-    if (t.extensionApproved || (t.extensionCount && t.extensionCount >= 1)) {
+    if (t.extensionApproved) {
       if (typeof window.showToast === 'function') {
         window.showToast('Perpanjangan waktu hanya dapat diajukan maksimal 1 kali dan telah disetujui sebelumnya!', 'warning');
       }
@@ -4765,22 +4776,20 @@
     } else {
       localStorage.setItem('kujang_tickets', JSON.stringify(tickets));
       window.ticketsList = tickets;
+      try {
+        const apiBase = 'api';
+        fetch(`${apiBase}/update_ticket.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticketId: ticketId,
+            action: 'request_extension',
+            newEstimatedReturn: newTime,
+            reason: reason
+          })
+        }).catch(e => console.warn('[Sync] Gagal push perpanjangan ke MySQL:', e));
+      } catch (e) {}
     }
-
-    // Sinkronisasi Permohonan Perpanjangan langsung ke MySQL
-    try {
-      const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
-      fetch(`${apiBase}/update_ticket.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticketId: ticketId,
-          action: 'request_extension',
-          newEstimatedReturn: newTime,
-          reason: reason
-        })
-      }).catch(e => console.warn('[Sync] Gagal push perpanjangan ke MySQL:', e));
-    } catch (e) {}
 
     window.mobileCloseSheet();
 

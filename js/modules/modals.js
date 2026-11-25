@@ -4898,6 +4898,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const nowFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}.${pad(now.getMinutes())} WIB`;
 
+        ticket.hasExtensionPending = true;
+        ticket.extensionRequestedTime = newReturnVal;
+        ticket.extensionReason = reasonVal;
         ticket.pendingExtension = {
           requestedAt: nowFormatted,
           requestedAtIso: now.toISOString(),

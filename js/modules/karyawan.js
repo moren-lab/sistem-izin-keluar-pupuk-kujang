@@ -1473,9 +1473,7 @@ function renderKaryawanDashboard() {
         `;
       } else if (isOutside) {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
-        const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
-        const isKembali = activeTicket.type !== 'Pulang Mendahului';
-        const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
+        const hasUsedExtension = activeTicket.extensionApproved || false;
 
         actionButtonsHtml = `
           ${(isKembali) ? (
@@ -1918,7 +1916,7 @@ function renderPengajuanSayaView() {
     } else if (isOutside) {
       const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
       const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
-      const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
+      const hasUsedExtension = activeTicket.extensionApproved || false;
       const isKembali = activeTicket.type !== 'Pulang Mendahului';
 
       actionButtonsHtml = `
@@ -2999,8 +2997,7 @@ function renderKaryawanMobileDashboard() {
         `;
       } else if (isOutside) {
         const hasPendingExt = activeTicket.pendingExtension && activeTicket.pendingExtension.status === 'Menunggu Persetujuan';
-        const hasUsedExtension = activeTicket.extensionApproved || (activeTicket.extensionCount && activeTicket.extensionCount >= 1);
-        const isGroupDinasActive = Boolean(activeTicket.isGroupDinas && Array.isArray(activeTicket.members) && activeTicket.members.filter(m => m.status !== 'batal').length > 0);
+        const hasUsedExtension = activeTicket.extensionApproved || false;
 
         const isLateStatus = (activeTicket.status === 'Terlambat' || activeTicket.isLate);
         mobileBtnsHtml = `

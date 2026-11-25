@@ -346,9 +346,8 @@
         const wasPendingExt = Boolean(knownServerPendingExt.get(t.id));
         const isNowPendingExt = Boolean(
           (t.status === 'Sedang di Luar' || t.status === 'Terlambat') &&
-          t.pendingExtension &&
-          t.hasExtensionPending &&
-          t.pendingExtension.status === 'Menunggu Persetujuan'
+          (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) &&
+          (!t.pendingExtension || !t.pendingExtension.status || t.pendingExtension.status === 'Menunggu Persetujuan')
         );
         let extensionResolvedStatus = '';
         if (wasPendingExt && !isNowPendingExt) {
@@ -402,6 +401,12 @@
           emergencyAuthorizerPhone: t.emergencyAuthorizerPhone || null,
           emergencyAuthorizationNote: t.emergencyAuthorizationNote || null,
           emergencyVerifiedAt: t.emergencyVerifiedAt || null,
+          hasExtensionPending: isNowPendingExt ? 1 : 0,
+          pendingExtension: isNowPendingExt ? (t.pendingExtension || {
+            newEstimatedReturn: t.extensionRequestedTime,
+            reason: t.extensionReason || 'Perpanjangan waktu keluar',
+            status: 'Menunggu Persetujuan'
+          }) : null,
           extensionResolvedStatus: extensionResolvedStatus || null,
           scanOutGate: t.scanOutGate,
           securityOfficerOut: t.securityOfficerOut,
@@ -443,27 +448,6 @@
           })
           .catch(e => console.warn('[SyncEngine] Gagal sync tiket individual:', e));
         tasks.push(createPromise);
-
-        if (isNowPendingExt) {
-          const reqExtPromise = fetch(`${API_BASE}/update_ticket.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ticketId: t.id,
-              action: 'request_extension',
-              newEstimatedReturn: t.pendingExtension.newEstimatedReturn || t.extensionRequestedTime,
-              reason: t.pendingExtension.reason || t.extensionReason
-            })
-          })
-            .then(r => r.ok ? r.json() : null)
-            .then(j => {
-              if (j && j.success) {
-                knownServerPendingExt.set(t.id, true);
-              }
-            })
-            .catch(() => {});
-          tasks.push(reqExtPromise);
-        }
       }
 
       if (tasks.length > 0) {
@@ -474,7 +458,7 @@
     } finally {
       setTimeout(() => {
         mutationInFlight = Math.max(0, mutationInFlight - 1);
-      }, 300);
+      }, 600);
     }
   }
 

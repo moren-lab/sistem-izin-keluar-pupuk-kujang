@@ -382,6 +382,41 @@ try {
         ':id' => $ticketId
     ]);
 
+    if (!empty($input['hasExtensionPending']) && empty($input['extensionResolvedStatus']) && !empty($input['pendingExtension']) && is_array($input['pendingExtension'])) {
+        $extInput = $input['pendingExtension'];
+        $rawExtTime = isset($extInput['newEstimatedReturn']) ? trim((string)$extInput['newEstimatedReturn']) : '';
+        $extReason = isset($extInput['reason']) ? trim((string)$extInput['reason']) : '';
+        $extTs = $rawExtTime !== '' ? strtotime($rawExtTime) : false;
+        if ($extTs !== false && $extReason !== '' && in_array($status, ['Sedang di Luar', 'Terlambat'], true)) {
+            $extTimeMysql = date('Y-m-d H:i:s', $extTs);
+            $stmtChkExt = $pdo->prepare("SELECT `id` FROM `ticket_extensions` WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan' LIMIT 1");
+            $stmtChkExt->execute([':ticket_id' => $ticketId]);
+            $existingExtRow = $stmtChkExt->fetch();
+            if ($existingExtRow) {
+                $stmtUpdExt = $pdo->prepare("
+                    UPDATE `ticket_extensions`
+                    SET `new_estimated_return` = :new_time, `extension_reason` = :reason
+                    WHERE `id` = :id
+                ");
+                $stmtUpdExt->execute([
+                    ':new_time' => $extTimeMysql,
+                    ':reason' => $extReason,
+                    ':id' => $existingExtRow['id']
+                ]);
+            } else {
+                $stmtInsExt = $pdo->prepare("
+                    INSERT INTO `ticket_extensions` (`ticket_id`, `new_estimated_return`, `extension_reason`, `status`, `requested_at`)
+                    VALUES (:ticket_id, :new_time, :reason, 'Menunggu Persetujuan', NOW())
+                ");
+                $stmtInsExt->execute([
+                    ':ticket_id' => $ticketId,
+                    ':new_time' => $extTimeMysql,
+                    ':reason' => $extReason
+                ]);
+            }
+        }
+    }
+
     if (!empty($input['extensionResolvedStatus'])) {
         $resolvedSt = trim((string)$input['extensionResolvedStatus']);
         if (in_array($resolvedSt, ['Disetujui', 'Ditolak', 'Dibatalkan', 'Diselesaikan'], true)) {

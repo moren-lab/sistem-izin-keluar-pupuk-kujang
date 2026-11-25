@@ -3514,6 +3514,9 @@
         }
         t.pendingExtension = null;
         t.hasExtensionPending = false;
+        // Reset agar karyawan bisa ajukan ulang — hanya extensionApproved yang mengunci
+        t.extensionApproved = false;
+        t.extensionRejected = true;
         t.timeline.push({
           event: 'Perpanjangan Waktu Ditolak',
           time: nowFormatted,
