@@ -2218,10 +2218,55 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   }
 
   const approverName = ticket.approverName || 'Arthur Morgan, S.Tr.T.';
+  const cleanNameFn = typeof window.cleanPersonName === 'function'
+    ? window.cleanPersonName
+    : (s) => String(s || '').toLowerCase().trim();
+  const directSupName = ticket.directSupervisor || ticket.reassignedFrom || (typeof window.getPrimaryApprover === 'function' ? (window.getPrimaryApprover(ticket.applicantName)?.name || '') : '');
+  const isReassignedTicket = Boolean(
+    ticket.reassignedFrom ||
+    ticket.reassignedStatusLabel ||
+    (directSupName && approverName && cleanNameFn(directSupName) !== cleanNameFn(approverName))
+  );
+
+  let displayCardApproverName = approverName;
+  let reassignSubNoteHtml = '';
+
+  if (isReassignedTicket) {
+    const isApproverViewer = (window.currentActor === 'approver' || window.currentActor === 'approver2');
+    const curApprActor = (isApproverViewer && typeof window.getCurrentApproverActor === 'function')
+      ? window.getCurrentApproverActor()
+      : null;
+    const curApprName = curApprActor ? (curApprActor.name || '') : '';
+    const isViewerDirectSup = Boolean(
+      isApproverViewer &&
+      curApprName &&
+      directSupName &&
+      cleanNameFn(curApprName) === cleanNameFn(directSupName) &&
+      cleanNameFn(curApprName) !== cleanNameFn(approverName)
+    );
+    const isViewerTargetAppr = Boolean(
+      isApproverViewer &&
+      curApprName &&
+      cleanNameFn(curApprName) === cleanNameFn(approverName)
+    );
+
+    if (isViewerDirectSup) {
+      displayCardApproverName = directSupName;
+      reassignSubNoteHtml = `<div style="font-size:0.725rem; color:#b45309; font-weight:600; margin-top:3px; line-height:1.35;">↳ Pemohon mengalihkan pengajuan ke atasan <strong>${approverName}</strong></div>`;
+    } else if (isViewerTargetAppr) {
+      displayCardApproverName = approverName;
+      reassignSubNoteHtml = `<div style="font-size:0.725rem; color:#0284c7; font-weight:600; margin-top:3px; line-height:1.35;">↳ Pemohon dari atasan <strong>${directSupName || 'Atasan Langsung'}</strong> mengalihkan pengajuan kepada Anda</div>`;
+    } else if (ticket.reassignedStatusLabel) {
+      reassignSubNoteHtml = `<div style="font-size:0.725rem; color:#0284c7; font-weight:700; margin-top:3px; line-height:1.35;">↳ ${ticket.reassignedStatusLabel}</div>`;
+    } else if (directSupName) {
+      reassignSubNoteHtml = `<div style="font-size:0.725rem; color:#b45309; font-weight:600; margin-top:3px; line-height:1.35;">↳ Dialihkan dari <strong>${directSupName}</strong> ke <strong>${approverName}</strong></div>`;
+    }
+  }
+
   const infoApproverAvatar = document.getElementById('infoApproverAvatar');
   if (infoApproverAvatar) {
     if (typeof window.renderUserPhoto === 'function') {
-      infoApproverAvatar.innerHTML = window.renderUserPhoto(approverName, 34);
+      infoApproverAvatar.innerHTML = window.renderUserPhoto(displayCardApproverName, 34);
     } else {
       infoApproverAvatar.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
     }
@@ -2229,21 +2274,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
-    if (ticket.reassignedStatusLabel) {
-      infoApproverLbl.innerHTML = `
-        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${approverName}</div>
-        <div style="font-size:0.725rem; color:#0284c7; font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">↳ ${ticket.reassignedStatusLabel}</div>
-      `;
-    } else if (ticket.reassignedFrom) {
-      infoApproverLbl.innerHTML = `
-        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${approverName}</div>
-        <div style="font-size:0.725rem; color:#b45309; font-weight:600; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">↳ Dialihkan dari ${ticket.reassignedFrom}</div>
-      `;
-    } else {
-      infoApproverLbl.innerHTML = `
-        <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${approverName}</div>
-      `;
-    }
+    infoApproverLbl.innerHTML = `
+      <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${displayCardApproverName}</div>
+      ${reassignSubNoteHtml}
+    `;
   }
 
   const infoApproverBadgeContainer = document.getElementById('infoApproverBadgeContainer');

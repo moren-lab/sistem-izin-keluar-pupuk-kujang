@@ -1482,7 +1482,7 @@ function renderKaryawanDashboard() {
             hasPendingExt ? `
               <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                 <div style="display: flex; gap: 8px; width: 100%;">
-                  <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 1; cursor: not-allowed; font-weight: 800; background: #facc15; color: #0f172a; border: 1.5px solid #eab308;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                  <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;" title="Permohonan perpanjangan sedang ditinjau Atasan">
                     <span>Menunggu Persetujuan</span>
                   </button>
                   ${isGroupDinasActive ? `
@@ -1926,7 +1926,7 @@ function renderPengajuanSayaView() {
           hasPendingExt ? `
             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
               <div style="display: flex; gap: 8px; width: 100%;">
-                <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 1; cursor: not-allowed; font-weight: 800; background: #facc15; color: #0f172a; border: 1.5px solid #eab308;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;" title="Permohonan perpanjangan sedang ditinjau Atasan">
                   <span>Menunggu Persetujuan</span>
                 </button>
                 ${isGroupDinasActive ? `
@@ -2168,6 +2168,7 @@ function renderRiwayatView() {
 
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalItems);
+  window.currentDetailTicketIds = filtered.map(t => t.id);
   const pageItems = filtered.slice(startIndex, endIndex);
 
   if (figmaEmpPaginationMeta) {

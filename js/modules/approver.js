@@ -445,10 +445,10 @@ function renderApproverDashboard() {
                 </div>
               </div>
             ` : ''}
-            <div style="display: flex; justify-content: flex-end; gap: 0.45rem; flex-wrap: wrap; padding-top: 0.45rem; border-top: 1px solid rgba(59, 130, 246, 0.25);">
-              <button type="button" class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${t.id}', 'detail')">Detail Pengajuan</button>
-              <button type="button" class="btn-reject" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px;" onclick="window.rejectArrivalByApprover('${t.id}')">✕ Belum Tiba</button>
-              <button type="button" class="btn-approve" style="padding: 0.35rem 0.85rem; font-size: 0.75rem; font-weight: 800;" onclick="window.confirmArrivalByApprover('${t.id}')">✓ Ya, Sudah Tiba</button>
+            <div style="display: flex; justify-content: flex-end; gap: 0.4rem; flex-wrap: wrap; padding-top: 0.45rem; border-top: 1px solid rgba(59, 130, 246, 0.25);">
+              <button type="button" class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></button>
+              <button type="button" class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 8px;" onclick="window.rejectArrivalByApprover('${t.id}')" title="Belum Tiba" aria-label="Belum Tiba">✕</button>
+              <button type="button" class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="window.confirmArrivalByApprover('${t.id}')" title="Ya, Sudah Tiba" aria-label="Ya, Sudah Tiba">✓</button>
             </div>
           </div>
         `;
@@ -480,9 +480,9 @@ function renderApproverDashboard() {
                 Diajukan: ${typeof window.formatDisplayCreatedDate === 'function' ? window.formatDisplayCreatedDate(emg.createdAt) : emg.createdAt}
               </span>
               <div style="display: flex; gap: 0.35rem; align-items: center;">
-                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${emg.id}', 'detail')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg><span>Detail Pengajuan</span></button>
-                <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectModal('${emg.id}')">✕ Tolak</button>
-                <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openApproveModal('${emg.id}')">✓ Setujui</button>
+                <button class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openTicketDetail('${emg.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></button>
+                <button class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="openRejectModal('${emg.id}')" title="Tolak" aria-label="Tolak">✕</button>
+                <button class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="openApproveModal('${emg.id}')" title="Setujui" aria-label="Setujui">✓</button>
               </div>
             </div>
           </div>
@@ -512,10 +512,10 @@ function renderApproverDashboard() {
               <span style="font-size: 0.725rem; color: var(--text-muted);">
                 Diajukan: ${t.pendingExtension.requestedAt}
               </span>
-              <div style="display: flex; gap: 0.35rem;">
-                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg><span>Detail Pengajuan</span></button>
-                <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectExtensionModal('${t.id}')">✕ Tolak</button>
-                <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="approveExtensionRequest('${t.id}')">✓ Setujui</button>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <button class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></button>
+                <button class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="openRejectExtensionModal('${t.id}')" title="Tolak" aria-label="Tolak">✕</button>
+                <button class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="approveExtensionRequest('${t.id}')" title="Setujui" aria-label="Setujui">✓</button>
               </div>
             </div>
           </div>
@@ -543,10 +543,10 @@ function renderApproverDashboard() {
               <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
                 Keluar: ${t.plannedExit.replace('T', ' ')}
               </span>
-              <div style="display: flex; gap: 0.35rem;">
-                <button class="btn-card-detail" style="padding: 0.3rem 0.6rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg><span>Detail Pengajuan</span></button>
-                <button class="btn-reject" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openRejectModal('${t.id}')">✕ Tolak</button>
-                <button class="btn-approve" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openApproveModal('${t.id}')">✓ Setujui</button>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <button class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></button>
+                <button class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="openRejectModal('${t.id}')" title="Tolak" aria-label="Tolak">✕</button>
+                <button class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px;" onclick="openApproveModal('${t.id}')" title="Setujui" aria-label="Setujui">✓</button>
               </div>
             </div>
           </div>
@@ -574,7 +574,7 @@ function renderApproverDashboard() {
               <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
                 Rencana: ${t.plannedExit ? t.plannedExit.replace('T', ' ') : '-'}
               </span>
-              <button class="btn-card-detail" style="padding: 0.3rem 0.65rem; font-size: 0.725rem;" onclick="openTicketDetail('${t.id}', 'detail')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg><span>Detail Pengajuan</span></button>
+              <button class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></button>
             </div>
           </div>
         `;
@@ -1172,7 +1172,7 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
                 ${extraAntrianBtns}
                 ${isAntrianView ? `
                   <button type="button" class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="event.stopPropagation(); openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan #${t.id}" aria-label="Detail Pengajuan">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                   </button>
                 ` : `
                   <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'approver', '${t.id}', ${isRiwayatView})" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
@@ -1770,6 +1770,7 @@ function renderApproverView() {
     const currentPage = window.appRiwayatCurrentPage;
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = Math.min(startIndex + pageSize, totalItems);
+    window.currentDetailTicketIds = list.map(t => t.id);
     const pageItems = list.slice(startIndex, endIndex);
 
     const metaEl = document.getElementById('figmaApproverRiwayatMeta');
