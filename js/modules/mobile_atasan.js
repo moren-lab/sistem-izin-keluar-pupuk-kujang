@@ -3256,6 +3256,26 @@
         });
       }
 
+      if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+        window.SyncEngine.callUpdateTicket(
+          decision === 'approve'
+            ? {
+                ticketId: t.id,
+                action: 'approve',
+                approverNip: approver.nip,
+                approverName: approver.name,
+                approverTitle: approver.title || 'Atasan Langsung',
+                approverNote: note
+              }
+            : {
+                ticketId: t.id,
+                action: 'reject',
+                rejectionReason: note,
+                approverName: approver.name
+              }
+        );
+      }
+
       if (typeof window.createNotification === 'function') {
         if (decision === 'approve') {
           const appInfo = resolveDynamicApplicantInfo(t);
@@ -3413,6 +3433,15 @@
         renderMobileAtasan(null, currentAtasanTab);
         return;
       }
+      if (!t.pendingExtension && !t.extensionRequestedTime) {
+        t.hasExtensionPending = false;
+        if (typeof window.showToast === 'function') {
+          window.showToast('Permohonan perpanjangan sudah tidak aktif atau telah diproses.', 'warning');
+        }
+        window.mobileCloseSheet();
+        renderMobileAtasan(null, currentAtasanTab);
+        return;
+      }
       t.hasExtensionPending = false;
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
@@ -3433,8 +3462,10 @@
           const today = new Date().toISOString().split('T')[0];
           newReturn = `${today}T${newReturn.replace('.', ':')}:00`;
         }
-        t.plannedReturn = newReturn;
-        t.estimatedReturn = newReturn;
+        if (newReturn) {
+          t.plannedReturn = newReturn;
+          t.estimatedReturn = newReturn;
+        }
         t.extensionApproved = true;
         t.extensionCount = (t.extensionCount || 0) + 1;
         if (t.status === 'Terlambat') {
@@ -3452,6 +3483,16 @@
           by: `${approver.name} (${approver.title || 'Atasan'})`,
           desc: `Tambahan waktu keluar disetujui hingga ${formatDisplayDate(newReturn)}. Catatan: "${note}"`
         });
+
+        if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+          window.SyncEngine.callUpdateTicket({
+            ticketId: t.id,
+            action: 'approve_extension',
+            approverNip: approver.nip,
+            approverName: approver.name,
+            note: note
+          });
+        }
 
         if (typeof window.createNotification === 'function') {
           window.createNotification({
@@ -3479,6 +3520,16 @@
           by: `${approver.name} (${approver.title || 'Atasan'})`,
           desc: `Permohonan perpanjangan ditolak. Catatan: "${note}"`
         });
+
+        if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+          window.SyncEngine.callUpdateTicket({
+            ticketId: t.id,
+            action: 'reject_extension',
+            approverNip: approver.nip,
+            approverName: approver.name,
+            note: note
+          });
+        }
 
         if (typeof window.createNotification === 'function') {
           window.createNotification({

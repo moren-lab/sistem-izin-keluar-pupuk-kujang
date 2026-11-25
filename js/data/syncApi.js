@@ -29,9 +29,11 @@
   let pollIntervalTimer = null;
   const knownServerTicketHashes = new Map();
   const knownServerStatuses = new Map();
+  const knownServerPendingExt = new Map();
   const pendingCreateIds = new Set();
   const lastLocalSnapshotIds = new Set();
   let softDeleteInFlight = 0;
+  let mutationInFlight = 0;
 
   console.log(`[SyncEngine] Menghubungkan ke API Laragon MySQL di: ${API_BASE}`);
 
@@ -54,10 +56,11 @@
     const delKary = Array.isArray(t.deletedByKaryawanNips) ? t.deletedByKaryawanNips.join(',') : '';
     return [
       t.id, t.status, t.scanOutTime || '', t.scanInTime || '', t.tapInTime || '',
-      t.lateMinutes || 0, t.approverNip || '', t.approverNote || '', t.rejectionReason || '',
-      t.cancellationReason || '', t.plannedExit || '', t.estimatedReturn || '',
+      t.lateMinutes || 0, t.isLate ? 1 : 0, t.approverNip || '', t.approverNote || '', t.rejectionReason || '',
+      t.cancellationReason || '', t.approvedAt || '', t.plannedExit || '', t.estimatedReturn || '',
+      t.emergencyAuthorizerNip || '', t.emergencyAuthorizerName || '', t.emergencyVerifiedAt || '',
       t.timeFrozen ? 1 : 0, t.arrivalReportedTime || '', t.timeline ? t.timeline.length : 0,
-      mbrStr, t.hasExtensionPending ? 1 : 0, extStr,
+      mbrStr, t.hasExtensionPending ? 1 : 0, extStr, t.extensionApproved ? 1 : 0,
       t.deletedByKaryawan ? 1 : 0, delKary, t.deletedByApprover1 ? 1 : 0, t.deletedByApprover2 ? 1 : 0,
       t.deletedBySecurity ? 1 : 0, t.deletedFromAudit ? 1 : 0, delAppr,
       t.initiatorCancelled ? 1 : 0
@@ -71,7 +74,7 @@
 
   // 2. Fetch Tiket dari Database MySQL
   async function fetchTicketsFromMySQL(isInitial = false) {
-    if (isSyncing || softDeleteInFlight > 0) return;
+    if (isSyncing || softDeleteInFlight > 0 || mutationInFlight > 0) return;
     isSyncing = true;
 
     try {
@@ -86,10 +89,10 @@
         throw new Error(`HTTP error ${response.status}`);
       }
 
-      if (softDeleteInFlight > 0) return;
+      if (softDeleteInFlight > 0 || mutationInFlight > 0) return;
 
       const resJson = await response.json();
-      if (softDeleteInFlight > 0) return;
+      if (softDeleteInFlight > 0 || mutationInFlight > 0) return;
       if (resJson && resJson.success && Array.isArray(resJson.data)) {
         isApiOnline = true;
         const serverTickets = resJson.data;
@@ -176,9 +179,11 @@
         // Perbarui peta referensi MySQL (MySQL selalu menjadi Single Source of Truth, termasuk jika tabel dikosongkan di phpMyAdmin)
         knownServerTicketHashes.clear();
         knownServerStatuses.clear();
+        knownServerPendingExt.clear();
         serverTickets.forEach(t => {
           knownServerTicketHashes.set(t.id, computeSingleHash(t));
           knownServerStatuses.set(t.id, t.status);
+          knownServerPendingExt.set(t.id, Boolean(t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')));
           pendingCreateIds.delete(t.id);
         });
         hasInitialFetchCompleted = true;
@@ -313,6 +318,9 @@
   async function pushTicketChangesToMySQL(newTicketsList) {
     if (!newTicketsList || !Array.isArray(newTicketsList)) return;
 
+    const tasks = [];
+    mutationInFlight++;
+
     try {
       for (const t of newTicketsList) {
         if (!t || !t.id) continue;
@@ -335,6 +343,26 @@
           pendingCreateIds.add(t.id);
         }
 
+        const wasPendingExt = Boolean(knownServerPendingExt.get(t.id));
+        const isNowPendingExt = Boolean(
+          (t.status === 'Sedang di Luar' || t.status === 'Terlambat') &&
+          t.pendingExtension &&
+          t.hasExtensionPending &&
+          t.pendingExtension.status === 'Menunggu Persetujuan'
+        );
+        let extensionResolvedStatus = '';
+        if (wasPendingExt && !isNowPendingExt) {
+          const lastTl = Array.isArray(t.timeline) && t.timeline.length > 0 ? t.timeline[t.timeline.length - 1] : null;
+          const ev = String((lastTl && (lastTl.event || lastTl.title)) || '').toLowerCase();
+          if (t.extensionApproved || ev.includes('perpanjangan waktu disetujui')) {
+            extensionResolvedStatus = 'Disetujui';
+          } else if (ev.includes('pembatalan') || ev.includes('batal')) {
+            extensionResolvedStatus = 'Dibatalkan';
+          } else {
+            extensionResolvedStatus = 'Ditolak';
+          }
+        }
+
         const payload = {
           id: t.id,
           updateOnly: existedOnServer ? 1 : 0,
@@ -351,6 +379,8 @@
           plannedExit: t.plannedExit || t.waktuKeluar,
           estimatedReturn: t.estimatedReturn || t.estimasiKembali,
           status: t.status,
+          isLate: t.isLate ? 1 : 0,
+          lateMinutes: t.lateMinutes || 0,
           tapInTime: t.tapInTime,
           tapInMember: t.tapInMember,
           tapInNip: t.tapInNip,
@@ -364,6 +394,15 @@
           approverName: t.approverName,
           approverTitle: t.approverTitle,
           approverNote: t.approverNote,
+          approvedAt: t.approvedAt || null,
+          rejectionReason: t.rejectionReason || t.rejectReason || null,
+          cancellationReason: t.cancellationReason || null,
+          emergencyAuthorizerNip: t.emergencyAuthorizerNip || null,
+          emergencyAuthorizerName: t.emergencyAuthorizerName || null,
+          emergencyAuthorizerPhone: t.emergencyAuthorizerPhone || null,
+          emergencyAuthorizationNote: t.emergencyAuthorizationNote || null,
+          emergencyVerifiedAt: t.emergencyVerifiedAt || null,
+          extensionResolvedStatus: extensionResolvedStatus || null,
           scanOutGate: t.scanOutGate,
           securityOfficerOut: t.securityOfficerOut,
           scanOutTime: t.scanOutTime,
@@ -382,7 +421,7 @@
           deletedFromAudit: t.deletedFromAudit ? 1 : 0
         };
 
-        fetch(`${API_BASE}/create_ticket.php`, {
+        const createPromise = fetch(`${API_BASE}/create_ticket.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -394,16 +433,19 @@
               if (resJson.data && resJson.data.skippedDeleted) {
                 knownServerTicketHashes.delete(t.id);
                 knownServerStatuses.delete(t.id);
+                knownServerPendingExt.delete(t.id);
               } else {
                 knownServerTicketHashes.set(t.id, currentTicketHash);
                 knownServerStatuses.set(t.id, t.status);
+                knownServerPendingExt.set(t.id, isNowPendingExt);
               }
             }
           })
           .catch(e => console.warn('[SyncEngine] Gagal sync tiket individual:', e));
+        tasks.push(createPromise);
 
-        if ((t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.hasExtensionPending && t.pendingExtension.status === 'Menunggu Persetujuan') {
-          fetch(`${API_BASE}/update_ticket.php`, {
+        if (isNowPendingExt) {
+          const reqExtPromise = fetch(`${API_BASE}/update_ticket.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -412,11 +454,27 @@
               newEstimatedReturn: t.pendingExtension.newEstimatedReturn || t.extensionRequestedTime,
               reason: t.pendingExtension.reason || t.extensionReason
             })
-          }).catch(() => {});
+          })
+            .then(r => r.ok ? r.json() : null)
+            .then(j => {
+              if (j && j.success) {
+                knownServerPendingExt.set(t.id, true);
+              }
+            })
+            .catch(() => {});
+          tasks.push(reqExtPromise);
         }
+      }
+
+      if (tasks.length > 0) {
+        await Promise.allSettled(tasks);
       }
     } catch (err) {
       console.warn('[SyncEngine] Gagal push perubahan ke MySQL:', err);
+    } finally {
+      setTimeout(() => {
+        mutationInFlight = Math.max(0, mutationInFlight - 1);
+      }, 300);
     }
   }
 
@@ -532,11 +590,45 @@
     }
   }
 
+  // 3c. Direct Ticket Lifecycle Action Sync Helper (Lock polling during update_ticket.php)
+  async function callUpdateTicket(payload) {
+    if (!payload || !payload.ticketId || !payload.action) return null;
+    mutationInFlight++;
+    try {
+      const res = await fetch(`${API_BASE}/update_ticket.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = res.ok ? await res.json() : null;
+      if (json && json.success && Array.isArray(window.ticketsList)) {
+        const localT = window.ticketsList.find(x => x && x.id === payload.ticketId);
+        if (localT) {
+          knownServerTicketHashes.set(localT.id, computeSingleHash(localT));
+          knownServerStatuses.set(localT.id, localT.status);
+          knownServerPendingExt.set(
+            localT.id,
+            Boolean(localT.hasExtensionPending || (localT.pendingExtension && localT.pendingExtension.status === 'Menunggu Persetujuan'))
+          );
+        }
+      }
+      return json;
+    } catch (e) {
+      console.warn('[SyncEngine] callUpdateTicket gagal:', payload.action, e);
+      return null;
+    } finally {
+      setTimeout(() => {
+        mutationInFlight = Math.max(0, mutationInFlight - 1);
+      }, 350);
+    }
+  }
+
   // Expose untuk kontrol manual / debugging jika diperlukan
   window.SyncEngine = {
     fetchFromMySQL: fetchTicketsFromMySQL,
     pushToMySQL: pushTicketChangesToMySQL,
     softDeleteTickets: softDeleteTickets,
+    callUpdateTicket: callUpdateTicket,
     getApiUrl: () => API_BASE,
     isOnline: () => isApiOnline,
     isInitialFetchDone: () => hasInitialFetchCompleted

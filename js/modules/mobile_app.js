@@ -9,6 +9,8 @@
 
   let currentMobileRole = 'karyawan'; // 'karyawan' | 'approver' | 'approver2' | 'security'
   let currentMobileTab = 'dashboard';
+  let prevMobileTabBeforeNotif = 'dashboard';
+  let mobileNotifFilterTab = 'all';
 
   // Global helper fallbacks for safe tickets persistence
   window.getTickets = function () {
@@ -275,6 +277,14 @@
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    if (currentMobileTab === 'notifikasi') {
+      if (typeof window.renderMobileFullNotifikasiPage === 'function') {
+        window.renderMobileFullNotifikasiPage(mobileNotifFilterTab, container);
+      }
+      renderBottomNav();
+      return;
+    }
+
     if (currentMobileRole === 'karyawan' || currentMobileRole === 'karyawan2') {
       if (typeof window.renderMobileKaryawan === 'function') {
         window.renderMobileKaryawan(container, currentMobileTab);
@@ -483,6 +493,18 @@
     }
 
     if (tab === 'beranda') tab = 'dashboard';
+    if (tab === 'notifikasi') {
+      if (currentMobileTab && currentMobileTab !== 'notifikasi') {
+        prevMobileTabBeforeNotif = currentMobileTab;
+      }
+      if (subParam === 'all' || subParam === 'unread') {
+        mobileNotifFilterTab = subParam;
+      }
+      currentMobileTab = 'notifikasi';
+      window.currentMobileTab = 'notifikasi';
+      renderActiveView();
+      return;
+    }
     if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'pelacakan') {
       tab = 'tim';
     }
@@ -501,6 +523,11 @@
         window.mobileSwitchPelacakanFilter(subParam);
       }
     }
+  };
+
+  window.closeMobileFullNotifikasiPage = function () {
+    const backTab = (prevMobileTabBeforeNotif && prevMobileTabBeforeNotif !== 'notifikasi') ? prevMobileTabBeforeNotif : 'dashboard';
+    window.mobileSwitchTab(backTab);
   };
 
   window.mobileSwitchRole = function (role) {
@@ -527,10 +554,18 @@
     let targetUser = null;
     if (role === 'karyawan') {
       targetUser = allUsers.find(u => u.nip === 'PK-2024-8841' && !delNips.has('pk-2024-8841')) ||
-                   allUsers.find(u => (u.roleKey === 'karyawan' || u.role === 'Karyawan') && !delNips.has((u.nip || '').toLowerCase()));
+                   allUsers.find(u => (u.roleKey === 'karyawan' || u.role === 'Karyawan') && u.nip !== 'PK-2024-8842' && !delNips.has((u.nip || '').toLowerCase()));
+      if (targetUser) {
+        window.activeEmployeeUser = null;
+        try { localStorage.removeItem('KUJANG_ACTIVE_EMP_NIP'); } catch (e) {}
+      }
     } else if (role === 'karyawan2') {
       targetUser = allUsers.find(u => u.nip === 'PK-2024-8842' && !delNips.has('pk-2024-8842')) ||
                    allUsers.find(u => u.roleKey === 'karyawan2' && !delNips.has((u.nip || '').toLowerCase()));
+      if (targetUser) {
+        window.activeEmployeeUser = targetUser;
+        try { localStorage.setItem('KUJANG_ACTIVE_EMP_NIP', targetUser.nip); } catch (e) {}
+      }
     } else if (role === 'approver') {
       targetUser = allUsers.find(u => u.roleKey === 'approver' && u.status === 'Aktif' && !delNips.has((u.nip || '').toLowerCase())) ||
                    allUsers.find(u => u.roleKey === 'approver' && !delNips.has((u.nip || '').toLowerCase()));
@@ -592,10 +627,17 @@
 
     window.currentActor = role;
 
-    // Sinkronkan peran aktif di tingkat sistem
+    // Sinkronkan peran aktif di tingkat sistem dengan targetUser yang persis
     if (typeof window.switchRole === 'function') {
-      window.switchRole(role);
+      window.switchRole(role, targetUser);
     }
+
+    if (typeof window.setKujangCurrentUser === 'function') {
+      window.setKujangCurrentUser(targetUser);
+    }
+    currentMobileRole = role;
+    window.currentMobileRole = currentMobileRole;
+    window.currentActor = role;
 
     window.closeMobileRoleSheet();
     renderMobileShell();
@@ -676,11 +718,21 @@
       }
     } catch (e) {}
 
-    // Jika sedang melihat detail tiket yang dibuka dari action sheet notifikasi mobile lengkap, kembalikan ke daftar
+    // Jika sedang melihat detail tiket yang dibuka dari halaman notifikasi mobile lengkap, tetap di halaman penuh & perbarui read state
     if (wasFromNotif && (notifSource === 'mobile' || (!notifSource && isMobileEnv))) {
-      if (notifTab !== 'dropdown' && typeof window.openMobileFullNotificationSheet === 'function') {
+      if (notifTab === 'fullpage') {
+        if (currentMobileTab === 'notifikasi' && typeof window.renderMobileFullNotifikasiPage === 'function') {
+          setTimeout(() => {
+            window.renderMobileFullNotifikasiPage(mobileNotifFilterTab);
+          }, 50);
+        } else if (typeof window.openMobileFullNotifikasiPage === 'function') {
+          setTimeout(() => {
+            window.openMobileFullNotifikasiPage(mobileNotifFilterTab || 'all');
+          }, 50);
+        }
+      } else if (notifTab !== 'dropdown' && typeof window.openMobileFullNotifikasiPage === 'function') {
         setTimeout(() => {
-          window.openMobileFullNotificationSheet(notifTab);
+          window.openMobileFullNotifikasiPage(notifTab);
         }, 50);
       }
     }

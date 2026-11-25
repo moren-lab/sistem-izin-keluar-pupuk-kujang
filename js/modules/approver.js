@@ -1941,6 +1941,17 @@ function confirmApproveDecision() {
 
   window.saveTickets(ticketsList);
 
+  if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+    window.SyncEngine.callUpdateTicket({
+      ticketId: ticket.id,
+      action: 'approve',
+      approverNip: approverActor.nip,
+      approverName: approverName,
+      approverTitle: approverTitle,
+      approverNote: note
+    });
+  }
+
   if (typeof window.createNotification === 'function') {
     window.createNotification({
       recipientRole: 'karyawan',
@@ -2145,6 +2156,15 @@ function confirmRejectDecision() {
   });
 
   window.saveTickets(ticketsList);
+
+  if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+    window.SyncEngine.callUpdateTicket({
+      ticketId: ticket.id,
+      action: 'reject',
+      rejectionReason: reason,
+      approverName: approverName
+    });
+  }
 
   if (typeof window.createNotification === 'function') {
     window.createNotification({
@@ -2354,6 +2374,16 @@ function approveExtensionRequest(ticketId) {
   }
 
   window.saveTickets(ticketsList);
+
+  if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+    window.SyncEngine.callUpdateTicket({
+      ticketId: ticket.id,
+      action: 'approve_extension',
+      approverNip: currentActor ? currentActor.nip : null,
+      approverName: approverName,
+      note: `Disetujui hingga ${newReturn}`
+    });
+  }
   if (typeof window.showToast === 'function') {
     window.showToast(`Perpanjangan waktu tiket #${ticket.id} berhasil disetujui!`, 'success');
   }
@@ -2437,6 +2467,16 @@ function rejectExtensionRequest(ticketId, reason) {
   ticket.extensionRejected = true;
 
   window.saveTickets(ticketsList);
+
+  if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+    window.SyncEngine.callUpdateTicket({
+      ticketId: ticket.id,
+      action: 'reject_extension',
+      approverNip: (typeof approverActor !== 'undefined' && approverActor) ? approverActor.nip : null,
+      approverName: approverName,
+      note: rejectReason
+    });
+  }
   if (typeof window.showToast === 'function') {
     window.showToast(`Permohonan perpanjangan tiket #${ticket.id} ditolak.`, 'info');
   }

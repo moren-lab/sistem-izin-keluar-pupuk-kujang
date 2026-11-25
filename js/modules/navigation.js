@@ -319,9 +319,11 @@ function findUserByRoleOrId(roleOrId, maybeId) {
     if (byId) return byId;
   }
   if (roleOrId === 'karyawan') {
-    if (window.activeEmployeeUser) return window.activeEmployeeUser;
+    if (window.activeEmployeeUser && window.activeEmployeeUser.roleKey !== 'karyawan2' && window.activeEmployeeUser.nip !== 'PK-2024-8842') {
+      return window.activeEmployeeUser;
+    }
     return allUsers.find(u => u.kujangId === 'KJG-991024' || u.nip === 'PK-2024-8841' || (u.name && u.name.includes('Budi Pratama'))) ||
-           allUsers.find(u => u.roleKey === 'karyawan');
+           allUsers.find(u => u.roleKey === 'karyawan' && u.nip !== 'PK-2024-8842');
   }
   if (roleOrId === 'karyawan2') {
     return allUsers.find(u => u.kujangId === 'KJG-991025' || u.nip === 'PK-2024-8842' || (u.name && u.name.includes('Arthur Morgan'))) ||

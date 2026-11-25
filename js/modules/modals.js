@@ -3006,7 +3006,9 @@ function closeTicketDetailModal() {
       }, 50);
     } else if (notifSource === 'mobile') {
       setTimeout(() => {
-        if (typeof window.openMobileNotificationSheet === 'function') {
+        if (notifTab !== 'dropdown' && typeof window.openMobileFullNotifikasiPage === 'function') {
+          window.openMobileFullNotifikasiPage(notifTab === 'unread' ? 'unread' : 'all');
+        } else if (typeof window.openMobileNotificationSheet === 'function') {
           window.openMobileNotificationSheet(notifTab);
         }
       }, 50);
@@ -5194,8 +5196,15 @@ function executeCancelPendingExtension(targetTicketId) {
 
   // Hapus permohonan perpanjangan yang tertunda
   delete ticket.pendingExtension;
+  ticket.hasExtensionPending = false;
 
   window.saveTickets(ticketsList);
+  if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+    window.SyncEngine.callUpdateTicket({
+      ticketId: ticket.id,
+      action: 'cancel_extension'
+    });
+  }
   closePendingExtensionDetailModal();
 
   if (typeof window.showToast === 'function') {

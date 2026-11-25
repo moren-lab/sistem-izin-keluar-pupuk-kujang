@@ -123,6 +123,8 @@ try {
             :document_name, :document_url, NOW()
         )
         ON DUPLICATE KEY UPDATE
+            `planned_exit` = VALUES(`planned_exit`),
+            `estimated_return` = VALUES(`estimated_return`),
             `status` = VALUES(`status`),
             `approver_nip` = COALESCE(VALUES(`approver_nip`), `approver_nip`),
             `approver_name` = COALESCE(VALUES(`approver_name`), `approver_name`),
@@ -331,6 +333,73 @@ try {
     }
     if (!empty($input['deletedFromAudit'])) {
         $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'admin', ':nip' => '']);
+    }
+
+    // F. Sinkronkan metadata siklus hidup tambahan (penolakan, pembatalan, keterlambatan, approval time, & perpanjangan)
+    $rejReason = isset($input['rejectionReason']) && trim((string)$input['rejectionReason']) !== '' ? trim((string)$input['rejectionReason']) : null;
+    $canReason = isset($input['cancellationReason']) && trim((string)$input['cancellationReason']) !== '' ? trim((string)$input['cancellationReason']) : null;
+    $isLateVal = !empty($input['isLate']) ? 1 : 0;
+    $lateMinsVal = isset($input['lateMinutes']) ? max(0, (int)$input['lateMinutes']) : 0;
+    $emergAuthNip = isset($input['emergencyAuthorizerNip']) && $input['emergencyAuthorizerNip'] !== '' ? trim((string)$input['emergencyAuthorizerNip']) : null;
+    $emergAuthName = isset($input['emergencyAuthorizerName']) && $input['emergencyAuthorizerName'] !== '' ? trim((string)$input['emergencyAuthorizerName']) : null;
+    $emergAuthPhone = isset($input['emergencyAuthorizerPhone']) && $input['emergencyAuthorizerPhone'] !== '' ? trim((string)$input['emergencyAuthorizerPhone']) : null;
+    $emergAuthNote = isset($input['emergencyAuthorizationNote']) && $input['emergencyAuthorizationNote'] !== '' ? trim((string)$input['emergencyAuthorizationNote']) : null;
+
+    $approvedAtMysql = null;
+    if ($status === 'Disetujui') {
+        $approvedAtMysql = date('Y-m-d H:i:s');
+        if (!empty($input['approvedAt'])) {
+            $parsedTs = strtotime((string)$input['approvedAt']);
+            if ($parsedTs !== false) {
+                $approvedAtMysql = date('Y-m-d H:i:s', $parsedTs);
+            }
+        }
+    }
+
+    $stmtExtra = $pdo->prepare("
+        UPDATE `tickets`
+        SET `is_late` = :is_late,
+            `late_minutes` = :late_minutes,
+            `approved_at` = COALESCE(`approved_at`, :approved_at),
+            `rejection_reason` = COALESCE(:rejection_reason, `rejection_reason`),
+            `cancellation_reason` = COALESCE(:cancellation_reason, `cancellation_reason`),
+            `emergency_authorizer_nip` = COALESCE(:e_nip, `emergency_authorizer_nip`),
+            `emergency_authorizer_name` = COALESCE(:e_name, `emergency_authorizer_name`),
+            `emergency_authorizer_phone` = COALESCE(:e_phone, `emergency_authorizer_phone`),
+            `emergency_authorization_note` = COALESCE(:e_note, `emergency_authorization_note`)
+        WHERE `id` = :id
+    ");
+    $stmtExtra->execute([
+        ':is_late' => $isLateVal,
+        ':late_minutes' => $lateMinsVal,
+        ':approved_at' => $approvedAtMysql,
+        ':rejection_reason' => $rejReason,
+        ':cancellation_reason' => $canReason,
+        ':e_nip' => $emergAuthNip,
+        ':e_name' => $emergAuthName,
+        ':e_phone' => $emergAuthPhone,
+        ':e_note' => $emergAuthNote,
+        ':id' => $ticketId
+    ]);
+
+    if (!empty($input['extensionResolvedStatus'])) {
+        $resolvedSt = trim((string)$input['extensionResolvedStatus']);
+        if (in_array($resolvedSt, ['Disetujui', 'Ditolak', 'Dibatalkan', 'Diselesaikan'], true)) {
+            $stmtResExt = $pdo->prepare("
+                UPDATE `ticket_extensions`
+                SET `status` = :ext_status,
+                    `approver_nip` = COALESCE(:appr_nip, `approver_nip`),
+                    `approver_name` = COALESCE(:appr_name, `approver_name`),
+                    `decided_at` = NOW()
+                WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan'
+            ");
+            $stmtResExt->execute([
+                ':ext_status' => $resolvedSt,
+                ':appr_nip' => isset($input['approverNip']) ? $input['approverNip'] : null,
+                ':appr_name' => isset($input['approverName']) ? $input['approverName'] : null,
+                ':ticket_id' => $ticketId
+            ]);
+        }
     }
 
     $pdo->commit();

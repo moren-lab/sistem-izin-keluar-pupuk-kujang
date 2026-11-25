@@ -916,19 +916,24 @@ window.cancelMemberParticipation = function(ticketId, memberNip) {
 
   if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
 
-  // Sinkronisasi status pembatalan anggota secara langsung ke MySQL API
+  // Sinkronisasi status pembatalan anggota secara langsung ke MySQL API (dengan lock polling)
   try {
-    const apiBase = (typeof resolveApiBaseUrl === 'function') ? resolveApiBaseUrl() : 'api';
-    fetch(`${apiBase}/update_ticket.php`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ticketId: ticketId,
-        action: 'cancel_member',
-        memberNip: targetNip,
-        memberName: currentEmp.name || memberObj.name
-      })
-    }).catch(err => console.warn('[cancelMemberParticipation] Gagal sync ke MySQL:', err));
+    const cancelPayload = {
+      ticketId: ticketId,
+      action: 'cancel_member',
+      memberNip: targetNip,
+      memberName: currentEmp.name || memberObj.name
+    };
+    if (window.SyncEngine && typeof window.SyncEngine.callUpdateTicket === 'function') {
+      window.SyncEngine.callUpdateTicket(cancelPayload);
+    } else {
+      const apiBase = (typeof resolveApiBaseUrl === 'function') ? resolveApiBaseUrl() : 'api';
+      fetch(`${apiBase}/update_ticket.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cancelPayload)
+      }).catch(err => console.warn('[cancelMemberParticipation] Gagal sync ke MySQL:', err));
+    }
   } catch (e) {}
 
   // Tutup modal cancel jika terbuka
