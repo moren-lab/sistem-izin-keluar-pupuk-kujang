@@ -1477,8 +1477,8 @@ function renderKaryawanDashboard() {
             hasPendingExt ? `
               <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                 <div style="display: flex; gap: 8px; width: 100%;">
-                  <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;" title="Permohonan perpanjangan sedang ditinjau Atasan">
-                    <span>Menunggu Persetujuan Perpanjangan</span>
+                  <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 1; cursor: not-allowed; font-weight: 800; background: #facc15; color: #0f172a; border: 1.5px solid #eab308;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                    <span>Menunggu Persetujuan</span>
                   </button>
                   ${isGroupDinasActive ? `
                     <button class="btn-figma-secondary" style="flex: 1; background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
@@ -1490,7 +1490,7 @@ function renderKaryawanDashboard() {
                     </button>
                   `}
                 </div>
-                <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="width: 100%; padding: 6px 12px; font-size: 0.775rem; font-weight: 700; background: #fff; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')">
+                <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="width: 100%; padding: 8px 12px; font-size: 0.8rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')">
                   <span>✕ Batalkan Perpanjangan</span>
                 </button>
               </div>
@@ -1921,8 +1921,8 @@ function renderPengajuanSayaView() {
           hasPendingExt ? `
             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
               <div style="display: flex; gap: 8px; width: 100%;">
-                <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;" title="Permohonan perpanjangan sedang ditinjau Atasan">
-                  <span>Menunggu Persetujuan Perpanjangan</span>
+                <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 1; cursor: not-allowed; font-weight: 800; background: #facc15; color: #0f172a; border: 1.5px solid #eab308;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                  <span>Menunggu Persetujuan</span>
                 </button>
                 ${isGroupDinasActive ? `
                   <button class="btn-figma-secondary" style="flex: 1; background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
@@ -1934,7 +1934,7 @@ function renderPengajuanSayaView() {
                   </button>
                 `}
               </div>
-              <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="width: 100%; padding: 6px 12px; font-size: 0.775rem; font-weight: 700; background: #fff; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')">
+              <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="width: 100%; padding: 8px 12px; font-size: 0.8rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')">
                 <span>✕ Batalkan Perpanjangan</span>
               </button>
             </div>
@@ -2329,7 +2329,9 @@ function getCleanEmpStatus(status, ticket) {
     color = '#d97706';
     statusKey = 'pending';
   } else if (status === 'Menunggu Verifikasi Atasan') {
-    label = 'Menunggu Verifikasi Atasan';
+    label = (window.currentActor === 'approver' || window.currentActor === 'approver2')
+      ? 'Menunggu Verifikasi'
+      : 'Menunggu Verifikasi Atasan';
     color = '#2563eb';
     statusKey = 'waiting-verify';
   } else if (status === 'Menunggu Bukti Kedatangan') {

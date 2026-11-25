@@ -2644,7 +2644,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   if (btnDetailRejectTicket && btnDetailApproveTicket) {
     const isEmergFaceScan = Boolean(ticket.isEmergency || (ticket.id && ticket.id.includes('-EMG-'))) && (ticket.selectedMethod === 'facescan') && (ticket.status === 'Menunggu Otorisasi Darurat' || ticket.emergencyLocked);
-    if (isApproverActor && isPendingDecision && isAssignedToMe && !isEmergFaceScan) {
+    const isPendingExtDecision = Boolean(
+      ticket.pendingExtension &&
+      ticket.pendingExtension.status === 'Menunggu Persetujuan' &&
+      (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat')
+    );
+
+    if (isApproverActor && isAssignedToMe && isPendingDecision && !isEmergFaceScan) {
       btnDetailRejectTicket.style.display = 'inline-flex';
       btnDetailApproveTicket.style.display = 'inline-flex';
       btnDetailRejectTicket.onclick = () => {
@@ -2655,6 +2661,19 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       btnDetailApproveTicket.onclick = () => {
         if (typeof window.openApproveModal === 'function') {
           window.openApproveModal(ticket.id);
+        }
+      };
+    } else if (isApproverActor && isAssignedToMe && isPendingExtDecision) {
+      btnDetailRejectTicket.style.display = 'inline-flex';
+      btnDetailApproveTicket.style.display = 'inline-flex';
+      btnDetailRejectTicket.onclick = () => {
+        if (typeof window.openRejectExtensionModal === 'function') {
+          window.openRejectExtensionModal(ticket.id);
+        }
+      };
+      btnDetailApproveTicket.onclick = () => {
+        if (typeof window.approveExtensionRequest === 'function') {
+          window.approveExtensionRequest(ticket.id);
         }
       };
     } else {
@@ -2819,25 +2838,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       if (infoExtReason) infoExtReason.textContent = ticket.pendingExtension.reason;
 
       if (approverExtActionBtns) {
-        if (window.currentActor === 'approver' || window.currentActor === 'approver2') {
-          approverExtActionBtns.style.display = 'flex';
-          if (btnDetailApproveExt) {
-            btnDetailApproveExt.onclick = () => {
-              if (typeof window.approveExtensionRequest === 'function') {
-                window.approveExtensionRequest(ticket.id);
-              }
-            };
-          }
-          if (btnDetailRejectExt) {
-            btnDetailRejectExt.onclick = () => {
-              if (typeof window.openRejectExtensionModal === 'function') {
-                window.openRejectExtensionModal(ticket.id);
-              }
-            };
-          }
-        } else {
-          approverExtActionBtns.style.display = 'none';
-        }
+        approverExtActionBtns.style.display = 'none';
       }
 
       if (karyawanExtActionBtns) {

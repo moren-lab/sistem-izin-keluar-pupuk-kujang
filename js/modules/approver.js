@@ -398,105 +398,10 @@ function renderApproverDashboard() {
   // Pengajuan yang dialihkan dari atasan ini ke atasan lain (tetap dipantau selama belum selesai)
   const reassignedAwayTickets = ticketsList.filter(t => isTicketReassignedFromCurrentApprover(t) && t.status !== 'Selesai' && t.status !== 'Ditolak' && t.status !== 'Dibatalkan');
 
-  // Urgent Attention Banner
+  // Urgent Attention Banner (dihapus sesuai permintaan agar dashboard bersih)
   if (approverUrgentBanner) {
-    let bannerHtml = '';
-
-    // 0b. INFORMASI TEMBUSAN PENGAJUAN DINAS STAF (JIKA ADA)
-    const currentAct = getCurrentApproverActor();
-    const currNip = (currentAct.nip || '').trim();
-    const currActorName = cleanPersonName(currentAct.name || '');
-
-    const memberDinasPendingTickets = ticketsList.filter(t =>
-      t.status !== 'Dibatalkan' &&
-      t.status !== 'Ditolak' &&
-      t.status !== 'Selesai' &&
-      !isTicketAssignedToCurrentApprover(t) &&
-      !isTicketReassignedFromCurrentApprover(t) &&
-      (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat') &&
-      t.isGroupDinas &&
-      Array.isArray(t.members) &&
-      t.members.some(m => isMemberMySubordinate(m, currNip, currActorName))
-    );
-
-    if (memberDinasPendingTickets.length > 0) {
-      bannerHtml += `
-        <div style="background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; padding: 0.95rem 1.25rem; margin-bottom: 0.85rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
-          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-              <div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                  <span style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary, #0f172a);">
-                    ${memberDinasPendingTickets.length} TEMBUSAN PENGAJUAN DINAS STAF ANDA
-                  </span>
-                  <span class="tag-badge" style="background: #ffffff; color: #334155; font-weight: 700; border: 1px solid #cbd5e1;">Tembusan</span>
-                </div>
-                <div style="font-size: 0.8rem; color: #475569; margin-top: 3px;">
-                  Staf Anda terdaftar dalam tim tugas dinas kantor (Menunggu persetujuan Atasan Utama).
-                </div>
-                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
-                  Anda dapat memantau rincian penugasan, jadwal, dan lampiran surat tugas di menu Antrean.
-                </div>
-              </div>
-            </div>
-            <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem; background: #ffffff; border-color: #cbd5e1; color: #334155;" onclick="setApproverNav('antrian')">
-              Lihat di Antrean →
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    // Permohonan izin darurat kini dipindahkan langsung ke dalam Antrean Persetujuan Cepat
-
-    if (activeEmergencyTickets.length > 0) {
-      const emg = activeEmergencyTickets[0];
-      const liveStatusText = emg.status === 'Disetujui' ? 'Menuju Pos Gerbang (Belum Keluar)' : (emg.status === 'Sedang di Luar' ? `Sedang di Luar (Scan Out: ${emg.scanOutTime || '-'})` : emg.status);
-      bannerHtml += `
-        <div style="background: #fff1f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.9rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="font-size: 1.4rem;">🚨</div>
-            <div>
-              <div style="font-weight: 800; font-size: 0.875rem; color: #9f1239;">
-                Monitoring Izin Darurat Aktif (${activeEmergencyTickets.length} Karyawan)
-              </div>
-              <div style="font-size: 0.775rem; color: #881337;">
-                ${emg.applicantName} — Tujuan: <strong>${emg.destination}</strong> — Status: <strong>${liveStatusText}</strong> — Otorisasi: <em>${emg.emergencyUnlockMethod || 'Resmi'}</em>
-              </div>
-            </div>
-          </div>
-          <button class="btn-card-detail" style="background: #be123c; color: #ffffff; border: none; padding: 0.4rem 0.85rem; font-size: 0.75rem; border-radius: 6px; cursor: pointer;" onclick="openTicketDetail('${emg.id}', 'detail')">
-            Lacak Izin Darurat →
-          </button>
-        </div>
-      `;
-    }
-
-    if (pendingExtensions.length > 0) {
-      const extFirst = pendingExtensions[0];
-      bannerHtml += `
-        <div style="background: #fffdf7; border: 1.5px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="font-size: 1.4rem;">⏱️</div>
-            <div>
-              <div style="font-weight: 800; font-size: 0.875rem; color: #92400e;">
-                Permohonan Perpanjangan Waktu Izin (${pendingExtensions.length} Karyawan Sedang di Luar)
-              </div>
-              <div style="font-size: 0.775rem; color: #78350f;">
-                ${extFirst.applicantName} (${extFirst.id}) mengajukan perpanjangan kembali s/d <strong>${extFirst.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong>. Alasan: "${extFirst.pendingExtension.reason}"
-              </div>
-            </div>
-          </div>
-          <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <button class="btn-card-detail" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openTicketDetail('${extFirst.id}', 'detail')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg><span>Detail Pengajuan</span></button>
-            <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openRejectExtensionModal('${extFirst.id}')">✕ Tolak</button>
-            <button class="btn-approve" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="approveExtensionRequest('${extFirst.id}')">✓ Setujui</button>
-          </div>
-        </div>
-      `;
-    }
-
-    approverUrgentBanner.innerHTML = bannerHtml;
+    approverUrgentBanner.innerHTML = '';
+    approverUrgentBanner.style.display = 'none';
   }
 
   // Pending queue quick inline list (Verifikasi Tiba + Permohonan Darurat + Initial approvals + Extension requests)
@@ -514,7 +419,7 @@ function renderApproverDashboard() {
       waitingVerificationTickets.forEach(t => {
         const hasProofPhoto = Boolean(t.arrivalProofPhoto);
         html += `
-          <div class="feed-item" style="border: 1px solid var(--border-color, #e2e8f0); border-left: 4px solid #2563eb; background: #ffffff; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
+          <div class="feed-item" style="border: 1px solid var(--border-color, #e2e8f0); background: #ffffff; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
@@ -553,7 +458,7 @@ function renderApproverDashboard() {
       lockedEmergencyTickets.forEach(emg => {
         const isFaceScanMethod = (emg.selectedMethod === 'facescan');
         html += `
-          <div class="feed-item" style="border-left: 4px solid #e11d48; background: #fff1f2; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
+          <div class="feed-item" style="border: 1px solid #fecdd3; background: #fff1f2; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="card-id-num" style="font-size: 0.85rem; color: #9f1239; font-weight: 800;">${emg.id}</span>
@@ -620,7 +525,7 @@ function renderApproverDashboard() {
       // Render regular pending tickets
       pendingTickets.forEach(t => {
         html += `
-          <div class="feed-item" style="border-left: 3px solid var(--amber-warning); flex-direction: column; align-items: stretch; gap: 0.65rem;">
+          <div class="feed-item" style="flex-direction: column; align-items: stretch; gap: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="card-id-num" style="font-size: 0.85rem;">${t.id}</span>
@@ -692,7 +597,7 @@ function renderApproverDashboard() {
         const isOverdue = t.status === 'Terlambat';
         const isEmergency = t.isEmergency || (t.id && t.id.startsWith('TK-EMG'));
         return `
-          <div class="feed-item" style="${isEmergency ? 'border-left: 3.5px solid var(--rose-danger); background: #fff1f2;' : (isOverdue ? 'border-left: 3.5px solid var(--rose-danger); background: #fff5f5;' : '')}">
+          <div class="feed-item" style="${isEmergency ? 'background: #fff1f2;' : (isOverdue ? 'background: #fff5f5;' : '')}">
             <div class="feed-item-left">
               <div class="feed-item-icon" style="background: ${isEmergency ? '#ffe4e6' : (isOverdue ? 'var(--rose-light)' : '#e0f2fe')}; color: ${isEmergency ? '#b91c1c' : (isOverdue ? 'var(--rose-danger)' : '#0284c7')};">
                 ${isEmergency ? '🚨' : (isOverdue ? '⚠️' : '🚗')}
@@ -721,13 +626,26 @@ function renderApproverDashboard() {
 }
 
 function getApproverExitCountdownBadge(t) {
-  if (!t || !t.plannedExit) return '';
-  if (t.status !== 'Menunggu Persetujuan' && t.status !== 'Menunggu Otorisasi Darurat') return '';
+  if (!t) return '';
+  const isPendingExt = Boolean(
+    (t.status === 'Sedang di Luar' || t.status === 'Terlambat') &&
+    t.pendingExtension &&
+    t.pendingExtension.status === 'Menunggu Persetujuan'
+  );
+  const isWaitingExit = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
+  if (!isWaitingExit && !isPendingExt) return '';
+
+  const targetTimeRaw = isPendingExt
+    ? (t.estimatedReturn || t.pendingExtension.newEstimatedReturn)
+    : t.plannedExit;
+  if (!targetTimeRaw) return '';
 
   const exitDate = typeof window.parseTicketDateTime === 'function'
-    ? window.parseTicketDateTime(t.plannedExit)
-    : new Date(t.plannedExit);
+    ? window.parseTicketDateTime(targetTimeRaw)
+    : new Date(targetTimeRaw);
   if (!exitDate || isNaN(exitDate.getTime())) return '';
+
+  const labelText = isPendingExt ? 'Batas kembali' : 'Rencana keluar';
 
   const diffMins = Math.round((exitDate.getTime() - Date.now()) / 60000);
   let valueText = '';
@@ -775,7 +693,7 @@ function getApproverExitCountdownBadge(t) {
           </svg>
         </div>
         <div class="approver-exit-countdown-text">
-          <span class="approver-exit-countdown-label">Rencana keluar</span>
+          <span class="approver-exit-countdown-label">${labelText}</span>
           <span class="approver-exit-countdown-value">${valueText}</span>
         </div>
       </div>
@@ -916,13 +834,17 @@ function renderApproverCards(list, containerElement, isTracking = false) {
 
             ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
               <div class="approver-alert-banner extension" style="border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; margin: 0.5rem 0;">
-                <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
+                <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
                   <span>Permohonan Perpanjangan Waktu</span>
                   <span style="font-size:0.75rem; font-weight:700;">Grace Period</span>
                 </div>
-                <div style="margin-top: 0.35rem; font-size: 0.775rem; line-height: 1.4;">
-                  <div><strong>Waktu Baru:</strong> <strong>${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong></div>
-                  <div><strong>Alasan:</strong> "${t.pendingExtension.reason}"</div>
+                <div class="realization-grid">
+                  <span class="realization-label">Waktu Baru</span>
+                  <span class="realization-separator">:</span>
+                  <span class="realization-value" style="font-weight: 700;">${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</span>
+                  <span class="realization-label">Alasan</span>
+                  <span class="realization-separator">:</span>
+                  <span class="realization-value">"${t.pendingExtension.reason}"</span>
                 </div>
               </div>
             ` : ''}
@@ -976,10 +898,10 @@ function renderApproverCards(list, containerElement, isTracking = false) {
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%;">
                     ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
                       <button class="btn-reject" style="width: 100%; min-height: 38px; justify-content: center; font-size: 0.825rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; background: #b91c1c; color: #ffffff; border: none;" onclick="openRejectExtensionModal('${t.id}')">
-                        ✕ Tolak Perpanjang
+                        ✕ Tolak
                       </button>
                       <button class="btn-approve" style="width: 100%; min-height: 38px; justify-content: center; font-size: 0.825rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; background: #047857; color: #ffffff; border: none;" onclick="approveExtensionRequest('${t.id}')">
-                        ✓ Setujui Perpanjang
+                        ✓ Setujui
                       </button>
                     ` : (isEmergDeciding ? (
               t.selectedMethod === 'facescan' ? `
@@ -1206,40 +1128,40 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
                       <span>📷 Foto</span>
                     </button>
                   ` : ''}
-                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); window.rejectArrivalByApprover('${t.id}')">
-                    ✕ Belum Tiba
+                  <button type="button" class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; background: #dc2626; color: #ffffff; border: 1px solid #dc2626; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); window.rejectArrivalByApprover('${t.id}')" title="Belum Tiba" aria-label="Belum Tiba">
+                    ✕
                   </button>
-                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); window.confirmArrivalByApprover('${t.id}')">
-                    ✓ Sudah Tiba
+                  <button type="button" class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); window.confirmArrivalByApprover('${t.id}')" title="Sudah Tiba" aria-label="Sudah Tiba">
+                    ✓
                   </button>
                 `;
       } else if (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan') {
         extraAntrianBtns = `
-                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openRejectExtensionModal('${t.id}')">
-                    ✕ Tolak Perpanjang
+                  <button type="button" class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); openRejectExtensionModal('${t.id}')" title="Tolak" aria-label="Tolak">
+                    ✕
                   </button>
-                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); approveExtensionRequest('${t.id}')">
-                    ✓ Setujui Perpanjang
+                  <button type="button" class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); approveExtensionRequest('${t.id}')" title="Setujui" aria-label="Setujui">
+                    ✓
                   </button>
                 `;
       } else if (isEmergDeciding) {
         extraAntrianBtns = t.selectedMethod === 'facescan' ? `
                   <span style="font-size: 0.72rem; color: #7e22ce; background: #faf5ff; border: 1px solid #e9d5ff; padding: 0.28rem 0.55rem; border-radius: 6px; font-weight: 700;">🤳 Scan Wajah (Menunggu)</span>
                 ` : `
-                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openRejectModal('${t.id}')">
-                    ✕ Tolak
+                  <button type="button" class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); openRejectModal('${t.id}')" title="Tolak" aria-label="Tolak">
+                    ✕
                   </button>
-                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer; background: #059669;" onclick="event.stopPropagation(); window.emergencyDirectApprove('${t.id}')">
-                    ✓ Setujui
+                  <button type="button" class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer; background: #059669;" onclick="event.stopPropagation(); window.emergencyDirectApprove('${t.id}')" title="Setujui" aria-label="Setujui">
+                    ✓
                   </button>
                 `;
       } else if (isPending) {
         extraAntrianBtns = `
-                  <button type="button" class="btn-reject" style="padding: 0.34rem 0.65rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openRejectModal('${t.id}')">
-                    ✕ Tolak
+                  <button type="button" class="btn-reject" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); openRejectModal('${t.id}')" title="Tolak" aria-label="Tolak">
+                    ✕
                   </button>
-                  <button type="button" class="btn-approve" style="padding: 0.34rem 0.7rem; font-size: 0.74rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="event.stopPropagation(); openApproveModal('${t.id}')">
-                    ✓ Setujui
+                  <button type="button" class="btn-approve" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; border-radius: 8px; cursor: pointer;" onclick="event.stopPropagation(); openApproveModal('${t.id}')" title="Setujui" aria-label="Setujui">
+                    ✓
                   </button>
                 `;
       }
@@ -1248,13 +1170,19 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
     let tindakanHtml = `
               <div style="display: flex; justify-content: center; align-items: center; gap: 0.35rem;">
                 ${extraAntrianBtns}
-                <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'approver', '${t.id}', ${isRiwayatView})" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="5" r="2"></circle>
-                    <circle cx="12" cy="12" r="2"></circle>
-                    <circle cx="12" cy="19" r="2"></circle>
-                  </svg>
-                </button>
+                ${isAntrianView ? `
+                  <button type="button" class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="event.stopPropagation(); openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan #${t.id}" aria-label="Detail Pengajuan">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                  </button>
+                ` : `
+                  <button type="button" class="btn-action-more-dots" onclick="event.stopPropagation(); window.toggleRowActionDropdown(this, 'approver', '${t.id}', ${isRiwayatView})" title="Opsi Tindakan #${t.id}" aria-label="Opsi Tindakan">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="12" cy="5" r="2"></circle>
+                      <circle cx="12" cy="12" r="2"></circle>
+                      <circle cx="12" cy="19" r="2"></circle>
+                    </svg>
+                  </button>
+                `}
               </div>
             `;
 
@@ -2414,22 +2342,41 @@ function approveExtensionRequest(ticketId) {
   ticket.pendingExtension = null;
   ticket.extensionApproved = true;
 
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    const navIds = typeof window.getTicketDetailNavigationIds === 'function'
+      ? window.getTicketDetailNavigationIds(ticket.id)
+      : (Array.isArray(window.currentDetailTicketIds) ? [...window.currentDetailTicketIds] : [ticket.id]);
+    window._detailDecisionOrigin = { ticketId: ticket.id, ids: navIds };
+    modalTicketDetail.classList.remove('open');
+  } else {
+    window._detailDecisionOrigin = null;
+  }
+
   window.saveTickets(ticketsList);
   if (typeof window.showToast === 'function') {
     window.showToast(`Perpanjangan waktu tiket #${ticket.id} berhasil disetujui!`, 'success');
   }
   renderApproverView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
-  const modalTicketDetail = document.getElementById('modalTicketDetail');
-  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
-    window.openTicketDetail(ticket.id, 'detail');
-  }
+  advanceDetailModalAfterDecision();
 }
 
 function openRejectExtensionModal(ticketId) {
   const ticketsList = window.ticketsList || [];
   const ticket = ticketsList.find(t => t.id === ticketId);
   if (!ticket || !ticket.pendingExtension) return;
+
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    const navIds = typeof window.getTicketDetailNavigationIds === 'function'
+      ? window.getTicketDetailNavigationIds(ticketId)
+      : (Array.isArray(window.currentDetailTicketIds) ? [...window.currentDetailTicketIds] : [ticketId]);
+    window._detailDecisionOrigin = { ticketId, ids: navIds };
+    modalTicketDetail.classList.remove('open');
+  } else {
+    window._detailDecisionOrigin = null;
+  }
 
   window.currentRejectExtTicketId = ticketId;
   const rejectExtEmployeeName = document.getElementById('rejectExtEmployeeName');
@@ -2496,9 +2443,8 @@ function rejectExtensionRequest(ticketId, reason) {
   renderApproverView();
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
   const modalTicketDetail = document.getElementById('modalTicketDetail');
-  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
-    window.openTicketDetail(ticket.id, 'detail');
-  }
+  if (modalTicketDetail) modalTicketDetail.classList.remove('open');
+  advanceDetailModalAfterDecision();
 }
 
 // FITUR HAPUS DI PELACAKAN KARYAWAN (HAK AKSES ATASAN - TERPISAH ATASAN 1 & ATASAN 2)

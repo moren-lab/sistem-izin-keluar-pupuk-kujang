@@ -1451,11 +1451,9 @@ body.theme-dark #karyawanDonutInfoBadge > div {
 }
 
 .approver-feed-warning {
-  border-left: 3.5px solid #d97706 !important;
   background: #fffdfa;
 }
 .approver-feed-reassign {
-  border-left: 3.5px solid #3b82f6 !important;
   background: #f8fafc;
 }
 .approver-detail-callout {
@@ -1571,7 +1569,6 @@ body.theme-dark #karyawanDonutInfoBadge > div {
   color: #7f1d1d;
 }
 .feed-item.item-overdue {
-  border-left: 3px solid var(--rose-danger);
   background: #fff5f5;
 }
 .sec-status-callout {
@@ -1741,17 +1738,11 @@ body.theme-dark .approver-alert-banner.emergency {
 }
 body.theme-dark .approver-feed-warning {
   background: #141f2d !important;
-  border-left-color: #f59e0b !important;
-  border-top-color: #24334a !important;
-  border-right-color: #24334a !important;
-  border-bottom-color: #24334a !important;
+  border-color: #24334a !important;
 }
 body.theme-dark .approver-feed-reassign {
   background: #141f2d !important;
-  border-left-color: #60a5fa !important;
-  border-top-color: #24334a !important;
-  border-right-color: #24334a !important;
-  border-bottom-color: #24334a !important;
+  border-color: #24334a !important;
 }
 body.theme-dark .approver-detail-callout.warning {
   background: rgba(245, 158, 11, 0.12) !important;
@@ -1891,7 +1882,6 @@ body.theme-dark .feed-item:hover {
   border-color: #3b82f6 !important;
 }
 body.theme-dark .feed-item.item-overdue {
-  border-left: 3px solid #ef4444 !important;
   background: rgba(239, 68, 68, 0.1) !important;
 }
 body.theme-dark .feed-item-title {
