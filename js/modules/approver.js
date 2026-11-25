@@ -414,9 +414,13 @@ function renderApproverDashboard() {
       `;
     } else {
       let html = '';
+      let renderedFeedCount = 0;
+      const MAX_DASHBOARD_FEED = 10;
 
       // Render Verifikasi Kedatangan (Tap In Gerbang / Bukti Foto Karyawan)
       waitingVerificationTickets.forEach(t => {
+        if (renderedFeedCount >= MAX_DASHBOARD_FEED) return;
+        renderedFeedCount++;
         const hasProofPhoto = Boolean(t.arrivalProofPhoto);
         html += `
           <div class="feed-item" style="border: 1px solid var(--border-color, #e2e8f0); background: #ffffff; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
@@ -456,6 +460,8 @@ function renderApproverDashboard() {
 
       // Render Permohonan Izin Darurat di paling atas Antrean Persetujuan Cepat (Priority 1)
       lockedEmergencyTickets.forEach(emg => {
+        if (renderedFeedCount >= MAX_DASHBOARD_FEED) return;
+        renderedFeedCount++;
         const isFaceScanMethod = (emg.selectedMethod === 'facescan');
         html += `
           <div class="feed-item" style="border: 1px solid #fecdd3; background: #fff1f2; flex-direction: column; align-items: stretch; gap: 0.65rem; padding: 0.85rem; border-radius: 8px; margin-bottom: 0.65rem;">
@@ -491,6 +497,8 @@ function renderApproverDashboard() {
 
       // Render perpanjangan waktu terlebih dahulu (urgent)
       pendingExtensions.forEach(t => {
+        if (renderedFeedCount >= MAX_DASHBOARD_FEED) return;
+        renderedFeedCount++;
         html += `
           <div class="feed-item approver-feed-warning" style="flex-direction: column; align-items: stretch; gap: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -524,6 +532,8 @@ function renderApproverDashboard() {
 
       // Render regular pending tickets
       pendingTickets.forEach(t => {
+        if (renderedFeedCount >= MAX_DASHBOARD_FEED) return;
+        renderedFeedCount++;
         html += `
           <div class="feed-item" style="flex-direction: column; align-items: stretch; gap: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -555,6 +565,8 @@ function renderApproverDashboard() {
 
       // Render reassigned away tickets (so former approver can monitor them directly in feed)
       reassignedAwayTickets.forEach(t => {
+        if (renderedFeedCount >= MAX_DASHBOARD_FEED) return;
+        renderedFeedCount++;
         html += `
           <div class="feed-item approver-feed-reassign" style="flex-direction: column; align-items: stretch; gap: 0.65rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
