@@ -595,30 +595,40 @@ window.deleteSelectedRiwayat = function (role) {
 
   const handler = () => {
     const ticketsList = window.ticketsList || [];
-    let deletedCount = 0;
+    const deletedIds = [];
     const isApprover2 = (window.currentActor === 'approver2');
     const currentApprover = (typeof window.getCurrentApproverActor === 'function') ? window.getCurrentApproverActor() : null;
     const approverNip = currentApprover ? currentApprover.nip : null;
+    const currentEmp = (typeof window.getCurrentEmployeeActor === 'function') ? window.getCurrentEmployeeActor() : null;
+    const empNip = (currentEmp && currentEmp.nip) || 'PK-2024-8841';
 
     ticketsList.forEach(t => {
       if (!idsToDelete.has(t.id)) return;
       if (role === 'karyawan') {
+        if (!Array.isArray(t.deletedByKaryawanNips)) t.deletedByKaryawanNips = [];
+        if (empNip && !t.deletedByKaryawanNips.includes(empNip)) t.deletedByKaryawanNips.push(empNip);
         t.deletedByKaryawan = true;
-        deletedCount++;
+        deletedIds.push(t.id);
       } else if (role === 'approver') {
         if (!Array.isArray(t.deletedByApproverNips)) t.deletedByApproverNips = [];
         if (approverNip && !t.deletedByApproverNips.includes(approverNip)) t.deletedByApproverNips.push(approverNip);
         if (isApprover2) t.deletedByApprover2 = true;
         else t.deletedByApprover1 = true;
         t.deletedByApprover = true;
-        deletedCount++;
+        deletedIds.push(t.id);
       } else if (role === 'security') {
         t.deletedBySecurity = true;
-        deletedCount++;
+        deletedIds.push(t.id);
       }
     });
+    const deletedCount = deletedIds.length;
 
     if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
+    if (deletedIds.length > 0 && window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      const apiRole = role === 'approver' ? (isApprover2 ? 'approver2' : 'approver') : role;
+      const actorNip = role === 'approver' ? (approverNip || '') : (role === 'karyawan' ? empNip : '');
+      window.SyncEngine.softDeleteTickets(deletedIds, apiRole, actorNip);
+    }
     st.selected.clear();
     st.active = false;
     cfg.refresh();

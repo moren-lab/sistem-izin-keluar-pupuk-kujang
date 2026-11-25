@@ -159,6 +159,11 @@ function checkOverdueAndExpiredTickets(silent = true) {
     return;
   }
 
+  // Sync guard: tunggu fetch awal dari MySQL selesai agar data lokal/default belum tersinkron tidak termutasi prematur
+  if (window.SyncEngine && typeof window.SyncEngine.isInitialFetchDone === 'function' && !window.SyncEngine.isInitialFetchDone()) {
+    return;
+  }
+
   _isCheckingTickets = true;
   try {
     _executeCheckOverdueAndExpiredTickets(silent);

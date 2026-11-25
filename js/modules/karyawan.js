@@ -1082,7 +1082,8 @@ function filterEmpTickets() {
 
   const filtered = ticketsList.filter(t => {
     // Check if deleted by employee
-    if (t.deletedByKaryawan) return false;
+    const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myNip) : Boolean(t.deletedByKaryawan);
+    if (isDelEmp) return false;
 
     // 0. Batasi ke akun yang sedang aktif (sebagai inisiator maupun anggota tim)
     const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')) || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip));
@@ -1637,7 +1638,8 @@ function renderKaryawanDashboard() {
   if (karyawanDashboardRecentList) {
     const RIWAYAT_STATUSES = ['selesai', 'selesai (terlambat)', 'ditolak', 'kedaluwarsa', 'kadaluwarsa', 'dibatalkan'];
     const myHistoryTickets = ticketsList.filter(t => {
-      if (t.deletedByKaryawan) return false;
+      const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myNip) : Boolean(t.deletedByKaryawan);
+      if (isDelEmp) return false;
       const isMyTicket = t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip));
       if (!isMyTicket) return false;
       const normStatus = (t.status || '').toLowerCase().trim();
@@ -2735,8 +2737,13 @@ function deleteEmpTicket(ticketId) {
   const savedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
   const handler = () => {
+    if (!Array.isArray(t.deletedByKaryawanNips)) t.deletedByKaryawanNips = [];
+    if (myNip && !t.deletedByKaryawanNips.includes(myNip)) t.deletedByKaryawanNips.push(myNip);
     t.deletedByKaryawan = true;
     window.saveTickets(ticketsList);
+    if (window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets([t.id], 'karyawan', myNip);
+    }
 
     renderRiwayatView();
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
@@ -2781,14 +2788,20 @@ function deleteAllEmpRiwayat() {
   const handler = () => {
     const idsToDelete = new Set(allFiltered.map(t => t.id));
     let ticketsList = window.ticketsList || [];
-    let deletedCount = 0;
+    const deletedIds = [];
     ticketsList.forEach(t => {
       if (idsToDelete.has(t.id)) {
+        if (!Array.isArray(t.deletedByKaryawanNips)) t.deletedByKaryawanNips = [];
+        if (myNip && !t.deletedByKaryawanNips.includes(myNip)) t.deletedByKaryawanNips.push(myNip);
         t.deletedByKaryawan = true;
-        deletedCount++;
+        deletedIds.push(t.id);
       }
     });
+    const deletedCount = deletedIds.length;
     window.saveTickets(ticketsList);
+    if (deletedIds.length > 0 && window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets(deletedIds, 'karyawan', myNip);
+    }
 
     renderRiwayatView();
     if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();

@@ -24,24 +24,59 @@
   const API_BASE = resolveApiBaseUrl();
   let isApiOnline = false;
   let isSyncing = false;
+  let hasInitialFetchCompleted = false;
   let lastTicketsJson = '';
   let pollIntervalTimer = null;
+  const knownServerTicketHashes = new Map();
+  const knownServerStatuses = new Map();
+  const pendingCreateIds = new Set();
+  const lastLocalSnapshotIds = new Set();
+  let softDeleteInFlight = 0;
 
   console.log(`[SyncEngine] Menghubungkan ke API Laragon MySQL di: ${API_BASE}`);
 
-  // Helper Komparasi Ringan
+  // Helper Universal: Cek apakah tiket sudah dihapus dari riwayat karyawan aktif saat ini
+  window.isTicketDeletedByKaryawan = function(t, myNip) {
+    if (!t) return false;
+    const nip = myNip || (typeof window.getCurrentEmployeeActor === 'function' ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+    if (Array.isArray(t.deletedByKaryawanNips) && t.deletedByKaryawanNips.length > 0) {
+      return t.deletedByKaryawanNips.includes(nip);
+    }
+    return Boolean(t.deletedByKaryawan);
+  };
+
+  // Helper Komparasi Lengkap per Tiket & Daftar Tiket
+  function computeSingleHash(t) {
+    if (!t) return '';
+    const mbrStr = Array.isArray(t.members) ? t.members.map(m => `${m.nip}:${m.status || 'aktif'}`).join(',') : '';
+    const extStr = t.pendingExtension ? `${t.pendingExtension.status || ''}:${t.pendingExtension.newEstimatedReturn || ''}:${t.pendingExtension.reason || ''}` : '';
+    const delAppr = Array.isArray(t.deletedByApproverNips) ? t.deletedByApproverNips.join(',') : '';
+    const delKary = Array.isArray(t.deletedByKaryawanNips) ? t.deletedByKaryawanNips.join(',') : '';
+    return [
+      t.id, t.status, t.scanOutTime || '', t.scanInTime || '', t.tapInTime || '',
+      t.lateMinutes || 0, t.approverNip || '', t.approverNote || '', t.rejectionReason || '',
+      t.cancellationReason || '', t.plannedExit || '', t.estimatedReturn || '',
+      t.timeFrozen ? 1 : 0, t.arrivalReportedTime || '', t.timeline ? t.timeline.length : 0,
+      mbrStr, t.hasExtensionPending ? 1 : 0, extStr,
+      t.deletedByKaryawan ? 1 : 0, delKary, t.deletedByApprover1 ? 1 : 0, t.deletedByApprover2 ? 1 : 0,
+      t.deletedBySecurity ? 1 : 0, t.deletedFromAudit ? 1 : 0, delAppr,
+      t.initiatorCancelled ? 1 : 0
+    ].join(':');
+  }
+
   function computeHash(tickets) {
     if (!tickets || !Array.isArray(tickets)) return '';
-    return tickets.map(t => `${t.id}:${t.status}:${t.scanOutTime || ''}:${t.scanInTime || ''}:${t.tapInTime || ''}:${t.lateMinutes || 0}:${t.approverNote || ''}:${t.timeline ? t.timeline.length : 0}`).join('|');
+    return tickets.map(computeSingleHash).join('|');
   }
 
   // 2. Fetch Tiket dari Database MySQL
   async function fetchTicketsFromMySQL(isInitial = false) {
-    if (isSyncing) return;
+    if (isSyncing || softDeleteInFlight > 0) return;
     isSyncing = true;
 
     try {
-      const response = await fetch(`${API_BASE}/get_tickets.php`, {
+      const cacheBust = Date.now();
+      const response = await fetch(`${API_BASE}/get_tickets.php?_t=${cacheBust}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
         cache: 'no-store'
@@ -51,10 +86,14 @@
         throw new Error(`HTTP error ${response.status}`);
       }
 
+      if (softDeleteInFlight > 0) return;
+
       const resJson = await response.json();
+      if (softDeleteInFlight > 0) return;
       if (resJson && resJson.success && Array.isArray(resJson.data)) {
         isApiOnline = true;
         const serverTickets = resJson.data;
+        const prevStatusesSnapshot = new Map(knownServerStatuses);
 
         // Normalisasi & Integritas Status Tiket (Cegah kontradiksi data)
         serverTickets.forEach(t => {
@@ -76,13 +115,42 @@
             t.extensionRequestedTime = null;
             t.extensionReason = null;
           }
+        });
 
-          // Otomatis pastikan notifikasi persetujuan dibuat untuk Karyawan jika tiket berstatus 'Disetujui'
-          if (t.status === 'Disetujui') {
+        // Sinkronisasi notifikasi lintas perangkat dari MySQL
+        let serverNotifsFetched = [];
+        let notifFetchSucceeded = false;
+        const rawRole = (typeof window.getCurrentMobileRole === 'function' && window.innerWidth <= 768 ? window.getCurrentMobileRole() : null) || (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
+        const apiRole = rawRole.startsWith('karyawan') ? 'karyawan' : (rawRole.startsWith('approver') ? 'approver' : rawRole);
+        try {
+          if (!window._notifDeleteInFlight) {
+            const notifRes = await fetch(`${API_BASE}/notifications.php?role=${encodeURIComponent(apiRole)}&limit=200&_t=${cacheBust}`, {
+              headers: { 'Accept': 'application/json' },
+              cache: 'no-store'
+            });
+            if (notifRes.ok && !window._notifDeleteInFlight) {
+              const notifData = await notifRes.json();
+              if (notifData && notifData.success && Array.isArray(notifData.data)) {
+                notifFetchSucceeded = true;
+                serverNotifsFetched = notifData.data;
+                if (typeof window.mergeServerNotifications === 'function') {
+                  window.mergeServerNotifications(serverNotifsFetched, apiRole);
+                }
+              }
+            }
+          }
+        } catch (e) {}
+
+        // Fallback notifikasi persetujuan HANYA saat terjadi transisi live ke 'Disetujui' dan belum dihapus pengguna
+        serverTickets.forEach(t => {
+          const prevStatus = prevStatusesSnapshot.get(t.id);
+          if (prevStatus && prevStatus !== 'Disetujui' && t.status === 'Disetujui') {
             const notifEventId = `approved_${t.id}`;
+            const isDismissed = typeof window.isNotifEventDismissed === 'function' && window.isNotifEventDismissed(notifEventId);
+            const hasInServer = serverNotifsFetched.some(n => n.eventId === notifEventId || (n.ticketId === t.id && (n.type === 'disetujui' || n.type === 'persetujuan')));
             const notifs = (typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('kujang_notifications') || '[]') : []);
-            const hasNotif = notifs.some(n => n.eventId === notifEventId || (n.ticketId === t.id && (n.type === 'disetujui' || n.type === 'persetujuan')));
-            if (!hasNotif && typeof window.createNotification === 'function') {
+            const hasNotif = hasInServer || notifs.some(n => n.eventId === notifEventId || (n.ticketId === t.id && (n.type === 'disetujui' || n.type === 'persetujuan')));
+            if (!hasNotif && !isDismissed && typeof window.createNotification === 'function') {
               window.createNotification({
                 recipientRole: 'karyawan',
                 recipientNip: t.applicantNip || 'PK-2024-8841',
@@ -99,43 +167,37 @@
           }
         });
 
-        // Sinkronisasi notifikasi lintas perangkat dari MySQL
-        try {
-          const curRole = (typeof window.getCurrentMobileRole === 'function' && window.innerWidth <= 768 ? window.getCurrentMobileRole() : null) || (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : window.currentActor) || 'karyawan';
-          const notifRes = await fetch(`${API_BASE}/notifications.php?role=${encodeURIComponent(curRole)}`, {
-            headers: { 'Accept': 'application/json' },
-            cache: 'no-store'
-          });
-          if (notifRes.ok) {
-            const notifData = await notifRes.json();
-            if (notifData && notifData.success && Array.isArray(notifData.data)) {
-              if (typeof window.mergeServerNotifications === 'function') {
-                window.mergeServerNotifications(notifData.data);
-              }
-            }
-          }
-        } catch (e) {}
+        // Pertahankan tiket yang BARU dibuat secara lokal dan masih dalam antrean upload ke MySQL
+        const serverIdSet = new Set(serverTickets.map(t => t.id));
+        const localTicketsBefore = window.ticketsList || [];
+        const pendingCreates = localTicketsBefore.filter(t => t && t.id && pendingCreateIds.has(t.id) && !serverIdSet.has(t.id));
+        const mergedTickets = [...pendingCreates, ...serverTickets];
 
-        if (serverTickets.length === 0 && (window.ticketsList && window.ticketsList.length > 0)) {
-          // Database MySQL belum terisi, kirim data lokal awal ke MySQL tanpa mengosongkan layar pengguna
-          pushTicketChangesToMySQL(window.ticketsList);
-          return;
-        }
+        // Perbarui peta referensi MySQL (MySQL selalu menjadi Single Source of Truth, termasuk jika tabel dikosongkan di phpMyAdmin)
+        knownServerTicketHashes.clear();
+        knownServerStatuses.clear();
+        serverTickets.forEach(t => {
+          knownServerTicketHashes.set(t.id, computeSingleHash(t));
+          knownServerStatuses.set(t.id, t.status);
+          pendingCreateIds.delete(t.id);
+        });
+        hasInitialFetchCompleted = true;
 
         const currentHash = computeHash(window.ticketsList || []);
-        const serverHash = computeHash(serverTickets);
+        const serverHash = computeHash(mergedTickets);
 
-        // Jika data dari MySQL berbeda dengan data lokal saat ini
+        // Jika data dari MySQL berbeda dengan data lokal saat ini (termasuk ketika dikosongkan di phpMyAdmin!)
         if (isInitial || currentHash !== serverHash) {
           console.log('[SyncEngine] Data tiket MySQL terdeteksi berubah, memperbarui tampilan...');
-          window.ticketsList = serverTickets;
+          window.ticketsList = mergedTickets;
           lastTicketsJson = serverHash;
+
+          lastLocalSnapshotIds.clear();
+          mergedTickets.forEach(t => { if (t && t.id) lastLocalSnapshotIds.add(t.id); });
 
           // Perbarui juga cache localStorage untuk ketahanan offline
           try {
-            if (window.STORAGE_KEY) {
-              localStorage.setItem(window.STORAGE_KEY, JSON.stringify(serverTickets));
-            }
+            localStorage.setItem(window.STORAGE_KEY || 'KUJANG_GATEPASS_TICKETS_V9', JSON.stringify(mergedTickets));
           } catch (e) {}
 
           // Auto-close QR Sheet jika tiket yang sedang ditampilkan di layar karyawan sudah di-scan di pos jaga
@@ -247,7 +309,7 @@
     }
   }
 
-  // 3. Mengirim Perubahan Tiket ke Database MySQL saat saveTickets Dipanggil
+  // 3. Mengirim Perubahan Tiket ke Database MySQL saat saveTickets Dipanggil (Hanya Tiket Baru / Berubah)
   async function pushTicketChangesToMySQL(newTicketsList) {
     if (!newTicketsList || !Array.isArray(newTicketsList)) return;
 
@@ -255,8 +317,27 @@
       for (const t of newTicketsList) {
         if (!t || !t.id) continue;
 
+        const currentTicketHash = computeSingleHash(t);
+        const existedOnServer = knownServerTicketHashes.has(t.id);
+        const isBrandNewLocal = !existedOnServer && (!lastLocalSnapshotIds.has(t.id) || pendingCreateIds.has(t.id));
+
+        // Lewati jika tiket server tidak berubah sama sekali
+        if (existedOnServer && knownServerTicketHashes.get(t.id) === currentTicketHash) {
+          continue;
+        }
+
+        // Jangan sisipkan ulang tiket default/cache lama atau tiket yang sudah dihapus di phpMyAdmin
+        if (!existedOnServer && !isBrandNewLocal) {
+          continue;
+        }
+
+        if (isBrandNewLocal) {
+          pendingCreateIds.add(t.id);
+        }
+
         const payload = {
           id: t.id,
+          updateOnly: existedOnServer ? 1 : 0,
           applicantNip: t.applicantNip || t.karyawanNip || (t.pemohon && t.pemohon.nip),
           applicantName: t.applicantName || (t.pemohon && t.pemohon.nama),
           applicantPhone: t.applicantPhone || t.telepon,
@@ -291,14 +372,35 @@
           scanInTime: t.scanInTime,
           timeline: t.timeline || [],
           documentName: t.documentName || (t.suratPerintah ? t.suratPerintah.name : null),
-          documentUrl: t.documentUrl
+          documentUrl: t.documentUrl,
+          deletedByKaryawan: t.deletedByKaryawan ? 1 : 0,
+          deletedByKaryawanNips: Array.isArray(t.deletedByKaryawanNips) ? t.deletedByKaryawanNips : [],
+          deletedByApprover1: t.deletedByApprover1 ? 1 : 0,
+          deletedByApprover2: t.deletedByApprover2 ? 1 : 0,
+          deletedByApproverNips: Array.isArray(t.deletedByApproverNips) ? t.deletedByApproverNips : [],
+          deletedBySecurity: t.deletedBySecurity ? 1 : 0,
+          deletedFromAudit: t.deletedFromAudit ? 1 : 0
         };
 
         fetch(`${API_BASE}/create_ticket.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        }).catch(e => console.warn('[SyncEngine] Gagal sync tiket individual:', e));
+        })
+          .then(res => res.ok ? res.json() : null)
+          .then(resJson => {
+            if (resJson && resJson.success) {
+              pendingCreateIds.delete(t.id);
+              if (resJson.data && resJson.data.skippedDeleted) {
+                knownServerTicketHashes.delete(t.id);
+                knownServerStatuses.delete(t.id);
+              } else {
+                knownServerTicketHashes.set(t.id, currentTicketHash);
+                knownServerStatuses.set(t.id, t.status);
+              }
+            }
+          })
+          .catch(e => console.warn('[SyncEngine] Gagal sync tiket individual:', e));
 
         if ((t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.hasExtensionPending && t.pendingExtension.status === 'Menunggu Persetujuan') {
           fetch(`${API_BASE}/update_ticket.php`, {
@@ -366,6 +468,8 @@
         }
 
         pushTicketChangesToMySQL(data);
+        lastLocalSnapshotIds.clear();
+        (data || []).forEach(item => { if (item && item.id) lastLocalSnapshotIds.add(item.id); });
       };
       console.log('[SyncEngine] Hook window.saveTickets berhasil diaktifkan.');
     }
@@ -390,6 +494,8 @@
 
   // 6. Jalankan Inisialisasi Saat DOM Siap
   function initSyncEngine() {
+    lastLocalSnapshotIds.clear();
+    (window.ticketsList || []).forEach(t => { if (t && t.id) lastLocalSnapshotIds.add(t.id); });
     initSaveTicketsHook();
     fetchTicketsFromMySQL(true);
     startBackgroundPolling();
@@ -401,12 +507,39 @@
     initSyncEngine();
   }
 
+  // 3b. Soft Delete Riwayat Batch / Single ke MySQL (Semua Aktor: Karyawan, Atasan, Pos Jaga, Admin)
+  async function softDeleteTickets(ticketIds, role, nip) {
+    const ids = Array.isArray(ticketIds) ? ticketIds.filter(Boolean) : (ticketIds ? [ticketIds] : []);
+    if (ids.length === 0) return;
+    softDeleteInFlight++;
+    try {
+      await fetch(`${API_BASE}/delete_ticket.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'soft_delete',
+          ticketIds: ids,
+          role: role || 'karyawan',
+          nip: nip || ''
+        })
+      });
+    } catch (e) {
+      console.warn('[SyncEngine] Gagal sinkronisasi soft delete riwayat ke MySQL:', e);
+    } finally {
+      setTimeout(() => {
+        softDeleteInFlight = Math.max(0, softDeleteInFlight - 1);
+      }, 400);
+    }
+  }
+
   // Expose untuk kontrol manual / debugging jika diperlukan
   window.SyncEngine = {
     fetchFromMySQL: fetchTicketsFromMySQL,
     pushToMySQL: pushTicketChangesToMySQL,
+    softDeleteTickets: softDeleteTickets,
     getApiUrl: () => API_BASE,
-    isOnline: () => isApiOnline
+    isOnline: () => isApiOnline,
+    isInitialFetchDone: () => hasInitialFetchCompleted
   };
 
 })();

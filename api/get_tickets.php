@@ -6,6 +6,9 @@
 
 require_once __DIR__ . '/koneksi.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+
 try {
     $actorRole = isset($_GET['role']) ? trim($_GET['role']) : null;
     $actorNip = isset($_GET['nip']) ? trim($_GET['nip']) : null;
@@ -110,19 +113,36 @@ try {
         if (!isset($softDeletesMap[$tId])) {
             $softDeletesMap[$tId] = [
                 'deletedByKaryawan' => false,
+                'deletedByKaryawanNips' => [],
+                'deletedByApprover1' => false,
+                'deletedByApprover2' => false,
                 'deletedByApproverNips' => [],
-                'deletedBySecurity' => false
+                'deletedBySecurity' => false,
+                'deletedFromAudit' => false
             ];
         }
-        $r = strtolower($sd['deleted_by_role']);
-        if ($r === 'karyawan') {
-            $softDeletesMap[$tId]['deletedByKaryawan'] = true;
+        $r = strtolower(trim($sd['deleted_by_role']));
+        $sdNip = trim((string)$sd['deleted_by_nip']);
+        if ($r === 'karyawan' || $r === 'karyawan2') {
+            if ($sdNip !== '' && !in_array($sdNip, $softDeletesMap[$tId]['deletedByKaryawanNips'], true)) {
+                $softDeletesMap[$tId]['deletedByKaryawanNips'][] = $sdNip;
+            }
+            if ($sdNip === '') {
+                $softDeletesMap[$tId]['deletedByKaryawan'] = true;
+            }
         } elseif ($r === 'approver' || $r === 'approver2') {
-            if ($sd['deleted_by_nip']) {
-                $softDeletesMap[$tId]['deletedByApproverNips'][] = $sd['deleted_by_nip'];
+            if ($sdNip !== '' && !in_array($sdNip, $softDeletesMap[$tId]['deletedByApproverNips'], true)) {
+                $softDeletesMap[$tId]['deletedByApproverNips'][] = $sdNip;
+            }
+            if ($r === 'approver2' || $sdNip === 'PK-2012-0845') {
+                $softDeletesMap[$tId]['deletedByApprover2'] = true;
+            } else {
+                $softDeletesMap[$tId]['deletedByApprover1'] = true;
             }
         } elseif ($r === 'security') {
             $softDeletesMap[$tId]['deletedBySecurity'] = true;
+        } elseif ($r === 'admin' || $r === 'audit') {
+            $softDeletesMap[$tId]['deletedFromAudit'] = true;
         }
     }
 
@@ -132,9 +152,15 @@ try {
         $id = $row['id'];
         $soft = isset($softDeletesMap[$id]) ? $softDeletesMap[$id] : [
             'deletedByKaryawan' => false,
+            'deletedByKaryawanNips' => [],
+            'deletedByApprover1' => false,
+            'deletedByApprover2' => false,
             'deletedByApproverNips' => [],
-            'deletedBySecurity' => false
+            'deletedBySecurity' => false,
+            'deletedFromAudit' => false
         ];
+        // Kompatibilitas flag deletedByKaryawan jika pemohon (applicant_nip) termasuk dalam daftar hapus
+        $isDeletedByApplicant = $soft['deletedByKaryawan'] || (!empty($row['applicant_nip']) && in_array($row['applicant_nip'], $soft['deletedByKaryawanNips'], true));
 
         // Format date string for createdAt display
         $createdDt = !empty($row['created_at']) ? date('d M Y, H.i \W\I\B', strtotime($row['created_at'])) : '';
@@ -225,9 +251,13 @@ try {
             'extensionCount' => isset($extensionsMap[$id]) ? count($extensionsMap[$id]) : 0,
             'extensionApproved' => isset($extensionsMap[$id]) && array_reduce($extensionsMap[$id], function($c, $x) { return $c || $x['status'] === 'Disetujui'; }, false),
             'arrivalProofPhoto' => isset($proofsMap[$id]) ? $proofsMap[$id] : null,
-            'deletedByKaryawan' => $soft['deletedByKaryawan'],
+            'deletedByKaryawan' => $isDeletedByApplicant,
+            'deletedByKaryawanNips' => $soft['deletedByKaryawanNips'],
+            'deletedByApprover1' => $soft['deletedByApprover1'],
+            'deletedByApprover2' => $soft['deletedByApprover2'],
             'deletedByApproverNips' => $soft['deletedByApproverNips'],
-            'deletedBySecurity' => $soft['deletedBySecurity']
+            'deletedBySecurity' => $soft['deletedBySecurity'],
+            'deletedFromAudit' => $soft['deletedFromAudit']
         ];
 
         $formattedTickets[] = $ticket;

@@ -263,13 +263,15 @@
     // Tiket aktif/berjalan tidak boleh pernah tersembunyi sebagai tiket terhapus
     const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
     if (!isFinished) return false;
-    if (t.deletedByApprover) return true;
     const app = getActiveApprover();
-    const aName = (app.name || '').toLowerCase();
-    if (aName.includes('dewi')) {
-      return Boolean(t.deletedByApprover2 || t.deletedByApprover);
+    if (app && app.nip && Array.isArray(t.deletedByApproverNips) && t.deletedByApproverNips.includes(app.nip)) {
+      return true;
     }
-    return Boolean(t.deletedByApprover1 || t.deletedByApprover);
+    const aName = (app && app.name ? app.name : '').toLowerCase();
+    if (aName.includes('dewi')) {
+      return Boolean(t.deletedByApprover2 || (t.deletedByApprover && (!Array.isArray(t.deletedByApproverNips) || t.deletedByApproverNips.length === 0)));
+    }
+    return Boolean(t.deletedByApprover1 || (t.deletedByApprover && (!Array.isArray(t.deletedByApproverNips) || t.deletedByApproverNips.length === 0)));
   }
 
   function getTeamTickets() {
@@ -3630,8 +3632,8 @@
     const isDewi = approver.name.toLowerCase().includes('dewi');
     const finishedTickets = tickets.filter(t => {
       const isMyTicket = isTicketUnderMobileSupervision(t) || isTicketAssignedToMobileApprover(t);
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
-      const isDel = isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover);
+      const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+      const isDel = isDeletedByCurrentMobileApprover(t);
       return isMyTicket && isFinished && !isDel;
     });
     if (finishedTickets.length === 0) {
@@ -3681,13 +3683,17 @@
     const isDewi = approver.name.toLowerCase().includes('dewi');
     const finishedTickets = tickets.filter(t => {
       const isMyTicket = isTicketUnderMobileSupervision(t) || isTicketAssignedToMobileApprover(t);
-      const isFinished = (t.status === 'Selesai' || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
-      const isDel = isDewi ? t.deletedByApprover2 : t.deletedByApprover1;
+      const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
+      const isDel = isDeletedByCurrentMobileApprover(t);
       return isMyTicket && isFinished && !isDel;
     });
 
     finishedTickets.forEach(t => {
       t.deletedByApprover = true;
+      if (!Array.isArray(t.deletedByApproverNips)) t.deletedByApproverNips = [];
+      if (approver && approver.nip && !t.deletedByApproverNips.includes(approver.nip)) {
+        t.deletedByApproverNips.push(approver.nip);
+      }
       if (isDewi) {
         t.deletedByApprover2 = true;
       } else {
@@ -3695,6 +3701,9 @@
       }
     });
     if (typeof window.saveTickets === 'function') window.saveTickets(tickets);
+    if (finishedTickets.length > 0 && window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets(finishedTickets.map(t => t.id), isDewi ? 'approver2' : 'approver', (approver && approver.nip) || '');
+    }
     window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
       window.showToast(`${finishedTickets.length} riwayat selesai dibersihkan dari pelacakan Atasan.`, 'success');

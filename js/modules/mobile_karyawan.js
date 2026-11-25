@@ -95,7 +95,8 @@
     const myNip = emp.nip || 'PK-2024-8841';
     return tickets.filter(t => {
       const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
-      const isDeleted = isFinished && t.deletedByKaryawan;
+      const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myNip) : Boolean(t.deletedByKaryawan);
+      const isDeleted = isFinished && isDelEmp;
       if (isDeleted) return false;
       return (
         t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (myNip === 'PK-2024-8841' && (!t.applicantNip || t.applicantNip === 'PK-2024-8841')) ||
@@ -677,11 +678,12 @@
     });
 
     const myActorNip = (emp && emp.nip) ? emp.nip : 'PK-2024-8841';
-    const hasDeletableTickets = (window.ticketsList || []).some(t =>
-      !t.deletedByKaryawan &&
-      (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841')) &&
-      (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa')
-    );
+    const hasDeletableTickets = (window.ticketsList || []).some(t => {
+      const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myActorNip) : Boolean(t.deletedByKaryawan);
+      const isMine = (t.applicantNip === myActorNip || (!t.applicantNip && myActorNip === 'PK-2024-8841') || (Array.isArray(t.members) && t.members.some(m => m.nip === myActorNip)));
+      return !isDelEmp && isMine &&
+        (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Dibatalkan' || t.status === 'Ditolak' || t.status === 'Kedaluwarsa');
+    });
 
     // 1. Filter by Status
     let filtered = allEmpTickets;
@@ -991,7 +993,8 @@
     const baseTickets = typeof getEmpTickets === 'function' ? getEmpTickets() : (window.ticketsList || []);
 
     const allEmpTickets = baseTickets.filter(t => {
-      if (t.deletedByKaryawan) return false;
+      const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myActorNip) : Boolean(t.deletedByKaryawan);
+      if (isDelEmp) return false;
       const isFinished = (t.status === 'Selesai' || t.status === 'Selesai (Terlambat)' || (typeof t.status === 'string' && t.status.startsWith('Selesai')) || t.status === 'Ditolak' || t.status === 'Dibatalkan' || t.status === 'Kedaluwarsa');
       const isEmergency = Boolean(t.isEmergency || (t.id && (t.id.includes('-EMG-') || t.id.startsWith('TK-EMG'))) || t.category === 'Izin Darurat' || t.status === 'Menunggu Otorisasi Darurat');
       if (isEmergency && isFinished) return true;

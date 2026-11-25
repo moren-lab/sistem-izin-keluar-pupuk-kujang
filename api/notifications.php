@@ -6,6 +6,9 @@
 
 require_once __DIR__ . '/koneksi.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
@@ -105,10 +108,21 @@ if ($method === 'GET') {
                 sendResponse(false, null, 'Title dan message notifikasi wajib diisi', 400);
             }
 
-            $id = 'NOTIF-' . round(microtime(true) * 1000) . '-' . rand(100, 999);
+            $eventId = isset($input['eventId']) && trim((string)$input['eventId']) !== '' ? trim((string)$input['eventId']) : null;
+            if ($eventId) {
+                $stmtChk = $pdo->prepare("SELECT `id` FROM `notifications` WHERE `event_id` = :event_id LIMIT 1");
+                $stmtChk->execute([':event_id' => $eventId]);
+                $existing = $stmtChk->fetch();
+                if ($existing) {
+                    sendResponse(true, ['id' => $existing['id'], 'duplicate' => true], 'Notifikasi sudah tercatat sebelumnya');
+                }
+            }
+
+            $id = !empty($input['id']) ? trim($input['id']) : ('NOTIF-' . round(microtime(true) * 1000) . '-' . rand(100, 999));
             $stmt = $pdo->prepare("
                 INSERT INTO `notifications` (`id`, `recipient_role`, `recipient_nip`, `recipient_name`, `actor_source`, `type`, `priority`, `title`, `message`, `ticket_id`, `event_id`, `is_read`, `created_at`)
                 VALUES (:id, :role, :nip, :name, :source, :type, :priority, :title, :message, :ticket_id, :event_id, 0, NOW())
+                ON DUPLICATE KEY UPDATE `id` = `id`
             ");
             $stmt->execute([
                 ':id' => $id,
@@ -121,10 +135,57 @@ if ($method === 'GET') {
                 ':title' => $title,
                 ':message' => $message,
                 ':ticket_id' => isset($input['ticketId']) ? $input['ticketId'] : null,
-                ':event_id' => isset($input['eventId']) ? $input['eventId'] : null
+                ':event_id' => $eventId
             ]);
 
             sendResponse(true, ['id' => $id], 'Notifikasi baru berhasil dibuat', 201);
+
+        } elseif ($action === 'delete') {
+            $notifId = isset($input['id']) ? trim($input['id']) : '';
+            $eventId = isset($input['eventId']) ? trim($input['eventId']) : '';
+
+            if (!$notifId && !$eventId) {
+                sendResponse(false, null, 'ID atau eventId notifikasi wajib disertakan', 400);
+            }
+
+            if ($notifId && $eventId) {
+                $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `id` = :id OR `event_id` = :event_id");
+                $stmt->execute([':id' => $notifId, ':event_id' => $eventId]);
+            } elseif ($notifId) {
+                $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `id` = :id");
+                $stmt->execute([':id' => $notifId]);
+            } else {
+                $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `event_id` = :event_id");
+                $stmt->execute([':event_id' => $eventId]);
+            }
+
+            sendResponse(true, ['id' => $notifId], 'Notifikasi berhasil dihapus permanen');
+
+        } elseif ($action === 'delete_all' || $action === 'clear_all') {
+            $ids = isset($input['ids']) && is_array($input['ids']) ? array_values(array_filter(array_map('trim', $input['ids']))) : [];
+            $role = isset($input['role']) ? trim($input['role']) : null;
+            $nip = isset($input['nip']) ? trim($input['nip']) : null;
+
+            if (!empty($ids)) {
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `id` IN ({$placeholders})");
+                $stmt->execute($ids);
+            }
+            if ($nip) {
+                if ($nip === 'PK-2024-8841') {
+                    $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `recipient_nip` = :nip OR (`recipient_nip` IS NULL AND `recipient_role` = 'karyawan')");
+                } elseif ($nip === 'PK-2015-1002') {
+                    $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `recipient_nip` = :nip OR (`recipient_nip` IS NULL AND `recipient_role` = 'approver')");
+                } else {
+                    $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `recipient_nip` = :nip");
+                }
+                $stmt->execute([':nip' => $nip]);
+            } elseif ($role) {
+                $stmt = $pdo->prepare("DELETE FROM `notifications` WHERE `recipient_role` = :role");
+                $stmt->execute([':role' => $role]);
+            }
+
+            sendResponse(true, null, 'Semua notifikasi pengguna berhasil dihapus permanen');
         } else {
             sendResponse(false, null, "Aksi '{$action}' tidak dikenal", 400);
         }

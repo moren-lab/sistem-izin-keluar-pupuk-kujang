@@ -2271,6 +2271,9 @@ function deleteSecurityTicket(ticketId, source) {
     if (t) {
       t.deletedBySecurity = true;
       window.saveTickets(ticketsList);
+      if (window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+        window.SyncEngine.softDeleteTickets([ticketId], 'security', '');
+      }
     }
 
     renderSecurityView();
@@ -2330,14 +2333,18 @@ function deleteAllSecurityLogs() {
   const handler = () => {
     const idsToDelete = new Set(deletable.map(t => t.id));
     let ticketsList = window.ticketsList || [];
-    let deletedCount = 0;
+    const deletedIds = [];
     ticketsList.forEach(t => {
       if (idsToDelete.has(t.id) && (FINISHED_SEC_STATUSES.includes(t.status) || (t.status === 'Terlambat' && t.scanInTime))) {
         t.deletedBySecurity = true;
-        deletedCount++;
+        deletedIds.push(t.id);
       }
     });
+    const deletedCount = deletedIds.length;
     window.saveTickets(ticketsList);
+    if (deletedIds.length > 0 && window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets(deletedIds, 'security', '');
+    }
 
     renderSecurityView();
 

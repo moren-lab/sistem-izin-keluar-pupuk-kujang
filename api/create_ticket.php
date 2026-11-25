@@ -85,6 +85,16 @@ if (in_array($status, ['Menunggu Persetujuan', 'Disetujui', 'Menunggu Otorisasi 
 try {
     $pdo->beginTransaction();
 
+    $stmtExists = $pdo->prepare("SELECT `id` FROM `tickets` WHERE `id` = :id LIMIT 1");
+    $stmtExists->execute([':id' => $ticketId]);
+    $ticketAlreadyExists = (bool)$stmtExists->fetch();
+
+    // Proteksi agar tiket yang sudah dihapus langsung dari phpMyAdmin / Admin tidak disisipkan ulang oleh sinkronisasi client
+    if (!empty($input['updateOnly']) && !$ticketAlreadyExists) {
+        $pdo->commit();
+        sendResponse(true, ['ticketId' => $ticketId, 'skippedDeleted' => true], 'Tiket sudah tidak ada di database (dihapus), dilewati.');
+    }
+
     // A. Simpan / Perbarui Tiket (Idempoten via ON DUPLICATE KEY UPDATE)
     $stmtTicket = $pdo->prepare("
         INSERT INTO `tickets` (
@@ -257,10 +267,11 @@ try {
         }
     }
 
-    // D. Buat Notifikasi untuk Atasan (Hanya jika tiket baru dan belum pernah dibuat notifnya)
+    // D. Buat Notifikasi untuk Atasan (HANYA saat tiket benar-benar baru dibuat & belum berstatus final)
     $approverNip = isset($input['approverNip']) ? $input['approverNip'] : null;
     $approverName = isset($input['approverName']) ? $input['approverName'] : null;
-    if ($approverNip || $approverName) {
+    $isFinalStatus = in_array($status, ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa']);
+    if (!$ticketAlreadyExists && empty($input['updateOnly']) && !$isFinalStatus && ($approverNip || $approverName)) {
         $stmtChkNotif = $pdo->prepare("SELECT `id` FROM `notifications` WHERE `ticket_id` = :tid AND `recipient_role` = 'approver'");
         $stmtChkNotif->execute([':tid' => $ticketId]);
         if (!$stmtChkNotif->fetch()) {
@@ -283,6 +294,43 @@ try {
                 ':ticket_id' => $ticketId
             ]);
         }
+    }
+
+    // E. Sinkronkan Status Soft Delete (Riwayat Terhapus per Aktor)
+    $stmtSd = $pdo->prepare("
+        INSERT INTO `ticket_soft_deletes` (`ticket_id`, `deleted_by_role`, `deleted_by_nip`, `deleted_at`)
+        VALUES (:ticket_id, :role, :nip, NOW())
+        ON DUPLICATE KEY UPDATE `deleted_at` = NOW()
+    ");
+    if (!empty($input['deletedByKaryawanNips']) && is_array($input['deletedByKaryawanNips'])) {
+        foreach ($input['deletedByKaryawanNips'] as $knip) {
+            $knipClean = trim((string)$knip);
+            if ($knipClean !== '') {
+                $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'karyawan', ':nip' => $knipClean]);
+            }
+        }
+    } elseif (!empty($input['deletedByKaryawan'])) {
+        $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'karyawan', ':nip' => $applicantNip ?: '']);
+    }
+    if (!empty($input['deletedByApproverNips']) && is_array($input['deletedByApproverNips'])) {
+        foreach ($input['deletedByApproverNips'] as $anip) {
+            $anipClean = trim((string)$anip);
+            if ($anipClean !== '') {
+                $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'approver', ':nip' => $anipClean]);
+            }
+        }
+    }
+    if (!empty($input['deletedByApprover1'])) {
+        $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'approver', ':nip' => 'PK-2015-1002']);
+    }
+    if (!empty($input['deletedByApprover2'])) {
+        $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'approver2', ':nip' => 'PK-2012-0845']);
+    }
+    if (!empty($input['deletedBySecurity'])) {
+        $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'security', ':nip' => '']);
+    }
+    if (!empty($input['deletedFromAudit'])) {
+        $stmtSd->execute([':ticket_id' => $ticketId, ':role' => 'admin', ':nip' => '']);
     }
 
     $pdo->commit();

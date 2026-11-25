@@ -736,17 +736,21 @@ function deleteAllAdminAudit() {
   const count = activeTickets.length;
   const handler = () => {
     let ticketsList = window.ticketsList || [];
-    let deletedCount = 0;
+    const deletedIds = [];
     ticketsList.forEach(t => {
       if (!t.deletedFromAudit) {
         t.deletedFromAudit = true;
         t.activityLog = [];
         t.timeline = [];
-        deletedCount++;
+        deletedIds.push(t.id);
       }
     });
+    const deletedCount = deletedIds.length;
 
     window.saveTickets(ticketsList);
+    if (deletedIds.length > 0 && window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets(deletedIds, 'admin', '');
+    }
     renderAdminAudit();
     if (typeof renderAdminRecentFeed === 'function') renderAdminRecentFeed();
 

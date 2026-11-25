@@ -996,26 +996,31 @@
     let roleLabel = 'Karyawan';
     let flag = 'deletedByKaryawan';
 
+    const isFinalStatus = (st) => FINISHED_STATUSES_RULE.includes(st) || (typeof st === 'string' && st.startsWith('Selesai'));
+
     if (role === 'karyawan' || role === 'karyawan2') {
       const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || (role === 'karyawan2' ? 'PK-2024-8842' : 'PK-2024-8841');
-      finishedTickets = tickets.filter(t => !t.deletedByKaryawan && 
-        (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841')) &&
-        FINISHED_STATUSES_RULE.includes(t.status)
-      );
+      finishedTickets = tickets.filter(t => {
+        const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myNip) : Boolean(t.deletedByKaryawan);
+        const isMyTicket = (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip)));
+        return !isDelEmp && isMyTicket && isFinalStatus(t.status);
+      });
       roleLabel = 'riwayat Karyawan';
       flag = 'deletedByKaryawan';
     } else if (role === 'approver' || role === 'approver2') {
-      const isDewi = (role === 'approver2' || (typeof window.getActiveApprover === 'function' && (window.getActiveApprover().name || '').toLowerCase().includes('dewi')));
+      const activeApp = (typeof window.getActiveApprover === 'function') ? window.getActiveApprover() : null;
+      const appNip = (activeApp && activeApp.nip) || (role === 'approver2' ? 'PK-2012-0845' : 'PK-2015-1002');
+      const isDewi = (role === 'approver2' || (activeApp && (activeApp.name || '').toLowerCase().includes('dewi')));
       finishedTickets = tickets.filter(t => {
-        const isDel = isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover);
-        return !isDel && FINISHED_STATUSES_RULE.includes(t.status);
+        const isDel = (Array.isArray(t.deletedByApproverNips) && t.deletedByApproverNips.length > 0)
+          ? t.deletedByApproverNips.includes(appNip)
+          : (isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover));
+        return !isDel && isFinalStatus(t.status);
       });
       roleLabel = 'riwayat Atasan';
       flag = 'deletedByApprover';
     } else if (role === 'security') {
-      finishedTickets = tickets.filter(t => !t.deletedBySecurity &&
-        FINISHED_STATUSES_RULE.includes(t.status)
-      );
+      finishedTickets = tickets.filter(t => !t.deletedBySecurity && isFinalStatus(t.status));
       roleLabel = 'pelacakan Pos Jaga';
       flag = 'deletedBySecurity';
     }
@@ -1077,45 +1082,67 @@
 
   window.mobileConfirmBatchDelete = function (flag, count) {
     let tickets = (typeof window.getTickets === 'function') ? window.getTickets() : (window.ticketsList || []);
-    let deletedCount = 0;
+    const isFinalStatus = (st) => FINISHED_STATUSES_RULE.includes(st) || (typeof st === 'string' && st.startsWith('Selesai'));
+    const deletedIds = [];
+    let apiRole = 'karyawan';
+    let actorNip = '';
 
     if (flag === 'deletedByKaryawan') {
       const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+      apiRole = 'karyawan';
+      actorNip = myNip;
       tickets.forEach(t => {
-        const isMyTicket = (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841'));
-        if (isMyTicket && FINISHED_STATUSES_RULE.includes(t.status) && !t.deletedByKaryawan) {
+        const isMyTicket = (t.applicantNip === myNip || (!t.applicantNip && myNip === 'PK-2024-8841') || (Array.isArray(t.members) && t.members.some(m => m.nip === myNip)));
+        const isDelEmp = (typeof window.isTicketDeletedByKaryawan === 'function') ? window.isTicketDeletedByKaryawan(t, myNip) : Boolean(t.deletedByKaryawan);
+        if (isMyTicket && isFinalStatus(t.status) && !isDelEmp) {
+          if (!Array.isArray(t.deletedByKaryawanNips)) t.deletedByKaryawanNips = [];
+          if (myNip && !t.deletedByKaryawanNips.includes(myNip)) t.deletedByKaryawanNips.push(myNip);
           t.deletedByKaryawan = true;
-          deletedCount++;
+          deletedIds.push(t.id);
         }
       });
     } else if (flag === 'deletedByApprover') {
-      const isDewi = (currentMobileRole === 'approver2' || (typeof window.getActiveApprover === 'function' && (window.getActiveApprover().name || '').toLowerCase().includes('dewi')));
+      const activeApp = (typeof window.getActiveApprover === 'function') ? window.getActiveApprover() : null;
+      const isDewi = (currentMobileRole === 'approver2' || (activeApp && (activeApp.name || '').toLowerCase().includes('dewi')));
+      const appNip = (activeApp && activeApp.nip) || (isDewi ? 'PK-2012-0845' : 'PK-2015-1002');
+      apiRole = isDewi ? 'approver2' : 'approver';
+      actorNip = appNip;
       tickets.forEach(t => {
-        if (FINISHED_STATUSES_RULE.includes(t.status)) {
-          const isDel = isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover);
+        if (isFinalStatus(t.status)) {
+          const isDel = (Array.isArray(t.deletedByApproverNips) && t.deletedByApproverNips.length > 0)
+            ? t.deletedByApproverNips.includes(appNip)
+            : (isDewi ? (t.deletedByApprover2 || t.deletedByApprover) : (t.deletedByApprover1 || t.deletedByApprover));
           if (!isDel) {
+            if (!Array.isArray(t.deletedByApproverNips)) t.deletedByApproverNips = [];
+            if (appNip && !t.deletedByApproverNips.includes(appNip)) t.deletedByApproverNips.push(appNip);
             t.deletedByApprover = true;
             if (isDewi) {
               t.deletedByApprover2 = true;
             } else {
               t.deletedByApprover1 = true;
             }
-            deletedCount++;
+            deletedIds.push(t.id);
           }
         }
       });
     } else if (flag === 'deletedBySecurity') {
+      apiRole = 'security';
+      actorNip = '';
       tickets.forEach(t => {
-        if (FINISHED_STATUSES_RULE.includes(t.status) && !t.deletedBySecurity) {
+        if (isFinalStatus(t.status) && !t.deletedBySecurity) {
           t.deletedBySecurity = true;
-          deletedCount++;
+          deletedIds.push(t.id);
         }
       });
     }
 
+    const deletedCount = deletedIds.length;
     window.ticketsList = tickets;
     if (typeof window.saveTickets === 'function') {
       window.saveTickets(tickets);
+    }
+    if (deletedIds.length > 0 && window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets(deletedIds, apiRole, actorNip);
     }
     window.mobileCloseSheet();
     if (typeof window.showToast === 'function') {
@@ -1194,7 +1221,8 @@
     const t = tickets.find(x => x.id === ticketId);
     const FINISHED_STATUSES_RULE = ['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'];
     if (t) {
-      if (!FINISHED_STATUSES_RULE.includes(t.status)) {
+      const isFinal = FINISHED_STATUSES_RULE.includes(t.status) || (typeof t.status === 'string' && t.status.startsWith('Selesai'));
+      if (!isFinal) {
         if (typeof window.showToast === 'function') {
           window.showToast('Tiket yang masih aktif tidak dapat dihapus.', 'error');
         }
@@ -1202,11 +1230,30 @@
         return;
       }
       t[flag] = true;
-      if (flag === 'deletedByApprover1' || flag === 'deletedByApprover2') {
+      let apiRole = 'karyawan';
+      let actorNip = '';
+      if (flag === 'deletedByKaryawan') {
+        const myNip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : null) || 'PK-2024-8841';
+        if (!Array.isArray(t.deletedByKaryawanNips)) t.deletedByKaryawanNips = [];
+        if (myNip && !t.deletedByKaryawanNips.includes(myNip)) t.deletedByKaryawanNips.push(myNip);
+        apiRole = 'karyawan';
+        actorNip = myNip;
+      } else if (flag === 'deletedByApprover1' || flag === 'deletedByApprover2') {
         t.deletedByApprover = true;
+        const activeApp = (typeof window.getActiveApprover === 'function') ? window.getActiveApprover() : null;
+        const appNip = (activeApp && activeApp.nip) || (flag === 'deletedByApprover2' ? 'PK-2012-0845' : 'PK-2015-1002');
+        if (!Array.isArray(t.deletedByApproverNips)) t.deletedByApproverNips = [];
+        if (appNip && !t.deletedByApproverNips.includes(appNip)) t.deletedByApproverNips.push(appNip);
+        apiRole = flag === 'deletedByApprover2' ? 'approver2' : 'approver';
+        actorNip = appNip;
+      } else if (flag === 'deletedBySecurity') {
+        apiRole = 'security';
       }
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(tickets);
+      }
+      if (window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+        window.SyncEngine.softDeleteTickets([ticketId], apiRole, actorNip);
       }
       if (typeof window.showToast === 'function') {
         window.showToast(`1 riwayat (${ticketId}) dihapus`, 'info');

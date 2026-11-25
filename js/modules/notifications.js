@@ -8,6 +8,55 @@
   'use strict';
 
   const NOTIF_STORAGE_KEY = 'kujang_notifications';
+  const DISMISSED_IDS_KEY = 'kujang_dismissed_notif_ids';
+  const DISMISSED_EVENTS_KEY = 'kujang_dismissed_notif_events';
+  const pendingServerCreateIds = new Set();
+
+  function loadStringList(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveStringList(key, arr) {
+    try {
+      localStorage.setItem(key, JSON.stringify(arr.slice(-300)));
+    } catch (e) {}
+  }
+
+  function markNotifDismissed(id, eventId) {
+    if (id) {
+      const ids = loadStringList(DISMISSED_IDS_KEY);
+      if (!ids.includes(id)) {
+        ids.push(id);
+        saveStringList(DISMISSED_IDS_KEY, ids);
+      }
+    }
+    if (eventId) {
+      const evs = loadStringList(DISMISSED_EVENTS_KEY);
+      if (!evs.includes(eventId)) {
+        evs.push(eventId);
+        saveStringList(DISMISSED_EVENTS_KEY, evs);
+      }
+    }
+  }
+
+  function isNotifIdDismissed(id) {
+    if (!id) return false;
+    return loadStringList(DISMISSED_IDS_KEY).includes(id);
+  }
+
+  function isNotifEventDismissed(eventId) {
+    if (!eventId) return false;
+    return loadStringList(DISMISSED_EVENTS_KEY).includes(eventId);
+  }
+
+  window.isNotifIdDismissed = isNotifIdDismissed;
+  window.isNotifEventDismissed = isNotifEventDismissed;
 
   // 1. Data Loader & Saver
   function loadStoredNotifications() {
@@ -91,9 +140,10 @@
       actor = sessionUser;
     }
 
-    // 2. Jika karyawan, sinkronisasi dengan aktor karyawan aktif
-    if ((!actor || !actor.nip) && isEmployeeRole(actorKey) && typeof window.getCurrentEmployeeActor === 'function') {
-      actor = window.getCurrentEmployeeActor();
+    // 2. Jika karyawan, selalu sinkronisasi dengan aktor karyawan aktif (Budi / Arthur / Moreno / dll)
+    if (isEmployeeRole(actorKey) && typeof window.getCurrentEmployeeActor === 'function') {
+      const empActor = window.getCurrentEmployeeActor();
+      if (empActor && empActor.nip) actor = empActor;
     }
 
     // 3. Jika approver, pastikan Atasan 1 vs Atasan 2 dibedakan secara tegas
@@ -137,8 +187,9 @@
   function createNotification(payload) {
     if (!payload || !payload.title || !payload.message) return null;
 
-    // Idempotency: Jika eventId sudah pernah dicatat, jangan duplikat
+    // Idempotency & Dismissal guard: Jangan duplikat atau buat ulang eventId yang sudah dihapus pengguna
     if (payload.eventId) {
+      if (!payload.forceRecreate && isNotifEventDismissed(payload.eventId)) return null;
       const exists = notificationsList.some(n => n.eventId === payload.eventId);
       if (exists) return null;
     }
@@ -236,14 +287,16 @@
     // Update UI badge jika modul UI sudah termuat
     updateNotificationBadges();
 
-    // Push notifikasi baru ke database server MySQL
+    // Push notifikasi baru ke database server MySQL (menyertakan ID eksak agar sinkron saat hapus)
     try {
+      pendingServerCreateIds.add(newNotif.id);
       const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
       fetch(`${apiBase}/notifications.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create',
+          id: newNotif.id,
           recipientRole: newNotif.recipientRole,
           recipientNip: newNotif.recipientNip,
           recipientName: newNotif.recipientName,
@@ -255,17 +308,42 @@
           ticketId: newNotif.ticketId,
           eventId: newNotif.eventId
         })
-      }).catch(e => console.warn('[Notifications] Gagal push notifikasi ke server:', e));
-    } catch (e) {}
+      })
+        .catch(e => console.warn('[Notifications] Gagal push notifikasi ke server:', e))
+        .finally(() => { pendingServerCreateIds.delete(newNotif.id); });
+    } catch (e) {
+      pendingServerCreateIds.delete(newNotif.id);
+    }
 
     return newNotif;
   }
 
+  // Helper kecocokan role cakupan query server untuk rekonsiliasi penghapusan
+  function matchesQueriedRoleScope(n, queriedRole) {
+    if (!queriedRole || !n) return false;
+    const qr = String(queriedRole).toLowerCase();
+    if (qr === 'karyawan' || qr.startsWith('karyawan')) return isEmployeeRole(n.recipientRole);
+    if (qr === 'approver' || qr.startsWith('approver')) return isApproverRole(n.recipientRole);
+    if (qr === 'security') return isSecurityRole(n.recipientRole);
+    return String(n.recipientRole || '').toLowerCase() === qr;
+  }
+
   // Penggabung Notifikasi dari Server MySQL (Sinkronisasi Multi-Device HP & Laptop)
-  function mergeServerNotifications(serverNotifs) {
-    if (!Array.isArray(serverNotifs) || serverNotifs.length === 0) return;
+  function mergeServerNotifications(serverNotifs, queriedRole = null) {
+    if (!Array.isArray(serverNotifs) || window._notifDeleteInFlight > 0) return;
     let changed = false;
-    serverNotifs.forEach(sn => {
+
+    const dismissedIds = new Set(loadStringList(DISMISSED_IDS_KEY));
+    const dismissedEvents = new Set(loadStringList(DISMISSED_EVENTS_KEY));
+
+    const validServerNotifs = serverNotifs.filter(sn => {
+      if (!sn) return false;
+      if (sn.id && dismissedIds.has(sn.id)) return false;
+      if (sn.eventId && dismissedEvents.has(sn.eventId)) return false;
+      return true;
+    });
+
+    validServerNotifs.forEach(sn => {
       const exists = notificationsList.find(n => (sn.eventId && n.eventId === sn.eventId) || (n.id === sn.id));
       if (!exists) {
         notificationsList.unshift({
@@ -284,14 +362,39 @@
           eventId: sn.eventId
         });
         changed = true;
+      } else if (sn.isRead && !exists.isRead) {
+        exists.isRead = true;
+        changed = true;
       }
     });
+
+    // Rekonsiliasi hapus dari server/phpMyAdmin/perangkat lain untuk scope peran yang sedang aktif
+    if (queriedRole) {
+      const serverIdSet = new Set(serverNotifs.map(s => s && s.id).filter(Boolean));
+      const serverEventSet = new Set(serverNotifs.map(s => s && s.eventId).filter(Boolean));
+      const beforeLen = notificationsList.length;
+      notificationsList = notificationsList.filter(n => {
+        if (!n) return false;
+        if (!matchesQueriedRoleScope(n, queriedRole)) return true;
+        if (pendingServerCreateIds.has(n.id)) return true;
+        const onServer = serverIdSet.has(n.id) || (n.eventId && serverEventSet.has(n.eventId));
+        return onServer;
+      });
+      if (notificationsList.length !== beforeLen) {
+        changed = true;
+      }
+    }
+
     if (changed) {
       notificationsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       saveStoredNotifications(notificationsList);
       updateNotificationBadges();
       if (typeof window.renderMobileNotifDropdownContent === 'function') {
         window.renderMobileNotifDropdownContent();
+      }
+      const notifView = document.getElementById('viewNotifikasi');
+      if (notifView && notifView.style.display === 'block' && typeof window.renderDesktopFullNotifikasiPage === 'function') {
+        window.renderDesktopFullNotifikasiPage('all');
       }
     }
   }
@@ -424,24 +527,73 @@
     return false;
   }
 
-  // 4b. Delete Notification API (Soft Delete per Actor)
+  // 4b. Delete Notification API (Sinkron Permanen ke MySQL & Cegah Muncul Kembali)
   function deleteNotification(notifId) {
     if (!notifId) return false;
     const idx = notificationsList.findIndex(n => n.id === notifId);
+    const targetNotif = idx !== -1 ? notificationsList[idx] : null;
+    markNotifDismissed(notifId, targetNotif ? targetNotif.eventId : null);
+
     if (idx !== -1) {
       notificationsList.splice(idx, 1);
       saveStoredNotifications(notificationsList);
       updateNotificationBadges();
-      return true;
     }
-    return false;
+
+    try {
+      window._notifDeleteInFlight = (window._notifDeleteInFlight || 0) + 1;
+      const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
+      fetch(`${apiBase}/notifications.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          id: notifId,
+          eventId: targetNotif ? targetNotif.eventId : null
+        })
+      })
+        .catch(e => console.warn('[Notifications] Gagal hapus notifikasi di server:', e))
+        .finally(() => {
+          setTimeout(() => {
+            window._notifDeleteInFlight = Math.max(0, (window._notifDeleteInFlight || 1) - 1);
+          }, 500);
+        });
+    } catch (e) {}
+
+    return idx !== -1;
   }
 
   function clearAllNotificationsForActiveActor() {
     const user = getActiveUserInfo();
+    const toDelete = notificationsList.filter(n => isNotificationForUser(n, user));
+    const targetIds = toDelete.map(n => n.id).filter(Boolean);
+
+    toDelete.forEach(n => markNotifDismissed(n.id, n.eventId));
     notificationsList = notificationsList.filter(n => !isNotificationForUser(n, user));
     saveStoredNotifications(notificationsList);
     updateNotificationBadges();
+
+    try {
+      window._notifDeleteInFlight = (window._notifDeleteInFlight || 0) + 1;
+      const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
+      const normalizedRole = isEmployeeRole(user.roleKey) ? 'karyawan' : (isApproverRole(user.roleKey) ? 'approver' : user.roleKey);
+      fetch(`${apiBase}/notifications.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete_all',
+          ids: targetIds,
+          role: normalizedRole,
+          nip: user.nip
+        })
+      })
+        .catch(e => console.warn('[Notifications] Gagal hapus semua notifikasi di server:', e))
+        .finally(() => {
+          setTimeout(() => {
+            window._notifDeleteInFlight = Math.max(0, (window._notifDeleteInFlight || 1) - 1);
+          }, 500);
+        });
+    } catch (e) {}
   }
 
   window.deleteNotification = deleteNotification;
@@ -461,6 +613,19 @@
     if (updatedCount > 0) {
       saveStoredNotifications(notificationsList);
       updateNotificationBadges();
+      try {
+        const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
+        const normalizedRole = isEmployeeRole(user.roleKey) ? 'karyawan' : (isApproverRole(user.roleKey) ? 'approver' : user.roleKey);
+        fetch(`${apiBase}/notifications.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'mark_all_read',
+            role: normalizedRole,
+            nip: user.nip
+          })
+        }).catch(() => {});
+      } catch (e) {}
       if (typeof window.showToast === 'function') {
         window.showToast('Semua notifikasi telah ditandai dibaca.', 'info');
       }
@@ -1141,6 +1306,8 @@
     notificationsList = [];
     try {
       localStorage.removeItem(NOTIF_STORAGE_KEY);
+      localStorage.removeItem(DISMISSED_IDS_KEY);
+      localStorage.removeItem(DISMISSED_EVENTS_KEY);
     } catch (e) {
       console.error('Failed to reset stored notifications:', e);
     }
@@ -1160,18 +1327,6 @@
   }
 
 })();
-
-  window.deleteMobileNotification = function(notifId, currentTab = 'all') {
-    if (typeof window.deleteNotification === 'function') {
-      window.deleteNotification(notifId);
-    }
-    if (typeof window.showToast === 'function') {
-      window.showToast('Notifikasi berhasil dihapus.', 'info');
-    }
-    if (typeof window.openMobileNotificationSheet === 'function') {
-      window.openMobileNotificationSheet(currentTab);
-    }
-  };
 
   window.deleteDesktopNotification = function(notifId, currentTab = 'all') {
     if (typeof window.deleteNotification === 'function') {

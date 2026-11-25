@@ -2539,6 +2539,9 @@ function deleteApproverTicket(ticketId) {
       if (typeof window.saveTickets === 'function') {
         window.saveTickets(tickets);
       }
+      if (window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+        window.SyncEngine.softDeleteTickets([ticketId], isApprover2 ? 'approver2' : 'approver', nip || '');
+      }
       if (typeof window.showToast === 'function') {
         const who = currentApprover ? currentApprover.name : (isApprover2 ? 'Atasan 2' : 'Atasan 1');
         window.showToast(`Catatan izin #${ticketId} berhasil dihapus dari riwayat ${who}.`, 'info');
@@ -2594,6 +2597,9 @@ function clearApproverTrackingHistory() {
     });
     if (typeof window.saveTickets === 'function') {
       window.saveTickets(tickets);
+    }
+    if (window.SyncEngine && typeof window.SyncEngine.softDeleteTickets === 'function') {
+      window.SyncEngine.softDeleteTickets(finishedTickets.map(t => t.id), isApprover2 ? 'approver2' : 'approver', nip || '');
     }
     if (typeof window.showToast === 'function') {
       const who = currentApprover ? currentApprover.name : (isApprover2 ? 'Atasan 2' : 'Atasan 1');
