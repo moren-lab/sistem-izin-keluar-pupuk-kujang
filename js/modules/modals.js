@@ -912,7 +912,20 @@ function setupSingleApproverCombobox(cfg) {
     if (!itemsList) return;
     itemsList.innerHTML = '';
 
-    list.forEach((approver, idx) => {
+    const empActor = typeof window.getCurrentEmployeeActor === 'function' ? window.getCurrentEmployeeActor() : null;
+    const empDept = ((empActor && empActor.department) || '').toLowerCase().trim();
+    const alphaSort = (a, b) => (a.name || '').localeCompare((b.name || ''), 'id', { sensitivity: 'base' });
+
+    const directGroup = list.filter(a => Boolean(a.isDirectSupervisor)).sort(alphaSort);
+    const sameDeptGroup = list.filter(a => !a.isDirectSupervisor && empDept && (a.department || '').toLowerCase().trim() === empDept).sort(alphaSort);
+    const otherDeptGroup = list.filter(a => !a.isDirectSupervisor && (!empDept || (a.department || '').toLowerCase().trim() !== empDept)).sort(alphaSort);
+
+    const orderedSections = [
+      ...directGroup,
+      ...sameDeptGroup
+    ];
+
+    const appendApproverItem = (approver, idx) => {
       const itemEl = document.createElement('div');
       itemEl.className = 'approver-item';
       if (selectApprover.value === approver.name) {
@@ -973,7 +986,37 @@ function setupSingleApproverCombobox(cfg) {
       });
 
       itemsList.appendChild(itemEl);
+    };
+
+    let runningIdx = 0;
+    orderedSections.forEach((approver) => {
+      appendApproverItem(approver, runningIdx++);
     });
+
+    if (otherDeptGroup.length > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'approver-dept-divider';
+      divider.style.cssText = 'padding: 0.45rem 0.85rem; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.05em; color: #64748b; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; text-transform: uppercase;';
+      divider.textContent = 'Atasan Departemen Lain';
+      itemsList.appendChild(divider);
+
+      otherDeptGroup.forEach((approver) => {
+        appendApproverItem(approver, runningIdx++);
+      });
+    }
+  }
+
+  function toggleReassignReasonField(approver) {
+    if (cfg.selectApproverId !== 'selectApprover') return;
+    const grp = document.getElementById('reassignmentReasonGroup');
+    const inp = document.getElementById('inputReassignReason');
+    if (!grp) return;
+    if (approver && !approver.isDirectSupervisor) {
+      grp.style.display = 'block';
+    } else {
+      grp.style.display = 'none';
+      if (inp) inp.value = '';
+    }
   }
 
   function chooseApprover(approver, silent = false) {
@@ -988,6 +1031,7 @@ function setupSingleApproverCombobox(cfg) {
     }
     if (selectedPreview) selectedPreview.style.display = 'flex';
     if (btnClear) btnClear.style.display = 'flex';
+    toggleReassignReasonField(approver);
 
     closeDropdown();
     selectApprover.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1002,6 +1046,7 @@ function setupSingleApproverCombobox(cfg) {
     searchInput.value = '';
     if (selectedPreview) selectedPreview.style.display = 'none';
     if (btnClear) btnClear.style.display = 'none';
+    toggleReassignReasonField(null);
     renderList('');
     selectApprover.dispatchEvent(new Event('change', { bubbles: true }));
   }
@@ -2274,9 +2319,13 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
 
   const infoApproverLbl = document.getElementById('infoApproverLbl');
   if (infoApproverLbl) {
+    const reasonHtml = (isReassignedTicket && ticket.reassignmentReason)
+      ? `<div style="font-size:0.715rem; color:#475569; margin-top:2px; line-height:1.35;">Alasan: "${ticket.reassignmentReason}"</div>`
+      : '';
     infoApproverLbl.innerHTML = `
       <div style="font-size:0.85rem; font-weight:800; color:var(--text-primary, #0f172a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">${displayCardApproverName}</div>
       ${reassignSubNoteHtml}
+      ${reasonHtml}
     `;
   }
 
@@ -2976,7 +3025,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
     if (detailStatusPillTop && !isFinished) {
       const isEmergBadge = ticket.status === 'Menunggu Otorisasi Darurat' || (ticket.id && ticket.id.includes('-EMG-') && ticket.status !== 'Disetujui' && ticket.status !== 'Sedang di Luar' && ticket.status !== 'Selesai');
       if (isEmergBadge) {
-        detailStatusPillTop.innerHTML = `<span style="color: #b91c1c; font-weight: 800; font-size: 0.8rem;">Menunggu Otorisasi Darurat</span>`;
+        detailStatusPillTop.innerHTML = `<span style="color: #b91c1c; font-weight: 800; font-size: 0.8rem; white-space: nowrap;">Menunggu Otorisasi</span>`;
       }
     }
 
@@ -3766,6 +3815,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const approverName = selectApprover.value;
+      const reassignReasonGroup = document.getElementById('reassignmentReasonGroup');
+      const inputReassignReason = document.getElementById('inputReassignReason');
+      const isReassignReasonVisible = reassignReasonGroup && getComputedStyle(reassignReasonGroup).display !== 'none';
+      const reassignmentReason = inputReassignReason ? inputReassignReason.value.trim() : '';
+      if (isReassignReasonVisible && !reassignmentReason) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Harap isi alasan memilih atasan lain terlebih dahulu!', 'warning');
+        }
+        if (inputReassignReason) inputReassignReason.focus();
+        return;
+      }
       const members = (category === 'Dinas Kantor' && Array.isArray(window._selectedGroupMembers)) ? [...window._selectedGroupMembers] : [];
 
       // Validasi Anggota: pastikan tidak ada anggota yang memiliki izin aktif
@@ -3797,7 +3857,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const suratPerintah = (category === 'Dinas Kantor' && window._currentSuratPerintah) ? { ...window._currentSuratPerintah } : null;
 
-      window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn, approverName, members, suratPerintah };
+      window.pendingFormData = { category, type, destination, reason, plannedExit, estimatedReturn, approverName, reassignmentReason, members, suratPerintah };
 
       const sumApprover = document.getElementById('sumApprover');
       const sumCategory = document.getElementById('sumCategory');
@@ -4056,6 +4116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reassignedTo: isReassignedFromStart ? chosenApproverName : null,
         reassignedToNip: isReassignedFromStart ? approverNip : null,
         reassignedAt: isReassignedFromStart ? nowFormatted : null,
+        reassignmentReason: isReassignedFromStart ? (window.pendingFormData.reassignmentReason || null) : null,
         scanOutTime: null,
         scanInTime: null,
         timeline: [
@@ -4064,7 +4125,7 @@ document.addEventListener('DOMContentLoaded', () => {
             time: nowFormatted,
             by: `${getActiveEmployeeActorInfo().name} (Karyawan)`,
             desc: isReassignedFromStart
-              ? `Pengajuan tiket dibuat dan dialihkan ke ${chosenApproverName} untuk ditinjau (Atasan Langsung: ${directSup}).`
+              ? `Pengajuan tiket dibuat dan dialihkan ke ${chosenApproverName} untuk ditinjau (Atasan Langsung: ${directSup}).${window.pendingFormData.reassignmentReason ? ` Alasan: "${window.pendingFormData.reassignmentReason}".` : ''}`
               : 'Pengajuan tiket izin keluar area berhasil dikirim ke antrean Atasan.'
           }
         ]

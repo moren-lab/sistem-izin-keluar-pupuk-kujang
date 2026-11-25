@@ -425,7 +425,7 @@ function renderSecurityDashboard() {
         </div>
       `;
     } else {
-      securityDashboardOutsideList.innerHTML = outsideTickets.map(t => {
+      securityDashboardOutsideList.innerHTML = outsideTickets.slice(0, 10).map(t => {
         const isOverdue = t.status === 'Terlambat';
         return `
           <div class="feed-item ${isOverdue ? 'item-overdue' : ''}">

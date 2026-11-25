@@ -265,6 +265,7 @@
       isApiOnline = false;
     } finally {
       isSyncing = false;
+      if (isInitial) hasInitialFetchCompleted = true;
     }
   }
 

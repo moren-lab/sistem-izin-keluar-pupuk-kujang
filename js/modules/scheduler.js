@@ -189,15 +189,55 @@ function _executeCheckOverdueAndExpiredTickets(silent = true) {
     const isEmergencyTicket = Boolean(ticket.isEmergency || (ticket.id && (ticket.id.includes('-EMG-') || ticket.id.startsWith('TK-EMG'))));
 
     // -------------------------------------------------------------------------
-    // 1. KEDALUWARSA (BRULE-11 & Simulation Protection):
-    // Tiket biasa (Disetujui) atau Tiket Darurat (Disetujui / Menunggu Otorisasi Darurat)
-    // yang tidak kunjung dipindai keluar melewati batas toleransi rencana keluar.
-    // PENTING: Tiket Menunggu Persetujuan reguler TIDAK BOLEH kedaluwarsa sebelum direspon.
-    // Untuk sesi simulasi hari ini, batas toleransi dihitung dari waktu persetujuan
-    // dan diberikan durasi yang aman agar proses pengujian tidak ter-reset saat refresh.
+    // 1. KEDALUWARSA OTOMATIS:
+    // A. Pengajuan baru (Menunggu Persetujuan / Menunggu Otorisasi Darurat)
+    //    yang melewati jadwal rencana keluar tanpa ditinjau oleh atasan.
     // -------------------------------------------------------------------------
-    const isPendingEmergency = isEmergencyTicket && (statusNormalized === 'Menunggu Otorisasi Darurat');
-    const isApprovedOrEmergencyPending = (statusNormalized === 'Disetujui' || isPendingEmergency);
+    const isUnreviewedPending = (statusNormalized === 'Menunggu Persetujuan' || statusNormalized === 'Menunggu Otorisasi Darurat');
+    if (isUnreviewedPending && ticket.plannedExit && !ticket.scanOutTime) {
+      const exitTime = parseTicketDateTime(ticket.plannedExit);
+      const toleranceMinutes = (isEmergencyTicket ? 20 : 60);
+      const toleranceMs = toleranceMinutes * 60 * 1000;
+      if (exitTime && !isNaN(exitTime.getTime()) && now.getTime() > (exitTime.getTime() + toleranceMs)) {
+        const expiredReasonMsg = 'Pengajuan kedaluwarsa karena telah melewati batas waktu rencana keluar dan belum ditinjau oleh atasan.';
+        ticket.status = 'Kedaluwarsa';
+        ticket.approverNote = expiredReasonMsg;
+        ticket.systemNote = expiredReasonMsg;
+        if (!ticket.notifiedExpired) {
+          ticket.notifiedExpired = true;
+          if (typeof window.createNotification === 'function') {
+            window.createNotification({
+              recipientRole: 'karyawan',
+              recipientNip: ticket.applicantNip || 'PK-2024-8841',
+              recipientName: ticket.applicantName || 'Budi Pratama, S.T.',
+              actorSource: 'system',
+              type: 'kedaluwarsa',
+              title: isEmergencyTicket ? 'Izin Darurat Kedaluwarsa' : 'Pengajuan Kedaluwarsa',
+              message: `Pengajuan izin (#${ticket.id}) otomatis kedaluwarsa karena melewati jadwal rencana keluar dan belum ditinjau oleh atasan.`,
+              ticketId: ticket.id,
+              priority: isEmergencyTicket ? 'high' : 'normal',
+              eventId: `expired_unreviewed_${ticket.id}`
+            });
+          }
+          newlyExpired++;
+        }
+        if (!ticket.timeline) ticket.timeline = [];
+        const hasExpiredEvent = ticket.timeline.some(tl => (tl.event || '').toLowerCase().includes('kedaluwarsa'));
+        if (!hasExpiredEvent) {
+          ticket.timeline.push({
+            event: 'Tiket Kedaluwarsa Otomatis',
+            time: nowFormatted,
+            by: 'Sistem Otomatis (Scheduler)',
+            desc: expiredReasonMsg
+          });
+        }
+        hasChanges = true;
+        return;
+      }
+    }
+
+    // B. Tiket yang sudah Disetujui namun tidak kunjung dipindai keluar melewati batas toleransi rencana keluar.
+    const isApprovedOrEmergencyPending = (statusNormalized === 'Disetujui');
 
     if (isApprovedOrEmergencyPending && ticket.plannedExit && !ticket.scanOutTime) {
       const exitTime = parseTicketDateTime(ticket.plannedExit);

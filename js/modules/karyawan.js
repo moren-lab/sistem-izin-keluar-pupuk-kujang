@@ -2345,7 +2345,7 @@ function getCleanEmpStatus(status, ticket) {
     color = '#b45309';
     statusKey = 'waiting-proof';
   } else if (status === 'Menunggu Otorisasi Darurat' || status === 'Darurat Terkunci') {
-    label = 'Menunggu Otorisasi Darurat';
+    label = 'Menunggu Otorisasi';
     color = '#be123c';
     statusKey = 'emergency';
   } else if (status === 'Ditolak') {
