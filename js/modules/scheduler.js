@@ -89,7 +89,21 @@ function parseTicketDateTime(val) {
   return null;
 }
 
-function getActiveTicket(nip = (window.getCurrentEmployeeActor ? window.getCurrentEmployeeActor().nip : (window.ACTORS && window.ACTORS.karyawan ? window.ACTORS.karyawan.nip : 'PK-2024-8841'))) {
+function getActiveTicket(nipParam) {
+  let nip = nipParam;
+  if (!nip) {
+    const sessionUser = typeof window.getKujangCurrentUser === 'function' ? window.getKujangCurrentUser() : null;
+    if (sessionUser && sessionUser.nip) {
+      nip = sessionUser.nip;
+    } else if (typeof window.getCurrentEmployeeActor === 'function') {
+      const emp = window.getCurrentEmployeeActor();
+      if (emp && emp.nip) nip = emp.nip;
+    }
+    if (!nip && window.ACTORS && window.ACTORS.karyawan) {
+      nip = window.ACTORS.karyawan.nip;
+    }
+    if (!nip) nip = 'PK-2024-8841';
+  }
   // Ambil tiket terbaru dari window.ticketsList atau localStorage
   const list = window.ticketsList || (typeof window.loadTickets === 'function' ? window.loadTickets() : []);
   const activeCandidates = list.filter(t => {

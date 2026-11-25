@@ -201,15 +201,6 @@
     const aNip = (app.nip || '').trim();
 
     if (isTicketAssignedToMobileApprover(ticket)) return true;
-
-    // ISOLASI KETAT PENGAJUAN PENDING: Tiket yang sedang menunggu persetujuan/otorisasi
-    // HANYA dan MUTLAK boleh masuk ke antrean/dashboard atasan yang ditugaskan (dipilih).
-    // DILARANG bocor ke atasan lain hanya karena kesamaan departemen atau atasan langsung!
-    const isPendingDecision = (ticket.status === 'Menunggu Persetujuan' || ticket.status === 'Menunggu Otorisasi Darurat');
-    if (isPendingDecision) {
-      return false;
-    }
-
     if (isTicketReassignedFromMobileApprover(ticket)) return true;
     if (isTicketReassignedToMobileApprover(ticket)) return true;
 
@@ -393,11 +384,10 @@
     const tickets = getTeamTickets();
 
     const pendingNew = tickets.filter(t => {
-      if (!isTicketAssignedToMobileApprover(t)) return false;
       if (t.status === 'Menunggu Verifikasi Atasan') return true;
       return !t.isEmergency && !t.id.includes('-EMG-') && t.status === 'Menunggu Persetujuan';
     });
-    const pendingExt = tickets.filter(t => isTicketAssignedToMobileApprover(t) && (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
+    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
     const outsideTickets = tickets.filter(t => t.status === 'Sedang di Luar' || t.status === 'Terlambat');
     const lateTickets = tickets.filter(t => t.status === 'Terlambat' || (t.isLate && t.status !== 'Selesai'));
     const processedTickets = tickets.filter(t => t.status === 'Disetujui' || t.status === 'Selesai' || t.status === 'Ditolak');
@@ -516,17 +506,16 @@
     // Priority Cards: Emergency Tickets if exist (supports concurrent submissions)
     let priorityHtml = '';
     const pendingEmergTickets = tickets.filter(t =>
-      isTicketAssignedToMobileApprover(t) &&
       (t.isEmergency || (t.id && t.id.includes('-EMG-'))) &&
       (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
       t.status !== 'Ditolak' &&
       t.status !== 'Selesai' &&
       t.status !== 'Dibatalkan'
     );
-    const finishedEmergTicket = tickets.find(t => isTicketAssignedToMobileApprover(t) && (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
+    const finishedEmergTicket = tickets.find(t => (t.isEmergency || (t.id && t.id.includes('-EMG-'))) && t.status === 'Selesai');
 
     // 4 Metrik Ringkasan Perizinan (Identik Akurat dengan Versi Web/PC)
-    const needDecisionCount = pendingNew.length + pendingEmergTickets.length + pendingExt.length;
+    const needDecisionCount = pendingNew.length + pendingEmergTickets.length + pendingExt.length + reassignedAwayTickets.length;
     const approvedCount = tickets.filter(t => t.status === 'Disetujui' && isTicketAssignedToMobileApprover(t)).length;
     const rejectedCount = tickets.filter(t => t.status === 'Ditolak' && isTicketAssignedToMobileApprover(t)).length;
     const totalCount = tickets.filter(t => isTicketAssignedToMobileApprover(t)).length;
@@ -596,7 +585,7 @@
             </div>
             
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${pendingEmergTicket.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${pendingEmergTicket.id}', 'reject')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency ? window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}') : window.mobileQuickApproveTicket('${pendingEmergTicket.id}')">
@@ -734,7 +723,7 @@
             </div>
           ` : `
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenRejectSheet('${t.id}')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
@@ -963,7 +952,6 @@
     const tickets = getTeamTickets();
 
     const pendingEmergTickets = tickets.filter(t =>
-      isTicketAssignedToMobileApprover(t) &&
       (t.isEmergency || (t.id && t.id.includes('-EMG-'))) &&
       (t.status === 'Menunggu Otorisasi Darurat' || t.status === 'Menunggu Persetujuan') &&
       t.status !== 'Ditolak' &&
@@ -972,14 +960,13 @@
     );
 
     const pendingRegular = tickets.filter(t => {
-      if (!isTicketAssignedToMobileApprover(t)) return false;
       if (t.status === 'Menunggu Verifikasi Atasan') return true;
       return !t.isEmergency && !t.id.includes('-EMG-') && t.status === 'Menunggu Persetujuan';
     });
 
     // Izin darurat diletakkan di puncak antrean dengan prioritas tertinggi
     const pendingNew = [...pendingEmergTickets, ...pendingRegular];
-    const pendingExt = tickets.filter(t => isTicketAssignedToMobileApprover(t) && (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
+    const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
 
     let activeList = currentAntreanSegment === 'baru' ? pendingNew : pendingExt;
 
@@ -3190,13 +3177,6 @@
   };
 
   window.mobileAtasanExecuteDecision = function (ticketId, decision, defaultNote) {
-    if (decision === 'reject') {
-      const explicitNote = defaultNote || document.getElementById('mAtasanDetailNote')?.value;
-      if (!explicitNote || explicitNote.trim().length < 5) {
-        window.mobileOpenRejectSheet(ticketId);
-        return;
-      }
-    }
     if (isExecutingAtasanDecision) return;
     const list = window.ticketsList || [];
     const t = list.find(x => x.id === ticketId);
@@ -3394,21 +3374,6 @@
         localStorage.setItem('kujang_tickets', JSON.stringify(list));
       }
 
-      // Sinkronisasi Keputusan Perpanjangan ke database MySQL
-      try {
-        const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
-        fetch(`${apiBase}/update_ticket.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ticketId: ticketId,
-            action: decision === 'approve' ? 'approve_extension' : 'reject_extension',
-            approverName: approver.name,
-            note: note
-          })
-        }).catch(e => console.warn('[Sync] Gagal push keputusan perpanjangan ke MySQL:', e));
-      } catch (e) {}
-
       // Sync Desktop Views
       if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
       if (typeof window.renderApproverDashboard === 'function') window.renderApproverDashboard();
@@ -3534,21 +3499,6 @@
       } else {
         localStorage.setItem('kujang_tickets', JSON.stringify(list));
       }
-
-      // Sinkronisasi Keputusan Perpanjangan ke database MySQL
-      try {
-        const apiBase = (typeof window.SyncEngine !== 'undefined' && window.SyncEngine.getApiUrl) ? window.SyncEngine.getApiUrl() : 'api';
-        fetch(`${apiBase}/update_ticket.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ticketId: ticketId,
-            action: decision === 'approve' ? 'approve_extension' : 'reject_extension',
-            approverName: approver.name,
-            note: note
-          })
-        }).catch(e => console.warn('[Sync] Gagal push keputusan perpanjangan ke MySQL:', e));
-      } catch (e) {}
 
       // Sync Desktop Views
       if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();

@@ -16,10 +16,31 @@ window.currentEmpViewMode = window.currentEmpViewMode || 'card';
  * Menyelesaikan bug sinkronisasi akun baru/pergantian pengguna (Moreno dsb.)
  */
 function getCurrentEmployeeActor() {
+  // 1. Cek sesi login aktif saat ini (Portal SAKTI / KUJANG ID)
+  const sessionUser = typeof window.getKujangCurrentUser === 'function' ? window.getKujangCurrentUser() : null;
+  if (sessionUser && sessionUser.nip && (
+    sessionUser.role === 'karyawan' || 
+    sessionUser.roleKey === 'karyawan' || 
+    sessionUser.roleKey === 'karyawan2' ||
+    (sessionUser.role && !sessionUser.role.toLowerCase().includes('atasan') && !sessionUser.role.toLowerCase().includes('pos') && !sessionUser.role.toLowerCase().includes('security') && !sessionUser.role.toLowerCase().includes('admin'))
+  )) {
+    if (window.ACTORS && window.ACTORS.karyawan) {
+      window.ACTORS.karyawan.name = sessionUser.name;
+      window.ACTORS.karyawan.nip = sessionUser.nip;
+      if (sessionUser.department) window.ACTORS.karyawan.department = sessionUser.department;
+      if (sessionUser.role || sessionUser.title) window.ACTORS.karyawan.title = sessionUser.role || sessionUser.title;
+      if (sessionUser.directSupervisor || sessionUser.supervisor) {
+        window.ACTORS.karyawan.approverName = sessionUser.directSupervisor || sessionUser.supervisor;
+      }
+    }
+    return sessionUser;
+  }
+
+  // 2. Cek activeEmployeeUser
   if (!window.activeEmployeeUser) {
     try {
       const savedNip = localStorage.getItem('KUJANG_ACTIVE_EMP_NIP');
-      if (savedNip && savedNip !== 'PK-2024-8841' && savedNip !== 'PK-2024-8842') {
+      if (savedNip) {
         const users = (typeof window.loadUsers === 'function' ? window.loadUsers() : window.MOCK_USERS) || [];
         const found = users.find(u => u.nip === savedNip && u.status === 'Aktif');
         if (found) window.activeEmployeeUser = found;
@@ -895,6 +916,21 @@ window.cancelMemberParticipation = function(ticketId, memberNip) {
 
   if (typeof window.saveTickets === 'function') window.saveTickets(ticketsList);
 
+  // Sinkronisasi status pembatalan anggota secara langsung ke MySQL API
+  try {
+    const apiBase = (typeof resolveApiBaseUrl === 'function') ? resolveApiBaseUrl() : 'api';
+    fetch(`${apiBase}/update_ticket.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ticketId: ticketId,
+        action: 'cancel_member',
+        memberNip: targetNip,
+        memberName: currentEmp.name || memberObj.name
+      })
+    }).catch(err => console.warn('[cancelMemberParticipation] Gagal sync ke MySQL:', err));
+  } catch (e) {}
+
   // Tutup modal cancel jika terbuka
   const modalCancelRequest = document.getElementById('modalCancelRequest');
   if (modalCancelRequest) modalCancelRequest.classList.remove('open');
@@ -904,11 +940,12 @@ window.cancelMemberParticipation = function(ticketId, memberNip) {
     window.showToast(`Keikutsertaan Anda pada tiket #${t.id} berhasil dibatalkan. Anggota tim lainnya tetap berjalan.`, 'info');
   }
 
-  // Refresh
+  // Refresh seluruh tampilan (Desktop Web & Mobile)
   if (typeof window.renderKaryawanView === 'function') window.renderKaryawanView();
   if (typeof window.renderApproverView === 'function') window.renderApproverView();
   if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
   if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
+  if (typeof window.renderMobileActiveView === 'function') window.renderMobileActiveView();
 };
 
 /**

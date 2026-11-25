@@ -177,22 +177,37 @@ try {
 
     // B. Simpan Anggota Tim (Jika Group Dinas)
     if ($isGroupDinas && !empty($input['members']) && is_array($input['members'])) {
-        $stmtMember = $pdo->prepare("
+        $stmtInsertMbr = $pdo->prepare("
             INSERT INTO `ticket_members` (`ticket_id`, `nip`, `name`, `department`, `role`, `status`)
-            VALUES (:ticket_id, :nip, :name, :department, :role, 'aktif')
+            VALUES (:ticket_id, :nip, :name, :department, :role, :status)
+        ");
+        $stmtUpdateMbr = $pdo->prepare("
+            UPDATE `ticket_members` 
+            SET `status` = :status, `name` = :name, `department` = :department, `role` = :role
+            WHERE `ticket_id` = :ticket_id AND `nip` = :nip
         ");
         foreach ($input['members'] as $mbr) {
             if (!empty($mbr['nip']) && !empty($mbr['name'])) {
-                // Cek apakah anggota sudah ada di tiket ini
+                $mbrStatus = (isset($mbr['status']) && in_array(strtolower($mbr['status']), ['batal', 'cancelled'])) ? 'batal' : 'aktif';
                 $stmtChkMbr = $pdo->prepare("SELECT `id` FROM `ticket_members` WHERE `ticket_id` = :tid AND `nip` = :nip");
                 $stmtChkMbr->execute([':tid' => $ticketId, ':nip' => $mbr['nip']]);
-                if (!$stmtChkMbr->fetch()) {
-                    $stmtMember->execute([
+                if ($stmtChkMbr->fetch()) {
+                    $stmtUpdateMbr->execute([
+                        ':status' => $mbrStatus,
+                        ':name' => $mbr['name'],
+                        ':department' => isset($mbr['department']) ? $mbr['department'] : $department,
+                        ':role' => isset($mbr['role']) ? $mbr['role'] : 'Anggota',
+                        ':ticket_id' => $ticketId,
+                        ':nip' => $mbr['nip']
+                    ]);
+                } else {
+                    $stmtInsertMbr->execute([
                         ':ticket_id' => $ticketId,
                         ':nip' => $mbr['nip'],
                         ':name' => $mbr['name'],
                         ':department' => isset($mbr['department']) ? $mbr['department'] : $department,
-                        ':role' => isset($mbr['role']) ? $mbr['role'] : 'Anggota'
+                        ':role' => isset($mbr['role']) ? $mbr['role'] : 'Anggota',
+                        ':status' => $mbrStatus
                     ]);
                 }
             }

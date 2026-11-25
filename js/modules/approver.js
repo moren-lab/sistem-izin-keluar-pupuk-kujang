@@ -269,6 +269,7 @@ function updateApproverMetrics() {
   ).length;
 
   const pendingExtensions = ticketsList.filter(t =>
+    (t.status === 'Sedang di Luar' || t.status === 'Terlambat') &&
     t.pendingExtension &&
     t.pendingExtension.status === 'Menunggu Persetujuan' &&
     t.status !== 'Menunggu Verifikasi Atasan' &&
@@ -370,7 +371,7 @@ function renderApproverDashboard() {
   const ticketsList = window.ticketsList || [];
   const waitingVerificationTickets = ticketsList.filter(t => t.status === 'Menunggu Verifikasi Atasan' && isTicketAssignedToCurrentApprover(t));
   const pendingTickets = ticketsList.filter(t => !t.isEmergency && !(t.id && t.id.startsWith('TK-EMG-')) && t.status === 'Menunggu Persetujuan' && isTicketAssignedToCurrentApprover(t));
-  const pendingExtensions = ticketsList.filter(t => t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' && isTicketAssignedToCurrentApprover(t));
+  const pendingExtensions = ticketsList.filter(t => (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' && isTicketAssignedToCurrentApprover(t));
   const outsideTickets = ticketsList.filter(t => !isDeletedByCurrentApprover(t) && (t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketUnderMySupervision(t));
   const lockedEmergencyTickets = ticketsList.filter(t => t.isEmergency && t.status === 'Menunggu Otorisasi Darurat' && isTicketAssignedToCurrentApprover(t));
   const activeEmergencyTickets = ticketsList.filter(t => (t.isEmergency || (t.id && t.id.startsWith('TK-EMG'))) && !t.emergencyLocked && (t.status === 'Disetujui' || t.status === 'Sedang di Luar' || t.status === 'Terlambat') && isTicketAssignedToCurrentApprover(t));
@@ -904,7 +905,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
             ` : ''}
 
-            ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
+            ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
               <div class="approver-alert-banner extension" style="border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; margin: 0.5rem 0;">
                 <div style="font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
                   <span>Permohonan Perpanjangan Waktu</span>
@@ -959,12 +960,12 @@ function renderApproverCards(list, containerElement, isTracking = false) {
         const canDecide = !isTrackingView && isAssigned && !isReassignedAway;
         const isEmergDeciding = isEmergency && (t.status === 'Menunggu Otorisasi Darurat' || (t.emergencyLocked && t.status !== 'Disetujui' && !['Selesai', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status)));
 
-        if (canDecide && (isPending || isEmergDeciding || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
+        if (canDecide && (isPending || isEmergDeciding || ((t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
           // Decision Mode (Exclusive to Officially Assigned Approver)
           return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; margin-top: auto; padding-top: 0.65rem; border-top: 1px solid var(--border-color);">
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%;">
-                    ${t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
+                    ${(t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan' && t.status !== 'Menunggu Verifikasi Atasan' ? `
                       <button class="btn-reject" style="width: 100%; min-height: 38px; justify-content: center; font-size: 0.825rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; background: #b91c1c; color: #ffffff; border: none;" onclick="openRejectExtensionModal('${t.id}')">
                         ✕ Tolak Perpanjang
                       </button>
@@ -1001,7 +1002,7 @@ function renderApproverCards(list, containerElement, isTracking = false) {
         }
 
         // Monitoring / Read-Only Mode (Subordinate pending with other approver OR Reassigned Away)
-        if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || isEmergDeciding || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
+        if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || isEmergDeciding || ((t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
           return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
                   <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; font-size: 0.725rem; color: #334155; font-weight: 600;">

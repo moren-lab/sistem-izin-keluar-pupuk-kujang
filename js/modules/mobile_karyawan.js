@@ -4319,7 +4319,7 @@
                   </div>
                   <div style="flex-shrink: 0; text-align: right;">
                     <span style="font-size: 0.725rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; ${t.initiatorCancelled ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca;' : 'background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;'} white-space: nowrap;">
-                      ${t.initiatorCancelled ? 'Batal' : 'Aktif Ikut'}
+                      ${t.initiatorCancelled ? 'Batal Ikut Serta' : 'Aktif Ikut'}
                     </span>
                   </div>
                 </div>
@@ -4335,7 +4335,7 @@
                     </div>
                     <div style="flex-shrink: 0; text-align: right;">
                       <span style="font-size: 0.725rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; ${(m.status === 'batal' || m.status === 'cancelled') ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca;' : 'background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;'} white-space: nowrap;">
-                        ${(m.status === 'batal' || m.status === 'cancelled') ? 'Batal' : 'Aktif Ikut'}
+                        ${(m.status === 'batal' || m.status === 'cancelled') ? 'Batal Ikut Serta' : 'Aktif Ikut'}
                       </span>
                     </div>
                   </div>

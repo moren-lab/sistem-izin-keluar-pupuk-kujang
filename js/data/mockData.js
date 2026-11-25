@@ -619,6 +619,34 @@ function loadTickets() {
           changed = true;
         }
       }
+
+      // Sanitisasi permohonan perpanjangan ghoib (tiket selesai/batal/tolak/kedaluwarsa atau belum keluar)
+      const isTicketFinishedOrNotOutside = ['Selesai', 'Selesai (Terlambat)', 'Ditolak', 'Dibatalkan', 'Kedaluwarsa'].includes(t.status) || Boolean(t.scanInTime) || (t.status !== 'Sedang di Luar' && t.status !== 'Terlambat');
+      if (isTicketFinishedOrNotOutside && (t.pendingExtension || t.hasExtensionPending)) {
+        t.pendingExtension = null;
+        t.hasExtensionPending = false;
+        t.extensionRequestedTime = null;
+        t.extensionReason = null;
+        changed = true;
+      }
+
+      // Khusus tiket TK-20261124-777: hapus permohonan perpanjangan ghoib Ir. Hendra Gunawan
+      if (t.id === 'TK-20261124-777' && (t.pendingExtension || t.hasExtensionPending)) {
+        t.pendingExtension = null;
+        t.hasExtensionPending = false;
+        t.extensionRequestedTime = null;
+        t.extensionReason = null;
+        changed = true;
+      }
+
+      // Khusus tiket dinas bersama TK-20261124-308: pastikan status pembatalan Arthur Morgan tersinkron
+      if (t.id === 'TK-20261124-308' && Array.isArray(t.members)) {
+        const arthur = t.members.find(m => m.nip === 'PK-2024-8842');
+        if (arthur && arthur.status !== 'batal') {
+          arthur.status = 'batal';
+          changed = true;
+        }
+      }
       return t;
     });
     if (changed) {

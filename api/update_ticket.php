@@ -263,6 +263,10 @@ try {
                     ':caption' => isset($input['photoCaption']) ? $input['photoCaption'] : 'Foto verifikasi kehadiran di pos jaga'
                 ]);
             }
+
+            // Selesaikan permohonan perpanjangan yang masih pending (jika ada)
+            $stmtClearExt = $pdo->prepare("UPDATE `ticket_extensions` SET `status` = 'Diselesaikan', `decided_at` = NOW() WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan'");
+            $stmtClearExt->execute([':ticket_id' => $ticketId]);
             break;
 
         // ==========================================
@@ -276,27 +280,45 @@ try {
                 sendResponse(false, null, 'Waktu kembali baru dan alasan perpanjangan wajib diisi', 400);
             }
 
-            $stmtExt = $pdo->prepare("
-                INSERT INTO `ticket_extensions` (`ticket_id`, `new_estimated_return`, `extension_reason`, `status`, `requested_at`)
-                VALUES (:ticket_id, :new_time, :reason, 'Menunggu Persetujuan', NOW())
-            ");
-            $stmtExt->execute([
-                ':ticket_id' => $ticketId,
-                ':new_time' => date('Y-m-d H:i:s', strtotime($newEstimatedReturn)),
-                ':reason' => $extensionReason
-            ]);
+            // Cegah duplikasi antrean perpanjangan ghoib jika permohonan pending sudah ada
+            $stmtChkPending = $pdo->prepare("SELECT `id` FROM `ticket_extensions` WHERE `ticket_id` = :ticket_id AND `status` = 'Menunggu Persetujuan' LIMIT 1");
+            $stmtChkPending->execute([':ticket_id' => $ticketId]);
+            $existingPending = $stmtChkPending->fetch();
 
-            // Timeline
-            $stmtTl = $pdo->prepare("
-                INSERT INTO `ticket_timeline` (`ticket_id`, `event`, `event_time`, `actor_by`, `description`)
-                VALUES (:ticket_id, 'Permohonan Perpanjangan Diajukan', :event_time, :actor_by, :description)
-            ");
-            $stmtTl->execute([
-                ':ticket_id' => $ticketId,
-                ':event_time' => $nowDisplay,
-                ':actor_by' => $ticket['applicant_name'],
-                ':description' => "Perpanjangan s/d {$newEstimatedReturn}. Alasan: {$extensionReason}"
-            ]);
+            if ($existingPending) {
+                $stmtExt = $pdo->prepare("
+                    UPDATE `ticket_extensions`
+                    SET `new_estimated_return` = :new_time, `extension_reason` = :reason, `requested_at` = NOW()
+                    WHERE `id` = :id
+                ");
+                $stmtExt->execute([
+                    ':new_time' => date('Y-m-d H:i:s', strtotime($newEstimatedReturn)),
+                    ':reason' => $extensionReason,
+                    ':id' => $existingPending['id']
+                ]);
+            } else {
+                $stmtExt = $pdo->prepare("
+                    INSERT INTO `ticket_extensions` (`ticket_id`, `new_estimated_return`, `extension_reason`, `status`, `requested_at`)
+                    VALUES (:ticket_id, :new_time, :reason, 'Menunggu Persetujuan', NOW())
+                ");
+                $stmtExt->execute([
+                    ':ticket_id' => $ticketId,
+                    ':new_time' => date('Y-m-d H:i:s', strtotime($newEstimatedReturn)),
+                    ':reason' => $extensionReason
+                ]);
+
+                // Timeline hanya dicatat saat pertama kali diajukan
+                $stmtTl = $pdo->prepare("
+                    INSERT INTO `ticket_timeline` (`ticket_id`, `event`, `event_time`, `actor_by`, `description`)
+                    VALUES (:ticket_id, 'Permohonan Perpanjangan Diajukan', :event_time, :actor_by, :description)
+                ");
+                $stmtTl->execute([
+                    ':ticket_id' => $ticketId,
+                    ':event_time' => $nowDisplay,
+                    ':actor_by' => $ticket['applicant_name'],
+                    ':description' => "Perpanjangan s/d {$newEstimatedReturn}. Alasan: {$extensionReason}"
+                ]);
+            }
             break;
 
         case 'approve_extension':
@@ -393,6 +415,32 @@ try {
                 ':event_time' => $nowDisplay,
                 ':actor_by' => $ticket['applicant_name'],
                 ':description' => 'Permohonan perpanjangan waktu dibatalkan mandiri sebelum disetujui Atasan.'
+            ]);
+            break;
+
+        // ==========================================
+        // 7. PEMBATALAN ANGGOTA DINAS BERSAMA
+        // ==========================================
+        case 'cancel_member':
+            $memberNip = isset($input['memberNip']) ? trim($input['memberNip']) : '';
+            $memberName = isset($input['memberName']) ? trim($input['memberName']) : 'Anggota Tim';
+            if (!$memberNip) {
+                sendResponse(false, null, 'NIP anggota wajib disertakan', 400);
+            }
+
+            $stmtUpMbr = $pdo->prepare("UPDATE `ticket_members` SET `status` = 'batal' WHERE `ticket_id` = :ticket_id AND `nip` = :nip");
+            $stmtUpMbr->execute([':ticket_id' => $ticketId, ':nip' => $memberNip]);
+
+            // Timeline
+            $stmtTl = $pdo->prepare("
+                INSERT INTO `ticket_timeline` (`ticket_id`, `event`, `event_time`, `actor_by`, `description`)
+                VALUES (:ticket_id, 'Anggota Mundur dari Tim', :event_time, :actor_by, :description)
+            ");
+            $stmtTl->execute([
+                ':ticket_id' => $ticketId,
+                ':event_time' => $nowDisplay,
+                ':actor_by' => "{$memberName} (Anggota Tim)",
+                ':description' => "{$memberName} membatalkan keikutsertaan dalam dinas bersama ini. Pengajuan tetap berjalan untuk anggota lainnya."
             ]);
             break;
 

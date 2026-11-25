@@ -1918,14 +1918,14 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
           </div>
           <div>
             ${initiatorCancelled
-              ? '<span style="font-size: 0.75rem; font-weight: 700; color: #dc2626;">Batal Ikut</span>'
-              : '<span style="font-size: 0.75rem; font-weight: 700; color: #16a34a;">Aktif Ikut</span>'}
+              ? '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #fecaca;">Batal Ikut Serta</span>'
+              : '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">Aktif Ikut</span>'}
           </div>
         </div>
       `;
 
       ticket.members.forEach(m => {
-        const isBatal = m.status === 'batal';
+        const isBatal = (m.status === 'batal' || m.status === 'cancelled');
         membersHtml += `
           <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color, #f1f5f9);">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -1941,8 +1941,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
             </div>
             <div>
               ${isBatal
-                ? '<span style="font-size: 0.75rem; font-weight: 700; color: #dc2626;">Batal Ikut</span>'
-                : '<span style="font-size: 0.75rem; font-weight: 700; color: #16a34a;">Aktif Ikut</span>'}
+                ? '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #fecaca;">Batal Ikut Serta</span>'
+                : '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">Aktif Ikut</span>'}
             </div>
           </div>
         `;

@@ -69,6 +69,14 @@
             t.scanInGate = null;
           }
 
+          // Cegah permohonan perpanjangan ghoib: tiket final atau belum scan out tidak boleh memiliki perpanjangan aktif
+          if (['Selesai', 'Selesai (Terlambat)', 'Dibatalkan', 'Ditolak', 'Kedaluwarsa'].includes(t.status) || Boolean(t.scanInTime) || (t.status !== 'Sedang di Luar' && t.status !== 'Terlambat')) {
+            t.pendingExtension = null;
+            t.hasExtensionPending = false;
+            t.extensionRequestedTime = null;
+            t.extensionReason = null;
+          }
+
           // Otomatis pastikan notifikasi persetujuan dibuat untuk Karyawan jika tiket berstatus 'Disetujui'
           if (t.status === 'Disetujui') {
             const notifEventId = `approved_${t.id}`;
@@ -107,6 +115,12 @@
             }
           }
         } catch (e) {}
+
+        if (serverTickets.length === 0 && (window.ticketsList && window.ticketsList.length > 0)) {
+          // Database MySQL belum terisi, kirim data lokal awal ke MySQL tanpa mengosongkan layar pengguna
+          pushTicketChangesToMySQL(window.ticketsList);
+          return;
+        }
 
         const currentHash = computeHash(window.ticketsList || []);
         const serverHash = computeHash(serverTickets);
@@ -286,7 +300,7 @@
           body: JSON.stringify(payload)
         }).catch(e => console.warn('[SyncEngine] Gagal sync tiket individual:', e));
 
-        if (t.pendingExtension && t.hasExtensionPending && t.pendingExtension.status === 'Menunggu Persetujuan') {
+        if ((t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.hasExtensionPending && t.pendingExtension.status === 'Menunggu Persetujuan') {
           fetch(`${API_BASE}/update_ticket.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -163,6 +163,11 @@ try {
             $row['tap_in_time'] = null;
         }
 
+        $curStatus = $row['status'];
+        // Cegah permohonan perpanjangan ghoib: hanya tiket yang sedang di luar/terlambat yang dapat memiliki pendingExtension
+        $canHaveExtension = ($curStatus === 'Sedang di Luar' || $curStatus === 'Terlambat');
+        $hasPendingExt = $canHaveExtension && isset($pendingExtMap[$id]);
+
         $ticket = [
             'id' => $row['id'],
             'applicantNip' => $row['applicant_nip'],
@@ -213,10 +218,10 @@ try {
             'updatedAt' => $row['updated_at'],
             'timeline' => isset($timelineMap[$id]) ? $timelineMap[$id] : [],
             'members' => isset($membersMap[$id]) ? $membersMap[$id] : [],
-            'pendingExtension' => isset($pendingExtMap[$id]) ? $pendingExtMap[$id] : null,
-            'hasExtensionPending' => isset($pendingExtMap[$id]),
-            'extensionRequestedTime' => isset($pendingExtMap[$id]) ? $pendingExtMap[$id]['newEstimatedReturn'] : null,
-            'extensionReason' => isset($pendingExtMap[$id]) ? $pendingExtMap[$id]['reason'] : null,
+            'pendingExtension' => $hasPendingExt ? $pendingExtMap[$id] : null,
+            'hasExtensionPending' => $hasPendingExt,
+            'extensionRequestedTime' => $hasPendingExt ? $pendingExtMap[$id]['newEstimatedReturn'] : null,
+            'extensionReason' => $hasPendingExt ? $pendingExtMap[$id]['reason'] : null,
             'extensionCount' => isset($extensionsMap[$id]) ? count($extensionsMap[$id]) : 0,
             'extensionApproved' => isset($extensionsMap[$id]) && array_reduce($extensionsMap[$id], function($c, $x) { return $c || $x['status'] === 'Disetujui'; }, false),
             'arrivalProofPhoto' => isset($proofsMap[$id]) ? $proofsMap[$id] : null,
