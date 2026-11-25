@@ -7346,7 +7346,7 @@ body.theme-dark .detail-swipe-hint {
 }
 
 .figma-hero-top h2 {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #ffffff;
   margin: 0;
@@ -7434,11 +7434,21 @@ body.theme-dark .detail-swipe-hint {
 }
 
 .figma-section-title {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.4px;
-  margin-top: 2px;
+  margin-top: 0;
+}
+
+.figma-hero-banner + .figma-section-bar .figma-section-title {
+  font-size: 1.15rem;
+  letter-spacing: -0.25px;
+}
+
+#karyawanPengajuanPage .figma-section-bar,
+#karyawanRiwayatPage .figma-section-bar {
+  margin-top: 0;
 }
 
 .figma-section-sub {
