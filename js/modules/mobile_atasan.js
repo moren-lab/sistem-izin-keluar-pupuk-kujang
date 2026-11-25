@@ -587,7 +587,7 @@
             </div>
             
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${pendingEmergTicket.id}', 'reject')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenAtasanRejectModal('${pendingEmergTicket.id}')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanApproveEmergency ? window.mobileAtasanApproveEmergency('${pendingEmergTicket.id}') : window.mobileQuickApproveTicket('${pendingEmergTicket.id}')">
@@ -725,7 +725,7 @@
             </div>
           ` : `
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileOpenAtasanRejectModal('${t.id}')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 42px; padding: 8px 10px; font-size: 0.775rem; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;" onclick="window.mobileQuickApproveTicket('${t.id}')">
@@ -1631,7 +1631,7 @@
             </div>
 
             <div style="display: flex; gap: 8px;">
-              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+              <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenAtasanRejectModal('${t.id}')">
                 Tolak
               </button>
               <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
@@ -2802,7 +2802,7 @@
               </div>
 
               <div style="display: flex; gap: 8px;">
-                <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'reject')">
+                <button type="button" class="mobile-btn-danger" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px;" onclick="window.mobileOpenAtasanRejectModal('${t.id}')">
                   Tolak
                 </button>
                 <button type="button" class="mobile-btn-approve" style="flex: 1; min-height: 44px; padding: 10px; font-weight: 800; background: #059669; color: #ffffff; border: 1.5px solid #059669; border-radius: 8px;" onclick="window.mobileAtasanExecuteDecision('${t.id}', 'approve')">
@@ -3177,6 +3177,113 @@
   window.mobileQuickApproveTicket = function (ticketId) {
     window.mobileOpenAtasanApproveModal(ticketId);
   };
+
+  // Pop-up Modal Penolakan Atasan dengan Catatan Alasan (Paritas Fitur Web & Persetujuan)
+  window.mobileOpenAtasanRejectModal = function (ticketId) {
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
+    if (!t) return;
+
+    if (isTicketReassignedFromMobileApprover(t)) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Pengajuan ini telah dialihkan ke atasan lain.', 'danger');
+      }
+      return;
+    }
+
+    if (t.status !== 'Menunggu Persetujuan' && t.status !== 'Menunggu Otorisasi Darurat') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Peringatan: Tiket #${t.id} telah berstatus '${t.status}'.`, 'warning');
+      }
+      return;
+    }
+
+    const sheet = document.getElementById('mobileActionSheet');
+    if (!sheet) return;
+
+    const isEmerg = Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')) || t.status === 'Menunggu Otorisasi Darurat');
+    const exitFormatted = formatTimeOnly(getTExitTime(t)) || '10.00 WIB';
+    const isPulang = (t.type === 'Pulang Mendahului' || t.returnType === 'Pulang Mendahului');
+    const returnFormatted = isPulang ? 'Pulang Lebih Awal' : (formatTimeOnly(getTReturnTime(t)) || '13.00 WIB');
+
+    const defaultReason = isEmerg
+      ? 'Kondisi kedaruratan belum memenuhi kriteria evakuasi mendesak.'
+      : 'Alasan keperluan dinas/operasional belum memadai.';
+
+    const existingDetailNote = (document.getElementById('mAtasanDetailNote')?.value || '').trim();
+    const initialNote = existingDetailNote || '';
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-handle-bar"></div>
+      <div class="mobile-sheet-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #fee2e2;">
+        <div>
+          <span style="font-size: 0.675rem; color: #dc2626; font-weight: 800; text-transform: uppercase;">PENOLAKAN ATASAN</span>
+          <h3 class="mobile-sheet-title" style="font-family: monospace; font-size: 1rem; margin: 0; color: #0f172a;">${t.id}</h3>
+        </div>
+        <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+      <div class="mobile-sheet-body" style="padding: 14px 16px;">
+        <div style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="font-size: 0.825rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">${getTName(t)}</div>
+            ${isEmerg ? '<span style="font-size: 0.65rem; color: #b91c1c; background: #fee2e2; border: 1px solid #fca5a5; font-weight: 800; padding: 2px 6px; border-radius: 4px;">🚨 Darurat</span>' : ''}
+          </div>
+          <div style="font-size: 0.725rem; color: #64748b;">${getTNip(t)} • ${t.department || 'Departemen Rekayasa & Pemeliharaan'}</div>
+          <div style="border-top: 1px dashed #fca5a5; margin-top: 6px; padding-top: 6px; font-size: 0.725rem; color: #334155; display: flex; flex-direction: column; gap: 2px;">
+            <div><strong>Keperluan:</strong> ${t.category || (isEmerg ? 'Darurat Medis/K3' : 'Dinas Kantor')} (${t.destination || 'Area Pabrik'})</div>
+            <div><strong>Waktu:</strong> ${exitFormatted} s/d ${returnFormatted}</div>
+          </div>
+        </div>
+
+        <div class="mobile-form-group" style="margin-bottom: 14px;">
+          <label class="mobile-form-label" style="font-size: 0.75rem; font-weight: 700; color: #334155; margin-bottom: 4px; display: block;">
+            Catatan Alasan Penolakan <span style="color: #dc2626;">*</span>
+          </label>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+            <button type="button" class="mobile-chip-btn" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;" onclick="document.getElementById('mRejectModalNote').value='Alasan keperluan dinas/operasional belum memadai.';">Dinas belum memadai</button>
+            <button type="button" class="mobile-chip-btn" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;" onclick="document.getElementById('mRejectModalNote').value='Prioritas penugasan operasional di area kerja.';">Prioritas operasional</button>
+            <button type="button" class="mobile-chip-btn" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;" onclick="document.getElementById('mRejectModalNote').value='Dokumen pendukung atau justifikasi belum lengkap.';">Justifikasi kurang</button>
+          </div>
+          <textarea id="mRejectModalNote" class="mobile-textarea" placeholder="${defaultReason}" style="font-size: 0.775rem; min-height: 64px; width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px;">${initialNote}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="mobile-btn-secondary" style="flex: 1; min-height: 44px; font-size: 0.8rem; font-weight: 700; border-radius: 8px;" onclick="window.mobileCloseSheet()">
+            Batal
+          </button>
+          <button type="button" class="mobile-btn-danger" style="flex: 1.5; min-height: 44px; font-size: 0.8rem; font-weight: 800; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer;" onclick="window.mobileConfirmRejectFromModal('${t.id}')">
+            ✕ Tolak Pengajuan
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (typeof window.mobileOpenSheet === 'function') {
+      window.mobileOpenSheet();
+    } else {
+      sheet.classList.add('open');
+      const backdrop = document.getElementById('mobileModalBackdrop') || document.getElementById('mobileSheetBackdrop');
+      if (backdrop) backdrop.classList.add('open');
+    }
+  };
+
+  window.mobileConfirmRejectFromModal = function (ticketId) {
+    const list = window.ticketsList || [];
+    const t = list.find(x => x.id === ticketId);
+    const isEmerg = t && Boolean(t.isEmergency || (t.id && t.id.includes('-EMG-')) || t.status === 'Menunggu Otorisasi Darurat');
+    const noteEl = document.getElementById('mRejectModalNote');
+    const defaultMsg = isEmerg 
+      ? 'Kondisi kedaruratan belum memenuhi kriteria evakuasi mendesak.' 
+      : 'Alasan keperluan dinas/operasional belum memadai.';
+    const reason = (noteEl && noteEl.value && noteEl.value.trim()) ? noteEl.value.trim() : defaultMsg;
+    if (typeof window.mobileCloseSheet === 'function') window.mobileCloseSheet();
+    window.mobileAtasanExecuteDecision(ticketId, 'reject', reason);
+  };
+
+  window.mobileQuickRejectTicket = function (ticketId) {
+    window.mobileOpenAtasanRejectModal(ticketId);
+  };
+  window.mobileOpenRejectSheet = window.mobileOpenAtasanRejectModal;
 
   window.mobileAtasanExecuteDecision = function (ticketId, decision, defaultNote) {
     if (isExecutingAtasanDecision) return;
