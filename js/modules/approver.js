@@ -402,36 +402,6 @@ function renderApproverDashboard() {
   if (approverUrgentBanner) {
     let bannerHtml = '';
 
-    // 0. INFORMASI PENGAJUAN DIALIHKAN KE ATASAN LAIN (JIKA ADA)
-    if (reassignedAwayTickets.length > 0) {
-      bannerHtml += `
-        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 0.95rem 1.25rem; margin-bottom: 0.85rem; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);">
-          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-              <div style="font-size: 1.5rem;">↳</div>
-              <div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                  <span style="font-weight: 800; font-size: 0.9rem; color: #92400e;">
-                    ${reassignedAwayTickets.length} PENGAJUAN DIALIHKAN KE ATASAN LAIN
-                  </span>
-                  <span class="tag-badge" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Dialihkan</span>
-                </div>
-                <div style="font-size: 0.8rem; color: #78350f; margin-top: 3px;">
-                  ${reassignedAwayTickets.map(t => `Tiket <strong>${t.id}</strong> (${t.applicantName}) dialihkan ke <strong>${t.approverName}</strong>`).join(', ')}.
-                </div>
-                <div style="font-size: 0.75rem; color: #b45309; margin-top: 2px;">
-                  Status pengajuan ini tetap dapat Anda pantau di menu Pelacakan Izin Karyawan.
-                </div>
-              </div>
-            </div>
-            <button type="button" class="btn-card-detail" style="padding: 0.4rem 0.8rem; font-size: 0.775rem;" onclick="setApproverNav('pelacakan')">
-              Lihat di Pelacakan →
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
     // 0b. INFORMASI TEMBUSAN PENGAJUAN DINAS STAF (JIKA ADA)
     const currentAct = getCurrentApproverActor();
     const currNip = (currentAct.nip || '').trim();
@@ -522,32 +492,6 @@ function renderApproverDashboard() {
             <button class="btn-reject" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openRejectExtensionModal('${extFirst.id}')">✕ Tolak</button>
             <button class="btn-approve" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="approveExtensionRequest('${extFirst.id}')">✓ Setujui</button>
           </div>
-        </div>
-      `;
-    }
-
-    if (pendingTickets.length > 0) {
-      bannerHtml += `
-        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="font-size: 1.4rem;">⚡</div>
-            <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: #92400e;">
-                Ada ${pendingTickets.length} Permohonan Izin Bawahan Menunggu Keputusan Anda!
-              </div>
-              <div style="font-size: 0.775rem; color: #78350f;">
-                Sesuai SOP "No Approval, No Exit", bawahan tidak dapat meninggalkan pabrik sebelum Anda menyetujui tiket ini.
-              </div>
-            </div>
-          </div>
-          <button class="btn-primary-action" style="padding: 0.45rem 0.9rem; font-size: 0.775rem; background: #b45309;" onclick="setApproverNav('antrian')">
-            Buka Antrian Persetujuan →
-          </button>
-        </div>
-      `;
-    } else if (lockedEmergencyTickets.length === 0 && activeEmergencyTickets.length === 0 && pendingExtensions.length === 0) {
-      bannerHtml += `
-       
         </div>
       `;
     }
@@ -776,6 +720,69 @@ function renderApproverDashboard() {
   }
 }
 
+function getApproverExitCountdownBadge(t) {
+  if (!t || !t.plannedExit) return '';
+  if (t.status !== 'Menunggu Persetujuan' && t.status !== 'Menunggu Otorisasi Darurat') return '';
+
+  const exitDate = typeof window.parseTicketDateTime === 'function'
+    ? window.parseTicketDateTime(t.plannedExit)
+    : new Date(t.plannedExit);
+  if (!exitDate || isNaN(exitDate.getTime())) return '';
+
+  const diffMins = Math.round((exitDate.getTime() - Date.now()) / 60000);
+  let valueText = '';
+  let stateClass = '';
+
+  if (diffMins > 1440) {
+    valueText = `${Math.floor(diffMins / 1440)} hari lagi`;
+  } else if (diffMins >= 60) {
+    const h = Math.floor(diffMins / 60);
+    const m = diffMins % 60;
+    valueText = m > 0 ? `${h} jam ${m} menit lagi` : `${h} jam lagi`;
+  } else if (diffMins > 0) {
+    valueText = `${diffMins} menit lagi`;
+    if (diffMins <= 15) stateClass = 'is-soon';
+  } else if (diffMins === 0) {
+    valueText = 'Sekarang';
+    stateClass = 'is-soon';
+  } else {
+    const absMins = Math.abs(diffMins);
+    if (absMins >= 1440) {
+      valueText = `Lewat ${Math.floor(absMins / 1440)} hari`;
+    } else if (absMins >= 60) {
+      const h = Math.floor(absMins / 60);
+      const m = absMins % 60;
+      valueText = m > 0 ? `Lewat ${h} jam ${m} menit` : `Lewat ${h} jam`;
+    } else {
+      valueText = `Lewat ${absMins} menit`;
+    }
+    stateClass = 'is-overdue';
+  }
+
+  if (t.isEmergency && !stateClass) {
+    stateClass = 'is-overdue';
+  }
+
+  return `
+    <div class="approver-exit-countdown-wrap">
+      <div class="approver-exit-countdown-pill ${stateClass}">
+        <div class="approver-exit-countdown-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="13" r="8"></circle>
+            <path d="M12 9v4l2.5 1.5"></path>
+            <path d="M5 3 2 6"></path>
+            <path d="m22 6-3-3"></path>
+          </svg>
+        </div>
+        <div class="approver-exit-countdown-text">
+          <span class="approver-exit-countdown-label">Rencana keluar</span>
+          <span class="approver-exit-countdown-value">${valueText}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderApproverCards(list, containerElement, isTracking = false) {
   const containerApproverRequests = document.getElementById('containerApproverRequests');
   const target = containerElement || containerApproverRequests;
@@ -798,9 +805,11 @@ function renderApproverCards(list, containerElement, isTracking = false) {
     const appSelState = isRiwayatView && window.riwayatSelectState && window.riwayatSelectState.approver;
     const isSelectActive = Boolean(isRiwayatView && appSelState && appSelState.active);
     const isSelected = Boolean(isSelectActive && appSelState.selected && appSelState.selected.has(t.id));
+    const exitCountdownHtml = (!isTrackingView && !isRiwayatView) ? getApproverExitCountdownBadge(t) : '';
 
     return `
           <div class="card-item${isRiwayatView ? ' card-history-item' : ''}${isSelected ? ' riwayat-card-selected' : ''}${isSelectActive ? ' riwayat-select-active-item' : ''}" data-select-role="approver" data-ticket-id="${t.id}" onclick="${isRiwayatView ? `window.handleRiwayatItemClick('approver', '${t.id}', event)` : ''}">
+            ${exitCountdownHtml}
             <div class="card-top">
               <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
                 ${isSelectActive ? `<input type="checkbox" class="riwayat-select-checkbox" style="margin-top: 2px;" ${isSelected ? 'checked' : ''} onchange="window.toggleRiwayatTicketSelection('approver', '${t.id}', this.checked)" onclick="event.stopPropagation()">` : ''}
@@ -1005,10 +1014,6 @@ function renderApproverCards(list, containerElement, isTracking = false) {
         if (!isTrackingView && (isReassignedAway || !isAssigned) && (isPending || isEmergDeciding || ((t.status === 'Sedang di Luar' || t.status === 'Terlambat') && t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan'))) {
           return `
                 <div class="card-actions-bar" style="display: flex; flex-direction: column; gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color);">
-                  <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.6rem; background: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px; font-size: 0.725rem; color: #334155; font-weight: 600;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-                    <span>${isReassignedAway ? `Dialihkan ke: <strong>${t.approverName || 'Pejabat Terkait'}</strong>` : `Menunggu keputusan dari: <strong>${t.approverName || 'Pejabat Terkait'}</strong>`}</span>
-                  </div>
                   <button class="btn-card-detail" style="width: 100%; padding: 0.45rem 0.65rem; font-size: 0.75rem; font-weight: 600; min-height: 34px; justify-content: center; display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 6px;" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Rincian Lengkap">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     <span>Detail Pengajuan</span>
@@ -1325,19 +1330,7 @@ function renderQueueGroupSection(groupNum, title, subtitle, items, badgeColor, b
   }
 
   return `
-    <div class="approver-queue-group" data-group="${groupNum}" style="margin-bottom: 2rem;">
-      <div class="approver-group-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 1.5px solid var(--border-color);">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: ${badgeColor}; color: #ffffff; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">${groupNum}</div>
-          <div>
-            <h3 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-              <span>${title}</span>
-              <span style="font-size: 0.725rem; font-weight: 700; background: ${badgeBg}; color: ${badgeText}; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor;">${items.length} Tiket</span>
-            </h3>
-            <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.35;">${subtitle}</p>
-          </div>
-        </div>
-      </div>
+    <div class="approver-queue-group" data-group="${groupNum}" style="margin-bottom: 1.5rem;">
       ${tempDiv.innerHTML}
     </div>
   `;
@@ -1438,109 +1431,98 @@ function renderApproverView() {
     const group3All = Array.from(group3Map.values());
     group3All.sort(priorityEmergencyComparator);
 
-    // Filter Sifat Izin Aktif: 'all', 'emergency', 'regular'
-    const activeNature = window.currentApproverAntrianFilter || 'all';
+    // Tab 3 Kelompok Antrean: 'direct' (Reguler & Darurat), 'incoming' (Persetujuan Pengalihan), 'outgoing' (Pantau Pengalihan)
+    const validAntrianTabs = ['direct', 'incoming', 'outgoing'];
+    const activeTab = validAntrianTabs.includes(window.currentApproverAntrianFilter) ? window.currentApproverAntrianFilter : 'direct';
+    window.currentApproverAntrianFilter = activeTab;
 
-    const btnFilterAntrianAll = document.getElementById('btnFilterAntrianAll');
-    const btnFilterAntrianEmergency = document.getElementById('btnFilterAntrianEmergency');
-    const btnFilterAntrianRegular = document.getElementById('btnFilterAntrianRegular');
+    const btnDirect = document.getElementById('btnFilterAntrianDirect');
+    const btnIncoming = document.getElementById('btnFilterAntrianIncoming');
+    const btnOutgoing = document.getElementById('btnFilterAntrianOutgoing');
 
-    if (btnFilterAntrianAll) btnFilterAntrianAll.classList.toggle('active', activeNature === 'all');
-    if (btnFilterAntrianEmergency) btnFilterAntrianEmergency.classList.toggle('active', activeNature === 'emergency');
-    if (btnFilterAntrianRegular) btnFilterAntrianRegular.classList.toggle('active', activeNature === 'regular');
+    if (btnDirect) btnDirect.classList.toggle('active', activeTab === 'direct');
+    if (btnIncoming) btnIncoming.classList.toggle('active', activeTab === 'incoming');
+    if (btnOutgoing) btnOutgoing.classList.toggle('active', activeTab === 'outgoing');
 
-    let group1 = group1All;
-    let group2 = group2All;
-    let group3 = group3All;
-
-    if (activeNature === 'emergency') {
-      group1 = group1All.filter(isEmgTicket);
-      group2 = group2All.filter(isEmgTicket);
-      group3 = group3All.filter(isEmgTicket);
-    } else if (activeNature === 'regular') {
-      group1 = group1All.filter(t => !isEmgTicket(t));
-      group2 = group2All.filter(t => !isEmgTicket(t));
-      group3 = group3All.filter(t => !isEmgTicket(t));
-    }
-
-    // Hitung counter untuk badge filter antrean (Total dari ketiga kelompok)
     const totalCount = group1All.length + group2All.length + group3All.length;
-    const emgCount = (group1All.filter(isEmgTicket).length + group2All.filter(isEmgTicket).length + group3All.filter(isEmgTicket).length);
-    const regCount = (group1All.filter(t => !isEmgTicket(t)).length + group2All.filter(t => !isEmgTicket(t)).length + group3All.filter(t => !isEmgTicket(t)).length);
-
-    const countAntrianAll = document.getElementById('countAntrianAll');
-    const countAntrianEmergency = document.getElementById('countAntrianEmergency');
-    const countAntrianRegular = document.getElementById('countAntrianRegular');
+    const countDirect = document.getElementById('countAntrianDirect');
+    const countIncoming = document.getElementById('countAntrianIncoming');
+    const countOutgoing = document.getElementById('countAntrianOutgoing');
     const headingPendingBadge = document.getElementById('headingPendingBadge');
+    const approverSectionHeading = document.getElementById('approverSectionHeading');
 
-    if (countAntrianAll) countAntrianAll.textContent = totalCount;
-    if (countAntrianEmergency) countAntrianEmergency.textContent = emgCount;
-    if (countAntrianRegular) countAntrianRegular.textContent = regCount;
-    if (headingPendingBadge) headingPendingBadge.textContent = totalCount;
+    if (countDirect) countDirect.textContent = group1All.length;
+    if (countIncoming) countIncoming.textContent = group2All.length;
+    if (countOutgoing) countOutgoing.textContent = group3All.length;
 
-    if (group1.length === 0 && group2.length === 0 && group3.length === 0) {
+    const tabConfig = {
+      direct: {
+        num: 1,
+        headingTitle: 'Daftar Antrean Reguler & Darurat',
+        title: 'Daftar antrean pengajuan (regular dan darurat)',
+        subtitle: 'Pengajuan langsung di bawah naungan kerja Anda (Wajib Anda putuskan)',
+        items: group1All,
+        badgeColor: '#047857',
+        badgeBg: '#d1fae5',
+        badgeText: '#065f46',
+        isReadOnly: false,
+        emptyText: 'Tidak ada antrean pengajuan reguler & darurat langsung saat ini.'
+      },
+      incoming: {
+        num: 2,
+        headingTitle: 'Daftar Antrean Persetujuan Pengalihan',
+        title: 'Daftar antrean pengajuan yang dialihkan',
+        subtitle: 'Karyawan memilih Anda sebagai peninjau pengganti (Wajib Anda setujui atau tolak)',
+        items: group2All,
+        badgeColor: '#0284c7',
+        badgeBg: '#e0f2fe',
+        badgeText: '#0369a1',
+        isReadOnly: false,
+        emptyText: 'Tidak ada antrean pengajuan yang dialihkan ke Anda saat ini.'
+      },
+      outgoing: {
+        num: 3,
+        headingTitle: 'Daftar Pengajuan Bawahan Dialihkan',
+        title: 'Daftar pengajuan bawahan yang dialihkan ke atasan lain',
+        subtitle: 'Karyawan memilih atasan lain — Atasan langsung hanya bisa melihat detail pengajuannya',
+        items: group3All,
+        badgeColor: '#d97706',
+        badgeBg: '#fef3c7',
+        badgeText: '#92400e',
+        isReadOnly: true,
+        emptyText: 'Tidak ada pengajuan bawahan yang dialihkan ke atasan lain saat ini.'
+      }
+    };
+
+    const currentGroup = tabConfig[activeTab];
+    if (approverSectionHeading) approverSectionHeading.textContent = currentGroup.headingTitle;
+    if (headingPendingBadge) headingPendingBadge.textContent = currentGroup.items.length;
+    window.currentDetailTicketIds = currentGroup.items.map(t => t.id);
+
+    if (currentGroup.items.length === 0) {
       if (containerApproverPendingQueue) containerApproverPendingQueue.innerHTML = '';
       if (emptyApproverPendingBox) {
         emptyApproverPendingBox.style.display = 'flex';
         const emptyMsg = emptyApproverPendingBox.querySelector('p');
         if (emptyMsg) {
-          if (activeNature === 'emergency') {
-            emptyMsg.textContent = 'Tidak ada permohonan izin darurat yang menunggu persetujuan Anda saat ini.';
-          } else if (activeNature === 'regular') {
-            emptyMsg.textContent = 'Tidak ada permohonan izin reguler yang menunggu persetujuan Anda saat ini.';
-          } else {
-            emptyMsg.textContent = 'Tidak ada permohonan izin baru yang menunggu persetujuan Anda saat ini.';
-          }
+          emptyMsg.textContent = currentGroup.emptyText;
         }
       }
     } else {
       if (emptyApproverPendingBox) emptyApproverPendingBox.style.display = 'none';
       if (containerApproverPendingQueue) {
         const isAntrianTable = (window.currentApproverAntrianViewMode === 'table');
-        let queueHtml = '';
-
-        // Kelompok 1: Daftar antrean pengajuan (regular dan darurat)
-        queueHtml += renderQueueGroupSection(
-          1,
-          'Daftar antrean pengajuan (regular dan darurat)',
-          'Pengajuan langsung di bawah naungan kerja Anda (Wajib Anda putuskan)',
-          group1,
-          '#047857',
-          '#d1fae5',
-          '#065f46',
-          false,
+        const queueHtml = renderQueueGroupSection(
+          currentGroup.num,
+          currentGroup.title,
+          currentGroup.subtitle,
+          currentGroup.items,
+          currentGroup.badgeColor,
+          currentGroup.badgeBg,
+          currentGroup.badgeText,
+          currentGroup.isReadOnly,
           isAntrianTable,
-          'Tidak ada antrean pengajuan reguler & darurat langsung saat ini.',
-          false
-        );
-
-        // Kelompok 2: Daftar antrean pengajuan yang dialihkan ke Anda (Wajib Anda putuskan)
-        queueHtml += renderQueueGroupSection(
-          2,
-          'Daftar antrean pengajuan yang dialihkan',
-          'Karyawan memilih Anda sebagai peninjau pengganti (Wajib Anda setujui atau tolak)',
-          group2,
-          '#0284c7',
-          '#e0f2fe',
-          '#0369a1',
-          false,
-          isAntrianTable,
-          'Tidak ada antrean pengajuan yang dialihkan ke Anda saat ini.',
-          false
-        );
-
-        // Kelompok 3: Daftar antrean pengajuan bawahan yang dialihkan ke atasan lain (Hanya lihat detail)
-        queueHtml += renderQueueGroupSection(
-          3,
-          'Daftar pengajuan bawahan yang dialihkan ke atasan lain',
-          'Karyawan memilih atasan lain — Atasan langsung hanya bisa melihat detail pengajuannya',
-          group3,
-          '#d97706',
-          '#fef3c7',
-          '#92400e',
-          true,
-          isAntrianTable,
-          'Tidak ada pengajuan bawahan yang dialihkan ke atasan lain saat ini.',
+          currentGroup.emptyText,
           false
         );
 
@@ -1643,19 +1625,10 @@ function renderApproverView() {
       btnApproverViewTable.classList.toggle('active', window.currentApproverViewMode === 'table');
     }
 
-    const totalItems = list.length;
     const metaEl = document.getElementById('figmaApproverPelacakanMeta');
     const btnsEl = document.getElementById('figmaApproverPelacakanBtns');
     const barEl = document.getElementById('figmaApproverPelacakanPagination');
 
-    if (totalItems === 0) {
-      if (containerApproverRequests) containerApproverRequests.innerHTML = '';
-      if (emptyApproverBox) emptyApproverBox.style.display = 'flex';
-      if (barEl) barEl.style.display = 'none';
-      return;
-    }
-
-    if (emptyApproverBox) emptyApproverBox.style.display = 'none';
     const isPelacakanTable = (window.currentApproverViewMode === 'table');
     const currentApproverForTracking = getCurrentApproverActor();
     const currApproverNip = (currentApproverForTracking.nip || '').trim();
@@ -1673,62 +1646,101 @@ function renderApproverView() {
       (t.isGroupDinas && Array.isArray(t.members) && t.members.some(m => isMemberMySubordinate(m, currApproverNip, currApproverName)) && !isTicketAssignedToCurrentApprover(t))
     );
 
-    let pelacakanHtml = '';
+    const validPelacakanTabs = ['direct', 'incoming', 'outgoing'];
+    const activePelacakanTab = validPelacakanTabs.includes(window.currentApproverPelacakanFilter) ? window.currentApproverPelacakanFilter : 'direct';
+    window.currentApproverPelacakanFilter = activePelacakanTab;
 
-    // Kelompok 1: Pelacakan Izin Pengajuan Langsung (Reguler & Darurat)
-    pelacakanHtml += renderQueueGroupSection(
-      1,
-      'Pelacakan izin pengajuan langsung (regular dan darurat)',
-      'Izin aktif bawahan langsung di bawah naungan kerja Anda',
-      pGroup1,
-      '#047857',
-      '#d1fae5',
-      '#065f46',
-      false,
+    const btnPDirect = document.getElementById('btnFilterPelacakanDirect');
+    const btnPIncoming = document.getElementById('btnFilterPelacakanIncoming');
+    const btnPOutgoing = document.getElementById('btnFilterPelacakanOutgoing');
+    if (btnPDirect) btnPDirect.classList.toggle('active', activePelacakanTab === 'direct');
+    if (btnPIncoming) btnPIncoming.classList.toggle('active', activePelacakanTab === 'incoming');
+    if (btnPOutgoing) btnPOutgoing.classList.toggle('active', activePelacakanTab === 'outgoing');
+
+    const countPDirect = document.getElementById('countPelacakanDirect');
+    const countPIncoming = document.getElementById('countPelacakanIncoming');
+    const countPOutgoing = document.getElementById('countPelacakanOutgoing');
+    if (countPDirect) countPDirect.textContent = pGroup1.length;
+    if (countPIncoming) countPIncoming.textContent = pGroup2.length;
+    if (countPOutgoing) countPOutgoing.textContent = pGroup3.length;
+
+    const pelacakanTabConfig = {
+      direct: {
+        num: 1,
+        title: 'Pelacakan izin pengajuan langsung (regular dan darurat)',
+        subtitle: 'Izin aktif bawahan langsung di bawah naungan kerja Anda',
+        items: pGroup1,
+        badgeColor: '#047857',
+        badgeBg: '#d1fae5',
+        badgeText: '#065f46',
+        isReadOnly: false,
+        emptyText: 'Tidak ada izin aktif langsung saat ini.'
+      },
+      incoming: {
+        num: 2,
+        title: 'Pelacakan pengajuan yang dialihkan ke Anda',
+        subtitle: 'Izin aktif yang dialihkan dari atasan lain ke Anda',
+        items: pGroup2,
+        badgeColor: '#0284c7',
+        badgeBg: '#e0f2fe',
+        badgeText: '#0369a1',
+        isReadOnly: false,
+        emptyText: 'Tidak ada izin aktif yang dialihkan ke Anda saat ini.'
+      },
+      outgoing: {
+        num: 3,
+        title: 'Pelacakan pengajuan bawahan yang dialihkan ke atasan lain',
+        subtitle: 'Izin aktif staf bawahan yang disetujui / diproses atasan lain (Hanya Lihat Detail)',
+        items: pGroup3,
+        badgeColor: '#d97706',
+        badgeBg: '#fef3c7',
+        badgeText: '#92400e',
+        isReadOnly: true,
+        emptyText: 'Tidak ada izin aktif bawahan yang dialihkan ke atasan lain saat ini.'
+      }
+    };
+
+    const currentPGroup = pelacakanTabConfig[activePelacakanTab];
+
+    if (currentPGroup.items.length === 0) {
+      if (containerApproverRequests) containerApproverRequests.innerHTML = '';
+      if (emptyApproverBox) {
+        emptyApproverBox.style.display = 'flex';
+        const pMsg = emptyApproverBox.querySelector('p');
+        if (pMsg) pMsg.textContent = currentPGroup.emptyText;
+      }
+      if (barEl) barEl.style.display = 'none';
+      return;
+    }
+
+    if (emptyApproverBox) emptyApproverBox.style.display = 'none';
+    window.currentDetailTicketIds = currentPGroup.items.map(t => t.id);
+
+    const pelacakanHtml = renderQueueGroupSection(
+      currentPGroup.num,
+      currentPGroup.title,
+      currentPGroup.subtitle,
+      currentPGroup.items,
+      currentPGroup.badgeColor,
+      currentPGroup.badgeBg,
+      currentPGroup.badgeText,
+      currentPGroup.isReadOnly,
       isPelacakanTable,
-      'Tidak ada izin aktif langsung saat ini.',
+      currentPGroup.emptyText,
       true
     );
 
-    // Kelompok 2: Pelacakan Pengajuan yang Dialihkan ke Anda
-    pelacakanHtml += renderQueueGroupSection(
-      2,
-      'Pelacakan pengajuan yang dialihkan ke Anda',
-      'Izin aktif yang dialihkan dari atasan lain ke Anda',
-      pGroup2,
-      '#0284c7',
-      '#e0f2fe',
-      '#0369a1',
-      false,
-      isPelacakanTable,
-      'Tidak ada izin aktif yang dialihkan ke Anda saat ini.',
-      true
-    );
-
-    // Kelompok 3: Pelacakan Pengajuan Bawahan yang Dialihkan ke Atasan Lain
-    pelacakanHtml += renderQueueGroupSection(
-      3,
-      'Pelacakan pengajuan bawahan yang dialihkan ke atasan lain',
-      'Izin aktif staf bawahan yang disetujui / diproses atasan lain (Hanya Lihat Detail)',
-      pGroup3,
-      '#d97706',
-      '#fef3c7',
-      '#92400e',
-      true,
-      isPelacakanTable,
-      'Tidak ada izin aktif bawahan yang dialihkan ke atasan lain saat ini.',
-      true
-    );
-
-    containerApproverRequests.innerHTML = pelacakanHtml;
-    if (isPelacakanTable && typeof window.enableDragScroll === 'function') {
-      containerApproverRequests.querySelectorAll('.figma-table-card').forEach(card => {
-        window.enableDragScroll(card);
-      });
+    if (containerApproverRequests) {
+      containerApproverRequests.innerHTML = pelacakanHtml;
+      if (isPelacakanTable && typeof window.enableDragScroll === 'function') {
+        containerApproverRequests.querySelectorAll('.figma-table-card').forEach(card => {
+          window.enableDragScroll(card);
+        });
+      }
     }
 
     if (barEl) barEl.style.display = 'flex';
-    if (metaEl) metaEl.textContent = `Menampilkan ${totalItems} izin aktif dalam 3 kelompok`;
+    if (metaEl) metaEl.textContent = `Menampilkan ${currentPGroup.items.length} izin aktif pada tab ini`;
     if (btnsEl) btnsEl.innerHTML = '';
     return;
   }
@@ -1883,6 +1895,16 @@ function openApproveModal(ticketId) {
     return;
   }
 
+  const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    const navIds = typeof window.getTicketDetailNavigationIds === 'function'
+      ? window.getTicketDetailNavigationIds(ticketId)
+      : (Array.isArray(window.currentDetailTicketIds) ? [...window.currentDetailTicketIds] : [ticketId]);
+    window._detailDecisionOrigin = { ticketId, ids: navIds };
+  } else {
+    window._detailDecisionOrigin = null;
+  }
+
   // Cek preferensi sesi: Jika user memilih lewati pop up konfirmasi approve
   if (sessionStorage.getItem('kujang_skip_confirm_approve') === 'true') {
     window.currentDecisionTicketId = ticketId;
@@ -1890,7 +1912,6 @@ function openApproveModal(ticketId) {
     return;
   }
 
-  const modalTicketDetail = document.getElementById('modalTicketDetail');
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
 
   window.currentDecisionTicketId = ticketId;
@@ -1920,6 +1941,14 @@ function openRejectModal(ticketId) {
   }
 
   const modalTicketDetail = document.getElementById('modalTicketDetail');
+  if (modalTicketDetail && modalTicketDetail.classList.contains('open')) {
+    const navIds = typeof window.getTicketDetailNavigationIds === 'function'
+      ? window.getTicketDetailNavigationIds(ticketId)
+      : (Array.isArray(window.currentDetailTicketIds) ? [...window.currentDetailTicketIds] : [ticketId]);
+    window._detailDecisionOrigin = { ticketId, ids: navIds };
+  } else {
+    window._detailDecisionOrigin = null;
+  }
   if (modalTicketDetail) modalTicketDetail.classList.remove('open');
 
   window.currentDecisionTicketId = ticketId;
@@ -2110,6 +2139,34 @@ function confirmApproveDecision() {
   if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
   if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
   if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+
+  advanceDetailModalAfterDecision();
+}
+
+function advanceDetailModalAfterDecision() {
+  const origin = window._detailDecisionOrigin;
+  window._detailDecisionOrigin = null;
+  if (!origin) return;
+
+  const remainingIds = Array.isArray(window.currentDetailTicketIds) ? window.currentDetailTicketIds : [];
+  if (remainingIds.length === 0) return;
+
+  const origIdx = Array.isArray(origin.ids) ? origin.ids.indexOf(origin.ticketId) : -1;
+  let nextId = null;
+  if (origIdx !== -1) {
+    for (let i = origIdx + 1; i < origin.ids.length; i++) {
+      if (remainingIds.includes(origin.ids[i])) {
+        nextId = origin.ids[i];
+        break;
+      }
+    }
+  }
+  if (!nextId) {
+    nextId = remainingIds[0];
+  }
+  if (nextId && typeof window.openTicketDetail === 'function') {
+    window.openTicketDetail(nextId, 'info');
+  }
 }
 
 function confirmRejectDecision() {
@@ -2194,6 +2251,8 @@ function confirmRejectDecision() {
   if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
   if (typeof window.renderSecurityView === 'function') window.renderSecurityView();
   if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+
+  advanceDetailModalAfterDecision();
 }
 
 function quickApproveTicket(ticketId) {
@@ -2599,8 +2658,14 @@ window.clearApproverRiwayatHistory = clearApproverTrackingHistory;
 window.setApproverViewMode = setApproverViewMode;
 window.setApproverRiwayatViewMode = setApproverRiwayatViewMode;
 window.setApproverAntrianViewMode = setApproverAntrianViewMode;
-window.setApproverAntrianFilter = function (filterNature) {
-  window.currentApproverAntrianFilter = filterNature || 'all';
+window.setApproverAntrianFilter = function (filterGroup) {
+  window.currentApproverAntrianFilter = filterGroup || 'direct';
+  if (typeof window.renderApproverView === 'function') {
+    window.renderApproverView();
+  }
+};
+window.setApproverPelacakanFilter = function (filterGroup) {
+  window.currentApproverPelacakanFilter = filterGroup || 'direct';
   if (typeof window.renderApproverView === 'function') {
     window.renderApproverView();
   }

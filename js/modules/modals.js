@@ -1794,6 +1794,10 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   window.currentDetailTicketId = ticket.id;
   window.currentModalTicketId = ticket.id;
 
+  if (typeof window.updateTicketDetailNavButtons === 'function') {
+    window.updateTicketDetailNavButtons(ticket.id);
+  }
+
   // Kurangi badge notifikasi di sidebar audit trail admin saat detail telah dilihat
   if (typeof window.markAuditDetailAsViewed === 'function') {
     window.markAuditDetailAsViewed(ticket.id);
@@ -5364,3 +5368,74 @@ window.openNoticeModal = function (options) {
     alert(typeof message === 'string' ? message.replace(/<[^>]+>/g, '') : message);
   }
 };
+
+window.getTicketDetailNavigationIds = function (currentId) {
+  if (Array.isArray(window.currentDetailTicketIds) && window.currentDetailTicketIds.includes(currentId)) {
+    return window.currentDetailTicketIds;
+  }
+  const domIds = Array.from(document.querySelectorAll('[data-ticket-id]'))
+    .filter(el => el.offsetParent !== null)
+    .map(el => el.getAttribute('data-ticket-id'))
+    .filter(Boolean);
+  const uniqueDomIds = Array.from(new Set(domIds));
+  if (uniqueDomIds.includes(currentId)) {
+    return uniqueDomIds;
+  }
+  return currentId ? [currentId] : [];
+};
+
+window.updateTicketDetailNavButtons = function (ticketId) {
+  const prevBtn = document.getElementById('btnDetailPrevTicket');
+  const nextBtn = document.getElementById('btnDetailNextTicket');
+  const counterEl = document.getElementById('detailNavCounter');
+  if (!prevBtn || !nextBtn) return;
+
+  const ids = window.getTicketDetailNavigationIds(ticketId);
+  const idx = ids.indexOf(ticketId);
+
+  if (ids.length <= 1 || idx === -1) {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    if (counterEl) counterEl.style.display = 'none';
+    return;
+  }
+
+  prevBtn.style.display = 'inline-flex';
+  nextBtn.style.display = 'inline-flex';
+  prevBtn.disabled = (idx <= 0);
+  nextBtn.disabled = (idx >= ids.length - 1);
+
+  if (counterEl) {
+    counterEl.textContent = `${idx + 1} / ${ids.length}`;
+    counterEl.style.display = 'inline-flex';
+  }
+};
+
+window.navigateTicketDetail = function (direction) {
+  const currentId = window.currentDetailTicketId;
+  if (!currentId) return;
+  const ids = window.getTicketDetailNavigationIds(currentId);
+  const idx = ids.indexOf(currentId);
+  if (idx === -1) return;
+
+  const nextIdx = idx + direction;
+  if (nextIdx < 0 || nextIdx >= ids.length) return;
+
+  const tabNavTimeline = document.getElementById('tabNavTimeline');
+  const activeTab = (tabNavTimeline && tabNavTimeline.classList.contains('active')) ? 'timeline' : 'info';
+  openTicketDetail(ids[nextIdx], activeTab);
+};
+
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('modalTicketDetail');
+  if (!modal || !modal.classList.contains('open')) return;
+  const tag = (document.activeElement && document.activeElement.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    window.navigateTicketDetail(-1);
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    window.navigateTicketDetail(1);
+  }
+});

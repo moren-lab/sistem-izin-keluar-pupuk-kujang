@@ -3841,6 +3841,113 @@ body.theme-dark .role-dropdown-item.active {
   justify-content: space-between;
 }
 
+/* Pill Countdown Rencana Keluar pada Card Antrean Persetujuan */
+.approver-exit-countdown-wrap {
+  margin: -1.25rem 0 0.1rem -1.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.approver-exit-countdown-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.9rem 0.35rem 0.4rem;
+  border-radius: var(--radius-lg, 12px) 999px 999px 999px;
+  background: #eff6ff;
+  border-bottom: 1px solid #dbeafe;
+  border-right: 1px solid #dbeafe;
+}
+
+.approver-exit-countdown-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1e40af;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.approver-exit-countdown-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.approver-exit-countdown-label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.approver-exit-countdown-value {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+.approver-exit-countdown-pill.is-soon {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.approver-exit-countdown-pill.is-soon .approver-exit-countdown-icon {
+  background: #d97706;
+}
+.approver-exit-countdown-pill.is-soon .approver-exit-countdown-label {
+  color: #92400e;
+}
+.approver-exit-countdown-pill.is-soon .approver-exit-countdown-value {
+  color: #b45309;
+}
+
+.approver-exit-countdown-pill.is-overdue {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+.approver-exit-countdown-pill.is-overdue .approver-exit-countdown-icon {
+  background: #dc2626;
+}
+.approver-exit-countdown-pill.is-overdue .approver-exit-countdown-label {
+  color: #991b1b;
+}
+.approver-exit-countdown-pill.is-overdue .approver-exit-countdown-value {
+  color: #b91c1c;
+}
+
+body.theme-dark .approver-exit-countdown-pill {
+  background: rgba(30, 64, 175, 0.22);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+body.theme-dark .approver-exit-countdown-label {
+  color: #94a3b8;
+}
+body.theme-dark .approver-exit-countdown-value {
+  color: #93c5fd;
+}
+body.theme-dark .approver-exit-countdown-pill.is-soon {
+  background: rgba(217, 119, 6, 0.2);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+body.theme-dark .approver-exit-countdown-pill.is-soon .approver-exit-countdown-label {
+  color: #fcd34d;
+}
+body.theme-dark .approver-exit-countdown-pill.is-soon .approver-exit-countdown-value {
+  color: #fde68a;
+}
+body.theme-dark .approver-exit-countdown-pill.is-overdue {
+  background: rgba(220, 38, 38, 0.22);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+body.theme-dark .approver-exit-countdown-pill.is-overdue .approver-exit-countdown-label {
+  color: #fca5a5;
+}
+body.theme-dark .approver-exit-countdown-pill.is-overdue .approver-exit-countdown-value {
+  color: #fecaca;
+}
+
 .card-id-num {
   font-family: var(--font-mono);
   font-weight: 800;
@@ -4283,6 +4390,89 @@ body.modal-open {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+.modal-detail-stage {
+  position: relative;
+  width: 95%;
+  max-width: 820px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-side-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.modal-side-nav-btn.prev {
+  left: -58px;
+}
+
+.modal-side-nav-btn.next {
+  right: -58px;
+}
+
+.modal-side-nav-btn:hover:not(:disabled) {
+  background: #0f172a;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.modal-side-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.detail-nav-counter {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary, #475569);
+  background: var(--bg-subtle, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  font-family: var(--font-mono, monospace);
+}
+
+body.theme-dark .modal-side-nav-btn {
+  background: rgba(30, 41, 59, 0.96);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+body.theme-dark .modal-side-nav-btn:hover:not(:disabled) {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+@media (max-width: 960px) {
+  .modal-side-nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .modal-side-nav-btn.prev {
+    left: 6px;
+  }
+  .modal-side-nav-btn.next {
+    right: 6px;
+  }
 }
 
 .modal-header {
