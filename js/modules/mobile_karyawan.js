@@ -908,6 +908,16 @@
           ${totalItems} tiket riwayat
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Tombol Export Excel Karyawan (.xlsx) -->
+          <button type="button" class="mobile-btn-export-csv mobile-touch-hit-44" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; border: 1.5px solid #16a34a; background: #f0fdf4; color: #16a34a; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-sizing: border-box;" onclick="window.mobileExportKaryawanRiwayatCsv()" title="Unduh Riwayat (Excel .xlsx)" aria-label="Unduh Riwayat (Excel .xlsx)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </button>
           <!-- Tombol Filter (36x36px visual, Hit Area >= 44x44px) -->
           <button type="button" class="mobile-filter-toggle-btn mobile-touch-hit-44 ${isRiwayatFilterOpen ? 'active' : ''}" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1.5px solid ${isRiwayatFilterOpen ? '#059669' : '#cbd5e1'}; background: ${isRiwayatFilterOpen ? '#ecfdf5' : '#ffffff'}; color: ${isRiwayatFilterOpen ? '#047857' : '#334155'}; cursor: pointer; box-sizing: border-box; position: relative;" onclick="window.mobileToggleRiwayatFilter()" title="Filter Status Riwayat" aria-label="Filter Status Riwayat">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
@@ -1259,31 +1269,139 @@
       return;
     }
 
-    let csv = "data:text/csv;charset=utf-8,";
-    csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Alasan,Rencana Keluar,Estimasi Kembali,Status\n";
+    const formatDateTimeClean = (dtStr) => {
+      if (!dtStr || dtStr === '-' || dtStr === 'null') return '-';
+      const isoMatch = String(dtStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+      if (isoMatch) {
+        const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        const d = parseInt(isoMatch[3], 10);
+        const m = months[parseInt(isoMatch[2], 10) - 1];
+        const y = isoMatch[1];
+        const h = isoMatch[4];
+        const min = isoMatch[5];
+        return `${d} ${m} ${y}, ${h}.${min} WIB`;
+      }
+      return String(dtStr).replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+    };
 
-    tickets.forEach(t => {
-      csv += [
-        `"${t.id}"`,
-        `"${t.applicantName || (emp ? emp.name : 'Budi Pratama')}"`,
-        `"${t.applicantNip || (emp ? emp.nip : 'PK-2024-8841')}"`,
-        `"${t.category || 'Dinas Kantor'}"`,
-        `"${t.type || t.returnType || 'Keluar Sementara'}"`,
-        `"${(t.destination || '').replace(/"/g, '""')}"`,
-        `"${(t.reason || '').replace(/"/g, '""')}"`,
-        `"${t.plannedExit || t.createdAt || '-'}"`,
-        `"${t.estimatedReturn || '-'}"`,
-        `"${t.status}"`
-      ].join(',') + "\n";
+    const cleanTimeAndGate = (timeStr, explicitGate) => {
+      let gate = explicitGate || '-';
+      let time = timeStr || '-';
+      if (time !== '-') {
+        time = time.replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+        const m = time.match(/^(.*?)\s*\((.*?)\)$/);
+        if (m) {
+          time = m[1].trim();
+          if (!explicitGate || explicitGate === '-') {
+            gate = m[2].trim();
+          }
+        }
+      }
+      return { time, gate };
+    };
+
+    const headers = [
+      'No',
+      'No Tiket',
+      'Tanggal Pengajuan',
+      'NIP Karyawan',
+      'Nama Karyawan',
+      'Keperluan',
+      'Tipe Izin',
+      'Tujuan',
+      'Alasan',
+      'Rencana Keluar',
+      'Estimasi Kembali',
+      'Scan Out (Waktu)',
+      'Scan Out (Gerbang)',
+      'Tap In (Waktu)',
+      'Tap In (Gerbang)',
+      'Status Akhir',
+      'Catatan / Alasan Penolakan'
+    ];
+
+    const rows = tickets.map((t, idx) => {
+      const reqDate = formatDateTimeClean(t.createdAt || t.createdDate);
+      const outData = cleanTimeAndGate(t.scanOutTime, t.scanOutGate || t.gateOut);
+      const inData = cleanTimeAndGate(t.scanInTime, t.scanInGate || t.gateIn);
+      const planExit = formatDateTimeClean(t.plannedExit);
+      let estReturn = '-';
+      if (t.type === 'Tidak Kembali (Pulang)' || t.type === 'Pulang Mendahului') {
+        estReturn = 'Tidak Kembali (Pulang)';
+      } else if (t.estimatedReturn && t.estimatedReturn !== 'null') {
+        estReturn = formatDateTimeClean(t.estimatedReturn);
+      }
+      let finalStatus = t.status || '-';
+      if (t.status === 'Selesai' && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0))) {
+        finalStatus = 'Selesai (Terlambat)';
+      }
+      const notes = t.rejectionReason || t.cancellationReason || t.approverNote || '-';
+
+      return [
+        idx + 1,
+        t.id || '-',
+        reqDate,
+        t.applicantNip || (emp ? emp.nip : '-'),
+        t.applicantName || (emp ? emp.name : ''),
+        t.category || '-',
+        t.type || t.returnType || '-',
+        t.destination || '',
+        t.reason || '',
+        planExit,
+        estReturn,
+        outData.time,
+        outData.gate,
+        inData.time,
+        inData.gate,
+        finalStatus,
+        String(notes)
+      ];
     });
 
-    const uri = encodeURI(csv);
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+
+    // Native Microsoft Excel (.xlsx) Export via SheetJS
+    if (typeof window.XLSX !== 'undefined') {
+      const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      ws['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 18 }, // No Tiket
+        { wch: 22 }, // Tanggal Pengajuan
+        { wch: 16 }, // NIP
+        { wch: 25 }, // Nama
+        { wch: 16 }, // Keperluan
+        { wch: 20 }, // Tipe Izin
+        { wch: 25 }, // Tujuan
+        { wch: 25 }, // Alasan
+        { wch: 22 }, // Rencana Keluar
+        { wch: 22 }, // Estimasi Kembali
+        { wch: 16 }, // Scan Out
+        { wch: 24 }, // Scan Out Gate
+        { wch: 16 }, // Tap In
+        { wch: 24 }, // Tap In Gate
+        { wch: 18 }, // Status Akhir
+        { wch: 30 }  // Catatan
+      ];
+      const wb = window.XLSX.utils.book_new();
+      window.XLSX.utils.book_append_sheet(wb, ws, "Riwayat Izin");
+      window.XLSX.writeFile(wb, `Riwayat_Izin_Karyawan_${dateStr}.xlsx`);
+      if (typeof window.showToast === 'function') window.showToast(`Berhasil mengunduh ${tickets.length} riwayat ke Excel (.xlsx)!`, 'success');
+      return;
+    }
+
+    // Fallback to CSV
+    const csvRows = rows.map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','));
+    const csvContent = '\uFEFFsep=,\r\n' + [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = uri;
-    a.download = `Riwayat-Izin-Karyawan-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.href = url;
+    a.download = `Riwayat-Izin-Karyawan-${dateStr}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 1000);
     if (typeof window.showToast === 'function') window.showToast('Riwayat berhasil diekspor ke file CSV!', 'success');
   };
 
@@ -1479,11 +1597,18 @@
           </div>
         `;
       } else {
+        const cancelExtBtn = `
+          <button type="button" class="mobile-btn-danger btn-cancel-pending-ext" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 44px; font-size: 0.7rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 4px; line-height: 1.2; cursor: pointer;" onclick="window.mobileCancelPendingExtension('${t.id}')" title="Batalkan Perpanjangan">
+            <span>✕ Batalkan</span>
+          </button>
+        `;
+
         actionButtonsHtml = `
           <div style="margin-top: 12px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div style="display: grid; grid-template-columns: ${hasPendingExt ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: ${hasPendingExt ? '6px' : '8px'};">
               ${extButtonHtml}
               ${tapInBtn}
+              ${hasPendingExt ? cancelExtBtn : ''}
             </div>
           </div>
           <div style="text-align: center; margin-top: 8px;">
@@ -2014,8 +2139,11 @@
 
             <!-- 4. Alasan Keperluan Izin -->
             <div class="mobile-form-group" style="margin-bottom: 12px;">
-              <label class="mobile-form-label" id="mFormReasonLabel" data-is-emergency="${isEmergency ? '1' : '0'}">${initialType === 'Pulang Mendahului' ? 'Alasan Keperluan Izin dan memilih pulang lebih awal' : (isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin')} <span class="req">*</span></label>
-              <textarea class="mobile-textarea" id="mFormReason" placeholder="${initialType === 'Pulang Mendahului' ? 'Masukkan alasan keperluan izin dan memilih pulang lebih awal...' : (isEmergency ? 'Masukkan alasan kondisi kedaruratan...' : 'Masukkan alasan keperluan izin...')}" required style="min-height: 65px;">${initialReason}</textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label class="mobile-form-label" id="mFormReasonLabel" data-is-emergency="${isEmergency ? '1' : '0'}" style="margin-bottom: 0;">${initialType === 'Pulang Mendahului' ? 'Alasan Keperluan Izin dan memilih pulang lebih awal' : (isEmergency ? 'Alasan Kondisi Kedaruratan' : 'Alasan Keperluan Izin')} <span class="req">*</span></label>
+                <span id="mFormReasonWordCount" style="font-size: 0.68rem; color: #64748b; font-weight: 600;">0 / 500 kata</span>
+              </div>
+              <textarea class="mobile-textarea" id="mFormReason" placeholder="${initialType === 'Pulang Mendahului' ? 'Masukkan alasan keperluan izin dan memilih pulang lebih awal (maks. 500 kata)...' : (isEmergency ? 'Masukkan alasan kondisi kedaruratan (maks. 500 kata)...' : 'Masukkan alasan keperluan izin (maks. 500 kata)...')}" required style="min-height: 65px;" oninput="window.handleReasonWordCount(this, 'mFormReasonWordCount')">${initialReason}</textarea>
             </div>
 
             <!-- 5. Rencana Waktu Keluar & Perkiraan Waktu Kembali (Anti Waktu Lampau & Aturan Kategori) -->
@@ -3118,6 +3246,12 @@
       if (typeof window.showToast === 'function') window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'warning');
       if (!destination) document.getElementById('mFormDestination')?.focus();
       else document.getElementById('mFormReason')?.focus();
+      return;
+    }
+
+    if (typeof window.countWords === 'function' ? window.countWords(reason) > 500 : reason.split(/\s+/).filter(Boolean).length > 500) {
+      if (typeof window.showToast === 'function') window.showToast('Alasan keperluan izin dibatasi maksimal 500 kata!', 'warning');
+      document.getElementById('mFormReason')?.focus();
       return;
     }
 
@@ -4469,23 +4603,21 @@
                   Perpanjangan Telah Digunakan (Maks. 1x)
                 </button>
               ` : (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
-                <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%;">
-                    <button type="button" class="mobile-btn-secondary btn-pending-ext-notice" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 40px; font-size: 0.725rem; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; padding: 0 4px;">
-                      Menunggu Persetujuan
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%;">
+                  <button type="button" class="mobile-btn-secondary btn-pending-ext-notice" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 40px; font-size: 0.68rem; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; padding: 0 4px; line-height: 1.2;">
+                    Menunggu Persetujuan
+                  </button>
+                  ${isGroupDinasActive ? `
+                    <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 40px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px; line-height: 1.2;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
+                      💳 Tap In Gerbang
                     </button>
-                    ${isGroupDinasActive ? `
-                      <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 40px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
-                        💳 Tap In Gerbang
-                      </button>
-                    ` : `
-                      <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 40px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}');">
-                        ✓ Tap In Masuk
-                      </button>
-                    `}
-                  </div>
-                  <button type="button" class="mobile-btn-secondary btn-cancel-pending-ext" style="background: #ffffff; color: #b91c1c; border: 1.5px solid #fca5a5; min-height: 36px; font-size: 0.775rem; font-weight: 700; border-radius: 8px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer;" onclick="window.mobileCancelPendingExtension('${t.id}')">
-                    ✕ Batalkan Perpanjangan
+                  ` : `
+                    <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 40px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px; line-height: 1.2;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}');">
+                      ✓ Tap In Masuk
+                    </button>
+                  `}
+                  <button type="button" class="mobile-btn-danger btn-cancel-pending-ext" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 40px; font-size: 0.68rem; font-weight: 700; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 4px; line-height: 1.2; cursor: pointer;" onclick="window.mobileCancelPendingExtension('${t.id}')">
+                    ✕ Batalkan
                   </button>
                 </div>
               ` : `

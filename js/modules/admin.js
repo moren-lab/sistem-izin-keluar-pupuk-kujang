@@ -992,88 +992,149 @@ function exportAdminExcel() {
     return;
   }
 
+  const formatDateTimeClean = (dtStr) => {
+    if (!dtStr || dtStr === '-' || dtStr === 'null') return '-';
+    const isoMatch = String(dtStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+    if (isoMatch) {
+      const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+      const d = parseInt(isoMatch[3], 10);
+      const m = months[parseInt(isoMatch[2], 10) - 1];
+      const y = isoMatch[1];
+      const h = isoMatch[4];
+      const min = isoMatch[5];
+      return `${d} ${m} ${y}, ${h}.${min} WIB`;
+    }
+    return String(dtStr).replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+  };
+
+  const cleanTimeAndGate = (timeStr, explicitGate) => {
+    let gate = explicitGate || '-';
+    let time = timeStr || '-';
+    if (time !== '-') {
+      time = time.replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+      const m = time.match(/^(.*?)\s*\((.*?)\)$/);
+      if (m) {
+        time = m[1].trim();
+        if (!explicitGate || explicitGate === '-') {
+          gate = m[2].trim();
+        }
+      }
+    }
+    return { time, gate };
+  };
+
   const headers = [
+    'No',
     'No Tiket',
-    'Tanggal',
+    'Tanggal Pengajuan',
     'NIP Karyawan',
     'Nama Karyawan',
     'Departemen',
     'Keperluan',
+    'Tipe Izin',
     'Tujuan',
     'Alasan',
+    'Rencana Keluar',
+    'Estimasi Kembali',
     'Scan Out (Waktu)',
     'Scan Out (Gerbang)',
-    'Tap In (Waktu)', 'Tap In (Gerbang)',
-    'Estimasi Kembali',
+    'Tap In (Waktu)',
+    'Tap In (Gerbang)',
     'Status Akhir',
-    'Atasan Penyetuju'
+    'Atasan Penyetuju',
+    'Catatan / Alasan Penolakan'
   ];
 
-  const rows = tickets.map(t => {
+  const rows = tickets.map((t, idx) => {
+    // Tanggal pengajuan
+    const reqDate = formatDateTimeClean(t.createdAt || t.createdDate);
+
     // Clean scan out string
-    let outTime = '-';
-    let outGate = t.gateOut || '-';
-    if (t.scanOutTime) {
-      const match = t.scanOutTime.match(/^(.*?)\s*\((.*?)\)/);
-      if (match) {
-        outTime = match[1].trim();
-        outGate = match[2].trim();
-      } else {
-        outTime = t.scanOutTime;
-      }
-    }
+    const outData = cleanTimeAndGate(t.scanOutTime, t.scanOutGate || t.gateOut);
 
     // Clean Tap In string
-    let inTime = '-';
-    let inGate = t.gateIn || '-';
-    if (t.scanInTime) {
-      const match = t.scanInTime.match(/^(.*?)\s*\((.*?)\)/);
-      if (match) {
-        inTime = match[1].trim();
-        inGate = match[2].trim();
-      } else {
-        inTime = t.scanInTime;
-      }
-    }
+    const inData = cleanTimeAndGate(t.scanInTime, t.scanInGate || t.gateIn);
 
-    // Clean return time
+    // Rencana keluar & estimasi kembali
+    const planExit = formatDateTimeClean(t.plannedExit);
     let estReturn = '-';
-    if (t.type === 'Tidak Kembali (Pulang)') {
-      estReturn = 'Tidak Kembali';
+    if (t.type === 'Tidak Kembali (Pulang)' || t.type === 'Pulang Mendahului') {
+      estReturn = 'Tidak Kembali (Pulang)';
     } else if (t.estimatedReturn && t.estimatedReturn !== 'null') {
-      estReturn = t.estimatedReturn.includes('T') ? t.estimatedReturn.split('T')[1] + ' WIB' : t.estimatedReturn;
+      estReturn = formatDateTimeClean(t.estimatedReturn);
     }
 
     let finalStatus = t.status || '-';
     if (t.status === 'Selesai' && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0))) {
-      finalStatus = `Selesai (Terlambat)`;
+      finalStatus = 'Selesai (Terlambat)';
     }
 
+    const notes = t.rejectionReason || t.cancellationReason || t.approverNote || '-';
+
     return [
-      `"${t.id}"`,
-      `"${t.createdAt || t.createdDate || '-'}"`,
-      `"${t.applicantNip || '-'}"`,
-      `"${(t.applicantName || '').replace(/"/g, '""')}"`,
-      `"${(t.department || '').replace(/"/g, '""')}"`,
-      `"${t.category || '-'}"`,
-      `"${(t.destination || '').replace(/"/g, '""')}"`,
-      `"${(t.reason || '').replace(/"/g, '""')}"`,
-      `"${outTime}"`,
-      `"${outGate}"`,
-      `"${inTime}"`,
-      `"${inGate}"`,
-      `"${estReturn}"`,
-      `"${finalStatus}"`,
-      `"${(t.approverName || '-').replace(/"/g, '""')}"`
+      idx + 1,
+      t.id || '-',
+      reqDate,
+      t.applicantNip || '-',
+      t.applicantName || '',
+      t.department || '',
+      t.category || '-',
+      t.type || t.returnType || '-',
+      t.destination || '',
+      t.reason || '',
+      planExit,
+      estReturn,
+      outData.time,
+      outData.gate,
+      inData.time,
+      inData.gate,
+      finalStatus,
+      t.approverName || '-',
+      String(notes)
     ];
   });
 
-  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\r\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
   const now = new Date();
   const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+
+  // Native Microsoft Excel (.xlsx) Export via SheetJS
+  if (typeof window.XLSX !== 'undefined') {
+    const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = [
+      { wch: 6 },  // No
+      { wch: 18 }, // No Tiket
+      { wch: 22 }, // Tanggal Pengajuan
+      { wch: 16 }, // NIP
+      { wch: 25 }, // Nama
+      { wch: 22 }, // Departemen
+      { wch: 16 }, // Keperluan
+      { wch: 20 }, // Tipe Izin
+      { wch: 25 }, // Tujuan
+      { wch: 25 }, // Alasan
+      { wch: 22 }, // Rencana Keluar
+      { wch: 22 }, // Estimasi Kembali
+      { wch: 16 }, // Scan Out Waktu
+      { wch: 24 }, // Scan Out Gerbang
+      { wch: 16 }, // Tap In Waktu
+      { wch: 24 }, // Tap In Gerbang
+      { wch: 18 }, // Status Akhir
+      { wch: 25 }, // Atasan Penyetuju
+      { wch: 30 }  // Catatan
+    ];
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "Rekap Perizinan");
+    window.XLSX.writeFile(wb, `Rekap_Izin_Keluar_Pupuk_Kujang_${dateStr}.xlsx`);
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Berhasil mengunduh rekap ${tickets.length} perizinan ke Excel (.xlsx)`, 'success');
+    }
+    return;
+  }
+
+  // Fallback to CSV with Excel separation header
+  const csvRows = rows.map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','));
+  const csvContent = '\uFEFFsep=,\r\n' + [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const filename = `Rekap_Izin_Keluar_Pupuk_Kujang_${dateStr}.csv`;
 
   const link = document.createElement('a');

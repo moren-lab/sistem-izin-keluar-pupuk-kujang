@@ -409,8 +409,9 @@
             ${isLate ? `<div style="font-size: 0.675rem; color: #b91c1c; font-weight: 700; margin-top: 2px;">Terlambat ${t.lateMinutes || 30} menit</div>` : ''}
           </div>
           <!-- Tombol Detail Pengajuan -->
-          <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+          <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+            <span>Detail Pengajuan</span>
           </button>
         </div>
       `;
@@ -721,8 +722,9 @@
           ${statusInfoHtml}
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+            <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="height: 32px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-size: 0.75rem; font-weight: 700;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+              <span>Detail Pengajuan</span>
             </button>
           </div>
         </div>
@@ -1001,10 +1003,11 @@
                 )
               }
             </div>
-            <!-- Tombol Detail Pengajuan (Emoji Dokumen) & Tombol Hapus 1 Riwayat (Tong Sampah Merah) -->
+            <!-- Tombol Detail Pengajuan (Pill Button) & Tombol Hapus 1 Riwayat (Tong Sampah Merah) -->
             <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-              <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+              <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                <span>Detail Pengajuan</span>
               </button>
               <button type="button" class="mobile-btn-danger" title="Hapus Riwayat" aria-label="Hapus Riwayat" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'security')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1062,10 +1065,11 @@
             <div style="font-size: 0.7rem; color: #334155; font-weight: 600;">
               Scan Out: <strong style="color: #0f172a;">${scanOutT || '—'}</strong> • Masuk: <strong style="color: ${isPulang ? '#64748b' : (scanInT ? '#0f172a' : '#dc2626')}; font-weight: 800;">${isPulang ? '—' : (scanInT || 'Belum')}</strong>
             </div>
-            <!-- Tombol Detail Pengajuan (Emoji Dokumen) & Tombol Hapus 1 Riwayat (Tong Sampah Merah) -->
+            <!-- Tombol Detail Pengajuan (Pill Button) & Tombol Hapus 1 Riwayat (Tong Sampah Merah) -->
             <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-              <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="window.mobileSecurityInspectTicket('${t.id}')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+              <button type="button" class="mobile-btn-secondary" title="Detail Pengajuan" aria-label="Detail Pengajuan" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSecurityInspectTicket('${t.id}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                <span>Detail Pengajuan</span>
               </button>
               <button type="button" class="mobile-btn-danger" title="Hapus Riwayat" aria-label="Hapus Riwayat" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);" onclick="window.mobileDeleteTicketItem('${t.id}', 'security')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -2509,31 +2513,126 @@
       return;
     }
 
-    let csv = 'data:text/csv;charset=utf-8,';
-    csv += 'Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Waktu Scan Out,Waktu Tap In,Pos Bertugas,Status\n';
+    const formatDateTimeClean = (dtStr) => {
+      if (!dtStr || dtStr === '-' || dtStr === 'null') return '-';
+      const isoMatch = String(dtStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+      if (isoMatch) {
+        const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        const d = parseInt(isoMatch[3], 10);
+        const m = months[parseInt(isoMatch[2], 10) - 1];
+        const y = isoMatch[1];
+        const h = isoMatch[4];
+        const min = isoMatch[5];
+        return `${d} ${m} ${y}, ${h}.${min} WIB`;
+      }
+      return String(dtStr).replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+    };
 
-    eligible.forEach(t => {
-      csv += [
-        `"${t.id}"`,
-        `"${getTName(t)}"`,
-        `"${getTNip(t)}"`,
-        `"${t.category || 'Dinas Kantor'}"`,
-        `"${t.type || t.returnType || 'Keluar Sementara'}"`,
-        `"${(t.destination || '').replace(/"/g, '""')}"`,
-        `"${t.scanOutTime || '-'}"`,
-        `"${t.scanInTime || '-'}"`,
-        `"${t.scanOutGate || activeGate}"`,
-        `"${t.status}"`
-      ].join(',') + '\n';
+    const cleanTimeAndGate = (timeStr, explicitGate) => {
+      let gate = explicitGate || '-';
+      let time = timeStr || '-';
+      if (time !== '-') {
+        time = time.replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+        const m = time.match(/^(.*?)\s*\((.*?)\)$/);
+        if (m) {
+          time = m[1].trim();
+          if (!explicitGate || explicitGate === '-') {
+            gate = m[2].trim();
+          }
+        }
+      }
+      return { time, gate };
+    };
+
+    const headers = [
+      'No',
+      'No Tiket',
+      'Tanggal Pengajuan',
+      'NIP Karyawan',
+      'Nama Karyawan',
+      'Departemen',
+      'Keperluan',
+      'Tipe Izin',
+      'Tujuan',
+      'Scan Out (Waktu)',
+      'Scan Out (Gerbang)',
+      'Tap In (Waktu)',
+      'Tap In (Gerbang)',
+      'Status Akhir',
+      'Catatan / Keterangan'
+    ];
+
+    const rows = eligible.map((t, idx) => {
+      const reqDate = formatDateTimeClean(t.createdAt || t.createdDate);
+      const outData = cleanTimeAndGate(t.scanOutTime, t.scanOutGate || t.gateOut || activeGate);
+      const inData = cleanTimeAndGate(t.scanInTime, t.scanInGate || t.gateIn || activeGate);
+      let finalStatus = t.status || '-';
+      if (t.status === 'Selesai' && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0))) {
+        finalStatus = 'Selesai (Terlambat)';
+      }
+      const notes = t.rejectionReason || t.cancellationReason || t.approverNote || '-';
+
+      return [
+        idx + 1,
+        t.id || '-',
+        reqDate,
+        getTNip(t),
+        getTName(t) || '',
+        getTDept(t) || '',
+        t.category || '-',
+        t.type || t.returnType || '-',
+        t.destination || '',
+        outData.time,
+        outData.gate,
+        inData.time,
+        inData.gate,
+        finalStatus,
+        String(notes)
+      ];
     });
 
-    const uri = encodeURI(csv);
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+
+    // Native Microsoft Excel (.xlsx) Export via SheetJS
+    if (typeof window.XLSX !== 'undefined') {
+      const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      ws['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 18 }, // No Tiket
+        { wch: 22 }, // Tanggal Pengajuan
+        { wch: 16 }, // NIP
+        { wch: 25 }, // Nama
+        { wch: 22 }, // Departemen
+        { wch: 16 }, // Keperluan
+        { wch: 20 }, // Tipe Izin
+        { wch: 25 }, // Tujuan
+        { wch: 16 }, // Scan Out
+        { wch: 24 }, // Scan Out Gate
+        { wch: 16 }, // Tap In
+        { wch: 24 }, // Tap In Gate
+        { wch: 18 }, // Status Akhir
+        { wch: 30 }  // Catatan
+      ];
+      const wb = window.XLSX.utils.book_new();
+      window.XLSX.utils.book_append_sheet(wb, ws, "Log Pemindaian");
+      window.XLSX.writeFile(wb, `Riwayat_Pemindaian_Pos_Jaga_${dateStr}.xlsx`);
+      if (typeof window.showToast === 'function') window.showToast(`Berhasil mengunduh ${eligible.length} log pemindaian ke Excel (.xlsx)!`, 'success');
+      return;
+    }
+
+    // Fallback to CSV
+    const csvRows = rows.map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','));
+    const csvContent = '\uFEFFsep=,\r\n' + [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = uri;
-    a.download = `Riwayat-Pemindaian-Pos-Jaga-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.href = url;
+    a.download = `Riwayat-Pemindaian-Pos-Jaga-${dateStr}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 1000);
     if (typeof window.showToast === 'function') window.showToast('Riwayat pemindaian gerbang berhasil diekspor ke CSV!', 'success');
   };
 

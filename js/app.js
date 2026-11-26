@@ -51,31 +51,142 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      let csv = "data:text/csv;charset=utf-8,";
-      csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Alasan,Rencana Keluar,Estimasi Kembali,Status\n";
+      const formatDateTimeClean = (dtStr) => {
+        if (!dtStr || dtStr === '-' || dtStr === 'null') return '-';
+        const isoMatch = String(dtStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+        if (isoMatch) {
+          const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+          const d = parseInt(isoMatch[3], 10);
+          const m = months[parseInt(isoMatch[2], 10) - 1];
+          const y = isoMatch[1];
+          const h = isoMatch[4];
+          const min = isoMatch[5];
+          return `${d} ${m} ${y}, ${h}.${min} WIB`;
+        }
+        return String(dtStr).replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+      };
 
-      filtered.forEach(t => {
-        csv += [
-          `"${t.id}"`,
-          `"${t.applicantName || 'Budi Pratama'}"`,
-          `"${t.applicantNip || 'PK-2024-8841'}"`,
-          `"${t.category}"`,
-          `"${t.type}"`,
-          `"${(t.destination || '').replace(/"/g, '""')}"`,
-          `"${(t.reason || '').replace(/"/g, '""')}"`,
-          `"${t.plannedExit}"`,
-          `"${t.estimatedReturn || '-'}"`,
-          `"${t.status}"`
-        ].join(',') + "\n";
+      const cleanTimeAndGate = (timeStr, explicitGate) => {
+        let gate = explicitGate || '-';
+        let time = timeStr || '-';
+        if (time !== '-') {
+          time = time.replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+          const m = time.match(/^(.*?)\s*\((.*?)\)$/);
+          if (m) {
+            time = m[1].trim();
+            if (!explicitGate || explicitGate === '-') {
+              gate = m[2].trim();
+            }
+          }
+        }
+        return { time, gate };
+      };
+
+      const headers = [
+        'No',
+        'No Tiket',
+        'Tanggal Pengajuan',
+        'NIP Karyawan',
+        'Nama Karyawan',
+        'Departemen',
+        'Keperluan',
+        'Tipe Izin',
+        'Tujuan',
+        'Alasan',
+        'Rencana Keluar',
+        'Estimasi Kembali',
+        'Scan Out (Waktu)',
+        'Scan Out (Gerbang)',
+        'Tap In (Waktu)',
+        'Tap In (Gerbang)',
+        'Status Akhir',
+        'Catatan / Alasan Penolakan'
+      ];
+
+      const rows = filtered.map((t, idx) => {
+        const reqDate = formatDateTimeClean(t.createdAt || t.createdDate);
+        const outData = cleanTimeAndGate(t.scanOutTime, t.scanOutGate || t.gateOut);
+        const inData = cleanTimeAndGate(t.scanInTime, t.scanInGate || t.gateIn);
+        const planExit = formatDateTimeClean(t.plannedExit);
+        let estReturn = '-';
+        if (t.type === 'Tidak Kembali (Pulang)' || t.type === 'Pulang Mendahului') {
+          estReturn = 'Tidak Kembali (Pulang)';
+        } else if (t.estimatedReturn && t.estimatedReturn !== 'null') {
+          estReturn = formatDateTimeClean(t.estimatedReturn);
+        }
+        let finalStatus = t.status || '-';
+        if (t.status === 'Selesai' && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0))) {
+          finalStatus = 'Selesai (Terlambat)';
+        }
+        const notes = t.rejectionReason || t.cancellationReason || t.approverNote || '-';
+
+        return [
+          idx + 1,
+          t.id || '-',
+          reqDate,
+          t.applicantNip || '-',
+          t.applicantName || '',
+          t.department || '',
+          t.category || '-',
+          t.type || t.returnType || '-',
+          t.destination || '',
+          t.reason || '',
+          planExit,
+          estReturn,
+          outData.time,
+          outData.gate,
+          inData.time,
+          inData.gate,
+          finalStatus,
+          String(notes)
+        ];
       });
 
-      const uri = encodeURI(csv);
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+
+      // Native Microsoft Excel (.xlsx) Export via SheetJS
+      if (typeof window.XLSX !== 'undefined') {
+        const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        ws['!cols'] = [
+          { wch: 6 },  // No
+          { wch: 18 }, // No Tiket
+          { wch: 22 }, // Tanggal Pengajuan
+          { wch: 16 }, // NIP
+          { wch: 25 }, // Nama
+          { wch: 22 }, // Departemen
+          { wch: 16 }, // Keperluan
+          { wch: 20 }, // Tipe Izin
+          { wch: 25 }, // Tujuan
+          { wch: 25 }, // Alasan
+          { wch: 22 }, // Rencana Keluar
+          { wch: 22 }, // Estimasi Kembali
+          { wch: 16 }, // Scan Out
+          { wch: 24 }, // Scan Out Gate
+          { wch: 16 }, // Tap In
+          { wch: 24 }, // Tap In Gate
+          { wch: 18 }, // Status Akhir
+          { wch: 30 }  // Catatan
+        ];
+        const wb = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(wb, ws, "Rekap Izin");
+        window.XLSX.writeFile(wb, `Rekap_Izin_Keluar_${dateStr}.xlsx`);
+        if (typeof window.showToast === 'function') window.showToast(`Berhasil mengunduh rekap ${filtered.length} perizinan ke Excel (.xlsx)!`, 'success');
+        return;
+      }
+
+      // Fallback to CSV
+      const csvRows = rows.map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','));
+      const csvContent = '\uFEFFsep=,\r\n' + [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = uri;
-      a.download = `Rekap-Izin-Keluar-${new Date().toISOString().slice(0,10)}.csv`;
+      a.href = url;
+      a.download = `Rekap-Izin-Keluar-${dateStr}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 1000);
       if (typeof window.showToast === 'function') window.showToast('Data berhasil diekspor ke file CSV!', 'success');
     });
   }

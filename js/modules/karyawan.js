@@ -1484,22 +1484,20 @@ function renderKaryawanDashboard() {
         actionButtonsHtml = `
           ${(isKembali) ? (
             hasPendingExt ? `
-              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-                <div style="display: flex; gap: 8px; width: 100%;">
-                  <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;" title="Permohonan perpanjangan sedang ditinjau Atasan">
-                    <span>Menunggu Persetujuan</span>
+              <div style="display: flex; gap: 8px; width: 100%; align-items: stretch;">
+                <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 40px; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.825rem;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                  <span>Menunggu Persetujuan</span>
+                </button>
+                ${isGroupDinasActive ? `
+                  <button class="btn-figma-secondary" style="flex: 1; background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 40px; padding: 8px 12px; font-size: 0.825rem;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
+                    <span>💳 Simulasi Tap In Gerbang</span>
                   </button>
-                  ${isGroupDinasActive ? `
-                    <button class="btn-figma-secondary" style="flex: 1; background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
-                      <span>💳 Simulasi Tap In Gerbang</span>
-                    </button>
-                  ` : `
-                    <button class="btn-figma-secondary" style="flex: 1; background:#059669; color:#ffffff; border-color:#059669; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="executeScanIn('${activeTicket.id}')" title="Tap in kartu akses gerbang masuk">
-                      <span>✓ Tap In Kartu Akses (Masuk)</span>
-                    </button>
-                  `}
-                </div>
-                <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="width: 100%; padding: 8px 12px; font-size: 0.8rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')">
+                ` : `
+                  <button class="btn-figma-secondary" style="flex: 1; background:#059669; color:#ffffff; border-color:#059669; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 12px; font-size: 0.825rem;" onclick="executeScanIn('${activeTicket.id}')" title="Tap in kartu akses gerbang masuk">
+                    <span>✓ Tap In Kartu Akses (Masuk)</span>
+                  </button>
+                `}
+                <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="flex: 1; min-height: 40px; padding: 8px 12px; font-size: 0.825rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')" title="Batalkan pengajuan perpanjangan waktu">
                   <span>✕ Batalkan Perpanjangan</span>
                 </button>
               </div>
@@ -1941,22 +1939,20 @@ function renderPengajuanSayaView() {
       actionButtonsHtml = `
         ${(!isLateStatus && isKembali) ? (
           hasPendingExt ? `
-            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-              <div style="display: flex; gap: 8px; width: 100%;">
-                <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a;" title="Permohonan perpanjangan sedang ditinjau Atasan">
-                  <span>Menunggu Persetujuan</span>
+            <div style="display: flex; gap: 8px; width: 100%; align-items: stretch;">
+              <button class="btn-figma-secondary btn-pending-ext-notice" disabled style="flex: 1; opacity: 0.95; cursor: not-allowed; font-weight: 700; background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 40px; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.825rem;" title="Permohonan perpanjangan sedang ditinjau Atasan">
+                <span>Menunggu Persetujuan</span>
+              </button>
+              ${isGroupDinasActive ? `
+                <button class="btn-figma-secondary" style="flex: 1; background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 40px; padding: 8px 12px; font-size: 0.825rem;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
+                  <span>💳 Simulasi Tap In Gerbang</span>
                 </button>
-                ${isGroupDinasActive ? `
-                  <button class="btn-figma-secondary" style="flex: 1; background:#2563eb; color:#ffffff; border-color:#2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.openSimulasiTapInModal('${activeTicket.id}')" title="Tempelkan kartu akses gerbang masuk untuk mengunci waktu kepulangan">
-                    <span>💳 Simulasi Tap In Gerbang</span>
-                  </button>
-                ` : `
-                  <button class="btn-figma-secondary" style="flex: 1; background:#059669; color:#ffffff; border-color:#059669; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;" onclick="executeScanIn('${activeTicket.id}')" title="Tap in kartu akses gerbang masuk">
-                    <span>✓ Tap In Kartu Akses (Masuk)</span>
-                  </button>
-                `}
-              </div>
-              <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="width: 100%; padding: 8px 12px; font-size: 0.8rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')">
+              ` : `
+                <button class="btn-figma-secondary" style="flex: 1; background:#059669; color:#ffffff; border-color:#059669; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 12px; font-size: 0.825rem;" onclick="executeScanIn('${activeTicket.id}')" title="Tap in kartu akses gerbang masuk">
+                  <span>✓ Tap In Kartu Akses (Masuk)</span>
+                </button>
+              `}
+              <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="flex: 1; min-height: 40px; padding: 8px 12px; font-size: 0.825rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')" title="Batalkan pengajuan perpanjangan waktu">
                 <span>✕ Batalkan Perpanjangan</span>
               </button>
             </div>

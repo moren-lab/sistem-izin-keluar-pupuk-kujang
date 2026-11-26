@@ -377,8 +377,9 @@ function renderSecurityDashboard() {
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
               <span class="status-pill-green" style="font-size: 0.7rem;">Disetujui</span>
-              <button type="button" class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+              <button type="button" class="btn-card-detail-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #ffffff; border: 1.2px solid #cbd5e1; border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: #1e293b; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; flex-shrink: 0; color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                <span>Detail Pengajuan</span>
               </button>
             </div>
           </div>
@@ -637,11 +638,11 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               <div class="realization-grid">
                 <span class="realization-label">Tujuan keluar</span>
                 <span class="realization-separator">:</span>
-                <span class="realization-value" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
+                <span class="realization-value" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; line-height: 1.35; max-height: 2.8em;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(typeof window.escapeHtml === 'function' ? window.escapeHtml((t.destination || '-').replace(/\r?\n+/g, ' ')) : (t.destination || '-'))}</span>
 
                 <span class="realization-label">Keperluan</span>
                 <span class="realization-separator">:</span>
-                <span class="realization-value" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
+                <span class="realization-value" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; line-height: 1.35; max-height: 2.8em;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(typeof window.escapeHtml === 'function' ? window.escapeHtml((t.reason || '-').replace(/\r?\n+/g, ' ')) : (t.reason || '-'))}</span>
 
                 <span class="realization-label">Rencana Waktu</span>
                 <span class="realization-separator">:</span>
@@ -689,8 +690,9 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
 
             <!-- Quick Action Buttons for Satpam (Single Symmetrical Row) -->
             <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
-              <button type="button" class="btn-card-detail" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan" aria-label="Detail Pengajuan">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+              <button type="button" class="btn-card-detail-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #ffffff; border: 1.2px solid #cbd5e1; border-radius: 8px; font-size: 0.775rem; font-weight: 700; color: #1e293b; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan #${t.id}" aria-label="Detail Pengajuan">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                <span>Detail Pengajuan</span>
               </button>
               ${isHistoryMode ? `
               <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.stopPropagation(); window.deleteSecurityTicket('${t.id}', 'riwayat')" title="Hapus Data #${t.id}">
@@ -2206,30 +2208,126 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      let csv = "data:text/csv;charset=utf-8,";
-      csv += "Nomor Tiket,Pemohon,NIP,Kategori,Tipe,Tujuan,Waktu Scan Out,Waktu Tap In,Status\n";
+      const formatDateTimeClean = (dtStr) => {
+        if (!dtStr || dtStr === '-' || dtStr === 'null') return '-';
+        const isoMatch = String(dtStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+        if (isoMatch) {
+          const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+          const d = parseInt(isoMatch[3], 10);
+          const m = months[parseInt(isoMatch[2], 10) - 1];
+          const y = isoMatch[1];
+          const h = isoMatch[4];
+          const min = isoMatch[5];
+          return `${d} ${m} ${y}, ${h}.${min} WIB`;
+        }
+        return String(dtStr).replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+      };
 
-      filtered.forEach(t => {
-        csv += [
-          `"${t.id}"`,
-          `"${t.applicantName || 'Budi Pratama'}"`,
-          `"${t.applicantNip || 'PK-2024-8841'}"`,
-          `"${t.category}"`,
-          `"${t.type}"`,
-          `"${(t.destination || '').replace(/"/g, '""')}"`,
-          `"${t.scanOutTime || '-'}"`,
-          `"${t.scanInTime || '-'}"`,
-          `"${t.status}"`
-        ].join(',') + "\n";
+      const cleanTimeAndGate = (timeStr, explicitGate) => {
+        let gate = explicitGate || '-';
+        let time = timeStr || '-';
+        if (time !== '-') {
+          time = time.replace(/^(Minggu|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu),\s*/i, '');
+          const m = time.match(/^(.*?)\s*\((.*?)\)$/);
+          if (m) {
+            time = m[1].trim();
+            if (!explicitGate || explicitGate === '-') {
+              gate = m[2].trim();
+            }
+          }
+        }
+        return { time, gate };
+      };
+
+      const headers = [
+        'No',
+        'No Tiket',
+        'Tanggal Pengajuan',
+        'NIP Karyawan',
+        'Nama Karyawan',
+        'Departemen',
+        'Keperluan',
+        'Tipe Izin',
+        'Tujuan',
+        'Scan Out (Waktu)',
+        'Scan Out (Gerbang)',
+        'Tap In (Waktu)',
+        'Tap In (Gerbang)',
+        'Status Akhir',
+        'Catatan / Keterangan'
+      ];
+
+      const rows = filtered.map((t, idx) => {
+        const reqDate = formatDateTimeClean(t.createdAt || t.createdDate);
+        const outData = cleanTimeAndGate(t.scanOutTime, t.scanOutGate || t.gateOut);
+        const inData = cleanTimeAndGate(t.scanInTime, t.scanInGate || t.gateIn);
+        let finalStatus = t.status || '-';
+        if (t.status === 'Selesai' && (t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]')) || (t.lateMinutes > 0))) {
+          finalStatus = 'Selesai (Terlambat)';
+        }
+        const notes = t.rejectionReason || t.cancellationReason || t.approverNote || '-';
+
+        return [
+          idx + 1,
+          t.id || '-',
+          reqDate,
+          t.applicantNip || '-',
+          t.applicantName || '',
+          t.department || '',
+          t.category || '-',
+          t.type || t.returnType || '-',
+          t.destination || '',
+          outData.time,
+          outData.gate,
+          inData.time,
+          inData.gate,
+          finalStatus,
+          String(notes)
+        ];
       });
 
-      const uri = encodeURI(csv);
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+
+      // Native Microsoft Excel (.xlsx) Export via SheetJS
+      if (typeof window.XLSX !== 'undefined') {
+        const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        ws['!cols'] = [
+          { wch: 6 },  // No
+          { wch: 18 }, // No Tiket
+          { wch: 22 }, // Tanggal Pengajuan
+          { wch: 16 }, // NIP
+          { wch: 25 }, // Nama
+          { wch: 22 }, // Departemen
+          { wch: 16 }, // Keperluan
+          { wch: 20 }, // Tipe Izin
+          { wch: 25 }, // Tujuan
+          { wch: 16 }, // Scan Out
+          { wch: 24 }, // Scan Out Gate
+          { wch: 16 }, // Tap In
+          { wch: 24 }, // Tap In Gate
+          { wch: 18 }, // Status Akhir
+          { wch: 30 }  // Catatan
+        ];
+        const wb = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(wb, ws, "Log Pemindaian");
+        window.XLSX.writeFile(wb, `Riwayat_Pemindaian_Pos_Jaga_${dateStr}.xlsx`);
+        if (typeof window.showToast === 'function') window.showToast(`Berhasil mengunduh ${filtered.length} log pemindaian ke Excel (.xlsx)!`, 'success');
+        return;
+      }
+
+      // Fallback to CSV
+      const csvRows = rows.map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','));
+      const csvContent = '\uFEFFsep=,\r\n' + [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = uri;
-      a.download = `Riwayat-Pemindaian-Pos-Jaga-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.href = url;
+      a.download = `Riwayat-Pemindaian-Pos-Jaga-${dateStr}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 1000);
       if (typeof window.showToast === 'function') window.showToast('Riwayat pemindaian berhasil diekspor ke CSV!', 'success');
     });
   }

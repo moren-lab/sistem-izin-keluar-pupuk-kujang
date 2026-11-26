@@ -92,6 +92,33 @@ function escapeHtml(str) {
 }
 window.escapeHtml = escapeHtml;
 
+function countWords(str) {
+  if (!str) return 0;
+  return String(str).trim().split(/\s+/).filter(Boolean).length;
+}
+window.countWords = countWords;
+
+function handleReasonWordCount(el, counterId) {
+  if (!el) return;
+  const maxWords = 500;
+  const raw = el.value || '';
+  let words = raw.trim().split(/\s+/).filter(Boolean);
+  if (words.length > maxWords) {
+    words = words.slice(0, maxWords);
+    el.value = words.join(' ');
+    if (typeof window.showToast === 'function') {
+      window.showToast('Alasan keperluan izin dibatasi maksimal 500 kata.', 'warning');
+    }
+  }
+  const countEl = document.getElementById(counterId);
+  if (countEl) {
+    const cur = words.length;
+    countEl.textContent = `${cur} / ${maxWords} kata`;
+    countEl.style.color = cur >= maxWords ? '#dc2626' : '#64748b';
+  }
+}
+window.handleReasonWordCount = handleReasonWordCount;
+
 // OPTION C: INTERCEPT NEW REQUEST IF EMPLOYEE ALREADY HAS AN ACTIVE TICKET
 function handleOpenNewRequest() {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
@@ -3711,6 +3738,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.showToast === 'function') window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'warning');
         return;
       }
+      if (countWords(reason) > 500) {
+        if (typeof window.showToast === 'function') window.showToast('Alasan keperluan izin dibatasi maksimal 500 kata!', 'warning');
+        if (inputReason) inputReason.focus();
+        return;
+      }
       if (!plannedExit) {
         if (typeof window.showToast === 'function') window.showToast('Harap isi rencana waktu keluar!', 'warning');
         if (inputPlannedExit) inputPlannedExit.focus();
@@ -4427,6 +4459,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.showToast === 'function') {
           window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'danger');
         }
+        return;
+      }
+      if (countWords(reason) > 500) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Alasan kedaruratan dibatasi maksimal 500 kata!', 'danger');
+        }
+        if (emergReason) emergReason.focus();
         return;
       }
 

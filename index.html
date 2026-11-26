@@ -1076,9 +1076,9 @@
                                 <label class="form-label" id="labelInputReason" for="inputReason" style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.35rem;">
                                   Alasan Keperluan Izin <span style="color: var(--rose-danger, #dc2626);">*</span>
                                 </label>
-                                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Tanpa batasan karakter (Jelaskan selengkapnya)</span>
+                                <span id="inputReasonWordCount" style="font-size: 0.72rem; color: #64748b; font-weight: 600;">0 / 500 kata</span>
                               </div>
-                              <textarea id="inputReason" class="form-textarea" placeholder="Masukkan alasan keperluan izin..." required rows="3" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; min-height: 80px; height: auto; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);"></textarea>
+                              <textarea id="inputReason" class="form-textarea" placeholder="Masukkan alasan keperluan izin (maksimal 500 kata)..." required rows="3" oninput="window.handleReasonWordCount(this, 'inputReasonWordCount')" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; min-height: 80px; height: auto; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);"></textarea>
                             </div>
 
                             <!-- Rencana Waktu Keluar & Perkiraan Waktu Kembali -->
@@ -1321,9 +1321,9 @@
                               <label class="form-label" id="labelEmergReason" for="emergReason" style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; margin-bottom: 0.35rem;">
                                 Alasan Kedaruratan <span style="color: var(--rose-danger, #dc2626);">*</span>
                               </label>
-                              <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Tanpa batasan karakter (Jelaskan selengkapnya)</span>
+                              <span id="emergReasonWordCount" style="font-size: 0.72rem; color: #64748b; font-weight: 600;">0 / 500 kata</span>
                             </div>
-                            <textarea id="emergReason" class="form-textarea" style="width: 100%; box-sizing: border-box; min-height: 80px; height: auto; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" placeholder="Masukkan alasan kondisi kedaruratan..." required></textarea>
+                            <textarea id="emergReason" class="form-textarea" style="width: 100%; box-sizing: border-box; min-height: 80px; height: auto; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" placeholder="Masukkan alasan kondisi kedaruratan (maksimal 500 kata)..." oninput="window.handleReasonWordCount(this, 'emergReasonWordCount')" required></textarea>
                           </div>
 
                           <!-- Rencana Keluar & Estimasi Kembali -->
@@ -5215,6 +5215,7 @@
   <script src="qrcode.min.js" defer></script>
   <script src="html5-qrcode.min.js" defer></script>
   <script src="html2pdf.bundle.min.js" defer></script>
+  <script src="xlsx.full.min.js"></script>
   <script src="js/data/mockData.js?v=20261125_0805"></script>
   <script src="js/data/syncApi.js?v=20261125_1000"></script>
   <script src="js/data/authData.js?v=20261116_1400"></script>
@@ -5223,19 +5224,19 @@
   <script src="js/modules/ui.js?v=20261125_0805"></script>
   <script src="js/modules/scheduler.js?v=20261125_1440"></script>
   <script src="js/modules/navigation.js?v=20261125_0900"></script>
-  <script src="js/modules/karyawan.js?v=20261125_1038"></script>
+  <script src="js/modules/karyawan.js?v=20261126_0820"></script>
   <script src="js/modules/approver.js?v=20261125_0935"></script>
-  <script src="js/modules/security.js?v=20261125_0935"></script>
-  <script src="js/modules/admin.js?v=20261125_0805"></script>
+  <script src="js/modules/security.js?v=20261126_0820"></script>
+  <script src="js/modules/admin.js?v=20261126_0820"></script>
   <script src="js/modules/charts.js?v=20261116_1400"></script>
   <script src="js/modules/emergency.js?v=20261116_1400"></script>
-  <script src="js/modules/modals.js?v=20261125_1440"></script>
-  <script src="js/modules/mobile_karyawan.js?v=20261125_1038"></script>
-  <script src="js/modules/mobile_atasan.js?v=20261125_1415"></script>
-  <script src="js/modules/mobile_security.js?v=20261125_0805"></script>
+  <script src="js/modules/modals.js?v=20261126_0820"></script>
+  <script src="js/modules/mobile_karyawan.js?v=20261126_0820"></script>
+  <script src="js/modules/mobile_atasan.js?v=20261126_0820"></script>
+  <script src="js/modules/mobile_security.js?v=20261126_0820"></script>
   <script src="js/modules/mobile_app.js?v=20261125_0900"></script>
   <script src="js/modules/export_pdf.js?v=20261123_1030"></script>
-  <script src="js/app.js?v=20261116_1400"></script>
+  <script src="js/app.js?v=20261126_0820"></script>
 </body>
 
 </html>
