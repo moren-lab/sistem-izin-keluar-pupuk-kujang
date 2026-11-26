@@ -1067,7 +1067,7 @@
                                 </label>
                                 <span style="font-size: 0.7rem; color: var(--text-muted);"><span id="countInputDestination">0</span>/300 huruf</span>
                               </div>
-                              <textarea id="inputDestination" class="form-textarea" placeholder="Masukkan lokasi / tujuan keluar..." required maxlength="300" rows="3" oninput="const el = document.getElementById('countInputDestination'); if(el) el.textContent = this.value.length;" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; min-height: 70px; height: auto; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);"></textarea>
+                              <textarea id="inputDestination" class="form-textarea" placeholder="Masukkan lokasi / tujuan keluar..." required maxlength="300" rows="3" oninput="const countDest = document.getElementById('countInputDestination'); if (countDest) countDest.textContent = this.value.length;" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; min-height: 70px; height: auto; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);"></textarea>
                             </div>
 
                             <!-- Alasan Keperluan Izin (Tanpa Batas Huruf) -->
@@ -1312,7 +1312,7 @@
                               </label>
                               <span style="font-size: 0.7rem; color: var(--text-muted);"><span id="countEmergDest">0</span>/300 huruf</span>
                             </div>
-                            <textarea id="emergDest" class="form-textarea" placeholder="Masukkan lokasi / tujuan keluar..." required maxlength="300" rows="3" oninput="const el = document.getElementById('countEmergDest'); if(el) el.textContent = this.value.length;" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; min-height: 70px; height: auto; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);"></textarea>
+                            <textarea id="emergDest" class="form-textarea" placeholder="Masukkan lokasi / tujuan keluar..." required maxlength="300" rows="3" oninput="const countEmerg = document.getElementById('countEmergDest'); if (countEmerg) countEmerg.textContent = this.value.length;" style="width: 100%; box-sizing: border-box; font-size: 0.825rem; padding: 0.65rem 0.85rem; border-radius: 8px; min-height: 70px; height: auto; resize: vertical; line-height: 1.5; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);"></textarea>
                           </div>
 
                           <!-- Alasan Kedaruratan (Tanpa Batas Huruf) -->
@@ -3770,7 +3770,7 @@
               Lokasi / Tujuan Keluar
             </div>
             <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
-              <div id="infoDestination" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">Pelabuhan Cirebon</div>
+              <div id="infoDestination" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;">Pelabuhan Cirebon</div>
               <button type="button" id="btnToggleDestExpand" onclick="window.toggleDetailExpand('infoDestination', this)" style="display: none; background: none; border: none; padding: 4px 0 0 0; color: #2563eb; font-size: 0.775rem; font-weight: 700; cursor: pointer;">Lihat selengkapnya ∨</button>
             </div>
           </div>
@@ -3781,7 +3781,7 @@
               Alasan Keperluan Izin
             </div>
             <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.85rem 1rem;">
-              <div id="infoReason" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.</div>
+              <div id="infoReason" style="font-size: 0.85rem; color: var(--text-primary, #0f172a); font-weight: 700; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;">Koordinasi teknis pemeriksaan komponen pompa P-204 bersama vendor.</div>
               <button type="button" id="btnToggleReasonExpand" onclick="window.toggleDetailExpand('infoReason', this)" style="display: none; background: none; border: none; padding: 4px 0 0 0; color: #2563eb; font-size: 0.775rem; font-weight: 700; cursor: pointer;">Lihat selengkapnya ∨</button>
             </div>
           </div>
