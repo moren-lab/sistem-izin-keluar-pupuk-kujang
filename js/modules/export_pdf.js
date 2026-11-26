@@ -150,15 +150,41 @@
     if (imgPupukKujang) imgPupukKujang.src = LOGO_PUPUK_KUJANG_B64;
 
 
-    // Title setup (Otomatis: Laporan & Rekapitulasi Data Perizinan)
-    const fixedTitle = 'Laporan & Rekapitulasi Data Perizinan';
+    const isAuditMode = (source === 'admin-audit');
+    const fixedTitle = customTitle || (isAuditMode ? 'Laporan Audit Trail & Log Investigasi Aktivitas' : 'Laporan & Rekapitulasi Data Perizinan');
     const displayTitle = document.getElementById('pdfDocumentDisplayTitle');
     if (displayTitle) displayTitle.textContent = fixedTitle;
 
     // Meta count
     const metaInfo = document.getElementById('exportPdfMetaInfo');
     if (metaInfo) {
-      metaInfo.textContent = `Menampilkan ${tickets.length} data perizinan`;
+      metaInfo.textContent = isAuditMode
+        ? `Menampilkan ${tickets.length} catatan aktivitas`
+        : `Menampilkan ${tickets.length} data perizinan`;
+    }
+
+    // Update Table Header dynamically for Audit Trail vs Rekapitulasi
+    const thead = document.querySelector('#pdfOfficialReportTable thead');
+    if (thead) {
+      thead.innerHTML = isAuditMode ? `
+        <tr style="background: #f8fafc; page-break-inside: avoid; break-inside: avoid;">
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 15%; word-break: break-word; color: #0f172a; background: #f8fafc;">Waktu &amp; Tanggal</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 14%; word-break: break-word; color: #0f172a; background: #f8fafc;">No. Tiket</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 18%; word-break: break-word; color: #0f172a; background: #f8fafc;">Karyawan &amp; NIP</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 15%; word-break: break-word; color: #0f172a; background: #f8fafc;">Peristiwa</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 16%; word-break: break-word; color: #0f172a; background: #f8fafc;">Eksekutor</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 22%; word-break: break-word; color: #0f172a; background: #f8fafc;">Keterangan</th>
+        </tr>
+      ` : `
+        <tr style="background: #f8fafc; page-break-inside: avoid; break-inside: avoid;">
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 14%; word-break: break-word; color: #0f172a; background: #f8fafc;">Tanggal &amp; Waktu</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 18%; word-break: break-word; color: #0f172a; background: #f8fafc;">Identitas Akses</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 16%; word-break: break-word; color: #0f172a; background: #f8fafc;">Departemen</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 19%; word-break: break-word; color: #0f172a; background: #f8fafc;">Keperluan</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 22%; word-break: break-word; color: #0f172a; background: #f8fafc;">Waktu Gerbang &amp; Batas</th>
+          <th style="border: 1px solid #cbd5e1; padding: 8px 6px; text-align: center; font-weight: 800; width: 11%; word-break: break-word; color: #0f172a; background: #f8fafc;">Status Akhir</th>
+        </tr>
+      `;
     }
 
     // Populate Table Body
@@ -166,7 +192,19 @@
     if (tbody) {
       let rowsHtml = '';
       if (tickets.length > 0) {
-        rowsHtml = tickets.map(t => `
+        rowsHtml = isAuditMode ? tickets.map(log => {
+          const safe = (v) => typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(v, '-') : String(v || '-');
+          return `
+            <tr style="height: 36px; page-break-inside: avoid; break-inside: avoid;">
+              <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; text-align: center; font-size: 7.8pt;">${safe(log.time)}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-family: monospace; font-weight: 700; font-size: 7.8pt;">${safe(log.ticketId)}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 7.8pt;"><strong>${safe(log.applicantName)}</strong><br><span style="color:#475569;">NIP: ${safe(log.applicantNip)}</span></td>
+              <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; text-align: center; font-weight: 700; font-size: 7.8pt;">${safe(log.event)}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 7.8pt;">${safe(log.by)}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; font-size: 7.8pt;">${safe(log.desc)}</td>
+            </tr>
+          `;
+        }).join('') : tickets.map(t => `
           <tr style="height: 38px; page-break-inside: avoid; break-inside: avoid;">
             <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top; text-align: center;">${formatDateWaktu(t)}</td>
             <td style="border: 1px solid #cbd5e1; padding: 6px 6px; vertical-align: top;">${formatIdentitasAkses(t)}</td>
@@ -182,7 +220,7 @@
         rowsHtml = `
           <tr style="height: 48px; page-break-inside: avoid; break-inside: avoid;">
             <td colspan="6" style="border: 1px solid #cbd5e1; padding: 14px 10px; text-align: center; color: #64748b; font-style: italic; font-size: 8.5pt;">
-              Tidak ada data perizinan yang sesuai dengan filter saat ini.
+              ${isAuditMode ? 'Tidak ada catatan log aktivitas yang sesuai dengan filter saat ini.' : 'Tidak ada data perizinan yang sesuai dengan filter saat ini.'}
             </td>
           </tr>
         `;

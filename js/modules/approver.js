@@ -834,10 +834,10 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               </div>
               <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                 <span style="font-weight: 700; font-size: 0.75rem; color: ${isRiwayatView ? 'var(--text-secondary, #475569)' : (isDinas ? '#059669' : '#d97706')}; white-space: nowrap;">${displayCategory}</span>
-                ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                ${isEmergency ? `<span style="font-size: 0.72rem; font-weight: 700; color: #be123c; white-space: nowrap;">🚨 Darurat</span>` : ''}
                 ${isGroupDinas ? (() => {
         const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-        return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+        return `<span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
       })() : ''}
               </div>
             </div>
@@ -1279,10 +1279,10 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
                   <div style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
                   ${(isEmergency || isGroupDinas) ? `
                     <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
-                      ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                      ${isEmergency ? `<span style="font-size: 0.72rem; font-weight: 700; color: #be123c; white-space: nowrap;">🚨 Darurat</span>` : ''}
                       ${isGroupDinas ? (() => {
                         const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-                        return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                        return `<span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
                       })() : ''}
                     </div>
                   ` : ''}
