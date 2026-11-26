@@ -203,6 +203,11 @@
     ];
   }
 
+  // Expose tab aktif secara global untuk pengamanan sinkronisasi
+  window.getCurrentKaryawanTab = function() {
+    return currentKaryawanTab;
+  };
+
   // -------------------------------------------------------------------
   // 1. RENDER KARYAWAN MAIN VIEW
   // -------------------------------------------------------------------
@@ -232,6 +237,12 @@
     } else if (currentKaryawanTab === 'riwayat') {
       renderRiwayat(container);
     } else if (currentKaryawanTab === 'form_pengajuan') {
+      // PROTEKSI: Jika formulir pengajuan sudah tampil dan ini adalah background refresh (tanpa targetTab eksplisit),
+      // DILARANG merender ulang agar seluruh ketikan pengguna tidak terhapus.
+      const hasActiveForm = container && (container.querySelector('#mFormReason') || container.querySelector('#mFormDestination'));
+      if (!targetTab && hasActiveForm) {
+        return;
+      }
       renderKaryawanPengajuanFullPage(container, currentFormIsEmergency, currentFormPrefill);
     }
   }

@@ -337,6 +337,11 @@
     if (currentSecurityTab === 'dashboard') {
       renderSecurityDashboard(container);
     } else if (currentSecurityTab === 'scanner') {
+      // PROTEKSI: Jika kamera sedang aktif streaming atau scanner sudah terpasang dan ini background refresh, dilarang menimpa DOM
+      const alreadyHasScanner = container && container.querySelector('#mScannerSecCamera');
+      if (isMobileCameraActive || (!targetTab && alreadyHasScanner)) {
+        return;
+      }
       renderSecurityScanner(container);
     } else if (currentSecurityTab === 'pelacakan') {
       renderSecurityPelacakan(container);
@@ -512,6 +517,15 @@
   // 3. PEMINDAI QR (Hal 2 & 3)
   // -------------------------------------------------------------------
   function renderSecurityScanner(container) {
+    if (!container) container = document.getElementById('mobileMainContent');
+    if (!container) return;
+
+    // PROTEKSI: Jika kamera sedang aktif, dilarang menimpa container.innerHTML agar stream video tidak terputus
+    const existingScanner = container.querySelector('#mScannerSecCamera');
+    if (existingScanner && isMobileCameraActive) {
+      return;
+    }
+
     const officer = getActiveOfficer();
     const tickets = getTickets();
 
@@ -2641,7 +2655,10 @@
     renderMobileSecurity(null, 'riwayat');
   };
 
-  // Expose module function
+  // Expose module functions
   window.renderMobileSecurity = renderMobileSecurity;
+  window.isMobileCameraScanning = function () {
+    return Boolean(isMobileCameraActive);
+  };
 
 })();

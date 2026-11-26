@@ -1781,19 +1781,21 @@ window.switchFullPermitTab = function(tab) {
   const panelEmergency = document.getElementById('panelFullEmergency');
 
   if (tab === 'emergency') {
+    const isAlreadyEmergency = panelEmergency && panelEmergency.style.display === 'block';
     if (btnEmergency) btnEmergency.classList.add('active', 'emergency');
     if (btnRegular) btnRegular.classList.remove('active');
     if (panelRegular) panelRegular.style.display = 'none';
     if (panelEmergency) panelEmergency.style.display = 'block';
-    if (typeof window.handleOpenEmergency === 'function') {
+    if (!isAlreadyEmergency && typeof window.handleOpenEmergency === 'function') {
       window.handleOpenEmergency();
     }
   } else {
+    const isAlreadyRegular = panelRegular && panelRegular.style.display === 'block';
     if (btnRegular) btnRegular.classList.add('active');
     if (btnEmergency) btnEmergency.classList.remove('active', 'emergency');
     if (panelRegular) panelRegular.style.display = 'block';
     if (panelEmergency) panelEmergency.style.display = 'none';
-    if (typeof window.handleOpenNewRequest === 'function') {
+    if (!isAlreadyRegular && typeof window.handleOpenNewRequest === 'function') {
       window.handleOpenNewRequest();
     }
   }
@@ -1864,8 +1866,11 @@ function renderPengajuanSayaView() {
     if (colPengajuanRight) colPengajuanRight.style.display = 'none';
     if (emptyEmpActiveBox) emptyEmpActiveBox.style.display = 'none';
     if (karyawanFullFormContainer) {
+      const isAlreadyVisible = (karyawanFullFormContainer.style.display === 'block');
       karyawanFullFormContainer.style.display = 'block';
-      window.switchFullPermitTab('regular');
+      if (!isAlreadyVisible) {
+        window.switchFullPermitTab('regular');
+      }
     }
     document.body.classList.remove('modal-open');
     return;

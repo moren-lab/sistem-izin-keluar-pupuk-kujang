@@ -269,10 +269,69 @@
     }
   }
 
+  // Helper: Deteksi apakah pengguna sedang aktif mengetik / mengisi form
+  function isUserInteractingWithForm() {
+    try {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
+        return true;
+      }
+      // Cek apakah modal form sedang terbuka
+      const openModal = document.querySelector('.modal.open, .kujang-modal.open, #modalNewPermit.open, #modalEmergencyRequest.open, #modalExtension.open, #modalRejectReason.open, #modalCancelReason.open');
+      if (openModal) {
+        return true;
+      }
+      // Cek apakah di mobile user sedang di tab form_pengajuan
+      if (typeof window.getCurrentKaryawanTab === 'function' && window.getCurrentKaryawanTab() === 'form_pengajuan') {
+        return true;
+      }
+      const mobileFormContainer = document.getElementById('mobileMainContent');
+      if (mobileFormContainer && (mobileFormContainer.querySelector('#mFormReason') || mobileFormContainer.querySelector('#mFormDestination') || mobileFormContainer.querySelector('form.mobile-form'))) {
+        return true;
+      }
+      // Cek apakah form desktop Bento sedang terbuka dan memiliki isi
+      const fullForm = document.getElementById('karyawanFullFormContainer');
+      if (fullForm && fullForm.style.display !== 'none') {
+        const reasonInput = document.getElementById('inputReason');
+        const destInput = document.getElementById('inputDestination');
+        if ((reasonInput && reasonInput.value && reasonInput.value.trim().length > 0) || (destInput && destInput.value && destInput.value.trim().length > 0)) {
+          return true;
+        }
+      }
+      // Cek apakah kamera pemindai (scanner QR) Pos Jaga sedang aktif streaming
+      if (typeof window.isMobileCameraScanning === 'function' && window.isMobileCameraScanning()) {
+        return true;
+      }
+      if (document.querySelector('#mCameraReaderView video, #cameraReaderView video')) {
+        return true;
+      }
+      // Cek apakah pengguna di mobile sedang aktif menyentuh atau menggeser layar
+      if (typeof window.isMobileUserInteracting === 'function' && window.isMobileUserInteracting()) {
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
   // Helper Refresh UI Tanpa Gangguan
   function refreshActiveViewSafely() {
     try {
-      const role = (typeof window.getCurrentRole === 'function' ? window.getCurrentRole() : (window.getCurrentMobileRole ? window.getCurrentMobileRole() : window.currentActor)) || 'karyawan';
+      const isFillingForm = isUserInteractingWithForm();
+
+      // Selalu update metrik dan badges (tidak merusak DOM formulir)
+      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
+      if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
+      if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
+      if (typeof window.updateNotificationBadges === 'function') window.updateNotificationBadges();
+
+      // Jika user sedang aktif mengisi formulir, lindungi DOM formulir agar input tidak terhapus
+      if (isFillingForm) {
+        console.log('[SyncEngine] Pengguna sedang berinteraksi dengan form/kamera/touch, menunda re-render.');
+        return;
+      }
+
+      // Preservasi posisi scroll pengguna agar tidak melompat ke atas
+      const savedScrollY = (typeof window !== 'undefined') ? (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) : 0;
 
       // 1. Dashboard & Charts
       if (typeof window.refreshAllDashboardData === 'function') {
@@ -297,18 +356,17 @@
 
       // 3. Tampilan Mobile HP (Auto-update kartu status, riwayat, antrean secara real-time)
       if (typeof window.renderMobileActiveView === 'function') {
-        window.renderMobileActiveView();
+        window.renderMobileActiveView({ scrollToTop: false });
       } else {
         if (typeof window.renderMobileKaryawan === 'function') window.renderMobileKaryawan();
         if (typeof window.renderMobileAtasan === 'function') window.renderMobileAtasan();
         if (typeof window.renderMobileSecurity === 'function') window.renderMobileSecurity();
       }
 
-      // 4. Update Metrik & Badges
-      if (typeof window.updateKaryawanMetrics === 'function') window.updateKaryawanMetrics();
-      if (typeof window.updateApproverMetrics === 'function') window.updateApproverMetrics();
-      if (typeof window.updateSecurityMetrics === 'function') window.updateSecurityMetrics();
-      if (typeof window.updateNotificationBadges === 'function') window.updateNotificationBadges();
+      // Pulihkan posisi scroll dengan aman
+      if (savedScrollY > 0 && typeof window !== 'undefined') {
+        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+      }
 
     } catch (e) {
       console.warn('[SyncEngine] Error saat refresh UI otomatis:', e);

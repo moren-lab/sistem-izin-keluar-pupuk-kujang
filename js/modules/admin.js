@@ -183,17 +183,20 @@ function updateAdminMetrics() {
 
   const sidebarAdminAuditBadge = document.getElementById('sidebarAdminAuditBadge');
   if (sidebarAdminAuditBadge) {
-    let viewedAuditTickets = [];
-    try {
-      viewedAuditTickets = JSON.parse(localStorage.getItem('KUJANG_VIEWED_AUDIT_TICKETS') || '[]');
-    } catch (e) { viewedAuditTickets = []; }
+    // Hitung jumlah karyawan unik yang sedang dilacak di audit trail (fokus karyawan, bukan jumlah proses/tiket)
+    const auditEmployeeKeys = new Set();
+    tickets.forEach(t => {
+      if (t.deletedFromAudit) return;
+      const logs = t.activityLog || t.timeline || [];
+      if (logs.length > 0 || t.status) {
+        const empKey = (t.applicantNip || t.applicantName || 'karyawan').trim().toLowerCase();
+        auditEmployeeKeys.add(empKey);
+      }
+    });
 
-    // Hitung tiket aktif di audit trail yang belum dilihat detail pengajuannya
-    const auditTicketsWithLogs = tickets.filter(t => !t.deletedFromAudit && ((t.timeline && t.timeline.length > 0) || (t.activityLog && t.activityLog.length > 0) || t.status));
-    const unreadAuditCount = auditTicketsWithLogs.filter(t => !viewedAuditTickets.includes(t.id)).length;
-
-    sidebarAdminAuditBadge.textContent = unreadAuditCount;
-    sidebarAdminAuditBadge.style.display = unreadAuditCount > 0 ? 'inline-block' : 'none';
+    const uniqueAuditEmployeeCount = auditEmployeeKeys.size;
+    sidebarAdminAuditBadge.textContent = uniqueAuditEmployeeCount;
+    sidebarAdminAuditBadge.style.display = uniqueAuditEmployeeCount > 0 ? 'inline-block' : 'none';
   }
 
   // Calm Headcount Card
@@ -704,6 +707,7 @@ function deleteAdminAuditLog(ticketId, encodedTime, encodedEvent) {
     window.saveTickets(tickets);
     renderAdminAudit();
     renderAdminRecentFeed();
+    updateAdminMetrics();
 
     if (typeof window.showToast === 'function') {
       window.showToast(`Catatan audit [${event}] untuk tiket #${ticketId} berhasil dihapus.`, 'info');
@@ -753,6 +757,7 @@ function deleteAllAdminAudit() {
     }
     renderAdminAudit();
     if (typeof renderAdminRecentFeed === 'function') renderAdminRecentFeed();
+    updateAdminMetrics();
 
     if (typeof window.showToast === 'function') {
       window.showToast(`Seluruh catatan log investigasi audit (${deletedCount} data) berhasil dihapus.`, 'success');
@@ -783,6 +788,9 @@ function markAuditDetailAsViewed(ticketId) {
   } catch (e) {}
   if (typeof updateAdminStats === 'function') {
     updateAdminStats();
+  }
+  if (typeof updateAdminMetrics === 'function') {
+    updateAdminMetrics();
   }
 }
 window.markAuditDetailAsViewed = markAuditDetailAsViewed;

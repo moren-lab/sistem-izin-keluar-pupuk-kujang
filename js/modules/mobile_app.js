@@ -260,9 +260,9 @@
   }
 
   // -------------------------------------------------------------------
-  // 3. RENDER ACTIVE VIEW
+  // 3. RENDER ACTIVE VIEW (DENGAN PRESERVASI POSISI SCROLL)
   // -------------------------------------------------------------------
-  function renderActiveView() {
+  function renderActiveView(options = {}) {
     const container = document.getElementById('mobileMainContent');
     if (!container) return;
 
@@ -275,13 +275,19 @@
       }
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const shouldScrollToTop = Boolean(options && options.scrollToTop);
+    const savedScrollY = shouldScrollToTop ? 0 : (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0);
 
     if (currentMobileTab === 'notifikasi') {
       if (typeof window.renderMobileFullNotifikasiPage === 'function') {
         window.renderMobileFullNotifikasiPage(mobileNotifFilterTab, container);
       }
       renderBottomNav();
+      if (shouldScrollToTop) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } else if (savedScrollY > 0) {
+        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+      }
       return;
     }
 
@@ -302,6 +308,16 @@
     }
 
     renderBottomNav();
+
+    // Pertahankan posisi scroll saat pembaruan data real-time, hanya scroll ke atas saat ganti tab sengaja
+    if (shouldScrollToTop) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else if (savedScrollY > 0) {
+      window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+      });
+    }
   }
 
   // -------------------------------------------------------------------
@@ -502,7 +518,7 @@
       }
       currentMobileTab = 'notifikasi';
       window.currentMobileTab = 'notifikasi';
-      renderActiveView();
+      renderActiveView({ scrollToTop: true });
       return;
     }
     if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'pelacakan') {
@@ -514,7 +530,7 @@
       localStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', tab);
       sessionStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', tab);
     } catch (e) {}
-    renderActiveView();
+    renderActiveView({ scrollToTop: true });
 
     if (subParam) {
       if ((currentMobileRole === 'approver' || currentMobileRole === 'approver2') && tab === 'antrean' && typeof window.mobileSwitchAntreanSegment === 'function') {
@@ -1325,6 +1341,35 @@
 
   // Expose global initializer
   window.initMobileApp = initMobileApp;
+
+  // Touch & Scroll Interaction Guard
+  let isUserTouchInteracting = false;
+  let touchEndDebounceTimer = null;
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('touchstart', function () {
+      isUserTouchInteracting = true;
+      if (touchEndDebounceTimer) clearTimeout(touchEndDebounceTimer);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function () {
+      isUserTouchInteracting = true;
+    }, { passive: true });
+
+    const handleTouchEnd = function () {
+      if (touchEndDebounceTimer) clearTimeout(touchEndDebounceTimer);
+      touchEndDebounceTimer = setTimeout(function () {
+        isUserTouchInteracting = false;
+      }, 500);
+    };
+
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+
+    window.isMobileUserInteracting = function () {
+      return Boolean(isUserTouchInteracting);
+    };
+  }
 
   // Auto init when DOM is loaded
   if (document.readyState === 'loading') {
