@@ -1591,7 +1591,7 @@
         </button>
       ` : `
         <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; font-weight: 700; min-height: 44px; font-size: 0.8rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; text-align: center; width: 100%; box-shadow: 0 1px 3px rgba(5,150,105,0.2);" onclick="window.mobileExecuteTapIn('${t.id}')">
-          <span>✓ Tap In Masuk</span>
+          <span>Tap In Masuk</span>
         </button>
       `;
 
@@ -1607,23 +1607,37 @@
             <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail</a>
           </div>
         `;
-      } else {
-        const cancelExtBtn = `
-          <button type="button" class="mobile-btn-danger btn-cancel-pending-ext" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 44px; font-size: 0.7rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 4px; line-height: 1.2; cursor: pointer;" onclick="window.mobileCancelPendingExtension('${t.id}')" title="Batalkan Perpanjangan">
-            <span>✕ Batalkan</span>
-          </button>
-        `;
-
+      } else if (hasPendingExt) {
         actionButtonsHtml = `
-          <div style="margin-top: 12px;">
-            <div style="display: grid; grid-template-columns: ${hasPendingExt ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: ${hasPendingExt ? '6px' : '8px'};">
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Baris 1: Menunggu Persetujuan (Kiri) & Tap In Masuk (Kanan) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
               ${extButtonHtml}
               ${tapInBtn}
-              ${hasPendingExt ? cancelExtBtn : ''}
             </div>
+            <!-- Baris 2: Lihat Detail Pengajuan (Full Width) -->
+            <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 700; font-size: 0.8rem; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #0f172a; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Lihat Detail Pengajuan</span>
+            </button>
+            <!-- Baris 3: Batalkan Pengajuan Perpanjangan (Teks Putih & Background Merah) -->
+            <button type="button" class="mobile-btn-danger btn-cancel-pending-ext" style="width: 100%; min-height: 42px; font-weight: 700; font-size: 0.8rem; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(220,38,38,0.25); cursor: pointer;" onclick="window.mobileOpenCancelExtensionModal('${t.id}')" title="Batalkan Perpanjangan">
+              
+              <span>Batalkan Pengajuan Perpanjangan</span>
+            </button>
           </div>
-          <div style="text-align: center; margin-top: 8px;">
-            <a href="#" class="mobile-link-rincian" onclick="window.mobileOpenTicketDetail('${t.id}'); return false;">Lihat Detail</a>
+        `;
+      } else {
+        actionButtonsHtml = `
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              ${extButtonHtml}
+              ${tapInBtn}
+            </div>
+            <button type="button" class="mobile-btn-secondary" style="width: 100%; min-height: 42px; font-weight: 700; font-size: 0.8rem; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #0f172a; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;" onclick="window.mobileOpenTicketDetail('${t.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Lihat Detail Pengajuan</span>
+            </button>
           </div>
         `;
       }
@@ -2426,6 +2440,7 @@
       </div>
     `;
 
+    sheet.classList.add('modal-center');
     backdrop.classList.add('open');
     sheet.classList.add('open');
   };
@@ -2529,8 +2544,63 @@
     if (typeof window.renderApproverView === 'function') window.renderApproverView();
   };
 
-  // SEDANG-05 FIX: Opsi Penarikan Permohonan Perpanjangan Waktu oleh Karyawan
+  // SEDANG-05 FIX: Opsi Penarikan Permohonan Perpanjangan Waktu oleh Karyawan (Pop Up Konfirmasi Batal di Tengah Layar)
+  window.mobileOpenCancelExtensionModal = function (ticketId) {
+    const sheet = document.getElementById('mobileActionSheet');
+    const backdrop = document.getElementById('mobileModalBackdrop');
+    if (!sheet || !backdrop) return;
+
+    const tickets = window.ticketsList || [];
+    const t = tickets.find(x => x.id === ticketId);
+    if (!t) return;
+
+    const emp = getActiveEmp();
+    const isInitiator = t.applicantNip === emp.nip || (!t.applicantNip && emp.nip === 'PK-2024-8841');
+    if (!isInitiator) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Gagal: Anda bukan pemilik izin ini.', 'danger');
+      }
+      return;
+    }
+
+    sheet.innerHTML = `
+      <div class="mobile-sheet-header" style="border-bottom: 1px solid #fee2e2; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: #b91c1c; margin: 0;">Batalkan Pengajuan Perpanjangan</h3>
+          <p style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0 0;">Tiket ${escapeHtml(t.id)}</p>
+        </div>
+        <button type="button" class="mobile-sheet-close" onclick="window.mobileCloseSheet()">✕</button>
+      </div>
+
+      <div class="mobile-sheet-body" style="padding: 16px 18px 20px 18px;">
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #9f1239; margin-bottom: 4px;">Konfirmasi Pembatalan Perpanjangan</div>
+          <div style="font-size: 0.825rem; color: #475569; line-height: 1.45;">
+            Apakah Anda yakin ingin membatalkan permohonan perpanjangan waktu untuk tiket <strong>${escapeHtml(t.id)}</strong>? Toleransi batas waktu kembali akan dikembalikan ke jadwal semula.
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button type="button" class="mobile-btn-secondary" style="padding: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; cursor: pointer;" onclick="window.mobileCloseSheet()">
+            <span>Tidak, Kembali</span>
+          </button>
+          <button type="button" id="mBtnConfirmCancelExt" class="mobile-btn-danger" style="padding: 11px; font-weight: 700; background: #dc2626; border: 1.5px solid #dc2626; color: #ffffff; border-radius: 8px; cursor: pointer;" onclick="window.executeMobileCancelPendingExtension('${escapeHtml(t.id)}')">
+            <span>Ya, Batalkan</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    sheet.classList.add('modal-center');
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
+  };
+
   window.mobileCancelPendingExtension = function (ticketId) {
+    window.mobileOpenCancelExtensionModal(ticketId);
+  };
+
+  window.executeMobileCancelPendingExtension = function (ticketId) {
     const tickets = window.ticketsList || [];
     const t = tickets.find(x => x.id === ticketId);
     if (!t) return;
@@ -2552,7 +2622,7 @@
     t.extensionReason = null;
     if (!t.timeline) t.timeline = [];
     t.timeline.push({
-      event: 'Perpanjangan Dibatalkan',
+      event: 'Pembatalan Pengajuan Perpanjangan',
       time: nowFormatted,
       by: `${emp.name} (Karyawan)`,
       desc: 'Permohonan perpanjangan waktu dibatalkan mandiri sebelum disetujui Atasan.'
@@ -4614,21 +4684,23 @@
                   Perpanjangan Telah Digunakan (Maks. 1x)
                 </button>
               ` : (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) ? `
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%;">
-                  <button type="button" class="mobile-btn-secondary btn-pending-ext-notice" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 40px; font-size: 0.68rem; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; padding: 0 4px; line-height: 1.2;">
-                    Menunggu Persetujuan
-                  </button>
-                  ${isGroupDinasActive ? `
-                    <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 40px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px; line-height: 1.2;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
-                      💳 Tap In Gerbang
+                <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%;">
+                    <button type="button" class="mobile-btn-secondary btn-pending-ext-notice" disabled style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; min-height: 40px; font-size: 0.72rem; font-weight: 700; opacity: 0.95; cursor: not-allowed; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; padding: 0 4px; line-height: 1.2;">
+                      Menunggu Persetujuan
                     </button>
-                  ` : `
-                    <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 40px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px; line-height: 1.2;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}');">
-                      ✓ Tap In Masuk
-                    </button>
-                  `}
-                  <button type="button" class="mobile-btn-danger btn-cancel-pending-ext" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 40px; font-size: 0.68rem; font-weight: 700; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 4px; line-height: 1.2; cursor: pointer;" onclick="window.mobileCancelPendingExtension('${t.id}')">
-                    ✕ Batalkan
+                    ${isGroupDinasActive ? `
+                      <button type="button" class="mobile-btn-primary" style="background: #2563eb; color: #ffffff; border: 1.5px solid #2563eb; min-height: 40px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px; line-height: 1.2;" onclick="window.mobileCloseSheet(); if(typeof window.openSimulasiTapInModal==='function') window.openSimulasiTapInModal('${t.id}'); else window.mobileExecuteTapIn('${t.id}');">
+                        💳 Tap In Gerbang
+                      </button>
+                    ` : `
+                      <button type="button" class="mobile-btn-primary" style="background: #059669; color: #ffffff; border: 1.5px solid #059669; min-height: 40px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 8px; padding: 0 4px; line-height: 1.2;" onclick="window.mobileCloseSheet(); window.mobileExecuteTapIn('${t.id}');">
+                        ✓ Tap In Masuk
+                      </button>
+                    `}
+                  </div>
+                  <button type="button" class="mobile-btn-danger btn-cancel-pending-ext" style="background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; min-height: 40px; font-size: 0.75rem; font-weight: 700; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 8px; cursor: pointer; width: 100%; box-shadow: 0 1px 3px rgba(220,38,38,0.25);" onclick="window.mobileOpenCancelExtensionModal('${t.id}')">
+                    ✕ Batalkan Pengajuan Perpanjangan
                   </button>
                 </div>
               ` : `
@@ -5149,7 +5221,10 @@
     window.currentOpenedMobileQrTicketId = null;
     const sheet = document.getElementById('mobileActionSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (sheet) sheet.classList.remove('open');
+    if (sheet) {
+      sheet.classList.remove('open');
+      sheet.classList.remove('modal-center');
+    }
     if (backdrop) backdrop.classList.remove('open');
     if (typeof window.mobileUpdateStepperUI === 'function' && currentKaryawanTab === 'form_pengajuan') {
       window.mobileUpdateStepperUI(window.currentMobileFormStep || 1);

@@ -2947,7 +2947,9 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
       btnFooterCancelExt.style.display = 'inline-flex';
       btnFooterCancelExt.textContent = 'Batalkan Perpanjangan';
       btnFooterCancelExt.onclick = () => {
-        if (typeof window.executeCancelPendingExtension === 'function') {
+        if (typeof window.openCancelPendingExtensionModal === 'function') {
+          window.openCancelPendingExtensionModal(ticket.id);
+        } else if (typeof window.executeCancelPendingExtension === 'function') {
           window.executeCancelPendingExtension(ticket.id);
         }
       };
@@ -5270,6 +5272,34 @@ function closePendingExtensionDetailModal() {
   const modal = document.getElementById('modalPendingExtensionDetail');
   if (modal) modal.classList.remove('open');
 }
+
+function openCancelPendingExtensionModal(targetTicketId) {
+  const ticketsList = window.ticketsList || [];
+  const ticketId = targetTicketId || window.currentPendingExtTicketId;
+  const ticket = ticketsList.find(t => t.id === ticketId) || (typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null);
+
+  if (!ticket || !ticket.pendingExtension) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Pengajuan perpanjangan tidak ditemukan atau sudah diproses.', 'warning');
+    }
+    return;
+  }
+
+  if (typeof window.openDeleteConfirmModal === 'function') {
+    window.openDeleteConfirmModal({
+      title: 'Batalkan Pengajuan Perpanjangan',
+      message: `Apakah Anda yakin ingin membatalkan pengajuan perpanjangan waktu untuk tiket <strong>${ticket.id}</strong>? Toleransi batas waktu kembali akan dikembalikan ke jadwal semula.`,
+      confirmText: 'Ya, Batalkan',
+      forceModal: true,
+      onConfirm: () => {
+        executeCancelPendingExtension(ticket.id);
+      }
+    });
+  } else if (confirm(`Apakah Anda yakin ingin membatalkan pengajuan perpanjangan waktu untuk tiket #${ticket.id}?`)) {
+    executeCancelPendingExtension(ticket.id);
+  }
+}
+window.openCancelPendingExtensionModal = openCancelPendingExtensionModal;
 
 function executeCancelPendingExtension(targetTicketId) {
   const ticketsList = window.ticketsList || [];

@@ -1308,6 +1308,43 @@ body.theme-dark .mobile-top-role-pill {
   transform: translateY(0) !important;
 }
 
+/* Modal Popup Centered Mode (Opsi Pembatalan & Dialog Tengah Layar) */
+.mobile-bottom-sheet.modal-center {
+  top: 50% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  width: calc(100% - 32px) !important;
+  max-width: 380px !important;
+  border-radius: 18px !important;
+  transform: translate(-50%, -50%) scale(0.92) !important;
+  opacity: 0 !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease !important;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.45) !important;
+  margin: 0 !important;
+}
+
+.mobile-bottom-sheet.modal-center.open {
+  transform: translate(-50%, -50%) scale(1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.mobile-bottom-sheet.modal-center .mobile-sheet-handle-bar {
+  display: none !important;
+}
+
+.mobile-bottom-sheet.modal-center .mobile-sheet-header {
+  border-radius: 18px 18px 0 0 !important;
+}
+
+.mobile-bottom-sheet.modal-center .mobile-sheet-body {
+  border-radius: 0 0 18px 18px !important;
+  padding-bottom: 20px !important;
+  max-height: 80vh !important;
+}
+
 .mobile-sheet-handle-bar {
   width: 36px;
   height: 4px;

@@ -1497,7 +1497,7 @@ function renderKaryawanDashboard() {
                     <span>✓ Tap In Kartu Akses (Masuk)</span>
                   </button>
                 `}
-                <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="flex: 1; min-height: 40px; padding: 8px 12px; font-size: 0.825rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')" title="Batalkan pengajuan perpanjangan waktu">
+                <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="flex: 1; min-height: 40px; padding: 8px 12px; font-size: 0.825rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="if(typeof window.openCancelPendingExtensionModal==='function'){window.openCancelPendingExtensionModal('${activeTicket.id}');}else if(typeof window.executeCancelPendingExtension==='function'){window.executeCancelPendingExtension('${activeTicket.id}');}" title="Batalkan pengajuan perpanjangan waktu">
                   <span>✕ Batalkan Perpanjangan</span>
                 </button>
               </div>
@@ -1957,7 +1957,7 @@ function renderPengajuanSayaView() {
                   <span>✓ Tap In Kartu Akses (Masuk)</span>
                 </button>
               `}
-              <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="flex: 1; min-height: 40px; padding: 8px 12px; font-size: 0.825rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="window.executeCancelPendingExtension('${activeTicket.id}')" title="Batalkan pengajuan perpanjangan waktu">
+              <button type="button" class="btn-figma-danger btn-cancel-pending-ext" style="flex: 1; min-height: 40px; padding: 8px 12px; font-size: 0.825rem; font-weight: 700; background: #dc2626; color: #ffffff; border: 1.5px solid #dc2626; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" onclick="if(typeof window.openCancelPendingExtensionModal==='function'){window.openCancelPendingExtensionModal('${activeTicket.id}');}else if(typeof window.executeCancelPendingExtension==='function'){window.executeCancelPendingExtension('${activeTicket.id}');}" title="Batalkan pengajuan perpanjangan waktu">
                 <span>✕ Batalkan Perpanjangan</span>
               </button>
             </div>

@@ -725,7 +725,10 @@
     const sheet = document.getElementById('mobileActionSheet');
     const roleSheet = document.getElementById('mobileRoleSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (sheet) sheet.classList.remove('open');
+    if (sheet) {
+      sheet.classList.remove('open');
+      sheet.classList.remove('modal-center');
+    }
     if (roleSheet) roleSheet.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
     try {
