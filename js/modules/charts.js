@@ -711,26 +711,26 @@ function getGambar2AestheticBarChartHtml(isMobile = false) {
   return `
     <div style="position: relative; width: 100%; max-width: 100%; border-radius: 12px; ${containerPadding}">
       <!-- Bento Summary Header Bar -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color, #f1f5f9); margin-bottom: 10px; flex-wrap: wrap; gap: ${isMobile ? '8px' : '10px'};">
-        <div style="display: flex; align-items: center; gap: ${isMobile ? '10px' : '14px'}; flex-wrap: wrap;">
-          <div>
-            <span style="font-size: ${isMobile ? '0.625rem' : '0.7rem'}; color: ${isMobile ? '#0f172a' : '#64748b'}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Volume 7 Hari</span>
-            <div style="font-size: ${isMobile ? '0.95rem' : '1.15rem'}; font-weight: 800; color: #0f172a; line-height: 1.2;">
-              <strong style="color: #0f172a;">${chartData.totalWeekVolume}</strong> <span style="font-size: ${isMobile ? '0.675rem' : '0.75rem'}; font-weight: 600; color: #0f172a;">Pengajuan</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color, #f1f5f9); margin-bottom: 10px;">
+        <div style="display: grid; grid-template-columns: auto 1px auto 1px auto; align-items: center; gap: ${isMobile ? '8px' : '12px'}; width: 100%; overflow-x: auto;">
+          <div style="white-space: nowrap;">
+            <span style="font-size: 0.62rem; color: ${isMobile ? '#0f172a' : '#64748b'}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; display: block;">Total 7 Hari</span>
+            <div style="font-size: ${isMobile ? '0.88rem' : '0.98rem'}; font-weight: 800; color: #0f172a; line-height: 1.2; margin-top: 2px;">
+              <strong style="color: #0f172a;">${chartData.totalWeekVolume}</strong> <span style="font-size: 0.7rem; font-weight: 600; color: #475569;">Izin</span>
             </div>
           </div>
-          <div style="width: 1px; height: 26px; background: var(--border-color, #e2e8f0);"></div>
-          <div>
-            <span style="font-size: ${isMobile ? '0.625rem' : '0.7rem'}; color: ${isMobile ? '#0f172a' : '#64748b'}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Hari Puncak</span>
-            <div style="font-size: ${isMobile ? '0.8rem' : '0.9rem'}; font-weight: 700; color: #0f172a; line-height: 1.2;">
+          <div style="width: 1px; height: 24px; background: var(--border-color, #e2e8f0);"></div>
+          <div style="white-space: nowrap;">
+            <span style="font-size: 0.62rem; color: ${isMobile ? '#0f172a' : '#64748b'}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; display: block;">Hari Puncak</span>
+            <div style="font-size: ${isMobile ? '0.8rem' : '0.88rem'}; font-weight: 700; color: #0f172a; line-height: 1.2; margin-top: 2px;">
               ${peakDayObj ? `${peakDayObj.dayName.replace(' (Hari Ini)', '')} (${peakDayObj.total})` : 'Belum Ada'}
             </div>
           </div>
-          <div style="width: 1px; height: 26px; background: #e2e8f0;"></div>
-          <div>
-            <span style="font-size: ${isMobile ? '0.625rem' : '0.7rem'}; color: ${isMobile ? '#0f172a' : '#64748b'}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Rata-rata Harian</span>
-            <div style="font-size: ${isMobile ? '0.8rem' : '0.9rem'}; font-weight: 700; color: #0f172a; line-height: 1.2;">
-              ~${avgDaily} / hari
+          <div style="width: 1px; height: 24px; background: #e2e8f0;"></div>
+          <div style="white-space: nowrap;">
+            <span style="font-size: 0.62rem; color: ${isMobile ? '#0f172a' : '#64748b'}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; display: block;">Rata-rata</span>
+            <div style="font-size: ${isMobile ? '0.8rem' : '0.88rem'}; font-weight: 700; color: #0f172a; line-height: 1.2; margin-top: 2px;">
+              ~${avgDaily} / hr
             </div>
           </div>
         </div>

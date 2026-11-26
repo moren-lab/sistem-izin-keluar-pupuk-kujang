@@ -7809,6 +7809,13 @@ body.theme-dark .user-profile-photo-inline {
   margin-bottom: 0.85rem;
 }
 
+#cardActivePermitSummary .card-action-btns-wrap > button,
+#colPengajuanLeft .card-action-btns-wrap > button {
+  flex: 1;
+  justify-content: center;
+  min-height: 38px;
+}
+
 .figma-card-title {
   font-size: 0.95rem;
   font-weight: 800;

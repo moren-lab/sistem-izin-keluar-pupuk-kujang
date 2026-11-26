@@ -1036,12 +1036,12 @@
 
                                 <input type="file" id="fileSuratPerintah" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" onchange="window.handleSuratPerintahUpload(this)">
 
-                                <!-- Upload Dropzone -->
-                                <div id="dropzoneSuratPerintah" onclick="document.getElementById('fileSuratPerintah').click()" style="border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 0.85rem; text-align: center; background: #ffffff; cursor: pointer; transition: all 0.2s ease;">
-                                  <div style="font-size: 1.35rem; margin-bottom: 4px;">📑</div>
-                                  <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">Klik untuk memilih file Surat Perintah / Tugas</div>
-                                  <div style="font-size: 0.72rem; color: #64748b;">Format berkas: .PDF, .JPG, atau .PNG (Maks 5 MB)</div>
+                                <!-- Compact Single-Row File Picker -->
+                                <div id="dropzoneSuratPerintah" onclick="document.getElementById('fileSuratPerintah').click()" style="display: flex; align-items: center; gap: 0.65rem; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.35rem 0.65rem 0.35rem 0.4rem; background: #ffffff; cursor: pointer; transition: border-color 0.2s ease;">
+                                  <span style="display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.32rem 0.75rem; font-size: 0.78rem; font-weight: 600; color: #1e293b; white-space: nowrap; flex-shrink: 0;">Pilih File</span>
+                                  <span style="font-size: 0.78rem; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Belum ada file dipilih</span>
                                 </div>
+                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.35rem;">Format: .PDF, .JPG, atau .PNG (Maks. 5 MB)</div>
 
                                 <!-- Uploaded File Preview Card -->
                                 <div id="previewSuratPerintahCard" style="display: none; background: #ffffff; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 0.65rem 0.85rem; align-items: center; justify-content: space-between;">

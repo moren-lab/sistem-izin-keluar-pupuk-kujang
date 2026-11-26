@@ -1585,38 +1585,51 @@ function renderKaryawanDashboard() {
       const activeMembers = Array.isArray(activeTicket.members) ? activeTicket.members.filter(m => m.status !== 'batal' && m.status !== 'cancelled') : [];
 
       cardActivePermitSummary.innerHTML = `
-        <div class="figma-card-header">
+        <div class="figma-card-header" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color, #f1f5f9);">
           <h3 class="figma-card-title">Izin aktif saya</h3>
-          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
+          <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan →</a>
         </div>
-        <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.9rem;">
+          <div style="font-size: 1.08rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.72rem; color: var(--text-primary); font-weight: 700; background: var(--bg-secondary); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border-color); letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
+            ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 700; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
             ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• 👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600; line-height: 1.35;">
-            <div>${activeTicket.category}</div>
-            <div style="font-weight: 500; font-size: 0.75rem; color: var(--text-muted);">${activeTicket.type}</div>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
-          <div style="margin-top: 8px; display: inline-flex; align-items: center;">
+          <div style="display: inline-flex; align-items: center; flex-shrink: 0;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
+        <div style="margin-top: 0.85rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.75rem 0.9rem; display: flex; flex-direction: column; gap: 0.55rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color, #e2e8f0);">
+            <div>
+              <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Kategori</div>
+              <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.category}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tipe Izin</div>
+              <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.type}</div>
+            </div>
+          </div>
           <div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
+            <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tujuan &amp; Keperluan</div>
+            <div style="font-size: 0.825rem; font-weight: 600; color: var(--text-primary); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--border-color, #f1f5f9);">
+          <div>
+            <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">${col1Label}</div>
             <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col1Val}</div>
           </div>
           <div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col2Label}</div>
+            <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">${col2Label}</div>
             <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col2Val}</div>
           </div>
         </div>
 
-        <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
+        <div class="card-action-btns-wrap" style="display: flex; gap: 0.6rem; margin-top: 1.05rem; flex-wrap: wrap;">
           ${actionButtonsHtml}
         </div>
       `;
