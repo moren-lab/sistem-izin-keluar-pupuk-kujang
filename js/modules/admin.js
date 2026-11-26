@@ -532,6 +532,8 @@ function renderAdminAudit() {
     return matchesSearch && matchesEvent && matchesPeriod;
   });
 
+  window._latestFilteredAuditLogs = filtered;
+
   if (countBadge) {
     countBadge.textContent = `${filtered.length} riwayat karyawan`;
   }
@@ -946,10 +948,10 @@ function renderAdminReports(isPrinting = false) {
           <div class="report-ticket-id" style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.8rem; white-space: nowrap;">${t.id}</div>
           ${(isEmergency || isGroupDinas) ? `
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
-              ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+              ${isEmergency ? `<span style="font-size: 0.72rem; font-weight: 700; color: #be123c; white-space: nowrap;">🚨 Darurat</span>` : ''}
               ${isGroupDinas ? (() => {
                 const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-                return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                return `<span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
               })() : ''}
             </div>
           ` : ''}
@@ -1178,6 +1180,77 @@ function printAdminReport() {
   setTimeout(() => {
     renderAdminReports(false);
   }, 1000);
+}
+
+function exportAdminAuditCsv() {
+  const logs = window._latestFilteredAuditLogs || [];
+  if (logs.length === 0) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Tidak ada catatan audit trail yang sesuai untuk diekspor.', 'warning');
+    }
+    return;
+  }
+
+  const headers = ['No', 'Waktu & Tanggal', 'No. Tiket', 'NIP Karyawan', 'Nama Karyawan', 'Peristiwa', 'Eksekutor', 'Keterangan'];
+  const cleanVal = (v) => String(v || '-').replace(/[\r\n]+/g, ' ').trim();
+  const rows = logs.map((log, idx) => [
+    idx + 1,
+    cleanVal(log.time),
+    cleanVal(log.ticketId),
+    cleanVal(log.applicantNip),
+    cleanVal(log.applicantName),
+    cleanVal(log.event),
+    cleanVal(log.by),
+    cleanVal(log.desc)
+  ]);
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+
+  if (typeof window.XLSX !== 'undefined') {
+    const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = [
+      { wch: 6 },  // No
+      { wch: 22 }, // Waktu & Tanggal
+      { wch: 20 }, // No. Tiket
+      { wch: 16 }, // NIP Karyawan
+      { wch: 26 }, // Nama Karyawan
+      { wch: 24 }, // Peristiwa
+      { wch: 26 }, // Eksekutor
+      { wch: 48 }  // Keterangan
+    ];
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, 'Audit Trail & Log');
+    window.XLSX.writeFile(wb, `Audit_Trail_Log_Pupuk_Kujang_${dateStr}.xlsx`);
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Berhasil mengunduh ${logs.length} catatan Audit Trail ke Excel (.xlsx)`, 'success');
+    }
+    return;
+  }
+
+  const esc = (v) => `"${String(v || '-').replace(/"/g, '""')}"`;
+  const csvRows = [headers.join(';'), ...rows.map(r => r.map(esc).join(';'))];
+  const csvString = '\uFEFF' + csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Audit_Trail_Log_Pupuk_Kujang_${dateStr}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) { } }, 1000);
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(`Berhasil mengunduh ${logs.length} catatan Audit Trail ke Excel (.csv)`, 'success');
+  }
+}
+
+function printAdminAuditPdf() {
+  const logs = window._latestFilteredAuditLogs || [];
+  if (typeof window.openExportPdfModal === 'function') {
+    window.openExportPdfModal('admin-audit', logs, 'Laporan Audit Trail & Log Investigasi Aktivitas');
+  }
 }
 
 // ==========================================
@@ -3385,10 +3458,10 @@ function renderAdminStatusTracking() {
           </div>
           ${(isEmergency || isGroupDinas) ? `
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
-              ${isEmergency ? `<span style="font-size: 0.68rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.2px; white-space: nowrap;">🚨 Darurat</span>` : ''}
+              ${isEmergency ? `<span style="font-size: 0.72rem; font-weight: 700; color: #be123c; white-space: nowrap;">🚨 Darurat</span>` : ''}
               ${isGroupDinas ? (() => {
                 const groupCount = (t.initiatorCancelled ? 0 : 1) + (Array.isArray(t.members) ? t.members.filter(m => m.status !== 'batal').length : (t.memberCount || 2));
-                return `<span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; letter-spacing: 0.2px; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
+                return `<span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; white-space: nowrap;" title="Tim Dinas (${groupCount} Orang)">👥 Tim (${groupCount})</span>`;
               })() : ''}
             </div>
           ` : ''}
@@ -4016,6 +4089,8 @@ window.renderAdminUsers = renderAdminUsers;
 window.renderAdminView = renderAdminView;
 window.exportAdminExcel = exportAdminExcel;
 window.printAdminReport = printAdminReport;
+window.exportAdminAuditCsv = exportAdminAuditCsv;
+window.printAdminAuditPdf = printAdminAuditPdf;
 window.viewAdminTicketDetail = viewAdminTicketDetail;
 window.openAdminUserModal = openAdminUserModal;
 window.closeAdminUserModal = closeAdminUserModal;

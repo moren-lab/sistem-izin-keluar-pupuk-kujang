@@ -8227,11 +8227,11 @@ body.theme-dark .figma-contact-sub {
 }
 
 .figma-tag-badge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: #f1f5f9;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
   color: #475569;
 }
 
