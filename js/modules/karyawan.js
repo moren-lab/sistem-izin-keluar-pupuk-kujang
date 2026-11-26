@@ -1009,9 +1009,13 @@ function updateKaryawanMetrics() {
     (Array.isArray(t.members) && t.members.some(m => m.nip === myNip)) ||
     (!t.applicantNip && myNip === 'PK-2024-8841')
   );
-  const totalMonth = myTickets.length;
+  // Sinkronisasi ketat dengan periode kalender Bulan Ini (sama dengan Donut Chart "Bulan Ini")
+  const monthTickets = myTickets.filter(t =>
+    typeof window.matchesPeriodFilter === 'function' ? window.matchesPeriodFilter(t, 'month') : true
+  );
+  const totalMonth = monthTickets.length;
 
-  const completedTickets = myTickets.filter(t => t.status === 'Selesai');
+  const completedTickets = monthTickets.filter(t => t.status === 'Selesai');
   const completedCount = completedTickets.length;
   const lateCompleted = completedTickets.filter(t => t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'))).length;
   const onTimeCompleted = Math.max(0, completedCount - lateCompleted);
@@ -1591,10 +1595,10 @@ function renderKaryawanDashboard() {
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.9rem;">
-          <div style="font-size: 1.08rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 700; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
-            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• 👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span style="font-size: 1.08rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); letter-spacing: -0.02em;">${activeTicket.id}</span>
+            ${isEmergency ? `<span style="font-size: 0.75rem; color: #be123c; font-weight: 700;">• 🚨 Izin Darurat</span>` : ''}
+            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• 👥 Tim (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)})</span>` : ''}
           </div>
           <div style="display: inline-flex; align-items: center; flex-shrink: 0;">
             ${getCleanEmpStatus(activeTicket.status, activeTicket)}
@@ -1602,19 +1606,19 @@ function renderKaryawanDashboard() {
         </div>
 
         <div style="margin-top: 0.85rem; background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.75rem 0.9rem; display: flex; flex-direction: column; gap: 0.55rem;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color, #e2e8f0);">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color, #e2e8f0);">
             <div>
-              <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Kategori</div>
-              <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.category}</div>
+              <div style="font-size: 0.675rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Kategori</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.category}</div>
             </div>
             <div>
-              <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tipe Izin</div>
-              <div style="font-size: 0.825rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.type}</div>
+              <div style="font-size: 0.675rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tipe Izin</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${activeTicket.type}</div>
             </div>
           </div>
           <div>
-            <div style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tujuan &amp; Keperluan</div>
-            <div style="font-size: 0.825rem; font-weight: 600; color: var(--text-primary); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(String(activeTicket.destination || '') + ' — ' + String(activeTicket.reason || '')).replace(/"/g, '&quot;')}">${activeTicket.destination} — ${activeTicket.reason}</div>
+            <div style="font-size: 0.675rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tujuan</div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45;" title="${String(activeTicket.destination || '').replace(/"/g, '&quot;')}">${String(activeTicket.destination || '-').replace(/\r?\n+/g, ' ')}</div>
           </div>
         </div>
 
@@ -1703,37 +1707,37 @@ function renderKaryawanDashboard() {
         }
 
         return `
-          <div class="dashboard-recent-row" style="display: grid; grid-template-columns: minmax(130px, 1.2fr) 140px 115px auto; align-items: center; padding: 0.85rem 0; ${idx < completedItems.length - 1 ? 'border-bottom: 1px solid var(--border-color, #f1f5f9);' : ''} gap: 0.75rem;">
+          <div class="dashboard-recent-row" style="display: grid; grid-template-columns: minmax(170px, 1.3fr) 1fr 1fr auto; align-items: center; padding: 0.85rem 0; ${idx < completedItems.length - 1 ? 'border-bottom: 1px solid var(--border-color, #f1f5f9);' : ''} gap: 1.25rem;">
             <!-- Kolom 1: ID Tiket & Kategori -->
             <div style="min-width: 0; overflow: hidden;">
-              <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
-                <span style="font-size: 0.875rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary, #0f172a); letter-spacing: -0.2px; white-space: nowrap;">${t.id}</span>
-                ${isEmergency ? `<span style="font-size: 0.65rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 5px; border-radius: 4px; border: 1px solid #fecdd3; white-space: nowrap;">🚨 Darurat</span>` : ''}
-                ${isGroupDinas ? `<span style="font-size: 0.65rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 5px; border-radius: 4px; border: 1px solid #bae6fd; white-space: nowrap;">👥 Tim (${groupCount})</span>` : ''}
-              </div>
+              <div style="font-size: 0.875rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary, #0f172a); letter-spacing: -0.2px; white-space: nowrap;">${t.id}</div>
+              ${(isEmergency || isGroupDinas) ? `
+                <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; margin-top: 3px;">
+                  ${isEmergency ? `<span style="font-size: 0.65rem; font-weight: 800; color: #be123c; background: #ffe4e6; padding: 1px 5px; border-radius: 4px; border: 1px solid #fecdd3; white-space: nowrap;">🚨 Darurat</span>` : ''}
+                  ${isGroupDinas ? `<span style="font-size: 0.65rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 1px 5px; border-radius: 4px; border: 1px solid #bae6fd; white-space: nowrap;">👥 Tim (${groupCount})</span>` : ''}
+                </div>
+              ` : ''}
               <div style="font-size: 0.75rem; color: var(--text-secondary, #64748b); margin-top: 3px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${dayMonth} — ${t.category}</div>
             </div>
 
-            <!-- Kolom 2: Rentang Waktu (Sejajar Rapi) -->
-            <div style="text-align: right; white-space: nowrap;">
+            <!-- Kolom 2: Rentang Waktu (Tengah-tengah, tidak mepet kiri/kanan) -->
+            <div style="text-align: center; white-space: nowrap;">
               <span style="font-size: 0.8rem; color: var(--text-primary, #334155); font-weight: 600; font-family: var(--font-mono);">${timeSpan}</span>
             </div>
 
-            <!-- Kolom 3: Status Pill (Dipenggal rapi dengan ellipsis sesuai Gambar 3) -->
-            <div style="max-width: 115px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]'))) ? 'Selesai (Terlambat)' : (t.status || 'Selesai')}">
+            <!-- Kolom 3: Status Pill (Tengah-tengah dengan jarak lega) -->
+            <div style="display: flex; justify-content: center; overflow: hidden; white-space: nowrap;" title="${(t.isLate || (t.scanInTime && t.scanInTime.includes('[Terlambat]'))) ? 'Selesai (Terlambat)' : (t.status || 'Selesai')}">
               ${getCleanEmpStatus(t.status || 'Selesai', t)}
             </div>
 
-            <!-- Kolom 4: Aksi Detail Pengajuan & Hapus -->
+            <!-- Kolom 4: Aksi Detail Pengajuan & Hapus (Ikon) -->
             <div style="text-align: right; white-space: nowrap; display: flex; justify-content: flex-end;">
-              <div class="action-pills-row">
-                <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-                  <span>Detail Pengajuan</span>
+              <div class="action-pills-row" style="gap: 0.4rem;">
+                <button type="button" class="btn-pill-action btn-pill-detail" onclick="openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan" aria-label="Lihat Detail Pengajuan" style="width: 32px; height: 32px; padding: 0 !important; flex: 0 0 32px !important;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                 </button>
-                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.preventDefault(); event.stopPropagation(); deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Hapus</span>
+                <button type="button" class="btn-pill-action btn-pill-delete" onclick="event.preventDefault(); event.stopPropagation(); deleteEmpTicket('${t.id}')" title="Hapus Pengajuan #${t.id}" aria-label="Hapus Pengajuan #${t.id}" style="width: 32px; height: 32px; padding: 0 !important; flex: 0 0 32px !important;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
               </div>
             </div>
@@ -2044,39 +2048,53 @@ function renderPengajuanSayaView() {
     colPengajuanLeft.innerHTML = `
       <!-- Card 1: Izin aktif saya -->
       <div class="figma-card">
-        <div class="figma-card-header">
+        <div class="figma-card-header" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color, #f1f5f9);">
           <h3 class="figma-card-title">Izin aktif saya</h3>
           <a href="#" class="figma-card-link" onclick="openTicketDetail('${activeTicket.id}', 'detail'); return false;">Detail Pengajuan</a>
         </div>
-        <div>
-          <div style="font-size: 1.05rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <span>${activeTicket.id}</span>
-            ${isEmergency ? `<span style="font-size: 0.72rem; color: #be123c; font-weight: 800; background: #ffe4e6; padding: 2px 7px; border-radius: 4px; border: 1px solid #fecdd3; letter-spacing: 0.3px;">Izin Darurat</span>` : ''}
-            ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• 👥 Dinas Bersama (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)} Orang)</span>` : ''}
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.85rem;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span style="font-size: 1.08rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary); letter-spacing: -0.02em;">${activeTicket.id}</span>
+              ${isEmergency ? `<span style="font-size: 0.75rem; color: #be123c; font-weight: 700;">• 🚨 Izin Darurat</span>` : ''}
+              ${activeTicket.isGroupDinas ? `<span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">• 👥 Tim (${activeMembers.length + (activeTicket.initiatorCancelled ? 0 : 1)})</span>` : ''}
+            </div>
+            <div style="flex-shrink: 0;">
+              ${getCleanEmpStatus(activeTicket.status, activeTicket)}
+            </div>
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 600; line-height: 1.35;">
-            <div>${activeTicket.category}</div>
-            <div style="font-weight: 500; font-size: 0.75rem; color: var(--text-muted);">${activeTicket.type}</div>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')} — ${(activeTicket.reason || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '').replace(/\r?\n+/g, ' ')} — ${(activeTicket.reason || '').replace(/\r?\n+/g, ' ')}</div>
-          <div style="margin-top: 8px; display: inline-flex; align-items: center;">
-            ${getCleanEmpStatus(activeTicket.status, activeTicket)}
-          </div>
-        </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color, #f1f5f9);">
-          <div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col1Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col1Val}</div>
+          <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 0.75rem 0.9rem; display: flex; flex-direction: column; gap: 0.55rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div>
+                <div style="font-size: 0.675rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Kategori</div>
+                <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: 700; margin-top: 2px;">${activeTicket.category}</div>
+              </div>
+              <div>
+                <div style="font-size: 0.675rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tipe Izin</div>
+                <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: 700; margin-top: 2px;">${activeTicket.type}</div>
+              </div>
+            </div>
+            <div style="padding-top: 0.5rem; border-top: 1px dashed var(--border-color, #e2e8f0);">
+              <div style="font-size: 0.675rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Tujuan</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; max-width: 100%; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45;" title="${(activeTicket.destination || '').replace(/"/g, '&quot;')}">${(activeTicket.destination || '-').replace(/\r?\n+/g, ' ')}</div>
+            </div>
           </div>
-          <div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${col2Label}</div>
-            <div style="font-size: 0.825rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">${col2Val}</div>
-          </div>
-        </div>
 
-        <div class="card-action-btns-wrap" style="display: flex; gap: 0.5rem; margin-top: 1.15rem; flex-wrap: wrap;">
-          ${actionButtonsHtml}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color, #f1f5f9);">
+            <div>
+              <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">${col1Label}</div>
+              <div style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); margin-top: 3px;">${col1Val}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">${col2Label}</div>
+              <div style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); margin-top: 3px;">${col2Val}</div>
+            </div>
+          </div>
+
+          <div class="card-action-btns-wrap" style="display: flex; gap: 0.6rem; margin-top: 0.25rem; flex-wrap: wrap;">
+            ${actionButtonsHtml}
+          </div>
         </div>
       </div>
 
@@ -2318,96 +2336,96 @@ function formatTicketScheduleWithDay(t) {
 
 function getCleanEmpStatus(status, ticket) {
   let label = status || 'Selesai';
-  let color = '#059669'; // brand green
+  let color = '#047857'; // Forest Emerald (Selesai)
   let statusKey = 'selesai';
 
   if (status === 'Selesai') {
     if (ticket && (ticket.isLate || (ticket.scanInTime && ticket.scanInTime.includes('[Terlambat]')) || ticket.lateMinutes > 0)) {
       label = 'Selesai (Terlambat)';
-      color = '#b45309';
+      color = '#854d0e'; // Muted Bronze
       statusKey = 'selesai-late';
     } else {
       label = 'Selesai';
-      color = '#059669';
+      color = '#047857'; // Forest Emerald
       statusKey = 'selesai';
     }
   } else if (status === 'Sedang di Luar') {
     label = 'Sedang di Luar';
-    color = '#0284c7';
+    color = '#0369a1'; // Corporate Blue
     statusKey = 'outside';
   } else if (status === 'Terlambat') {
     label = 'Sedang di Luar (Terlambat)';
-    color = '#dc2626';
+    color = '#dc2626'; // Alert Crimson
     statusKey = 'late';
   } else if (status === 'Disetujui') {
     label = 'Disetujui';
-    color = '#059669';
+    color = '#0f766e'; // Corporate Teal
     statusKey = 'approved';
   } else if (status === 'Menunggu Persetujuan') {
     label = 'Menunggu Persetujuan';
-    color = '#d97706';
+    color = '#b45309'; // Warm Amber
     statusKey = 'pending';
   } else if (status === 'Menunggu Verifikasi Atasan') {
     label = (window.currentActor === 'approver' || window.currentActor === 'approver2')
       ? 'Menunggu Verifikasi'
       : 'Menunggu Verifikasi Atasan';
-    color = '#2563eb';
+    color = '#1d4ed8'; // Steel Navy
     statusKey = 'waiting-verify';
   } else if (status === 'Menunggu Bukti Kedatangan') {
     label = 'Menunggu Bukti Kedatangan';
-    color = '#b45309';
+    color = '#c2410c'; // Burnt Copper
     statusKey = 'waiting-proof';
   } else if (status === 'Menunggu Otorisasi Darurat' || status === 'Darurat Terkunci') {
     label = 'Menunggu Otorisasi';
-    color = '#be123c';
+    color = '#9f1239'; // Deep Burgundy
     statusKey = 'emergency';
   } else if (status === 'Ditolak') {
     label = 'Ditolak';
-    color = '#dc2626';
+    color = '#991b1b'; // Brick Maroon
     statusKey = 'rejected';
   } else if (status === 'Kedaluwarsa' || status === 'Kadaluwarsa') {
     label = 'Kedaluwarsa';
-    color = '#64748b';
+    color = '#334155'; // Charcoal Slate
     statusKey = 'expired';
   } else if (status === 'Dibatalkan') {
     label = 'Dibatalkan';
-    color = '#64748b';
+    color = '#78716c'; // Warm Stone Gray
     statusKey = 'cancelled';
   }
 
   const bgMap = {
-    'selesai': 'rgba(16, 185, 129, 0.1)',
-    'selesai-late': 'rgba(245, 158, 11, 0.12)',
-    'outside': 'rgba(2, 132, 199, 0.1)',
-    'late': 'rgba(220, 38, 38, 0.1)',
-    'approved': 'rgba(16, 185, 129, 0.1)',
-    'pending': '#ffffff',
-    'waiting-verify': '#ffffff',
-    'waiting-proof': '#ffffff',
-    'emergency': 'transparent',
-    'rejected': 'rgba(220, 38, 38, 0.1)',
-    'expired': 'rgba(100, 116, 139, 0.1)',
-    'cancelled': 'rgba(100, 116, 139, 0.1)'
+    'selesai': 'rgba(4, 120, 87, 0.09)',
+    'selesai-late': 'rgba(133, 77, 14, 0.10)',
+    'outside': 'rgba(3, 105, 161, 0.09)',
+    'late': 'rgba(220, 38, 38, 0.10)',
+    'approved': 'rgba(15, 118, 110, 0.09)',
+    'pending': 'rgba(180, 83, 9, 0.09)',
+    'waiting-verify': 'rgba(29, 78, 216, 0.09)',
+    'waiting-proof': 'rgba(194, 65, 12, 0.09)',
+    'emergency': 'rgba(159, 18, 57, 0.09)',
+    'rejected': 'rgba(153, 27, 27, 0.09)',
+    'expired': 'rgba(51, 65, 85, 0.09)',
+    'cancelled': 'rgba(120, 113, 108, 0.11)'
   };
   const borderMap = {
-    'selesai': 'rgba(16, 185, 129, 0.25)',
-    'selesai-late': 'rgba(245, 158, 11, 0.3)',
-    'outside': 'rgba(2, 132, 199, 0.25)',
+    'selesai': 'rgba(4, 120, 87, 0.24)',
+    'selesai-late': 'rgba(133, 77, 14, 0.25)',
+    'outside': 'rgba(3, 105, 161, 0.24)',
     'late': 'rgba(220, 38, 38, 0.25)',
-    'approved': 'rgba(16, 185, 129, 0.25)',
-    'pending': '#cbd5e1',
-    'waiting-verify': '#cbd5e1',
-    'waiting-proof': '#cbd5e1',
-    'emergency': 'transparent',
-    'rejected': 'rgba(220, 38, 38, 0.25)',
-    'expired': 'rgba(100, 116, 139, 0.25)',
-    'cancelled': 'rgba(100, 116, 139, 0.25)'
+    'approved': 'rgba(15, 118, 110, 0.24)',
+    'pending': 'rgba(180, 83, 9, 0.24)',
+    'waiting-verify': 'rgba(29, 78, 216, 0.24)',
+    'waiting-proof': 'rgba(194, 65, 12, 0.24)',
+    'emergency': 'rgba(159, 18, 57, 0.24)',
+    'rejected': 'rgba(153, 27, 27, 0.24)',
+    'expired': 'rgba(51, 65, 85, 0.24)',
+    'cancelled': 'rgba(120, 113, 108, 0.26)'
   };
 
   const currentBg = bgMap[statusKey] || 'rgba(100, 116, 139, 0.1)';
   const currentBorder = borderMap[statusKey] || 'rgba(100, 116, 139, 0.25)';
 
-  return `<span class="figma-clean-status status-${statusKey}" style="display: inline-flex; align-items: center; padding: 0.2rem 0.65rem; border-radius: 9999px; font-weight: 700; font-size: 0.775rem; background: ${currentBg}; color: ${color}; border: 1px solid ${currentBorder}; line-height: 1.3;" title="${(label || '').replace(/"/g, '&quot;')}"><span>${label}</span></span>`;
+  return `<span class="figma-clean-status status-${statusKey}" style="display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 9999px; font-weight: 700; font-size: 0.725rem; background: ${currentBg}; color: ${color}; border: 1px solid ${currentBorder}; line-height: 1.3; white-space: nowrap;" title="${(label || '').replace(/"/g, '&quot;')}"><span>${label}</span></span>`;
 }
 
 /**
@@ -2514,11 +2532,11 @@ function renderEmpCards(list, containerElement) {
               <div class="realization-grid">
                 <span class="realization-label">Tujuan keluar</span>
                 <span class="realization-separator">:</span>
-                <span class="realization-value" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
+                <span class="realization-value" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
 
                 <span class="realization-label">Keperluan</span>
                 <span class="realization-separator">:</span>
-                <span class="realization-value" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
+                <span class="realization-value" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : (t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
 
                 <span class="realization-label">Rencana Waktu</span>
                 <span class="realization-separator">:</span>

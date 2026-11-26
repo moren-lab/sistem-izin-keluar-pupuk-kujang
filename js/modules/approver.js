@@ -431,8 +431,8 @@ function renderApproverDashboard() {
               </div>
               <span style="font-size: 0.72rem; color: #475569; font-weight: 700;">Tap In: ${t.tapInTime || t.arrivalReportedTime || 'Terkunci'}</span>
             </div>
-            <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Pemohon'}</strong> (${t.applicantNip || '-'}) — Tujuan: <strong>${t.destination || '-'}</strong>
+            <div style="font-size: 0.825rem; color: var(--text-primary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word;">
+              <strong>${t.applicantName || 'Pemohon'}</strong> (${t.applicantNip || '-'}) — Tujuan: <strong>${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-')}</strong>
             </div>
             <div style="font-size: 0.775rem; color: #334155; line-height: 1.4;">
               ${hasProofPhoto
@@ -472,11 +472,13 @@ function renderApproverDashboard() {
               </div>
               <span class="status-pill emergency-locked" style="font-size: 0.65rem; padding: 2px 8px;">QR TERKUNCI</span>
             </div>
-            <div style="font-size: 0.825rem; color: #881337;">
-              <span style="display:inline-flex; align-items:center; gap:6px;">${window.renderUserPhoto(emg.applicantName, 22)} <strong>${emg.applicantName}</strong></span> (${emg.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${emg.destination}</strong>
+            <div style="font-size: 0.825rem; color: #881337; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; word-break: break-word;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(emg.destination, '-') : ''}">
+              <span style="display:inline-flex; align-items:center; gap:6px; vertical-align: middle;">${window.renderUserPhoto(emg.applicantName, 22)} <strong>${emg.applicantName}</strong></span> (${emg.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(emg.destination, '-') : (emg.destination || '-')}</strong>
             </div>
             <div style="font-size: 0.775rem; color: #9f1239; background: #ffe4e6; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #fecdd3; line-height: 1.4;">
-              <strong>Alasan Kedaruratan:</strong> "${emg.reason || '-'}"
+              <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(emg.reason, '-') : ''}">
+                <strong>Alasan Kedaruratan:</strong> "${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(emg.reason, '-') : (emg.reason || '-')}"
+              </div>
             </div>
             <div style="font-size: 0.75rem; color: ${isFaceScanMethod ? '#7e22ce' : '#047857'}; font-weight: 700;">
               ${isFaceScanMethod ? '🤳 Metode: Scan Wajah Atasan di Tempat (Karyawan akan memindai wajah Anda)' : '📱 Metode: Persetujuan Langsung Atasan di App'}
@@ -509,12 +511,12 @@ function renderApproverDashboard() {
               <span class="tag-badge badge-outside" style="font-weight: 700;">Sedang di Luar</span>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom;" title="${t.destination}">${t.destination}</strong>
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-')}</strong>
             </div>
             <div class="approver-detail-callout warning" style="border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.775rem; line-height: 1.45;">
               <div><strong>Estimasi Kembali Semula:</strong> ${t.estimatedReturn ? t.estimatedReturn.replace('T', ' ') : '-'}</div>
               <div><strong>Permohonan Waktu Baru:</strong> <strong class="callout-highlight">${t.pendingExtension.newEstimatedReturn.replace('T', ' ')}</strong></div>
-              <div style="margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.pendingExtension.reason || '').replace(/"/g, '&quot;')}"><strong>Alasan:</strong> "${t.pendingExtension.reason}"</div>
+              <div style="margin-top: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.pendingExtension.reason, '-') : ''}"><strong>Alasan:</strong> "${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.pendingExtension.reason, '-') : (t.pendingExtension.reason || '-')}"</div>
             </div>
             <div class="approver-feed-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
               <span style="font-size: 0.725rem; color: var(--text-muted);">
@@ -544,10 +546,10 @@ function renderApproverDashboard() {
               ${window.getStatusPill(t.status, t)}
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</strong>
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-').replace(/\r?\n+/g, ' ')}</strong>
             </div>
-            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">
-              "${t.reason}"
+            <div style="font-size: 0.775rem; color: var(--text-secondary); line-height: 1.4; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : ''}">
+              "${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : (t.reason || '-')}"
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem;">
               <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
@@ -577,10 +579,7 @@ function renderApproverDashboard() {
               <div>${window.getStatusPill(t.status, t)}</div>
             </div>
             <div style="font-size: 0.825rem; color: var(--text-primary);">
-              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${t.destination}</strong>
-            </div>
-            <div class="approver-detail-callout info" style="border-radius: 6px; padding: 0.45rem 0.75rem; font-size: 0.75rem; line-height: 1.45;">
-              Pengajuan ini dialihkan oleh pemohon ke <strong>${t.approverName}</strong> pada ${t.reassignedAt || 'hari ini'}. Anda tetap dapat memantau perkembangan statusnya.
+              <strong>${t.applicantName || 'Budi Pratama'}</strong> (${t.applicantNip || 'PK-2024-8841'}) — Tujuan: <strong>${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-')}</strong>
             </div>
             <div class="approver-feed-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem; padding-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
               <span style="font-size: 0.725rem; color: var(--text-muted); font-family: var(--font-mono);">
@@ -885,11 +884,11 @@ function renderApproverCards(list, containerElement, isTracking = false) {
               <div class="realization-grid">
                 <span class="realization-label">Tujuan keluar</span>
                 <span class="realization-separator">:</span>
-                <span class="realization-value" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
+                <span class="realization-value" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-').replace(/\r?\n+/g, ' ')}</span>
 
                 <span class="realization-label">Keperluan</span>
                 <span class="realization-separator">:</span>
-                <span class="realization-value" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
+                <span class="realization-value" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : (t.reason || '-').replace(/\r?\n+/g, ' ')}</span>
 
                 <span class="realization-label">Rencana Waktu</span>
                 <span class="realization-separator">:</span>
@@ -1303,8 +1302,8 @@ function renderApproverTable(list, containerElement, isReadOnlyMonitoring = fals
                   </div>
                 </td>
                 <td style="vertical-align: middle;">
-                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.destination || '').replace(/"/g, '&quot;')}">${(t.destination || '-').replace(/\r?\n+/g, ' ')}</div>
-                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(t.reason || '').replace(/"/g, '&quot;')}">${(t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
+                  <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8rem; line-height: 1.35; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.destination, '-') : (t.destination || '-').replace(/\r?\n+/g, ' ')}</div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 3px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : ''}">${typeof window.formatCleanCardText === 'function' ? window.formatCleanCardText(t.reason, '-') : (t.reason || '-').replace(/\r?\n+/g, ' ')}</div>
                 </td>
                 <td style="white-space: nowrap; vertical-align: middle;">${scheduleWithDay}</td>
                 <td style="white-space: nowrap; vertical-align: middle;">${statusHtml}</td>

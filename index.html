@@ -1041,7 +1041,6 @@
                                   <span style="display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.32rem 0.75rem; font-size: 0.78rem; font-weight: 600; color: #1e293b; white-space: nowrap; flex-shrink: 0;">Pilih File</span>
                                   <span style="font-size: 0.78rem; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Belum ada file dipilih</span>
                                 </div>
-                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.35rem;">Format: .PDF, .JPG, atau .PNG (Maks. 5 MB)</div>
 
                                 <!-- Uploaded File Preview Card -->
                                 <div id="previewSuratPerintahCard" style="display: none; background: #ffffff; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 0.65rem 0.85rem; align-items: center; justify-content: space-between;">
@@ -1282,11 +1281,10 @@
 
                               <input type="file" id="fileEmergSuratPerintah" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" onchange="window.handleEmergSuratPerintahUpload(this)">
 
-                              <!-- Upload Dropzone -->
-                              <div id="dropzoneEmergSuratPerintah" onclick="document.getElementById('fileEmergSuratPerintah').click()" style="border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 0.85rem; text-align: center; background: #ffffff; cursor: pointer; transition: all 0.2s ease;">
-                                <div style="font-size: 1.35rem; margin-bottom: 4px;">📑</div>
-                                <div style="font-size: 0.8rem; font-weight: 700; color: #1e293b;">Klik untuk memilih file Surat Perintah / Tugas</div>
-                                <div style="font-size: 0.72rem; color: #64748b;">Format berkas: .PDF, .JPG, atau .PNG (Maks 5 MB)</div>
+                              <!-- Compact Single-Row File Picker -->
+                              <div id="dropzoneEmergSuratPerintah" onclick="document.getElementById('fileEmergSuratPerintah').click()" style="display: flex; align-items: center; gap: 0.65rem; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.35rem 0.65rem 0.35rem 0.4rem; background: #ffffff; cursor: pointer; transition: border-color 0.2s ease;">
+                                <span style="display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.32rem 0.75rem; font-size: 0.78rem; font-weight: 600; color: #1e293b; white-space: nowrap; flex-shrink: 0;">Pilih File</span>
+                                <span style="font-size: 0.78rem; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Belum ada file dipilih</span>
                               </div>
 
                               <!-- Uploaded File Preview Card -->
@@ -1674,7 +1672,7 @@
                   <div class="dashboard-widget-header"
                     style="align-items: flex-start; margin-bottom: 0.5rem; border-bottom: none; padding-bottom: 0;">
                     <div>
-                      <div class="dashboard-widget-title" style="font-size: 1.05rem; font-weight: 800; gap: 0.5rem;">
+                      <div class="dashboard-widget-title">
                         <span>📈</span>
                         <span>Volume pengajuan tim</span>
                       </div>
@@ -5174,8 +5172,8 @@
             </div>
           </div>
 
-          <!-- Bagian Bawah Dokumen -->
-          <div style="margin-top: 28px;">
+          <!-- Bagian Bawah Dokumen (Menempel di Bawah Setiap Halaman Cetak/PDF) -->
+          <div class="pdf-persistent-footer" style="margin-top: 28px;">
             <!-- 6. Footer Resmi Perusahaan (Sesuai Gambar 1: Tengah Bawah) -->
             <div class="pdf-footer-section" style="text-align: center; font-size: 0.78rem; color: #1e293b; line-height: 1.4; page-break-inside: avoid; break-inside: avoid; margin-bottom: 8px;">
               <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; margin-bottom: 2px;">PT Pupuk Kujang</div>
@@ -5199,9 +5197,6 @@
         <button type="button" class="btn-secondary" id="btnPrintPdfModal" onclick="window.executePrintExportPdf()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; padding: 10px 20px; border: 1.2px solid #008444; background: #ffffff; color: #008444; border-radius: 8px; cursor: pointer; font-size: 0.875rem;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
           <span>Cetak Dokumen</span>
-        </button>
-        <button type="button" class="btn-secondary" onclick="window.closeExportPdfModal()" style="font-weight: 600; padding: 10px 20px; border-radius: 8px; font-size: 0.875rem; border: 1.2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
-          <span>Tutup</span>
         </button>
       </div>
 

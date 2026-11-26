@@ -196,10 +196,8 @@ function _executeCheckOverdueAndExpiredTickets(silent = true) {
     const isUnreviewedPending = (statusNormalized === 'Menunggu Persetujuan' || statusNormalized === 'Menunggu Otorisasi Darurat');
     if (isUnreviewedPending && ticket.plannedExit && !ticket.scanOutTime) {
       const exitTime = parseTicketDateTime(ticket.plannedExit);
-      const toleranceMinutes = (isEmergencyTicket ? 20 : 60);
-      const toleranceMs = toleranceMinutes * 60 * 1000;
-      if (exitTime && !isNaN(exitTime.getTime()) && now.getTime() > (exitTime.getTime() + toleranceMs)) {
-        const expiredReasonMsg = 'Pengajuan kedaluwarsa karena telah melewati batas waktu rencana keluar dan belum ditinjau oleh atasan.';
+      if (exitTime && !isNaN(exitTime.getTime()) && now.getTime() > exitTime.getTime()) {
+        const expiredReasonMsg = 'Pengajuan kedaluwarsa otomatis karena telah melewati batas waktu rencana keluar dan belum ditinjau oleh atasan.';
         ticket.status = 'Kedaluwarsa';
         ticket.approverNote = expiredReasonMsg;
         ticket.systemNote = expiredReasonMsg;

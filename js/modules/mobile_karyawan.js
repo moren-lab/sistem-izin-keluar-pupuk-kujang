@@ -248,13 +248,16 @@
       ? window.getPrimaryApprover()
       : { name: 'Ir. Hendra Gunawan, M.T.' };
 
-    const totalCount = allEmpTickets.length;
-    const completedTickets = allEmpTickets.filter(t => t.status === 'Selesai');
+    const monthEmpTickets = allEmpTickets.filter(t =>
+      typeof window.matchesPeriodFilter === 'function' ? window.matchesPeriodFilter(t, 'month') : true
+    );
+    const totalCount = monthEmpTickets.length;
+    const completedTickets = monthEmpTickets.filter(t => t.status === 'Selesai');
     const selesaiCount = completedTickets.length;
     const lateCompleted = completedTickets.filter(t => t.isLate || (t.approverNote && t.approverNote.toLowerCase().includes('terlambat'))).length;
     const tepatWaktuCount = Math.max(0, selesaiCount - lateCompleted);
     const activeCount = activeTicket ? 1 : 0;
-    const terlambatCount = allEmpTickets.filter(t => t.status === 'Terlambat' || (t.status === 'Selesai' && ((t.lateMinutes && t.lateMinutes > 0) || (t.scanInTime || '').includes('[Terlambat]')))).length;
+    const terlambatCount = monthEmpTickets.filter(t => t.status === 'Terlambat' || (t.status === 'Selesai' && ((t.lateMinutes && t.lateMinutes > 0) || (t.scanInTime || '').includes('[Terlambat]')))).length;
 
     // Greeting by time of day (matching PC)
     const nowH = new Date().getHours();

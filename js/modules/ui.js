@@ -259,6 +259,42 @@ function matchesPeriodFilter(ticket, period) {
   return true;
 }
 
+/**
+ * Auto-resize semua textarea agar tinggi kolom mengikuti isi teks tanpa scrollbar internal
+ */
+function autoResizeTextarea(el) {
+  if (!el || el.tagName !== 'TEXTAREA') return;
+  el.style.overflowY = 'hidden';
+  el.style.resize = 'none';
+  el.style.height = 'auto';
+  const minH = parseInt(el.getAttribute('data-min-height') || '0', 10) || 68;
+  el.style.height = Math.max(minH, el.scrollHeight) + 'px';
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('input', (e) => {
+    if (e.target && e.target.tagName === 'TEXTAREA') {
+      autoResizeTextarea(e.target);
+    }
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('textarea').forEach(autoResizeTextarea);
+  });
+}
+if (typeof window !== 'undefined') {
+  window.autoResizeTextarea = autoResizeTextarea;
+  window.formatCleanCardText = function (val, fallback = '-') {
+    const raw = (val === undefined || val === null || val === '') ? fallback : String(val);
+    return raw
+      .replace(/[\r\n]+/g, ' ')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+}
+
 // UNIVERSAL CONFIRMATION DIALOG MODAL
 function openConfirmDialog({ title = 'Konfirmasi', message = '', confirmText = 'Ya', cancelText = 'Batal', isDanger = false, onConfirm }) {
   // Cek apakah user telah memilih untuk melewati konfirmasi hapus selama sesi ini

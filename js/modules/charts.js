@@ -149,11 +149,12 @@ function renderKaryawanDonutChart() {
     : (window.activeEmployeeUser || (window.ACTORS && window.ACTORS.karyawan) || { nip: 'PK-2024-8841' });
   const myNip = activeEmp ? activeEmp.nip : 'PK-2024-8841';
 
-  // Single Source of Truth: Filter only tickets belonging to this employee
+  // Single Source of Truth: Filter only tickets belonging to this employee (termasuk anggota Tim)
   const myTickets = ticketsList.filter(t =>
     t.applicantNip === myNip ||
     t.createdForNip === myNip ||
     t.createdByNip === myNip ||
+    (Array.isArray(t.members) && t.members.some(m => m.nip === myNip)) ||
     (!t.applicantNip && myNip === 'PK-2024-8841')
   );
 
@@ -559,9 +560,13 @@ function getApproverWeeklyRealtimeData(isMobile = false) {
   const defaultBasePattern = [12, 9, 18, 14, 20, 11, 14];
   const days = [];
 
-  // Generate 7 hari berurutan yang berakhir pada hari ini (index 6 = hari ini)
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+  // Generate 7 hari berurutan untuk minggu kalender berjalan (Senin s/d Minggu)
+  const dayOfWeek = now.getDay();
+  const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
     const dayIdx = d.getDay();
     const dayName = daysIndo[dayIdx];
     const dayLabel = daysShort[dayIdx];
@@ -570,9 +575,9 @@ function getApproverWeeklyRealtimeData(isMobile = false) {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const dt = String(d.getDate()).padStart(2, '0');
     const fullDate = `${y}-${m}-${dt}`;
-    const isToday = (i === 0);
+    const isToday = (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate());
 
-    const baseCount = defaultBasePattern[(6 - i) % defaultBasePattern.length];
+    const baseCount = defaultBasePattern[i % defaultBasePattern.length];
 
     days.push({
       label: dayLabel,

@@ -218,32 +218,74 @@
       qrContainer.appendChild(qrMount);
 
       if (typeof QRCode !== 'undefined') {
-        new QRCode(qrMount, {
+        const tempMount = document.createElement('div');
+        tempMount.style.position = 'fixed';
+        tempMount.style.left = '-9999px';
+        tempMount.style.top = '-9999px';
+        document.body.appendChild(tempMount);
+
+        const qrInstance = new QRCode(tempMount, {
           text: qrPayload,
-          width: 80,
-          height: 80,
+          width: 128,
+          height: 128,
           colorDark: '#000000',
           colorLight: '#ffffff',
           correctLevel: QRCode.CorrectLevel.M
         });
 
-        // Pastikan terkonversi menjadi elemen gambar permanen agar html2canvas tidak blank
-        const syncCanvasToImg = () => {
-          const qrCanvas = qrMount.querySelector('canvas');
-          if (qrCanvas) {
-            try {
-              const dataUrl = qrCanvas.toDataURL('image/png');
-              qrMount.innerHTML = `<img src="${dataUrl}" style="width: 56px; height: 56px; display: block; margin: 0 auto;" alt="QR TTE" />`;
-            } catch (e) {
-              qrCanvas.style.width = '56px';
-              qrCanvas.style.height = '56px';
-              qrCanvas.style.display = 'block';
-              qrCanvas.style.margin = '0 auto';
+        let svgMarkup = '';
+        let pngDataUrl = '';
+
+        // 1. Ekstrak matriks modul QR langsung agar menghasilkan SVG vektor tajam & PNG bebas blur
+        const qrModel = qrInstance && qrInstance._oQRCode;
+        if (qrModel && typeof qrModel.getModuleCount === 'function') {
+          const count = qrModel.getModuleCount();
+          const quiet = 2;
+          const total = count + quiet * 2;
+          let rects = '';
+          for (let r = 0; r < count; r++) {
+            for (let c = 0; c < count; c++) {
+              if (qrModel.isDark(r, c)) {
+                rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" fill="#000000"/>`;
+              }
             }
           }
-        };
-        setTimeout(syncCanvasToImg, 50);
-        setTimeout(syncCanvasToImg, 150);
+          svgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="64" height="64" shape-rendering="crispEdges" style="width: 64px; height: 64px; display: block; margin: 0 auto; background: #ffffff;">` +
+            `<rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
+
+          try {
+            const offCanvas = document.createElement('canvas');
+            const scale = 8;
+            offCanvas.width = total * scale;
+            offCanvas.height = total * scale;
+            const ctx = offCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+            ctx.fillStyle = '#000000';
+            for (let r = 0; r < count; r++) {
+              for (let c = 0; c < count; c++) {
+                if (qrModel.isDark(r, c)) {
+                  ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
+                }
+              }
+            }
+            pngDataUrl = offCanvas.toDataURL('image/png');
+          } catch (e) { }
+        } else {
+          const qrCanvas = tempMount.querySelector('canvas');
+          if (qrCanvas && qrCanvas.width > 0) {
+            try { pngDataUrl = qrCanvas.toDataURL('image/png'); } catch (e) { }
+          }
+        }
+
+        document.body.removeChild(tempMount);
+        window._pdfExportQrDataUrl = pngDataUrl || '';
+
+        if (svgMarkup) {
+          qrMount.innerHTML = svgMarkup;
+        } else if (pngDataUrl) {
+          qrMount.innerHTML = `<img src="${pngDataUrl}" width="64" height="64" style="width: 64px; height: 64px; display: block; margin: 0 auto;" alt="QR TTE" />`;
+        }
 
         const qrLabel = document.createElement('div');
         qrLabel.style.fontSize = '6pt';
@@ -336,8 +378,27 @@
       `;
     }
 
+    // Pastikan QR code sudah terkonversi ke <img> sebelum html2canvas berjalan
+    const qrMount = document.querySelector('#pdfExportSignatureQr > div');
+    if (qrMount) {
+      const qrCanvas = qrMount.querySelector('canvas');
+      if (qrCanvas && qrCanvas.width > 0) {
+        try {
+          const dataUrl = qrCanvas.toDataURL('image/png');
+          if (dataUrl && dataUrl.length > 100) {
+            qrMount.innerHTML = `<img src="${dataUrl}" width="64" height="64" style="width: 64px; height: 64px; display: block; margin: 0 auto;" alt="QR TTE" />`;
+          }
+        } catch (e) { }
+      }
+    }
+
+    // Sembunyikan footer inline sementara agar dapat digambar di bagian bawah SETIAP halaman PDF
+    const persistentFooter = el.querySelector('.pdf-persistent-footer');
+    const prevFooterDisplay = persistentFooter ? persistentFooter.style.display : '';
+    if (persistentFooter) persistentFooter.style.display = 'none';
+
     const opt = {
-      margin: [8, 8, 8, 8],
+      margin: [8, 8, 22, 8],
       filename: 'Laporan-Perizinan-Pupuk-Kujang.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, logging: false },
@@ -349,7 +410,33 @@
     };
 
     if (typeof html2pdf !== 'undefined') {
-      html2pdf().from(el).set(opt).save().then(() => {
+      html2pdf().from(el).set(opt).toPdf().get('pdf').then((pdf) => {
+        const totalPages = pdf.internal.getNumberOfPages();
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(8.5);
+          pdf.setTextColor(15, 23, 42);
+          pdf.text('PT Pupuk Kujang', pageWidth / 2, pageHeight - 14.5, { align: 'center' });
+
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(7);
+          pdf.setTextColor(71, 85, 105);
+          pdf.text(
+            'Jl. Jend A. Yani No 39 Cikampek 41373 Karawang, Jawa Barat, Telp : (0264) 316141, 317007 (Hunting System)',
+            pageWidth / 2,
+            pageHeight - 10.5,
+            { align: 'center' }
+          );
+
+          pdf.setFillColor(0, 132, 68);
+          pdf.rect(8, pageHeight - 7.5, pageWidth - 16, 3.2, 'F');
+        }
+        pdf.save(opt.filename);
+      }).then(() => {
+        if (persistentFooter) persistentFooter.style.display = prevFooterDisplay;
         if (btnDownload) {
           btnDownload.disabled = false;
           btnDownload.innerHTML = originalText;
@@ -358,6 +445,7 @@
           window.showToast('Laporan PDF berhasil diunduh ke perangkat', 'success');
         }
       }).catch(err => {
+        if (persistentFooter) persistentFooter.style.display = prevFooterDisplay;
         console.error('Direct PDF download error:', err);
         if (btnDownload) {
           btnDownload.disabled = false;
@@ -366,6 +454,7 @@
         executePrintExportPdf();
       });
     } else {
+      if (persistentFooter) persistentFooter.style.display = prevFooterDisplay;
       if (btnDownload) {
         btnDownload.disabled = false;
         btnDownload.innerHTML = originalText;

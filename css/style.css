@@ -844,35 +844,51 @@ body.theme-dark .figma-grid-item [style*="background:#fef2f2"] {
 
 /* Status text coloring */
 body.theme-dark .figma-clean-status.status-selesai,
-body.theme-dark [style*="color: #059669"] {
+body.theme-dark [style*="color: #059669"],
+body.theme-dark [style*="color: #047857"] {
   color: #34d399 !important;
 }
+body.theme-dark .figma-clean-status.status-approved {
+  color: #2dd4bf !important;
+}
 body.theme-dark .figma-clean-status.status-selesai-late {
-  color: #fbbf24 !important;
+  color: #eab308 !important;
 }
 body.theme-dark .figma-clean-status.status-outside,
-body.theme-dark [style*="color: #0284c7"] {
+body.theme-dark [style*="color: #0284c7"],
+body.theme-dark [style*="color: #0369a1"] {
   color: #38bdf8 !important;
 }
+body.theme-dark .figma-clean-status.status-waiting-verify {
+  color: #60a5fa !important;
+}
 body.theme-dark .figma-clean-status.status-late,
-body.theme-dark .figma-clean-status.status-rejected,
 body.theme-dark [style*="color: #dc2626"],
 body.theme-dark [style*="color: #b91c1c"] {
   color: #f87171 !important;
+}
+body.theme-dark .figma-clean-status.status-rejected {
+  color: #fca5a5 !important;
 }
 body.theme-dark .figma-clean-status.status-pending,
 body.theme-dark [style*="color: #d97706"],
 body.theme-dark [style*="color: #b45309"] {
   color: #fbbf24 !important;
 }
+body.theme-dark .figma-clean-status.status-waiting-proof {
+  color: #fb923c !important;
+}
 body.theme-dark .figma-clean-status.status-emergency,
-body.theme-dark [style*="color: #be123c"] {
-  color: #ef4444 !important;
+body.theme-dark [style*="color: #be123c"],
+body.theme-dark [style*="color: #9f1239"] {
+  color: #fb7185 !important;
   font-weight: 800;
 }
-body.theme-dark .figma-clean-status.status-expired,
-body.theme-dark .figma-clean-status.status-cancelled {
+body.theme-dark .figma-clean-status.status-expired {
   color: #94a3b8 !important;
+}
+body.theme-dark .figma-clean-status.status-cancelled {
+  color: #a8a29e !important;
 }
 
 /* Action Buttons & Footers in Cards (Gambar 1 & Gambar 2) */
@@ -4807,6 +4823,11 @@ body.theme-dark .detail-swipe-hint {
 }
 
 .form-input:focus,
+.form-textarea {
+  overflow-y: hidden;
+  resize: none;
+}
+
 .form-textarea:focus,
 .form-select:focus {
   outline: none;
@@ -5600,6 +5621,11 @@ body.theme-dark .detail-swipe-hint {
   border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-kpi-label {
@@ -11089,8 +11115,18 @@ body.theme-dark .figma-select-sm {
 body.theme-dark .form-input:focus,
 .theme-dark .form-select:focus,
 body.theme-dark .form-select:focus,
-.theme-dark .form-textarea:focus,
-body.theme-dark .form-textarea:focus,
+.theme-dark .form-textarea {
+  overflow-y: hidden;
+  resize: none;
+}
+
+.form-textarea:focus,
+body.theme-dark .form-textarea {
+  overflow-y: hidden;
+  resize: none;
+}
+
+.form-textarea:focus,
 .theme-dark .searchable-dropdown-input:focus,
 body.theme-dark .searchable-dropdown-input:focus {
   border-color: #10b981 !important;
@@ -12034,27 +12070,27 @@ table td .action-pills-row {
   justify-content: flex-start !important;
 }
 
-/* FIGMA CLEAN TEXT STATUS BADGE (Sesuai Gambar 1 & Gambar 4) */
+/* FIGMA SOFT PILL STATUS BADGE (Konsisten di Kartu, List, dan Tabel) */
 .figma-clean-status {
   font-family: var(--font-main, 'Plus Jakarta Sans', sans-serif);
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.725rem;
   letter-spacing: -0.01em;
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
+  border-radius: 9999px;
+  padding: 3px 10px;
   line-height: 1.3;
 }
 
-/* Single line ellipsis truncation for status in table lists (Sesuai Gambar 4) */
+/* Single line ellipsis truncation for status in table lists (Rata kiri) */
 .figma-table td .figma-clean-status,
 .figma-table td span.figma-clean-status,
 table td .figma-clean-status {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 140px !important;
-  display: inline-block !important;
+  max-width: 175px !important;
+  display: inline-flex !important;
+  align-items: center !important;
   vertical-align: middle !important;
 }
 
@@ -14929,27 +14965,40 @@ body.theme-dark #modalExportPdfPreview .modal-footer {
     margin: 0 auto 3px auto !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
-    border: 1.2px dashed #008444 !important;
+    border: 1.2px solid #008444 !important;
     text-align: center !important;
   }
 
+  body.printing-official-pdf #pdfExportSignatureQr img,
+  body.printing-official-pdf #pdfExportSignatureQr svg,
   body.printing-official-pdf #pdfExportSignatureQr canvas {
-    display: none !important;
-  }
-
-  body.printing-official-pdf #pdfExportSignatureQr img {
-    width: 56px !important;
-    height: 56px !important;
+    width: 64px !important;
+    height: 64px !important;
     display: block !important;
     margin: 0 auto !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
   }
 
+  body.printing-official-pdf .pdf-persistent-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    padding-top: 4px !important;
+    z-index: 9999 !important;
+  }
+
+  body.printing-official-pdf #printableOfficialPdfDocument {
+    padding-bottom: 56px !important;
+  }
+
   body.printing-official-pdf .pdf-footer-section {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-top: 6px !important;
+    margin-top: 2px !important;
     margin-bottom: 2px !important;
     font-size: 7pt !important;
     line-height: 1.25 !important;
