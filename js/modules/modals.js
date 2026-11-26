@@ -92,33 +92,6 @@ function escapeHtml(str) {
 }
 window.escapeHtml = escapeHtml;
 
-function countWords(str) {
-  if (!str) return 0;
-  return String(str).trim().split(/\s+/).filter(Boolean).length;
-}
-window.countWords = countWords;
-
-function handleReasonWordCount(el, counterId) {
-  if (!el) return;
-  const maxWords = 500;
-  const raw = el.value || '';
-  let words = raw.trim().split(/\s+/).filter(Boolean);
-  if (words.length > maxWords) {
-    words = words.slice(0, maxWords);
-    el.value = words.join(' ');
-    if (typeof window.showToast === 'function') {
-      window.showToast('Alasan keperluan izin dibatasi maksimal 500 kata.', 'warning');
-    }
-  }
-  const countEl = document.getElementById(counterId);
-  if (countEl) {
-    const cur = words.length;
-    countEl.textContent = `${cur} / ${maxWords} kata`;
-    countEl.style.color = cur >= maxWords ? '#dc2626' : '#64748b';
-  }
-}
-window.handleReasonWordCount = handleReasonWordCount;
-
 // OPTION C: INTERCEPT NEW REQUEST IF EMPLOYEE ALREADY HAS AN ACTIVE TICKET
 function handleOpenNewRequest() {
   const activeTicket = typeof window.getActiveTicket === 'function' ? window.getActiveTicket() : null;
@@ -1994,8 +1967,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
           </div>
           <div>
             ${initiatorCancelled
-              ? '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #fecaca;">Batal Ikut Serta</span>'
-              : '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">Aktif Ikut</span>'}
+          ? '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #fecaca;">Batal Ikut Serta</span>'
+          : '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">Aktif Ikut</span>'}
           </div>
         </div>
       `;
@@ -2017,8 +1990,8 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
             </div>
             <div>
               ${isBatal
-                ? '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #fecaca;">Batal Ikut Serta</span>'
-                : '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">Aktif Ikut</span>'}
+            ? '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #fecaca;">Batal Ikut Serta</span>'
+            : '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">Aktif Ikut</span>'}
             </div>
           </div>
         `;
@@ -2914,7 +2887,7 @@ function openTicketDetail(ticketId, defaultTab = 'info', options = {}) {
   if (btnDetailScanIn) {
     const isOutsideToReturn = (ticket.status === 'Sedang di Luar' || ticket.status === 'Terlambat') && !ticket.scanInTime;
     const isKaryawan = (window.currentActor === 'karyawan');
-    
+
     // Hapus button tap in saat ada button "💳 Simulasi Tap In Gerbang" khusus jika dinas kantor pakai Tim.
     // Jika perorangan / biasa, tetap tampilkan Tap In biasa.
     if (isOutsideToReturn && isKaryawan && !isGroupDinasActiveForTapIn) {
@@ -3311,7 +3284,7 @@ function confirmCancelTicket() {
           cancelledBy: `${getActiveEmployeeActorInfo().name} (Karyawan)`
         })
       }).catch(e => console.warn('[Modals] Gagal sync pembatalan ke MySQL:', e));
-    } catch (e) {}
+    } catch (e) { }
 
     const modalCancelRequest = document.getElementById('modalCancelRequest');
     if (modalCancelRequest) modalCancelRequest.classList.remove('open');
@@ -3736,11 +3709,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!destination || !reason) {
         if (typeof window.showToast === 'function') window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'warning');
-        return;
-      }
-      if (countWords(reason) > 500) {
-        if (typeof window.showToast === 'function') window.showToast('Alasan keperluan izin dibatasi maksimal 500 kata!', 'warning');
-        if (inputReason) inputReason.focus();
         return;
       }
       if (!plannedExit) {
@@ -4459,13 +4427,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.showToast === 'function') {
           window.showToast('Harap lengkapi lokasi tujuan dan alasan keperluan izin!', 'danger');
         }
-        return;
-      }
-      if (countWords(reason) > 500) {
-        if (typeof window.showToast === 'function') {
-          window.showToast('Alasan kedaruratan dibatasi maksimal 500 kata!', 'danger');
-        }
-        if (emergReason) emergReason.focus();
         return;
       }
 
@@ -5473,10 +5434,10 @@ window.closeDeleteConfirmModal = function () {
 };
 
 window.openNoticeModal = function (options) {
-  const { 
-    title = 'Pemberitahuan', 
-    message = '', 
-    buttonText = 'Batal', 
+  const {
+    title = 'Pemberitahuan',
+    message = '',
+    buttonText = 'Batal',
     onConfirm = null,
     actionText = null,
     onAction = null

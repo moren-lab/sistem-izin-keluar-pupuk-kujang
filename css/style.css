@@ -12103,6 +12103,21 @@ table td .figma-clean-status {
   align-items: center !important;
 }
 
+.sec-full-gate-bar .gate-badge-pill {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 6px 12px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  background: var(--bg-subtle, #f8fafc) !important;
+  border: 1px solid var(--border-color, #e2e8f0) !important;
+  color: var(--text-secondary, #475569) !important;
+}
+
 .figma-card-footer .action-pills-row .btn-pill-detail,
 .card-actions-bar .btn-pill-detail {
   flex: 1 1 auto !important;

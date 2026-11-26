@@ -650,8 +650,8 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             </div>
 
-            <!-- Pos Gate Badge -->
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.4rem;">
+            <!-- Pos Gate Badge (Full Width) -->
+            <div class="sec-full-gate-bar" style="display: flex; width: 100%; margin: 0.25rem 0 0.4rem 0;">
               ${gateBadgeHtml}
             </div>
 
@@ -688,10 +688,10 @@ function renderSecurityCards(list, containerElement, isHistoryMode = false) {
               </div>
             ` : ''}
 
-            <!-- Quick Action Buttons for Satpam (Single Symmetrical Row) -->
-            <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap;">
-              <button type="button" class="btn-card-detail-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #ffffff; border: 1.2px solid #cbd5e1; border-radius: 8px; font-size: 0.775rem; font-weight: 700; color: #1e293b; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Detail Pengajuan #${t.id}" aria-label="Detail Pengajuan">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: #64748b;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+            <!-- Quick Action Buttons for Satpam (Single Symmetrical Row matching Approver) -->
+            <div class="card-actions-bar" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--border-color); flex-wrap: nowrap; width: 100%;">
+              <button type="button" class="btn-pill-action btn-pill-detail" onclick="window.openTicketDetail('${t.id}', 'detail')" title="Lihat Detail Pengajuan #${t.id}" aria-label="Detail Pengajuan">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
                 <span>Detail Pengajuan</span>
               </button>
               ${isHistoryMode ? `
