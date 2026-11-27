@@ -176,22 +176,39 @@
     const navEl = document.getElementById('mobileBottomNav');
     if (!navEl) return;
 
-    if (currentMobileRole === 'karyawan' || currentMobileRole === 'karyawan2') {
-      navEl.innerHTML = `
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" onclick="window.mobileSwitchTab('dashboard')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Dashboard</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${(currentMobileTab === 'pengajuan' || currentMobileTab === 'form_pengajuan') ? 'active' : ''}" onclick="window.mobileSwitchTab('pengajuan')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-          <span>Pengajuan</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <span>Riwayat</span>
-        </div>
-      `;
-    } else if (currentMobileRole === 'approver' || currentMobileRole === 'approver2') {
+    const role = (currentMobileRole === 'karyawan2') ? 'karyawan' : (currentMobileRole === 'approver2' ? 'approver' : currentMobileRole);
+    const prevRole = navEl.getAttribute('data-role');
+    const itemsCount = (role === 'karyawan') ? '3' : '4';
+    navEl.setAttribute('data-items', itemsCount);
+    navEl.setAttribute('data-active-tab', currentMobileTab || 'dashboard');
+
+    if (role === 'karyawan') {
+      if (prevRole !== 'karyawan' || !document.getElementById('mBottomNavGlider')) {
+        navEl.setAttribute('data-role', 'karyawan');
+        navEl.innerHTML = `
+          <div class="mobile-bottom-nav-glider" id="mBottomNavGlider"></div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" id="mBNavTabDashboard" onclick="window.mobileSwitchTab('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${(currentMobileTab === 'pengajuan' || currentMobileTab === 'form_pengajuan') ? 'active' : ''}" id="mBNavTabPengajuan" onclick="window.mobileSwitchTab('pengajuan')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Pengajuan</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" id="mBNavTabRiwayat" onclick="window.mobileSwitchTab('riwayat')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Riwayat</span>
+          </div>
+        `;
+      } else {
+        const tabDash = document.getElementById('mBNavTabDashboard');
+        const tabPeng = document.getElementById('mBNavTabPengajuan');
+        const tabRiw = document.getElementById('mBNavTabRiwayat');
+        if (tabDash) tabDash.classList.toggle('active', currentMobileTab === 'dashboard');
+        if (tabPeng) tabPeng.classList.toggle('active', currentMobileTab === 'pengajuan' || currentMobileTab === 'form_pengajuan');
+        if (tabRiw) tabRiw.classList.toggle('active', currentMobileTab === 'riwayat');
+      }
+    } else if (role === 'approver') {
       const tickets = window.ticketsList || [];
       const pendingCount = tickets.filter(t => {
         const isPending = (t.status === 'Menunggu Persetujuan' || t.status === 'Menunggu Otorisasi Darurat');
@@ -204,44 +221,75 @@
         }
       }).length;
 
-      navEl.innerHTML = `
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" onclick="window.mobileSwitchTab('dashboard')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Dashboard</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'antrean' ? 'active' : ''}" onclick="window.mobileSwitchTab('antrean')" style="position:relative;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          <span>Antrean</span>
-          ${pendingCount > 0 ? `<span class="mobile-nav-badge">${pendingCount}</span>` : ''}
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'pelacakan' || currentMobileTab === 'tim' ? 'active' : ''}" onclick="window.mobileSwitchTab('tim')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-          <span>Pelacakan</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span>Riwayat</span>
-        </div>
-      `;
-    } else if (currentMobileRole === 'security') {
-      navEl.innerHTML = `
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" onclick="window.mobileSwitchTab('dashboard')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Dashboard</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'scanner' ? 'active' : ''}" onclick="window.mobileSwitchTab('scanner')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line><line x1="12" y1="8" x2="12" y2="16"></line></svg>
-          <span>Pindai</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'pelacakan' ? 'active' : ''}" onclick="window.mobileSwitchTab('pelacakan')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <span>Pelacakan</span>
-        </div>
-        <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" onclick="window.mobileSwitchTab('riwayat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <span>Riwayat</span>
-        </div>
-      `;
+      if (prevRole !== 'approver' || !document.getElementById('mBottomNavGlider')) {
+        navEl.setAttribute('data-role', 'approver');
+        navEl.innerHTML = `
+          <div class="mobile-bottom-nav-glider" id="mBottomNavGlider"></div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" id="mBNavTabDashboard" onclick="window.mobileSwitchTab('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'antrean' ? 'active' : ''}" id="mBNavTabAntrean" onclick="window.mobileSwitchTab('antrean')" style="position:relative;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span>Antrean</span>
+            <span id="mBottomNavBadgePending" class="mobile-nav-badge" style="${pendingCount > 0 ? '' : 'display:none;'}">${pendingCount}</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${(currentMobileTab === 'pelacakan' || currentMobileTab === 'tim') ? 'active' : ''}" id="mBNavTabTim" onclick="window.mobileSwitchTab('tim')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span>Pelacakan</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" id="mBNavTabRiwayat" onclick="window.mobileSwitchTab('riwayat')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Riwayat</span>
+          </div>
+        `;
+      } else {
+        const tabDash = document.getElementById('mBNavTabDashboard');
+        const tabAnt = document.getElementById('mBNavTabAntrean');
+        const tabTim = document.getElementById('mBNavTabTim');
+        const tabRiw = document.getElementById('mBNavTabRiwayat');
+        const badge = document.getElementById('mBottomNavBadgePending');
+        if (tabDash) tabDash.classList.toggle('active', currentMobileTab === 'dashboard');
+        if (tabAnt) tabAnt.classList.toggle('active', currentMobileTab === 'antrean');
+        if (tabTim) tabTim.classList.toggle('active', currentMobileTab === 'pelacakan' || currentMobileTab === 'tim');
+        if (tabRiw) tabRiw.classList.toggle('active', currentMobileTab === 'riwayat');
+        if (badge) {
+          badge.textContent = pendingCount;
+          badge.style.display = pendingCount > 0 ? '' : 'none';
+        }
+      }
+    } else if (role === 'security') {
+      if (prevRole !== 'security' || !document.getElementById('mBottomNavGlider')) {
+        navEl.setAttribute('data-role', 'security');
+        navEl.innerHTML = `
+          <div class="mobile-bottom-nav-glider" id="mBottomNavGlider"></div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'dashboard' ? 'active' : ''}" id="mBNavTabDashboard" onclick="window.mobileSwitchTab('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'scanner' ? 'active' : ''}" id="mBNavTabScanner" onclick="window.mobileSwitchTab('scanner')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line><line x1="12" y1="8" x2="12" y2="16"></line></svg>
+            <span>Pindai</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'pelacakan' ? 'active' : ''}" id="mBNavTabPelacakan" onclick="window.mobileSwitchTab('pelacakan')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Pelacakan</span>
+          </div>
+          <div class="mobile-bottom-nav-item ${currentMobileTab === 'riwayat' ? 'active' : ''}" id="mBNavTabRiwayat" onclick="window.mobileSwitchTab('riwayat')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Riwayat</span>
+          </div>
+        `;
+      } else {
+        const tabDash = document.getElementById('mBNavTabDashboard');
+        const tabScan = document.getElementById('mBNavTabScanner');
+        const tabPel = document.getElementById('mBNavTabPelacakan');
+        const tabRiw = document.getElementById('mBNavTabRiwayat');
+        if (tabDash) tabDash.classList.toggle('active', currentMobileTab === 'dashboard');
+        if (tabScan) tabScan.classList.toggle('active', currentMobileTab === 'scanner');
+        if (tabPel) tabPel.classList.toggle('active', currentMobileTab === 'pelacakan');
+        if (tabRiw) tabRiw.classList.toggle('active', currentMobileTab === 'riwayat');
+      }
     }
   }
 
@@ -530,6 +578,26 @@
       localStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', tab);
       sessionStorage.setItem('KUJANG_MOBILE_ACTIVE_TAB', tab);
     } catch (e) {}
+
+    // Segera perbarui glider Downbar secara in-place agar animasi slide berjalan halus
+    const navEl = document.getElementById('mobileBottomNav');
+    if (navEl) {
+      navEl.setAttribute('data-active-tab', tab);
+      const items = navEl.querySelectorAll('.mobile-bottom-nav-item');
+      items.forEach(it => {
+        const id = it.id || '';
+        let match = false;
+        if (id === 'mBNavTabDashboard' && tab === 'dashboard') match = true;
+        else if (id === 'mBNavTabPengajuan' && (tab === 'pengajuan' || tab === 'form_pengajuan')) match = true;
+        else if (id === 'mBNavTabAntrean' && tab === 'antrean') match = true;
+        else if (id === 'mBNavTabScanner' && tab === 'scanner') match = true;
+        else if (id === 'mBNavTabTim' && (tab === 'tim' || tab === 'pelacakan')) match = true;
+        else if (id === 'mBNavTabPelacakan' && tab === 'pelacakan') match = true;
+        else if (id === 'mBNavTabRiwayat' && tab === 'riwayat') match = true;
+        it.classList.toggle('active', match);
+      });
+    }
+
     renderActiveView({ scrollToTop: true });
 
     if (subParam) {
@@ -703,8 +771,18 @@
   window.closeMobileRoleSheet = function () {
     const sheet = document.getElementById('mobileRoleSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (sheet) sheet.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
+    if (sheet && sheet.classList.contains('open')) {
+      sheet.classList.add('closing');
+      sheet.classList.remove('open');
+    }
+    if (backdrop && backdrop.classList.contains('open')) {
+      backdrop.classList.add('closing');
+      backdrop.classList.remove('open');
+    }
+    setTimeout(() => {
+      if (sheet) sheet.classList.remove('closing');
+      if (backdrop) backdrop.classList.remove('closing');
+    }, 280);
   };
 
   window.mobileCloseSheet = function () {
@@ -725,12 +803,33 @@
     const sheet = document.getElementById('mobileActionSheet');
     const roleSheet = document.getElementById('mobileRoleSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (sheet) {
+
+    if (sheet && sheet.classList.contains('open')) {
+      sheet.classList.add('closing');
       sheet.classList.remove('open');
-      sheet.classList.remove('modal-center');
     }
-    if (roleSheet) roleSheet.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
+    if (roleSheet && roleSheet.classList.contains('open')) {
+      roleSheet.classList.add('closing');
+      roleSheet.classList.remove('open');
+    }
+    if (backdrop && backdrop.classList.contains('open')) {
+      backdrop.classList.add('closing');
+      backdrop.classList.remove('open');
+    }
+
+    setTimeout(() => {
+      if (sheet) {
+        sheet.classList.remove('closing');
+        sheet.classList.remove('modal-center');
+      }
+      if (roleSheet) {
+        roleSheet.classList.remove('closing');
+      }
+      if (backdrop) {
+        backdrop.classList.remove('closing');
+      }
+    }, 280);
+
     try {
       if (history.state && history.state.mobileDetailOpen) {
         history.back();

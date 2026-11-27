@@ -548,11 +548,12 @@
         </div>
 
         <!-- Segment Tabs (Kamera vs Manual / Barcode) -->
-        <div class="mobile-segment-toggle" style="margin-bottom: 0;">
-          <button type="button" class="mobile-seg-btn ${currentScannerMode === 'camera' ? 'active' : ''}" onclick="window.mobileSwitchScannerMode('camera')">
+        <div class="mobile-segment-toggle" id="mSecScannerSegToggle" data-active="${currentScannerMode === 'camera' ? '1' : '2'}" style="margin-bottom: 0;">
+          <div class="mobile-segment-glider"></div>
+          <button type="button" id="mBtnScannerCamera" class="mobile-seg-btn ${currentScannerMode === 'camera' ? 'active' : ''}" onclick="window.mobileSwitchScannerMode('camera')">
             Kamera
           </button>
-          <button type="button" class="mobile-seg-btn ${currentScannerMode === 'manual' ? 'active' : ''}" onclick="window.mobileSwitchScannerMode('manual')">
+          <button type="button" id="mBtnScannerManual" class="mobile-seg-btn ${currentScannerMode === 'manual' ? 'active' : ''}" onclick="window.mobileSwitchScannerMode('manual')">
             Manual / Barcode
           </button>
         </div>
@@ -647,7 +648,7 @@
   // -------------------------------------------------------------------
   // 4. PELACAKAN KARYAWAN (Hal 4 & 5)
   // -------------------------------------------------------------------
-  function renderSecurityPelacakan(container) {
+  function getSecurityPelacakanData(targetFilter = currentPelacakanFilter) {
     const tickets = getTickets();
 
     const outsideTickets = tickets.filter(t =>
@@ -657,7 +658,7 @@
     const readyExitTickets = tickets.filter(t => t.status === 'Disetujui');
     const lateTickets = outsideTickets.filter(t => isTicketLate(t));
 
-    let activeList = (currentPelacakanFilter === 'outside') ? outsideTickets : readyExitTickets;
+    let activeList = (targetFilter === 'outside') ? outsideTickets : readyExitTickets;
 
     if (pelacakanSearchQuery) {
       const matcher = typeof window.matchSearchTokens === 'function' ? window.matchSearchTokens : (typeof matchSearchTokens === 'function' ? matchSearchTokens : null);
@@ -745,9 +746,13 @@
       `;
     }).join('');
 
-    container.innerHTML = `
-     
+    return { outsideTickets, readyExitTickets, lateTickets, activeList, listHtml };
+  }
 
+  function renderSecurityPelacakan(container) {
+    const { outsideTickets, readyExitTickets, lateTickets, activeList, listHtml } = getSecurityPelacakanData(currentPelacakanFilter);
+
+    container.innerHTML = `
       <!-- 2 Summary Cards -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
         <div class="mobile-card" style="margin: 0; padding: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -764,18 +769,19 @@
       </div>
 
       <!-- Segment Tabs (Sedang di Luar · 2 | Izin Siap Keluar · 1) -->
-      <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
-        <button type="button" class="mobile-seg-btn ${currentPelacakanFilter === 'outside' ? 'active' : ''}" onclick="window.mobileSwitchPelacakanFilter('outside')">
+      <div class="mobile-segment-toggle" id="mSecPelacakanSegToggle" data-active="${currentPelacakanFilter === 'outside' ? '1' : '2'}" style="margin-bottom: 12px;">
+        <div class="mobile-segment-glider"></div>
+        <button type="button" id="mBtnSecPelacakanOutside" class="mobile-seg-btn ${currentPelacakanFilter === 'outside' ? 'active' : ''}" onclick="window.mobileSwitchPelacakanFilter('outside')">
           Sedang di Luar · ${outsideTickets.length}
         </button>
-        <button type="button" class="mobile-seg-btn ${currentPelacakanFilter === 'ready' ? 'active' : ''}" onclick="window.mobileSwitchPelacakanFilter('ready')">
+        <button type="button" id="mBtnSecPelacakanReady" class="mobile-seg-btn ${currentPelacakanFilter === 'ready' ? 'active' : ''}" onclick="window.mobileSwitchPelacakanFilter('ready')">
           Izin Siap Keluar · ${readyExitTickets.length}
         </button>
       </div>
 
       <!-- Result Bar & Filter Button -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
+        <span id="mSecPelacakanCountText" style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
           ${activeList.length} karyawan (${currentPelacakanFilter === 'outside' ? 'Di Luar Area' : 'Siap Keluar'})
         </span>
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -817,7 +823,9 @@
       </div>
 
       <!-- Tickets List -->
-      ${listHtml || `<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada karyawan pada status ini.</div>`}
+      <div id="mSecPelacakanItemsList">
+        ${listHtml || `<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada karyawan pada status ini.</div>`}
+      </div>
     `;
   }
 
@@ -1332,7 +1340,8 @@
 
       <div class="mobile-sheet-body" style="padding-top: 6px; padding-bottom: 24px;">
         <!-- Segment Toggle: Info vs Aktivitas -->
-        <div class="mobile-segment-toggle" style="margin-top: 4px; margin-bottom: 12px;">
+        <div class="mobile-segment-toggle" id="mSecSegToggleDetail" data-active="1" style="margin-top: 4px; margin-bottom: 12px;">
+          <div class="mobile-segment-glider"></div>
           <button type="button" class="mobile-seg-btn active" id="mBtnSecDetailInfo" onclick="window.mobileToggleSecurityDetailTab('info')">Informasi Tiket</button>
           <button type="button" class="mobile-seg-btn" id="mBtnSecDetailJejak" onclick="window.mobileToggleSecurityDetailTab('jejak')">Riwayat Aktivitas</button>
         </div>
@@ -2247,6 +2256,21 @@
     if (isMobileCameraActive && mode !== 'camera') {
       window.mobileStopCameraScanner();
     }
+    const toggle = document.getElementById('mSecScannerSegToggle');
+    const btnCam = document.getElementById('mBtnScannerCamera');
+    const btnMan = document.getElementById('mBtnScannerManual');
+    const secCam = document.getElementById('mScannerSecCamera');
+    const secMan = document.getElementById('mScannerSecManual');
+
+    if (toggle && secCam && secMan) {
+      toggle.setAttribute('data-active', mode === 'camera' ? '1' : '2');
+      if (btnCam) btnCam.classList.toggle('active', mode === 'camera');
+      if (btnMan) btnMan.classList.toggle('active', mode === 'manual');
+      secCam.style.display = mode === 'camera' ? 'block' : 'none';
+      secMan.style.display = mode === 'manual' ? 'block' : 'none';
+      return;
+    }
+
     const container = customContainer || document.getElementById('mobileMainContent');
     if (container) {
       renderSecurityScanner(container);
@@ -2267,6 +2291,29 @@
 
   window.mobileSwitchPelacakanFilter = function (filter, customContainer) {
     currentPelacakanFilter = filter;
+    const toggle = document.getElementById('mSecPelacakanSegToggle');
+    const btnOut = document.getElementById('mBtnSecPelacakanOutside');
+    const btnReady = document.getElementById('mBtnSecPelacakanReady');
+    const countText = document.getElementById('mSecPelacakanCountText');
+    const itemsList = document.getElementById('mSecPelacakanItemsList');
+    const select = document.getElementById('mPelacakanFilterSelect');
+
+    if (toggle && btnOut && btnReady && itemsList) {
+      toggle.setAttribute('data-active', filter === 'outside' ? '1' : '2');
+      btnOut.classList.toggle('active', filter === 'outside');
+      btnReady.classList.toggle('active', filter === 'ready');
+      if (select) select.value = filter;
+
+      const data = getSecurityPelacakanData(filter);
+      btnOut.innerText = `Sedang di Luar · ${data.outsideTickets.length}`;
+      btnReady.innerText = `Izin Siap Keluar · ${data.readyExitTickets.length}`;
+      if (countText) {
+        countText.innerText = `${data.activeList.length} karyawan (${filter === 'outside' ? 'Di Luar Area' : 'Siap Keluar'})`;
+      }
+      itemsList.innerHTML = data.listHtml || `<div class="mobile-card" style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 24px;">Tidak ada karyawan pada status ini.</div>`;
+      return;
+    }
+
     const container = customContainer || document.getElementById('mobileMainContent');
     if (container) {
       renderSecurityPelacakan(container);
@@ -2319,6 +2366,7 @@
     const secJejak = document.getElementById('mSecDetailSecJejak');
     const btnInfo = document.getElementById('mBtnSecDetailInfo');
     const btnJejak = document.getElementById('mBtnSecDetailJejak');
+    const toggle = document.getElementById('mSecSegToggleDetail') || (btnInfo ? btnInfo.closest('.mobile-segment-toggle') : null);
     if (!secInfo || !secJejak) return;
 
     if (tab === 'info') {
@@ -2326,11 +2374,13 @@
       secJejak.style.display = 'none';
       if (btnInfo) btnInfo.classList.add('active');
       if (btnJejak) btnJejak.classList.remove('active');
+      if (toggle) toggle.setAttribute('data-active', '1');
     } else {
       secInfo.style.display = 'none';
       secJejak.style.display = 'block';
       if (btnInfo) btnInfo.classList.remove('active');
       if (btnJejak) btnJejak.classList.add('active');
+      if (toggle) toggle.setAttribute('data-active', '2');
     }
   };
 

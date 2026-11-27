@@ -798,14 +798,15 @@
       </section>
 
       <!-- Switcher Segment: Ringkasan perizinan | Volume pengajuan tim (Di Atas Dashboard) -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <button type="button" id="mAtasanBtnSegRingkasan" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${atasanDashboardSegment === 'ringkasan' ? '#d4af37' : '#cbd5e1'}; background: ${atasanDashboardSegment === 'ringkasan' ? '#12161f' : '#ffffff'}; color: ${atasanDashboardSegment === 'ringkasan' ? '#fef3c7' : '#475569'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('ringkasan')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Ringkasan perizinan</span>
+      <div class="mobile-segment-toggle" id="mAtasanDashboardSegToggle" data-active="${atasanDashboardSegment === 'ringkasan' ? '1' : '2'}" style="margin-bottom: 12px;">
+        <div class="mobile-segment-glider"></div>
+        <button type="button" id="mAtasanBtnSegRingkasan" class="mobile-seg-btn ${atasanDashboardSegment === 'ringkasan' ? 'active' : ''}" onclick="window.mobileSwitchAtasanDashboardSegment('ringkasan')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 5px; vertical-align: middle;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Ringkasan perizinan
         </button>
-        <button type="button" id="mAtasanBtnSegVolume" style="height: 40px; border-radius: 10px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid ${atasanDashboardSegment === 'volume' ? '#d4af37' : '#cbd5e1'}; background: ${atasanDashboardSegment === 'volume' ? '#12161f' : '#ffffff'}; color: ${atasanDashboardSegment === 'volume' ? '#fef3c7' : '#475569'}; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.mobileSwitchAtasanDashboardSegment('volume')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          <span>Volume pengajuan tim</span>
+        <button type="button" id="mAtasanBtnSegVolume" class="mobile-seg-btn ${atasanDashboardSegment === 'volume' ? 'active' : ''}" onclick="window.mobileSwitchAtasanDashboardSegment('volume')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 5px; vertical-align: middle;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Volume pengajuan tim
         </button>
       </div>
 
@@ -949,7 +950,7 @@
   // -------------------------------------------------------------------
   // 3. ANTREAN PERSETUJUAN (Figma PDF Page 2)
   // -------------------------------------------------------------------
-  function renderAtasanAntrean(container) {
+  function getAtasanAntreanData(targetSegment = currentAntreanSegment) {
     const approver = getActiveApprover();
     const tickets = getTeamTickets();
 
@@ -970,7 +971,7 @@
     const pendingNew = [...pendingEmergTickets, ...pendingRegular];
     const pendingExt = tickets.filter(t => (t.hasExtensionPending || (t.pendingExtension && t.pendingExtension.status === 'Menunggu Persetujuan')) && t.status !== 'Selesai' && !t.scanInTime && t.status !== 'Ditolak' && t.status !== 'Dibatalkan' && t.status !== 'Kedaluwarsa' && t.status !== 'Menunggu Verifikasi Atasan');
 
-    let activeList = currentAntreanSegment === 'baru' ? pendingNew : pendingExt;
+    let activeList = targetSegment === 'baru' ? pendingNew : pendingExt;
 
     // Apply Filter
     if (atasanSearchQuery) {
@@ -1240,22 +1241,27 @@
       }
     }
 
-    container.innerHTML = `
-     
+    return { pendingNew, pendingExt, activeList, itemsHtml };
+  }
 
+  function renderAtasanAntrean(container) {
+    const { pendingNew, pendingExt, activeList, itemsHtml } = getAtasanAntreanData(currentAntreanSegment);
+
+    container.innerHTML = `
       <!-- Segment Tabs (Izin Baru | Perpanjangan) -->
-      <div class="mobile-segment-toggle">
-        <button type="button" class="mobile-seg-btn ${currentAntreanSegment === 'baru' ? 'active' : ''}" onclick="window.mobileSwitchAntreanSegment('baru')">
+      <div class="mobile-segment-toggle" id="mAtasanAntreanSegToggle" data-active="${currentAntreanSegment === 'baru' ? '1' : '2'}">
+        <div class="mobile-segment-glider"></div>
+        <button type="button" id="mBtnAtasanAntreanBaru" class="mobile-seg-btn ${currentAntreanSegment === 'baru' ? 'active' : ''}" onclick="window.mobileSwitchAntreanSegment('baru')">
           Izin Baru (${pendingNew.length})
         </button>
-        <button type="button" class="mobile-seg-btn ${currentAntreanSegment === 'perpanjangan' ? 'active' : ''}" onclick="window.mobileSwitchAntreanSegment('perpanjangan')">
+        <button type="button" id="mBtnAtasanAntreanPerpanjangan" class="mobile-seg-btn ${currentAntreanSegment === 'perpanjangan' ? 'active' : ''}" onclick="window.mobileSwitchAntreanSegment('perpanjangan')">
           Perpanjangan (${pendingExt.length})
         </button>
       </div>
 
       <!-- Result Bar & Filter Button -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
+        <span id="mAtasanAntreanCountLabel" style="font-size: 0.725rem; color: #64748b; font-weight: 700;">
           ${activeList.length} ${currentAntreanSegment === 'baru' ? 'izin baru' : 'perpanjangan'} menunggu persetujuan
         </span>
         <button type="button" class="mobile-filter-toggle-btn ${isAntreanFilterOpen ? 'active' : ''}" onclick="window.mobileToggleAntreanFilter()">
@@ -1300,10 +1306,11 @@
       </div>
 
       <!-- Ticket Items List -->
-      ${itemsHtml}
+      <div id="mAtasanAntreanItemsList">
+        ${itemsHtml}
+      </div>
     `;
   }
-
 
   function getBadgeClass(status) {
     if (!status) return 'menunggu';
@@ -1427,17 +1434,20 @@
     const btnJejak = document.getElementById('mAtasanDetailBtnJejak');
     const secInfo = document.getElementById('mAtasanDetailSecInfo');
     const secJejak = document.getElementById('mAtasanDetailSecJejak');
+    const toggle = btnInfo ? btnInfo.closest('.mobile-segment-toggle') : null;
     if (btnInfo && btnJejak && secInfo && secJejak) {
       if (tab === 'info') {
         btnInfo.classList.add('active');
         btnJejak.classList.remove('active');
         secInfo.style.display = 'block';
         secJejak.style.display = 'none';
+        if (toggle) toggle.setAttribute('data-active', '1');
       } else {
         btnInfo.classList.remove('active');
         btnJejak.classList.add('active');
         secInfo.style.display = 'none';
         secJejak.style.display = 'block';
+        if (toggle) toggle.setAttribute('data-active', '2');
       }
     }
   };
@@ -1495,7 +1505,8 @@
       </div>
 
       <!-- Segment Toggle Identik Karyawan -->
-      <div class="mobile-segment-toggle" style="margin-bottom: 12px;">
+      <div class="mobile-segment-toggle" data-active="${currentAtasanDetailTab === 'info' ? '1' : '2'}" style="margin-bottom: 12px;">
+        <div class="mobile-segment-glider"></div>
         <button type="button" class="mobile-seg-btn ${currentAtasanDetailTab === 'info' ? 'active' : ''}" id="mAtasanDetailBtnInfo" onclick="window.mobileToggleAtasanDetailTab('info')">Informasi Tiket</button>
         <button type="button" class="mobile-seg-btn ${currentAtasanDetailTab === 'jejak' ? 'active' : ''}" id="mAtasanDetailBtnJejak" onclick="window.mobileToggleAtasanDetailTab('jejak')">Riwayat Aktivitas</button>
       </div>
@@ -2578,54 +2589,16 @@
 
   // Helper actions
   window.mobileSwitchAtasanDashboardSegment = function (segment) {
-
     atasanDashboardSegment = segment;
-
+    const toggle = document.getElementById('mAtasanDashboardSegToggle');
     const btnRingkasan = document.getElementById('mAtasanBtnSegRingkasan');
-
     const btnVolume = document.getElementById('mAtasanBtnSegVolume');
-
     const secRingkasan = document.getElementById('mAtasanSecRingkasan');
-
     const secVolume = document.getElementById('mAtasanSecVolume');
 
-
-
-    if (btnRingkasan && btnVolume) {
-
-      if (segment === 'ringkasan') {
-
-        btnRingkasan.style.background = '#12161f';
-
-        btnRingkasan.style.color = '#fef3c7';
-
-        btnRingkasan.style.borderColor = '#d4af37';
-
-        btnVolume.style.background = '#ffffff';
-
-        btnVolume.style.color = '#475569';
-
-        btnVolume.style.borderColor = '#cbd5e1';
-
-      } else {
-
-        btnRingkasan.style.background = '#ffffff';
-
-        btnRingkasan.style.color = '#475569';
-
-        btnRingkasan.style.borderColor = '#cbd5e1';
-
-        btnVolume.style.background = '#12161f';
-
-        btnVolume.style.color = '#fef3c7';
-
-        btnVolume.style.borderColor = '#d4af37';
-
-      }
-
-    }
-
-
+    if (toggle) toggle.setAttribute('data-active', segment === 'ringkasan' ? '1' : '2');
+    if (btnRingkasan) btnRingkasan.classList.toggle('active', segment === 'ringkasan');
+    if (btnVolume) btnVolume.classList.toggle('active', segment === 'volume');
 
     if (secRingkasan) secRingkasan.style.display = segment === 'ringkasan' ? 'block' : 'none';
     if (secVolume) {
@@ -2676,7 +2649,8 @@
 
       <div class="mobile-sheet-body" style="padding: 6px 18px 24px 18px;">
         <!-- Segment Toggle Identik Karyawan -->
-        <div class="mobile-segment-toggle" style="margin-top: 4px; margin-bottom: 12px;">
+        <div class="mobile-segment-toggle" data-active="${currentAtasanDetailTab === 'info' ? '1' : '2'}" style="margin-top: 4px; margin-bottom: 12px;">
+          <div class="mobile-segment-glider"></div>
           <button type="button" class="mobile-seg-btn ${currentAtasanDetailTab === 'info' ? 'active' : ''}" id="mAtasanDetailBtnInfo" onclick="window.mobileToggleAtasanDetailTab('info')">Informasi Tiket</button>
           <button type="button" class="mobile-seg-btn ${currentAtasanDetailTab === 'jejak' ? 'active' : ''}" id="mAtasanDetailBtnJejak" onclick="window.mobileToggleAtasanDetailTab('jejak')">Riwayat Aktivitas</button>
         </div>
@@ -2963,6 +2937,27 @@
 
   window.mobileSwitchAntreanSegment = function (seg) {
     currentAntreanSegment = seg;
+    const toggle = document.getElementById('mAtasanAntreanSegToggle');
+    const btnBaru = document.getElementById('mBtnAtasanAntreanBaru');
+    const btnExt = document.getElementById('mBtnAtasanAntreanPerpanjangan');
+    const countLabel = document.getElementById('mAtasanAntreanCountLabel');
+    const itemsList = document.getElementById('mAtasanAntreanItemsList');
+
+    if (toggle && btnBaru && btnExt && itemsList) {
+      toggle.setAttribute('data-active', seg === 'baru' ? '1' : '2');
+      btnBaru.classList.toggle('active', seg === 'baru');
+      btnExt.classList.toggle('active', seg === 'perpanjangan');
+
+      const data = getAtasanAntreanData(seg);
+      btnBaru.innerText = `Izin Baru (${data.pendingNew.length})`;
+      btnExt.innerText = `Perpanjangan (${data.pendingExt.length})`;
+      if (countLabel) {
+        countLabel.innerText = `${data.activeList.length} ${seg === 'baru' ? 'izin baru' : 'perpanjangan'} menunggu persetujuan`;
+      }
+      itemsList.innerHTML = data.itemsHtml;
+      return;
+    }
+
     renderMobileAtasan(null, 'antrean');
   };
 

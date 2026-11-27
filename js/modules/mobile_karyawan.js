@@ -429,12 +429,13 @@
         `}
       </section>
 
-      <!-- Switcher Segment: Ringkasan Perizinan | Total Pengajuan Izin (A2: Hijau Teks Putih) -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <button type="button" id="mBtnSegRingkasan" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #059669; background: ${currentSegment === 'ringkasan' ? '#059669' : '#ffffff'}; color: ${currentSegment === 'ringkasan' ? '#ffffff' : '#059669'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('ringkasan')">
+      <!-- Switcher Segment: Ringkasan Perizinan | Total Pengajuan Izin -->
+      <div class="mobile-segment-toggle" id="mSegToggleStats" data-active="${currentSegment === 'ringkasan' ? '1' : '2'}" style="margin-bottom: 12px;">
+        <div class="mobile-segment-glider"></div>
+        <button type="button" class="mobile-seg-btn ${currentSegment === 'ringkasan' ? 'active' : ''}" id="mBtnSegRingkasan" onclick="window.mobileSwitchSegment('ringkasan')">
           Ringkasan Perizinan
         </button>
-        <button type="button" id="mBtnSegDonut" style="height: 38px; border-radius: 8px; font-weight: 700; font-size: 0.775rem; border: 1.5px solid #059669; background: ${currentSegment === 'donut' ? '#059669' : '#ffffff'}; color: ${currentSegment === 'donut' ? '#ffffff' : '#059669'}; cursor: pointer; transition: all 0.2s;" onclick="window.mobileSwitchSegment('donut')">
+        <button type="button" class="mobile-seg-btn ${currentSegment === 'donut' ? 'active' : ''}" id="mBtnSegDonut" onclick="window.mobileSwitchSegment('donut')">
           Total Pengajuan Izin
         </button>
       </div>
@@ -4094,7 +4095,8 @@
 
       <div class="mobile-sheet-body">
         <!-- 2 Pilihan Metode Otorisasi Darurat: App Atasan & Scan Wajah -->
-        <div style="display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 14px;">
+        <div class="mobile-segment-toggle" id="mSegToggleEmg" data-active="1" style="margin-bottom: 14px;">
+          <div class="mobile-segment-glider"></div>
           <button type="button" id="mTabBtnEmgApp" class="mobile-seg-btn active" style="flex:1; padding: 7px 4px; font-size: 0.725rem; font-weight: 700;" onclick="window.mobileSwitchEmgTab('app')">
             App Atasan (1-Klik)
           </button>
@@ -4141,9 +4143,11 @@
     const btnFace = document.getElementById('mTabBtnEmgFace');
     const paneApp = document.getElementById('mPaneEmgApp');
     const paneFace = document.getElementById('mPaneEmgFace');
+    const toggle = document.getElementById('mSegToggleEmg') || (btnApp ? btnApp.closest('.mobile-segment-toggle') : null);
 
     if (btnApp) btnApp.classList.toggle('active', tab === 'app');
     if (btnFace) btnFace.classList.toggle('active', tab === 'facescan');
+    if (toggle) toggle.setAttribute('data-active', tab === 'app' ? '1' : '2');
 
     if (paneApp) paneApp.style.display = tab === 'app' ? 'block' : 'none';
     if (paneFace) paneFace.style.display = tab === 'facescan' ? 'block' : 'none';
@@ -4413,7 +4417,8 @@
         <button type="button" aria-label="Tutup" class="mobile-sheet-close" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; border-radius: 50%; font-size: 1.1rem; color: #64748b; cursor: pointer; padding: 0;" onclick="window.mobileCloseSheet()">✕</button>
       </div>
       <div class="mobile-sheet-body" style="padding-top: 6px; padding-bottom: 20px;">
-        <div class="mobile-segment-toggle" style="margin-top: 4px; margin-bottom: 12px;">
+        <div class="mobile-segment-toggle" id="mSegToggleDetail" data-active="1" style="margin-top: 4px; margin-bottom: 12px;">
+          <div class="mobile-segment-glider"></div>
           <button type="button" class="mobile-seg-btn active" id="mBtnDetailInfo" onclick="window.mobileToggleDetailTab('info')">Informasi Tiket</button>
           <button type="button" class="mobile-seg-btn" id="mBtnDetailJejak" onclick="window.mobileToggleDetailTab('jejak')">Riwayat Aktivitas</button>
         </div>
@@ -4765,18 +4770,21 @@
     const secJejak = document.getElementById('mDetailSecJejak');
     const btnInfo = document.getElementById('mBtnDetailInfo');
     const btnJejak = document.getElementById('mBtnDetailJejak');
+    const toggle = document.getElementById('mSegToggleDetail') || (btnInfo ? btnInfo.closest('.mobile-segment-toggle') : null);
     if (!secInfo || !secJejak) return;
 
     if (tab === 'info') {
       secInfo.style.display = 'block';
       secJejak.style.display = 'none';
-      btnInfo.classList.add('active');
-      btnJejak.classList.remove('active');
+      if (btnInfo) btnInfo.classList.add('active');
+      if (btnJejak) btnJejak.classList.remove('active');
+      if (toggle) toggle.setAttribute('data-active', '1');
     } else {
       secInfo.style.display = 'none';
       secJejak.style.display = 'block';
-      btnInfo.classList.remove('active');
-      btnJejak.classList.add('active');
+      if (btnInfo) btnInfo.classList.remove('active');
+      if (btnJejak) btnJejak.classList.add('active');
+      if (toggle) toggle.setAttribute('data-active', '2');
     }
   };
 
@@ -5045,23 +5053,19 @@
       secR.style.display = seg === 'ringkasan' ? 'grid' : 'none';
       secD.style.display = seg === 'donut' ? 'block' : 'none';
     }
+    const toggle = document.getElementById('mSegToggleStats');
     const btnR = document.getElementById('mBtnSegRingkasan');
     const btnD = document.getElementById('mBtnSegDonut');
+    if (toggle) {
+      toggle.setAttribute('data-active', seg === 'ringkasan' ? '1' : '2');
+    }
     if (btnR && btnD) {
       if (seg === 'ringkasan') {
-        btnR.style.background = '#059669';
-        btnR.style.color = '#ffffff';
-        btnR.style.borderColor = '#059669';
-        btnD.style.background = '#ffffff';
-        btnD.style.color = '#059669';
-        btnD.style.borderColor = '#059669';
+        btnR.classList.add('active');
+        btnD.classList.remove('active');
       } else {
-        btnD.style.background = '#059669';
-        btnD.style.color = '#ffffff';
-        btnD.style.borderColor = '#059669';
-        btnR.style.background = '#ffffff';
-        btnR.style.color = '#059669';
-        btnR.style.borderColor = '#059669';
+        btnD.classList.add('active');
+        btnR.classList.remove('active');
       }
     }
   };
@@ -5220,12 +5224,35 @@
     }
     window.currentOpenedMobileQrTicketId = null;
     const sheet = document.getElementById('mobileActionSheet');
+    const roleSheet = document.getElementById('mobileRoleSheet');
     const backdrop = document.getElementById('mobileModalBackdrop');
-    if (sheet) {
+
+    if (sheet && sheet.classList.contains('open')) {
+      sheet.classList.add('closing');
       sheet.classList.remove('open');
-      sheet.classList.remove('modal-center');
     }
-    if (backdrop) backdrop.classList.remove('open');
+    if (roleSheet && roleSheet.classList.contains('open')) {
+      roleSheet.classList.add('closing');
+      roleSheet.classList.remove('open');
+    }
+    if (backdrop && backdrop.classList.contains('open')) {
+      backdrop.classList.add('closing');
+      backdrop.classList.remove('open');
+    }
+
+    setTimeout(() => {
+      if (sheet) {
+        sheet.classList.remove('closing');
+        sheet.classList.remove('modal-center');
+      }
+      if (roleSheet) {
+        roleSheet.classList.remove('closing');
+      }
+      if (backdrop) {
+        backdrop.classList.remove('closing');
+      }
+    }, 280);
+
     if (typeof window.mobileUpdateStepperUI === 'function' && currentKaryawanTab === 'form_pengajuan') {
       window.mobileUpdateStepperUI(window.currentMobileFormStep || 1);
     }

@@ -764,22 +764,87 @@
   }
 
   // 8. TAMPILAN MOBILE: DROPDOWN FLOATING POPUP NOTIFIKASI IDENTIK DENGAN VERSI WEB (GAMBAR 1)
+  function triggerBellRinging(btn) {
+    if (!btn) return;
+    btn.classList.remove('bell-ringing');
+    void btn.offsetWidth; // Force reflow agar animasi selalu re-trigger saat diklik berulang
+    btn.classList.add('bell-ringing');
+    setTimeout(() => {
+      btn.classList.remove('bell-ringing');
+    }, 600);
+  }
+  window.triggerBellRinging = triggerBellRinging;
+
+  let isMobileNotifClosing = false;
+  let mobileCloseTimer = null;
+
   window.openMobileNotifDropdown = function () {
     const dropdown = document.getElementById('mobileNotifDropdown');
+    const bellBtn = document.getElementById('mBtnTopNotif');
     if (!dropdown) return;
+
+    if (mobileCloseTimer) {
+      clearTimeout(mobileCloseTimer);
+      mobileCloseTimer = null;
+    }
+    isMobileNotifClosing = false;
+
     renderMobileNotifDropdownContent();
-    dropdown.style.display = 'block';
+    dropdown.classList.remove('closing');
+    dropdown.classList.add('open');
+    dropdown.style.display = 'flex';
+    if (bellBtn) {
+      triggerBellRinging(bellBtn);
+      bellBtn.setAttribute('aria-expanded', 'true');
+      bellBtn.classList.add('active');
+    }
   };
 
-  window.closeMobileNotifDropdown = function () {
+  window.closeMobileNotifDropdown = function (callback) {
     const dropdown = document.getElementById('mobileNotifDropdown');
-    if (dropdown) dropdown.style.display = 'none';
+    const bellBtn = document.getElementById('mBtnTopNotif');
+    if (!dropdown) return;
+
+    const isVisible = dropdown.classList.contains('open') || 
+                      (dropdown.style.display !== 'none' && dropdown.style.display !== '');
+    if (!isVisible && !isMobileNotifClosing) {
+      if (typeof callback === 'function') callback();
+      return;
+    }
+    if (isMobileNotifClosing) return;
+
+    isMobileNotifClosing = true;
+    if (bellBtn) {
+      bellBtn.setAttribute('aria-expanded', 'false');
+      bellBtn.classList.remove('active');
+    }
+
+    dropdown.classList.remove('open');
+    dropdown.classList.add('closing');
+
+    const finishClosing = () => {
+      if (mobileCloseTimer) {
+        clearTimeout(mobileCloseTimer);
+        mobileCloseTimer = null;
+      }
+      dropdown.classList.remove('closing');
+      dropdown.style.display = 'none';
+      isMobileNotifClosing = false;
+      if (typeof callback === 'function') callback();
+    };
+
+    mobileCloseTimer = setTimeout(finishClosing, 160);
   };
 
   window.toggleMobileNotifDropdown = function () {
     const dropdown = document.getElementById('mobileNotifDropdown');
+    const bellBtn = document.getElementById('mBtnTopNotif');
+    if (bellBtn) triggerBellRinging(bellBtn);
     if (!dropdown) return;
-    const isShowing = dropdown.style.display === 'block';
+
+    const isShowing = dropdown.classList.contains('open') || 
+                      (dropdown.style.display !== 'none' && dropdown.style.display !== '' && !isMobileNotifClosing);
+
     if (isShowing) {
       window.closeMobileNotifDropdown();
     } else {
@@ -995,6 +1060,21 @@
       </div>
     `;
 
+    const toggle = document.getElementById('mNotifSegToggle');
+    const btnAll = document.getElementById('mBtnNotifAll');
+    const btnUnread = document.getElementById('mBtnNotifUnread');
+    const itemsWrap = document.getElementById('mNotifFullItemsWrap');
+
+    if (toggle && btnAll && btnUnread && itemsWrap) {
+      toggle.setAttribute('data-active', cleanTab === 'all' ? '1' : '2');
+      btnAll.classList.toggle('active', cleanTab === 'all');
+      btnUnread.classList.toggle('active', cleanTab === 'unread');
+      btnAll.innerText = `Semua (${allNotifsCount})`;
+      btnUnread.innerText = `Belum (${unreadTotal})`;
+      itemsWrap.innerHTML = fullItemsHtml;
+      return;
+    }
+
     container.innerHTML = `
       <div class="mobile-full-notif-page" style="padding: 2px 0 20px 0;">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px;">
@@ -1010,17 +1090,18 @@
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
-          <div class="mobile-segment-toggle" style="margin-bottom: 0; width: 176px; height: 34px; padding: 2px;">
-            <button type="button" class="mobile-seg-btn ${cleanTab === 'all' ? 'active' : ''}" style="font-size: 0.725rem;" onclick="window.openMobileFullNotifikasiPage('all')">
+          <div class="mobile-segment-toggle" id="mNotifSegToggle" data-active="${cleanTab === 'all' ? '1' : '2'}" style="margin-bottom: 0; width: 176px; height: 34px; padding: 2px;">
+            <div class="mobile-segment-glider"></div>
+            <button type="button" id="mBtnNotifAll" class="mobile-seg-btn ${cleanTab === 'all' ? 'active' : ''}" style="font-size: 0.725rem;" onclick="window.renderMobileFullNotifikasiPage('all')">
               Semua (${allNotifsCount})
             </button>
-            <button type="button" class="mobile-seg-btn ${cleanTab === 'unread' ? 'active' : ''}" style="font-size: 0.725rem;" onclick="window.openMobileFullNotifikasiPage('unread')">
+            <button type="button" id="mBtnNotifUnread" class="mobile-seg-btn ${cleanTab === 'unread' ? 'active' : ''}" style="font-size: 0.725rem;" onclick="window.renderMobileFullNotifikasiPage('unread')">
               Belum (${unreadTotal})
             </button>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
             ${unreadTotal > 0 ? `
-              <button type="button" style="border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; font-size: 0.725rem; font-weight: 700; cursor: pointer; padding: 6px 10px; border-radius: 8px;" onclick="window.markAllNotificationsAsRead(); window.openMobileFullNotifikasiPage('${cleanTab}')">
+              <button type="button" style="border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; font-size: 0.725rem; font-weight: 700; cursor: pointer; padding: 6px 10px; border-radius: 8px;" onclick="window.markAllNotificationsAsRead(); window.renderMobileFullNotifikasiPage('${cleanTab}')">
                 ✓ Tandai dibaca
               </button>
             ` : ''}
@@ -1033,7 +1114,9 @@
           </div>
         </div>
 
-        ${fullItemsHtml}
+        <div id="mNotifFullItemsWrap">
+          ${fullItemsHtml}
+        </div>
       </div>
     `;
   };
@@ -1043,22 +1126,83 @@
   };
 
   // 9. TAMPILAN WEB/PC: DROPDOWN PANEL NOTIFIKASI
+  let isDesktopNotifClosing = false;
+  let desktopCloseTimer = null;
+
+  function openDesktopNotifDropdown() {
+    const dropdown = document.getElementById('desktopNotifDropdown');
+    const btn = document.getElementById('btnDesktopNotif');
+    if (!dropdown) return;
+
+    if (desktopCloseTimer) {
+      clearTimeout(desktopCloseTimer);
+      desktopCloseTimer = null;
+    }
+    isDesktopNotifClosing = false;
+
+    renderDesktopNotifDropdownContent();
+    dropdown.classList.remove('closing');
+    dropdown.classList.add('open');
+    dropdown.style.display = 'flex';
+    if (btn) {
+      triggerBellRinging(btn);
+      btn.setAttribute('aria-expanded', 'true');
+      btn.classList.add('active');
+    }
+  }
+
+  function closeDesktopNotifDropdown(callback) {
+    const dropdown = document.getElementById('desktopNotifDropdown');
+    const btn = document.getElementById('btnDesktopNotif');
+    if (!dropdown) return;
+
+    const isVisible = dropdown.classList.contains('open') || 
+                      (dropdown.style.display !== 'none' && dropdown.style.display !== '');
+    if (!isVisible && !isDesktopNotifClosing) {
+      if (typeof callback === 'function') callback();
+      return;
+    }
+    if (isDesktopNotifClosing) return;
+
+    isDesktopNotifClosing = true;
+    if (btn) {
+      triggerBellRinging(btn);
+      btn.setAttribute('aria-expanded', 'false');
+      btn.classList.remove('active');
+    }
+
+    dropdown.classList.remove('open');
+    dropdown.classList.add('closing');
+
+    const finishClosing = () => {
+      if (desktopCloseTimer) {
+        clearTimeout(desktopCloseTimer);
+        desktopCloseTimer = null;
+      }
+      dropdown.classList.remove('closing');
+      dropdown.style.display = 'none';
+      isDesktopNotifClosing = false;
+      if (typeof callback === 'function') callback();
+    };
+
+    desktopCloseTimer = setTimeout(finishClosing, 160);
+  }
+
   window.toggleDesktopNotifDropdown = function () {
     const dropdown = document.getElementById('desktopNotifDropdown');
+    const btn = document.getElementById('btnDesktopNotif');
+    if (btn) triggerBellRinging(btn);
     if (!dropdown) return;
-    const isShowing = dropdown.style.display === 'block';
+
+    const isShowing = dropdown.classList.contains('open') || 
+                      (dropdown.style.display !== 'none' && dropdown.style.display !== '' && !isDesktopNotifClosing);
+
     if (isShowing) {
-      dropdown.style.display = 'none';
+      closeDesktopNotifDropdown();
     } else {
-      renderDesktopNotifDropdownContent();
-      dropdown.style.display = 'block';
+      openDesktopNotifDropdown();
     }
   };
-
-  function closeDesktopNotifDropdown() {
-    const dropdown = document.getElementById('desktopNotifDropdown');
-    if (dropdown) dropdown.style.display = 'none';
-  }
 
   function renderDesktopNotifDropdownContent() {
     const container = document.getElementById('desktopNotifDropdownList');
@@ -1134,7 +1278,8 @@
             <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary, #0f172a); margin: 2px 0 0 0;">Semua Notifikasi</h1>
           </div>
           <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <div class="mobile-segment-toggle" style="margin: 0; width: 210px; height: 38px; padding: 3px; display: inline-flex; align-items: center; box-sizing: border-box; border-radius: 10px;">
+            <div class="mobile-segment-toggle" data-active="${filterTab === 'all' ? '1' : '2'}" style="margin: 0; width: 210px; height: 38px; padding: 3px; display: inline-flex; align-items: center; box-sizing: border-box; border-radius: 10px;">
+              <div class="mobile-segment-glider"></div>
               <button type="button" class="mobile-seg-btn ${filterTab === 'all' ? 'active' : ''}" style="height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 8px; font-size: 0.785rem; border-radius: 7px;" onclick="window.renderDesktopFullNotifikasiPage('all')">Semua (${allNotifsList.length})</button>
               <button type="button" class="mobile-seg-btn ${filterTab === 'unread' ? 'active' : ''}" style="height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 8px; font-size: 0.785rem; border-radius: 7px;" onclick="window.renderDesktopFullNotifikasiPage('unread')">Belum (${unreadCount})</button>
             </div>
@@ -1314,12 +1459,7 @@
   window.openTicketFromNotification = openTicketFromNotification;
   window.closeDesktopNotifDropdown = closeDesktopNotifDropdown;
   window.renderDesktopNotifDropdownContent = renderDesktopNotifDropdownContent;
-  window.openDesktopNotifDropdown = function () {
-    const dropdown = document.getElementById('desktopNotifDropdown');
-    if (!dropdown) return;
-    renderDesktopNotifDropdownContent();
-    dropdown.style.display = 'block';
-  };
+  window.openDesktopNotifDropdown = openDesktopNotifDropdown;
 
   function resetAllNotifications() {
     notificationsList = [];

@@ -10033,6 +10033,104 @@ body.theme-dark .figma-contact-sub {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.mobile-bottom-nav-glider {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  border-radius: 12px;
+  background: rgba(5, 150, 105, 0.08);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.mobile-bottom-nav-glider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  border-radius: 999px;
+  background: #059669;
+}
+
+.mobile-bottom-nav[data-items="3"] .mobile-bottom-nav-glider {
+  width: calc(100% / 3);
+}
+.mobile-bottom-nav[data-items="3"][data-active-tab="dashboard"] .mobile-bottom-nav-glider {
+  transform: translateX(0%);
+}
+.mobile-bottom-nav[data-items="3"][data-active-tab="pengajuan"] .mobile-bottom-nav-glider,
+.mobile-bottom-nav[data-items="3"][data-active-tab="form_pengajuan"] .mobile-bottom-nav-glider {
+  transform: translateX(100%);
+}
+.mobile-bottom-nav[data-items="3"][data-active-tab="riwayat"] .mobile-bottom-nav-glider {
+  transform: translateX(200%);
+}
+
+.mobile-bottom-nav[data-items="4"] .mobile-bottom-nav-glider {
+  width: calc(100% / 4);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="dashboard"] .mobile-bottom-nav-glider {
+  transform: translateX(0%);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="antrean"] .mobile-bottom-nav-glider,
+.mobile-bottom-nav[data-items="4"][data-active-tab="scanner"] .mobile-bottom-nav-glider {
+  transform: translateX(100%);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="tim"] .mobile-bottom-nav-glider,
+.mobile-bottom-nav[data-items="4"][data-active-tab="pelacakan"] .mobile-bottom-nav-glider {
+  transform: translateX(200%);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="riwayat"] .mobile-bottom-nav-glider {
+  transform: translateX(300%);
+}
+
+.mobile-bottom-nav[data-active-tab="notifikasi"] .mobile-bottom-nav-glider {
+  opacity: 0;
+}
+
+.mobile-bottom-nav-item {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #64748b !important;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.675rem;
+  font-weight: 700;
+  transition: color 0.22s ease;
+  padding: 6px 0;
+  user-select: none;
+}
+
+.mobile-bottom-nav-item svg {
+  width: 22px;
+  height: 22px;
+  stroke: #64748b !important;
+  stroke-width: 2;
+  transition: stroke 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-bottom-nav-item.active {
+  color: #059669 !important;
+  font-weight: 800;
+}
+
+.mobile-bottom-nav-item.active svg {
+  stroke: #059669 !important;
+  transform: translateY(-2px);
 }
 
 .bottom-nav-group {
@@ -10444,35 +10542,86 @@ body.theme-dark .mobile-hero-card.security-theme {
 
 /* 3. Mobile Segment Switcher */
 .mobile-segment-toggle {
+  position: relative;
   display: flex;
-  gap: 6px;
+  gap: 0;
   margin: 16px 0 12px 0;
   background: #f1f5f9;
-  padding: 4px;
-  border-radius: 10px;
-  border: 1.5px solid #e2e8f0;
+  padding: 3px;
+  border-radius: 11px;
+  border: 1px solid #e2e8f0;
   box-sizing: border-box;
+  overflow: hidden;
+  height: 40px;
+}
+
+.mobile-segment-glider {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  background: #059669;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mobile-segment-toggle[data-active="2"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="donut"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="volume"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="jejak"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="perpanjangan"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="facescan"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="manual"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="ready"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="unread"] .mobile-segment-glider,
+.mobile-segment-toggle:has(.mobile-seg-btn:last-child.active) .mobile-segment-glider {
+  transform: translateX(100%);
+}
+
+.mobile-segment-toggle[data-active="1"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="ringkasan"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="info"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="baru"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="app"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="camera"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="outside"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="all"] .mobile-segment-glider,
+.mobile-segment-toggle:has(.mobile-seg-btn:first-of-type.active) .mobile-segment-glider {
+  transform: translateX(0);
 }
 
 .mobile-seg-btn {
   flex: 1;
-  padding: 9px 8px;
-  border-radius: 7px;
-  border: none;
-  background: transparent;
-  color: #475569;
-  font-size: 0.785rem;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: none !important;
+  background: transparent !important;
+  color: #64748b !important;
+  font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
   text-align: center;
-  transition: all 0.15s ease;
+  transition: color 0.22s ease;
   white-space: nowrap;
+  position: relative;
+  z-index: 2;
+  box-shadow: none !important;
 }
 
-.mobile-seg-btn.active {
-  background: #059669 !important;
+.mobile-segment-toggle .mobile-seg-btn {
+  background: transparent !important;
+}
+
+.mobile-segment-toggle .mobile-seg-btn.active,
+.mobile-segment-toggle .mobile-seg-btn.active * {
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-weight: 800;
 }
 
 /* 4. Mobile 3-Column Stats Card */
@@ -10710,6 +10859,13 @@ body.theme-dark .mobile-segment-toggle {
 
 body.theme-dark .mobile-seg-btn {
   color: #94a3b8 !important;
+  background: transparent !important;
+}
+
+body.theme-dark .mobile-seg-btn.active,
+body.theme-dark .mobile-seg-btn.active * {
+  background: transparent !important;
+  color: #ffffff !important;
 }
 
 body.theme-dark .mobile-stats-card {
@@ -10765,6 +10921,15 @@ body.theme-dark .mobile-btn-secondary {
   border-color: #94a3b8;
   color: #0f172a;
 }
+.btn-top-notif svg {
+  transform-origin: 50% 2px;
+  will-change: transform;
+}
+.btn-top-notif.bell-ringing svg,
+.btn-top-notif:hover svg,
+.btn-top-notif:active svg {
+  animation: bell-ring-swing 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+}
 .desktop-notif-badge {
   position: absolute;
   top: -3px;
@@ -10797,11 +10962,61 @@ body.theme-dark .mobile-btn-secondary {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: dropdown-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+  will-change: transform, opacity;
 }
+
+.desktop-notif-dropdown.open {
+  animation: notif-dropdown-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.desktop-notif-dropdown.closing {
+  animation: notif-dropdown-exit 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.btn-top-notif.active,
+.btn-top-notif[aria-expanded="true"] {
+  background: var(--bg-card, #f1f5f9);
+  border-color: #94a3b8;
+  color: var(--text-primary, #0f172a);
+}
+
 @keyframes dropdown-fade-in {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes notif-dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notif-dropdown-exit {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+@keyframes bell-ring-swing {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-12deg); }
+  45% { transform: rotate(8deg); }
+  60% { transform: rotate(-5deg); }
+  75% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
 }
 
 /* ==========================================================================

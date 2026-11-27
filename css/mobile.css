@@ -353,41 +353,96 @@ body.theme-dark .mobile-top-role-pill {
    5. SEGMENT SWITCHERS & TABS
    ------------------------------------------------------------------- */
 .mobile-segment-toggle {
+  position: relative;
   display: flex;
-  background: #e2e8f0;
-  border-radius: 10px;
+  background: #f1f5f9;
+  border-radius: 11px;
   padding: 3px;
-  gap: 3px;
-  margin-bottom: 1rem;
-  height: 36px;
+  gap: 0;
+  height: 40px;
   box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
-.mobile-seg-btn {
+.mobile-segment-glider {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  background: #059669;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mobile-segment-toggle[data-active="2"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="donut"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="volume"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="jejak"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="perpanjangan"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="facescan"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="manual"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="ready"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="unread"] .mobile-segment-glider,
+.mobile-segment-toggle:has(.mobile-seg-btn:last-child.active) .mobile-segment-glider {
+  transform: translateX(100%);
+}
+
+.mobile-segment-toggle[data-active="1"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="ringkasan"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="info"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="baru"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="app"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="camera"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="outside"] .mobile-segment-glider,
+.mobile-segment-toggle[data-active="all"] .mobile-segment-glider,
+.mobile-segment-toggle:has(.mobile-seg-btn:first-of-type.active) .mobile-segment-glider {
+  transform: translateX(0);
+}
+
+.mobile-segment-toggle .mobile-seg-btn {
+  position: relative;
+  z-index: 2;
   flex: 1;
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 8px;
   font-size: 0.8125rem;
-  /* 13px */
   font-weight: 700;
-  color: #64748b;
-  border-radius: 7px;
+  color: #64748b !important;
+  border-radius: 8px;
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s ease;
+  transition: color 0.22s ease;
   white-space: nowrap;
   box-sizing: border-box;
+  box-shadow: none !important;
 }
 
-.mobile-seg-btn.active {
-  background: #ffffff;
-  color: #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+.mobile-segment-toggle .mobile-seg-btn svg {
+  stroke: #64748b;
+  transition: stroke 0.22s ease;
+}
+
+.mobile-segment-toggle .mobile-seg-btn.active,
+.mobile-segment-toggle .mobile-seg-btn.active * {
+  color: #ffffff !important;
+  font-weight: 800;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.mobile-segment-toggle .mobile-seg-btn.active svg {
+  stroke: #ffffff !important;
 }
 
 /* -------------------------------------------------------------------
@@ -1211,21 +1266,86 @@ body.theme-dark .mobile-top-role-pill {
   align-items: center;
   z-index: 50;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.mobile-bottom-nav-glider {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  border-radius: 12px;
+  background: rgba(5, 150, 105, 0.08);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.mobile-bottom-nav-glider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  border-radius: 999px;
+  background: #059669;
+}
+
+/* 3 Items layout (Karyawan) */
+.mobile-bottom-nav[data-items="3"] .mobile-bottom-nav-glider {
+  width: calc(100% / 3);
+}
+.mobile-bottom-nav[data-items="3"][data-active-tab="dashboard"] .mobile-bottom-nav-glider {
+  transform: translateX(0%);
+}
+.mobile-bottom-nav[data-items="3"][data-active-tab="pengajuan"] .mobile-bottom-nav-glider,
+.mobile-bottom-nav[data-items="3"][data-active-tab="form_pengajuan"] .mobile-bottom-nav-glider {
+  transform: translateX(100%);
+}
+.mobile-bottom-nav[data-items="3"][data-active-tab="riwayat"] .mobile-bottom-nav-glider {
+  transform: translateX(200%);
+}
+
+/* 4 Items layout (Atasan & Pos Jaga) */
+.mobile-bottom-nav[data-items="4"] .mobile-bottom-nav-glider {
+  width: calc(100% / 4);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="dashboard"] .mobile-bottom-nav-glider {
+  transform: translateX(0%);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="antrean"] .mobile-bottom-nav-glider,
+.mobile-bottom-nav[data-items="4"][data-active-tab="scanner"] .mobile-bottom-nav-glider {
+  transform: translateX(100%);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="tim"] .mobile-bottom-nav-glider,
+.mobile-bottom-nav[data-items="4"][data-active-tab="pelacakan"] .mobile-bottom-nav-glider {
+  transform: translateX(200%);
+}
+.mobile-bottom-nav[data-items="4"][data-active-tab="riwayat"] .mobile-bottom-nav-glider {
+  transform: translateX(300%);
+}
+
+.mobile-bottom-nav[data-active-tab="notifikasi"] .mobile-bottom-nav-glider {
+  opacity: 0;
 }
 
 .mobile-bottom-nav-item {
+  position: relative;
+  z-index: 2;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  color: #64748b;
+  color: #64748b !important;
   cursor: pointer;
   text-decoration: none;
   font-size: 0.675rem;
   font-weight: 700;
-  transition: color 0.15s ease;
+  transition: color 0.22s ease;
   padding: 6px 0;
   user-select: none;
 }
@@ -1233,17 +1353,18 @@ body.theme-dark .mobile-top-role-pill {
 .mobile-bottom-nav-item svg {
   width: 22px;
   height: 22px;
-  stroke: #64748b;
+  stroke: #64748b !important;
   stroke-width: 2;
-  transition: stroke 0.15s ease, transform 0.15s ease;
+  transition: stroke 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-bottom-nav-item.active {
-  color: #059669;
+  color: #059669 !important;
+  font-weight: 800;
 }
 
 .mobile-bottom-nav-item.active svg {
-  stroke: #059669;
+  stroke: #059669 !important;
   transform: translateY(-2px);
 }
 
@@ -1273,6 +1394,8 @@ body.theme-dark .mobile-top-role-pill {
   z-index: 10040 !important;
   display: none;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .mobile-bottom-sheet {
@@ -1299,6 +1422,14 @@ body.theme-dark .mobile-top-role-pill {
 .mobile-modal-backdrop.open {
   display: block !important;
   pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+.mobile-modal-backdrop.closing {
+  display: block !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.25s ease !important;
 }
 
 .mobile-bottom-sheet.open {
@@ -1306,6 +1437,14 @@ body.theme-dark .mobile-top-role-pill {
   pointer-events: auto !important;
   visibility: visible !important;
   transform: translateY(0) !important;
+}
+
+.mobile-bottom-sheet.closing {
+  display: flex !important;
+  pointer-events: none !important;
+  visibility: visible !important;
+  transform: translateY(100%) !important;
+  transition: transform 0.26s cubic-bezier(0.32, 0, 0.67, 0) !important;
 }
 
 /* Modal Popup Centered Mode (Opsi Pembatalan & Dialog Tengah Layar) */
@@ -1329,6 +1468,15 @@ body.theme-dark .mobile-top-role-pill {
   opacity: 1 !important;
   visibility: visible !important;
   display: flex !important;
+}
+
+.mobile-bottom-sheet.modal-center.closing {
+  display: flex !important;
+  pointer-events: none !important;
+  visibility: visible !important;
+  transform: translate(-50%, -50%) scale(0.92) !important;
+  opacity: 0 !important;
+  transition: transform 0.22s ease-in, opacity 0.22s ease-in !important;
 }
 
 .mobile-bottom-sheet.modal-center .mobile-sheet-handle-bar {
@@ -1483,20 +1631,47 @@ body.theme-dark .mobile-meta-val {
 
 body.theme-dark .mobile-segment-toggle {
   background: #1e293b !important;
+  border-color: #334155 !important;
 }
 
 body.theme-dark .mobile-seg-btn {
   color: #94a3b8 !important;
+  background: transparent !important;
 }
 
-body.theme-dark .mobile-seg-btn.active {
-  background: #0f172a !important;
-  color: #34d399 !important;
+body.theme-dark .mobile-seg-btn.active,
+body.theme-dark .mobile-seg-btn.active * {
+  background: transparent !important;
+  color: #ffffff !important;
 }
 
 body.theme-dark .mobile-bottom-nav {
   background: rgba(15, 23, 42, 0.98) !important;
   border-top-color: #1e293b !important;
+}
+
+body.theme-dark .mobile-bottom-nav-glider {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+body.theme-dark .mobile-bottom-nav-glider::after {
+  background: #10b981 !important;
+}
+
+body.theme-dark .mobile-bottom-nav-item {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .mobile-bottom-nav-item svg {
+  stroke: #94a3b8 !important;
+}
+
+body.theme-dark .mobile-bottom-nav-item.active {
+  color: #34d399 !important;
+}
+
+body.theme-dark .mobile-bottom-nav-item.active svg {
+  stroke: #34d399 !important;
 }
 
 body.theme-dark .mobile-input,
@@ -2488,6 +2663,33 @@ body.theme-dark #mobileAppContainer .mobile-filter-reset-btn {
   transform: scale(0.96);
 }
 
+.mobile-top-notif-btn.active,
+.mobile-top-notif-btn[aria-expanded="true"] {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.mobile-top-notif-btn svg {
+  transform-origin: 50% 2px;
+  will-change: transform;
+}
+
+.mobile-top-notif-btn.bell-ringing svg,
+.mobile-top-notif-btn:active svg {
+  animation: bell-ring-swing 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes bell-ring-swing {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-12deg); }
+  45% { transform: rotate(8deg); }
+  60% { transform: rotate(-5deg); }
+  75% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}
+
 .mobile-notif-badge {
   position: absolute;
   top: -2px;
@@ -3408,7 +3610,39 @@ body.theme-dark .mobile-notif-row-delete-btn:active,
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: dropdown-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+  will-change: transform, opacity;
+}
+
+.mobile-notif-dropdown.open {
+  animation: notif-dropdown-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mobile-notif-dropdown.closing {
+  animation: notif-dropdown-exit 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes notif-dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notif-dropdown-exit {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
 }
 
 body.theme-dark .mobile-notif-dropdown,
